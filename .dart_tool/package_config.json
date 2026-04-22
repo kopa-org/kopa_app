@@ -212,6 +212,12 @@
       "languageVersion": "3.9"
     },
     {
+      "name": "google_nav_bar",
+      "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/google_nav_bar-5.0.7",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "hooks",
       "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/hooks-1.0.3",
       "packageUri": "lib/",

@@ -1,122 +1,156 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/page/match_polls/match_polls_page.dart';
-import 'package:kopa/page/match/match_programme.dart';
 import 'package:kopa/page/team/team_page.dart';
 import 'package:kopa/page/team_fines/team_fines_page.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class HomeTab extends StatelessWidget {
+  const HomeTab({super.key});
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: CupertinoColors.systemGrey6,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
-        child: SingleChildScrollView(
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Velkommen tilbage,',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Holdoversigt',
+                      style: theme.textTheme.headlineLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 400,
+                      height: 140,
+                      child: _buildDashboardCard(
+                        context: context,
+                        title: 'Kampens spiller',
+                        icon: Icons.star_rounded,
+                        color: const Color.fromRGBO(38, 64, 139, 1),
+                        onTap: () {
+                          Navigator.of(context).push(MaterialWithModalsPageRoute(
+                              builder: (context) => MatchPollsListPage()));
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: 400,
+                      height: 140,
+                      child: _buildDashboardCard(
+                        context: context,
+                        title: 'Truppen',
+                        icon: Icons.groups_rounded,
+                        color: const Color.fromRGBO(224, 159, 62, 1),
+                        onTap: () {
+                          Navigator.of(context).push(MaterialWithModalsPageRoute(
+                              builder: (context) => TeamPage()));
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: 400,
+                      height: 140,
+                      child: _buildDashboardCard(
+                        context: context,
+                        title: 'Bødekassen',
+                        icon: Icons.account_balance_wallet_rounded,
+                        color: const Color.fromRGBO(166, 117, 161, 1),
+                        onTap: () {
+                          Navigator.of(context).push(MaterialWithModalsPageRoute(
+                              builder: (context) => TeamFinesPage()));
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDashboardCard({
+    required BuildContext context,
+    required String title,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Card(
+      elevation: 4,
+      shadowColor: color.withOpacity(0.3),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                color.withOpacity(0.8),
+                color,
+              ],
+            ),
+          ),
+          padding: const EdgeInsets.all(20),
           child: Column(
-            children: <Widget>[
-              // Container for match programme
-              CupertinoButton(
-                child: Container(
-                  height: 100,
-                  width: 400,
-                  decoration: BoxDecoration(
-                    color: Color.fromRGBO(46, 134, 171, 100),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'Kampprogram',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  shape: BoxShape.circle,
                 ),
-                onPressed: () {
-                  Navigator.of(context).push(MaterialWithModalsPageRoute(
-                      builder: (context) => MatchProgrammePage()));
-                },
+                child: Icon(
+                  icon,
+                  color: Colors.white,
+                  size: 32,
+                ),
               ),
-
-              // Container for Man-of-the-match
-              CupertinoButton(
-                child: Container(
-                  height: 100,
-                  width: 400,
-                  decoration: BoxDecoration(
-                    color: Color.fromRGBO(38, 64, 139, 100),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'Kampens spiller',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
                 ),
-                onPressed: () {
-                  Navigator.of(context).push(MaterialWithModalsPageRoute(
-                      builder: (context) => MatchPollsListPage()));
-                },
-              ),
-
-              // Container for the Squad
-              CupertinoButton(
-                child: Container(
-                  height: 100,
-                  width: 400,
-                  decoration: BoxDecoration(
-                    color: Color.fromRGBO(224, 159, 62, 100),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'Truppen',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-                onPressed: () {
-                  Navigator.of(context).push(MaterialWithModalsPageRoute(
-                      builder: (context) => TeamPage()));
-                },
-              ),
-
-              // Container for Team Fines
-              CupertinoButton(
-                child: Container(
-                  height: 100,
-                  width: 400,
-                  decoration: BoxDecoration(
-                    color: Color.fromRGBO(166, 117, 161, 100),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'Bødekassen',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-                onPressed: () {
-                  Navigator.of(context).push(MaterialWithModalsPageRoute(
-                      builder: (context) => TeamFinesPage()));
-                },
               ),
             ],
           ),

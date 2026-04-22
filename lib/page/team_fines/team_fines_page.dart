@@ -281,25 +281,27 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _buildBalanceColumn(
-            data.currentAmount + data.totalOwedAmount, 'Når alle har betalt'),
+        Expanded(
+          child: _buildBalanceColumn(
+              data.currentAmount + data.totalOwedAmount, 'Når alle har betalt'),
+        ),
         verticalDividerSection(),
-        _buildBalanceColumn(data.totalOwedAmount, 'Manglende beløb'),
+        Expanded(
+          child: _buildBalanceColumn(data.totalOwedAmount, 'Manglende beløb'),
+        ),
       ],
     );
   }
 
   Widget _buildBalanceColumn(double amount, String label) {
-    return SizedBox(
-      width: 150,
-      child: Column(
-        children: [
-          Text(amount.toString(), style: TextStyle(fontSize: 24)),
-          SizedBox(height: 5),
-          Text(label,
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-        ],
-      ),
+    return Column(
+      children: [
+        Text(amount.toString(), style: TextStyle(fontSize: 24)),
+        SizedBox(height: 5),
+        Text(label,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+      ],
     );
   }
 

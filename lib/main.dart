@@ -9,6 +9,7 @@ import 'package:kopa/navigation/router_refresh_notifier.dart';
 import 'package:kopa/repositories/auth_repository.dart';
 import 'package:kopa/utils/crash_reporting.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:kopa/theme/app_theme.dart';
 
 void main() async {
   await CrashReporting.runAppGuarded(() async {
@@ -83,11 +84,7 @@ class _KopaAppState extends State<KopaApp> {
         child: MaterialApp.router(
           title: 'Kopa',
           debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            useMaterial3: true,
-            colorSchemeSeed: Colors.indigo,
-            brightness: Brightness.light,
-          ),
+          theme: AppTheme.lightTheme,
           localizationsDelegates: const [
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
