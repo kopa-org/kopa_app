@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/button/full_width_button.dart';
 import 'package:kopa/component/loading_indicator.dart';
+import 'package:go_router/go_router.dart';
 import 'package:kopa/main.dart';
 import 'package:kopa/services/auth_service.dart';
 import 'package:provider/provider.dart';
@@ -30,8 +31,7 @@ class _ProfileTabState extends State<ProfileTab> {
       });
 
       if (success) {
-        Navigator.of(context, rootNavigator: true)
-            .pushReplacementNamed(AppRoutes.login);
+        if (context.mounted) context.go('/login');
       } else {
         setState(() {
           _errorMessage = 'Brugeren kunne ikke logges ud.';

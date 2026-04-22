@@ -1,139 +1,105 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:kopa/page/login/login_page.dart';
-import 'package:kopa/page/login/register.dart';
-import 'package:kopa/services/auth_service.dart';
-import 'package:kopa/state/user_votes_state.dart';
-import 'package:kopa/tab/home_tab.dart';
-import 'package:kopa/tab/profile_tab.dart';
-import 'package:provider/provider.dart';
-
-String _appTitle = 'Kopa';
+import 'package:go_router/go_router.dart';
+import 'package:kopa/cubits/auth_cubit.dart';
+import 'package:kopa/navigation/app_router.dart';
+import 'package:kopa/navigation/router_refresh_notifier.dart';
+import 'package:kopa/repositories/auth_repository.dart';
+import 'package:kopa/utils/crash_reporting.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => UserVotesState()),
-        ChangeNotifierProvider(create: (context) => AuthService()),
-      ],
-      child: const KopaApp(),
-    ),
-  );
+  await CrashReporting.runAppGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    await dotenv.load(fileName: ".env");
+    await CrashReporting.initialize();
+    
+    final authRepository = ApiAuthRepository();
+    final authCubit = AuthCubit(authRepository: authRepository);
+    
+    // Initialize auth state
+    await authCubit.init();
+
+    runApp(
+      KopaApp(
+        authRepository: authRepository,
+        authCubit: authCubit,
+      ),
+    );
+  });
 }
 
-class AppRoutes {
-  static const String login = '/login';
-  static const String home = '/home';
-  static const String register = '/register';
+class KopaApp extends StatefulWidget {
+  final AuthRepository authRepository;
+  final AuthCubit authCubit;
 
-  static Map<String, WidgetBuilder> get routes {
-    return {
-      login: (context) => const LoginPage(),
-      home: (context) => const MainPage(),
-      register: (context) => const RegisterScreen(),
-    };
-  }
-}
-
-class KopaApp extends StatelessWidget {
-  const KopaApp({super.key});
+  const KopaApp({
+    super.key,
+    required this.authRepository,
+    required this.authCubit,
+  });
 
   @override
-  Widget build(BuildContext context) {
-    final authService = Provider.of<AuthService>(context);
+  State<KopaApp> createState() => _KopaAppState();
+}
 
-    SystemChrome.setPreferredOrientations(
-        [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+class _KopaAppState extends State<KopaApp> {
+  late final RouterRefreshNotifier _refreshNotifier;
+  late final _router;
 
-    return CupertinoApp(
-      title: _appTitle,
-      theme: CupertinoThemeData(
-          brightness: Brightness.light,
-          primaryColor: CupertinoColors.systemIndigo,
-          scaffoldBackgroundColor: CupertinoColors.systemBackground),
-      // Danish and English localization support
-      localizationsDelegates: <LocalizationsDelegate<dynamic>>[
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: <Locale>[
-        Locale('da'),
-        Locale('en'),
-      ],
-      home: authService.currentUser == null
-          ? const LoginPage()
-          : const MainPage(),
-      // home: const MainPage(),
-      routes: AppRoutes.routes,
+  @override
+  void initState() {
+    super.initState();
+    _refreshNotifier = RouterRefreshNotifier(widget.authCubit.stream);
+    _router = AppRouter.create(
+      authCubit: widget.authCubit,
+      refreshListenable: _refreshNotifier,
     );
   }
-}
-
-class MainPage extends StatefulWidget {
-  const MainPage({super.key});
 
   @override
-  State<MainPage> createState() => _MainPageState();
-}
-
-class _MainPageState extends State<MainPage> {
-  int _selectedIndex = 0;
-  final List<GlobalKey<NavigatorState>> _navigatorKeys = [
-    GlobalKey<NavigatorState>(),
-    GlobalKey<NavigatorState>(),
-  ];
-
-  void _onTabTapped(int index) {
-    if (_selectedIndex == index) {
-      // Hvis brugeren trykker på den valgte fane, popper vi til root
-      _navigatorKeys[index].currentState?.popUntil((route) => route.isFirst);
-    } else {
-      setState(() {
-        _selectedIndex = index;
-      });
-    }
+  void dispose() {
+    _refreshNotifier.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoTabScaffold(
-      tabBar: CupertinoTabBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.profile_circled),
-            label: 'Profile',
-          ),
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider.value(value: widget.authRepository),
+      ],
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider.value(value: widget.authCubit),
         ],
-        onTap: _onTabTapped,
+        child: MaterialApp.router(
+          title: 'Kopa',
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            useMaterial3: true,
+            colorSchemeSeed: Colors.indigo,
+            brightness: Brightness.light,
+          ),
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('da'),
+            Locale('en'),
+          ],
+          routerConfig: _router,
+        ),
       ),
-      tabBuilder: (BuildContext context, int index) {
-        return CupertinoTabView(
-          navigatorKey: _navigatorKeys[index],
-          builder: (context) {
-            if (index == 0) {
-              return CupertinoPageScaffold(
-                navigationBar: CupertinoNavigationBar(
-                  middle: Text('Boldklubben',
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 20)),
-                ),
-                child: HomeTab(),
-              );
-            } else {
-              return CupertinoPageScaffold(
-                child: ProfileTab(),
-              );
-            }
-          },
-        );
-      },
     );
   }
 }
