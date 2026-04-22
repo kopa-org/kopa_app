@@ -12,8 +12,8 @@ import 'package:kopa/page/team_fines/create_fine_type_modal.dart';
 import 'package:kopa/page/team_fines/deposit_modal.dart';
 import 'package:kopa/page/team_fines/deposit_personal_modal.dart';
 import 'package:kopa/repository/fines_repository.dart';
-import 'package:kopa/services/auth_service.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 enum TeamOwnerFinesSegments { overview, fineTypes, personal }
@@ -39,13 +39,13 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
     fineBoxDetails = FinesRepository.getFineBox();
     fineTypeDetails = FinesRepository.getFineTypes();
 
-    // Load logged in user via AuthService (cache -> API fallback)
-    currentUserData = context.read<AuthService>().getCurrentUser().then((u) {
-      if (u == null) {
-        throw Exception('Ingen bruger fundet. Log venligst ind igen.');
-      }
-      return u;
-    });
+    // Load logged in user via AuthCubit
+    final user = context.read<AuthCubit>().state.user;
+    if (user == null) {
+      currentUserData = Future.error(Exception('Ingen bruger fundet. Log venligst ind igen.'));
+    } else {
+      currentUserData = Future.value(user);
+    }
   }
 
   Future<void> _refreshFineBox() async {

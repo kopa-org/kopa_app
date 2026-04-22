@@ -4,8 +4,8 @@ import 'package:kopa/component/button/full_width_button.dart';
 import 'package:kopa/component/loading_indicator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kopa/main.dart';
-import 'package:kopa/services/auth_service.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kopa/cubits/auth_cubit.dart';
 
 class ProfileTab extends StatefulWidget {
   const ProfileTab({super.key});
@@ -23,19 +23,21 @@ class _ProfileTabState extends State<ProfileTab> {
     final theme = Theme.of(context);
 
     Future<void> logout() async {
-      final authService = Provider.of<AuthService>(context, listen: false);
-      final success = await authService.logout();
-
       setState(() {
-        _isLoading = false;
+        _isLoading = true;
+        _errorMessage = null;
       });
 
-      if (success) {
-        if (context.mounted) context.go('/login');
-      } else {
-        setState(() {
-          _errorMessage = 'Brugeren kunne ikke logges ud.';
-        });
+      try {
+        await context.read<AuthCubit>().logout();
+        // GoRouter will automatically handle the redirection due to the refreshListenable and redirect rules in AppRouter.
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+            _errorMessage = 'Brugeren kunne ikke logges ud: ${e.toString()}';
+          });
+        }
       }
     }
 

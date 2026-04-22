@@ -16,9 +16,9 @@ import 'package:kopa/model/user_details.dart';
 import 'package:kopa/page/match_polls/create_match_poll_page.dart';
 import 'package:kopa/repository/match_repository.dart';
 import 'package:kopa/repository/users_repository.dart';
-import 'package:kopa/services/auth_service.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:provider/provider.dart';
 
 enum MatchDetailsSegments { registration, events, manOfTheMatch, fines }
 
@@ -55,13 +55,13 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
 
     matchAndSquadData = _fetchMatchAndSquad();
 
-    // Load logged in user via AuthService (cache -> API fallback)
-    currentUser = context.read<AuthService>().getCurrentUser().then((u) {
-      if (u == null) {
-        throw Exception('Ingen bruger fundet. Log venligst ind igen.');
-      }
-      return u;
-    });
+    // Load logged in user via AuthCubit
+    final user = context.read<AuthCubit>().state.user;
+    if (user == null) {
+      currentUser = Future.error(Exception('Ingen bruger fundet. Log venligst ind igen.'));
+    } else {
+      currentUser = Future.value(user);
+    }
   }
 
   Future<Map<String, dynamic>> _fetchMatchAndSquad() async {

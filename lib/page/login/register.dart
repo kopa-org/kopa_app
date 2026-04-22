@@ -1,10 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/component/button/full_width_button.dart';
 import 'package:kopa/component/loading_indicator.dart';
-import 'package:kopa/services/auth_service.dart';
 import 'package:kopa/repository/authentication_repository.dart';
 import 'package:kopa/services/platform_service.dart';
 
@@ -45,13 +44,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     if (result['success'] == true) {
       // Auto-login after successful registration
-      final authService = Provider.of<AuthService>(context, listen: false);
-      final loginSuccess = await authService.login(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
-      );
-      if (loginSuccess) {
-        Navigator.of(context).pushReplacementNamed('/home');
+      try {
+        await context.read<AuthCubit>().login(
+          _emailController.text.trim(),
+          _passwordController.text.trim(),
+        );
+        if (mounted) {
+           Navigator.of(context).pushReplacementNamed('/home');
+        }
+      } catch (e) {
+        setState(() {
+          _errorMessage = 'Kunne ikke logge ind automatisk.';
+        });
       }
     } else {
       setState(() {
