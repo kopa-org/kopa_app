@@ -1,17 +1,17 @@
 class UpdateMatchScoreCommand {
-  final int matchId;
+  final int eventId;
   final int homeTeamScore;
   final int awayTeamScore;
 
   UpdateMatchScoreCommand({
-    required this.matchId,
+    required this.eventId,
     required this.homeTeamScore,
     required this.awayTeamScore,
   });
 
   Map<String, dynamic> toJson() {
     return {
-      'matchId': matchId,
+      'eventId': eventId,
       'homeTeamScore': homeTeamScore,
       'awayTeamScore': awayTeamScore,
     };

@@ -3,7 +3,7 @@ import 'package:kopa/model/user_details.dart';
 
 class MatchPollDetails {
   final int id;
-  final int matchId;
+  final int eventId;
   final UserDetails playerOfTheMatchDetails;
   final int playerOfTheMatchVotes;
   final List<MatchPollUserVotesDetails> matchPollUserVotesDetails;
@@ -12,7 +12,7 @@ class MatchPollDetails {
 
   MatchPollDetails({
     required this.id,
-    required this.matchId,
+    required this.eventId,
     required this.playerOfTheMatchDetails,
     required this.playerOfTheMatchVotes,
     required this.matchPollUserVotesDetails,
@@ -23,7 +23,7 @@ class MatchPollDetails {
   factory MatchPollDetails.fromJson(Map<String, dynamic> json) {
     return MatchPollDetails(
       id: json['id'],
-      matchId: json['matchId'],
+      eventId: json['eventId'],
       playerOfTheMatchDetails:
           UserDetails.fromJson(json['playerOfTheMatchDetails']),
       playerOfTheMatchVotes: json['playerOfTheMatchVotes'],

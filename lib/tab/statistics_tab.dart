@@ -107,7 +107,7 @@ class StatisticsTab extends StatelessWidget {
                 childAspectRatio: 1.5,
                 children: [
                   _buildStatCard(context, 'Målscorer', '${club.goalsFor} - ${club.goalsAgainst}', Icons.sports_baseball, Colors.indigo),
-                  _buildStatCard(context, 'Position', '#${club.position}', Icons.leaderboard, Colors.amber.shade700),
+                  _buildStatCard(context, 'Målforskel', '${club.goalsFor - club.goalsAgainst > 0 ? "+" : ""}${club.goalsFor - club.goalsAgainst}', Icons.leaderboard, Colors.amber.shade700),
                 ],
               ),
             ),

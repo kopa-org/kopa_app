@@ -1,11 +1,12 @@
 import 'package:kopa/model/match_event_details.dart';
 import 'package:kopa/model/match_poll_details.dart';
-import 'package:kopa/model/match_registration_details.dart';
+import 'package:kopa/model/event_attendance_details.dart';
 
 class MatchDetails {
   final int id;
-  final String homeTeam;
-  final String awayTeam;
+  final String type;
+  final String? homeTeam;
+  final String? awayTeam;
   final DateTime date;
   final DateTime? meetingTime;
   final String location;
@@ -15,14 +16,16 @@ class MatchDetails {
   final DateTime updatedAt;
   final int? homeTeamScore;
   final int? awayTeamScore;
+  final bool? isHomeTeam;
   final bool isCurrentUserRegistered;
-  final List<MatchRegistrationDetails>? matchRegistrationDetailsList;
+  final List<EventAttendanceDetails>? attendanceDetailsList;
   final List<MatchEventDetails>? matchEventDetailsList;
 
   MatchDetails({
     required this.id,
-    required this.homeTeam,
-    required this.awayTeam,
+    this.type = 'MATCH',
+    this.homeTeam,
+    this.awayTeam,
     required this.date,
     this.meetingTime,
     required this.location,
@@ -32,14 +35,16 @@ class MatchDetails {
     this.matchPollDetails,
     this.homeTeamScore,
     this.awayTeamScore,
+    this.isHomeTeam,
     this.isCurrentUserRegistered = false,
-    this.matchRegistrationDetailsList = const [],
+    this.attendanceDetailsList = const [],
     this.matchEventDetailsList = const [],
   });
 
   factory MatchDetails.fromJson(Map<String, dynamic> json) {
     return MatchDetails(
       id: json['id'],
+      type: json['type'] ?? 'MATCH',
       homeTeam: json['homeTeam'],
       awayTeam: json['awayTeam'],
       date: DateTime.parse(json['date']),
@@ -53,11 +58,12 @@ class MatchDetails {
       updatedAt: DateTime.parse(json['updatedAt']),
       homeTeamScore: json['homeTeamScore'],
       awayTeamScore: json['awayTeamScore'],
-      isCurrentUserRegistered: json['isCurrentUserRegistered'],
-      matchRegistrationDetailsList: json['matchRegistrationDetailsList'] != null
-          ? List<MatchRegistrationDetails>.from(
-              json['matchRegistrationDetailsList']
-                  .map((x) => MatchRegistrationDetails.fromJson(x)))
+      isHomeTeam: json['isHomeTeam'],
+      isCurrentUserRegistered: json['isCurrentUserRegistered'] ?? false,
+      attendanceDetailsList: json['attendanceDetailsList'] != null
+          ? List<EventAttendanceDetails>.from(
+              json['attendanceDetailsList']
+                  .map((x) => EventAttendanceDetails.fromJson(x)))
           : [],
       matchEventDetailsList: json['matchEventDetailsList'] != null
           ? List<MatchEventDetails>.from(json['matchEventDetailsList']
@@ -66,11 +72,11 @@ class MatchDetails {
     );
   }
 
-  get matchName {
-    return '$homeTeam vs $awayTeam';
+  String get matchName {
+    return '${homeTeam ?? "?"} vs ${awayTeam ?? "?"}';
   }
 
-  get hasMatchBeenPlayed {
+  bool get hasMatchBeenPlayed {
     return homeTeamScore != null && awayTeamScore != null;
   }
 }

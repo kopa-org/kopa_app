@@ -141,8 +141,8 @@ class MatchRepository {
 
     final url = Uri.parse('${ApiConfig.baseUrl}/match/register');
 
-    final command = RegisterForUnregisterFromMatchCommand(
-      matchId: matchId.toString(),
+    final command = RegisterForUnregisterFromEventCommand(
+      eventId: matchId.toString(),
     );
 
     final response = await http.post(
@@ -175,8 +175,8 @@ class MatchRepository {
 
     final url = Uri.parse('${ApiConfig.baseUrl}/match/unregister');
 
-    final command = RegisterForUnregisterFromMatchCommand(
-      matchId: matchId.toString(),
+    final command = RegisterForUnregisterFromEventCommand(
+      eventId: matchId.toString(),
     );
 
     final response = await http.post(
@@ -211,7 +211,7 @@ class MatchRepository {
     final url = Uri.parse('${ApiConfig.baseUrl}/match/score');
 
     final command = UpdateMatchScoreCommand(
-      matchId: matchId,
+      eventId: matchId,
       homeTeamScore: homeTeamScore,
       awayTeamScore: awayTeamScore,
     );

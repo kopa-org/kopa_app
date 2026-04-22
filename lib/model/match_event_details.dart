@@ -3,7 +3,7 @@ import 'package:kopa/model/match_event_type.dart';
 
 class MatchEventDetails {
   final int id;
-  final int matchId;
+  final int eventId;
   final MatchEventType type;
   final int teamId;
   final int goalscorerUserId;
@@ -14,7 +14,7 @@ class MatchEventDetails {
 
   MatchEventDetails({
     required this.id,
-    required this.matchId,
+    required this.eventId,
     required this.type,
     required this.teamId,
     required this.goalscorerUserId,
@@ -27,7 +27,7 @@ class MatchEventDetails {
   factory MatchEventDetails.fromJson(Map<String, dynamic> json) {
     return MatchEventDetails(
       id: json['id'],
-      matchId: json['matchId'],
+      eventId: json['eventId'],
       type: MatchEventType.values.firstWhere((e) => e.wire == json['type']),
       teamId: json['teamId'],
       goalscorerUserId: json['goalscorerUserId'],

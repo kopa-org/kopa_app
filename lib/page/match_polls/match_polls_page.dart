@@ -152,7 +152,7 @@ class _MatchPollsListPageState extends State<MatchPollsListPage> {
                     final user = row['user'] as UserDetails;
                     final match =
                         (data['matches'] as List<MatchDetails>).firstWhere(
-                      (m) => m.id == matchPoll.matchId,
+                      (m) => m.id == matchPoll.eventId,
                     );
 
                     return CupertinoListTile(

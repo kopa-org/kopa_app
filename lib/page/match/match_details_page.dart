@@ -144,7 +144,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
                                   children: [
                                     Expanded(
                                       child: Text(
-                                        matchDetails.homeTeam,
+                                        matchDetails.homeTeam ?? '?',
                                         textAlign: TextAlign.left,
                                         overflow: TextOverflow.ellipsis,
                                         maxLines: 1,
@@ -182,7 +182,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
                                       ),
                                     Expanded(
                                       child: Text(
-                                        matchDetails.awayTeam,
+                                        matchDetails.awayTeam ?? '?',
                                         textAlign: TextAlign.right,
                                         overflow: TextOverflow.ellipsis,
                                         maxLines: 1,
@@ -326,20 +326,19 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Tilmeldte - ${matchDetails.matchRegistrationDetailsList!.where((matchRegistrationDetails) => matchRegistrationDetails.isUserParticipating).length}',
+                      'Tilmeldte - ${matchDetails.attendanceDetailsList!.where((a) => a.isAttending).length}',
                       style: TextStyle(
                         color: CupertinoColors.black,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    if (matchDetails.matchRegistrationDetailsList!
-                        .where((matchRegistrationDetails) =>
-                            matchRegistrationDetails.isUserParticipating)
+                    if (matchDetails.attendanceDetailsList!
+                        .where((a) => a.isAttending)
                         .isNotEmpty)
                       const SizedBox(height: 10),
-                    ...matchDetails.matchRegistrationDetailsList!
-                        .where((d) => d.isUserParticipating)
+                    ...matchDetails.attendanceDetailsList!
+                        .where((d) => d.isAttending)
                         .map((d) => Padding(
                               padding: const EdgeInsets.symmetric(vertical: 4),
                               child: Text(
@@ -361,7 +360,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Frameldte - ${matchDetails.matchRegistrationDetailsList!.where((matchRegistrationDetails) => !matchRegistrationDetails.isUserParticipating).length}',
+                      'Frameldte - ${matchDetails.attendanceDetailsList!.where((a) => !a.isAttending).length}',
                       style: TextStyle(
                         color: CupertinoColors.black,
                         fontSize: 18,
@@ -369,8 +368,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    ...matchDetails.matchRegistrationDetailsList!
-                        .where((d) => !d.isUserParticipating)
+                    ...matchDetails.attendanceDetailsList!
+                        .where((d) => !d.isAttending)
                         .map((d) => Padding(
                               padding: const EdgeInsets.symmetric(vertical: 4),
                               child: Text(
@@ -392,7 +391,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Ej tilkendegivet - ${squad.where((player) => !matchDetails.matchRegistrationDetailsList!.any((registration) => registration.userDetails.id == player.id)).length}',
+                      'Ej tilkendegivet - ${squad.where((player) => !matchDetails.attendanceDetailsList!.any((a) => a.userDetails.id == player.id)).length}',
                       style: TextStyle(
                         color: CupertinoColors.black,
                         fontSize: 18,
@@ -401,16 +400,16 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
                     ),
                     if (squad
                         .where((player) => !matchDetails
-                            .matchRegistrationDetailsList!
-                            .any((registration) =>
-                                registration.userDetails.id == player.id))
+                            .attendanceDetailsList!
+                            .any((a) =>
+                                a.userDetails.id == player.id))
                         .isNotEmpty)
                       const SizedBox(height: 10),
                     ...squad
                         .where((player) => !matchDetails
-                            .matchRegistrationDetailsList!
-                            .any((registration) =>
-                                registration.userDetails.id == player.id))
+                            .attendanceDetailsList!
+                            .any((a) =>
+                                a.userDetails.id == player.id))
                         .map((d) => Padding(
                               padding: const EdgeInsets.symmetric(vertical: 4),
                               child: Text(
@@ -889,7 +888,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
                 await MatchRepository.createMatchEvents(
                   staged
                       .map((d) => CreateMatchEventCommand(
-                            matchId: widget.matchId,
+                            eventId: widget.matchId,
                             type: MatchEventType.goal,
                             teamId: currentUserData.teamDetails.id,
                             goalscorerUserId: d.scorerId!,

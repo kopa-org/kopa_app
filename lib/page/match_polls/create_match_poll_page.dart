@@ -178,7 +178,7 @@ class _CreateMatchPollPageState extends State<CreateMatchPollPage> {
     final idx = _safeIndex(widget.matches.length);
     final matchId = widget.matches[idx].id;
 
-    final exists = widget.matchPolls.any((x) => x.matchId == matchId);
+    final exists = widget.matchPolls.any((x) => x.eventId == matchId);
     if (exists) {
       await showCupertinoDialog(
         context: context,

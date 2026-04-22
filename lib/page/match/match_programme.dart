@@ -142,12 +142,12 @@ class _MatchProgrammePageState extends State<MatchProgrammePage> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(matchDetails.homeTeam,
+                                  Text(matchDetails.homeTeam ?? '?',
                                       style: const TextStyle(
                                           fontSize: 18,
                                           fontWeight: FontWeight.w500)),
                                   const SizedBox(height: 4),
-                                  Text(matchDetails.awayTeam,
+                                  Text(matchDetails.awayTeam ?? '?',
                                       style: const TextStyle(
                                           fontSize: 18,
                                           fontWeight: FontWeight.w500)),

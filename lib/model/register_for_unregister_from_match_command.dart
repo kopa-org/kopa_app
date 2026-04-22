@@ -1,11 +1,11 @@
-class RegisterForUnregisterFromMatchCommand {
-  String matchId;
+class RegisterForUnregisterFromEventCommand {
+  String eventId;
 
-  RegisterForUnregisterFromMatchCommand({required this.matchId});
+  RegisterForUnregisterFromEventCommand({required this.eventId});
 
   Map<String, dynamic> toJson() {
     return {
-      'matchId': matchId,
+      'eventId': eventId,
     };
   }
 }
