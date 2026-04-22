@@ -3,11 +3,13 @@ import 'package:go_router/go_router.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/auth_state.dart';
 import 'package:kopa/pages/login_page.dart';
+import 'package:kopa/pages/register_page.dart';
 import 'package:kopa/tab/home_tab.dart';
 import 'package:kopa/tab/profile_tab.dart';
 
 abstract final class AppRouter {
   static const login = '/login';
+  static const register = '/register';
   static const home = '/';
   static const profile = '/profile';
 
@@ -22,9 +24,10 @@ abstract final class AppRouter {
         final authState = authCubit.state;
         final isLoggedIn = authState.status == AuthStatus.authenticated;
         final isLoggingIn = state.uri.path == login;
+        final isRegistering = state.uri.path == register;
 
-        if (!isLoggedIn && !isLoggingIn) return login;
-        if (isLoggedIn && isLoggingIn) return home;
+        if (!isLoggedIn && !isLoggingIn && !isRegistering) return login;
+        if (isLoggedIn && (isLoggingIn || isRegistering)) return home;
 
         return null;
       },
@@ -32,6 +35,10 @@ abstract final class AppRouter {
         GoRoute(
           path: login,
           builder: (context, state) => const LoginPage(),
+        ),
+        GoRoute(
+          path: register,
+          builder: (context, state) => const RegisterPage(),
         ),
         StatefulShellRoute.indexedStack(
           builder: (context, state, navigationShell) {

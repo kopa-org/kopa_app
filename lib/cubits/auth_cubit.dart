@@ -41,4 +41,30 @@ class AuthCubit extends Cubit<AuthState> {
     await _authRepository.logout();
     emit(state.copyWith(status: AuthStatus.unauthenticated, user: null));
   }
+
+  Future<void> register(String name, String email, String password) async {
+    emit(state.copyWith(status: AuthStatus.loading));
+    try {
+      final success = await _authRepository.register(
+        name: name,
+        email: email,
+        password: password,
+        roleId: 2, // Default roleId from previous register page
+      );
+      if (success) {
+        // Automatically login after successful registration
+        await login(email, password);
+      } else {
+        emit(state.copyWith(
+          status: AuthStatus.failure,
+          errorMessage: 'Registration failed. Please try again.',
+        ));
+      }
+    } catch (e) {
+      emit(state.copyWith(
+        status: AuthStatus.failure,
+        errorMessage: e.toString(),
+      ));
+    }
+  }
 }
