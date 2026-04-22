@@ -6,6 +6,7 @@ import 'package:kopa/pages/login_page.dart';
 import 'package:kopa/pages/register_page.dart';
 import 'package:kopa/tab/home_tab.dart';
 import 'package:kopa/tab/profile_tab.dart';
+import 'package:kopa/tab/statistics_tab.dart';
 import 'package:kopa/page/match/match_programme.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 
@@ -14,6 +15,7 @@ abstract final class AppRouter {
   static const register = '/register';
   static const home = '/';
   static const match = '/match';
+  static const statistics = '/statistics';
   static const profile = '/profile';
 
   static GoRouter create({
@@ -85,6 +87,10 @@ abstract final class AppRouter {
                           text: 'Kampe',
                         ),
                         GButton(
+                          icon: Icons.bar_chart,
+                          text: 'Statistik',
+                        ),
+                        GButton(
                           icon: Icons.person,
                           text: 'Profil',
                         ),
@@ -109,6 +115,14 @@ abstract final class AppRouter {
                 GoRoute(
                   path: match,
                   builder: (context, state) => MatchProgrammePage(),
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: statistics,
+                  builder: (context, state) => const StatisticsTab(),
                 ),
               ],
             ),
