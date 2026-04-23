@@ -6,7 +6,7 @@ import 'package:kopa/pages/login_page.dart';
 import 'package:kopa/pages/register_page.dart';
 import 'package:kopa/tab/home_tab.dart';
 import 'package:kopa/tab/profile_tab.dart';
-import 'package:kopa/tab/statistics_tab.dart';
+import 'package:kopa/page/statistics/statistics_page.dart';
 import 'package:kopa/page/match/match_programme.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 
@@ -122,7 +122,7 @@ abstract final class AppRouter {
               routes: [
                 GoRoute(
                   path: statistics,
-                  builder: (context, state) => const StatisticsTab(),
+                  builder: (context, state) => const StatisticsPage(),
                 ),
               ],
             ),

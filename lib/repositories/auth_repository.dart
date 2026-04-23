@@ -61,7 +61,9 @@ class ApiAuthRepository implements AuthRepository {
         await SecureStorageService.setToken(data['token']);
         return true;
       }
-    } catch (_) {}
+    } catch (e) {
+      print('Error logging in: $e');
+    }
     return false;
   }
 
@@ -92,7 +94,9 @@ class ApiAuthRepository implements AuthRepository {
       );
 
       return response.statusCode == 201;
-    } catch (_) {}
+    } catch (e) {
+      print('Error registering user: $e');
+    }
     return false;
   }
 }

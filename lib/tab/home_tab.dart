@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/page/match_polls/match_polls_page.dart';
 import 'package:kopa/page/team/team_page.dart';
 import 'package:kopa/page/team_fines/team_fines_page.dart';
@@ -10,35 +11,13 @@ class HomeTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Scaffold(
+    return PageScaffold(
+      title: 'Home',
+      showBackButton: false,
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Velkommen tilbage,',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.6),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Holdoversigt',
-                      style: theme.textTheme.headlineLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),

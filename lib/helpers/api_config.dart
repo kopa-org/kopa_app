@@ -12,10 +12,7 @@ class ApiConfig {
       throw Exception('API_BASE_URL is not set in .env');
     }
 
-    // Replace localhost for Android emulator
-    if (!kIsWeb && PlatformService.isAndroid) {
-      return raw.replaceFirst('localhost', '10.0.2.2');
-    }
+
 
     return raw;
   }

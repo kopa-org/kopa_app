@@ -1,30 +1,47 @@
 import 'package:flutter/material.dart';
 
 class AppColors extends ThemeExtension<AppColors> {
-  final Color productRowDivider;
-  final Color searchBackground;
-  final Color searchCursorColor;
-  final Color searchIconColor;
+  final Color background;
+  final Color surface;
+  final Color primary;
+  final Color divider;
+  final Color textPrimary;
+  final Color textSecondary;
 
   const AppColors({
-    required this.productRowDivider,
-    required this.searchBackground,
-    required this.searchCursorColor,
-    required this.searchIconColor,
+    required this.background,
+    required this.surface,
+    required this.primary,
+    required this.divider,
+    required this.textPrimary,
+    required this.textSecondary,
   });
+
+  static const AppColors light = AppColors(
+    background: Color(0xfff0f0f0),
+    surface: Color(0xffffffff),
+    primary: Color(0xFF5856D6),
+    divider: Color(0xFFE5E5EA),
+    textPrimary: Color(0xFF000000),
+    textSecondary: Color(0xFF8E8E93),
+  );
 
   @override
   AppColors copyWith({
-    Color? productRowDivider,
-    Color? searchBackground,
-    Color? searchCursorColor,
-    Color? searchIconColor,
+    Color? background,
+    Color? surface,
+    Color? primary,
+    Color? divider,
+    Color? textPrimary,
+    Color? textSecondary,
   }) {
     return AppColors(
-      productRowDivider: productRowDivider ?? this.productRowDivider,
-      searchBackground: searchBackground ?? this.searchBackground,
-      searchCursorColor: searchCursorColor ?? this.searchCursorColor,
-      searchIconColor: searchIconColor ?? this.searchIconColor,
+      background: background ?? this.background,
+      surface: surface ?? this.surface,
+      primary: primary ?? this.primary,
+      divider: divider ?? this.divider,
+      textPrimary: textPrimary ?? this.textPrimary,
+      textSecondary: textSecondary ?? this.textSecondary,
     );
   }
 
@@ -34,10 +51,12 @@ class AppColors extends ThemeExtension<AppColors> {
       return this;
     }
     return AppColors(
-      productRowDivider: Color.lerp(productRowDivider, other.productRowDivider, t)!,
-      searchBackground: Color.lerp(searchBackground, other.searchBackground, t)!,
-      searchCursorColor: Color.lerp(searchCursorColor, other.searchCursorColor, t)!,
-      searchIconColor: Color.lerp(searchIconColor, other.searchIconColor, t)!,
+      background: Color.lerp(background, other.background, t)!,
+      surface: Color.lerp(surface, other.surface, t)!,
+      primary: Color.lerp(primary, other.primary, t)!,
+      divider: Color.lerp(divider, other.divider, t)!,
+      textPrimary: Color.lerp(textPrimary, other.textPrimary, t)!,
+      textSecondary: Color.lerp(textSecondary, other.textSecondary, t)!,
     );
   }
 }
