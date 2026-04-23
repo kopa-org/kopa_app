@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:kopa/helpers/api_config.dart';
 import 'package:kopa/model/create_match_poll_command.dart';
 import 'package:kopa/model/create_match_poll_user_command.dart';
@@ -9,14 +10,19 @@ import 'package:http/http.dart' as http;
 import 'package:kopa/model/user_vote.dart';
 
 class MatchPollsRepository {
+    static final _secureStorage = FlutterSecureStorage();
+
   static Future<List<MatchPollDetails>> getMatchPolls() async {
     await dotenv.load(); // Initialize dotenv
+    final token = await _secureStorage.read(key: 'token');
 
     var url = Uri.parse('${ApiConfig.baseUrl}/match/matchpoll/all');
-    var response = await http.get(url);
+    var response = await http.get(url, headers: {
+      'Authorization': 'Bearer $token',
+    });
 
     if (response.statusCode == 200) {
-      Iterable json = jsonDecode(response.body)['body'];
+      Iterable json = jsonDecode(response.body)['polls'];
 
       return List<MatchPollDetails>.from(
           json.map((content) => MatchPollDetails.fromJson(content)));
@@ -27,12 +33,15 @@ class MatchPollsRepository {
 
   static Future<MatchPollDetails> getMatchPoll(int id) async {
     await dotenv.load(); // Initialize dotenv
+    final token = await _secureStorage.read(key: 'token');
 
     var url = Uri.parse('${ApiConfig.baseUrl}/match/matchpoll/$id');
-    var response = await http.get(url);
+    var response = await http.get(url, headers: {
+      'Authorization': 'Bearer $token',
+    });
 
     if (response.statusCode == 200) {
-      var json = jsonDecode(response.body)['body'];
+      var json = jsonDecode(response.body)['poll'];
 
       return MatchPollDetails.fromJson(json);
     } else {

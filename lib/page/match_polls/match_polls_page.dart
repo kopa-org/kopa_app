@@ -38,13 +38,19 @@ class _MatchPollsListPageState extends State<MatchPollsListPage> {
   }
 
   Future<Map<String, dynamic>> _fetchMatchPollsData() async {
-    final squad = await UsersRepository.getSquad();
-    final matches = await MatchRepository.getMatches();
-    final matchPolls = await MatchPollsRepository.getMatchPolls();
+    final results = await Future.wait([
+      UsersRepository.getSquad(),
+      MatchRepository.getMatches(),
+      MatchPollsRepository.getMatchPolls(),
+    ]);
+
+    final squad = results[0] as List<UserDetails>;
+    final matches = results[1] as List<MatchDetails>;
+    final matchPolls = results[2] as List<MatchPollDetails>;
 
     return {
       'squad': squad,
-      'matches': matches,
+      'matches': matches,     
       'matchPolls': matchPolls.map((poll) {
         final user = squad.firstWhere(
           (user) => user.id == poll.playerOfTheMatchDetails.id,

@@ -34,7 +34,7 @@ class MatchRepository {
     );
 
     if (response.statusCode == 200) {
-      final json = jsonDecode(response.body)['body'];
+      final json = jsonDecode(response.body)['matches'];
       return List<MatchDetails>.from(
         json.map((content) => MatchDetails.fromJson(content)),
       );
@@ -120,7 +120,7 @@ class MatchRepository {
     );
 
     if (response.statusCode == 200) {
-      var json = jsonDecode(response.body)['body'];
+      var json = jsonDecode(response.body)['match'];
 
       return MatchDetails.fromJson(json);
     } else if (response.statusCode == 401) {

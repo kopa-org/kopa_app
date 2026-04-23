@@ -25,11 +25,11 @@ class UserDetails {
       id: json['id'],
       name: json['name'],
       email: json['email'],
-      isTeamOwner: json['isTeamOwner'],
-      roleId: json['roleId'],
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
-      teamDetails: TeamDetails.fromJson(json['teamDetails']),
+      isTeamOwner: json['is_team_owner'],
+      roleId: json['role_id'],
+      createdAt: DateTime.parse(json['created_at']),
+      updatedAt: DateTime.parse(json['updated_at']),
+      teamDetails: TeamDetails.fromJson(json['team_details']),
     );
   }
 }

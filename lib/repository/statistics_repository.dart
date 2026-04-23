@@ -27,7 +27,7 @@ class StatisticsRepository {
     );
 
     if (response.statusCode == 200) {
-      final json = jsonDecode(response.body)['body'];
+      final json = jsonDecode(response.body)['statistics'];
       return StatisticsResponse.fromJson(json);
     } else if (response.statusCode == 401) {
       throw Exception('Unauthorized. Please log in again.');
