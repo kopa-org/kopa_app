@@ -52,5 +52,24 @@ class UsersRepository {
 
     return json['id'];
   }
+  static Future<void> setCalendarUrl(String calendarUrl) async {
+    await dotenv.load();
+
+    final token = await SecureStorageService.getToken();
+    var url = Uri.parse('${ApiConfig.baseUrl}/team/calendar_url');
+
+    var response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({'calendar_url': calendarUrl}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update calendar URL');
+    }
+  }
 }
 

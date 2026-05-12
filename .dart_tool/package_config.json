@@ -236,6 +236,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "icalendar_parser",
+      "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/icalendar_parser-2.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
       "name": "intl",
       "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/intl-0.20.2",
       "packageUri": "lib/",
@@ -510,6 +516,30 @@
       "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/web-1.1.0",
       "packageUri": "lib/",
       "languageVersion": "3.4"
+    },
+    {
+      "name": "webview_flutter",
+      "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/webview_flutter-4.13.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.8"
+    },
+    {
+      "name": "webview_flutter_android",
+      "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/webview_flutter_android-4.12.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.9"
+    },
+    {
+      "name": "webview_flutter_platform_interface",
+      "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/webview_flutter_platform_interface-2.15.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.9"
+    },
+    {
+      "name": "webview_flutter_wkwebview",
+      "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/webview_flutter_wkwebview-3.25.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.10"
     },
     {
       "name": "win32",

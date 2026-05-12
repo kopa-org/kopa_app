@@ -6,6 +6,7 @@ import 'package:kopa/pages/login_page.dart';
 import 'package:kopa/pages/register_page.dart';
 import 'package:kopa/tab/home_tab.dart';
 import 'package:kopa/tab/profile_tab.dart';
+import 'package:kopa/page/profile/dbu_webview_page.dart';
 import 'package:kopa/page/statistics/statistics_page.dart';
 import 'package:kopa/page/match/match_programme.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
@@ -17,6 +18,7 @@ abstract final class AppRouter {
   static const match = '/match';
   static const statistics = '/statistics';
   static const profile = '/profile';
+  static const dbuWebview = '/dbu-webview';
 
   static GoRouter create({
     required AuthCubit authCubit,
@@ -37,6 +39,10 @@ abstract final class AppRouter {
         return null;
       },
       routes: [
+        GoRoute(
+          path: dbuWebview,
+          builder: (context, state) => const DbuWebviewPage(),
+        ),
         GoRoute(
           path: login,
           builder: (context, state) => const LoginPage(),
