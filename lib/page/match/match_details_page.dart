@@ -357,7 +357,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
             } catch (e) { setModalState(() => isSaving = false); }
           }
 
-          return Container(
+          return Material(
             color: appColors.surface,
             child: SafeArea(
               top: false,
