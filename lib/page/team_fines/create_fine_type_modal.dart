@@ -1,11 +1,15 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/model/fine_type_details.dart';
 import 'package:kopa/repository/fines_repository.dart';
+import 'package:kopa/theme/app_colors.dart';
+import 'package:kopa/theme/app_text_styles.dart';
 
 class CreateFineTypeModal extends StatefulWidget {
   final List<FineTypeDetails> fineTypeDetailsList;
 
-  CreateFineTypeModal({required this.fineTypeDetailsList});
+  const CreateFineTypeModal({super.key, required this.fineTypeDetailsList});
 
   @override
   State<CreateFineTypeModal> createState() => _CreateFineTypeModalState();
@@ -31,59 +35,62 @@ class _CreateFineTypeModalState extends State<CreateFineTypeModal> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-        navigationBar: CupertinoNavigationBar(
-          middle: Text('Opret bødetype'),
-          leading: GestureDetector(
-              onTap: () {
-                Navigator.pop(context,
-                    false); // Return false to indicate no user was added
-              },
-              child: Icon(
-                semanticLabel: 'Annullér',
-                CupertinoIcons.clear,
-              )),
-          trailing: GestureDetector(
-              onTap: () async {
-                var wasFineTypeCreated = await createFineType(context);
+    final theme = Theme.of(context);
+    final appColors = theme.extension<AppColors>() ?? AppColors.light;
+    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
-                if (wasFineTypeCreated && context.mounted) {
-                  Navigator.pop(context, wasFineTypeCreated);
-                }
-              },
-              child: Text('Opret',
-                  style: TextStyle(
-                      color: CupertinoColors.systemIndigo,
-                      fontWeight: FontWeight.bold))),
-        ),
-        child: SafeArea(
+    return PageScaffold(
+        title: 'Opret bødetype',
+        showBackButton: false,
+        backgroundColor: appColors.background,
+        leading: CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: () => Navigator.pop(context, false),
+            child: Icon(CupertinoIcons.clear, color: appColors.textPrimary)),
+        trailing: [
+          CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: () async {
+              var wasFineTypeCreated = await createFineType(context);
+              if (wasFineTypeCreated && context.mounted) {
+                Navigator.pop(context, wasFineTypeCreated);
+              }
+            },
+            child: Text(
+              'Opret',
+              style: appTextStyles.bodyBold.copyWith(color: appColors.primary),
+            ),
+          ),
+        ],
+        body: SafeArea(
           child: Form(
               autovalidateMode: AutovalidateMode.always,
               onChanged: () {
                 Form.maybeOf(primaryFocus!.context!)?.save();
               },
               child: CupertinoFormSection.insetGrouped(
+                  backgroundColor: appColors.background,
                   header: const Text(''),
                   children: <Widget>[
                     CupertinoFormRow(
-                      prefix: Text('Titel'),
+                      prefix: Text('Titel', style: appTextStyles.bodyBold),
                       child: CupertinoTextFormFieldRow(
                         placeholder: 'F.eks. "Kommet for sent"',
-                        validator: (String? value) =>
-                            validateTitleOfFineTypeInput(value),
+                        validator: (String? value) => validateTitleOfFineTypeInput(value),
                         keyboardType: TextInputType.name,
                         controller: _titleController,
                         maxLength: 255,
+                        style: appTextStyles.body,
                       ),
                     ),
                     CupertinoFormRow(
-                      prefix: Text('Beløb'),
+                      prefix: Text('Beløb', style: appTextStyles.bodyBold),
                       child: CupertinoTextFormFieldRow(
                         placeholder: 'F.eks. 100',
-                        validator: (String? value) =>
-                            validateDefaultAmountInput(value),
+                        validator: (String? value) => validateDefaultAmountInput(value),
                         keyboardType: TextInputType.number,
                         controller: _defaultAmountController,
+                        style: appTextStyles.body,
                       ),
                     ),
                   ])),

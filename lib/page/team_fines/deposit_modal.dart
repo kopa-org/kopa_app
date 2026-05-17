@@ -1,11 +1,15 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:kopa/component/button/mobile_pay_button.dart';
+import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/repository/fines_repository.dart';
+import 'package:kopa/theme/app_colors.dart';
+import 'package:kopa/theme/app_text_styles.dart';
 
 class DepositModal extends StatefulWidget {
   final int fineBoxId;
 
-  DepositModal({required this.fineBoxId});
+  const DepositModal({super.key, required this.fineBoxId});
 
   @override
   State<DepositModal> createState() => _DepositModalState();
@@ -17,7 +21,6 @@ class _DepositModalState extends State<DepositModal> {
   @override
   void initState() {
     super.initState();
-
     _depositController = TextEditingController();
   }
 
@@ -29,99 +32,103 @@ class _DepositModalState extends State<DepositModal> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGrey6,
-      navigationBar: CupertinoNavigationBar(
-        leading: GestureDetector(
-            onTap: () {
-              Navigator.pop(context,
-                  false); // Return false to indicate no player was added
-            },
-            child: Icon(
-              semanticLabel: 'Annullér',
-              CupertinoIcons.clear,
-            )),
-        middle: Text('Indbetal'),
-        trailing: GestureDetector(
-            onTap: () async {
-              var depositedAmount = await depositAmountToFineBox();
+    final theme = Theme.of(context);
+    final appColors = theme.extension<AppColors>() ?? AppColors.light;
+    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
-              if (depositedAmount != null && context.mounted) {
-                Navigator.pop(context, depositedAmount);
-              }
-            },
-            child: Text('Gem',
-                style: TextStyle(
-                    color: CupertinoColors.systemIndigo,
-                    fontWeight: FontWeight.bold))),
+    return PageScaffold(
+      title: 'Indbetal',
+      showBackButton: false,
+      backgroundColor: appColors.background,
+      leading: CupertinoButton(
+        padding: EdgeInsets.zero,
+        onPressed: () => Navigator.pop(context, false),
+        child: Icon(CupertinoIcons.clear, color: appColors.textPrimary),
       ),
-      child: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Container(
-                  margin: const EdgeInsets.all(20.0),
-                  padding: EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: CupertinoColors.systemBackground,
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Column(
-                        children: [
-                          Text('123', style: TextStyle(fontSize: 24)),
-                          SizedBox(height: 5), // Space between price and label
-                          Text('Mangler at blive betalt',
-                              style: TextStyle(
-                                  fontSize: 12, fontWeight: FontWeight.w600)),
-                        ],
-                      )
-                    ],
-                  )),
-              Container(
-                margin: const EdgeInsets.fromLTRB(20, 5, 20, 20),
-                padding: EdgeInsets.all(20),
+      trailing: [
+        CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: () async {
+            var depositedAmount = await depositAmountToFineBox();
+            if (depositedAmount != null && context.mounted) {
+              Navigator.pop(context, depositedAmount);
+            }
+          },
+          child: Text(
+            'Gem',
+            style: appTextStyles.bodyBold.copyWith(color: appColors.primary),
+          ),
+        ),
+      ],
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+                margin: const EdgeInsets.all(20.0),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: CupertinoColors.systemBackground,
+                  color: appColors.surface,
                   borderRadius: BorderRadius.circular(12.0),
-                ),
-                child: Column(
-                  children: [
-                    Text('Beløb til indbetaling',
-                        style: TextStyle(fontSize: 18)),
-                    SizedBox(height: 5), // Space between price and label
-                    CupertinoTextFormFieldRow(
-                      placeholder: 'F.eks. 100',
-                      controller: _depositController,
-                      keyboardType: TextInputType.number,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: CupertinoColors.black,
-                          width: 2,
-                        ),
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                    ),
+                  boxShadow: [
+                    BoxShadow(color: appColors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 2)),
                   ],
                 ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Column(
+                      children: [
+                        Text('123', style: appTextStyles.sectionHeader),
+                        const SizedBox(height: 5),
+                        Text(
+                          'Mangler at blive betalt',
+                          style: appTextStyles.caption.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    )
+                  ],
+                )),
+            Container(
+              margin: const EdgeInsets.fromLTRB(20, 5, 20, 20),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: appColors.surface,
+                borderRadius: BorderRadius.circular(12.0),
+                boxShadow: [
+                  BoxShadow(color: appColors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 2)),
+                ],
               ),
-              Container(
-                  margin: const EdgeInsets.fromLTRB(20, 5, 20, 20),
-                  padding: EdgeInsets.only(top: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Column(
-                        children: [
-                          MobilePayButton(),
-                        ],
-                      )
-                    ],
-                  )),
-            ],
-          ),
+              child: Column(
+                children: [
+                  Text('Beløb til indbetaling', style: appTextStyles.bodyBold),
+                  const SizedBox(height: 16),
+                  CupertinoTextField(
+                    placeholder: 'F.eks. 100',
+                    controller: _depositController,
+                    keyboardType: TextInputType.number,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: appColors.black, width: 2),
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+                margin: const EdgeInsets.fromLTRB(20, 5, 20, 20),
+                padding: const EdgeInsets.only(top: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Column(
+                      children: [
+                        MobilePayButton(),
+                      ],
+                    )
+                  ],
+                )),
+          ],
         ),
       ),
     );
@@ -129,31 +136,23 @@ class _DepositModalState extends State<DepositModal> {
 
   Future<String?> depositAmountToFineBox() async {
     var depositedAmount = _depositController.text;
-
     if (depositedAmount.isEmpty || depositedAmount == '0') {
-      // Show CupertinoDialog if player depositedAmount is empty or zero
       showCupertinoDialog(
         context: context,
         builder: (context) => CupertinoAlertDialog(
-          title: Text('Fejl'),
-          content: Text('Indtast venligst et beløb større end 0 kr.'),
+          title: const Text('Fejl'),
+          content: const Text('Indtast venligst et beløb større end 0 kr.'),
           actions: <CupertinoDialogAction>[
             CupertinoDialogAction(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: Text('Ok'),
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Ok'),
             ),
           ],
         ),
       );
-
       return null;
     }
-
-    await FinesRepository.depositAmountToFineBox(
-        widget.fineBoxId, depositedAmount, []);
-
+    await FinesRepository.depositAmountToFineBox(widget.fineBoxId, depositedAmount, []);
     return depositedAmount;
   }
 }

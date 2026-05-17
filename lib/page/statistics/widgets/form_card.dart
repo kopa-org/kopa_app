@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:kopa/theme/app_colors.dart';
+import 'package:kopa/theme/app_text_styles.dart';
 
 class FormCard extends StatelessWidget {
   final List<int> lastFiveMatchesForm;
@@ -10,13 +12,17 @@ class FormCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final appColors = theme.extension<AppColors>() ?? AppColors.light;
+    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: appColors.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: appColors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -28,10 +34,8 @@ class FormCard extends StatelessWidget {
         children: [
           Text(
             'Form (Seneste 5)',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.onSurface,
+            style: appTextStyles.bodyBold.copyWith(
+              color: appColors.textPrimary,
             ),
           ),
           const SizedBox(height: 16),
@@ -41,13 +45,13 @@ class FormCard extends StatelessWidget {
               Color bgColor;
               String label;
               if (result == 1) {
-                bgColor = Colors.green;
+                bgColor = appColors.success;
                 label = 'V';
               } else if (result == 0) {
-                bgColor = Colors.orange;
+                bgColor = appColors.warning;
                 label = 'U';
               } else {
-                bgColor = Colors.red;
+                bgColor = appColors.error;
                 label = 'T';
               }
               return Container(
@@ -58,7 +62,7 @@ class FormCard extends StatelessWidget {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: bgColor.withOpacity(0.4),
+                      color: bgColor.withValues(alpha: 0.4),
                       blurRadius: 6,
                       offset: const Offset(0, 2),
                     ),
@@ -67,10 +71,8 @@ class FormCard extends StatelessWidget {
                 alignment: Alignment.center,
                 child: Text(
                   label,
-                  style: const TextStyle(
+                  style: appTextStyles.bodyBold.copyWith(
                     color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
                   ),
                 ),
               );

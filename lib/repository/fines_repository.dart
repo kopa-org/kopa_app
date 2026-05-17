@@ -10,7 +10,6 @@ import 'package:kopa/model/create_user_fines_command.dart';
 import 'package:kopa/model/deposit_amount_to_fine_box_command.dart';
 import 'package:kopa/model/fine_box_details.dart';
 import 'package:kopa/model/fine_type_details.dart';
-import 'package:kopa/services/secure_storage_service.dart';
 
 class FinesRepository {
   static final _secureStorage = FlutterSecureStorage();

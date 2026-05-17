@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppTextStyles extends ThemeExtension<AppTextStyles> {
   final TextStyle pageTitle;
@@ -17,36 +18,36 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
     required this.button,
   });
 
-  static const AppTextStyles light = AppTextStyles(
-    pageTitle: TextStyle(
+  static AppTextStyles get light => AppTextStyles(
+    pageTitle: GoogleFonts.rethinkSans(
       fontSize: 28,
       fontWeight: FontWeight.bold,
-      color: Color(0xFF000000),
+      color: const Color(0xFF101010),
     ),
-    sectionHeader: TextStyle(
+    sectionHeader: GoogleFonts.rethinkSans(
       fontSize: 20,
       fontWeight: FontWeight.w600,
-      color: Color(0xFF000000),
+      color: const Color(0xFF101010),
     ),
-    bodyBold: TextStyle(
+    bodyBold: GoogleFonts.rethinkSans(
       fontSize: 16,
       fontWeight: FontWeight.w600,
-      color: Color(0xFF000000),
+      color: const Color(0xFF101010),
     ),
-    body: TextStyle(
+    body: GoogleFonts.rethinkSans(
       fontSize: 16,
       fontWeight: FontWeight.normal,
-      color: Color(0xFF000000),
+      color: const Color(0xFF101010),
     ),
-    caption: TextStyle(
+    caption: GoogleFonts.rethinkSans(
       fontSize: 13,
       fontWeight: FontWeight.normal,
-      color: Color(0xFF8E8E93),
+      color: const Color(0xFF2D1000),
     ),
-    button: TextStyle(
+    button: GoogleFonts.rethinkSans(
       fontSize: 16,
       fontWeight: FontWeight.w600,
-      color: Color(0xffffffff),
+      color: const Color(0xFFFFFFFF),
     ),
   );
 

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:kopa/component/button/button.dart';
 import 'package:kopa/component/button/mobile_pay_button.dart';
 import 'package:kopa/component/future_handler.dart';
+import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/model/fine_box_details.dart';
 import 'package:kopa/model/fine_type_details.dart';
 import 'package:kopa/model/user_details.dart';
@@ -14,11 +15,15 @@ import 'package:kopa/page/team_fines/deposit_personal_modal.dart';
 import 'package:kopa/repository/fines_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
+import 'package:kopa/theme/app_colors.dart';
+import 'package:kopa/theme/app_text_styles.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 enum TeamOwnerFinesSegments { overview, fineTypes, personal }
 
 class TeamFinesPage extends StatefulWidget {
+  const TeamFinesPage({super.key});
+
   @override
   State<TeamFinesPage> createState() => _TeamFinesPageState();
 }
@@ -34,12 +39,8 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
   @override
   void initState() {
     super.initState();
-
-    // Load fine data
     fineBoxDetails = FinesRepository.getFineBox();
     fineTypeDetails = FinesRepository.getFineTypes();
-
-    // Load logged in user via AuthCubit
     final user = context.read<AuthCubit>().state.user;
     if (user == null) {
       currentUserData = Future.error(Exception('Ingen bruger fundet. Log venligst ind igen.'));
@@ -63,65 +64,70 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
   @override
   Widget build(BuildContext context) {
     final double width = MediaQuery.of(context).size.width;
+    final theme = Theme.of(context);
+    final appColors = theme.extension<AppColors>() ?? AppColors.light;
+    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
-    return SizedBox(
-      height: double.infinity,
-      child: CupertinoPageScaffold(
-        backgroundColor: CupertinoColors.systemGrey6,
-        navigationBar: _buildNavigationBar(),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            child: Container(
-              margin: EdgeInsets.only(top: 20),
-              child: Column(
-                children: [
-                  Container(
-                    padding: EdgeInsets.fromLTRB(20, 0, 20, 20),
-                    width: double.infinity,
-                    child: CupertinoSlidingSegmentedControl<
-                        TeamOwnerFinesSegments>(
-                      backgroundColor: CupertinoColors.systemGrey2,
-                      groupValue: _selectedSegment,
-                      onValueChanged: (TeamOwnerFinesSegments? value) {
-                        if (value != null) {
-                          setState(() {
-                            _selectedSegment = value;
-                          });
-                        }
-                      },
-                      children: const <TeamOwnerFinesSegments, Widget>{
-                        TeamOwnerFinesSegments.overview: Text(
-                          'Overblik',
-                          style: TextStyle(
-                              color: CupertinoColors.black, fontSize: 13),
-                        ),
-                        TeamOwnerFinesSegments.fineTypes: Text(
-                          'Bødetyper',
-                          style: TextStyle(
-                              color: CupertinoColors.black, fontSize: 13),
-                        ),
-                        TeamOwnerFinesSegments.personal: Text(
-                          'Personlig',
-                          style: TextStyle(
-                              color: CupertinoColors.black, fontSize: 13),
-                        ),
-                      },
+    return PageScaffold(
+      title: 'Bødekassen',
+      showBackButton: true,
+      backgroundColor: appColors.background,
+      body: SingleChildScrollView(
+        child: Container(
+          margin: const EdgeInsets.only(top: 20),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                width: double.infinity,
+                child: CupertinoSlidingSegmentedControl<TeamOwnerFinesSegments>(
+                  backgroundColor: appColors.divider,
+                  thumbColor: appColors.surface,
+                  groupValue: _selectedSegment,
+                  onValueChanged: (TeamOwnerFinesSegments? value) {
+                    if (value != null) {
+                      setState(() {
+                        _selectedSegment = value;
+                      });
+                    }
+                  },
+                  children: <TeamOwnerFinesSegments, Widget>{
+                    TeamOwnerFinesSegments.overview: Text(
+                      'Overblik',
+                      style: appTextStyles.caption.copyWith(
+                        color: appColors.textPrimary,
+                        fontWeight: _selectedSegment == TeamOwnerFinesSegments.overview ? FontWeight.bold : FontWeight.normal,
+                      ),
                     ),
-                  ),
-                  SizedBox(
-                    width: double.infinity,
-                    child: getTeamFinesSegment(width),
-                  )
-                ],
+                    TeamOwnerFinesSegments.fineTypes: Text(
+                      'Bødetyper',
+                      style: appTextStyles.caption.copyWith(
+                        color: appColors.textPrimary,
+                        fontWeight: _selectedSegment == TeamOwnerFinesSegments.fineTypes ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
+                    TeamOwnerFinesSegments.personal: Text(
+                      'Personlig',
+                      style: appTextStyles.caption.copyWith(
+                        color: appColors.textPrimary,
+                        fontWeight: _selectedSegment == TeamOwnerFinesSegments.personal ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
+                  },
+                ),
               ),
-            ),
+              SizedBox(
+                width: double.infinity,
+                child: getTeamFinesSegment(width, appColors, appTextStyles),
+              )
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget? getTeamFinesSegment(double width) {
+  Widget? getTeamFinesSegment(double width, AppColors appColors, AppTextStyles appTextStyles) {
     return FutureHandler<FineBoxDetails>(
       future: fineBoxDetails,
       onSuccess: (context, fineBox) {
@@ -133,10 +139,10 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
               onSuccess: (context, user) {
                 return Column(
                   children: [
-                    _buildOverallBalanceSection(fineBox),
-                    if (user.isTeamOwner) _buildActionButtonsOverview(fineBox),
-                    if (user.isTeamOwner) _buildMobilePaySection(),
-                    _buildUserFineDetailsSection(allUserFineDetails, width),
+                    _buildOverallBalanceSection(fineBox, appColors, appTextStyles),
+                    if (user.isTeamOwner) _buildActionButtonsOverview(fineBox, appColors, appTextStyles),
+                    if (user.isTeamOwner) _buildMobilePaySection(appColors, appTextStyles),
+                    _buildUserFineDetailsSection(allUserFineDetails, width, appColors, appTextStyles),
                   ],
                 );
               });
@@ -147,8 +153,8 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
             onSuccess: (context, fineTypes) {
               return Column(
                 children: [
-                  _buildActionButtonFineTypes(fineTypes),
-                  _buildFineTypesSection(fineTypes, width),
+                  _buildActionButtonFineTypes(fineTypes, appColors, appTextStyles),
+                  _buildFineTypesSection(fineTypes, width, appColors, appTextStyles),
                 ],
               );
             },
@@ -162,21 +168,22 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
                   .toList();
 
               if (matches.isEmpty) {
-                // Ingen bøder for den nuværende bruger endnu
-                return _buildEmptyPersonalSection(user);
+                return _buildEmptyPersonalSection(user, appColors, appTextStyles);
               }
 
               final userFineDetails = matches.first;
 
               return Column(
                 children: [
-                  _buildPersonalBalanceSection(userFineDetails),
+                  _buildPersonalBalanceSection(userFineDetails, appColors, appTextStyles),
                   _buildActionButtonsPersonal(
                     fineBox,
                     userFineDetails,
                     user,
+                    appColors,
+                    appTextStyles,
                   ),
-                  _buildPersonalFineDetailsSection(userFineDetails, width),
+                  _buildPersonalFineDetailsSection(userFineDetails, width, appColors, appTextStyles),
                 ],
               );
             },
@@ -186,134 +193,127 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
     );
   }
 
-  CupertinoNavigationBar _buildNavigationBar() {
-    return CupertinoNavigationBar(
-      transitionBetweenRoutes: false,
-      leading: CupertinoButton(
-        padding: EdgeInsets.zero,
-        onPressed: () => Navigator.of(context)
-            .popUntil((route) => route.settings.name == '/'),
-        child: Icon(CupertinoIcons.chevron_left, semanticLabel: 'Tilbage'),
-      ),
-      middle: Text('Bødekassen'),
-    );
-  }
-
-  Widget _buildOverallBalanceSection(FineBoxDetails data) {
+  Widget _buildOverallBalanceSection(FineBoxDetails data, AppColors appColors, AppTextStyles appTextStyles) {
     return Center(
       child: Container(
         margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-        padding: EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: CupertinoColors.systemBackground,
+          color: appColors.surface,
           borderRadius: BorderRadius.circular(12.0),
+          boxShadow: [
+            BoxShadow(color: appColors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 2)),
+          ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildCurrentBalanceText(data.currentAmount),
-            SizedBox(height: 20),
-            dividerSection(),
-            SizedBox(height: 20),
-            _buildBalanceRow(data),
+            _buildCurrentBalanceText(data.currentAmount, appColors, appTextStyles),
+            const SizedBox(height: 20),
+            dividerSection(appColors),
+            const SizedBox(height: 20),
+            _buildBalanceRow(data, appColors, appTextStyles),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildPersonalBalanceSection(UserFineDetails userFineDetails) {
+  Widget _buildPersonalBalanceSection(UserFineDetails userFineDetails, AppColors appColors, AppTextStyles appTextStyles) {
     return Center(
       child: Container(
         margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-        padding: EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: CupertinoColors.systemBackground,
+          color: appColors.surface,
           borderRadius: BorderRadius.circular(12.0),
+          boxShadow: [
+            BoxShadow(color: appColors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 2)),
+          ],
         ),
         width: double.infinity,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildPersonalBalanceText(userFineDetails),
+            _buildPersonalBalanceText(userFineDetails, appColors, appTextStyles),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildPersonalBalanceText(UserFineDetails userFineDetails) {
+  Widget _buildPersonalBalanceText(UserFineDetails userFineDetails, AppColors appColors, AppTextStyles appTextStyles) {
+    final amount = userFineDetails.fineDetailsList
+        .where((x) => !x.hasBeenPaid)
+        .fold(0, (sum, fineDetail) => sum + fineDetail.owedAmount);
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          userFineDetails.fineDetailsList
-              .where((x) => !x.hasBeenPaid)
-              .fold(0, (sum, fineDetail) => sum + fineDetail.owedAmount)
-              .toString(),
-          style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+          '$amount,-',
+          style: appTextStyles.pageTitle.copyWith(color: appColors.error),
         ),
         Text(
           'Mangler du at betale',
-          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          style: appTextStyles.caption.copyWith(fontWeight: FontWeight.w600),
         ),
       ],
     );
   }
 
-  Widget _buildCurrentBalanceText(double currentAmount) {
+  Widget _buildCurrentBalanceText(double currentAmount, AppColors appColors, AppTextStyles appTextStyles) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          currentAmount.toString(),
-          style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+          '$currentAmount,-',
+          style: appTextStyles.pageTitle.copyWith(color: appColors.primary),
         ),
         Text(
           'I kassen nu',
-          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          style: appTextStyles.caption.copyWith(fontWeight: FontWeight.w600),
         ),
       ],
     );
   }
 
-  Widget _buildBalanceRow(FineBoxDetails data) {
+  Widget _buildBalanceRow(FineBoxDetails data, AppColors appColors, AppTextStyles appTextStyles) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         Expanded(
           child: _buildBalanceColumn(
-              data.currentAmount + data.totalOwedAmount, 'Når alle har betalt'),
+              data.currentAmount + data.totalOwedAmount, 'Når alle har betalt', appColors, appTextStyles),
         ),
-        verticalDividerSection(),
+        verticalDividerSection(appColors),
         Expanded(
-          child: _buildBalanceColumn(data.totalOwedAmount, 'Manglende beløb'),
+          child: _buildBalanceColumn(data.totalOwedAmount, 'Manglende beløb', appColors, appTextStyles),
         ),
       ],
     );
   }
 
-  Widget _buildBalanceColumn(double amount, String label) {
+  Widget _buildBalanceColumn(double amount, String label, AppColors appColors, AppTextStyles appTextStyles) {
     return Column(
       children: [
-        Text(amount.toString(), style: TextStyle(fontSize: 24)),
-        SizedBox(height: 5),
+        Text('$amount,-', style: appTextStyles.sectionHeader),
+        const SizedBox(height: 5),
         Text(label,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+            style: appTextStyles.caption.copyWith(fontWeight: FontWeight.w600)),
       ],
     );
   }
 
   Widget _buildActionButtonsPersonal(FineBoxDetails data,
-      UserFineDetails userFineDetails, UserDetails userDetails) {
+      UserFineDetails userFineDetails, UserDetails userDetails, AppColors appColors, AppTextStyles appTextStyles) {
     return Center(
       child: Container(
         margin: const EdgeInsets.fromLTRB(20, 20, 20, 20),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            getButtonItem('Indbetal', CupertinoIcons.arrow_up_square,
+            getButtonItem('Indbetal', CupertinoIcons.arrow_up_square, appColors, appTextStyles,
                 onTap: () async {
               var hasUserPaidAllFines = userFineDetails.fineDetailsList
                   .where((x) => !x.hasBeenPaid)
@@ -323,19 +323,18 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
                 showCupertinoDialog(
                   context: context,
                   builder: (context) => CupertinoAlertDialog(
-                    title: Text('Info'),
-                    content: Text('Du mangler ikke at indbetale nogle bøder.'),
+                    title: const Text('Info'),
+                    content: const Text('Du mangler ikke at indbetale nogle bøder.'),
                     actions: <CupertinoDialogAction>[
                       CupertinoDialogAction(
                         onPressed: () {
                           Navigator.of(context).pop();
                         },
-                        child: Text('Ok'),
+                        child: const Text('Ok'),
                       ),
                     ],
                   ),
                 );
-
                 return null;
               }
 
@@ -359,14 +358,14 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
     );
   }
 
-  Widget _buildActionButtonsOverview(FineBoxDetails data) {
+  Widget _buildActionButtonsOverview(FineBoxDetails data, AppColors appColors, AppTextStyles appTextStyles) {
     return Center(
       child: Container(
         margin: const EdgeInsets.fromLTRB(20, 20, 20, 20),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            getButtonItem('Tildel', CupertinoIcons.money_dollar,
+            getButtonItem('Tildel', CupertinoIcons.money_dollar, appColors, appTextStyles,
                 onTap: () async {
               final result = await showCupertinoModalBottomSheet(
                 expand: true,
@@ -377,8 +376,8 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
                 _refreshFineBox();
               }
             }),
-            SizedBox(width: 30),
-            getButtonItem('Indbetal', CupertinoIcons.arrow_up_square,
+            const SizedBox(width: 30),
+            getButtonItem('Indbetal', CupertinoIcons.arrow_up_square, appColors, appTextStyles,
                 onTap: () async {
               final result = await showCupertinoModalBottomSheet(
                 expand: true,
@@ -390,38 +389,37 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
                 _refreshFineBox();
               }
             }),
-            SizedBox(width: 30),
-            getButtonItem('Hæv', CupertinoIcons.arrow_down_square),
+            const SizedBox(width: 30),
+            getButtonItem('Hæv', CupertinoIcons.arrow_down_square, appColors, appTextStyles),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildMobilePaySection() {
+  Widget _buildMobilePaySection(AppColors appColors, AppTextStyles appTextStyles) {
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-      padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
       decoration: BoxDecoration(
-        color: CupertinoColors.systemBackground,
+        color: appColors.surface,
         borderRadius: BorderRadius.circular(12.0),
+        boxShadow: [
+          BoxShadow(color: appColors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 2)),
+        ],
       ),
       child: Container(
-        padding: EdgeInsets.fromLTRB(0, 20, 0, 20),
+        padding: const EdgeInsets.fromLTRB(0, 20, 0, 20),
         child: Column(
           children: [
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 'Betaling',
-                style: TextStyle(
-                  color: CupertinoColors.black,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: appTextStyles.sectionHeader,
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             MobilePayButton(),
           ],
         ),
@@ -430,24 +428,21 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
   }
 
   Widget _buildPersonalFineDetailsSection(
-      UserFineDetails userFineDetails, double width) {
+      UserFineDetails userFineDetails, double width, AppColors appColors, AppTextStyles appTextStyles) {
     return Container(
       margin: const EdgeInsets.only(top: 20, bottom: 20),
-      padding: EdgeInsets.fromLTRB(25, 20, 25, 20),
+      padding: const EdgeInsets.fromLTRB(25, 20, 25, 20),
       decoration: BoxDecoration(
-        color: CupertinoColors.systemBackground,
+        color: appColors.surface,
       ),
       child: userFineDetails.fineDetailsList.isEmpty
-          ? Center(child: Text('Ingen bøder tildelt endnu.'))
+          ? const Center(child: Text('Ingen bøder tildelt endnu.'))
           : Column(
               children: [
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text('Bødehistorik',
-                      style: TextStyle(
-                          color: CupertinoColors.black,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold)),
+                      style: appTextStyles.sectionHeader),
                 ),
                 FractionallySizedBox(
                   widthFactor: 1,
@@ -456,19 +451,19 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
                     columns: [
                       DataColumn(
                           label: SizedBox(
-                              width: width * .4, child: Text('Bødetype'))),
-                      DataColumn(label: SizedBox(child: Text('Beløb'))),
-                      DataColumn(label: SizedBox(child: Text('Betalt'))),
+                              width: width * .4, child: Text('Bødetype', style: appTextStyles.bodyBold))),
+                      DataColumn(label: SizedBox(child: Text('Beløb', style: appTextStyles.bodyBold))),
+                      DataColumn(label: SizedBox(child: Text('Betalt', style: appTextStyles.bodyBold))),
                     ],
                     rows: userFineDetails.fineDetailsList.map((fineDetail) {
                       return DataRow(
                         cells: [
-                          DataCell(Text(fineDetail.fineTypeDetails.title)),
-                          DataCell(Text('${fineDetail.owedAmount},-')),
+                          DataCell(Text(fineDetail.fineTypeDetails.title, style: appTextStyles.body)),
+                          DataCell(Text('${fineDetail.owedAmount},-', style: appTextStyles.body)),
                           DataCell(fineDetail.hasBeenPaid
                               ? Icon(CupertinoIcons.checkmark,
-                                  color: CupertinoColors.black, size: 16)
-                              : Text('')),
+                                  color: appColors.primary, size: 16)
+                              : const Text('')),
                         ],
                       );
                     }).toList(),
@@ -479,20 +474,20 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
     );
   }
 
-  Widget _buildEmptyPersonalSection(UserDetails user) {
+  Widget _buildEmptyPersonalSection(UserDetails user, AppColors appColors, AppTextStyles appTextStyles) {
     return Center(
       child: Container(
         margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: CupertinoColors.systemBackground,
+          color: appColors.surface,
           borderRadius: BorderRadius.circular(12.0),
         ),
         child: Column(
-          children: const [
+          children: [
             Text(
               'Ingen bøder tildelt endnu.',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              style: appTextStyles.bodyBold,
             ),
           ],
         ),
@@ -500,7 +495,7 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
     );
   }
 
-  Widget _buildActionButtonFineTypes(List<FineTypeDetails> fineTypeDetails) {
+  Widget _buildActionButtonFineTypes(List<FineTypeDetails> fineTypeDetails, AppColors appColors, AppTextStyles appTextStyles) {
     return FutureHandler<UserDetails>(
       future: currentUserData,
       onSuccess: (context, user) {
@@ -541,12 +536,14 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
   Widget _buildFineTypesSection(
     List<FineTypeDetails> fineTypeDetails,
     double width,
+    AppColors appColors,
+    AppTextStyles appTextStyles,
   ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       padding: const EdgeInsets.fromLTRB(25, 20, 25, 20),
-      decoration: const BoxDecoration(
-        color: CupertinoColors.systemBackground,
+      decoration: BoxDecoration(
+        color: appColors.surface,
       ),
       child: Column(
         children: [
@@ -554,18 +551,14 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
             alignment: Alignment.centerLeft,
             child: Text(
               'Holdets bødetyper',
-              style: TextStyle(
-                color: CupertinoColors.black,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: appTextStyles.sectionHeader,
             ),
           ),
           const SizedBox(height: 16),
           if (fineTypeDetails.isEmpty)
-            const Text(
+            Text(
               'Ingen bødertyper endnu.',
-              style: TextStyle(fontSize: 14, color: CupertinoColors.systemGrey),
+              style: appTextStyles.caption.copyWith(color: appColors.textSecondary),
             )
           else
             FractionallySizedBox(
@@ -574,15 +567,15 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
                 horizontalMargin: 0,
                 columns: [
                   DataColumn(
-                    label: SizedBox(width: width * .4, child: Text('Type')),
+                    label: SizedBox(width: width * .4, child: Text('Type', style: appTextStyles.bodyBold)),
                   ),
-                  DataColumn(label: SizedBox(child: Text('Standardbeløb'))),
+                  DataColumn(label: SizedBox(child: Text('Standardbeløb', style: appTextStyles.bodyBold))),
                 ],
                 rows: fineTypeDetails.map((fineTypeDetail) {
                   return DataRow(
                     cells: [
-                      DataCell(Text(fineTypeDetail.title)),
-                      DataCell(Text('${fineTypeDetail.defaultAmount},-')),
+                      DataCell(Text(fineTypeDetail.title, style: appTextStyles.body)),
+                      DataCell(Text('${fineTypeDetail.defaultAmount},-', style: appTextStyles.body)),
                     ],
                   );
                 }).toList(),
@@ -594,26 +587,23 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
   }
 
   Widget _buildUserFineDetailsSection(
-      List<UserFineDetails> userFineDetails, double width) {
+      List<UserFineDetails> userFineDetails, double width, AppColors appColors, AppTextStyles appTextStyles) {
     var fineDetailsList =
         userFineDetails.map((e) => e.fineDetailsList).expand((e) => e).toList();
 
     return Container(
       margin: const EdgeInsets.only(top: 20, bottom: 20),
-      padding: EdgeInsets.fromLTRB(25, 20, 25, 20),
+      padding: const EdgeInsets.fromLTRB(25, 20, 25, 20),
       decoration: BoxDecoration(
-        color: CupertinoColors.systemBackground,
+        color: appColors.surface,
       ),
       child: userFineDetails.isEmpty && fineDetailsList.isEmpty
-          ? Center(child: Text('Ingen bøder tildelt endnu.'))
+          ? const Center(child: Text('Ingen bøder tildelt endnu.'))
           : Column(children: [
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text('Bødeoverblik',
-                    style: TextStyle(
-                        color: CupertinoColors.black,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold)),
+                    style: appTextStyles.sectionHeader),
               ),
               FractionallySizedBox(
                 widthFactor: 1,
@@ -622,10 +612,11 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
                   columns: [
                     DataColumn(
                         label: SizedBox(
-                            width: width * .4, child: Text('Spiller'))),
+                            width: width * .4, child: Text('Spiller', style: appTextStyles.bodyBold))),
                     DataColumn(
                         label: SizedBox(
                             child: Text('Skyldigt beløb',
+                                style: appTextStyles.bodyBold,
                                 textAlign: TextAlign.right))),
                   ],
                   rows: userFineDetails
@@ -650,8 +641,8 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
                           (x) => int.parse(x['totalOwedAmount'].toString()) > 0)
                       .map((x) => DataRow(
                             cells: [
-                              DataCell(Text(x['userName'].toString())),
-                              DataCell(Text('${x['totalOwedAmount']},-')),
+                              DataCell(Text(x['userName'].toString(), style: appTextStyles.body)),
+                              DataCell(Text('${x['totalOwedAmount']},-', style: appTextStyles.body)),
                             ],
                           ))
                       .toList(),
@@ -661,27 +652,29 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
     );
   }
 
-  Widget getButtonItem(String buttonText, IconData buttonIcon,
+  Widget getButtonItem(String buttonText, IconData buttonIcon, AppColors appColors, AppTextStyles appTextStyles,
       {Function()? onTap}) {
     return Container(
-      padding: EdgeInsets.all(10),
+      padding: const EdgeInsets.all(10),
       width: 100,
       decoration: BoxDecoration(
-        color: CupertinoColors.systemBackground,
+        color: appColors.surface,
         borderRadius: BorderRadius.circular(12.0),
+        boxShadow: [
+          BoxShadow(color: appColors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 2)),
+        ],
       ),
       child: CupertinoButton(
         padding: EdgeInsets.zero,
         onPressed: onTap,
         child: Column(
           children: [
-            Icon(buttonIcon, color: CupertinoColors.black, size: 24),
-            SizedBox(height: 8),
+            Icon(buttonIcon, color: appColors.primary, size: 24),
+            const SizedBox(height: 8),
             Text(
               buttonText,
-              style: TextStyle(
-                  color: CupertinoColors.black,
-                  fontSize: 13,
+              style: appTextStyles.caption.copyWith(
+                  color: appColors.textPrimary,
                   fontWeight: FontWeight.bold),
             ),
           ],
@@ -690,22 +683,22 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
     );
   }
 
-  Widget verticalDividerSection() {
+  Widget verticalDividerSection(AppColors appColors) {
     return SizedBox(
       height: 50,
       child: VerticalDivider(
-        color: CupertinoColors.systemGrey3,
+        color: appColors.divider,
         thickness: 1,
         width: 1,
       ),
     );
   }
 
-  Widget dividerSection() {
+  Widget dividerSection(AppColors appColors) {
     return SizedBox(
       width: double.infinity,
       child: Divider(
-        color: CupertinoColors.systemGrey3,
+        color: appColors.divider,
         thickness: 1,
         height: 1,
       ),

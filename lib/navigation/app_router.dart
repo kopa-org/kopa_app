@@ -62,7 +62,7 @@ abstract final class AppRouter {
                   boxShadow: [
                     BoxShadow(
                       blurRadius: 20,
-                      color: Colors.black.withOpacity(.1),
+                      color: Colors.black.withValues(alpha: .1),
                     )
                   ],
                 ),
@@ -70,14 +70,14 @@ abstract final class AppRouter {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
                     child: GNav(
-                      rippleColor: theme.colorScheme.primary.withOpacity(0.1),
-                      hoverColor: theme.colorScheme.primary.withOpacity(0.1),
+                      rippleColor: theme.colorScheme.primary.withValues(alpha: 0.1),
+                      hoverColor: theme.colorScheme.primary.withValues(alpha: 0.1),
                       gap: 8,
                       activeColor: theme.colorScheme.primary,
                       iconSize: 24,
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                       duration: const Duration(milliseconds: 400),
-                      tabBackgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+                      tabBackgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
                       color: theme.unselectedWidgetColor,
                       selectedIndex: navigationShell.currentIndex,
                       onTabChange: (index) {

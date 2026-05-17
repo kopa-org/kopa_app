@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:kopa/theme/app_colors.dart';
+import 'package:kopa/theme/app_text_styles.dart';
 
 class AttendanceCard extends StatelessWidget {
   final double percentage;
@@ -10,15 +12,21 @@ class AttendanceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = percentage >= 80 ? Colors.green : (percentage >= 50 ? Colors.orange : Colors.red);
+    final theme = Theme.of(context);
+    final appColors = theme.extension<AppColors>() ?? AppColors.light;
+    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    final color = percentage >= 80 
+        ? appColors.success 
+        : (percentage >= 50 ? appColors.warning : appColors.error);
 
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: appColors.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: appColors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -33,17 +41,13 @@ class AttendanceCard extends StatelessWidget {
             children: [
               Text(
                 'Træningsfremmøde',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Theme.of(context).colorScheme.onSurface,
+                style: appTextStyles.bodyBold.copyWith(
+                  color: appColors.textPrimary,
                 ),
               ),
               Text(
                 '${percentage.toStringAsFixed(1)}%',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                style: appTextStyles.sectionHeader.copyWith(
                   color: color,
                 ),
               ),
@@ -55,7 +59,7 @@ class AttendanceCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: percentage / 100,
               minHeight: 12,
-              backgroundColor: Theme.of(context).dividerColor.withOpacity(0.1),
+              backgroundColor: appColors.divider.withValues(alpha: 0.3),
               valueColor: AlwaysStoppedAnimation<Color>(color),
             ),
           ),

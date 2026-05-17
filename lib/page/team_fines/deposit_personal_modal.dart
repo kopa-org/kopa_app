@@ -2,18 +2,21 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/button/mobile_pay_button.dart';
 import 'package:kopa/component/custom_checkbox.dart';
+import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/model/fine_details.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/model/user_fine_details.dart';
 import 'package:kopa/repository/fines_repository.dart';
+import 'package:kopa/theme/app_colors.dart';
+import 'package:kopa/theme/app_text_styles.dart';
 
 class DepositPersonalModal extends StatefulWidget {
   final int fineBoxId;
   final UserDetails userDetails;
   final UserFineDetails userFineDetails;
 
-  DepositPersonalModal(
-      {required this.fineBoxId,
+  const DepositPersonalModal(
+      {super.key, required this.fineBoxId,
       required this.userDetails,
       required this.userFineDetails});
 
@@ -25,12 +28,11 @@ class _DepositPersonalModalState extends State<DepositPersonalModal> {
   bool selectAllFines = false;
   int selectedAmountToDeposit = 0;
   List<FineDetails> fineDetailsListNotPaid = [];
-  Set<int> selectedIndexes = {}; // Keeps track of selected fines
+  Set<int> selectedIndexes = {};
 
   @override
   void initState() {
     super.initState();
-
     fineDetailsListNotPaid = widget.userFineDetails.fineDetailsList
         .where((x) => !x.hasBeenPaid)
         .toList();
@@ -51,11 +53,8 @@ class _DepositPersonalModalState extends State<DepositPersonalModal> {
       } else {
         selectedAmountToDeposit = 0;
       }
-
       selectAllFines = value ?? false;
-
-      selectedIndexes =
-          selectAllFines ? fineDetailsListNotPaid.asMap().keys.toSet() : {};
+      selectedIndexes = selectAllFines ? fineDetailsListNotPaid.asMap().keys.toSet() : {};
     });
   }
 
@@ -68,193 +67,138 @@ class _DepositPersonalModalState extends State<DepositPersonalModal> {
         selectedIndexes.remove(index);
         selectedAmountToDeposit -= fineDetailsListNotPaid[index].owedAmount;
       }
-
       selectAllFines = selectedIndexes.length == fineDetailsListNotPaid.length;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGrey6,
-      navigationBar: CupertinoNavigationBar(
-        leading: GestureDetector(
-            onTap: () {
-              Navigator.pop(
-                  context, false); // Return false to indicate no user was added
-            },
-            child: Icon(
-              semanticLabel: 'Annullér',
-              CupertinoIcons.clear,
-            )),
-        middle: Text('Indbetal'),
-        trailing: GestureDetector(
-            onTap: () async {
-              var depositedAmount = await depositAmountToFineBox();
+    final theme = Theme.of(context);
+    final appColors = theme.extension<AppColors>() ?? AppColors.light;
+    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
-              if (depositedAmount != null && context.mounted) {
-                Navigator.pop(context, depositedAmount);
-              }
-            },
-            child: Text('Gem',
-                style: TextStyle(
-                    color: CupertinoColors.systemIndigo,
-                    fontWeight: FontWeight.bold))),
-      ),
-      child: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Container(
-                  margin: const EdgeInsets.all(20.0),
-                  padding: EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: CupertinoColors.systemBackground,
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+    return PageScaffold(
+      title: 'Indbetal',
+      showBackButton: false,
+      backgroundColor: appColors.background,
+      leading: CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: () => Navigator.pop(context, false),
+            child: Icon(CupertinoIcons.clear, color: appColors.textPrimary)),
+      trailing: [
+        CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: () async {
+            var depositedAmount = await depositAmountToFineBox();
+            if (depositedAmount != null && context.mounted) {
+              Navigator.pop(context, depositedAmount);
+            }
+          },
+          child: Text(
+            'Gem',
+            style: appTextStyles.bodyBold.copyWith(color: appColors.primary),
+          ),
+        ),
+      ],
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            _buildBalanceCard(
+              title: 'Mangler at blive betalt',
+              amount: fineDetailsListNotPaid.fold(0, (sum, fd) => sum + fd.owedAmount).toString(),
+              appColors: appColors,
+              appTextStyles: appTextStyles,
+            ),
+            _buildBalanceCard(
+              title: 'Valgt beløb til indbetaling',
+              amount: selectedAmountToDeposit.toString(),
+              appColors: appColors,
+              appTextStyles: appTextStyles,
+              isHighlighted: true,
+            ),
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: appColors.surface,
+                borderRadius: BorderRadius.circular(12.0),
+                boxShadow: [
+                  BoxShadow(color: appColors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 2)),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(
-                        children: [
-                          Text(
-                              fineDetailsListNotPaid
-                                  .fold(
-                                      0,
-                                      (sum, fineDetail) =>
-                                          sum + fineDetail.owedAmount)
-                                  .toString(),
-                              style: TextStyle(fontSize: 24)),
-                          SizedBox(height: 5), // Space between price and label
-                          Text('Mangler at blive betalt',
-                              style: TextStyle(
-                                  fontSize: 12, fontWeight: FontWeight.w600)),
-                        ],
-                      )
+                      Expanded(child: Text('Bødetype', style: appTextStyles.bodyBold)),
+                      Text('Beløb', style: appTextStyles.bodyBold),
+                      const SizedBox(width: 10),
+                      CustomCheckbox(value: selectAllFines, onChanged: toggleSelectAll),
                     ],
-                  )),
-              Container(
-                margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                padding: EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: CupertinoColors.systemBackground,
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
+                  ),
+                  Divider(color: appColors.divider),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 400),
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      itemCount: fineDetailsListNotPaid.length,
+                      separatorBuilder: (_, __) => Divider(color: appColors.divider),
+                      itemBuilder: (context, index) {
+                        var fd = fineDetailsListNotPaid[index];
+                        bool isSelected = selectedIndexes.contains(index);
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(child: Text(fd.fineTypeDetails.title, style: appTextStyles.body)),
+                            Text('${fd.owedAmount} kr', style: appTextStyles.body),
+                            const SizedBox(width: 10),
+                            CustomCheckbox(value: isSelected, onChanged: (val) => toggleRowSelection(index, val)),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+                margin: const EdgeInsets.fromLTRB(20, 5, 20, 20),
+                padding: const EdgeInsets.only(top: 20),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Column(
-                      children: [
-                        Text(selectedAmountToDeposit.toString(),
-                            style: TextStyle(fontSize: 24)),
-                        SizedBox(height: 5), // Space between price and label
-                        Text('Valgt beløb til indbetaling',
-                            style: TextStyle(
-                                fontSize: 12, fontWeight: FontWeight.w600)),
-                      ],
-                    )
-                  ],
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
-                decoration: BoxDecoration(
-                  color: CupertinoColors.systemBackground,
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-                child: Column(
-                  children: [
-                    // Header Row
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        SizedBox(
-                          width: 200,
-                          child: Text(
-                            'Bødetype',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 14),
-                          ),
-                        ),
-                        SizedBox(
-                          width: 80,
-                          child: Text(
-                            'Beløb',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 14),
-                          ),
-                        ),
-                        CustomCheckbox(
-                          value: selectAllFines,
-                          onChanged: toggleSelectAll,
-                        ),
-                      ],
-                    ),
-                    Divider(),
-
-                    // Table Rows (Fix: Wrap in ConstrainedBox)
-                    ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxHeight:
-                            400, // Sæt en passende højde, eller brug MediaQuery
-                      ),
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        physics:
-                            AlwaysScrollableScrollPhysics(), // Tillader scroll
-                        itemCount: fineDetailsListNotPaid.length,
-                        itemBuilder: (context, index) {
-                          var userFineDetails = fineDetailsListNotPaid[index];
-                          bool isSelected = selectedIndexes.contains(index);
-
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              SizedBox(
-                                width: 200,
-                                child: Text(
-                                  userFineDetails.fineTypeDetails.title,
-                                  style: TextStyle(fontSize: 14),
-                                ),
-                              ),
-                              SizedBox(
-                                width: 80,
-                                child: Text(
-                                  '${userFineDetails.owedAmount} kr',
-                                  style: TextStyle(fontSize: 14),
-                                ),
-                              ),
-                              CustomCheckbox(
-                                value: isSelected,
-                                onChanged: (value) =>
-                                    toggleRowSelection(index, value),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                  margin: const EdgeInsets.fromLTRB(20, 5, 20, 20),
-                  padding: EdgeInsets.only(top: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Column(
-                        children: [
-                          MobilePayButton(),
-                        ],
-                      )
-                    ],
-                  )),
-            ],
-          ),
+                  children: [MobilePayButton()],
+                )),
+          ],
         ),
       ),
     );
+  }
+
+  Widget _buildBalanceCard({required String title, required String amount, required AppColors appColors, required AppTextStyles appTextStyles, bool isHighlighted = false}) {
+    return Container(
+        margin: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: appColors.surface,
+          borderRadius: BorderRadius.circular(12.0),
+          boxShadow: [
+            BoxShadow(color: appColors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 2)),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Column(
+              children: [
+                Text('$amount,-', style: appTextStyles.sectionHeader.copyWith(color: isHighlighted ? appColors.primary : appColors.textPrimary)),
+                const SizedBox(height: 5),
+                Text(title, style: appTextStyles.caption.copyWith(fontWeight: FontWeight.w600)),
+              ],
+            )
+          ],
+        ));
   }
 
   Future<String?> depositAmountToFineBox() async {

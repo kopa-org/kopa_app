@@ -1,4 +1,3 @@
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,12 +14,11 @@ import 'package:kopa/theme/app_theme.dart';
 void main() async {
   await CrashReporting.runAppGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
-    await dotenv.load(fileName: ".env");
+    await dotenv.load(fileName: '.env');
     await CrashReporting.initialize();
     
     final authRepository = ApiAuthRepository();
     final authCubit = AuthCubit(authRepository: authRepository);
-    FirebaseCrashlytics.instance.crash();
     // Initialize auth state
     await authCubit.init();
 
@@ -49,7 +47,7 @@ class KopaApp extends StatefulWidget {
 
 class _KopaAppState extends State<KopaApp> {
   late final RouterRefreshNotifier _refreshNotifier;
-  late final _router;
+  late final GoRouter _router;
 
   @override
   void initState() {

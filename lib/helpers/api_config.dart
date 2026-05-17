@@ -1,7 +1,5 @@
 // lib/config/api_config.dart
-import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:kopa/services/platform_service.dart';
 
 class ApiConfig {
   ApiConfig._();

@@ -69,7 +69,9 @@ class SecureStorageService {
       createdAtStr,
       updatedAtStr,
       teamName
-    ].contains(null)) return null;
+    ].contains(null)) {
+      return null;
+    }
 
     try {
       final bool isTeamOwner = isTeamOwnerStr!.toLowerCase() == 'true';

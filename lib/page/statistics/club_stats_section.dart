@@ -3,6 +3,8 @@ import 'package:kopa/model/statistics.dart';
 import 'package:kopa/page/statistics/widgets/stat_card.dart';
 import 'package:kopa/page/statistics/widgets/mini_stat_card.dart';
 import 'package:kopa/page/statistics/widgets/form_card.dart';
+import 'package:kopa/theme/app_colors.dart';
+import 'package:kopa/theme/app_text_styles.dart';
 
 class ClubStatsSection extends StatelessWidget {
   final ClubStats club;
@@ -15,6 +17,8 @@ class ClubStatsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final appColors = theme.extension<AppColors>() ?? AppColors.light;
+    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
     final goalDiff = club.goalsFor - club.goalsAgainst;
 
     return Column(
@@ -24,9 +28,8 @@ class ClubStatsSection extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(24, 32, 24, 16),
           child: Text(
             'Holdets Stats',
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: theme.colorScheme.primary,
+            style: appTextStyles.sectionHeader.copyWith(
+              color: appColors.primary,
             ),
           ),
         ),
@@ -47,17 +50,17 @@ class ClubStatsSection extends StatelessWidget {
               MiniStatCard(
                 title: 'Vundne',
                 value: club.wins.toString(),
-                color: Colors.green.shade700,
+                color: appColors.success,
               ),
               MiniStatCard(
                 title: 'Uafgjorte',
                 value: club.draws.toString(),
-                color: Colors.orange.shade700,
+                color: appColors.warning,
               ),
               MiniStatCard(
                 title: 'Tabte',
                 value: club.losses.toString(),
-                color: Colors.red.shade700,
+                color: appColors.error,
               ),
             ],
           ),
@@ -76,13 +79,13 @@ class ClubStatsSection extends StatelessWidget {
                 title: 'Målscorer',
                 value: '${club.goalsFor} - ${club.goalsAgainst}',
                 icon: Icons.sports_baseball,
-                color: Colors.indigo,
+                color: appColors.sky,
               ),
               StatCard(
                 title: 'Målforskel',
                 value: '${goalDiff > 0 ? "+" : ""}$goalDiff',
                 icon: Icons.leaderboard,
-                color: Colors.amber.shade700,
+                color: appColors.sunset,
               ),
             ],
           ),

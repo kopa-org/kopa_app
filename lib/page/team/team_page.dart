@@ -1,11 +1,17 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:kopa/component/future_handler.dart';
+import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/repository/users_repository.dart';
 import 'package:kopa/page/team/add_user_to_team_page.dart';
 import 'package:kopa/model/user_details.dart';
+import 'package:kopa/theme/app_colors.dart';
+import 'package:kopa/theme/app_text_styles.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class TeamPage extends StatefulWidget {
+  const TeamPage({super.key});
+
   @override
   State<TeamPage> createState() => _TeamPageState();
 }
@@ -27,69 +33,69 @@ class _TeamPageState extends State<TeamPage> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-        height: double.infinity,
-        child: CupertinoPageScaffold(
-          backgroundColor: CupertinoColors.systemGrey6,
-          navigationBar: CupertinoNavigationBar(
-            transitionBetweenRoutes: false,
-            middle: Text('Truppen'),
-            leading: CupertinoButton(
-              padding: EdgeInsets.zero,
-              onPressed: () {
-                Navigator.of(context)
-                    .popUntil((route) => route.settings.name == '/');
-              },
-              child: Icon(
-                semanticLabel: 'Tilbage',
-                CupertinoIcons.chevron_left,
-              ),
-            ),
-            trailing: CupertinoButton(
-              padding: EdgeInsets.zero,
-              onPressed: () async {
-                final squadData = await squad;
+    final theme = Theme.of(context);
+    final appColors = theme.extension<AppColors>() ?? AppColors.light;
+    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
-                if (context.mounted) {
-                  final result = await showCupertinoModalBottomSheet(
-                    expand: true,
-                    context: context,
-                    builder: (context) => AddUserToTeamPage(
-                      squad: squadData,
-                    ),
-                  );
+    return PageScaffold(
+      title: 'Truppen',
+      showBackButton: true,
+      backgroundColor: appColors.background,
+      trailing: [
+        CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: () async {
+            final squadData = await squad;
 
-                  if (result == true) {
-                    _refreshSquad(); // Refresh the squad if a new player was added
-                  }
-                }
-              },
-              child: Icon(
-                semanticLabel: 'Tilføj ny spiller',
-                CupertinoIcons.add,
-              ),
-            ),
+            if (context.mounted) {
+              final result = await showCupertinoModalBottomSheet(
+                expand: true,
+                context: context,
+                builder: (context) => AddUserToTeamPage(
+                  squad: squadData,
+                ),
+              );
+
+              if (result == true) {
+                _refreshSquad();
+              }
+            }
+          },
+          child: Icon(
+            semanticLabel: 'Tilføj ny spiller',
+            CupertinoIcons.add,
+            color: appColors.primary,
           ),
-          child: SafeArea(
-            child: FutureHandler<List<UserDetails>>(
-              future: squad,
-              noDataFoundMessage: 'Ingen spillere fundet.',
-              onSuccess: (context, data) {
-                return SingleChildScrollView(
-                  child: CupertinoListSection.insetGrouped(
-                    dividerMargin: 0,
-                    additionalDividerMargin: 0,
-                    children: data.map((player) {
-                      return CupertinoListTile(
-                        title: Text(player.name),
-                        subtitle: player.isTeamOwner ? Text('Holdleder') : null,
-                      );
-                    }).toList(),
+        ),
+      ],
+      body: FutureHandler<List<UserDetails>>(
+        future: squad,
+        noDataFoundMessage: 'Ingen spillere fundet.',
+        onSuccess: (context, data) {
+          return SingleChildScrollView(
+            child: CupertinoListSection.insetGrouped(
+              backgroundColor: appColors.background,
+              dividerMargin: 0,
+              additionalDividerMargin: 0,
+              children: data.map((player) {
+                return CupertinoListTile(
+                  backgroundColor: appColors.surface,
+                  title: Text(
+                    player.name,
+                    style: appTextStyles.bodyBold,
                   ),
+                  subtitle: player.isTeamOwner
+                      ? Text(
+                          'Holdleder',
+                          style: appTextStyles.caption.copyWith(color: appColors.primary),
+                        )
+                      : null,
                 );
-              },
+              }).toList(),
             ),
-          ),
-        ));
+          );
+        },
+      ),
+    );
   }
 }

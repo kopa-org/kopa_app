@@ -1,12 +1,15 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/repository/match_repository.dart';
+import 'package:kopa/theme/app_colors.dart';
+import 'package:kopa/theme/app_text_styles.dart';
 
 class CreateMatchPage extends StatefulWidget {
   final List<MatchDetails> matches;
 
-  CreateMatchPage({required this.matches});
+  const CreateMatchPage({super.key, required this.matches});
 
   @override
   State<CreateMatchPage> createState() => _CreateMatchPageState();
@@ -30,6 +33,9 @@ class _CreateMatchPageState extends State<CreateMatchPage> {
   }
 
   Future<void> _pickDateTime() async {
+    final theme = Theme.of(context);
+    final appColors = theme.extension<AppColors>() ?? AppColors.light;
+    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
     DateTime tempPickedDate = _selectedDate ?? DateTime.now();
 
     await showCupertinoModalPopup(
@@ -37,111 +43,34 @@ class _CreateMatchPageState extends State<CreateMatchPage> {
       builder: (BuildContext context) {
         return Container(
           height: 300,
-          color: CupertinoColors.systemBackground.resolveFrom(context),
+          color: appColors.surface,
           child: Column(
             children: [
-              MediaQuery.removePadding(
-                context: context,
-                removeTop: true,
-                child: CupertinoNavigationBar(
-                  middle: Text('Vælg dato og tid'),
-                  leading: CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    child: Text('Annullér'),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  trailing: CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    child: Text('OK'),
-                    onPressed: () {
-                      setState(() {
-                        _selectedDate = tempPickedDate;
-                      });
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  border: Border(
-                    bottom: BorderSide(
-                      color: CupertinoColors.separator,
-                      width: 0.0,
-                    ),
-                  ),
+              CupertinoNavigationBar(
+                backgroundColor: appColors.surface,
+                middle: Text('Vælg dato og tid', style: appTextStyles.sectionHeader),
+                leading: CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  child: Text('Annullér', style: TextStyle(color: appColors.error)),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+                trailing: CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  child: Text('OK', style: TextStyle(color: appColors.primary)),
+                  onPressed: () {
+                    setState(() => _selectedDate = tempPickedDate);
+                    Navigator.of(context).pop();
+                  },
                 ),
               ),
-              // Date/time picker
               Expanded(
                 child: CupertinoDatePicker(
                   initialDateTime: tempPickedDate,
                   mode: CupertinoDatePickerMode.dateAndTime,
                   use24hFormat: true,
-                  onDateTimeChanged: (DateTime newDate) {
-                    tempPickedDate = newDate;
-                  },
+                  onDateTimeChanged: (DateTime newDate) => tempPickedDate = newDate,
                 ),
               ),
-              const SizedBox(height: 30),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> _pickMeetingTime() async {
-    DateTime tempPickedDate = _selectedMeetingTime ?? DateTime.now();
-
-    await showCupertinoModalPopup(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          height: 300,
-          color: CupertinoColors.systemBackground.resolveFrom(context),
-          child: Column(
-            children: [
-              MediaQuery.removePadding(
-                context: context,
-                removeTop: true,
-                child: CupertinoNavigationBar(
-                  middle: Text('Vælg mødetid'),
-                  leading: CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    child: Text('Annullér'),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  trailing: CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    child: Text('OK'),
-                    onPressed: () {
-                      setState(() {
-                        _selectedMeetingTime = tempPickedDate;
-                      });
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  border: Border(
-                    bottom: BorderSide(
-                      color: CupertinoColors.separator,
-                      width: 0.0,
-                    ),
-                  ),
-                ),
-              ),
-              // Date/time picker
-              Expanded(
-                child: CupertinoDatePicker(
-                  initialDateTime: tempPickedDate,
-                  mode: CupertinoDatePickerMode.time,
-                  use24hFormat: true,
-                  onDateTimeChanged: (DateTime newDate) {
-                    tempPickedDate = newDate;
-                  },
-                ),
-              ),
-              const SizedBox(height: 30),
             ],
           ),
         );
@@ -151,119 +80,68 @@ class _CreateMatchPageState extends State<CreateMatchPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final appColors = theme.extension<AppColors>() ?? AppColors.light;
+    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+
     return CupertinoPageScaffold(
-        backgroundColor: CupertinoColors.systemGroupedBackground,
+        backgroundColor: appColors.background,
         navigationBar: CupertinoNavigationBar(
-          middle: Text('Opret kamp'),
+          backgroundColor: appColors.background,
+          middle: Text('Opret kamp', style: appTextStyles.sectionHeader),
           leading: GestureDetector(
             onTap: () => Navigator.pop(context, false),
-            child: Icon(CupertinoIcons.clear, semanticLabel: 'Annullér'),
+            child: Icon(CupertinoIcons.clear, color: appColors.textPrimary),
           ),
           trailing: GestureDetector(
             onTap: () async {
               final created = await _createMatch();
-              if (created && context.mounted) {
-                Navigator.pop(context, true);
-              }
+              if (created && context.mounted) Navigator.pop(context, true);
             },
-            child: Text('Opret',
-                style: TextStyle(
-                    color: CupertinoColors.activeBlue,
-                    fontWeight: FontWeight.bold)),
+            child: Text('Opret', style: appTextStyles.bodyBold.copyWith(color: appColors.primary)),
           ),
         ),
         child: Container(
-          padding: EdgeInsets.only(top: 15),
+          padding: const EdgeInsets.only(top: 15),
           child: SafeArea(
             child: CupertinoFormSection.insetGrouped(
+              backgroundColor: appColors.background,
               children: [
+                _buildFormRow('Hjemmehold', _teamAController, 'Fx Sønderjyske', appTextStyles),
+                _buildFormRow('Udehold', _teamBController, 'Fx AGF', appTextStyles),
                 CupertinoFormRow(
-                  prefix: Text('Hjemmehold',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  child: CupertinoTextFormFieldRow(
-                    controller: _teamAController,
-                    placeholder: 'Fx Sønderjyske',
-                  ),
-                ),
-                CupertinoFormRow(
-                  prefix: Text('Udehold',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  child: CupertinoTextFormFieldRow(
-                    controller: _teamBController,
-                    placeholder: 'Fx AGF',
-                  ),
-                ),
-                CupertinoFormRow(
-                  prefix: Text('Tidspunkt',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  prefix: Text('Tidspunkt', style: appTextStyles.bodyBold),
                   child: GestureDetector(
                     onTap: _pickDateTime,
                     behavior: HitTestBehavior.opaque,
                     child: Container(
                       alignment: Alignment.centerLeft,
-                      padding:
-                          EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
                       child: Text(
-                        _selectedDate != null
-                            ? DateFormat('dd.MM.yyyy - HH:mm')
-                                .format(_selectedDate!)
-                            : 'Vælg dato og tid',
-                        style: TextStyle(
-                          color: _selectedDate != null
-                              ? CupertinoColors.label
-                              : CupertinoColors.placeholderText,
-                          fontSize: 17,
-                        ),
+                        _selectedDate != null ? DateFormat('dd.MM.yyyy - HH:mm').format(_selectedDate!) : 'Vælg dato og tid',
+                        style: appTextStyles.body.copyWith(color: _selectedDate != null ? appColors.textPrimary : appColors.divider),
                       ),
                     ),
                   ),
                 ),
-                CupertinoFormRow(
-                  prefix: Text('Mødetid',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  child: GestureDetector(
-                    onTap: _pickMeetingTime,
-                    behavior: HitTestBehavior.opaque,
-                    child: Container(
-                      alignment: Alignment.centerLeft,
-                      padding:
-                          EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-                      child: Text(
-                        _selectedMeetingTime != null
-                            ? DateFormat('dd.MM.yyyy - HH:mm')
-                                .format(_selectedMeetingTime!)
-                            : 'VALGFRIT: Vælg mødetid',
-                        style: TextStyle(
-                          color: _selectedMeetingTime != null
-                              ? CupertinoColors.label
-                              : CupertinoColors.placeholderText,
-                          fontSize: 17,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                CupertinoFormRow(
-                  prefix: Text('Lokation',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  child: CupertinoTextFormFieldRow(
-                    controller: _locationController,
-                    placeholder: 'Fx Sydbank Park',
-                  ),
-                ),
-                CupertinoFormRow(
-                  prefix: Text('Noter',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  child: CupertinoTextFormFieldRow(
-                    controller: _noteController,
-                    placeholder: 'Evt. kommentarer',
-                    maxLines: 2,
-                  ),
-                ),
+                _buildFormRow('Lokation', _locationController, 'Fx Sydbank Park', appTextStyles),
+                _buildFormRow('Noter', _noteController, 'Evt. kommentarer', appTextStyles, maxLines: 2),
               ],
             ),
           ),
         ));
+  }
+
+  Widget _buildFormRow(String label, TextEditingController ctl, String hint, AppTextStyles styles, {int maxLines = 1}) {
+    return CupertinoFormRow(
+      prefix: Text(label, style: styles.bodyBold),
+      child: CupertinoTextFormFieldRow(
+        controller: ctl,
+        placeholder: hint,
+        maxLines: maxLines,
+        style: styles.body,
+      ),
+    );
   }
 
   Future<bool> _createMatch() async {

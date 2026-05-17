@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:kopa/theme/app_colors.dart';
+import 'package:kopa/theme/app_text_styles.dart';
 
 class PageScaffold extends StatelessWidget {
   final String title;
@@ -28,16 +30,23 @@ class PageScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final appColors = theme.extension<AppColors>() ?? AppColors.light;
+    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+
     final isIOS = Platform.isIOS;
-    final bgColor = backgroundColor ??
-        (isIOS ? CupertinoColors.systemGrey6 : const Color(0xfff0f0f0));
+    final bgColor = backgroundColor ?? appColors.background;
 
     if (isIOS) {
       return CupertinoPageScaffold(
         backgroundColor: bgColor,
         navigationBar: navigationBar ??
             CupertinoNavigationBar(
-              middle: Text(title),
+              backgroundColor: bgColor.withValues(alpha: 0.8),
+              middle: Text(
+                title,
+                style: appTextStyles.sectionHeader,
+              ),
               leading: leading ?? (showBackButton ? _defaultBackButton(context) : null),
               trailing:
                   trailing != null ? Row(mainAxisSize: MainAxisSize.min, children: trailing!) : null,
@@ -58,7 +67,10 @@ class PageScaffold extends StatelessWidget {
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
-        title: Text(title),
+        title: Text(
+          title,
+          style: appTextStyles.sectionHeader,
+        ),
         backgroundColor: bgColor,
         elevation: 0,
         scrolledUnderElevation: 0,

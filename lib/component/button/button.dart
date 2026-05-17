@@ -1,4 +1,7 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:kopa/theme/app_colors.dart';
+import 'package:kopa/theme/app_text_styles.dart';
 
 class Button extends StatelessWidget {
   final String buttonText;
@@ -18,19 +21,23 @@ class Button extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final appColors = theme.extension<AppColors>() ?? AppColors.light;
+    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+
     final Color bgColor = outlined
-        ? CupertinoColors.white
+        ? appColors.surface
         : (enabled
-            ? CupertinoColors.systemIndigo
-            : CupertinoColors.systemGrey4);
+            ? appColors.primary
+            : appColors.divider);
 
     final Color borderColor = outlined
-        ? (enabled ? CupertinoColors.systemIndigo : CupertinoColors.systemGrey)
-        : CupertinoColors.transparent;
+        ? (enabled ? appColors.primary : appColors.divider)
+        : Colors.transparent;
 
     final Color textColor = outlined
-        ? (enabled ? CupertinoColors.systemIndigo : CupertinoColors.systemGrey)
-        : (enabled ? CupertinoColors.white : CupertinoColors.black);
+        ? (enabled ? appColors.primary : appColors.textSecondary)
+        : (enabled ? Colors.white : appColors.textSecondary);
 
     return Semantics(
       button: true,
@@ -64,10 +71,8 @@ class Button extends StatelessWidget {
                 ],
                 Text(
                   buttonText,
-                  style: TextStyle(
+                  style: appTextStyles.button.copyWith(
                     color: textColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
                   ),
                 ),
               ],

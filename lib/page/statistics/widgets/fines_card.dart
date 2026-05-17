@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:kopa/theme/app_colors.dart';
+import 'package:kopa/theme/app_text_styles.dart';
 
 class FinesCard extends StatelessWidget {
   final double totalFines;
@@ -10,17 +12,21 @@ class FinesCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final appColors = theme.extension<AppColors>() ?? AppColors.light;
+    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.red.shade400, Colors.red.shade700],
+          colors: [appColors.error, appColors.dirt],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.red.withOpacity(0.3),
+            color: appColors.error.withValues(alpha: 0.3),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -30,26 +36,22 @@ class FinesCard extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Column(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(Icons.account_balance_wallet, color: Colors.white, size: 28),
-              SizedBox(height: 8),
+              const Icon(Icons.account_balance_wallet, color: Colors.white, size: 28),
+              const SizedBox(height: 8),
               Text(
                 'Udestående Bøder',
-                style: TextStyle(
-                  fontSize: 16,
+                style: appTextStyles.bodyBold.copyWith(
                   color: Colors.white,
-                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],
           ),
           Text(
             '${totalFines.toInt()} kr',
-            style: const TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
+            style: appTextStyles.pageTitle.copyWith(
               color: Colors.white,
             ),
           ),

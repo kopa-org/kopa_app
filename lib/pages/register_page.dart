@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/auth_state.dart';
+import 'package:kopa/theme/app_colors.dart';
+import 'package:kopa/theme/app_text_styles.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -38,21 +39,27 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final appColors = theme.extension<AppColors>() ?? AppColors.light;
+    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return BlocConsumer<AuthCubit, AuthState>(
       listener: (context, state) {
         if (state.status == AuthStatus.failure) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.errorMessage ?? 'Registration failed')),
+            SnackBar(
+              content: Text(state.errorMessage ?? 'Registration failed'),
+              backgroundColor: appColors.error,
+            ),
           );
         }
       },
       builder: (context, state) {
         return Scaffold(
+          backgroundColor: appColors.background,
           appBar: AppBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
-            leading: const BackButton(),
+            leading: BackButton(color: appColors.black),
           ),
           body: SafeArea(
             child: SingleChildScrollView(
@@ -65,31 +72,28 @@ class _RegisterPageState extends State<RegisterPage> {
                     Icon(
                       Icons.sports_soccer,
                       size: 80,
-                      color: theme.colorScheme.primary,
+                      color: appColors.primary,
                     ),
                     const SizedBox(height: 16),
                     Text(
                       'KOPA',
                       textAlign: TextAlign.center,
-                      style: theme.textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.primary,
+                      style: appTextStyles.pageTitle.copyWith(
+                        color: appColors.primary,
                       ),
                     ),
                     const SizedBox(height: 48),
                     Text(
                       'Opret bruger',
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: appTextStyles.sectionHeader,
                     ),
                     const SizedBox(height: 24),
                     TextFormField(
                       controller: _nameController,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Navn',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.person),
+                        border: const OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.person, color: appColors.grass),
                       ),
                       keyboardType: TextInputType.name,
                       validator: (value) {
@@ -100,10 +104,10 @@ class _RegisterPageState extends State<RegisterPage> {
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _emailController,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Email',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.email),
+                        border: const OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.email, color: appColors.grass),
                       ),
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
@@ -114,10 +118,10 @@ class _RegisterPageState extends State<RegisterPage> {
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _passwordController,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Adgangskode',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.lock),
+                        border: const OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.lock, color: appColors.grass),
                       ),
                       obscureText: true,
                       validator: (value) {
@@ -130,13 +134,16 @@ class _RegisterPageState extends State<RegisterPage> {
                     ElevatedButton(
                       onPressed: state.status == AuthStatus.loading ? null : _onRegisterPressed,
                       style: ElevatedButton.styleFrom(
+                        backgroundColor: appColors.primary,
+                        foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
+                        textStyle: appTextStyles.button,
                       ),
                       child: state.status == AuthStatus.loading
-                          ? const CircularProgressIndicator()
+                          ? const CircularProgressIndicator(color: Colors.white)
                           : const Text('OPRET KONTO'),
                     ),
                   ],

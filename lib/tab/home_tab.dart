@@ -3,6 +3,8 @@ import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/page/match_polls/match_polls_page.dart';
 import 'package:kopa/page/team/team_page.dart';
 import 'package:kopa/page/team_fines/team_fines_page.dart';
+import 'package:kopa/theme/app_colors.dart';
+import 'package:kopa/theme/app_text_styles.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class HomeTab extends StatelessWidget {
@@ -11,10 +13,12 @@ class HomeTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final appColors = theme.extension<AppColors>() ?? AppColors.light;
+
     return PageScaffold(
       title: 'Home',
       showBackButton: false,
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: appColors.background,
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
@@ -31,7 +35,7 @@ class HomeTab extends StatelessWidget {
                         context: context,
                         title: 'Kampens spiller',
                         icon: Icons.star_rounded,
-                        color: const Color.fromRGBO(38, 64, 139, 1),
+                        color: appColors.sky,
                         onTap: () {
                           Navigator.of(context).push(MaterialWithModalsPageRoute(
                               builder: (context) => MatchPollsListPage()));
@@ -46,7 +50,7 @@ class HomeTab extends StatelessWidget {
                         context: context,
                         title: 'Truppen',
                         icon: Icons.groups_rounded,
-                        color: const Color.fromRGBO(224, 159, 62, 1),
+                        color: appColors.sunset,
                         onTap: () {
                           Navigator.of(context).push(MaterialWithModalsPageRoute(
                               builder: (context) => TeamPage()));
@@ -61,7 +65,7 @@ class HomeTab extends StatelessWidget {
                         context: context,
                         title: 'Bødekassen',
                         icon: Icons.account_balance_wallet_rounded,
-                        color: const Color.fromRGBO(166, 117, 161, 1),
+                        color: appColors.grass,
                         onTap: () {
                           Navigator.of(context).push(MaterialWithModalsPageRoute(
                               builder: (context) => TeamFinesPage()));
@@ -86,9 +90,12 @@ class HomeTab extends StatelessWidget {
     required Color color,
     required VoidCallback onTap,
   }) {
+    final theme = Theme.of(context);
+    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+
     return Card(
       elevation: 4,
-      shadowColor: color.withOpacity(0.3),
+      shadowColor: color.withValues(alpha: 0.3),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: InkWell(
         onTap: onTap,
@@ -100,7 +107,7 @@ class HomeTab extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                color.withOpacity(0.8),
+                color.withValues(alpha: 0.8),
                 color,
               ],
             ),
@@ -113,7 +120,7 @@ class HomeTab extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -124,10 +131,9 @@ class HomeTab extends StatelessWidget {
               ),
               Text(
                 title,
-                style: const TextStyle(
+                style: appTextStyles.bodyBold.copyWith(
                   color: Colors.white,
                   fontSize: 18,
-                  fontWeight: FontWeight.bold,
                   letterSpacing: 0.5,
                 ),
               ),

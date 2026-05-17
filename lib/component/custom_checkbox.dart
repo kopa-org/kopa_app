@@ -1,4 +1,6 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:kopa/theme/app_colors.dart';
 
 class CustomCheckbox extends StatelessWidget {
   final bool value;
@@ -12,6 +14,9 @@ class CustomCheckbox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final appColors = theme.extension<AppColors>() ?? AppColors.light;
+
     return CupertinoButton(
       padding: EdgeInsets.zero,
       onPressed: () {
@@ -25,15 +30,15 @@ class CustomCheckbox extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(
-            color: CupertinoColors.black,
+            color: appColors.black,
             width: 2,
           ),
-          color: value == true ? CupertinoColors.black : CupertinoColors.white,
+          color: value == true ? appColors.black : appColors.surface,
         ),
         child: value
             ? Icon(
                 CupertinoIcons.check_mark,
-                color: CupertinoColors.white,
+                color: appColors.surface,
                 size: 14,
               )
             : null,

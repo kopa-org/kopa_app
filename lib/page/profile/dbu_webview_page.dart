@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:go_router/go_router.dart';
@@ -24,9 +23,6 @@ class _DbuWebviewPageState extends State<DbuWebviewPage> {
           if (mounted) {
             final String rawJson = message.message;
             try {
-              final Map<String, dynamic> scrapedData = jsonDecode(rawJson);
-              final List<dynamic> players = scrapedData['players'] ?? [];
-              // Put a breakpoint here to inspect `scrapedData` or `players`
               context.pop(rawJson);
             } catch (e) {
               context.pop(rawJson);

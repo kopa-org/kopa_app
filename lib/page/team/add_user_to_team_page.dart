@@ -1,11 +1,15 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/repository/users_repository.dart';
+import 'package:kopa/theme/app_colors.dart';
+import 'package:kopa/theme/app_text_styles.dart';
 
 class AddUserToTeamPage extends StatefulWidget {
   final List<UserDetails> squad;
 
-  AddUserToTeamPage({required this.squad});
+  const AddUserToTeamPage({super.key, required this.squad});
 
   @override
   State<AddUserToTeamPage> createState() => _AddUserToTeamPageState();
@@ -31,59 +35,63 @@ class _AddUserToTeamPageState extends State<AddUserToTeamPage> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-        navigationBar: CupertinoNavigationBar(
-          middle: Text('Tilføj spiller'),
-          leading: GestureDetector(
-              onTap: () {
-                Navigator.pop(context,
-                    false); // Return false to indicate no player was added
-              },
-              child: Icon(
-                semanticLabel: 'Annullér',
-                CupertinoIcons.clear,
-              )),
-          trailing: GestureDetector(
-              onTap: () async {
-                var wasPlayerAddedToSquad = await addPlayerToSquad(context);
+    final theme = Theme.of(context);
+    final appColors = theme.extension<AppColors>() ?? AppColors.light;
+    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
-                if (wasPlayerAddedToSquad && context.mounted) {
-                  Navigator.pop(context, true);
-                }
-              },
-              child: Text('Opret',
-                  style: TextStyle(
-                      color: CupertinoColors.systemIndigo,
-                      fontWeight: FontWeight.bold))),
-        ),
-        child: SafeArea(
+    return PageScaffold(
+        title: 'Tilføj spiller',
+        showBackButton: false,
+        backgroundColor: appColors.background,
+        leading: CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: () => Navigator.pop(context, false),
+            child: Icon(CupertinoIcons.clear, color: appColors.textPrimary)),
+        trailing: [
+          CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: () async {
+              var wasPlayerAddedToSquad = await addPlayerToSquad(context);
+              if (wasPlayerAddedToSquad && context.mounted) {
+                Navigator.pop(context, true);
+              }
+            },
+            child: Text(
+              'Opret',
+              style: appTextStyles.bodyBold.copyWith(color: appColors.primary),
+            ),
+          ),
+        ],
+        body: SafeArea(
           child: Form(
               autovalidateMode: AutovalidateMode.always,
               onChanged: () {
                 Form.maybeOf(primaryFocus!.context!)?.save();
               },
               child: CupertinoFormSection.insetGrouped(
+                  backgroundColor: appColors.background,
                   header: const Text(''),
                   children: <Widget>[
                     CupertinoFormRow(
-                      prefix: Text('Navn'),
+                      prefix: Text('Navn', style: appTextStyles.bodyBold),
                       child: CupertinoTextFormFieldRow(
                         placeholder: 'F.eks. Lars Larsen',
-                        validator: (String? value) =>
-                            validateNameOfPlayerInput(value),
+                        validator: (String? value) => validateNameOfPlayerInput(value),
                         keyboardType: TextInputType.name,
                         controller: _nameController,
                         maxLength: 255,
+                        style: appTextStyles.body,
                       ),
                     ),
                     CupertinoFormRow(
-                      prefix: Text('E-mail'),
+                      prefix: Text('E-mail', style: appTextStyles.bodyBold),
                       child: CupertinoTextFormFieldRow(
                         placeholder: 'F.eks. lars@example.com',
                         validator: (String? value) => validateEmailInput(value),
                         keyboardType: TextInputType.emailAddress,
                         controller: _emailController,
                         maxLength: 255,
+                        style: appTextStyles.body,
                       ),
                     ),
                   ])),
