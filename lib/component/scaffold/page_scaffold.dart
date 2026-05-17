@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/theme/app_colors.dart';
@@ -34,7 +33,7 @@ class PageScaffold extends StatelessWidget {
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
     final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
-    final isIOS = Platform.isIOS;
+    final isIOS = theme.platform == TargetPlatform.iOS;
     final bgColor = backgroundColor ?? appColors.background;
 
     if (isIOS) {
