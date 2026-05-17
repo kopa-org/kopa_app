@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
@@ -72,11 +73,23 @@ class _ProfileTabState extends State<ProfileTab> {
                             final result = await context.push<String>(AppRouter.dbuWebview);
                             if (result != null && context.mounted) {
                               try {
-                                final uri = Uri.parse(result);
+                                Map<String, dynamic> resultData;
+                                try {
+                                  resultData = jsonDecode(result);
+                                } catch (e) {
+                                  resultData = {'webcal': result, 'matches': []};
+                                }
+                                
+                                final String webcalLink = resultData['webcal'] ?? '';
+                                final List<dynamic> scrapedMatches = resultData['matches'] ?? [];
+                                final List<dynamic> scrapedPlayers = resultData['players'] ?? [];
+                                if (webcalLink.isEmpty) return;
+
+                                final uri = Uri.parse(webcalLink);
                                 
                                 // 1. Fetch and print the calendar data
                                 try {
-                                  final httpUrl = result.replaceFirst('webcal://', 'https://');
+                                  final httpUrl = webcalLink.replaceFirst('webcal://', 'https://');
                                   final response = await http.get(Uri.parse(httpUrl));
                                   if (response.statusCode == 200) {
                                     final iCalendar = ICalendar.fromString(response.body);
@@ -89,7 +102,43 @@ class _ProfileTabState extends State<ProfileTab> {
                                       print('Failed to save calendar URL to backend: $e');
                                     }
 
-                                    if (context.mounted && events.isNotEmpty) {
+                                    List<Map<String, dynamic>> combinedEvents = List.from(events);
+                                    final now = DateTime.now();
+                                    
+                                    for (var scraped in scrapedMatches) {
+                                      final String scrapedDate = scraped['dtstart']?.toString() ?? '';
+                                      bool isFuture = false;
+                                      
+                                      if (scrapedDate.length == 16) {
+                                        try {
+                                          final parsedDate = DateTime.parse("${scrapedDate.substring(0, 4)}-${scrapedDate.substring(4, 6)}-${scrapedDate.substring(6, 11)}:${scrapedDate.substring(11, 13)}:${scrapedDate.substring(13, 16)}").toLocal();
+                                          if (parsedDate.isAfter(now)) {
+                                            isFuture = true;
+                                          }
+                                        } catch (_) {}
+                                      }
+                                      
+                                      print("Scraped match: ${scraped['summary']} - dtstart: $scrapedDate - isFuture: $isFuture");
+                                      
+                                      if (isFuture) {
+                                        continue; // Skip future events from scraped matches
+                                      }
+                                      
+                                      combinedEvents.add({
+                                        'summary': scraped['summary'],
+                                        'dtstart': scraped['dtstart'],
+                                        'dtend': '',
+                                        'location': scraped['result'] != null && scraped['result'].toString().isNotEmpty ? "Resultat: ${scraped['result']}" : '',
+                                      });
+                                    }
+                                    
+                                    // Sort combined events by date
+                                    combinedEvents.sort((a, b) {
+                                      final aDateStr = (a['dtstart'] is IcsDateTime ? (a['dtstart'] as IcsDateTime).dt : a['dtstart'].toString());
+                                      final bDateStr = (b['dtstart'] is IcsDateTime ? (b['dtstart'] as IcsDateTime).dt : b['dtstart'].toString());
+                                      return bDateStr.compareTo(aDateStr); // Descending (newest first) or change to aDateStr.compareTo(bDateStr) for Ascending
+                                    });
+                                    if (context.mounted && (combinedEvents.isNotEmpty || scrapedPlayers.isNotEmpty)) {
                                       await showModalBottomSheet(
                                         context: context,
                                         isScrollControlled: true,
@@ -101,42 +150,10 @@ class _ProfileTabState extends State<ProfileTab> {
                                             minChildSize: 0.5,
                                             maxChildSize: 0.95,
                                             builder: (context, scrollController) {
-                                              return Column(
-                                                children: [
-                                                  const Padding(
-                                                    padding: EdgeInsets.all(16.0),
-                                                    child: Text(
-                                                      'Fundne kampe',
-                                                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                                                    ),
-                                                  ),
-                                                  Expanded(
-                                                    child: ListView.separated(
-                                                      controller: scrollController,
-                                                      itemCount: events.length,
-                                                      separatorBuilder: (context, index) => const Divider(),
-                                                      itemBuilder: (context, index) {
-                                                        final event = events[index];
-                                                        final summary = event['summary'] ?? 'Ukendt';
-                                                        final start = (event['dtstart'] as IcsDateTime?)?.dt ?? '';
-                                                        final end = (event['dtend'] as IcsDateTime?)?.dt ?? '';
-                                                        final location = event['location'] ?? '';
-                                                        
-                                                        return ListTile(
-                                                          title: Text(summary.toString(), style: const TextStyle(fontWeight: FontWeight.bold)),
-                                                          subtitle: Text('Start: $start\\nSlut: $end\\nLokation: $location'),
-                                                        );
-                                                      },
-                                                    ),
-                                                  ),
-                                                  Padding(
-                                                    padding: const EdgeInsets.all(16.0),
-                                                    child: FullWidthButton(
-                                                      buttonText: 'Fortsæt til kalender',
-                                                      onPressed: () => Navigator.of(context).pop(),
-                                                    ),
-                                                  ),
-                                                ],
+                                              // Using ScrapedMembersWidget for now to test scraped player output
+                                              return ScrapedMembersWidget(
+                                                players: scrapedPlayers,
+                                                scrollController: scrollController,
                                               );
                                             },
                                           );
@@ -203,5 +220,102 @@ class _ProfileTabState extends State<ProfileTab> {
                       ] else
                         const LoadingIndicator(),
                     ])))));
+  }
+}
+
+class ScrapedMatchesWidget extends StatelessWidget {
+  final List<Map<String, dynamic>> combinedEvents;
+  final ScrollController? scrollController;
+  
+  const ScrapedMatchesWidget({super.key, required this.combinedEvents, this.scrollController});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Text(
+            'Fundne kampe',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+        ),
+        Expanded(
+          child: ListView.separated(
+            controller: scrollController,
+            itemCount: combinedEvents.length,
+            separatorBuilder: (context, index) => const Divider(),
+            itemBuilder: (context, index) {
+              final event = combinedEvents[index];
+              final summary = event['summary'] ?? 'Ukendt';
+              final dtstart = event['dtstart'];
+              final start = dtstart is IcsDateTime ? dtstart.dt : dtstart.toString();
+              final dtend = event['dtend'];
+              final end = dtend is IcsDateTime ? dtend.dt : dtend?.toString() ?? '';
+              final location = event['location'] ?? '';
+              
+              return ListTile(
+                title: Text(summary.toString(), style: const TextStyle(fontWeight: FontWeight.bold)),
+                subtitle: Text('Start: $start' + (end.isNotEmpty ? '\nSlut: $end' : '') + (location.isNotEmpty ? '\nLokation/Resultat: $location' : '')),
+              );
+            },
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: FullWidthButton(
+            buttonText: 'Fortsæt til kalender',
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class ScrapedMembersWidget extends StatelessWidget {
+  final List<dynamic> players;
+  final ScrollController? scrollController;
+  
+  const ScrapedMembersWidget({super.key, required this.players, this.scrollController});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Text(
+            'Fundne holdmedlemmer',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+        ),
+        Expanded(
+          child: ListView.separated(
+            controller: scrollController,
+            itemCount: players.length,
+            separatorBuilder: (context, index) => const Divider(),
+            itemBuilder: (context, index) {
+              final player = players[index];
+              final name = player['name'] ?? 'Ukendt';
+              final contact = player['contact'] ?? '';
+              
+              return ListTile(
+                leading: const CircleAvatar(child: Icon(Icons.person)),
+                title: Text(name.toString(), style: const TextStyle(fontWeight: FontWeight.bold)),
+                subtitle: Text(contact.toString()),
+              );
+            },
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: FullWidthButton(
+            buttonText: 'Invitier holdet til Kopa',
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
+      ],
+    );
   }
 }
