@@ -357,15 +357,25 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
             } catch (e) { setModalState(() => isSaving = false); }
           }
 
+          String getUserName(int? id) {
+            if (id == null) return '';
+            try {
+              return squad.firstWhere((u) => u.id == id).name;
+            } catch (_) {
+              return 'Ukendt';
+            }
+          }
+
           return Material(
             color: appColors.surface,
             child: SafeArea(
               top: false,
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   CupertinoNavigationBar(
                     backgroundColor: appColors.surface,
-                    middle: Text('Tilføj målscorer', style: appTextStyles.sectionHeader),
+                    middle: Text('Tilføj mål', style: appTextStyles.sectionHeader),
                     leading: CupertinoButton(padding: EdgeInsets.zero, child: const Text('Luk'), onPressed: () => Navigator.of(modalContext).pop()),
                     trailing: CupertinoButton(
                       padding: EdgeInsets.zero,
@@ -373,17 +383,80 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
                       child: isSaving ? const CupertinoActivityIndicator() : Text('Gem', style: TextStyle(color: staged.isNotEmpty ? appColors.primary : appColors.divider)),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  
+                  // Staged Goals Section
+                  if (staged.isNotEmpty)
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: appColors.divider.withValues(alpha: 0.1),
+                        border: Border(bottom: BorderSide(color: appColors.divider)),
+                      ),
+                      constraints: const BoxConstraints(maxHeight: 150),
+                      child: ListView.separated(
+                        shrinkWrap: true,
+                        itemCount: staged.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 8),
+                        itemBuilder: (context, i) {
+                          final s = staged[i];
+                          return Row(
+                            children: [
+                              Icon(Icons.sports_soccer, size: 16, color: appColors.primary),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  '${getUserName(s.scorerId)}${s.assistId != null ? ' (Assist: ${getUserName(s.assistId)})' : ''}',
+                                  style: appTextStyles.body,
+                                ),
+                              ),
+                              CupertinoButton(
+                                padding: EdgeInsets.zero,
+                                child: Icon(CupertinoIcons.minus_circle_fill, color: appColors.error, size: 20),
+                                onPressed: () => setModalState(() => staged.removeAt(i)),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+
+                  const SizedBox(height: 16),
+                  
+                  // Current Selection Display
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _SelectionBox(
+                          label: 'Målscorer',
+                          name: getUserName(current.scorerId),
+                          isActive: activeRole == _PickRole.scorer,
+                          onTap: () => setModalState(() => activeRole = _PickRole.scorer),
+                        ),
+                        _SelectionBox(
+                          label: 'Assist',
+                          name: getUserName(current.assistId),
+                          isActive: activeRole == _PickRole.assist,
+                          onTap: () => setModalState(() => activeRole = _PickRole.assist),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+                  
                   CupertinoSlidingSegmentedControl<_PickRole>(
                     backgroundColor: appColors.divider,
                     thumbColor: appColors.surface,
                     groupValue: activeRole,
                     children: {
-                      _PickRole.scorer: Text('Målscorer', style: appTextStyles.caption),
-                      _PickRole.assist: Text('Assist', style: appTextStyles.caption),
+                      _PickRole.scorer: Text('Vælg målscorer', style: appTextStyles.caption),
+                      _PickRole.assist: Text('Vælg assist', style: appTextStyles.caption),
                     },
                     onValueChanged: (v) { if (v != null) setModalState(() => activeRole = v); },
                   ),
+                  
                   Expanded(
                     child: ListView.builder(
                       itemCount: squad.length,
@@ -391,8 +464,9 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
                         final u = squad[index];
                         final isScorer = current.scorerId == u.id;
                         final isAssist = current.assistId == u.id;
-                        return ListTile(
-                          title: Text(u.name, style: appTextStyles.body),
+                        
+                        return PlayerListItem(
+                          name: u.name,
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -403,23 +477,30 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
                           onTap: () => setModalState(() {
                             if (activeRole == _PickRole.scorer) {
                               current.scorerId = u.id;
+                              activeRole = _PickRole.assist; // Auto-advance to assist
                             } else {
-                              current.assistId = u.id;
+                              if (current.scorerId == u.id) {
+                                // Can't assist yourself
+                                return;
+                              }
+                              current.assistId = (current.assistId == u.id) ? null : u.id;
                             }
                           }),
                         );
                       },
                     ),
                   ),
+                  
                   Padding(
                     padding: const EdgeInsets.all(16),
                     child: Button(
-                      buttonText: 'Tilføj til liste',
+                      buttonText: 'Tilføj mål',
                       onPressed: () {
                         if (current.scorerId != null) {
                           setModalState(() {
                             staged.add(_GoalDraft(scorerId: current.scorerId, assistId: current.assistId));
                             current = _GoalDraft();
+                            activeRole = _PickRole.scorer;
                           });
                         }
                       },
@@ -436,6 +517,57 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
   }
 }
 
+class _SelectionBox extends StatelessWidget {
+  final String label;
+  final String name;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  const _SelectionBox({
+    required this.label,
+    required this.name,
+    required this.isActive,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final appColors = theme.extension<AppColors>() ?? AppColors.light;
+    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.4,
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        decoration: BoxDecoration(
+          color: isActive ? appColors.primary.withValues(alpha: 0.1) : appColors.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isActive ? appColors.primary : appColors.divider,
+            width: 2,
+          ),
+        ),
+        child: Column(
+          children: [
+            Text(label, style: appTextStyles.caption.copyWith(color: isActive ? appColors.primary : appColors.textSecondary)),
+            const SizedBox(height: 4),
+            Text(
+              name.isEmpty ? 'Vælg...' : name,
+              style: appTextStyles.bodyBold.copyWith(
+                color: name.isEmpty ? appColors.textSecondary.withValues(alpha: 0.5) : appColors.textPrimary,
+              ),
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _Badge extends StatelessWidget {
   final String label;
   const _Badge({required this.label});
@@ -445,8 +577,19 @@ class _Badge extends StatelessWidget {
     final appColors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(color: appColors.primary, borderRadius: BorderRadius.circular(999)),
-      child: Text(label, style: const TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold)),
+      margin: const EdgeInsets.only(left: 4),
+      decoration: BoxDecoration(
+        color: appColors.primary,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 10,
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
     );
   }
 }
