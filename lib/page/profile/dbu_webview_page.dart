@@ -36,6 +36,12 @@ class _DbuWebviewPageState extends State<DbuWebviewPage> {
             try {
               await controller.runJavaScript('''
                 (function() {
+                  // Auto-toggle "Husk mig til næste gang" checkbox
+                  var cb = document.getElementById('cbRemberMe');
+                  if (cb && !cb.checked) {
+                    cb.click();
+                  }
+
                   var url = window.location.href.toLowerCase();
                   
                   if (url.includes('myteams.aspx')) {
