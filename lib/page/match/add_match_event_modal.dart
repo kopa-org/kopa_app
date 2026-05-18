@@ -311,7 +311,7 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> {
           },
           child: Container(
             decoration: BoxDecoration(
-              color: isSelected ? appColors.primary.withOpacity(0.05) : appColors.surface,
+              color: isSelected ? appColors.primary.withValues(alpha: 0.05) : appColors.surface,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: isSelected ? appColors.primary : appColors.divider,
@@ -319,7 +319,7 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
