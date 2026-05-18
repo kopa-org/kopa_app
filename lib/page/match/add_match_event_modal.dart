@@ -8,15 +8,16 @@ import 'package:kopa/repository/match_repository.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 import 'package:kopa/component/list_item/player_list_item.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class _EventDraft {
-  MatchEventType type;
+  MatchEventType? type;
   int? primaryId;
   int? secondaryId;
   int? minute;
 
   _EventDraft({
-    this.type = MatchEventType.goal,
+    this.type,
     this.primaryId,
     this.secondaryId,
     this.minute,
@@ -44,8 +45,10 @@ Future<void> showAddMatchEventModal(
   UserDetails currentUserData,
   Future<void> Function() onSaved,
 ) async {
-  await showCupertinoModalPopup(
+  await showCupertinoModalBottomSheet(
     context: context,
+    expand: true,
+    enableDrag: false,
     builder: (modalContext) => _AddMatchEventScreen(
       matchId: matchId,
       squad: squad,
@@ -106,7 +109,40 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> {
     }
   }
 
-  String getPrimaryLabel(MatchEventType type) {
+  String _getTypeName(MatchEventType? type) {
+    if (type == null) return '?';
+    switch (type) {
+      case MatchEventType.goal:
+        return 'Mål';
+      case MatchEventType.substitution:
+        return 'Udskiftning';
+      case MatchEventType.yellowCard:
+        return 'Gult kort';
+      case MatchEventType.redCard:
+        return 'Rødt kort';
+      case MatchEventType.penaltyKick:
+        return 'Straffespark';
+    }
+  }
+
+  String _getEmoji(MatchEventType? type) {
+    if (type == null) return '❓';
+    switch (type) {
+      case MatchEventType.goal:
+        return '⚽';
+      case MatchEventType.substitution:
+        return '🔄';
+      case MatchEventType.yellowCard:
+        return '🟨';
+      case MatchEventType.redCard:
+        return '🟥';
+      case MatchEventType.penaltyKick:
+        return '🎯';
+    }
+  }
+
+  String getPrimaryLabel(MatchEventType? type) {
+    if (type == null) return 'Spiller';
     switch (type) {
       case MatchEventType.goal:
         return 'Målscorer';
@@ -120,7 +156,8 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> {
     }
   }
 
-  String? getSecondaryLabel(MatchEventType type) {
+  String? getSecondaryLabel(MatchEventType? type) {
+    if (type == null) return null;
     switch (type) {
       case MatchEventType.goal:
         return 'Assist';
@@ -136,10 +173,10 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> {
     setState(() => _isSaving = true);
     try {
       final commands = _staged
-          .where((d) => d.primaryId != null)
+          .where((d) => d.primaryId != null && d.type != null)
           .map((d) => CreateMatchEventCommand(
                 eventId: widget.matchId,
-                type: d.type,
+                type: d.type!,
                 minute: d.minute ?? 0,
                 teamId: widget.currentUserData.teamDetails.id,
                 goalscorerUserId: d.primaryId!,
@@ -155,11 +192,262 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> {
       await MatchRepository.createMatchEvents(commands);
       await widget.onSaved();
       if (mounted) {
+        // Pop main modal
         Navigator.of(context).pop();
       }
     } catch (e) {
       setState(() => _isSaving = false);
     }
+  }
+
+  Widget _buildProgressTrack(AppTextStyles appTextStyles, AppColors appColors) {
+    final secondaryLabel = getSecondaryLabel(_draft.type);
+    final steps = [
+      (0, 'Type', '${_getEmoji(_draft.type)} ${_getTypeName(_draft.type)}'),
+      (1, 'Tid', "${_draft.minute ?? 0}'"),
+      (2, getPrimaryLabel(_draft.type), getUserName(_draft.primaryId)),
+      if (secondaryLabel != null) (3, secondaryLabel, getUserName(_draft.secondaryId)),
+    ];
+
+    return Container(
+      height: 70,
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: appColors.divider, width: 0.5)),
+      ),
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        itemCount: steps.length,
+        itemBuilder: (context, index) {
+          final step = steps[index];
+          final stepIndex = step.$1;
+          final label = step.$2;
+          final value = step.$3;
+          final isActive = _currentStep == stepIndex;
+
+          return Padding(
+            padding: const EdgeInsets.only(right: 12.0),
+            child: InkWell(
+              onTap: () {
+                _pageController.animateToPage(stepIndex,
+                    duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+                setState(() => _currentStep = stepIndex);
+              },
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isActive ? appColors.primary.withValues(alpha: 0.05) : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: isActive ? appColors.primary : Colors.transparent,
+                  ),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: appTextStyles.caption.copyWith(
+                        fontSize: 10,
+                        color: isActive ? appColors.primary : appColors.textSecondary,
+                      ),
+                    ),
+                    Text(
+                      value.isEmpty ? 'Vælg...' : value,
+                      style: appTextStyles.bodyBold.copyWith(
+                        fontSize: 13,
+                        color: isActive ? appColors.primary : appColors.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _showReviewSheet(BuildContext context) {
+    final appColors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final appTextStyles = Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: appColors.surface,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(builder: (context, setModalState) {
+          return DraggableScrollableSheet(
+              initialChildSize: 0.6,
+              minChildSize: 0.4,
+              maxChildSize: 0.9,
+              expand: false,
+              builder: (context, scrollController) {
+                return SafeArea(
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text('Gennemse begivenheder', style: appTextStyles.sectionHeader),
+                      ),
+                      Expanded(
+                        child: ListView.builder(
+                          controller: scrollController,
+                          itemCount: _staged.length,
+                          itemBuilder: (context, index) {
+                            final event = _staged[index];
+                            return ListTile(
+                              leading:
+                                  Text(_getEmoji(event.type), style: const TextStyle(fontSize: 24)),
+                              title: Text("${_getTypeName(event.type)} - ${event.minute}'"),
+                              subtitle: Text(
+                                  "${getUserName(event.primaryId)}${event.secondaryId != null ? ' (${getUserName(event.secondaryId)})' : ''}"),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.delete_outline, color: Colors.red),
+                                onPressed: () {
+                                  setState(() {
+                                    _staged.removeAt(index);
+                                  });
+                                  setModalState(() {});
+                                  if (_staged.isEmpty) {
+                                    Navigator.pop(context);
+                                  }
+                                },
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Button(
+                          buttonText: _isSaving ? 'Gemmer...' : 'Gem alt (${_staged.length})',
+                          width: double.infinity,
+                          onPressed: () async {
+                            setModalState(() => _isSaving = true);
+                            await saveAll();
+                          },
+                          enabled: !_isSaving && _staged.isNotEmpty,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              });
+        });
+      },
+    );
+  }
+
+  Widget _buildBottomTray(AppTextStyles appTextStyles, AppColors appColors) {
+    final isSubstitution = _draft.type == MatchEventType.substitution;
+    final canAdd = _draft.type != null &&
+        _draft.primaryId != null &&
+        _draft.minute != null &&
+        (!isSubstitution || _draft.secondaryId != null);
+
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: appColors.surface,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (_staged.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '${_staged.length} begivenheder i kø',
+                    style: appTextStyles.bodyBold,
+                  ),
+                  CupertinoButton(
+                    padding: EdgeInsets.zero,
+                    onPressed: () => _showReviewSheet(context),
+                    child: Text('Gennemse',
+                        style: TextStyle(color: appColors.primary, fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
+            ),
+          Row(
+            children: [
+              Expanded(
+                child: Button(
+                  buttonText: 'Tilføj',
+                  width: double.infinity,
+                  onPressed: () {
+                    if (canAdd) {
+                      setState(() {
+                        _staged.add(_draft);
+                        _draft = _EventDraft(); // Reset completely
+                        _minuteScrollController.jumpToItem(0);
+                        _currentStep = 0;
+                        _pageController.jumpToPage(0);
+                      });
+                    }
+                  },
+                  enabled: canAdd,
+                ),
+              ),
+              if (_staged.isNotEmpty) ...[
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Button(
+                    buttonText: _isSaving ? 'Gemmer...' : 'Gem alt',
+                    width: double.infinity,
+                    onPressed: saveAll,
+                    enabled: !_isSaving,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<bool> _confirmDiscard() async {
+    if (_staged.isEmpty) return true;
+
+    final result = await showCupertinoDialog<bool>(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Kassér ændringer?'),
+        content: Text('Du har ${_staged.length} begivenheder i køen, som ikke er blevet gemt endnu.'),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('Fortsæt redigering'),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Kassér'),
+          ),
+        ],
+      ),
+    );
+
+    return result ?? false;
   }
 
   @override
@@ -168,12 +456,19 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> {
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
     final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
-    return Material(
-      color: appColors.surface,
-      child: SafeArea(
-        top: false,
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height * 0.85,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        final shouldPop = await _confirmDiscard();
+        if (shouldPop && context.mounted) {
+          Navigator.of(context).pop();
+        }
+      },
+      child: Material(
+        color: appColors.surface,
+        child: SafeArea(
+          top: false,
           child: Column(
             children: [
               CupertinoNavigationBar(
@@ -182,29 +477,15 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> {
                 leading: CupertinoButton(
                   padding: EdgeInsets.zero,
                   child: Icon(CupertinoIcons.chevron_back, color: appColors.primary),
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: () async {
+                    if (await _confirmDiscard()) {
+                      if (context.mounted) Navigator.of(context).pop();
+                    }
+                  },
                 ),
               ),
 
-              // Top navigation/progress area (placeholder)
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(4, (index) {
-                    final isActive = index == _currentStep;
-                    return Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isActive ? appColors.primary : appColors.divider,
-                      ),
-                    );
-                  }),
-                ),
-              ),
+              _buildProgressTrack(appTextStyles, appColors),
 
               Expanded(
                 child: PageView(
@@ -224,64 +505,7 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> {
                 ),
               ),
 
-              // Bottom area (placeholder for staged events count and add button)
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    if (_staged.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: Text(
-                          '${_staged.length} begivenheder i kø',
-                          style: appTextStyles.caption.copyWith(color: appColors.textSecondary),
-                        ),
-                      ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Builder(
-                            builder: (context) {
-                              final isSubstitution = _draft.type == MatchEventType.substitution;
-                              final canAdd = _draft.primaryId != null &&
-                                  _draft.minute != null &&
-                                  (!isSubstitution || _draft.secondaryId != null);
-
-                              return Button(
-                                buttonText: 'Tilføj til liste',
-                                width: double.infinity,
-                                onPressed: () {
-                                  if (canAdd) {
-                                    setState(() {
-                                      _staged.add(_draft);
-                                      _draft = _EventDraft(type: _draft.type);
-                                      _minuteScrollController.jumpToItem(0);
-                                      _currentStep = 0;
-                                      _pageController.jumpToPage(0);
-                                    });
-                                  }
-                                },
-                                enabled: canAdd,
-                              );
-                            },
-                          ),
-                        ),
-                        if (_staged.isNotEmpty) ...[
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Button(
-                              buttonText: _isSaving ? 'Gemmer...' : 'Gem alt',
-                              width: double.infinity,
-                              onPressed: saveAll,
-                              enabled: !_isSaving,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+              _buildBottomTray(appTextStyles, appColors),
             ],
           ),
         ),

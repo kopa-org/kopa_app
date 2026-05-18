@@ -6,6 +6,7 @@ import 'package:kopa/component/button/button.dart';
 import 'package:kopa/component/future_handler.dart';
 import 'package:kopa/helpers/date_helper.dart';
 import 'package:kopa/model/match_details.dart';
+import 'package:kopa/model/match_event_details.dart';
 import 'package:kopa/model/match_event_type.dart';
 import 'package:kopa/model/match_poll_details.dart';
 import 'package:kopa/model/user_details.dart';
@@ -190,7 +191,9 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
   }
 
   List<Widget> _buildTimelineItems(MatchDetails match, UserDetails user) {
-    final events = match.matchEventDetailsList ?? [];
+    final List<MatchEventDetails> events = List.from(match.matchEventDetailsList ?? []);
+    events.sort((a, b) => (b.minute ?? 0).compareTo(a.minute ?? 0));
+    
     if (events.isEmpty && !user.isTeamOwner) return [];
 
     final List<Widget> items = [];
