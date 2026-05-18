@@ -66,7 +66,10 @@ class _AddUserToTeamPageState extends State<AddUserToTeamPage> {
           child: Form(
               autovalidateMode: AutovalidateMode.always,
               onChanged: () {
-                Form.maybeOf(primaryFocus!.context!)?.save();
+                final context = FocusManager.instance.primaryFocus?.context;
+                if (context != null) {
+                  Form.maybeOf(context)?.save();
+                }
               },
               child: CupertinoFormSection.insetGrouped(
                   backgroundColor: appColors.background,

@@ -35,6 +35,11 @@ abstract final class CrashReporting {
 
     FlutterError.onError = crashlytics.recordFlutterFatalError;
     PlatformDispatcher.instance.onError = (error, stack) {
+      if (kIsWeb) {
+        // Log to console on web since Crashlytics is not supported
+        debugPrint('Kopa Error: $error');
+        debugPrint('Stack trace: $stack');
+      }
       crashlytics.recordError(error, stack, fatal: true);
       return true;
     };

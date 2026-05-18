@@ -87,8 +87,8 @@ DateTime? _parseMeetingTime(dynamic v) {
   final re = RegExp(r'^([01]\d|2[0-3]):([0-5]\d)(?::([0-5]\d))?$');
   final m = re.firstMatch(s);
   if (m != null) {
-    final h = int.parse(m.group(1)!);
-    final mm = int.parse(m.group(2)!);
+    final h = int.parse(m.group(1) ?? '0');
+    final mm = int.parse(m.group(2) ?? '0');
     final ss = m.group(3) != null ? int.parse(m.group(3)!) : 0;
     return DateTime.utc(1970, 1, 1, h, mm, ss);
   }

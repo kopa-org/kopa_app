@@ -161,6 +161,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       );
     }
 
+    if (matchPollDetails == null) return const SizedBox.shrink();
+
     final totalVotes = matchPollDetails!.matchPollUserVotesDetails.fold<int>(0, (sum, v) => sum + v.numberOfVotes);
     final options = matchPollDetails!.matchPollUserVotesDetails.map((v) {
       final player = squad.firstWhere((s) => s.id == v.userId);
