@@ -73,6 +73,7 @@ class _AddMatchEventScreen extends StatefulWidget {
 
 class _AddMatchEventScreenState extends State<_AddMatchEventScreen> {
   late PageController _pageController;
+  late FixedExtentScrollController _minuteScrollController;
   int _currentStep = 0;
   _EventDraft _draft = _EventDraft();
   final List<_EventDraft> _staged = [];
@@ -84,11 +85,13 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: _currentStep);
+    _minuteScrollController = FixedExtentScrollController(initialItem: _draft.minute ?? 0);
   }
 
   @override
   void dispose() {
     _pageController.dispose();
+    _minuteScrollController.dispose();
     _stagedScrollController.dispose();
     super.dispose();
   }
@@ -245,6 +248,7 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> {
                                 setState(() {
                                   _staged.add(_draft);
                                   _draft = _EventDraft(type: _draft.type);
+                                  _minuteScrollController.jumpToItem(0);
                                   _currentStep = 0;
                                   _pageController.jumpToPage(0);
                                 });
@@ -348,7 +352,50 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> {
   }
 
   Widget _buildTimeStep(AppTextStyles appTextStyles, AppColors appColors) {
-    return Center(child: Text('Step 1: Vælg Tidspunkt', style: appTextStyles.body));
+    return Column(
+      children: [
+        const SizedBox(height: 24),
+        Text('Vælg minut', style: appTextStyles.sectionHeader),
+        const SizedBox(height: 8),
+        Expanded(
+          child: CupertinoPicker(
+            scrollController: _minuteScrollController,
+            itemExtent: 48.0,
+            onSelectedItemChanged: (index) {
+              setState(() {
+                _draft.minute = index;
+              });
+            },
+            children: List.generate(
+              121,
+              (index) => Center(
+                child: Text(
+                  "${index}'",
+                  style: appTextStyles.body.copyWith(fontSize: 20),
+                ),
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Button(
+            buttonText: 'Næste',
+            width: double.infinity,
+            onPressed: () {
+              if (_draft.minute == null) {
+                setState(() => _draft.minute = 0);
+              }
+              _pageController.animateToPage(
+                2,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+              );
+            },
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildPrimaryPlayerStep(AppTextStyles appTextStyles, AppColors appColors) {
