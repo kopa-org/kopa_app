@@ -9,6 +9,7 @@ class Button extends StatelessWidget {
   final bool outlined;
   final bool enabled;
   final IconData? icon;
+  final double? width;
 
   const Button({
     super.key,
@@ -17,6 +18,7 @@ class Button extends StatelessWidget {
     this.outlined = false,
     this.enabled = true,
     this.icon,
+    this.width,
   });
 
   @override
@@ -49,6 +51,7 @@ class Button extends StatelessWidget {
           duration: const Duration(milliseconds: 150),
           opacity: enabled ? 1.0 : 0.5,
           child: Container(
+            width: width,
             decoration: BoxDecoration(
               color: bgColor,
               borderRadius: BorderRadius.circular(50.0),
@@ -58,7 +61,7 @@ class Button extends StatelessWidget {
             padding:
                 const EdgeInsets.symmetric(vertical: 15.0, horizontal: 30.0),
             child: Row(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize: width == double.infinity ? MainAxisSize.max : MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 if (icon != null) ...[
