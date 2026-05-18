@@ -7,6 +7,7 @@ import 'package:kopa/model/user_details.dart';
 import 'package:kopa/repository/match_repository.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
+import 'package:kopa/component/list_item/player_list_item.dart';
 
 class _EventDraft {
   MatchEventType type;
@@ -239,22 +240,30 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> {
                     Row(
                       children: [
                         Expanded(
-                          child: Button(
-                            buttonText: 'Tilføj til liste',
-                            width: double.infinity,
-                            onPressed: () {
-                              // Placeholder logic for now
-                              if (_draft.primaryId != null && _draft.minute != null) {
-                                setState(() {
-                                  _staged.add(_draft);
-                                  _draft = _EventDraft(type: _draft.type);
-                                  _minuteScrollController.jumpToItem(0);
-                                  _currentStep = 0;
-                                  _pageController.jumpToPage(0);
-                                });
-                              }
+                          child: Builder(
+                            builder: (context) {
+                              final isSubstitution = _draft.type == MatchEventType.substitution;
+                              final canAdd = _draft.primaryId != null &&
+                                  _draft.minute != null &&
+                                  (!isSubstitution || _draft.secondaryId != null);
+
+                              return Button(
+                                buttonText: 'Tilføj til liste',
+                                width: double.infinity,
+                                onPressed: () {
+                                  if (canAdd) {
+                                    setState(() {
+                                      _staged.add(_draft);
+                                      _draft = _EventDraft(type: _draft.type);
+                                      _minuteScrollController.jumpToItem(0);
+                                      _currentStep = 0;
+                                      _pageController.jumpToPage(0);
+                                    });
+                                  }
+                                },
+                                enabled: canAdd,
+                              );
                             },
-                            enabled: _draft.primaryId != null && _draft.minute != null,
                           ),
                         ),
                         if (_staged.isNotEmpty) ...[
@@ -370,7 +379,7 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> {
               121,
               (index) => Center(
                 child: Text(
-                  "${index}'",
+                  "$index'",
                   style: appTextStyles.body.copyWith(fontSize: 20),
                 ),
               ),
@@ -399,10 +408,75 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> {
   }
 
   Widget _buildPrimaryPlayerStep(AppTextStyles appTextStyles, AppColors appColors) {
-    return Center(child: Text('Step 2: Vælg Primær Spiller', style: appTextStyles.body));
+    final label = getPrimaryLabel(_draft.type);
+    return Column(
+      children: [
+        const SizedBox(height: 24),
+        Text(label, style: appTextStyles.sectionHeader),
+        const SizedBox(height: 8),
+        Expanded(
+          child: ListView.builder(
+            itemCount: widget.squad.length,
+            itemBuilder: (context, index) {
+              final user = widget.squad[index];
+              final isSelected = _draft.primaryId == user.id;
+
+              return PlayerListItem(
+                name: user.name,
+                trailing: isSelected ? Icon(Icons.check_circle, color: appColors.primary) : null,
+                onTap: () {
+                  setState(() {
+                    _draft.primaryId = user.id;
+                  });
+                  if (getSecondaryLabel(_draft.type) != null) {
+                    _pageController.animateToPage(
+                      3,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  }
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildSecondaryPlayerStep(AppTextStyles appTextStyles, AppColors appColors) {
-    return Center(child: Text('Step 3: Vælg Sekundær Spiller', style: appTextStyles.body));
+    final label = getSecondaryLabel(_draft.type);
+    if (label == null) return const SizedBox.shrink();
+
+    final filteredSquad = _draft.type == MatchEventType.substitution
+        ? widget.squad.where((u) => u.id != _draft.primaryId).toList()
+        : widget.squad;
+
+    return Column(
+      children: [
+        const SizedBox(height: 24),
+        Text(label, style: appTextStyles.sectionHeader),
+        const SizedBox(height: 8),
+        Expanded(
+          child: ListView.builder(
+            itemCount: filteredSquad.length,
+            itemBuilder: (context, index) {
+              final user = filteredSquad[index];
+              final isSelected = _draft.secondaryId == user.id;
+
+              return PlayerListItem(
+                name: user.name,
+                trailing: isSelected ? Icon(Icons.check_circle, color: appColors.primary) : null,
+                onTap: () {
+                  setState(() {
+                    _draft.secondaryId = user.id;
+                  });
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
   }
 }
