@@ -4,6 +4,7 @@ import 'package:kopa/model/match_event_type.dart';
 class CreateMatchEventCommand {
   final int eventId;
   final MatchEventType type;
+  final int minute;
   final int teamId;
   final int goalscorerUserId;
   final int? assistMakerUserId;
@@ -12,6 +13,7 @@ class CreateMatchEventCommand {
   CreateMatchEventCommand({
     required this.eventId,
     required this.type,
+    required this.minute,
     required this.teamId,
     required this.goalscorerUserId,
     this.assistMakerUserId,
@@ -22,6 +24,7 @@ class CreateMatchEventCommand {
     return {
       'eventId': eventId,
       'type': type.wire,
+      'minute': minute,
       'teamId': teamId,
       'goalscorerUserId': goalscorerUserId,
       if (assistMakerUserId != null) 'assistMakerUserId': assistMakerUserId,

@@ -10,6 +10,7 @@ import 'package:kopa/page/profile/dbu_webview_page.dart';
 import 'package:kopa/page/statistics/statistics_page.dart';
 import 'package:kopa/page/match/match_programme.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 abstract final class AppRouter {
   static const login = '/login';
@@ -83,21 +84,65 @@ abstract final class AppRouter {
                       onTabChange: (index) {
                         navigationShell.goBranch(index);
                       },
-                      tabs: const [
+                      tabs: [
                         GButton(
                           icon: Icons.home,
+                          leading: SvgPicture.asset(
+                            'assets/logos/home-simple-door.svg',
+                            width: 24,
+                            height: 24,
+                            colorFilter: ColorFilter.mode(
+                              navigationShell.currentIndex == 0
+                                  ? theme.colorScheme.primary
+                                  : theme.unselectedWidgetColor,
+                              BlendMode.srcIn,
+                            ),
+                          ),
                           text: 'Hjem',
                         ),
                         GButton(
                           icon: Icons.sports_soccer,
+                          leading: SvgPicture.asset(
+                            'assets/logos/soccer-ball.svg',
+                            width: 24,
+                            height: 24,
+                            colorFilter: ColorFilter.mode(
+                              navigationShell.currentIndex == 1
+                                  ? theme.colorScheme.primary
+                                  : theme.unselectedWidgetColor,
+                              BlendMode.srcIn,
+                            ),
+                          ),
                           text: 'Kampe',
                         ),
                         GButton(
                           icon: Icons.bar_chart,
+                          leading: SvgPicture.asset(
+                            'assets/logos/graph-up.svg',
+                            width: 24,
+                            height: 24,
+                            colorFilter: ColorFilter.mode(
+                              navigationShell.currentIndex == 2
+                                  ? theme.colorScheme.primary
+                                  : theme.unselectedWidgetColor,
+                              BlendMode.srcIn,
+                            ),
+                          ),
                           text: 'Statistik',
                         ),
                         GButton(
                           icon: Icons.person,
+                          leading: SvgPicture.asset(
+                            'assets/logos/piggy-bank.svg',
+                            width: 24,
+                            height: 24,
+                            colorFilter: ColorFilter.mode(
+                              navigationShell.currentIndex == 3
+                                  ? theme.colorScheme.primary
+                                  : theme.unselectedWidgetColor,
+                              BlendMode.srcIn,
+                            ),
+                          ),
                           text: 'Profil',
                         ),
                       ],

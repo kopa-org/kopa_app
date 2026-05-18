@@ -5,6 +5,7 @@ class MatchEventDetails {
   final int id;
   final int eventId;
   final MatchEventType type;
+  final int? minute;
   final int teamId;
   final int goalscorerUserId;
   final String goalscorerUserName;
@@ -16,6 +17,7 @@ class MatchEventDetails {
     required this.id,
     required this.eventId,
     required this.type,
+    this.minute,
     required this.teamId,
     required this.goalscorerUserId,
     required this.goalscorerUserName,
@@ -29,6 +31,7 @@ class MatchEventDetails {
       id: json['id'],
       eventId: json['eventId'],
       type: MatchEventType.values.firstWhere((e) => e.wire == json['type']),
+      minute: json['minute'],
       teamId: json['teamId'],
       goalscorerUserId: json['goalscorerUserId'],
       goalscorerUserName: json['goalscorerUserName'],

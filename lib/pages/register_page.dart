@@ -4,6 +4,7 @@ import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/auth_state.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -69,18 +70,9 @@ class _RegisterPageState extends State<RegisterPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Icon(
-                      Icons.sports_soccer,
-                      size: 80,
-                      color: appColors.primary,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'KOPA',
-                      textAlign: TextAlign.center,
-                      style: appTextStyles.pageTitle.copyWith(
-                        color: appColors.primary,
-                      ),
+                    SvgPicture.asset(
+                      'assets/logos/Logo.svg',
+                      height: 80,
                     ),
                     const SizedBox(height: 48),
                     Text(

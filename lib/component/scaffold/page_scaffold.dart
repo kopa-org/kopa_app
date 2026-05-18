@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class PageScaffold extends StatelessWidget {
   final String title;
@@ -42,10 +43,15 @@ class PageScaffold extends StatelessWidget {
         navigationBar: navigationBar ??
             CupertinoNavigationBar(
               backgroundColor: bgColor.withValues(alpha: 0.8),
-              middle: Text(
-                title,
-                style: appTextStyles.sectionHeader,
-              ),
+              middle: title == 'Kopa'
+                  ? SvgPicture.asset(
+                      'assets/logos/Logo.svg',
+                      height: 24,
+                    )
+                  : Text(
+                      title,
+                      style: appTextStyles.sectionHeader,
+                    ),
               leading: leading ?? (showBackButton ? _defaultBackButton(context) : null),
               trailing:
                   trailing != null ? Row(mainAxisSize: MainAxisSize.min, children: trailing!) : null,
@@ -66,10 +72,15 @@ class PageScaffold extends StatelessWidget {
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
-        title: Text(
-          title,
-          style: appTextStyles.sectionHeader,
-        ),
+        title: title == 'Kopa'
+            ? SvgPicture.asset(
+                'assets/logos/Logo.svg',
+                height: 24,
+              )
+            : Text(
+                title,
+                style: appTextStyles.sectionHeader,
+              ),
         backgroundColor: bgColor,
         elevation: 0,
         scrolledUnderElevation: 0,
