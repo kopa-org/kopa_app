@@ -1,4 +1,6 @@
 import 'package:flutter/cupertino.dart';
+import 'package:kopa/state/user_votes_state.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/button/button.dart';
 import 'package:kopa/component/future_handler.dart';
@@ -11,10 +13,10 @@ import 'package:kopa/model/user_details.dart';
 import 'package:kopa/page/match_polls/create_match_poll_page.dart';
 import 'package:kopa/repository/match_repository.dart';
 import 'package:kopa/repository/users_repository.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
+import 'package:kopa/utils/crash_reporting.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:kopa/template/match_detail_template.dart';
 import 'package:kopa/component/card/match_hero_card.dart';
@@ -152,7 +154,10 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
               final result = await showCupertinoModalBottomSheet(
                 expand: true,
                 context: context,
-                builder: (context) => CreateMatchPollPage(squad: squad, matches: [match]),
+                builder: (context) => ChangeNotifierProvider(
+                  create: (context) => UserVotesState(),
+                  child: CreateMatchPollPage(squad: squad, matches: [match]),
+                ),
               );
               if (result != null) _setMatchPollDetails(result);
             },
@@ -163,15 +168,16 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
 
     if (matchPollDetails == null) return const SizedBox.shrink();
 
-    final totalVotes = matchPollDetails!.matchPollUserVotesDetails.fold<int>(0, (sum, v) => sum + v.numberOfVotes);
-    final options = matchPollDetails!.matchPollUserVotesDetails.map((v) {
-      final player = squad.firstWhere((s) => s.id == v.userId);
+    final poll = matchPollDetails!;
+    final totalVotes = poll.matchPollUserVotesDetails.fold<int>(0, (sum, v) => sum + v.numberOfVotes);
+    final options = poll.matchPollUserVotesDetails.map((v) {
+      final player = squad.firstWhere((s) => s.id == v.userId, orElse: () => squad.first);
       return VotingOption(
         id: v.userId,
         label: player.name,
         votes: v.numberOfVotes,
         totalVotes: totalVotes,
-        isSelected: matchPollDetails!.playerOfTheMatchDetails.id == v.userId,
+        isSelected: poll.playerOfTheMatchDetails.id == v.userId,
       );
     }).toList();
 
@@ -323,50 +329,65 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
   }
 
   Future<void> addGoalscorer(UserDetails currentUserData) async {
-    final theme = Theme.of(context);
-    final appColors = theme.extension<AppColors>() ?? AppColors.light;
-    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
-    final data = await matchAndSquadData;
-    if (!mounted) return;
-    final squad = (data['squad'] as List<UserDetails>);
+    try {
+      final theme = Theme.of(context);
+      final appColors = theme.extension<AppColors>() ?? AppColors.light;
+      final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+      final data = await matchAndSquadData;
+      if (!mounted) return;
+      
+      final squadRaw = data['squad'];
+      if (squadRaw == null || squadRaw is! List) {
+        throw Exception('Squad data is missing or invalid');
+      }
+      final squad = List<UserDetails>.from(squadRaw);
 
-    _PickRole activeRole = _PickRole.scorer;
-    _GoalDraft current = _GoalDraft();
-    final List<_GoalDraft> staged = [];
-    bool isSaving = false;
+      _PickRole activeRole = _PickRole.scorer;
+      _GoalDraft current = _GoalDraft();
+      final List<_GoalDraft> staged = [];
+      bool isSaving = false;
 
-    await showCupertinoModalPopup(
-      context: context,
-      builder: (modalContext) => StatefulBuilder(
-        builder: (modalContext, setModalState) {
-          Future<void> saveAll() async {
-            if (staged.isEmpty || isSaving) return;
-            setModalState(() => isSaving = true);
-            try {
-              await MatchRepository.createMatchEvents(staged.map((d) => CreateMatchEventCommand(
-                  eventId: widget.matchId,
-                  type: MatchEventType.goal,
-                  teamId: currentUserData.teamDetails.id,
-                  goalscorerUserId: d.scorerId!,
-                  assistMakerUserId: d.assistId,
-                )).toList());
-              if (!mounted) return;
-              await _refreshMatchAndSquad();
-              if (!mounted) return;
-              if (modalContext.mounted) {
-                Navigator.of(modalContext).pop();
+      await showCupertinoModalPopup(
+        context: context,
+        builder: (modalContext) => StatefulBuilder(
+          builder: (modalContext, setModalState) {
+            Future<void> saveAll() async {
+              if (staged.isEmpty || isSaving) return;
+              setModalState(() => isSaving = true);
+              try {
+                final commands = staged.where((d) => d.scorerId != null).map((d) => CreateMatchEventCommand(
+                      eventId: widget.matchId,
+                      type: MatchEventType.goal,
+                      teamId: currentUserData.teamDetails.id,
+                      goalscorerUserId: d.scorerId!,
+                      assistMakerUserId: d.assistId,
+                    )).toList();
+                
+                if (commands.isEmpty) {
+                  setModalState(() => isSaving = false);
+                  return;
+                }
+
+                await MatchRepository.createMatchEvents(commands);
+                if (!mounted) return;
+                await _refreshMatchAndSquad();
+                if (!mounted) return;
+                if (modalContext.mounted) {
+                  Navigator.of(modalContext).pop();
+                }
+              } catch (e) {
+                setModalState(() => isSaving = false);
               }
-            } catch (e) { setModalState(() => isSaving = false); }
-          }
-
-          String getUserName(int? id) {
-            if (id == null) return '';
-            try {
-              return squad.firstWhere((u) => u.id == id).name;
-            } catch (_) {
-              return 'Ukendt';
             }
-          }
+
+            String getUserName(int? id) {
+              if (id == null) return '';
+              try {
+                return squad.firstWhere((u) => u.id == id).name;
+              } catch (_) {
+                return 'Ukendt';
+              }
+            }
 
           return Material(
             color: appColors.surface,
@@ -516,6 +537,10 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         },
       ),
     );
+       } catch (e, stack) {
+      CrashReporting.LogWebError(e, stack);
+      return;
+    }
   }
 }
 

@@ -1,4 +1,6 @@
 import 'package:flutter/cupertino.dart';
+import 'package:kopa/state/user_votes_state.dart';
+import 'package:provider/provider.dart';
 import 'package:kopa/component/future_handler.dart';
 import 'package:kopa/helpers/date_helper.dart';
 import 'package:kopa/model/match_details.dart';
@@ -8,7 +10,6 @@ import 'package:kopa/repository/match_polls_repository.dart';
 import 'package:kopa/repository/match_repository.dart';
 import 'package:kopa/repository/users_repository.dart';
 import 'package:kopa/page/match_polls/create_match_poll_page.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
@@ -111,10 +112,13 @@ class _MatchPollsListPageState extends State<MatchPollsListPage> {
                       await showCupertinoModalBottomSheet(
                     expand: true,
                     context: context,
-                    builder: (context) => CreateMatchPollPage(
-                      squad: squad,
-                      matches: matches,
-                      matchPolls: matchPolls,
+                    builder: (context) => ChangeNotifierProvider(
+                      create: (context) => UserVotesState(),
+                      child: CreateMatchPollPage(
+                        squad: squad,
+                        matches: matches,
+                        matchPolls: matchPolls,
+                      ),
                     ),
                   );
 
