@@ -70,6 +70,6 @@ class DefaultFirebaseOptions {
     messagingSenderId: '387318523179',
     projectId: 'kopa-358fe',
     storageBucket: 'kopa-358fe.firebasestorage.app',
-    iosBundleId: 'com.example.kopa',
+    iosBundleId: 'kopa.app',
   );
 }
