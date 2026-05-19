@@ -10,6 +10,7 @@ class PlayerListItem extends StatelessWidget {
   final String? initials;
   final Widget? trailing;
   final VoidCallback? onTap;
+  final String? heroTag;
 
   const PlayerListItem({
     super.key,
@@ -19,6 +20,7 @@ class PlayerListItem extends StatelessWidget {
     this.initials,
     this.trailing,
     this.onTap,
+    this.heroTag,
   });
 
   @override
@@ -45,10 +47,18 @@ class PlayerListItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    name,
-                    style: appTextStyles.bodyBold,
-                  ),
+                  heroTag != null
+                      ? Hero(
+                          tag: heroTag!,
+                          child: Text(
+                            name,
+                            style: appTextStyles.bodyBold.copyWith(decoration: TextDecoration.none),
+                          ),
+                        )
+                      : Text(
+                          name,
+                          style: appTextStyles.bodyBold,
+                        ),
                   if (subtitle != null)
                     Text(
                       subtitle!,

@@ -29,10 +29,10 @@ abstract final class CrashReporting {
     if (!isCrashlyticsSupported) {
       // Still set up error handlers on web, just without Crashlytics
       FlutterError.onError = (details) {
-        LogWebError(details.exception, details.stack);
+        logWebError(details.exception, details.stack);
       };
       PlatformDispatcher.instance.onError = (error, stack) {
-        LogWebError(error, stack);
+        logWebError(error, stack);
         return true;
       };
       return;
@@ -44,7 +44,7 @@ abstract final class CrashReporting {
     FlutterError.onError = crashlytics.recordFlutterFatalError;
     PlatformDispatcher.instance.onError = (error, stack) {
       if (kIsWeb) {
-        LogWebError(error, stack);
+        logWebError(error, stack);
       }
       crashlytics.recordError(error, stack, fatal: true);
       return true;
@@ -54,7 +54,7 @@ abstract final class CrashReporting {
   static Future<void> runAppGuarded(Future<void> Function() body) {
     if (kIsWeb) {
       return runZonedGuarded<Future<void>>(body, (error, stack) {
-        LogWebError(error, stack);
+        logWebError(error, stack);
       }) ??
           Future<void>.value();
     }
@@ -69,7 +69,7 @@ abstract final class CrashReporting {
         Future<void>.value();
   }
 
-  static void LogWebError(Object error, StackTrace? stack) {
+  static void logWebError(Object error, StackTrace? stack) {
     // Use print directly for release mode visibility in browser console
     // ignore: avoid_print
     print('*** KOPA WEB ERROR ***');

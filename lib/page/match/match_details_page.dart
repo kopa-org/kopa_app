@@ -375,7 +375,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         _refreshMatchAndSquad,
       );
     } catch (e, stack) {
-      CrashReporting.LogWebError(e, stack);
+      CrashReporting.logWebError(e, stack);
     }
   }
 }
