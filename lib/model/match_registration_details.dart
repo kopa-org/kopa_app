@@ -18,10 +18,10 @@ class MatchRegistrationDetails {
   factory MatchRegistrationDetails.fromJson(Map<String, dynamic> json) {
     return MatchRegistrationDetails(
       id: json['id'],
-      userDetails: UserDetails.fromJson(json['userDetails']),
-      isUserParticipating: json['isUserParticipating'],
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      userDetails: UserDetails.fromJson(json['user_details']),
+      isUserParticipating: json['is_user_participating'],
+      createdAt: DateTime.parse(json['created_at']),
+      updatedAt: DateTime.parse(json['updated_at']),
     );
   }
 }

@@ -9,7 +9,7 @@ class AddUserToTeamCommand {
     return {
       'name': name,
       'email': email,
-      'isTeamOwner': isTeamOwner.toString(),
+      'is_team_owner': isTeamOwner.toString(),
     };
   }
 }

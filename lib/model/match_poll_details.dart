@@ -23,14 +23,14 @@ class MatchPollDetails {
   factory MatchPollDetails.fromJson(Map<String, dynamic> json) {
     return MatchPollDetails(
       id: json['id'],
-      eventId: json['eventId'],
+      eventId: json['event_id'],
       playerOfTheMatchDetails:
-          UserDetails.fromJson(json['playerOfTheMatchDetails']),
-      playerOfTheMatchVotes: json['playerOfTheMatchVotes'],
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+          UserDetails.fromJson(json['player_of_the_match_details']),
+      playerOfTheMatchVotes: json['player_of_the_match_votes'],
+      createdAt: DateTime.parse(json['created_at']),
+      updatedAt: DateTime.parse(json['updated_at']),
       matchPollUserVotesDetails: List<MatchPollUserVotesDetails>.from(
-          json['matchPollUserVotesDetails']
+          json['match_poll_user_votes_details']
               .map((x) => MatchPollUserVotesDetails.fromJson(x))),
     );
   }

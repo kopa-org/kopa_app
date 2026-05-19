@@ -17,11 +17,11 @@ class MatchPollUserVotesDetails {
   factory MatchPollUserVotesDetails.fromJson(Map<String, dynamic> json) {
     return MatchPollUserVotesDetails(
       id: json['id'],
-      matchPollId: json['matchPollId'],
-      userId: json['userId'],
-      numberOfVotes: json['numberOfVotes'],
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      matchPollId: json['match_poll_id'],
+      userId: json['user_id'],
+      numberOfVotes: json['number_of_votes'],
+      createdAt: DateTime.parse(json['created_at']),
+      updatedAt: DateTime.parse(json['updated_at']),
     );
   }
 }

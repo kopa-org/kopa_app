@@ -19,14 +19,14 @@ class FineBoxDetails {
   factory FineBoxDetails.fromJson(Map<String, dynamic> json) {
     return FineBoxDetails(
       id: json['id'],
-      currentAmount: json['currentAmount'] + .0, // Convert to double
-      totalOwedAmount: json['totalOwedAmount'] + .0, // Convert to double
-      userFineDetails: json['userFineDetails'] != null
+      currentAmount: json['current_amount'] + .0, // Convert to double
+      totalOwedAmount: json['total_owed_amount'] + .0, // Convert to double
+      userFineDetails: json['user_fine_details'] != null
           ? List<UserFineDetails>.from(
-              json['userFineDetails'].map((x) => UserFineDetails.fromJson(x)))
+              json['user_fine_details'].map((x) => UserFineDetails.fromJson(x)))
           : [],
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: DateTime.parse(json['created_at']),
+      updatedAt: DateTime.parse(json['updated_at']),
     );
   }
 }

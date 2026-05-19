@@ -11,9 +11,9 @@ class CreateUserFineCommand {
 
   Map<String, dynamic> toJson() {
     return {
-      'userId': userId,
-      'fineTypeId': fineTypeId,
-      'owedAmount': owedAmount,
+      'user_id': userId,
+      'fine_type_id': fineTypeId,
+      'owed_amount': owedAmount,
     };
   }
 }

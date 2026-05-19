@@ -18,10 +18,10 @@ class EventAttendanceDetails {
   factory EventAttendanceDetails.fromJson(Map<String, dynamic> json) {
     return EventAttendanceDetails(
       id: json['id'],
-      userDetails: UserDetails.fromJson(json['userDetails']),
-      isAttending: json['isAttending'],
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      userDetails: UserDetails.fromJson(json['user_details']),
+      isAttending: json['is_attending'],
+      createdAt: DateTime.parse(json['created_at']),
+      updatedAt: DateTime.parse(json['updated_at']),
     );
   }
 }

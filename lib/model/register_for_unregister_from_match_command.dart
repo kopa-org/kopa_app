@@ -5,7 +5,7 @@ class RegisterForUnregisterFromEventCommand {
 
   Map<String, dynamic> toJson() {
     return {
-      'eventId': eventId,
+      'event_id': eventId,
     };
   }
 }

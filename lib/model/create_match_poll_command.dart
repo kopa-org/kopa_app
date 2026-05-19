@@ -10,8 +10,8 @@ class CreateMatchPollCommand {
 
   Map<String, dynamic> toJson() {
     return {
-      'eventId': eventId,
-      'createMatchPollUserVoteCommands': jsonEncode(
+      'event_id': eventId,
+      'create_match_poll_user_vote_commands': jsonEncode(
           createMatchPollUserVoteCommands.map((e) => e.toJson()).toList())
     };
   }

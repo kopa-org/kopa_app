@@ -9,7 +9,7 @@ class CreateUserFinesCommand {
 
   Map<String, dynamic> toJson() {
     return {
-      'CreateUserFinesCommand':
+      'create_user_fines_command':
           jsonEncode(createUserFinesCommand.map((e) => e.toJson()).toList())
     };
   }

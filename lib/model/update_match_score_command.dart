@@ -11,9 +11,9 @@ class UpdateMatchScoreCommand {
 
   Map<String, dynamic> toJson() {
     return {
-      'eventId': eventId,
-      'homeTeamScore': homeTeamScore,
-      'awayTeamScore': awayTeamScore,
+      'event_id': eventId,
+      'home_team_score': homeTeamScore,
+      'away_team_score': awayTeamScore,
     };
   }
 }

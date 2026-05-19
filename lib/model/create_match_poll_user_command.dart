@@ -7,8 +7,8 @@ class CreateMatchPollUserVoteCommand {
 
   Map<String, dynamic> toJson() {
     return {
-      'userId': userId,
-      'userVotes': userVotes,
+      'user_id': userId,
+      'user_votes': userVotes,
     };
   }
 }

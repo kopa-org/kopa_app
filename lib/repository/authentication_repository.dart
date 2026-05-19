@@ -55,7 +55,7 @@ class AuthenticationRepository {
           'name': name,
           'email': email,
           'password': password,
-          'roleId': roleId,
+          'role_id': roleId,
         }),
       );
 

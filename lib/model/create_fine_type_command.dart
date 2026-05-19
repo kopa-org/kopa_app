@@ -7,7 +7,7 @@ class CreateFineTypeCommand {
   Map<String, dynamic> toJson() {
     return {
       'title': title,
-      'defaultAmount': defaultAmount,
+      'default_amount': defaultAmount,
     };
   }
 }

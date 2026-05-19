@@ -13,9 +13,9 @@ class DepositAmountToFineBoxCommand {
 
   Map<String, dynamic> toJson() {
     return {
-      'fineBoxId': fineBoxId,
-      'amountToDeposit': amountToDeposit,
-      'userFineIds': jsonEncode(userFineIds),
+      'fine_box_id': fineBoxId,
+      'amount_to_deposit': amountToDeposit,
+      'user_fine_ids': jsonEncode(userFineIds),
     };
   }
 }

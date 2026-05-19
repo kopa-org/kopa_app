@@ -15,10 +15,10 @@ class UserFineDetails {
   factory UserFineDetails.fromJson(Map<String, dynamic> json) {
     return UserFineDetails(
       id: json['id'],
-      userDetails: UserDetails.fromJson(json['userDetails']),
-      fineDetailsList: json['fineDetailsList'] != null
+      userDetails: UserDetails.fromJson(json['user_details']),
+      fineDetailsList: json['fine_details_list'] != null
           ? List<FineDetails>.from(
-              json['fineDetailsList'].map((x) => FineDetails.fromJson(x)))
+              json['fine_details_list'].map((x) => FineDetails.fromJson(x)))
           : [],
     );
   }

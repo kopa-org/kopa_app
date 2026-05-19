@@ -22,13 +22,13 @@ class CreateMatchEventCommand {
 
   Map<String, dynamic> toJson() {
     return {
-      'eventId': eventId,
+      'event_id': eventId,
       'type': type.wire,
       'minute': minute,
-      'teamId': teamId,
-      'goalscorerUserId': goalscorerUserId,
-      if (assistMakerUserId != null) 'assistMakerUserId': assistMakerUserId,
-      if (cardType != null) 'cardType': cardType!.wire,
+      'team_id': teamId,
+      'goalscorer_user_id': goalscorerUserId,
+      if (assistMakerUserId != null) 'assist_maker_user_id': assistMakerUserId,
+      if (cardType != null) 'card_type': cardType!.wire,
     };
   }
 }

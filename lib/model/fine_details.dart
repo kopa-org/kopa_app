@@ -20,11 +20,11 @@ class FineDetails {
   factory FineDetails.fromJson(Map<String, dynamic> json) {
     return FineDetails(
       id: json['id'],
-      fineTypeDetails: FineTypeDetails.fromJson(json['fineTypeDetails']),
-      owedAmount: json['owedAmount'],
-      hasBeenPaid: json['hasBeenPaid'],
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      fineTypeDetails: FineTypeDetails.fromJson(json['fine_type_details']),
+      owedAmount: (json['owed_amount'] as num).toInt(),
+      hasBeenPaid: json['has_been_paid'],
+      createdAt: DateTime.parse(json['created_at']),
+      updatedAt: DateTime.parse(json['updated_at']),
     );
   }
 }

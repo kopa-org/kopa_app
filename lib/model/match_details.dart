@@ -45,28 +45,28 @@ class MatchDetails {
     return MatchDetails(
       id: json['id'],
       type: json['type'] ?? 'MATCH',
-      homeTeam: json['homeTeam'],
-      awayTeam: json['awayTeam'],
+      homeTeam: json['home_team'],
+      awayTeam: json['away_team'],
       date: DateTime.parse(json['date']),
-      meetingTime: _parseMeetingTime(json['meetingTime']),
+      meetingTime: _parseMeetingTime(json['meeting_time']),
       location: json['location'],
       notes: json['notes'],
-      matchPollDetails: json['matchPoll'] != null
-          ? MatchPollDetails.fromJson(json['matchPoll'])
+      matchPollDetails: json['match_poll'] != null
+          ? MatchPollDetails.fromJson(json['match_poll'])
           : null,
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
-      homeTeamScore: json['homeTeamScore'],
-      awayTeamScore: json['awayTeamScore'],
-      isHomeTeam: json['isHomeTeam'],
-      isCurrentUserRegistered: json['isCurrentUserRegistered'] ?? false,
-      attendanceDetailsList: json['attendanceDetailsList'] != null
+      createdAt: DateTime.parse(json['created_at']),
+      updatedAt: DateTime.parse(json['updated_at']),
+      homeTeamScore: json['home_team_score'],
+      awayTeamScore: json['away_team_score'],
+      isHomeTeam: json['is_home_team'],
+      isCurrentUserRegistered: json['is_current_user_registered'] ?? false,
+      attendanceDetailsList: json['attendance_details_list'] != null
           ? List<EventAttendanceDetails>.from(
-              json['attendanceDetailsList']
+              json['attendance_details_list']
                   .map((x) => EventAttendanceDetails.fromJson(x)))
           : [],
-      matchEventDetailsList: json['matchEventDetailsList'] != null
-          ? List<MatchEventDetails>.from(json['matchEventDetailsList']
+      matchEventDetailsList: json['match_event_details_list'] != null
+          ? List<MatchEventDetails>.from(json['match_event_details_list']
               .map((x) => MatchEventDetails.fromJson(x)))
           : [],
     );

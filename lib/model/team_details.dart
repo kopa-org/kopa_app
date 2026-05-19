@@ -15,8 +15,8 @@ class TeamDetails {
     return TeamDetails(
       id: json['id'],
       title: json['title'],
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: DateTime.parse(json['created_at']),
+      updatedAt: DateTime.parse(json['updated_at']),
     );
   }
 }

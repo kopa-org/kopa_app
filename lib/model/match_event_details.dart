@@ -29,16 +29,16 @@ class MatchEventDetails {
   factory MatchEventDetails.fromJson(Map<String, dynamic> json) {
     return MatchEventDetails(
       id: json['id'],
-      eventId: json['eventId'],
+      eventId: json['event_id'],
       type: MatchEventType.values.firstWhere((e) => e.wire == json['type']),
       minute: json['minute'],
-      teamId: json['teamId'],
-      goalscorerUserId: json['goalscorerUserId'],
-      goalscorerUserName: json['goalscorerUserName'],
-      assistMakerUserId: json['assistMakerUserId'],
-      assistMakerUserName: json['assistMakerUserName'],
-      cardType: json['cardType'] != null
-          ? CardType.values.firstWhere((e) => e.wire == json['cardType'])
+      teamId: json['team_id'],
+      goalscorerUserId: json['goalscorer_user_id'],
+      goalscorerUserName: json['goalscorer_user_name'],
+      assistMakerUserId: json['assist_maker_user_id'],
+      assistMakerUserName: json['assist_maker_user_name'],
+      cardType: json['card_type'] != null
+          ? CardType.values.firstWhere((e) => e.wire == json['card_type'])
           : null,
     );
   }
