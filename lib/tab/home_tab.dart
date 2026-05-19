@@ -6,111 +6,40 @@ import 'package:kopa/component/card/match_hero_card.dart';
 import 'package:kopa/component/card/stat_card.dart';
 import 'package:kopa/component/card/task_card.dart';
 import 'package:kopa/component/chip/status_chip.dart';
-import 'package:kopa/component/future_handler.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/component/section_header/section_header.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
+import 'package:kopa/cubits/home_cubit.dart';
+import 'package:kopa/cubits/home_state.dart';
 import 'package:kopa/helpers/date_helper.dart';
 import 'package:kopa/model/fine_box_details.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/match_event_type.dart';
 import 'package:kopa/model/statistics.dart';
 import 'package:kopa/model/user_details.dart';
-import 'package:kopa/repository/fines_repository.dart';
-import 'package:kopa/repository/match_repository.dart';
-import 'package:kopa/repository/statistics_repository.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 import 'package:kopa/page/match/match_details_page.dart';
 import 'package:kopa/page/team_fines/team_fines_page.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
-class HomeTab extends StatefulWidget {
+class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
 
   @override
-  State<HomeTab> createState() => _HomeTabState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) {
+        final teamId = context.read<AuthCubit>().state.user?.teamDetails.id ?? 0;
+        return HomeCubit()..fetchDashboardData(teamId);
+      },
+      child: const _HomeTabView(),
+    );
+  }
 }
 
-class _HomeTabState extends State<HomeTab> {
-  late Future<Map<String, dynamic>> _dashboardData;
-  late UserDetails _currentUser;
-
-  @override
-  void initState() {
-    super.initState();
-    final user = context.read<AuthCubit>().state.user;
-    if (user != null) {
-      _currentUser = user;
-      _dashboardData = _fetchDashboardData(user.teamDetails.id);
-    } else {
-      _dashboardData = Future.error(Exception('User not logged in'));
-    }
-  }
-
-  Future<void> _refreshData() async {
-    setState(() {
-      _dashboardData = _fetchDashboardData(_currentUser.teamDetails.id);
-    });
-  }
-
-  Future<Map<String, dynamic>> _fetchDashboardData(int teamId) async {
-    final results = await Future.wait([
-      MatchRepository.getMatches(),
-      _safeFetchStats(teamId),
-      _safeFetchFineBox(),
-    ]);
-
-    final matches = results[0] as List<MatchDetails>;
-    final statistics = results[1] as StatisticsResponse?;
-    final fineBox = results[2] as FineBoxDetails?;
-
-    MatchDetails? nextMatch;
-    MatchDetails? lastMatch;
-
-    final now = DateTime.now();
-    final unplayedMatches = matches
-        .where((m) =>
-            !m.hasMatchBeenPlayed &&
-            m.date.isAfter(now.subtract(const Duration(days: 1))))
-        .toList();
-    unplayedMatches.sort((a, b) => a.date.compareTo(b.date));
-    if (unplayedMatches.isNotEmpty) {
-      nextMatch = unplayedMatches.first;
-    }
-
-    final playedMatches = matches.where((m) => m.hasMatchBeenPlayed).toList();
-    playedMatches.sort((a, b) => b.date.compareTo(a.date));
-    if (playedMatches.isNotEmpty) {
-      lastMatch = playedMatches.first;
-    }
-
-    return {
-      'nextMatch': nextMatch,
-      'lastMatch': lastMatch,
-      'statistics': statistics,
-      'fineBox': fineBox,
-    };
-  }
-
-  Future<StatisticsResponse?> _safeFetchStats(int teamId) async {
-    try {
-      return await StatisticsRepository.getStatistics(teamId);
-    } catch (e) {
-      return StatisticsResponse(
-        player: MockData.playerStats,
-        club: MockData.clubStats,
-      );
-    }
-  }
-
-  Future<FineBoxDetails?> _safeFetchFineBox() async {
-    try {
-      return await FinesRepository.getFineBox();
-    } catch (e) {
-      return null;
-    }
-  }
+class _HomeTabView extends StatelessWidget {
+  const _HomeTabView();
 
   @override
   Widget build(BuildContext context) {
@@ -119,30 +48,47 @@ class _HomeTabState extends State<HomeTab> {
     final appTextStyles =
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
+    final currentUser = context.read<AuthCubit>().state.user;
+    if (currentUser == null) {
+      return const Center(child: Text('User not logged in'));
+    }
+
     return PageScaffold(
       title: 'Kopa',
       showBackButton: false,
       backgroundColor: appColors.background,
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: _refreshData,
-          child: FutureHandler<Map<String, dynamic>>(
-            future: _dashboardData,
-            noDataFoundMessage: 'Kunne ikke hente dashboard data',
-            onSuccess: (context, data) {
-              final nextMatch = data['nextMatch'] as MatchDetails?;
-              final lastMatch = data['lastMatch'] as MatchDetails?;
-              final stats = data['statistics'] as StatisticsResponse?;
-              final fineBox = data['fineBox'] as FineBoxDetails?;
+          onRefresh: () async {
+            await context.read<HomeCubit>().fetchDashboardData(currentUser.teamDetails.id);
+          },
+          child: BlocBuilder<HomeCubit, HomeState>(
+            builder: (context, state) {
+              if (state.status == HomeStatus.initial || state.status == HomeStatus.loading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (state.status == HomeStatus.failure) {
+                return Center(
+                  child: Text(
+                    state.errorMessage ?? 'Kunne ikke hente dashboard data',
+                    style: appTextStyles.body.copyWith(color: appColors.error),
+                  ),
+                );
+              }
+
+              final nextMatch = state.nextMatch;
+              final lastMatch = state.lastMatch;
+              final stats = state.statistics;
+              final fineBox = state.fineBox;
 
               return SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildGreetingSection(appColors, appTextStyles),
+                    _buildGreetingSection(currentUser, appColors, appTextStyles),
                     const SizedBox(height: 32),
                     if (nextMatch != null) ...[
                       SectionHeader(
@@ -153,23 +99,21 @@ class _HomeTabState extends State<HomeTab> {
                       const SizedBox(height: 12),
                       MatchHeroCard(
                         match: nextMatch,
-                        onTap: () {
-                          Navigator.of(context)
+                        onTap: () async {
+                          final homeCubit = context.read<HomeCubit>();
+                          await Navigator.of(context)
                               .push(MaterialWithModalsPageRoute(
-                            builder: (context) =>
-                                MatchDetailsPage(matchId: nextMatch.id),
-                          ))
-                              .then((_) => _refreshData());
+                            builder: (context) => MatchDetailsPage(matchId: nextMatch.id),
+                          ));
+                          homeCubit.fetchDashboardData(currentUser.teamDetails.id);
                         },
                       ),
                       const SizedBox(height: 12),
                       if (!nextMatch.isCurrentUserRegistered)
                         FullWidthButton(
                           buttonText: 'Tilmeld til kamp',
-                          onPressed: () async {
-                            await MatchRepository.registerForMatch(
-                                nextMatch.id);
-                            _refreshData();
+                          onPressed: () {
+                            context.read<HomeCubit>().registerForMatch(nextMatch.id, currentUser.teamDetails.id);
                           },
                         ),
                       const SizedBox(height: 32),
@@ -181,7 +125,7 @@ class _HomeTabState extends State<HomeTab> {
                     if (lastMatch != null) ...[
                       const SectionHeader(title: 'Seneste kamp'),
                       const SizedBox(height: 12),
-                      _buildLastMatchCard(lastMatch, appColors, appTextStyles),
+                      _buildLastMatchCard(context, lastMatch, appColors, appTextStyles),
                       const SizedBox(height: 32),
                     ],
                     if (stats != null) ...[
@@ -193,7 +137,7 @@ class _HomeTabState extends State<HomeTab> {
                     if (fineBox != null) ...[
                       const SectionHeader(title: 'Bødekasse'),
                       const SizedBox(height: 12),
-                      _buildFineBoxCard(fineBox, appColors, appTextStyles),
+                      _buildFineBoxCard(context, fineBox, currentUser, appColors, appTextStyles),
                       const SizedBox(height: 32),
                     ],
                   ],
@@ -206,8 +150,8 @@ class _HomeTabState extends State<HomeTab> {
     );
   }
 
-  Widget _buildGreetingSection(AppColors colors, AppTextStyles styles) {
-    final firstName = _currentUser.name.split(' ').first;
+  Widget _buildGreetingSection(UserDetails currentUser, AppColors colors, AppTextStyles styles) {
+    final firstName = currentUser.name.split(' ').first;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -253,8 +197,7 @@ class _HomeTabState extends State<HomeTab> {
     );
   }
 
-  Widget _buildLastMatchCard(
-      MatchDetails match, AppColors colors, AppTextStyles styles) {
+  Widget _buildLastMatchCard(BuildContext context, MatchDetails match, AppColors colors, AppTextStyles styles) {
     final resultStr =
         '${match.homeTeam ?? "Hjemme"} ${match.homeTeamScore ?? 0} - ${match.awayTeamScore ?? 0} ${match.awayTeam ?? "Ude"}';
 
@@ -326,12 +269,11 @@ class _HomeTabState extends State<HomeTab> {
     );
   }
 
-  Widget _buildFineBoxCard(
-      FineBoxDetails fineBox, AppColors colors, AppTextStyles styles) {
+  Widget _buildFineBoxCard(BuildContext context, FineBoxDetails fineBox, UserDetails currentUser, AppColors colors, AppTextStyles styles) {
     double myFines = 0.0;
     try {
       final myFineDetails = fineBox.userFineDetails
-          .firstWhere((u) => u.userDetails.id == _currentUser.id);
+          .firstWhere((u) => u.userDetails.id == currentUser.id);
       myFines = myFineDetails.fineDetailsList
           .where((f) => !f.hasBeenPaid)
           .fold(0.0, (sum, f) => sum + f.owedAmount);
@@ -348,29 +290,22 @@ class _HomeTabState extends State<HomeTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildFineRow('Nuværende saldo:',
-              '${fineBox.currentAmount.toStringAsFixed(0)} kr.', styles),
+          _buildFineRow('Nuværende saldo:', '${fineBox.currentAmount.toStringAsFixed(0)} kr.', styles),
           const SizedBox(height: 8),
-          _buildFineRow('Din saldo:', '${myFines.toStringAsFixed(0)} kr.',
-              styles,
-              highlight: myFines > 0),
+          _buildFineRow('Din saldo:', '${myFines.toStringAsFixed(0)} kr.', styles, highlight: myFines > 0),
           const SizedBox(height: 8),
-          _buildFineRow('Total manglende betaling:',
-              '${fineBox.totalOwedAmount.toStringAsFixed(0)} kr.', styles),
+          _buildFineRow('Total manglende betaling:', '${fineBox.totalOwedAmount.toStringAsFixed(0)} kr.', styles),
         ],
       ),
     );
   }
 
-  Widget _buildFineRow(String label, String value, AppTextStyles styles,
-      {bool highlight = false}) {
+  Widget _buildFineRow(String label, String value, AppTextStyles styles, {bool highlight = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label, style: styles.body),
-        Text(value,
-            style: styles.bodyBold
-                .copyWith(color: highlight ? Colors.red : null)),
+        Text(value, style: styles.bodyBold.copyWith(color: highlight ? Colors.red : null)),
       ],
     );
   }
