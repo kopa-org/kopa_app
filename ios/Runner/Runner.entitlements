@@ -4,7 +4,7 @@
 <dict>
 	<key>com.apple.developer.associated-domains</key>
 	<array>
-		<string>applinks:kopa.app</string>
+		<string>applinks:app-kopa.ntthyssen.com</string>
 	</array>
 </dict>
 </plist>

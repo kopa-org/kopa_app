@@ -226,7 +226,7 @@ class _ProfileTabState extends State<ProfileTab> {
                         if (!context.mounted) return;
                         final token = onboardingCubit.state.joinToken;
                         if (token != null) {
-                          await SharePlus.instance.share(ShareParams(title: 'Kopa hold-link', text: 'Bliv en del af mit hold på Kopa!' , uri: Uri.parse('https://kopa.app/join?team_token=$token')));
+                          await SharePlus.instance.share(ShareParams(text: 'Bliv en del af mit hold på Kopa! Klik her: https://app-kopa.ntthyssen.com/join?team_token=$token'));
                         }
                       },
                     );
