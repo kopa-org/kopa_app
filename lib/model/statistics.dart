@@ -22,14 +22,14 @@ class PlayerStats {
   factory PlayerStats.fromJson(Map<String, dynamic> json) {
     return PlayerStats(
       name: json['name'] ?? 'Unknown',
-      matchesPlayed: json['matchesPlayed'] ?? 0,
+      matchesPlayed: json['matches_played'] ?? 0,
       trainingAttendancePercentage:
-          (json['trainingAttendancePercentage'] ?? 0).toDouble(),
-      goalsScored: json['goalsScored'] ?? 0,
+          (json['training_attendance_percentage'] ?? 0).toDouble(),
+      goalsScored: json['goals_scored'] ?? 0,
       assists: json['assists'] ?? 0,
-      yellowCards: json['yellowCards'] ?? 0,
-      redCards: json['redCards'] ?? 0,
-      finesTotal: (json['finesTotal'] ?? 0).toDouble(),
+      yellowCards: json['yellow_cards'] ?? 0,
+      redCards: json['red_cards'] ?? 0,
+      finesTotal: (json['fines_total'] ?? 0).toDouble(),
     );
   }
 }
@@ -56,10 +56,10 @@ class ClubStats {
       wins: json['wins'] ?? 0,
       draws: json['draws'] ?? 0,
       losses: json['losses'] ?? 0,
-      goalsFor: json['goalsFor'] ?? 0,
-      goalsAgainst: json['goalsAgainst'] ?? 0,
-      lastFiveMatchesForm: json['lastFiveMatchesForm'] != null
-          ? List<int>.from(json['lastFiveMatchesForm'])
+      goalsFor: json['goals_for'] ?? 0,
+      goalsAgainst: json['goals_against'] ?? 0,
+      lastFiveMatchesForm: json['last_five_matches_form'] != null
+          ? List<int>.from(json['last_five_matches_form'])
           : [],
     );
   }
