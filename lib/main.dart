@@ -9,6 +9,8 @@ import 'package:kopa/navigation/router_refresh_notifier.dart';
 import 'package:kopa/repositories/auth_repository.dart';
 import 'package:kopa/utils/crash_reporting.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:kopa/repository/onboarding_repository.dart';
+import 'package:kopa/cubits/onboarding_cubit.dart';
 import 'package:kopa/theme/app_theme.dart';
 
 void main() async {
@@ -18,14 +20,20 @@ void main() async {
     await CrashReporting.initialize();
     
     final authRepository = ApiAuthRepository();
+    final onboardingRepository = OnboardingRepository();
+    
     final authCubit = AuthCubit(authRepository: authRepository);
+    final onboardingCubit = OnboardingCubit(onboardingRepository);
+    
     // Initialize auth state
     await authCubit.init();
 
     runApp(
       KopaApp(
         authRepository: authRepository,
+        onboardingRepository: onboardingRepository,
         authCubit: authCubit,
+        onboardingCubit: onboardingCubit,
       ),
     );
   });
@@ -33,12 +41,16 @@ void main() async {
 
 class KopaApp extends StatefulWidget {
   final AuthRepository authRepository;
+  final OnboardingRepository onboardingRepository;
   final AuthCubit authCubit;
+  final OnboardingCubit onboardingCubit;
 
   const KopaApp({
     super.key,
     required this.authRepository,
+    required this.onboardingRepository,
     required this.authCubit,
+    required this.onboardingCubit,
   });
 
   @override
@@ -55,6 +67,7 @@ class _KopaAppState extends State<KopaApp> {
     _refreshNotifier = RouterRefreshNotifier(widget.authCubit.stream);
     _router = AppRouter.create(
       authCubit: widget.authCubit,
+      onboardingCubit: widget.onboardingCubit,
       refreshListenable: _refreshNotifier,
     );
   }
@@ -75,10 +88,12 @@ class _KopaAppState extends State<KopaApp> {
     return MultiRepositoryProvider(
       providers: [
         RepositoryProvider.value(value: widget.authRepository),
+        RepositoryProvider.value(value: widget.onboardingRepository),
       ],
       child: MultiBlocProvider(
         providers: [
           BlocProvider.value(value: widget.authCubit),
+          BlocProvider.value(value: widget.onboardingCubit),
         ],
         child: MaterialApp.router(
           title: 'Kopa',

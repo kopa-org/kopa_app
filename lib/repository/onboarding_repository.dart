@@ -1,0 +1,107 @@
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:kopa/helpers/api_config.dart';
+import 'package:kopa/services/secure_storage_service.dart';
+
+class OnboardingRepository {
+  Future<Map<String, dynamic>> validateToken(String token) async {
+    final url = Uri.parse('${ApiConfig.baseUrl}/onboarding/validate/$token');
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        return {'valid': false, 'error': 'Kunne ikke validere invitation'};
+      }
+    } catch (e) {
+      if (kDebugMode) print('Validate token error: $e');
+      return {'valid': false, 'error': 'Netværksfejl'};
+    }
+  }
+
+  Future<Map<String, dynamic>> joinTeam(String token) async {
+    final userToken = await SecureStorageService.getToken();
+    if (userToken == null) return {'success': false, 'error': 'Ikke logget ind'};
+
+    final url = Uri.parse('${ApiConfig.baseUrl}/team/join');
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $userToken',
+        },
+        body: json.encode({'token': token}),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        final error = json.decode(response.body);
+        return {'success': false, 'error': error['error'] ?? 'Kunne ikke tilmelde holdet'};
+      }
+    } catch (e) {
+      if (kDebugMode) print('Join team error: $e');
+      return {'success': false, 'error': 'Netværksfejl'};
+    }
+  }
+
+  Future<Map<String, dynamic>> getJoinToken(int teamId) async {
+    final userToken = await SecureStorageService.getToken();
+    final url = Uri.parse('${ApiConfig.baseUrl}/team/$teamId/join_token');
+    try {
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $userToken'},
+      );
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        return {'error': 'Kunne ikke hente kode'};
+      }
+    } catch (e) {
+      return {'error': 'Netværksfejl'};
+    }
+  }
+
+  Future<Map<String, dynamic>> rotateJoinToken(int teamId) async {
+    final userToken = await SecureStorageService.getToken();
+    final url = Uri.parse('${ApiConfig.baseUrl}/team/$teamId/join_token/rotate');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Authorization': 'Bearer $userToken'},
+      );
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        return {'error': 'Kunne ikke rotere kode'};
+      }
+    } catch (e) {
+      return {'error': 'Netværksfejl'};
+    }
+  }
+
+  Future<Map<String, dynamic>> sendEmailInvites(int teamId, List<String> emails) async {
+    final userToken = await SecureStorageService.getToken();
+    final url = Uri.parse('${ApiConfig.baseUrl}/team/invite/email');
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $userToken',
+        },
+        body: json.encode({'team_id': teamId, 'emails': emails}),
+      );
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        return {'error': 'Kunne ikke sende invitationer'};
+      }
+    } catch (e) {
+      return {'error': 'Netværksfejl'};
+    }
+  }
+}

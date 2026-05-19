@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/auth_state.dart';
+import 'package:kopa/cubits/onboarding_cubit.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -18,6 +19,16 @@ class _RegisterPageState extends State<RegisterPage> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    // Pre-fill email if it exists in onboarding state
+    final onboardingState = context.read<OnboardingCubit>().state;
+    if (onboardingState.email != null) {
+      _emailController.text = onboardingState.email!;
+    }
+  }
 
   @override
   void dispose() {
@@ -43,108 +54,165 @@ class _RegisterPageState extends State<RegisterPage> {
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
     final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
-    return BlocConsumer<AuthCubit, AuthState>(
-      listener: (context, state) {
-        if (state.status == AuthStatus.failure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.errorMessage ?? 'Registration failed'),
-              backgroundColor: appColors.error,
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<AuthCubit, AuthState>(
+          listener: (context, state) {
+            if (state.status == AuthStatus.failure) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.errorMessage ?? 'Registration failed'),
+                  backgroundColor: appColors.error,
+                ),
+              );
+            } else if (state.status == AuthStatus.authenticated) {
+              // If we have an invite token, join the team now
+              final onboardingCubit = context.read<OnboardingCubit>();
+              if (onboardingCubit.state.inviteToken != null) {
+                onboardingCubit.joinTeamWithToken();
+              }
+            }
+          },
+        ),
+        BlocListener<OnboardingCubit, OnboardingState>(
+          listener: (context, state) {
+            if (state.status == OnboardingStatus.validated && state.email != null) {
+              _emailController.text = state.email!;
+            } else if (state.status == OnboardingStatus.success) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Du er nu tilmeldt holdet!'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+              context.read<OnboardingCubit>().clearOnboarding();
+            } else if (state.status == OnboardingStatus.failure) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.errorMessage ?? 'Kunne ikke tilmelde holdet'),
+                  backgroundColor: appColors.error,
+                ),
+              );
+            }
+          },
+        ),
+      ],
+      child: BlocBuilder<AuthCubit, AuthState>(
+        builder: (context, state) {
+          return Scaffold(
+            backgroundColor: appColors.background,
+            appBar: AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              leading: BackButton(color: appColors.black),
             ),
-          );
-        }
-      },
-      builder: (context, state) {
-        return Scaffold(
-          backgroundColor: appColors.background,
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            leading: BackButton(color: appColors.black),
-          ),
-          body: SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    SvgPicture.asset(
-                      'assets/logos/Logo.svg',
-                      height: 80,
-                    ),
-                    const SizedBox(height: 48),
-                    Text(
-                      'Opret bruger',
-                      style: appTextStyles.sectionHeader,
-                    ),
-                    const SizedBox(height: 24),
-                    TextFormField(
-                      controller: _nameController,
-                      decoration: InputDecoration(
-                        labelText: 'Navn',
-                        border: const OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.person, color: appColors.grass),
+            body: SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      SvgPicture.asset(
+                        'assets/logos/Logo.svg',
+                        height: 80,
                       ),
-                      keyboardType: TextInputType.name,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) return 'Please enter your name';
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _emailController,
-                      decoration: InputDecoration(
-                        labelText: 'Email',
-                        border: const OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.email, color: appColors.grass),
+                      const SizedBox(height: 48),
+                      BlocBuilder<OnboardingCubit, OnboardingState>(
+                        builder: (context, onboardingState) {
+                          if (onboardingState.teamTitle != null) {
+                            return Column(
+                              children: [
+                                Text(
+                                  'Bliv en del af',
+                                  style: appTextStyles.body,
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  onboardingState.teamTitle!,
+                                  style: appTextStyles.sectionHeader.copyWith(color: appColors.primary),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 24),
+                              ],
+                            );
+                          }
+                          return Text(
+                            'Opret bruger',
+                            style: appTextStyles.sectionHeader,
+                          );
+                        },
                       ),
-                      keyboardType: TextInputType.emailAddress,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) return 'Please enter your email';
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _passwordController,
-                      decoration: InputDecoration(
-                        labelText: 'Adgangskode',
-                        border: const OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.lock, color: appColors.grass),
-                      ),
-                      obscureText: true,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) return 'Please enter your password';
-                        if (value.length < 6) return 'Password must be at least 6 characters';
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed: state.status == AuthStatus.loading ? null : _onRegisterPressed,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: appColors.primary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                      const SizedBox(height: 24),
+                      TextFormField(
+                        controller: _nameController,
+                        decoration: InputDecoration(
+                          labelText: 'Navn',
+                          border: const OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.person, color: appColors.grass),
                         ),
-                        textStyle: appTextStyles.button,
+                        keyboardType: TextInputType.name,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) return 'Please enter your name';
+                          return null;
+                        },
                       ),
-                      child: state.status == AuthStatus.loading
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text('OPRET KONTO'),
-                    ),
-                  ],
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _emailController,
+                        decoration: InputDecoration(
+                          labelText: 'Email',
+                          border: const OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.email, color: appColors.grass),
+                        ),
+                        keyboardType: TextInputType.emailAddress,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) return 'Please enter your email';
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _passwordController,
+                        decoration: InputDecoration(
+                          labelText: 'Adgangskode',
+                          border: const OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.lock, color: appColors.grass),
+                        ),
+                        obscureText: true,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) return 'Please enter your password';
+                          if (value.length < 6) return 'Password must be at least 6 characters';
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: state.status == AuthStatus.loading ? null : _onRegisterPressed,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: appColors.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          textStyle: appTextStyles.button,
+                        ),
+                        child: state.status == AuthStatus.loading
+                            ? const CircularProgressIndicator(color: Colors.white)
+                            : const Text('OPRET KONTO'),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
+

@@ -10,17 +10,23 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:kopa/main.dart';
 import 'package:kopa/repositories/auth_repository.dart';
+import 'package:kopa/repository/onboarding_repository.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
+import 'package:kopa/cubits/onboarding_cubit.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     final authRepository = ApiAuthRepository();
+    final onboardingRepository = OnboardingRepository();
     final authCubit = AuthCubit(authRepository: authRepository);
+    final onboardingCubit = OnboardingCubit(onboardingRepository);
 
     // Build our app and trigger a frame.
     await tester.pumpWidget(KopaApp(
       authRepository: authRepository,
+      onboardingRepository: onboardingRepository,
       authCubit: authCubit,
+      onboardingCubit: onboardingCubit,
     ));
 
     // Verify that the app widget is rendered

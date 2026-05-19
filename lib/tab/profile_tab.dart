@@ -6,6 +6,7 @@ import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
+import 'package:kopa/cubits/onboarding_cubit.dart';
 import 'package:kopa/navigation/app_router.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
@@ -13,6 +14,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
 import 'package:icalendar_parser/icalendar_parser.dart';
 import 'package:kopa/repository/users_repository.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ProfileTab extends StatefulWidget {
   const ProfileTab({super.key});
@@ -24,12 +26,20 @@ class ProfileTab extends StatefulWidget {
 class _ProfileTabState extends State<ProfileTab> {
   bool _isLoading = false;
   String? _errorMessage;
+  final _emailController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
     final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final currentUser = context.read<AuthCubit>().state.user;
 
     Future<void> logout() async {
       setState(() {
@@ -174,7 +184,55 @@ class _ProfileTabState extends State<ProfileTab> {
                     }
                   },
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 32),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text('Onboarding Test (ADMIN)', style: appTextStyles.sectionHeader),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'Test Email Invite',
+                    border: OutlineInputBorder(),
+                    hintText: 'indtast email',
+                  ),
+                ),
+                const SizedBox(height: 8),
+                FullWidthButton(
+                  buttonText: 'Send Test Email',
+                  onPressed: () async {
+                    if (_emailController.text.isEmpty) return;
+                    final teamId = currentUser?.teamDetails.id ?? 0;
+                    final onboardingCubit = context.read<OnboardingCubit>();
+                    await onboardingCubit.sendEmailInvites(teamId, [_emailController.text.trim()]);
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Invite sent to ${_emailController.text}')),
+                    );
+                  },
+                ),
+                const SizedBox(height: 8),
+                BlocBuilder<OnboardingCubit, OnboardingState>(
+                  builder: (context, state) {
+                    return FullWidthButton(
+                      buttonText: 'Del Hold-Link',
+                      onPressed: () async {
+                        final teamId = currentUser?.teamDetails.id ?? 0;
+                        final onboardingCubit = context.read<OnboardingCubit>();
+                        if (state.joinToken == null) {
+                          await onboardingCubit.fetchTeamJoinToken(teamId);
+                        }
+                        if (!context.mounted) return;
+                        final token = onboardingCubit.state.joinToken;
+                        if (token != null) {
+                          await SharePlus.instance.share(ShareParams(title: 'Kopa hold-link', text: 'Bliv en del af mit hold på Kopa!' , uri: Uri.parse('https://kopa.app/join?team_token=$token')));
+                        }
+                      },
+                    );
+                  },
+                ),
+                const SizedBox(height: 32),
                 FullWidthButton(
                   buttonText: 'Log ud',
                   onPressed: logout,
@@ -251,6 +309,7 @@ class ScrapedMembersWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final currentUser = context.read<AuthCubit>().state.user;
 
     return Column(
       children: [
@@ -283,7 +342,29 @@ class ScrapedMembersWidget extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: FullWidthButton(
             buttonText: 'Invitier holdet til Kopa',
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () async {
+              final emails = players
+                  .map((p) => p['contact']?.toString() ?? '')
+                  .where((c) => c.contains('@'))
+                  .toList();
+              
+              if (emails.isNotEmpty) {
+                final teamId = currentUser?.teamDetails.id ?? 0;
+                await context.read<OnboardingCubit>().sendEmailInvites(teamId, emails);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Invitationer sendt til holdet!')),
+                  );
+                  Navigator.of(context).pop();
+                }
+              } else {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Ingen gyldige emails fundet.')),
+                  );
+                }
+              }
+            },
           ),
         ),
       ],

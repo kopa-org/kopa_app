@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/auth_state.dart';
+import 'package:kopa/cubits/onboarding_cubit.dart';
 import 'package:kopa/pages/login_page.dart';
 import 'package:kopa/pages/register_page.dart';
 import 'package:kopa/tab/home_tab.dart';
@@ -20,9 +21,12 @@ abstract final class AppRouter {
   static const statistics = '/statistics';
   static const profile = '/profile';
   static const dbuWebview = '/dbu-webview';
+  static const invite = '/invite';
+  static const join = '/join';
 
   static GoRouter create({
     required AuthCubit authCubit,
+    required OnboardingCubit onboardingCubit,
     required Listenable refreshListenable,
   }) {
     return GoRouter(
@@ -33,13 +37,35 @@ abstract final class AppRouter {
         final isLoggedIn = authState.status == AuthStatus.authenticated;
         final isLoggingIn = state.uri.path == login;
         final isRegistering = state.uri.path == register;
+        final isInvite = state.uri.path == invite;
+        final isJoin = state.uri.path == join;
 
-        if (!isLoggedIn && !isLoggingIn && !isRegistering) return login;
+        if (!isLoggedIn && !isLoggingIn && !isRegistering && !isInvite && !isJoin) return login;
         if (isLoggedIn && (isLoggingIn || isRegistering)) return home;
 
         return null;
       },
       routes: [
+        GoRoute(
+          path: invite,
+          builder: (context, state) {
+            final token = state.uri.queryParameters['token'];
+            if (token != null) {
+              onboardingCubit.handleDeepLink(token);
+            }
+            return const RegisterPage();
+          },
+        ),
+        GoRoute(
+          path: join,
+          builder: (context, state) {
+            final token = state.uri.queryParameters['team_token'];
+            if (token != null) {
+              onboardingCubit.handleDeepLink(token);
+            }
+            return const RegisterPage();
+          },
+        ),
         GoRoute(
           path: dbuWebview,
           builder: (context, state) => const DbuWebviewPage(),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:kopa/component/button/full_width_button.dart';
 import 'package:kopa/component/card/kopa_card.dart';
 import 'package:kopa/component/card/match_hero_card.dart';
@@ -17,6 +18,7 @@ import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/match_event_type.dart';
 import 'package:kopa/model/statistics.dart';
 import 'package:kopa/model/user_details.dart';
+import 'package:kopa/navigation/app_router.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 import 'package:kopa/page/match/match_details_page.dart';
@@ -129,7 +131,13 @@ class _HomeTabView extends StatelessWidget {
                       const SizedBox(height: 32),
                     ],
                     if (stats != null) ...[
-                      const SectionHeader(title: 'Statistisk highlights'),
+                      SectionHeader(
+                        title: 'Statistisk highlights',
+                        actionText: 'Se mere >',
+                        onActionPressed: () {
+                          context.go(AppRouter.statistics);
+                        },
+                      ),
                       const SizedBox(height: 12),
                       _buildStatsRow(stats.player),
                       const SizedBox(height: 32),

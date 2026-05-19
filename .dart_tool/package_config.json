@@ -56,6 +56,12 @@
       "languageVersion": "3.4"
     },
     {
+      "name": "cross_file",
+      "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/cross_file-0.3.5+2",
+      "packageUri": "lib/",
+      "languageVersion": "3.8"
+    },
+    {
       "name": "crypto",
       "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/crypto-3.0.7",
       "packageUri": "lib/",
@@ -120,6 +126,12 @@
       "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/firebase_crashlytics_platform_interface-3.8.20",
       "packageUri": "lib/",
       "languageVersion": "3.2"
+    },
+    {
+      "name": "fixnum",
+      "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/fixnum-1.1.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.1"
     },
     {
       "name": "flutter",
@@ -314,6 +326,12 @@
       "languageVersion": "3.5"
     },
     {
+      "name": "mime",
+      "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/mime-2.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
       "name": "modal_bottom_sheet",
       "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/modal_bottom_sheet-3.0.0",
       "packageUri": "lib/",
@@ -414,6 +432,18 @@
       "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/record_use-0.6.0",
       "packageUri": "lib/",
       "languageVersion": "3.10"
+    },
+    {
+      "name": "share_plus",
+      "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/share_plus-12.0.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "share_plus_platform_interface",
+      "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/share_plus_platform_interface-6.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.18"
     },
     {
       "name": "sky_engine",
@@ -522,6 +552,12 @@
       "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/url_launcher_windows-3.1.4",
       "packageUri": "lib/",
       "languageVersion": "3.4"
+    },
+    {
+      "name": "uuid",
+      "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/uuid-4.5.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
     },
     {
       "name": "vector_graphics",
