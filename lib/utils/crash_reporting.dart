@@ -54,8 +54,8 @@ abstract final class CrashReporting {
   static Future<void> runAppGuarded(Future<void> Function() body) {
     if (kIsWeb) {
       return runZonedGuarded<Future<void>>(body, (error, stack) {
-        logWebError(error, stack);
-      }) ??
+            logWebError(error, stack);
+          }) ??
           Future<void>.value();
     }
 
@@ -64,8 +64,8 @@ abstract final class CrashReporting {
     }
 
     return runZonedGuarded<Future<void>>(body, (error, stack) {
-      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-    }) ??
+          FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+        }) ??
         Future<void>.value();
   }
 

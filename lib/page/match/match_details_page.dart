@@ -49,7 +49,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     matchAndSquadData = _fetchMatchAndSquad();
     final user = context.read<AuthCubit>().state.user;
     if (user == null) {
-      currentUser = Future.error(Exception('Ingen bruger fundet. Log venligst ind igen.'));
+      currentUser = Future.error(
+          Exception('Ingen bruger fundet. Log venligst ind igen.'));
     } else {
       currentUser = Future.value(user);
     }
@@ -82,7 +83,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
-    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final appTextStyles =
+        theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return FutureHandler<Map<String, dynamic>>(
       future: matchAndSquadData,
@@ -112,7 +114,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
                 InfoRow(
                   icon: CupertinoIcons.time,
                   title: 'Tidspunkt',
-                  value: '${DateHelper.getFormattedTime(matchDetails.date)} (Mødetid: ${DateHelper.getFormattedTime(matchDetails.meetingTime)})',
+                  value:
+                      '${DateHelper.getFormattedTime(matchDetails.date)} (Mødetid: ${DateHelper.getFormattedTime(matchDetails.meetingTime)})',
                 ),
                 InfoRow(
                   icon: CupertinoIcons.location_solid,
@@ -125,7 +128,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
                   value: matchDetails.notes ?? 'Ingen noter',
                 ),
               ],
-              votingModule: _buildVotingModule(matchDetails, squad, appColors, appTextStyles),
+              votingModule: _buildVotingModule(
+                  matchDetails, squad, appColors, appTextStyles),
               attendanceList: _buildAttendanceList(matchDetails, squad),
               timelineItems: _buildTimelineItems(matchDetails, user),
             );
@@ -135,7 +139,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     );
   }
 
-  Widget? _buildVotingModule(MatchDetails match, List<UserDetails> squad, AppColors colors, AppTextStyles styles) {
+  Widget? _buildVotingModule(MatchDetails match, List<UserDetails> squad,
+      AppColors colors, AppTextStyles styles) {
     if (!_isManOfTheMatchVoted || matchPollDetails == null) {
       return Center(
         child: Padding(
@@ -161,9 +166,11 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     if (matchPollDetails == null) return const SizedBox.shrink();
 
     final poll = matchPollDetails!;
-    final totalVotes = poll.matchPollUserVotesDetails.fold<int>(0, (sum, v) => sum + v.numberOfVotes);
+    final totalVotes = poll.matchPollUserVotesDetails
+        .fold<int>(0, (sum, v) => sum + v.numberOfVotes);
     final options = poll.matchPollUserVotesDetails.map((v) {
-      final player = squad.firstWhere((s) => s.id == v.userId, orElse: () => squad.first);
+      final player =
+          squad.firstWhere((s) => s.id == v.userId, orElse: () => squad.first);
       return VotingOption(
         id: v.userId,
         label: player.name,
@@ -182,22 +189,27 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     );
   }
 
-  List<Widget> _buildAttendanceList(MatchDetails match, List<UserDetails> squad) {
-    final attending = match.attendanceDetailsList?.where((a) => a.isAttending).toList() ?? [];
-    return attending.map((a) => PlayerListItem(
-      name: a.userDetails.name,
-      subtitle: a.userDetails.email,
-    )).toList();
+  List<Widget> _buildAttendanceList(
+      MatchDetails match, List<UserDetails> squad) {
+    final attending =
+        match.attendanceDetailsList?.where((a) => a.isAttending).toList() ?? [];
+    return attending
+        .map((a) => PlayerListItem(
+              name: a.userDetails.name,
+              subtitle: a.userDetails.email,
+            ))
+        .toList();
   }
 
   List<Widget> _buildTimelineItems(MatchDetails match, UserDetails user) {
-    final List<MatchEventDetails> events = List.from(match.matchEventDetailsList ?? []);
+    final List<MatchEventDetails> events =
+        List.from(match.matchEventDetailsList ?? []);
     events.sort((a, b) => (b.minute ?? 0).compareTo(a.minute ?? 0));
-    
+
     if (events.isEmpty && !user.isTeamOwner) return [];
 
     final List<Widget> items = [];
-    
+
     if (user.isTeamOwner) {
       items.add(
         Center(
@@ -215,7 +227,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
 
     for (var i = 0; i < events.length; i++) {
       final e = events[i];
-      
+
       String title = e.goalscorerUserName;
       String timeLabel = '';
       IconData icon = Icons.circle;
@@ -223,7 +235,9 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       String subtitle = '';
 
       if (e.type == MatchEventType.goal) {
-        if (e.assistMakerUserName != null) title += ' (Assist: ${e.assistMakerUserName})';
+        if (e.assistMakerUserName != null) {
+          title += ' (Assist: ${e.assistMakerUserName})';
+        }
         timeLabel = e.minute != null ? '${e.minute}\'' : 'MÅL';
         icon = Icons.sports_soccer;
         subtitle = 'Mål';
@@ -238,7 +252,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         iconColor = Colors.red;
         subtitle = 'Rødt kort';
       } else if (e.type == MatchEventType.substitution) {
-        title = '${e.goalscorerUserName} (Ind) / ${e.assistMakerUserName ?? '?'} (Ud)';
+        title =
+            '${e.goalscorerUserName} (Ind) / ${e.assistMakerUserName ?? '?'} (Ud)';
         timeLabel = e.minute != null ? '${e.minute}\'' : 'UDSK.';
         icon = Icons.swap_horiz;
         subtitle = 'Udskiftning';
@@ -267,7 +282,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
   Future<void> setMatchScore(int matchDetailsId) async {
     final theme = Theme.of(context);
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
-    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final appTextStyles =
+        theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     final homeCtl = TextEditingController(text: _homeGoals.toString());
     final awayCtl = TextEditingController(text: _awayGoals.toString());
@@ -290,7 +306,10 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
               final a = int.parse(awayCtl.text);
               await MatchRepository.updateMatchScore(matchDetailsId, h, a);
               if (mounted) {
-                setState(() { _homeGoals = h; _awayGoals = a; });
+                setState(() {
+                  _homeGoals = h;
+                  _awayGoals = a;
+                });
                 _refreshMatchAndSquad();
                 if (modalContext.mounted) {
                   Navigator.of(modalContext).pop();
@@ -305,7 +324,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
             color: appColors.surface,
             child: AnimatedPadding(
               duration: const Duration(milliseconds: 200),
-              padding: EdgeInsets.only(bottom: MediaQuery.of(modalContext).viewInsets.bottom),
+              padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(modalContext).viewInsets.bottom),
               child: SafeArea(
                 top: false,
                 child: Column(
@@ -313,12 +333,23 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
                   children: [
                     CupertinoNavigationBar(
                       backgroundColor: appColors.surface,
-                      middle: Text('Indtast resultat', style: appTextStyles.sectionHeader),
-                      leading: CupertinoButton(padding: EdgeInsets.zero, child: Text('Annullér', style: TextStyle(color: appColors.error)), onPressed: () => Navigator.of(modalContext).pop()),
+                      middle: Text('Indtast resultat',
+                          style: appTextStyles.sectionHeader),
+                      leading: CupertinoButton(
+                          padding: EdgeInsets.zero,
+                          child: Text('Annullér',
+                              style: TextStyle(color: appColors.error)),
+                          onPressed: () => Navigator.of(modalContext).pop()),
                       trailing: CupertinoButton(
                         padding: EdgeInsets.zero,
                         onPressed: canSave && !isSaving ? onOk : null,
-                        child: isSaving ? const CupertinoActivityIndicator() : Text('OK', style: TextStyle(color: canSave ? appColors.primary : appColors.divider)),
+                        child: isSaving
+                            ? const CupertinoActivityIndicator()
+                            : Text('OK',
+                                style: TextStyle(
+                                    color: canSave
+                                        ? appColors.primary
+                                        : appColors.divider)),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -326,9 +357,17 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
                       padding: const EdgeInsets.symmetric(horizontal: 32),
                       child: Row(
                         children: [
-                          Expanded(child: _buildScoreField(homeCtl, homeNode, awayNode, appColors)),
-                          Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Text('—', style: appTextStyles.pageTitle)),
-                          Expanded(child: _buildScoreField(awayCtl, awayNode, null, appColors, onSubmitted: onOk)),
+                          Expanded(
+                              child: _buildScoreField(
+                                  homeCtl, homeNode, awayNode, appColors)),
+                          Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                              child: Text('—', style: appTextStyles.pageTitle)),
+                          Expanded(
+                              child: _buildScoreField(
+                                  awayCtl, awayNode, null, appColors,
+                                  onSubmitted: onOk)),
                         ],
                       ),
                     ),
@@ -343,7 +382,9 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     );
   }
 
-  Widget _buildScoreField(TextEditingController ctl, FocusNode node, FocusNode? next, AppColors appColors, {VoidCallback? onSubmitted}) {
+  Widget _buildScoreField(TextEditingController ctl, FocusNode node,
+      FocusNode? next, AppColors appColors,
+      {VoidCallback? onSubmitted}) {
     return CupertinoTextField(
       controller: ctl,
       focusNode: node,
@@ -351,8 +392,11 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       textAlign: TextAlign.center,
       keyboardType: TextInputType.number,
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(border: Border.all(color: appColors.black, width: 2), borderRadius: BorderRadius.circular(8)),
-      onSubmitted: (_) => next != null ? next.requestFocus() : onSubmitted?.call(),
+      decoration: BoxDecoration(
+          border: Border.all(color: appColors.black, width: 2),
+          borderRadius: BorderRadius.circular(8)),
+      onSubmitted: (_) =>
+          next != null ? next.requestFocus() : onSubmitted?.call(),
     );
   }
 
@@ -360,7 +404,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     try {
       final data = await matchAndSquadData;
       if (!mounted) return;
-      
+
       final squadRaw = data['squad'];
       if (squadRaw == null || squadRaw is! List) {
         throw Exception('Squad data is missing or invalid');

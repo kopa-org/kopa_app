@@ -8,7 +8,7 @@ class UserDetails {
   final int roleId;
   final DateTime createdAt;
   final DateTime updatedAt;
-  final TeamDetails teamDetails;
+  final TeamDetails? teamDetails;
 
   UserDetails(
       {required this.id,
@@ -29,7 +29,9 @@ class UserDetails {
       roleId: json['role_id'],
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
-      teamDetails: TeamDetails.fromJson(json['team_details']),
+      teamDetails: json['team_details'] == null
+          ? null
+          : TeamDetails.fromJson(json['team_details']),
     );
   }
 }

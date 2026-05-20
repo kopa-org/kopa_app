@@ -6,6 +6,8 @@ import 'package:kopa/cubits/onboarding_cubit.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
+import 'package:kopa/navigation/app_router.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -52,12 +54,13 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
-    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final appTextStyles =
+        theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return MultiBlocListener(
       listeners: [
         BlocListener<AuthCubit, AuthState>(
-          listener: (context, state) {
+          listener: (context, state) async {
             if (state.status == AuthStatus.failure) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -75,8 +78,9 @@ class _RegisterPageState extends State<RegisterPage> {
           },
         ),
         BlocListener<OnboardingCubit, OnboardingState>(
-          listener: (context, state) {
-            if (state.status == OnboardingStatus.validated && state.email != null) {
+          listener: (context, state) async {
+            if (state.status == OnboardingStatus.validated &&
+                state.email != null) {
               _emailController.text = state.email!;
             } else if (state.status == OnboardingStatus.success) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -85,11 +89,17 @@ class _RegisterPageState extends State<RegisterPage> {
                   backgroundColor: Colors.green,
                 ),
               );
-              context.read<OnboardingCubit>().clearOnboarding();
+              final authCubit = context.read<AuthCubit>();
+              final onboardingCubit = context.read<OnboardingCubit>();
+              await authCubit.init();
+              if (!context.mounted) return;
+              onboardingCubit.clearOnboarding();
+              if (context.mounted) context.go(AppRouter.home);
             } else if (state.status == OnboardingStatus.failure) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(state.errorMessage ?? 'Kunne ikke tilmelde holdet'),
+                  content:
+                      Text(state.errorMessage ?? 'Kunne ikke tilmelde holdet'),
                   backgroundColor: appColors.error,
                 ),
               );
@@ -108,7 +118,8 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             body: SafeArea(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -132,7 +143,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                 const SizedBox(height: 4),
                                 Text(
                                   onboardingState.teamTitle!,
-                                  style: appTextStyles.sectionHeader.copyWith(color: appColors.primary),
+                                  style: appTextStyles.sectionHeader
+                                      .copyWith(color: appColors.primary),
                                   textAlign: TextAlign.center,
                                 ),
                                 const SizedBox(height: 24),
@@ -151,11 +163,14 @@ class _RegisterPageState extends State<RegisterPage> {
                         decoration: InputDecoration(
                           labelText: 'Navn',
                           border: const OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.person, color: appColors.grass),
+                          prefixIcon:
+                              Icon(Icons.person, color: appColors.grass),
                         ),
                         keyboardType: TextInputType.name,
                         validator: (value) {
-                          if (value == null || value.trim().isEmpty) return 'Please enter your name';
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter your name';
+                          }
                           return null;
                         },
                       ),
@@ -169,7 +184,9 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         keyboardType: TextInputType.emailAddress,
                         validator: (value) {
-                          if (value == null || value.isEmpty) return 'Please enter your email';
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your email';
+                          }
                           return null;
                         },
                       ),
@@ -183,14 +200,20 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         obscureText: true,
                         validator: (value) {
-                          if (value == null || value.isEmpty) return 'Please enter your password';
-                          if (value.length < 6) return 'Password must be at least 6 characters';
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your password';
+                          }
+                          if (value.length < 6) {
+                            return 'Password must be at least 6 characters';
+                          }
                           return null;
                         },
                       ),
                       const SizedBox(height: 24),
                       ElevatedButton(
-                        onPressed: state.status == AuthStatus.loading ? null : _onRegisterPressed,
+                        onPressed: state.status == AuthStatus.loading
+                            ? null
+                            : _onRegisterPressed,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: appColors.primary,
                           foregroundColor: Colors.white,
@@ -201,7 +224,8 @@ class _RegisterPageState extends State<RegisterPage> {
                           textStyle: appTextStyles.button,
                         ),
                         child: state.status == AuthStatus.loading
-                            ? const CircularProgressIndicator(color: Colors.white)
+                            ? const CircularProgressIndicator(
+                                color: Colors.white)
                             : const Text('OPRET KONTO'),
                       ),
                     ],
@@ -215,4 +239,3 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 }
-

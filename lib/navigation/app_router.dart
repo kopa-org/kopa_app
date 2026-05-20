@@ -4,6 +4,7 @@ import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/auth_state.dart';
 import 'package:kopa/cubits/onboarding_cubit.dart';
 import 'package:kopa/pages/login_page.dart';
+import 'package:kopa/pages/onboarding_page.dart';
 import 'package:kopa/pages/register_page.dart';
 import 'package:kopa/tab/home_tab.dart';
 import 'package:kopa/tab/profile_tab.dart';
@@ -23,6 +24,7 @@ abstract final class AppRouter {
   static const dbuWebview = '/dbu-webview';
   static const invite = '/invite';
   static const join = '/join';
+  static const onboarding = '/onboarding';
 
   static GoRouter create({
     required AuthCubit authCubit,
@@ -39,9 +41,28 @@ abstract final class AppRouter {
         final isRegistering = state.uri.path == register;
         final isInvite = state.uri.path == invite;
         final isJoin = state.uri.path == join;
+        final isOnboarding = state.uri.path == onboarding;
+        final hasTeam = authState.user?.teamDetails != null;
 
-        if (!isLoggedIn && !isLoggingIn && !isRegistering && !isInvite && !isJoin) return login;
-        if (isLoggedIn && (isLoggingIn || isRegistering)) return home;
+        if (!isLoggedIn &&
+            !isLoggingIn &&
+            !isRegistering &&
+            !isInvite &&
+            !isJoin) {
+          return login;
+        }
+        if (isLoggedIn && (isLoggingIn || isRegistering)) {
+          return home;
+        }
+        if (isLoggedIn &&
+            !hasTeam &&
+            !isOnboarding &&
+            !isInvite &&
+            !isJoin &&
+            state.uri.path != dbuWebview) {
+          return onboarding;
+        }
+        if (isLoggedIn && hasTeam && isOnboarding) return home;
 
         return null;
       },
@@ -71,6 +92,10 @@ abstract final class AppRouter {
           builder: (context, state) => const DbuWebviewPage(),
         ),
         GoRoute(
+          path: onboarding,
+          builder: (context, state) => const OnboardingPage(),
+        ),
+        GoRoute(
           path: login,
           builder: (context, state) => const LoginPage(),
         ),
@@ -95,16 +120,21 @@ abstract final class AppRouter {
                 ),
                 child: SafeArea(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 15.0, vertical: 8),
                     child: GNav(
-                      rippleColor: theme.colorScheme.primary.withValues(alpha: 0.1),
-                      hoverColor: theme.colorScheme.primary.withValues(alpha: 0.1),
+                      rippleColor:
+                          theme.colorScheme.primary.withValues(alpha: 0.1),
+                      hoverColor:
+                          theme.colorScheme.primary.withValues(alpha: 0.1),
                       gap: 8,
                       activeColor: theme.colorScheme.primary,
                       iconSize: 24,
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 12),
                       duration: const Duration(milliseconds: 400),
-                      tabBackgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
+                      tabBackgroundColor:
+                          theme.colorScheme.primary.withValues(alpha: 0.1),
                       color: theme.unselectedWidgetColor,
                       selectedIndex: navigationShell.currentIndex,
                       onTabChange: (index) {

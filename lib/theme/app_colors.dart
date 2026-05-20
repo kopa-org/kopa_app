@@ -7,7 +7,7 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color divider;
   final Color textPrimary;
   final Color textSecondary;
-  
+
   // Design System Brand Colors
   final Color lightGrass;
   final Color offWhite;
@@ -18,7 +18,7 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color lightSky;
   final Color sunset;
   final Color sun;
-  
+
   // Semantic Colors
   final Color success;
   final Color warning;
@@ -48,7 +48,7 @@ class AppColors extends ThemeExtension<AppColors> {
   static const AppColors light = AppColors(
     background: Color(0xFFE8F2ED), // Off White
     surface: Color(0xFFFFFFFF),
-    primary: Color(0xFF00943C),    // Grass
+    primary: Color(0xFF00943C), // Grass
     divider: Color(0xFFE5E5EA),
     textPrimary: Color(0xFF101010), // Black
     textSecondary: Color(0xFF2D1000), // Dirt/Jord as secondary text

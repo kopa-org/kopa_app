@@ -35,7 +35,8 @@ class _TeamPageState extends State<TeamPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
-    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final appTextStyles =
+        theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return PageScaffold(
       title: 'Truppen',
@@ -87,7 +88,8 @@ class _TeamPageState extends State<TeamPage> {
                   subtitle: player.isTeamOwner
                       ? Text(
                           'Holdleder',
-                          style: appTextStyles.caption.copyWith(color: appColors.primary),
+                          style: appTextStyles.caption
+                              .copyWith(color: appColors.primary),
                         )
                       : null,
                 );

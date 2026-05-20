@@ -38,7 +38,8 @@ class _ProfileTabState extends State<ProfileTab> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
-    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final appTextStyles =
+        theme.extension<AppTextStyles>() ?? AppTextStyles.light;
     final currentUser = context.read<AuthCubit>().state.user;
 
     Future<void> logout() async {
@@ -71,8 +72,8 @@ class _ProfileTabState extends State<ProfileTab> {
                   padding: const EdgeInsets.only(bottom: 12.0),
                   child: Text(
                     _errorMessage!,
-                    style: appTextStyles.body.copyWith(
-                        color: appColors.error, fontSize: 14),
+                    style: appTextStyles.body
+                        .copyWith(color: appColors.error, fontSize: 14),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -80,7 +81,8 @@ class _ProfileTabState extends State<ProfileTab> {
                 FullWidthButton(
                   buttonText: 'Importér kampprogram',
                   onPressed: () async {
-                    final result = await context.push<String>(AppRouter.dbuWebview);
+                    final result =
+                        await context.push<String>(AppRouter.dbuWebview);
                     if (result != null && context.mounted) {
                       try {
                         Map<String, dynamic> resultData;
@@ -89,60 +91,80 @@ class _ProfileTabState extends State<ProfileTab> {
                         } catch (e) {
                           resultData = {'webcal': result, 'matches': []};
                         }
-                        
+
                         final String webcalLink = resultData['webcal'] ?? '';
-                        final List<dynamic> scrapedMatches = resultData['matches'] ?? [];
-                        final List<dynamic> scrapedPlayers = resultData['players'] ?? [];
+                        final List<dynamic> scrapedMatches =
+                            resultData['matches'] ?? [];
+                        final List<dynamic> scrapedPlayers =
+                            resultData['players'] ?? [];
                         if (webcalLink.isEmpty) return;
 
                         final uri = Uri.parse(webcalLink);
-                        
+
                         try {
-                          final httpUrl = webcalLink.replaceFirst('webcal://', 'https://');
+                          final httpUrl =
+                              webcalLink.replaceFirst('webcal://', 'https://');
                           final response = await http.get(Uri.parse(httpUrl));
                           if (response.statusCode == 200) {
-                            final iCalendar = ICalendar.fromString(response.body);
-                            final events = iCalendar.data.where((e) => e['type'] == 'VEVENT').toList();
-                            
+                            final iCalendar =
+                                ICalendar.fromString(response.body);
+                            final events = iCalendar.data
+                                .where((e) => e['type'] == 'VEVENT')
+                                .toList();
+
                             try {
                               await UsersRepository.setCalendarUrl(httpUrl);
                             } catch (e) {
-                              print('Failed to save calendar URL to backend: $e');
+                              print(
+                                  'Failed to save calendar URL to backend: $e');
                             }
 
-                            List<Map<String, dynamic>> combinedEvents = List.from(events);
+                            List<Map<String, dynamic>> combinedEvents =
+                                List.from(events);
                             final now = DateTime.now();
-                            
+
                             for (var scraped in scrapedMatches) {
-                              final String scrapedDate = scraped['dtstart']?.toString() ?? '';
+                              final String scrapedDate =
+                                  scraped['dtstart']?.toString() ?? '';
                               bool isFuture = false;
-                              
+
                               if (scrapedDate.length == 16) {
                                 try {
-                                  final parsedDate = DateTime.parse('${scrapedDate.substring(0, 4)}-${scrapedDate.substring(4, 6)}-${scrapedDate.substring(6, 11)}:${scrapedDate.substring(11, 13)}:${scrapedDate.substring(13, 16)}').toLocal();
+                                  final parsedDate = DateTime.parse(
+                                          '${scrapedDate.substring(0, 4)}-${scrapedDate.substring(4, 6)}-${scrapedDate.substring(6, 11)}:${scrapedDate.substring(11, 13)}:${scrapedDate.substring(13, 16)}')
+                                      .toLocal();
                                   if (parsedDate.isAfter(now)) {
                                     isFuture = true;
                                   }
                                 } catch (_) {}
                               }
-                              
+
                               if (isFuture) continue;
-                              
+
                               combinedEvents.add({
                                 'summary': scraped['summary'],
                                 'dtstart': scraped['dtstart'],
                                 'dtend': '',
-                                'location': scraped['result'] != null && scraped['result'].toString().isNotEmpty ? "Resultat: ${scraped['result']}" : '',
+                                'location': scraped['result'] != null &&
+                                        scraped['result'].toString().isNotEmpty
+                                    ? "Resultat: ${scraped['result']}"
+                                    : '',
                               });
                             }
-                            
+
                             combinedEvents.sort((a, b) {
-                              final aDateStr = (a['dtstart'] is IcsDateTime ? (a['dtstart'] as IcsDateTime).dt : a['dtstart'].toString());
-                              final bDateStr = (b['dtstart'] is IcsDateTime ? (b['dtstart'] as IcsDateTime).dt : b['dtstart'].toString());
+                              final aDateStr = (a['dtstart'] is IcsDateTime
+                                  ? (a['dtstart'] as IcsDateTime).dt
+                                  : a['dtstart'].toString());
+                              final bDateStr = (b['dtstart'] is IcsDateTime
+                                  ? (b['dtstart'] as IcsDateTime).dt
+                                  : b['dtstart'].toString());
                               return bDateStr.compareTo(aDateStr);
                             });
 
-                            if (context.mounted && (combinedEvents.isNotEmpty || scrapedPlayers.isNotEmpty)) {
+                            if (context.mounted &&
+                                (combinedEvents.isNotEmpty ||
+                                    scrapedPlayers.isNotEmpty)) {
                               await showModalBottomSheet(
                                 context: context,
                                 isScrollControlled: true,
@@ -165,19 +187,25 @@ class _ProfileTabState extends State<ProfileTab> {
                             }
                           }
                         } catch (fetchError) {
-                          print('Error fetching or parsing calendar: $fetchError');
+                          print(
+                              'Error fetching or parsing calendar: $fetchError');
                         }
 
-                        final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+                        final launched = await launchUrl(uri,
+                            mode: LaunchMode.externalApplication);
                         if (!launched && context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Kunne ikke åbne kalenderlinket.')),
+                            const SnackBar(
+                                content:
+                                    Text('Kunne ikke åbne kalenderlinket.')),
                           );
                         }
                       } catch (e) {
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Der skete en fejl ved åbning af linket.')),
+                            const SnackBar(
+                                content: Text(
+                                    'Der skete en fejl ved åbning af linket.')),
                           );
                         }
                       }
@@ -187,7 +215,8 @@ class _ProfileTabState extends State<ProfileTab> {
                 const SizedBox(height: 32),
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: Text('Onboarding Test (ADMIN)', style: appTextStyles.sectionHeader),
+                  child: Text('Onboarding Test (ADMIN)',
+                      style: appTextStyles.sectionHeader),
                 ),
                 const SizedBox(height: 12),
                 TextField(
@@ -203,12 +232,15 @@ class _ProfileTabState extends State<ProfileTab> {
                   buttonText: 'Send Test Email',
                   onPressed: () async {
                     if (_emailController.text.isEmpty) return;
-                    final teamId = currentUser?.teamDetails.id ?? 0;
+                    final teamId = currentUser?.teamDetails?.id ?? 0;
                     final onboardingCubit = context.read<OnboardingCubit>();
-                    await onboardingCubit.sendEmailInvites(teamId, [_emailController.text.trim()]);
+                    await onboardingCubit.sendEmailInvites(
+                        teamId, [_emailController.text.trim()]);
                     if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Invite sent to ${_emailController.text}')),
+                      SnackBar(
+                          content:
+                              Text('Invite sent to ${_emailController.text}')),
                     );
                   },
                 ),
@@ -218,7 +250,7 @@ class _ProfileTabState extends State<ProfileTab> {
                     return FullWidthButton(
                       buttonText: 'Del Hold-Link',
                       onPressed: () async {
-                        final teamId = currentUser?.teamDetails.id ?? 0;
+                        final teamId = currentUser?.teamDetails?.id ?? 0;
                         final onboardingCubit = context.read<OnboardingCubit>();
                         if (state.joinToken == null) {
                           await onboardingCubit.fetchTeamJoinToken(teamId);
@@ -226,7 +258,9 @@ class _ProfileTabState extends State<ProfileTab> {
                         if (!context.mounted) return;
                         final token = onboardingCubit.state.joinToken;
                         if (token != null) {
-                          await SharePlus.instance.share(ShareParams(text: 'Bliv en del af mit hold på Kopa! Klik her: https://kopa.ntthyssen.com/join?team_token=$token'));
+                          await SharePlus.instance.share(ShareParams(
+                              text:
+                                  'Bliv en del af mit hold på Kopa! Klik her: https://kopa.ntthyssen.com/join?team_token=$token'));
                         }
                       },
                     );
@@ -246,13 +280,15 @@ class _ProfileTabState extends State<ProfileTab> {
 class ScrapedMatchesWidget extends StatelessWidget {
   final List<Map<String, dynamic>> combinedEvents;
   final ScrollController? scrollController;
-  
-  const ScrapedMatchesWidget({super.key, required this.combinedEvents, this.scrollController});
+
+  const ScrapedMatchesWidget(
+      {super.key, required this.combinedEvents, this.scrollController});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final appTextStyles =
+        theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return Column(
       children: [
@@ -272,11 +308,13 @@ class ScrapedMatchesWidget extends StatelessWidget {
               final event = combinedEvents[index];
               final summary = event['summary'] ?? 'Ukendt';
               final dtstart = event['dtstart'];
-              final start = dtstart is IcsDateTime ? dtstart.dt : dtstart.toString();
+              final start =
+                  dtstart is IcsDateTime ? dtstart.dt : dtstart.toString();
               final dtend = event['dtend'];
-              final end = dtend is IcsDateTime ? dtend.dt : dtend?.toString() ?? '';
+              final end =
+                  dtend is IcsDateTime ? dtend.dt : dtend?.toString() ?? '';
               final location = event['location'] ?? '';
-              
+
               return ListTile(
                 title: Text(summary.toString(), style: appTextStyles.bodyBold),
                 subtitle: Text(
@@ -302,13 +340,15 @@ class ScrapedMatchesWidget extends StatelessWidget {
 class ScrapedMembersWidget extends StatelessWidget {
   final List<dynamic> players;
   final ScrollController? scrollController;
-  
-  const ScrapedMembersWidget({super.key, required this.players, this.scrollController});
+
+  const ScrapedMembersWidget(
+      {super.key, required this.players, this.scrollController});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final appTextStyles =
+        theme.extension<AppTextStyles>() ?? AppTextStyles.light;
     final currentUser = context.read<AuthCubit>().state.user;
 
     return Column(
@@ -329,11 +369,12 @@ class ScrapedMembersWidget extends StatelessWidget {
               final player = players[index];
               final name = player['name'] ?? 'Ukendt';
               final contact = player['contact'] ?? '';
-              
+
               return ListTile(
                 leading: const CircleAvatar(child: Icon(Icons.person)),
                 title: Text(name.toString(), style: appTextStyles.bodyBold),
-                subtitle: Text(contact.toString(), style: appTextStyles.caption),
+                subtitle:
+                    Text(contact.toString(), style: appTextStyles.caption),
               );
             },
           ),
@@ -347,20 +388,24 @@ class ScrapedMembersWidget extends StatelessWidget {
                   .map((p) => p['contact']?.toString() ?? '')
                   .where((c) => c.contains('@'))
                   .toList();
-              
+
               if (emails.isNotEmpty) {
-                final teamId = currentUser?.teamDetails.id ?? 0;
-                await context.read<OnboardingCubit>().sendEmailInvites(teamId, emails);
+                final teamId = currentUser?.teamDetails?.id ?? 0;
+                await context
+                    .read<OnboardingCubit>()
+                    .sendEmailInvites(teamId, emails);
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Invitationer sendt til holdet!')),
+                    const SnackBar(
+                        content: Text('Invitationer sendt til holdet!')),
                   );
                   Navigator.of(context).pop();
                 }
               } else {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Ingen gyldige emails fundet.')),
+                    const SnackBar(
+                        content: Text('Ingen gyldige emails fundet.')),
                   );
                 }
               }

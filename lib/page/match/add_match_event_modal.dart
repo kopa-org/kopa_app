@@ -57,7 +57,8 @@ class _AddMatchEventScreen extends StatefulWidget {
   State<_AddMatchEventScreen> createState() => _AddMatchEventScreenState();
 }
 
-class _AddMatchEventScreenState extends State<_AddMatchEventScreen> with TickerProviderStateMixin {
+class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
+    with TickerProviderStateMixin {
   late PageController _pageController;
   late FixedExtentScrollController _minuteScrollController;
   int _currentStep = 0;
@@ -78,7 +79,8 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> with TickerP
   final GlobalKey _headerSecondaryKey = GlobalKey();
   final GlobalKey _draftContainerKey = GlobalKey();
 
-  final List<GlobalKey> _minuteKeys = List.generate(121, (index) => GlobalKey());
+  final List<GlobalKey> _minuteKeys =
+      List.generate(121, (index) => GlobalKey());
 
   @override
   void initState() {
@@ -102,8 +104,10 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> with TickerP
     required VoidCallback onComplete,
     Size? customSourceSize,
   }) {
-    final RenderBox? sourceBox = sourceKey.currentContext?.findRenderObject() as RenderBox?;
-    final RenderBox? targetBox = targetKey.currentContext?.findRenderObject() as RenderBox?;
+    final RenderBox? sourceBox =
+        sourceKey.currentContext?.findRenderObject() as RenderBox?;
+    final RenderBox? targetBox =
+        targetKey.currentContext?.findRenderObject() as RenderBox?;
 
     if (sourceBox == null || targetBox == null) {
       onComplete();
@@ -114,7 +118,8 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> with TickerP
     final targetPos = targetBox.localToGlobal(Offset.zero);
     final sourceSize = customSourceSize ?? sourceBox.size;
 
-    final controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
+    final controller = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 600));
 
     final scaleAnimation = TweenSequence([
       TweenSequenceItem(tween: Tween<double>(begin: 1.0, end: 1.2), weight: 30),
@@ -122,7 +127,9 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> with TickerP
     ]).animate(CurvedAnimation(parent: controller, curve: Curves.easeOut));
 
     final positionAnimation = Tween<Offset>(begin: sourcePos, end: targetPos)
-        .animate(CurvedAnimation(parent: controller, curve: const Interval(0.2, 1.0, curve: Curves.easeInOutBack)));
+        .animate(CurvedAnimation(
+            parent: controller,
+            curve: const Interval(0.2, 1.0, curve: Curves.easeInOutBack)));
 
     final OverlayEntry entry = OverlayEntry(
       builder: (context) => AnimatedBuilder(
@@ -151,25 +158,51 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> with TickerP
   }
 
   void _onStepComplete(int nextStep) {
-    _pageController.animateToPage(nextStep, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+    _pageController.animateToPage(nextStep,
+        duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
     setState(() => _currentStep = nextStep);
   }
 
   void _syncAndConfirm({required bool thenSave}) {
     final List<(GlobalKey, Widget)> itemsToFly = [];
-    final appTextStyles = Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
 
     if (_draft.type != null) {
-      itemsToFly.add((_headerTypeKey, Center(child: Text(_getEmoji(_draft.type), style: const TextStyle(fontSize: 24, decoration: TextDecoration.none)))));
+      itemsToFly.add((
+        _headerTypeKey,
+        Center(
+            child: Text(_getEmoji(_draft.type),
+                style: const TextStyle(
+                    fontSize: 24, decoration: TextDecoration.none)))
+      ));
     }
     if (_draft.minute != null) {
-      itemsToFly.add((_headerTimeKey, Center(child: Text('${_draft.minute}\'', style: appTextStyles.bodyBold.copyWith(decoration: TextDecoration.none)))));
+      itemsToFly.add((
+        _headerTimeKey,
+        Center(
+            child: Text('${_draft.minute}\'',
+                style: appTextStyles.bodyBold
+                    .copyWith(decoration: TextDecoration.none)))
+      ));
     }
     if (_draft.primaryId != null) {
-      itemsToFly.add((_headerPrimaryKey, Center(child: AppAvatar(initials: _getInitials(getUserName(_draft.primaryId)), radius: 15))));
+      itemsToFly.add((
+        _headerPrimaryKey,
+        Center(
+            child: AppAvatar(
+                initials: _getInitials(getUserName(_draft.primaryId)),
+                radius: 15))
+      ));
     }
     if (_draft.secondaryId != null) {
-      itemsToFly.add((_headerSecondaryKey, Center(child: AppAvatar(initials: _getInitials(getUserName(_draft.secondaryId)), radius: 15))));
+      itemsToFly.add((
+        _headerSecondaryKey,
+        Center(
+            child: AppAvatar(
+                initials: _getInitials(getUserName(_draft.secondaryId)),
+                radius: 15))
+      ));
     }
 
     if (itemsToFly.isEmpty) {
@@ -194,18 +227,24 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> with TickerP
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_stagedScrollController.hasClients) {
-        _stagedScrollController.jumpTo(_stagedScrollController.position.maxScrollExtent);
+        _stagedScrollController
+            .jumpTo(_stagedScrollController.position.maxScrollExtent);
       }
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        final RenderBox? targetBox = _newItemKey.currentContext?.findRenderObject() as RenderBox?;
+        final RenderBox? targetBox =
+            _newItemKey.currentContext?.findRenderObject() as RenderBox?;
         final Offset targetPos;
 
         if (targetBox != null) {
-          targetPos = targetBox.localToGlobal(targetBox.size.center(Offset.zero));
+          targetPos =
+              targetBox.localToGlobal(targetBox.size.center(Offset.zero));
         } else {
-          final RenderBox? containerBox = _draftContainerKey.currentContext?.findRenderObject() as RenderBox?;
-          targetPos = containerBox?.localToGlobal(containerBox.size.center(Offset.zero)) ?? Offset.zero;
+          final RenderBox? containerBox = _draftContainerKey.currentContext
+              ?.findRenderObject() as RenderBox?;
+          targetPos = containerBox
+                  ?.localToGlobal(containerBox.size.center(Offset.zero)) ??
+              Offset.zero;
         }
 
         _animateFlyDown(
@@ -228,28 +267,35 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> with TickerP
     required Offset targetPos,
     required VoidCallback onComplete,
   }) {
-    final controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 800));
+    final controller = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 800));
     final List<OverlayEntry> entries = [];
 
     for (final item in items) {
-      final RenderBox? sourceBox = item.$1.currentContext?.findRenderObject() as RenderBox?;
+      final RenderBox? sourceBox =
+          item.$1.currentContext?.findRenderObject() as RenderBox?;
       if (sourceBox == null) continue;
 
       final sourcePos = sourceBox.localToGlobal(Offset.zero);
       final sourceSize = sourceBox.size;
 
-      final endPos = targetPos - Offset(sourceSize.width / 2, sourceSize.height / 2);
+      final endPos =
+          targetPos - Offset(sourceSize.width / 2, sourceSize.height / 2);
 
-      final posAnim = Tween<Offset>(begin: sourcePos, end: endPos).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOutCubic));
+      final posAnim = Tween<Offset>(begin: sourcePos, end: endPos).animate(
+          CurvedAnimation(parent: controller, curve: Curves.easeInOutCubic));
 
       final opacityAnim = TweenSequence([
         TweenSequenceItem(tween: ConstantTween<double>(1.0), weight: 80),
-        TweenSequenceItem(tween: Tween<double>(begin: 1.0, end: 0.0), weight: 20),
+        TweenSequenceItem(
+            tween: Tween<double>(begin: 1.0, end: 0.0), weight: 20),
       ]).animate(CurvedAnimation(parent: controller, curve: Curves.linear));
 
       final scaleAnim = TweenSequence([
-        TweenSequenceItem(tween: Tween<double>(begin: 1.0, end: 1.1), weight: 20),
-        TweenSequenceItem(tween: Tween<double>(begin: 1.1, end: 0.5), weight: 80),
+        TweenSequenceItem(
+            tween: Tween<double>(begin: 1.0, end: 1.1), weight: 20),
+        TweenSequenceItem(
+            tween: Tween<double>(begin: 1.1, end: 0.5), weight: 80),
       ]).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut));
 
       entries.add(OverlayEntry(
@@ -262,7 +308,10 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> with TickerP
               opacity: opacityAnim.value,
               child: Transform.scale(
                 scale: scaleAnim.value,
-                child: SizedBox(width: sourceSize.width, height: sourceSize.height, child: Material(color: Colors.transparent, child: item.$2)),
+                child: SizedBox(
+                    width: sourceSize.width,
+                    height: sourceSize.height,
+                    child: Material(color: Colors.transparent, child: item.$2)),
               ),
             ),
           ),
@@ -293,40 +342,56 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> with TickerP
   }
 
   String _getInitials(String name) {
-    if (name.isEmpty) return '?';
+    if (name.isEmpty) {
+      return '?';
+    }
     final parts = name.trim().split(' ');
-    if (parts.length > 1) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    if (parts.length > 1) {
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
     return name.substring(0, 1).toUpperCase();
   }
 
   String _getEmoji(MatchEventType? type) {
     if (type == null) return '❓';
     switch (type) {
-      case MatchEventType.goal: return '⚽';
-      case MatchEventType.substitution: return '🔄';
-      case MatchEventType.yellowCard: return '🟨';
-      case MatchEventType.redCard: return '🟥';
-      case MatchEventType.penaltyKick: return '🎯';
+      case MatchEventType.goal:
+        return '⚽';
+      case MatchEventType.substitution:
+        return '🔄';
+      case MatchEventType.yellowCard:
+        return '🟨';
+      case MatchEventType.redCard:
+        return '🟥';
+      case MatchEventType.penaltyKick:
+        return '🎯';
     }
   }
 
   String getPrimaryLabel(MatchEventType? type) {
     if (type == null) return 'Spiller';
     switch (type) {
-      case MatchEventType.goal: return 'Målscorer';
-      case MatchEventType.substitution: return 'Spiller ind';
-      case MatchEventType.penaltyKick: return 'Skytte';
+      case MatchEventType.goal:
+        return 'Målscorer';
+      case MatchEventType.substitution:
+        return 'Spiller ind';
+      case MatchEventType.penaltyKick:
+        return 'Skytte';
       case MatchEventType.yellowCard:
-      case MatchEventType.redCard: return 'Spiller';
+      case MatchEventType.redCard:
+        return 'Spiller';
     }
   }
 
   String? getSecondaryLabel(MatchEventType? type) {
     if (type == null) return null;
     switch (type) {
-      case MatchEventType.goal: return 'Assist';
-      case MatchEventType.substitution: return 'Spiller ud';
-      default: return null;
+      case MatchEventType.goal:
+        return 'Assist';
+      case MatchEventType.substitution:
+        return 'Spiller ud';
+      default:
+        return null;
     }
   }
 
@@ -334,14 +399,17 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> with TickerP
     if (_staged.isEmpty || _isSaving) return;
     setState(() => _isSaving = true);
     try {
-      final commands = _staged.where((d) => d.primaryId != null && d.type != null).map((d) => CreateMatchEventCommand(
-        eventId: widget.matchId,
-        type: d.type!,
-        minute: d.minute,
-        teamId: widget.currentUserData.teamDetails.id,
-        goalscorerUserId: d.primaryId!,
-        assistMakerUserId: d.secondaryId,
-      )).toList();
+      final commands = _staged
+          .where((d) => d.primaryId != null && d.type != null)
+          .map((d) => CreateMatchEventCommand(
+                eventId: widget.matchId,
+                type: d.type!,
+                minute: d.minute,
+                teamId: widget.currentUserData.teamDetails!.id,
+                goalscorerUserId: d.primaryId!,
+                assistMakerUserId: d.secondaryId,
+              ))
+          .toList();
 
       if (commands.isEmpty) {
         setState(() => _isSaving = false);
@@ -360,7 +428,8 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> with TickerP
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
-    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final appTextStyles =
+        theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return Scaffold(
       backgroundColor: appColors.surface,
@@ -369,10 +438,15 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> with TickerP
           children: [
             CupertinoNavigationBar(
               backgroundColor: appColors.surface,
-              middle: Text('Tilføj begivenhed', style: appTextStyles.sectionHeader),
+              middle:
+                  Text('Tilføj begivenhed', style: appTextStyles.sectionHeader),
               leading: CupertinoButton(
                 padding: EdgeInsets.zero,
-                child: Icon(_currentStep == 0 ? CupertinoIcons.xmark : CupertinoIcons.chevron_back, color: appColors.primary),
+                child: Icon(
+                    _currentStep == 0
+                        ? CupertinoIcons.xmark
+                        : CupertinoIcons.chevron_back,
+                    color: appColors.primary),
                 onPressed: () {
                   if (_currentStep == 0) {
                     Navigator.of(context).pop();
@@ -399,7 +473,8 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> with TickerP
               duration: const Duration(milliseconds: 300),
               height: _staged.isEmpty && !_isFlyingDown ? 0 : 90,
               key: _draftContainerKey,
-              child: ClipRect(child: _buildStagedDraft(appTextStyles, appColors)),
+              child:
+                  ClipRect(child: _buildStagedDraft(appTextStyles, appColors)),
             ),
             _buildBottomTray(appColors, appTextStyles),
           ],
@@ -413,35 +488,70 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> with TickerP
       height: 60,
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(color: appColors.surface, border: Border(bottom: BorderSide(color: appColors.divider, width: 0.5))),
+      decoration: BoxDecoration(
+          color: appColors.surface,
+          border:
+              Border(bottom: BorderSide(color: appColors.divider, width: 0.5))),
       child: Row(
         children: [
-          _buildHeaderChip(_headerTypeKey, _draft.type != null ? _getEmoji(_draft.type) : null, appColors, appTextStyles),
-          _buildHeaderChip(_headerTimeKey, _draft.minute != null ? '${_draft.minute}\'' : null, appColors, appTextStyles),
-          _buildHeaderAvatarChip(_headerPrimaryKey, _draft.primaryId != null ? _getInitials(getUserName(_draft.primaryId)) : null, appColors, appTextStyles),
-          _buildHeaderAvatarChip(_headerSecondaryKey, _draft.secondaryId != null ? _getInitials(getUserName(_draft.secondaryId)) : null, appColors, appTextStyles),
+          _buildHeaderChip(
+              _headerTypeKey,
+              _draft.type != null ? _getEmoji(_draft.type) : null,
+              appColors,
+              appTextStyles),
+          _buildHeaderChip(
+              _headerTimeKey,
+              _draft.minute != null ? '${_draft.minute}\'' : null,
+              appColors,
+              appTextStyles),
+          _buildHeaderAvatarChip(
+              _headerPrimaryKey,
+              _draft.primaryId != null
+                  ? _getInitials(getUserName(_draft.primaryId))
+                  : null,
+              appColors,
+              appTextStyles),
+          _buildHeaderAvatarChip(
+              _headerSecondaryKey,
+              _draft.secondaryId != null
+                  ? _getInitials(getUserName(_draft.secondaryId))
+                  : null,
+              appColors,
+              appTextStyles),
         ],
       ),
     );
   }
 
-  Widget _buildHeaderChip(GlobalKey key, String? value, AppColors appColors, AppTextStyles appTextStyles) {
+  Widget _buildHeaderChip(GlobalKey key, String? value, AppColors appColors,
+      AppTextStyles appTextStyles) {
     return Padding(
       padding: const EdgeInsets.only(right: 8.0),
       child: Container(
         key: key,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: value != null ? appColors.primary.withValues(alpha: 0.1) : Colors.transparent,
+          color: value != null
+              ? appColors.primary.withValues(alpha: 0.1)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: value != null ? Colors.transparent : appColors.divider.withValues(alpha: 0.3)),
+          border: Border.all(
+              color: value != null
+                  ? Colors.transparent
+                  : appColors.divider.withValues(alpha: 0.3)),
         ),
-        child: Text(value ?? '-', style: appTextStyles.bodyBold.copyWith(fontSize: 13, color: value != null ? appColors.primary : appColors.textSecondary.withValues(alpha: 0.5))),
+        child: Text(value ?? '-',
+            style: appTextStyles.bodyBold.copyWith(
+                fontSize: 13,
+                color: value != null
+                    ? appColors.primary
+                    : appColors.textSecondary.withValues(alpha: 0.5))),
       ),
     );
   }
 
-  Widget _buildHeaderAvatarChip(GlobalKey key, String? initials, AppColors appColors, AppTextStyles appTextStyles) {
+  Widget _buildHeaderAvatarChip(GlobalKey key, String? initials,
+      AppColors appColors, AppTextStyles appTextStyles) {
     return Padding(
       padding: const EdgeInsets.only(right: 8.0),
       child: Container(
@@ -449,12 +559,21 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> with TickerP
         width: 34,
         height: 34,
         decoration: BoxDecoration(
-          color: initials != null ? appColors.primary.withValues(alpha: 0.1) : Colors.transparent,
+          color: initials != null
+              ? appColors.primary.withValues(alpha: 0.1)
+              : Colors.transparent,
           shape: BoxShape.circle,
-          border: Border.all(color: initials != null ? Colors.transparent : appColors.divider.withValues(alpha: 0.3)),
+          border: Border.all(
+              color: initials != null
+                  ? Colors.transparent
+                  : appColors.divider.withValues(alpha: 0.3)),
         ),
         alignment: Alignment.center,
-        child: initials != null ? AppAvatar(initials: initials, radius: 17) : Text('-', style: appTextStyles.bodyBold.copyWith(color: appColors.textSecondary.withValues(alpha: 0.5))),
+        child: initials != null
+            ? AppAvatar(initials: initials, radius: 17)
+            : Text('-',
+                style: appTextStyles.bodyBold.copyWith(
+                    color: appColors.textSecondary.withValues(alpha: 0.5))),
       ),
     );
   }
@@ -470,7 +589,11 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> with TickerP
 
     return GridView.builder(
       padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, crossAxisSpacing: 16, mainAxisSpacing: 16, childAspectRatio: 1.3),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          childAspectRatio: 1.3),
       itemCount: types.length,
       itemBuilder: (context, index) {
         final type = types[index];
@@ -479,7 +602,10 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> with TickerP
             _animateSelection(
               sourceKey: type.$4,
               targetKey: _headerTypeKey,
-              child: Center(child: Text(type.$3, style: const TextStyle(fontSize: 32, decoration: TextDecoration.none))),
+              child: Center(
+                  child: Text(type.$3,
+                      style: const TextStyle(
+                          fontSize: 32, decoration: TextDecoration.none))),
               onComplete: () {
                 setState(() => _draft.type = type.$1);
                 _onStepComplete(1);
@@ -488,8 +614,16 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> with TickerP
           },
           child: Container(
             key: type.$4,
-            decoration: BoxDecoration(color: appColors.surface, borderRadius: BorderRadius.circular(16), border: Border.all(color: appColors.divider, width: 2)),
-            child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Text(type.$3, style: const TextStyle(fontSize: 32)), const SizedBox(height: 12), Text(type.$2, style: appTextStyles.bodyBold)]),
+            decoration: BoxDecoration(
+                color: appColors.surface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: appColors.divider, width: 2)),
+            child:
+                Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Text(type.$3, style: const TextStyle(fontSize: 32)),
+              const SizedBox(height: 12),
+              Text(type.$2, style: appTextStyles.bodyBold)
+            ]),
           ),
         );
       },
@@ -507,30 +641,49 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> with TickerP
             scrollController: _minuteScrollController,
             itemExtent: 48.0,
             onSelectedItemChanged: (index) {},
-            children: List.generate(121, (index) => Center(child: Text(key: _minuteKeys[index], "$index'", style: appTextStyles.body.copyWith(fontSize: 20)))),
+            children: List.generate(
+                121,
+                (index) => Center(
+                    child: Text(
+                        key: _minuteKeys[index],
+                        "$index'",
+                        style: appTextStyles.body.copyWith(fontSize: 20)))),
           ),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: Row(
             children: [
-              Expanded(child: Button(buttonText: 'Overspring', width: double.infinity, onPressed: () {
-                setState(() => _draft.minute = null);
-                _onStepComplete(2);
-              })),
+              Expanded(
+                  child: Button(
+                      buttonText: 'Overspring',
+                      width: double.infinity,
+                      onPressed: () {
+                        setState(() => _draft.minute = null);
+                        _onStepComplete(2);
+                      })),
               const SizedBox(width: 12),
-              Expanded(child: Button(buttonText: 'Næste', width: double.infinity, onPressed: () {
-                final selectedIndex = _minuteScrollController.selectedItem;
-                _animateSelection(
-                  sourceKey: _minuteKeys[selectedIndex],
-                  targetKey: _headerTimeKey,
-                  child: Center(child: Text("$selectedIndex'", style: appTextStyles.body.copyWith(fontSize: 20, decoration: TextDecoration.none))),
-                  onComplete: () {
-                    setState(() => _draft.minute = selectedIndex);
-                    _onStepComplete(2);
-                  },
-                );
-              })),
+              Expanded(
+                  child: Button(
+                      buttonText: 'Næste',
+                      width: double.infinity,
+                      onPressed: () {
+                        final selectedIndex =
+                            _minuteScrollController.selectedItem;
+                        _animateSelection(
+                          sourceKey: _minuteKeys[selectedIndex],
+                          targetKey: _headerTimeKey,
+                          child: Center(
+                              child: Text("$selectedIndex'",
+                                  style: appTextStyles.body.copyWith(
+                                      fontSize: 20,
+                                      decoration: TextDecoration.none))),
+                          onComplete: () {
+                            setState(() => _draft.minute = selectedIndex);
+                            _onStepComplete(2);
+                          },
+                        );
+                      })),
             ],
           ),
         ),
@@ -538,7 +691,8 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> with TickerP
     );
   }
 
-  Widget _buildPrimaryPlayerStep(AppTextStyles appTextStyles, AppColors appColors) {
+  Widget _buildPrimaryPlayerStep(
+      AppTextStyles appTextStyles, AppColors appColors) {
     final label = getPrimaryLabel(_draft.type);
     return Column(
       children: [
@@ -564,7 +718,9 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> with TickerP
                     child: AppAvatar(initials: initials, radius: 20),
                     onComplete: () {
                       setState(() => _draft.primaryId = user.id);
-                      if (getSecondaryLabel(_draft.type) != null) _onStepComplete(3);
+                      if (getSecondaryLabel(_draft.type) != null) {
+                        _onStepComplete(3);
+                      }
                     },
                   );
                 },
@@ -576,11 +732,14 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> with TickerP
     );
   }
 
-  Widget _buildSecondaryPlayerStep(AppTextStyles appTextStyles, AppColors appColors) {
+  Widget _buildSecondaryPlayerStep(
+      AppTextStyles appTextStyles, AppColors appColors) {
     final label = getSecondaryLabel(_draft.type);
     if (label == null) return const SizedBox.shrink();
 
-    final filteredSquad = _draft.type == MatchEventType.substitution ? widget.squad.where((u) => u.id != _draft.primaryId).toList() : widget.squad;
+    final filteredSquad = _draft.type == MatchEventType.substitution
+        ? widget.squad.where((u) => u.id != _draft.primaryId).toList()
+        : widget.squad;
 
     return Column(
       children: [
@@ -618,7 +777,10 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> with TickerP
 
   Widget _buildStagedDraft(AppTextStyles appTextStyles, AppColors appColors) {
     return Container(
-      decoration: BoxDecoration(color: appColors.primary.withValues(alpha: 0.05), border: Border(top: BorderSide(color: appColors.divider, width: 0.5))),
+      decoration: BoxDecoration(
+          color: appColors.primary.withValues(alpha: 0.05),
+          border:
+              Border(top: BorderSide(color: appColors.divider, width: 0.5))),
       child: ListView.builder(
         controller: _stagedScrollController,
         scrollDirection: Axis.horizontal,
@@ -635,22 +797,35 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> with TickerP
               key: isNew ? _newItemKey : null,
               margin: const EdgeInsets.only(right: 8),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(color: appColors.surface, borderRadius: BorderRadius.circular(16), border: Border.all(color: appColors.divider)),
+              decoration: BoxDecoration(
+                  color: appColors.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: appColors.divider)),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(_getEmoji(event.type), style: const TextStyle(fontSize: 18)),
+                  Text(_getEmoji(event.type),
+                      style: const TextStyle(fontSize: 18)),
                   const SizedBox(width: 8),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(getUserName(event.primaryId), style: appTextStyles.caption.copyWith(fontWeight: FontWeight.bold)),
-                      Text(event.minute != null ? '${event.minute}\'' : 'Ingen tid', style: appTextStyles.caption.copyWith(fontSize: 10)),
+                      Text(getUserName(event.primaryId),
+                          style: appTextStyles.caption
+                              .copyWith(fontWeight: FontWeight.bold)),
+                      Text(
+                          event.minute != null
+                              ? '${event.minute}\''
+                              : 'Ingen tid',
+                          style: appTextStyles.caption.copyWith(fontSize: 10)),
                     ],
                   ),
                   const SizedBox(width: 8),
-                  GestureDetector(onTap: () => setState(() => _staged.removeAt(index)), child: Icon(CupertinoIcons.xmark_circle_fill, size: 16, color: appColors.textSecondary)),
+                  GestureDetector(
+                      onTap: () => setState(() => _staged.removeAt(index)),
+                      child: Icon(CupertinoIcons.xmark_circle_fill,
+                          size: 16, color: appColors.textSecondary)),
                 ],
               ),
             ),
@@ -662,11 +837,18 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> with TickerP
 
   Widget _buildBottomTray(AppColors appColors, AppTextStyles appTextStyles) {
     final isSubstitution = _draft.type == MatchEventType.substitution;
-    final hasRequired = _draft.type != null && _draft.primaryId != null && (!isSubstitution || _draft.secondaryId != null);
+    final hasRequired = _draft.type != null &&
+        _draft.primaryId != null &&
+        (!isSubstitution || _draft.secondaryId != null);
 
     return Container(
       padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(color: appColors.surface, boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, -4))]),
+      decoration: BoxDecoration(color: appColors.surface, boxShadow: [
+        BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -4))
+      ]),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -682,8 +864,14 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> with TickerP
                       child: Container(
                         height: 50,
                         alignment: Alignment.center,
-                        decoration: BoxDecoration(color: appColors.surface, borderRadius: BorderRadius.circular(12), border: Border.all(color: appColors.primary)),
-                        child: Text('Tilføj flere', style: TextStyle(color: appColors.primary, fontWeight: FontWeight.bold)),
+                        decoration: BoxDecoration(
+                            color: appColors.surface,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: appColors.primary)),
+                        child: Text('Tilføj flere',
+                            style: TextStyle(
+                                color: appColors.primary,
+                                fontWeight: FontWeight.bold)),
                       ),
                     ),
                   ),
@@ -691,12 +879,25 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen> with TickerP
               Expanded(
                 child: CupertinoButton(
                   padding: EdgeInsets.zero,
-                  onPressed: hasRequired ? () => _syncAndConfirm(thenSave: true) : null,
+                  onPressed: hasRequired
+                      ? () => _syncAndConfirm(thenSave: true)
+                      : null,
                   child: Container(
                     height: 50,
                     alignment: Alignment.center,
-                    decoration: BoxDecoration(color: hasRequired ? Colors.green : appColors.primary.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
-                    child: _isSaving ? const CupertinoActivityIndicator(color: Colors.white) : Text('Gem & Afslut', style: TextStyle(color: hasRequired ? Colors.white : appColors.textSecondary, fontWeight: FontWeight.bold)),
+                    decoration: BoxDecoration(
+                        color: hasRequired
+                            ? Colors.green
+                            : appColors.primary.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(12)),
+                    child: _isSaving
+                        ? const CupertinoActivityIndicator(color: Colors.white)
+                        : Text('Gem & Afslut',
+                            style: TextStyle(
+                                color: hasRequired
+                                    ? Colors.white
+                                    : appColors.textSecondary,
+                                fontWeight: FontWeight.bold)),
                   ),
                 ),
               ),

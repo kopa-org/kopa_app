@@ -37,7 +37,8 @@ class _AddUserToTeamPageState extends State<AddUserToTeamPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
-    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final appTextStyles =
+        theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return PageScaffold(
         title: 'Tilføj spiller',
@@ -79,7 +80,8 @@ class _AddUserToTeamPageState extends State<AddUserToTeamPage> {
                       prefix: Text('Navn', style: appTextStyles.bodyBold),
                       child: CupertinoTextFormFieldRow(
                         placeholder: 'F.eks. Lars Larsen',
-                        validator: (String? value) => validateNameOfPlayerInput(value),
+                        validator: (String? value) =>
+                            validateNameOfPlayerInput(value),
                         keyboardType: TextInputType.name,
                         controller: _nameController,
                         maxLength: 255,

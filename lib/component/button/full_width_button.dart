@@ -21,7 +21,8 @@ class FullWidthButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
-    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final appTextStyles =
+        theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return CupertinoButton(
       padding: EdgeInsets.zero,
@@ -32,7 +33,9 @@ class FullWidthButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: outlined ? appColors.surface : appColors.lightGrass,
           borderRadius: BorderRadius.circular(12.0),
-          border: outlined ? Border.all(color: appColors.divider, width: 2.0) : null,
+          border: outlined
+              ? Border.all(color: appColors.divider, width: 2.0)
+              : null,
         ),
         alignment: Alignment.center,
         child: Row(

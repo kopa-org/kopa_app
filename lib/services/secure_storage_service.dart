@@ -39,7 +39,11 @@ class SecureStorageService {
         key: 'createdAt', value: user.createdAt.toIso8601String());
     await _storage.write(
         key: 'updatedAt', value: user.updatedAt.toIso8601String());
-    await _storage.write(key: 'teamName', value: user.teamDetails.title);
+    if (user.teamDetails != null) {
+      await _storage.write(key: 'teamName', value: user.teamDetails!.title);
+    } else {
+      await _storage.delete(key: 'teamName');
+    }
   }
 
   static Future<void> clearUserData() async {
@@ -68,7 +72,6 @@ class SecureStorageService {
       isTeamOwnerStr,
       createdAtStr,
       updatedAtStr,
-      teamName
     ].contains(null)) {
       return null;
     }
@@ -84,12 +87,14 @@ class SecureStorageService {
         isTeamOwner: isTeamOwner,
         createdAt: DateTime.parse(createdAtStr!),
         updatedAt: DateTime.parse(updatedAtStr!),
-        teamDetails: TeamDetails(
-          id: 1,
-          title: teamName!,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        ),
+        teamDetails: teamName == null
+            ? null
+            : TeamDetails(
+                id: 1,
+                title: teamName,
+                createdAt: DateTime.now(),
+                updatedAt: DateTime.now(),
+              ),
       );
     } catch (_) {
       return null;

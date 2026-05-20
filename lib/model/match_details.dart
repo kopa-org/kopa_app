@@ -61,9 +61,8 @@ class MatchDetails {
       isHomeTeam: json['is_home_team'],
       isCurrentUserRegistered: json['is_current_user_registered'] ?? false,
       attendanceDetailsList: json['attendance_details_list'] != null
-          ? List<EventAttendanceDetails>.from(
-              json['attendance_details_list']
-                  .map((x) => EventAttendanceDetails.fromJson(x)))
+          ? List<EventAttendanceDetails>.from(json['attendance_details_list']
+              .map((x) => EventAttendanceDetails.fromJson(x)))
           : [],
       matchEventDetailsList: json['match_event_details_list'] != null
           ? List<MatchEventDetails>.from(json['match_event_details_list']

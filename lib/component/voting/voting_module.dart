@@ -23,7 +23,8 @@ class VotingModule extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
-    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final appTextStyles =
+        theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return KopaCard(
       child: Column(
@@ -35,18 +36,18 @@ class VotingModule extends StatelessWidget {
           ),
           const SizedBox(height: Spacing.md),
           ...options.map((option) => Padding(
-            padding: const EdgeInsets.only(bottom: Spacing.sm),
-            child: _buildOption(context, option, appColors, appTextStyles),
-          )),
+                padding: const EdgeInsets.only(bottom: Spacing.sm),
+                child: _buildOption(context, option, appColors, appTextStyles),
+              )),
         ],
       ),
     );
   }
 
-  Widget _buildOption(BuildContext context, VotingOption option, AppColors appColors, AppTextStyles appTextStyles) {
-    final double percentage = option.totalVotes > 0 
-        ? (option.votes / option.totalVotes) 
-        : 0;
+  Widget _buildOption(BuildContext context, VotingOption option,
+      AppColors appColors, AppTextStyles appTextStyles) {
+    final double percentage =
+        option.totalVotes > 0 ? (option.votes / option.totalVotes) : 0;
 
     return InkWell(
       onTap: (!hasVoted && onVote != null) ? () => onVote!(option.id) : null,
@@ -88,7 +89,9 @@ class VotingModule extends StatelessWidget {
                   child: Text(
                     option.label,
                     style: appTextStyles.body.copyWith(
-                      fontWeight: option.isSelected ? FontWeight.bold : FontWeight.normal,
+                      fontWeight: option.isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                     ),
                   ),
                 ),

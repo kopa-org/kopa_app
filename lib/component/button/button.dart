@@ -25,13 +25,12 @@ class Button extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
-    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final appTextStyles =
+        theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     final Color bgColor = outlined
         ? appColors.surface
-        : (enabled
-            ? appColors.primary
-            : appColors.divider);
+        : (enabled ? appColors.primary : appColors.divider);
 
     final Color borderColor = outlined
         ? (enabled ? appColors.primary : appColors.divider)
@@ -61,7 +60,9 @@ class Button extends StatelessWidget {
             padding:
                 const EdgeInsets.symmetric(vertical: 15.0, horizontal: 30.0),
             child: Row(
-              mainAxisSize: width == double.infinity ? MainAxisSize.max : MainAxisSize.min,
+              mainAxisSize: width == double.infinity
+                  ? MainAxisSize.max
+                  : MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 if (icon != null) ...[

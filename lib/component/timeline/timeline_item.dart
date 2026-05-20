@@ -25,7 +25,8 @@ class TimelineItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
-    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final appTextStyles =
+        theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return IntrinsicHeight(
       child: Row(
@@ -37,7 +38,8 @@ class TimelineItem extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(Spacing.xs),
                   decoration: BoxDecoration(
-                    color: (iconColor ?? appColors.primary).withValues(alpha: 0.1),
+                    color:
+                        (iconColor ?? appColors.primary).withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(

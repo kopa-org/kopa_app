@@ -22,6 +22,7 @@ class _DepositModalState extends State<DepositModal> {
   void initState() {
     super.initState();
     _depositController = TextEditingController();
+    _depositController.addListener(() => setState(() {}));
   }
 
   @override
@@ -34,7 +35,8 @@ class _DepositModalState extends State<DepositModal> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
-    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final appTextStyles =
+        theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return PageScaffold(
       title: 'Indbetal',
@@ -70,7 +72,10 @@ class _DepositModalState extends State<DepositModal> {
                   color: appColors.surface,
                   borderRadius: BorderRadius.circular(12.0),
                   boxShadow: [
-                    BoxShadow(color: appColors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 2)),
+                    BoxShadow(
+                        color: appColors.black.withValues(alpha: 0.05),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2)),
                   ],
                 ),
                 child: Row(
@@ -82,7 +87,8 @@ class _DepositModalState extends State<DepositModal> {
                         const SizedBox(height: 5),
                         Text(
                           'Mangler at blive betalt',
-                          style: appTextStyles.caption.copyWith(fontWeight: FontWeight.w600),
+                          style: appTextStyles.caption
+                              .copyWith(fontWeight: FontWeight.w600),
                         ),
                       ],
                     )
@@ -95,7 +101,10 @@ class _DepositModalState extends State<DepositModal> {
                 color: appColors.surface,
                 borderRadius: BorderRadius.circular(12.0),
                 boxShadow: [
-                  BoxShadow(color: appColors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 2)),
+                  BoxShadow(
+                      color: appColors.black.withValues(alpha: 0.05),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2)),
                 ],
               ),
               child: Column(
@@ -123,7 +132,10 @@ class _DepositModalState extends State<DepositModal> {
                   children: [
                     Column(
                       children: [
-                        MobilePayButton(),
+                        MobilePayButton(
+                          amount: int.tryParse(_depositController.text),
+                          message: 'Bødekassen',
+                        ),
                       ],
                     )
                   ],
@@ -152,7 +164,8 @@ class _DepositModalState extends State<DepositModal> {
       );
       return null;
     }
-    await FinesRepository.depositAmountToFineBox(widget.fineBoxId, depositedAmount, []);
+    await FinesRepository.depositAmountToFineBox(
+        widget.fineBoxId, depositedAmount, []);
     return depositedAmount;
   }
 }

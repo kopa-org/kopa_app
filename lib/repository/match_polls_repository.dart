@@ -10,7 +10,7 @@ import 'package:http/http.dart' as http;
 import 'package:kopa/model/user_vote.dart';
 
 class MatchPollsRepository {
-    static final _secureStorage = FlutterSecureStorage();
+  static final _secureStorage = FlutterSecureStorage();
 
   static Future<List<MatchPollDetails>> getMatchPolls() async {
     await dotenv.load(); // Initialize dotenv

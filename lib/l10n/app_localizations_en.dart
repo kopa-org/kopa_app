@@ -1,0 +1,62 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for English (`en`).
+class AppLocalizationsEn extends AppLocalizations {
+  AppLocalizationsEn([String locale = 'en']) : super(locale);
+
+  @override
+  String get onboardingTitle => 'Join Kopa';
+
+  @override
+  String get onboardingCreateTeam => 'Create team';
+
+  @override
+  String get onboardingJoinTeam => 'Join team';
+
+  @override
+  String get onboardingTeamName => 'Team name';
+
+  @override
+  String get onboardingManual => 'Manual';
+
+  @override
+  String get onboardingDbu => 'DBU';
+
+  @override
+  String get onboardingContinue => 'Continue';
+
+  @override
+  String get onboardingCreate => 'Create';
+
+  @override
+  String get onboardingSearchHint => 'Search for a team';
+
+  @override
+  String get onboardingRequestJoin => 'Request to join';
+
+  @override
+  String get onboardingWaitingTitle => 'Waiting for approval';
+
+  @override
+  String get onboardingWaitingBody =>
+      'Your request has been sent to the team admins.';
+
+  @override
+  String get onboardingCancel => 'Cancel';
+
+  @override
+  String get onboardingPlayers => 'Players';
+
+  @override
+  String get onboardingMatches => 'Matches';
+
+  @override
+  String get onboardingNoResults => 'No teams found';
+
+  @override
+  String get onboardingFailure => 'Something went wrong';
+}

@@ -14,7 +14,8 @@ class FinesCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
-    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final appTextStyles =
+        theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return Container(
       decoration: BoxDecoration(
@@ -39,7 +40,8 @@ class FinesCard extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.account_balance_wallet, color: Colors.white, size: 28),
+              const Icon(Icons.account_balance_wallet,
+                  color: Colors.white, size: 28),
               const SizedBox(height: 8),
               Text(
                 'Udestående Bøder',

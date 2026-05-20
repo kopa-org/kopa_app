@@ -32,7 +32,8 @@ class PageScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
-    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final appTextStyles =
+        theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     final isIOS = theme.platform == TargetPlatform.iOS;
     final bgColor = backgroundColor ?? appColors.background;
@@ -52,9 +53,11 @@ class PageScaffold extends StatelessWidget {
                       title,
                       style: appTextStyles.sectionHeader,
                     ),
-              leading: leading ?? (showBackButton ? _defaultBackButton(context) : null),
-              trailing:
-                  trailing != null ? Row(mainAxisSize: MainAxisSize.min, children: trailing!) : null,
+              leading: leading ??
+                  (showBackButton ? _defaultBackButton(context) : null),
+              trailing: trailing != null
+                  ? Row(mainAxisSize: MainAxisSize.min, children: trailing!)
+                  : null,
             ),
         child: SafeArea(
           child: onRefresh != null
@@ -84,7 +87,8 @@ class PageScaffold extends StatelessWidget {
         backgroundColor: bgColor,
         elevation: 0,
         scrolledUnderElevation: 0,
-        leading: leading ?? (showBackButton ? _defaultMaterialBackButton(context) : null),
+        leading: leading ??
+            (showBackButton ? _defaultMaterialBackButton(context) : null),
         automaticallyImplyLeading: showBackButton,
         actions: trailing ?? [],
       ),

@@ -56,7 +56,8 @@ class _DbuWebviewPageState extends State<DbuWebviewPage> {
                           if (teamLinks.length > 0) {
                             eval(teamLinks[0].getAttribute('href').replace('javascript:', ''));
                           } else {
-                            DbuChannel.postMessage(JSON.stringify({ webcal: match[0], matches: [] }));
+                            var teamName = (document.querySelector('h1,h2,.team-name,.teamName') || {}).innerText || '';
+                            DbuChannel.postMessage(JSON.stringify({ webcal: match[0], teamName: teamName.trim(), matches: [] }));
                           }
                         }
                       }
@@ -98,6 +99,11 @@ class _DbuWebviewPageState extends State<DbuWebviewPage> {
                             }
 
                             var playerDoc = parser.parseFromString(playerHtml, 'text/html');
+                            var teamName = '';
+                            var heading = doc.querySelector('h1,h2,.team-name,.teamName') || playerDoc.querySelector('h1,h2,.team-name,.teamName');
+                            if (heading && heading.innerText) {
+                              teamName = heading.innerText.trim();
+                            }
                             var playerTables = playerDoc.querySelectorAll('table');
                             var players = [];
                             for (var t = 0; t < playerTables.length; t++) {
@@ -124,15 +130,15 @@ class _DbuWebviewPageState extends State<DbuWebviewPage> {
                             }
 
                             sessionStorage.removeItem('kopa_webcal');
-                            DbuChannel.postMessage(JSON.stringify({ webcal: webcal, matches: matches, players: players }));
+                            DbuChannel.postMessage(JSON.stringify({ webcal: webcal, teamName: teamName, matches: matches, players: players }));
                           } catch(e) {
                             sessionStorage.removeItem('kopa_webcal');
-                            DbuChannel.postMessage(JSON.stringify({ webcal: webcal, matches: [], players: [] }));
+                            DbuChannel.postMessage(JSON.stringify({ webcal: webcal, teamName: '', matches: [], players: [] }));
                           }
                         })
                         .catch(function(e) {
                           sessionStorage.removeItem('kopa_webcal');
-                          DbuChannel.postMessage(JSON.stringify({ webcal: webcal, matches: [], players: [] }));
+                          DbuChannel.postMessage(JSON.stringify({ webcal: webcal, teamName: '', matches: [], players: [] }));
                         });
                     }
                   }

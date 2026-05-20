@@ -53,7 +53,8 @@ class _AssignFinesModalState extends State<AssignFinesModal> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
-    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final appTextStyles =
+        theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return PageScaffold(
       title: 'Tildel bøder',
@@ -92,7 +93,8 @@ class _AssignFinesModalState extends State<AssignFinesModal> {
                     padding: const EdgeInsets.all(24.0),
                     child: Text(
                       'Ingen bødetyper fundet.',
-                      style: appTextStyles.sectionHeader.copyWith(color: appColors.textSecondary),
+                      style: appTextStyles.sectionHeader
+                          .copyWith(color: appColors.textSecondary),
                     ),
                   ),
                 );
@@ -112,7 +114,8 @@ class _AssignFinesModalState extends State<AssignFinesModal> {
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 300),
                           curve: Curves.easeInOut,
-                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 12, horizontal: 16),
                           color: appColors.surface,
                           child: Row(
                             children: [
@@ -120,7 +123,8 @@ class _AssignFinesModalState extends State<AssignFinesModal> {
                                 duration: const Duration(milliseconds: 300),
                                 turns: fine['expanded'] ? -0.5 : 0,
                                 curve: Curves.easeInOut,
-                                child: Icon(CupertinoIcons.chevron_down, color: appColors.textSecondary),
+                                child: Icon(CupertinoIcons.chevron_down,
+                                    color: appColors.textSecondary),
                               ),
                               const SizedBox(width: 10),
                               Expanded(
@@ -133,16 +137,21 @@ class _AssignFinesModalState extends State<AssignFinesModal> {
                                 width: 80,
                                 child: CupertinoTextField(
                                   placeholder: fine['price'].toString(),
-                                  placeholderStyle: TextStyle(color: appColors.divider),
-                                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                  placeholderStyle:
+                                      TextStyle(color: appColors.divider),
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(
+                                          decimal: true),
                                   onChanged: (value) {
                                     setState(() {
                                       fine['price'] = value;
                                     });
                                   },
                                   decoration: BoxDecoration(
-                                    border: Border.all(color: appColors.black, width: 1.0),
-                                    borderRadius: const BorderRadius.all(Radius.circular(5.0)),
+                                    border: Border.all(
+                                        color: appColors.black, width: 1.0),
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(5.0)),
                                   ),
                                   inputFormatters: [_FinePriceInputFormatter()],
                                 ),
@@ -159,7 +168,8 @@ class _AssignFinesModalState extends State<AssignFinesModal> {
                         child: fine['expanded']
                             ? Container(
                                 color: appColors.surface,
-                                margin: const EdgeInsets.only(top: 1, left: 0, right: 0, bottom: 0),
+                                margin: const EdgeInsets.only(
+                                    top: 1, left: 0, right: 0, bottom: 0),
                                 padding: const EdgeInsets.all(10),
                                 child: Column(
                                   children: squad.map((user) {
@@ -168,11 +178,15 @@ class _AssignFinesModalState extends State<AssignFinesModal> {
                                         return GestureDetector(
                                           onTap: () {
                                             setState(() {
-                                              selectedUsers[fine['id']]![user.id] = !(selectedUsers[fine['id']]![user.id] ?? false);
+                                              selectedUsers[fine['id']]![
+                                                  user.id] = !(selectedUsers[
+                                                      fine['id']]![user.id] ??
+                                                  false);
                                             });
                                           },
                                           child: Padding(
-                                            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 8, horizontal: 16),
                                             child: Column(
                                               children: [
                                                 Row(
@@ -180,7 +194,8 @@ class _AssignFinesModalState extends State<AssignFinesModal> {
                                                     Expanded(
                                                       child: Text(
                                                         user.name,
-                                                        style: appTextStyles.body,
+                                                        style:
+                                                            appTextStyles.body,
                                                       ),
                                                     ),
                                                     Container(
@@ -188,19 +203,42 @@ class _AssignFinesModalState extends State<AssignFinesModal> {
                                                       height: 22,
                                                       decoration: BoxDecoration(
                                                         shape: BoxShape.circle,
-                                                        border: Border.all(color: appColors.black, width: 2),
-                                                        color: selectedUsers[fine['id']]![user.id] == true ? appColors.black : appColors.surface,
+                                                        border: Border.all(
+                                                            color:
+                                                                appColors.black,
+                                                            width: 2),
+                                                        color: selectedUsers[fine[
+                                                                        'id']]![
+                                                                    user.id] ==
+                                                                true
+                                                            ? appColors.black
+                                                            : appColors.surface,
                                                       ),
-                                                      child: selectedUsers[fine['id']]![user.id] == true
-                                                          ? Icon(CupertinoIcons.checkmark, color: appColors.surface, size: 16)
+                                                      child: selectedUsers[fine[
+                                                                      'id']]![
+                                                                  user.id] ==
+                                                              true
+                                                          ? Icon(
+                                                              CupertinoIcons
+                                                                  .checkmark,
+                                                              color: appColors
+                                                                  .surface,
+                                                              size: 16)
                                                           : null,
                                                     ),
                                                   ],
                                                 ),
-                                                if (user.id != squad.map((x) => x.id).last)
+                                                if (user.id !=
+                                                    squad.map((x) => x.id).last)
                                                   Padding(
-                                                    padding: const EdgeInsets.only(top: 12.0),
-                                                    child: Divider(color: appColors.divider, thickness: 1, height: 1),
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            top: 12.0),
+                                                    child: Divider(
+                                                        color:
+                                                            appColors.divider,
+                                                        thickness: 1,
+                                                        height: 1),
                                                   ),
                                               ],
                                             ),
@@ -224,14 +262,19 @@ class _AssignFinesModalState extends State<AssignFinesModal> {
 
   void toggleExpansion(int index) {
     setState(() {
-      fineTypesExpanded[index]['expanded'] = !fineTypesExpanded[index]['expanded'];
+      fineTypesExpanded[index]['expanded'] =
+          !fineTypesExpanded[index]['expanded'];
     });
   }
 
   Future<bool> addFines(BuildContext context) async {
     List<CreateUserFineCommand> createUserFineCommand = [];
     for (var fine in fineTypesExpanded) {
-      var selectedUsersIds = selectedUsers[fine['id']]!.entries.where((entry) => entry.value).map((entry) => entry.key).toList();
+      var selectedUsersIds = selectedUsers[fine['id']]!
+          .entries
+          .where((entry) => entry.value)
+          .map((entry) => entry.key)
+          .toList();
       for (var userId in selectedUsersIds) {
         createUserFineCommand.add(CreateUserFineCommand(
             userId: userId.toString(),
@@ -245,7 +288,8 @@ class _AssignFinesModalState extends State<AssignFinesModal> {
         context: context,
         builder: (context) => CupertinoAlertDialog(
           title: const Text('Fejl'),
-          content: const Text('Ingen bøder er tildelt. Vælg venligst mindst én spiller.'),
+          content: const Text(
+              'Ingen bøder er tildelt. Vælg venligst mindst én spiller.'),
           actions: <CupertinoDialogAction>[
             CupertinoDialogAction(
               onPressed: () => Navigator.of(context).pop(),
@@ -264,12 +308,17 @@ class _AssignFinesModalState extends State<AssignFinesModal> {
 
 class _FinePriceInputFormatter extends TextInputFormatter {
   @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
     final newText = newValue.text;
     String formattedText = newText.replaceAll(',', '.');
-    if (formattedText.isEmpty) return newValue;
+    if (formattedText.isEmpty) {
+      return newValue;
+    }
     final regex = RegExp(r'^\d{0,4}(\.\d{0,2})?$');
-    if (regex.hasMatch(formattedText)) return newValue.copyWith(text: formattedText);
+    if (regex.hasMatch(formattedText)) {
+      return newValue.copyWith(text: formattedText);
+    }
     return oldValue;
   }
 }

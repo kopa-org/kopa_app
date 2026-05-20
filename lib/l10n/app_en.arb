@@ -1,0 +1,19 @@
+{
+  "onboardingTitle": "Join Kopa",
+  "onboardingCreateTeam": "Create team",
+  "onboardingJoinTeam": "Join team",
+  "onboardingTeamName": "Team name",
+  "onboardingManual": "Manual",
+  "onboardingDbu": "DBU",
+  "onboardingContinue": "Continue",
+  "onboardingCreate": "Create",
+  "onboardingSearchHint": "Search for a team",
+  "onboardingRequestJoin": "Request to join",
+  "onboardingWaitingTitle": "Waiting for approval",
+  "onboardingWaitingBody": "Your request has been sent to the team admins.",
+  "onboardingCancel": "Cancel",
+  "onboardingPlayers": "Players",
+  "onboardingMatches": "Matches",
+  "onboardingNoResults": "No teams found",
+  "onboardingFailure": "Something went wrong"
+}

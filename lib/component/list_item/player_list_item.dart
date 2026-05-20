@@ -26,7 +26,8 @@ class PlayerListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final appTextStyles =
+        theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return InkWell(
       onTap: onTap,
@@ -52,7 +53,8 @@ class PlayerListItem extends StatelessWidget {
                           tag: heroTag!,
                           child: Text(
                             name,
-                            style: appTextStyles.bodyBold.copyWith(decoration: TextDecoration.none),
+                            style: appTextStyles.bodyBold
+                                .copyWith(decoration: TextDecoration.none),
                           ),
                         )
                       : Text(

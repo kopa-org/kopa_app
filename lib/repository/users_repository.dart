@@ -52,6 +52,7 @@ class UsersRepository {
 
     return json['id'];
   }
+
   static Future<void> setCalendarUrl(String calendarUrl) async {
     await dotenv.load();
 
@@ -72,4 +73,3 @@ class UsersRepository {
     }
   }
 }
-

@@ -31,7 +31,8 @@ class _MatchProgrammePageState extends State<MatchProgrammePage> {
 
     final user = context.read<AuthCubit>().state.user;
     if (user == null) {
-      currentUser = Future.error(Exception('Ingen bruger fundet. Log venligst ind igen.'));
+      currentUser = Future.error(
+          Exception('Ingen bruger fundet. Log venligst ind igen.'));
     } else {
       currentUser = Future.value(user);
     }
@@ -71,7 +72,8 @@ class _MatchProgrammePageState extends State<MatchProgrammePage> {
                   _refreshMatches();
                 }
               },
-              child: const Icon(CupertinoIcons.add, semanticLabel: 'Opret kamp'),
+              child:
+                  const Icon(CupertinoIcons.add, semanticLabel: 'Opret kamp'),
             );
           },
         ),
@@ -85,7 +87,8 @@ class _MatchProgrammePageState extends State<MatchProgrammePage> {
           return ListView.separated(
             padding: Spacing.screenPadding,
             itemCount: sorted.length,
-            separatorBuilder: (context, index) => const SizedBox(height: Spacing.md),
+            separatorBuilder: (context, index) =>
+                const SizedBox(height: Spacing.md),
             itemBuilder: (context, index) {
               final matchDetails = sorted[index];
               return MatchHeroCard(
@@ -93,7 +96,8 @@ class _MatchProgrammePageState extends State<MatchProgrammePage> {
                 onTap: () async {
                   await Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (context) => MatchDetailsPage(matchId: matchDetails.id),
+                      builder: (context) =>
+                          MatchDetailsPage(matchId: matchDetails.id),
                     ),
                   );
                   if (!mounted) return;

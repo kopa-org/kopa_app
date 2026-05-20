@@ -16,7 +16,8 @@ class DepositPersonalModal extends StatefulWidget {
   final UserFineDetails userFineDetails;
 
   const DepositPersonalModal(
-      {super.key, required this.fineBoxId,
+      {super.key,
+      required this.fineBoxId,
       required this.userDetails,
       required this.userFineDetails});
 
@@ -54,7 +55,8 @@ class _DepositPersonalModalState extends State<DepositPersonalModal> {
         selectedAmountToDeposit = 0;
       }
       selectAllFines = value ?? false;
-      selectedIndexes = selectAllFines ? fineDetailsListNotPaid.asMap().keys.toSet() : {};
+      selectedIndexes =
+          selectAllFines ? fineDetailsListNotPaid.asMap().keys.toSet() : {};
     });
   }
 
@@ -75,16 +77,17 @@ class _DepositPersonalModalState extends State<DepositPersonalModal> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
-    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final appTextStyles =
+        theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return PageScaffold(
       title: 'Indbetal',
       showBackButton: false,
       backgroundColor: appColors.background,
       leading: CupertinoButton(
-            padding: EdgeInsets.zero,
-            onPressed: () => Navigator.pop(context, false),
-            child: Icon(CupertinoIcons.clear, color: appColors.textPrimary)),
+          padding: EdgeInsets.zero,
+          onPressed: () => Navigator.pop(context, false),
+          child: Icon(CupertinoIcons.clear, color: appColors.textPrimary)),
       trailing: [
         CupertinoButton(
           padding: EdgeInsets.zero,
@@ -105,7 +108,9 @@ class _DepositPersonalModalState extends State<DepositPersonalModal> {
           children: [
             _buildBalanceCard(
               title: 'Mangler at blive betalt',
-              amount: fineDetailsListNotPaid.fold(0, (sum, fd) => sum + fd.owedAmount).toString(),
+              amount: fineDetailsListNotPaid
+                  .fold(0, (sum, fd) => sum + fd.owedAmount)
+                  .toString(),
               appColors: appColors,
               appTextStyles: appTextStyles,
             ),
@@ -123,7 +128,10 @@ class _DepositPersonalModalState extends State<DepositPersonalModal> {
                 color: appColors.surface,
                 borderRadius: BorderRadius.circular(12.0),
                 boxShadow: [
-                  BoxShadow(color: appColors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 2)),
+                  BoxShadow(
+                      color: appColors.black.withValues(alpha: 0.05),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2)),
                 ],
               ),
               child: Column(
@@ -131,10 +139,13 @@ class _DepositPersonalModalState extends State<DepositPersonalModal> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Expanded(child: Text('Bødetype', style: appTextStyles.bodyBold)),
+                      Expanded(
+                          child:
+                              Text('Bødetype', style: appTextStyles.bodyBold)),
                       Text('Beløb', style: appTextStyles.bodyBold),
                       const SizedBox(width: 10),
-                      CustomCheckbox(value: selectAllFines, onChanged: toggleSelectAll),
+                      CustomCheckbox(
+                          value: selectAllFines, onChanged: toggleSelectAll),
                     ],
                   ),
                   Divider(color: appColors.divider),
@@ -144,17 +155,24 @@ class _DepositPersonalModalState extends State<DepositPersonalModal> {
                       shrinkWrap: true,
                       physics: const AlwaysScrollableScrollPhysics(),
                       itemCount: fineDetailsListNotPaid.length,
-                      separatorBuilder: (_, __) => Divider(color: appColors.divider),
+                      separatorBuilder: (_, __) =>
+                          Divider(color: appColors.divider),
                       itemBuilder: (context, index) {
                         var fd = fineDetailsListNotPaid[index];
                         bool isSelected = selectedIndexes.contains(index);
                         return Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Expanded(child: Text(fd.fineTypeDetails.title, style: appTextStyles.body)),
-                            Text('${fd.owedAmount} kr', style: appTextStyles.body),
+                            Expanded(
+                                child: Text(fd.fineTypeDetails.title,
+                                    style: appTextStyles.body)),
+                            Text('${fd.owedAmount} kr',
+                                style: appTextStyles.body),
                             const SizedBox(width: 10),
-                            CustomCheckbox(value: isSelected, onChanged: (val) => toggleRowSelection(index, val)),
+                            CustomCheckbox(
+                                value: isSelected,
+                                onChanged: (val) =>
+                                    toggleRowSelection(index, val)),
                           ],
                         );
                       },
@@ -168,7 +186,12 @@ class _DepositPersonalModalState extends State<DepositPersonalModal> {
                 padding: const EdgeInsets.only(top: 20),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: [MobilePayButton()],
+                  children: [
+                    MobilePayButton(
+                      amount: selectedAmountToDeposit,
+                      message: 'Bøder - ${widget.userDetails.name}',
+                    ),
+                  ],
                 )),
           ],
         ),
@@ -176,7 +199,12 @@ class _DepositPersonalModalState extends State<DepositPersonalModal> {
     );
   }
 
-  Widget _buildBalanceCard({required String title, required String amount, required AppColors appColors, required AppTextStyles appTextStyles, bool isHighlighted = false}) {
+  Widget _buildBalanceCard(
+      {required String title,
+      required String amount,
+      required AppColors appColors,
+      required AppTextStyles appTextStyles,
+      bool isHighlighted = false}) {
     return Container(
         margin: const EdgeInsets.fromLTRB(20, 20, 20, 10),
         padding: const EdgeInsets.all(20),
@@ -184,7 +212,10 @@ class _DepositPersonalModalState extends State<DepositPersonalModal> {
           color: appColors.surface,
           borderRadius: BorderRadius.circular(12.0),
           boxShadow: [
-            BoxShadow(color: appColors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 2)),
+            BoxShadow(
+                color: appColors.black.withValues(alpha: 0.05),
+                blurRadius: 4,
+                offset: const Offset(0, 2)),
           ],
         ),
         child: Row(
@@ -192,9 +223,15 @@ class _DepositPersonalModalState extends State<DepositPersonalModal> {
           children: [
             Column(
               children: [
-                Text('$amount,-', style: appTextStyles.sectionHeader.copyWith(color: isHighlighted ? appColors.primary : appColors.textPrimary)),
+                Text('$amount,-',
+                    style: appTextStyles.sectionHeader.copyWith(
+                        color: isHighlighted
+                            ? appColors.primary
+                            : appColors.textPrimary)),
                 const SizedBox(height: 5),
-                Text(title, style: appTextStyles.caption.copyWith(fontWeight: FontWeight.w600)),
+                Text(title,
+                    style: appTextStyles.caption
+                        .copyWith(fontWeight: FontWeight.w600)),
               ],
             )
           ],

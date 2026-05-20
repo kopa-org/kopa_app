@@ -39,9 +39,9 @@ class HomeTemplate extends StatelessWidget {
                 onActionPressed: () {},
               ),
               ...taskCards.map((card) => Padding(
-                padding: const EdgeInsets.only(bottom: Spacing.sm),
-                child: card,
-              )),
+                    padding: const EdgeInsets.only(bottom: Spacing.sm),
+                    child: card,
+                  )),
             ],
             if (statCards.isNotEmpty) ...[
               const SizedBox(height: Spacing.lg),

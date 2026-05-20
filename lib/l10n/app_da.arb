@@ -1,0 +1,19 @@
+{
+  "onboardingTitle": "Kom i gang med Kopa",
+  "onboardingCreateTeam": "Opret hold",
+  "onboardingJoinTeam": "Find hold",
+  "onboardingTeamName": "Holdnavn",
+  "onboardingManual": "Manuelt",
+  "onboardingDbu": "DBU",
+  "onboardingContinue": "Fortsæt",
+  "onboardingCreate": "Opret",
+  "onboardingSearchHint": "Søg efter et hold",
+  "onboardingRequestJoin": "Anmod om adgang",
+  "onboardingWaitingTitle": "Afventer godkendelse",
+  "onboardingWaitingBody": "Din anmodning er sendt til holdets administratorer.",
+  "onboardingCancel": "Annuller",
+  "onboardingPlayers": "Spillere",
+  "onboardingMatches": "Kampe",
+  "onboardingNoResults": "Ingen hold fundet",
+  "onboardingFailure": "Noget gik galt"
+}

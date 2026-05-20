@@ -14,10 +14,11 @@ class AttendanceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
-    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final appTextStyles =
+        theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
-    final color = percentage >= 80 
-        ? appColors.success 
+    final color = percentage >= 80
+        ? appColors.success
         : (percentage >= 50 ? appColors.warning : appColors.error);
 
     return Container(

@@ -46,11 +46,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
       // Auto-login after successful registration
       try {
         await context.read<AuthCubit>().login(
-          _emailController.text.trim(),
-          _passwordController.text.trim(),
-        );
+              _emailController.text.trim(),
+              _passwordController.text.trim(),
+            );
         if (mounted) {
-           Navigator.of(context).pushReplacementNamed('/home');
+          Navigator.of(context).pushReplacementNamed('/home');
         }
       } catch (e) {
         setState(() {

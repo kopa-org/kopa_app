@@ -39,7 +39,8 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
-    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final appTextStyles =
+        theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return BlocConsumer<AuthCubit, AuthState>(
       listener: (context, state) {
@@ -83,7 +84,9 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
-                        if (value == null || value.isEmpty) return 'Please enter your email';
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your email';
+                        }
                         return null;
                       },
                     ),
@@ -97,13 +100,17 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       obscureText: true,
                       validator: (value) {
-                        if (value == null || value.isEmpty) return 'Please enter your password';
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your password';
+                        }
                         return null;
                       },
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton(
-                      onPressed: state.status == AuthStatus.loading ? null : _onLoginPressed,
+                      onPressed: state.status == AuthStatus.loading
+                          ? null
+                          : _onLoginPressed,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: appColors.primary,
                         foregroundColor: Colors.white,

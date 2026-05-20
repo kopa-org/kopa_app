@@ -60,7 +60,8 @@ class FinesRepository {
 
     var createUserFinesCommand = CreateUserFinesCommand(createUserFineCommands);
 
-    var response = await http.post(url, body: createUserFinesCommand.toJson(), headers: {
+    var response =
+        await http.post(url, body: createUserFinesCommand.toJson(), headers: {
       'Authorization': 'Bearer $token',
     });
 
@@ -84,8 +85,8 @@ class FinesRepository {
         amountToDeposit: amountToDeposit,
         userFineIds: userFineIds.map((x) => x.toString()).toList());
 
-    var response =
-        await http.post(url, body: depositAmountToFineBoxCommand.toJson(), headers: {
+    var response = await http
+        .post(url, body: depositAmountToFineBoxCommand.toJson(), headers: {
       'Authorization': 'Bearer $token',
     });
 
@@ -104,7 +105,8 @@ class FinesRepository {
     var createFineTypeCommmand =
         CreateFineTypeCommand(title: title, defaultAmount: defaultAmount);
 
-    var response = await http.post(url, body: createFineTypeCommmand.toJson(), headers: {
+    var response =
+        await http.post(url, body: createFineTypeCommmand.toJson(), headers: {
       'Authorization': 'Bearer $token',
     });
 

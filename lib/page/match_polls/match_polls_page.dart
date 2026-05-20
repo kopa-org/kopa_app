@@ -32,7 +32,8 @@ class _MatchPollsListPageState extends State<MatchPollsListPage> {
     // Load logged in user via AuthCubit
     final user = context.read<AuthCubit>().state.user;
     if (user == null) {
-      currentUser = Future.error(Exception('Ingen bruger fundet. Log venligst ind igen.'));
+      currentUser = Future.error(
+          Exception('Ingen bruger fundet. Log venligst ind igen.'));
     } else {
       currentUser = Future.value(user);
     }
@@ -51,7 +52,7 @@ class _MatchPollsListPageState extends State<MatchPollsListPage> {
 
     return {
       'squad': squad,
-      'matches': matches,     
+      'matches': matches,
       'matchPolls': matchPolls.map((poll) {
         final user = squad.firstWhere(
           (user) => user.id == poll.playerOfTheMatchDetails.id,

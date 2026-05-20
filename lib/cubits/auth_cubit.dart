@@ -19,7 +19,8 @@ class AuthCubit extends Cubit<AuthState> {
         emit(state.copyWith(status: AuthStatus.unauthenticated));
       }
     } catch (e) {
-      emit(state.copyWith(status: AuthStatus.failure, errorMessage: e.toString()));
+      emit(state.copyWith(
+          status: AuthStatus.failure, errorMessage: e.toString()));
     }
   }
 

@@ -11,6 +11,7 @@ import 'package:kopa/utils/crash_reporting.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:kopa/repository/onboarding_repository.dart';
 import 'package:kopa/cubits/onboarding_cubit.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/theme/app_theme.dart';
 
 void main() async {
@@ -18,13 +19,13 @@ void main() async {
     WidgetsFlutterBinding.ensureInitialized();
     await dotenv.load(fileName: '.env');
     await CrashReporting.initialize();
-    
+
     final authRepository = ApiAuthRepository();
     final onboardingRepository = OnboardingRepository();
-    
+
     final authCubit = AuthCubit(authRepository: authRepository);
     final onboardingCubit = OnboardingCubit(onboardingRepository);
-    
+
     // Initialize auth state
     await authCubit.init();
 
@@ -100,6 +101,7 @@ class _KopaAppState extends State<KopaApp> {
           debugShowCheckedModeBanner: false,
           theme: AppTheme.lightTheme,
           localizationsDelegates: const [
+            AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,

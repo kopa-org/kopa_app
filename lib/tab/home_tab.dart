@@ -32,7 +32,8 @@ class HomeTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) {
-        final teamId = context.read<AuthCubit>().state.user?.teamDetails.id ?? 0;
+        final teamId =
+            context.read<AuthCubit>().state.user?.teamDetails?.id ?? 0;
         return HomeCubit()..fetchDashboardData(teamId);
       },
       child: const _HomeTabView(),
@@ -62,11 +63,14 @@ class _HomeTabView extends StatelessWidget {
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async {
-            await context.read<HomeCubit>().fetchDashboardData(currentUser.teamDetails.id);
+            await context
+                .read<HomeCubit>()
+                .fetchDashboardData(currentUser.teamDetails!.id);
           },
           child: BlocBuilder<HomeCubit, HomeState>(
             builder: (context, state) {
-              if (state.status == HomeStatus.initial || state.status == HomeStatus.loading) {
+              if (state.status == HomeStatus.initial ||
+                  state.status == HomeStatus.loading) {
                 return const Center(child: CircularProgressIndicator());
               }
 
@@ -86,11 +90,13 @@ class _HomeTabView extends StatelessWidget {
 
               return SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildGreetingSection(currentUser, appColors, appTextStyles),
+                    _buildGreetingSection(
+                        currentUser, appColors, appTextStyles),
                     const SizedBox(height: 32),
                     if (nextMatch != null) ...[
                       SectionHeader(
@@ -105,9 +111,11 @@ class _HomeTabView extends StatelessWidget {
                           final homeCubit = context.read<HomeCubit>();
                           await Navigator.of(context)
                               .push(MaterialWithModalsPageRoute(
-                            builder: (context) => MatchDetailsPage(matchId: nextMatch.id),
+                            builder: (context) =>
+                                MatchDetailsPage(matchId: nextMatch.id),
                           ));
-                          homeCubit.fetchDashboardData(currentUser.teamDetails.id);
+                          homeCubit
+                              .fetchDashboardData(currentUser.teamDetails!.id);
                         },
                       ),
                       const SizedBox(height: 12),
@@ -115,7 +123,8 @@ class _HomeTabView extends StatelessWidget {
                         FullWidthButton(
                           buttonText: 'Tilmeld til kamp',
                           onPressed: () {
-                            context.read<HomeCubit>().registerForMatch(nextMatch.id, currentUser.teamDetails.id);
+                            context.read<HomeCubit>().registerForMatch(
+                                nextMatch.id, currentUser.teamDetails!.id);
                           },
                         ),
                       const SizedBox(height: 32),
@@ -127,7 +136,8 @@ class _HomeTabView extends StatelessWidget {
                     if (lastMatch != null) ...[
                       const SectionHeader(title: 'Seneste kamp'),
                       const SizedBox(height: 12),
-                      _buildLastMatchCard(context, lastMatch, appColors, appTextStyles),
+                      _buildLastMatchCard(
+                          context, lastMatch, appColors, appTextStyles),
                       const SizedBox(height: 32),
                     ],
                     if (stats != null) ...[
@@ -145,7 +155,8 @@ class _HomeTabView extends StatelessWidget {
                     if (fineBox != null) ...[
                       const SectionHeader(title: 'Bødekasse'),
                       const SizedBox(height: 12),
-                      _buildFineBoxCard(context, fineBox, currentUser, appColors, appTextStyles),
+                      _buildFineBoxCard(context, fineBox, currentUser,
+                          appColors, appTextStyles),
                       const SizedBox(height: 32),
                     ],
                   ],
@@ -158,7 +169,8 @@ class _HomeTabView extends StatelessWidget {
     );
   }
 
-  Widget _buildGreetingSection(UserDetails currentUser, AppColors colors, AppTextStyles styles) {
+  Widget _buildGreetingSection(
+      UserDetails currentUser, AppColors colors, AppTextStyles styles) {
     final firstName = currentUser.name.split(' ').first;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -205,7 +217,8 @@ class _HomeTabView extends StatelessWidget {
     );
   }
 
-  Widget _buildLastMatchCard(BuildContext context, MatchDetails match, AppColors colors, AppTextStyles styles) {
+  Widget _buildLastMatchCard(BuildContext context, MatchDetails match,
+      AppColors colors, AppTextStyles styles) {
     final resultStr =
         '${match.homeTeam ?? "Hjemme"} ${match.homeTeamScore ?? 0} - ${match.awayTeamScore ?? 0} ${match.awayTeam ?? "Ude"}';
 
@@ -277,7 +290,8 @@ class _HomeTabView extends StatelessWidget {
     );
   }
 
-  Widget _buildFineBoxCard(BuildContext context, FineBoxDetails fineBox, UserDetails currentUser, AppColors colors, AppTextStyles styles) {
+  Widget _buildFineBoxCard(BuildContext context, FineBoxDetails fineBox,
+      UserDetails currentUser, AppColors colors, AppTextStyles styles) {
     double myFines = 0.0;
     try {
       final myFineDetails = fineBox.userFineDetails
@@ -298,22 +312,29 @@ class _HomeTabView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildFineRow('Nuværende saldo:', '${fineBox.currentAmount.toStringAsFixed(0)} kr.', styles),
+          _buildFineRow('Nuværende saldo:',
+              '${fineBox.currentAmount.toStringAsFixed(0)} kr.', styles),
           const SizedBox(height: 8),
-          _buildFineRow('Din saldo:', '${myFines.toStringAsFixed(0)} kr.', styles, highlight: myFines > 0),
+          _buildFineRow(
+              'Din saldo:', '${myFines.toStringAsFixed(0)} kr.', styles,
+              highlight: myFines > 0),
           const SizedBox(height: 8),
-          _buildFineRow('Total manglende betaling:', '${fineBox.totalOwedAmount.toStringAsFixed(0)} kr.', styles),
+          _buildFineRow('Total manglende betaling:',
+              '${fineBox.totalOwedAmount.toStringAsFixed(0)} kr.', styles),
         ],
       ),
     );
   }
 
-  Widget _buildFineRow(String label, String value, AppTextStyles styles, {bool highlight = false}) {
+  Widget _buildFineRow(String label, String value, AppTextStyles styles,
+      {bool highlight = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label, style: styles.body),
-        Text(value, style: styles.bodyBold.copyWith(color: highlight ? Colors.red : null)),
+        Text(value,
+            style:
+                styles.bodyBold.copyWith(color: highlight ? Colors.red : null)),
       ],
     );
   }

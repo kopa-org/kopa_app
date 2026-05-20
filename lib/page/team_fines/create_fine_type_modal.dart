@@ -37,7 +37,8 @@ class _CreateFineTypeModalState extends State<CreateFineTypeModal> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
-    final appTextStyles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final appTextStyles =
+        theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return PageScaffold(
         title: 'Opret bødetype',
@@ -79,7 +80,8 @@ class _CreateFineTypeModalState extends State<CreateFineTypeModal> {
                       prefix: Text('Titel', style: appTextStyles.bodyBold),
                       child: CupertinoTextFormFieldRow(
                         placeholder: 'F.eks. "Kommet for sent"',
-                        validator: (String? value) => validateTitleOfFineTypeInput(value),
+                        validator: (String? value) =>
+                            validateTitleOfFineTypeInput(value),
                         keyboardType: TextInputType.name,
                         controller: _titleController,
                         maxLength: 255,
@@ -90,7 +92,8 @@ class _CreateFineTypeModalState extends State<CreateFineTypeModal> {
                       prefix: Text('Beløb', style: appTextStyles.bodyBold),
                       child: CupertinoTextFormFieldRow(
                         placeholder: 'F.eks. 100',
-                        validator: (String? value) => validateDefaultAmountInput(value),
+                        validator: (String? value) =>
+                            validateDefaultAmountInput(value),
                         keyboardType: TextInputType.number,
                         controller: _defaultAmountController,
                         style: appTextStyles.body,

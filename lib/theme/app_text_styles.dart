@@ -19,37 +19,37 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
   });
 
   static AppTextStyles get light => AppTextStyles(
-    pageTitle: GoogleFonts.rethinkSans(
-      fontSize: 28,
-      fontWeight: FontWeight.bold,
-      color: const Color(0xFF101010),
-    ),
-    sectionHeader: GoogleFonts.rethinkSans(
-      fontSize: 20,
-      fontWeight: FontWeight.w600,
-      color: const Color(0xFF101010),
-    ),
-    bodyBold: GoogleFonts.rethinkSans(
-      fontSize: 16,
-      fontWeight: FontWeight.w600,
-      color: const Color(0xFF101010),
-    ),
-    body: GoogleFonts.rethinkSans(
-      fontSize: 16,
-      fontWeight: FontWeight.normal,
-      color: const Color(0xFF101010),
-    ),
-    caption: GoogleFonts.rethinkSans(
-      fontSize: 13,
-      fontWeight: FontWeight.normal,
-      color: const Color(0xFF2D1000),
-    ),
-    button: GoogleFonts.rethinkSans(
-      fontSize: 16,
-      fontWeight: FontWeight.w600,
-      color: const Color(0xFFFFFFFF),
-    ),
-  );
+        pageTitle: GoogleFonts.rethinkSans(
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+          color: const Color(0xFF101010),
+        ),
+        sectionHeader: GoogleFonts.rethinkSans(
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          color: const Color(0xFF101010),
+        ),
+        bodyBold: GoogleFonts.rethinkSans(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: const Color(0xFF101010),
+        ),
+        body: GoogleFonts.rethinkSans(
+          fontSize: 16,
+          fontWeight: FontWeight.normal,
+          color: const Color(0xFF101010),
+        ),
+        caption: GoogleFonts.rethinkSans(
+          fontSize: 13,
+          fontWeight: FontWeight.normal,
+          color: const Color(0xFF2D1000),
+        ),
+        button: GoogleFonts.rethinkSans(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: const Color(0xFFFFFFFF),
+        ),
+      );
 
   @override
   AppTextStyles copyWith({
