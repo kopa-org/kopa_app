@@ -116,6 +116,7 @@ class OnboardingRepository {
     required String title,
     String? dbuCalendarUrl,
     List<Map<String, dynamic>> matches = const [],
+    List<Map<String, dynamic>> standings = const [],
     List<String> inviteEmails = const [],
   }) async {
     final userToken = await SecureStorageService.getToken();
@@ -135,6 +136,7 @@ class OnboardingRepository {
           'title': title,
           if (dbuCalendarUrl != null) 'dbu_calendar_url': dbuCalendarUrl,
           'matches': matches,
+          'standings': standings,
           'invite_emails': inviteEmails,
         }),
       );

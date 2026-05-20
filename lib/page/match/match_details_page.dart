@@ -3,7 +3,8 @@ import 'package:kopa/state/user_votes_state.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/button/button.dart';
-import 'package:kopa/component/future_handler.dart';
+import 'package:kopa/component/error_message.dart';
+import 'package:kopa/component/loading_indicator.dart';
 import 'package:kopa/helpers/date_helper.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/match_event_details.dart';
@@ -28,16 +29,24 @@ import 'package:kopa/component/timeline/timeline_item.dart';
 
 class MatchDetailsPage extends StatefulWidget {
   final int matchId;
+  final MatchDetails? initialMatch;
 
-  const MatchDetailsPage({super.key, required this.matchId});
+  const MatchDetailsPage({
+    super.key,
+    required this.matchId,
+    this.initialMatch,
+  });
 
   @override
   State<MatchDetailsPage> createState() => _MatchDetailsPageState();
 }
 
 class _MatchDetailsPageState extends State<MatchDetailsPage> {
-  late Future<Map<String, dynamic>> matchAndSquadData;
-  late Future<UserDetails> currentUser;
+  Map<String, dynamic>? _matchAndSquadData;
+  Object? _loadError;
+  UserDetails? _currentUser;
+  Object? _currentUserError;
+  bool _showLoadedContent = false;
   bool _isManOfTheMatchVoted = false;
   MatchPollDetails? matchPollDetails;
   int _homeGoals = 0;
@@ -46,14 +55,46 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
   @override
   void initState() {
     super.initState();
-    matchAndSquadData = _fetchMatchAndSquad();
     final user = context.read<AuthCubit>().state.user;
     if (user == null) {
-      currentUser = Future.error(
-          Exception('Ingen bruger fundet. Log venligst ind igen.'));
+      _currentUserError =
+          Exception('Ingen bruger fundet. Log venligst ind igen.');
     } else {
-      currentUser = Future.value(user);
+      _currentUser = user;
     }
+    _loadMatchAndSquad();
+    _showLoadedContentAfterTransition();
+  }
+
+  Future<void> _loadMatchAndSquad() async {
+    try {
+      final data = await _fetchMatchAndSquad();
+      if (!mounted) return;
+      setState(() {
+        _matchAndSquadData = data;
+        _loadError = null;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _loadError = error;
+      });
+    }
+  }
+
+  void _showLoadedContentAfterTransition() {
+    if (widget.initialMatch == null) {
+      _showLoadedContent = true;
+      return;
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Future<void>.delayed(const Duration(milliseconds: 350));
+      if (!mounted) return;
+      setState(() {
+        _showLoadedContent = true;
+      });
+    });
   }
 
   Future<Map<String, dynamic>> _fetchMatchAndSquad() async {
@@ -69,8 +110,11 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
   }
 
   Future<void> _refreshMatchAndSquad() async {
+    final data = await _fetchMatchAndSquad();
+    if (!mounted) return;
     setState(() {
-      matchAndSquadData = _fetchMatchAndSquad();
+      _matchAndSquadData = data;
+      _loadError = null;
     });
   }
 
@@ -86,56 +130,71 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     final appTextStyles =
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
-    return FutureHandler<Map<String, dynamic>>(
-      future: matchAndSquadData,
-      noDataFoundMessage: 'Ingen kamp fundet.',
-      onSuccess: (context, data) {
-        final matchDetails = data['matchDetails'] as MatchDetails;
-        final squad = data['squad'] as List<UserDetails>;
+    if (_loadError != null || _currentUserError != null) {
+      return const ErrorMessage(
+        message: 'Der skete en fejl. Prøv venligst igen senere.',
+      );
+    }
 
-        return FutureHandler<UserDetails>(
-          future: currentUser,
-          noDataFoundMessage: 'Ingen bruger fundet.',
-          onSuccess: (context, user) {
-            return MatchDetailTemplate(
-              onRefresh: _refreshMatchAndSquad,
-              heroCard: MatchHeroCard(
-                match: matchDetails,
-                onTap: user.isTeamOwner && !matchDetails.hasMatchBeenPlayed
-                    ? () => setMatchScore(matchDetails.id)
-                    : null,
-              ),
-              infoRows: [
-                InfoRow(
-                  icon: CupertinoIcons.calendar,
-                  title: 'Dato',
-                  value: DateHelper.getFormattedDate(matchDetails.date),
-                ),
-                InfoRow(
-                  icon: CupertinoIcons.time,
-                  title: 'Tidspunkt',
-                  value:
-                      '${DateHelper.getFormattedTime(matchDetails.date)} (Mødetid: ${DateHelper.getFormattedTime(matchDetails.meetingTime)})',
-                ),
-                InfoRow(
-                  icon: CupertinoIcons.location_solid,
-                  title: 'Lokation',
-                  value: matchDetails.location,
-                ),
-                InfoRow(
-                  icon: CupertinoIcons.pencil,
-                  title: 'Noter',
-                  value: matchDetails.notes ?? 'Ingen noter',
-                ),
-              ],
-              votingModule: _buildVotingModule(
-                  matchDetails, squad, appColors, appTextStyles),
-              attendanceList: _buildAttendanceList(matchDetails, squad),
-              timelineItems: _buildTimelineItems(matchDetails, user),
-            );
-          },
-        );
-      },
+    final data = _matchAndSquadData;
+    if (data == null || !_showLoadedContent) {
+      final initialMatch = widget.initialMatch;
+      if (initialMatch != null) {
+        return _buildInitialLoadingState(initialMatch);
+      }
+
+      return const LoadingIndicator();
+    }
+
+    final user = _currentUser;
+    if (user == null) {
+      return const Center(child: Text('Ingen bruger fundet.'));
+    }
+
+    final matchDetails = data['matchDetails'] as MatchDetails;
+    final squad = data['squad'] as List<UserDetails>;
+
+    return MatchDetailTemplate(
+      onRefresh: _refreshMatchAndSquad,
+      heroCard: MatchHeroCard(
+        match: matchDetails,
+        onTap: user.isTeamOwner && !matchDetails.hasMatchBeenPlayed
+            ? () => setMatchScore(matchDetails.id)
+            : null,
+      ),
+      infoRows: [
+        InfoRow(
+          icon: CupertinoIcons.calendar,
+          title: 'Dato',
+          value: DateHelper.getFormattedDate(matchDetails.date),
+        ),
+        InfoRow(
+          icon: CupertinoIcons.time,
+          title: 'Tidspunkt',
+          value:
+              '${DateHelper.getFormattedTime(matchDetails.date)} (Mødetid: ${DateHelper.getFormattedTime(matchDetails.meetingTime)})',
+        ),
+        InfoRow(
+          icon: CupertinoIcons.location_solid,
+          title: 'Lokation',
+          value: matchDetails.location,
+        ),
+        InfoRow(
+          icon: CupertinoIcons.pencil,
+          title: 'Noter',
+          value: matchDetails.notes ?? 'Ingen noter',
+        ),
+      ],
+      votingModule:
+          _buildVotingModule(matchDetails, squad, appColors, appTextStyles),
+      attendanceList: _buildAttendanceList(matchDetails, squad),
+      timelineItems: _buildTimelineItems(matchDetails, user),
+    );
+  }
+
+  Widget _buildInitialLoadingState(MatchDetails match) {
+    return MatchDetailTemplate(
+      heroCard: MatchHeroCard(match: match),
     );
   }
 
@@ -402,7 +461,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
 
   Future<void> addMatchEvent(UserDetails currentUserData) async {
     try {
-      final data = await matchAndSquadData;
+      final data = _matchAndSquadData ?? await _fetchMatchAndSquad();
       if (!mounted) return;
 
       final squadRaw = data['squad'];

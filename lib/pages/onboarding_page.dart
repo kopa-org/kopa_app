@@ -66,6 +66,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
           dbuCalendarUrl: _dbuData?['webcal'] as String?,
           matches: (_dbuData?['matches'] as List<dynamic>? ?? [])
               .cast<Map<String, dynamic>>(),
+          standings: (_dbuData?['standings'] as List<dynamic>? ?? [])
+              .cast<Map<String, dynamic>>(),
           inviteEmails: inviteEmails,
         );
 
@@ -201,6 +203,8 @@ class _CreateTeamView extends StatelessWidget {
         .cast<Map<String, dynamic>>();
     final matches = (dbuData?['matches'] as List<dynamic>? ?? [])
         .cast<Map<String, dynamic>>();
+    final standings = (dbuData?['standings'] as List<dynamic>? ?? [])
+        .cast<Map<String, dynamic>>();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -248,6 +252,19 @@ class _CreateTeamView extends StatelessWidget {
               leading: const Icon(Icons.sports_soccer),
               title: Text(match['summary'] as String? ?? ''),
               subtitle: Text(match['dtstart'] as String? ?? ''),
+            );
+          }),
+          const SizedBox(height: 16),
+        ],
+        if (standings.isNotEmpty) ...[
+          Text('Stilling', style: theme.textTheme.titleMedium),
+          const SizedBox(height: 8),
+          ...standings.take(5).map((standing) {
+            return ListTile(
+              dense: true,
+              leading: Text('${standing['position'] ?? ''}'),
+              title: Text(standing['teamName'] as String? ?? ''),
+              trailing: Text('${standing['points'] ?? 0} p'),
             );
           }),
           const SizedBox(height: 16),

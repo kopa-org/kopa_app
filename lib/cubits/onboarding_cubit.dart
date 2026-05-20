@@ -137,6 +137,7 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     required String title,
     String? dbuCalendarUrl,
     List<Map<String, dynamic>> matches = const [],
+    List<Map<String, dynamic>> standings = const [],
     List<String> inviteEmails = const [],
   }) async {
     emit(state.copyWith(status: OnboardingStatus.loading, errorMessage: null));
@@ -144,6 +145,7 @@ class OnboardingCubit extends Cubit<OnboardingState> {
       title: title,
       dbuCalendarUrl: dbuCalendarUrl,
       matches: matches,
+      standings: standings,
       inviteEmails: inviteEmails,
     );
 

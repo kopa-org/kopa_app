@@ -10,11 +10,13 @@ import 'package:kopa/theme/spacing.dart';
 class MatchHeroCard extends StatelessWidget {
   final MatchDetails match;
   final VoidCallback? onTap;
+  final bool animateCard;
 
   const MatchHeroCard({
     super.key,
     required this.match,
     this.onTap,
+    this.animateCard = true,
   });
 
   @override
@@ -27,7 +29,7 @@ class MatchHeroCard extends StatelessWidget {
     final dateFormat = DateFormat('EEE d. MMM', 'da_DK');
     final timeFormat = DateFormat('HH:mm');
 
-    return KopaCard(
+    final card = KopaCard(
       onTap: onTap,
       padding: EdgeInsets.zero,
       child: Column(
@@ -141,6 +143,20 @@ class MatchHeroCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+
+    if (!animateCard) return card;
+
+    return Hero(
+      tag: 'match-${match.id}-hero-card',
+      transitionOnUserGestures: true,
+      createRectTween: (begin, end) {
+        return MaterialRectCenterArcTween(begin: begin, end: end);
+      },
+      child: Material(
+        type: MaterialType.transparency,
+        child: card,
       ),
     );
   }
