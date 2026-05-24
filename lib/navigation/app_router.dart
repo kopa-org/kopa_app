@@ -9,6 +9,7 @@ import 'package:kopa/pages/register_page.dart';
 import 'package:kopa/tab/home_tab.dart';
 import 'package:kopa/tab/profile_tab.dart';
 import 'package:kopa/page/profile/dbu_webview_page.dart';
+import 'package:kopa/page/player_plus/player_plus_page.dart';
 import 'package:kopa/page/statistics/statistics_page.dart';
 import 'package:kopa/page/match/match_programme.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
@@ -20,6 +21,7 @@ abstract final class AppRouter {
   static const home = '/';
   static const match = '/match';
   static const statistics = '/statistics';
+  static const playerPlus = '/player-plus';
   static const profile = '/profile';
   static const dbuWebview = '/dbu-webview';
   static const invite = '/invite';
@@ -94,6 +96,10 @@ abstract final class AppRouter {
         GoRoute(
           path: onboarding,
           builder: (context, state) => const OnboardingPage(),
+        ),
+        GoRoute(
+          path: playerPlus,
+          builder: (context, state) => const PlayerPlusPage(),
         ),
         GoRoute(
           path: login,
