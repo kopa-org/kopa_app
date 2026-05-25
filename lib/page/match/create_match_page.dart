@@ -1,11 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:kopa/cubits/match_programme_cubit.dart';
+import 'package:kopa/cubits/match_programme_state.dart';
 import 'package:kopa/model/match_details.dart';
-import 'package:kopa/repository/match_repository.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
-import 'package:kopa/utils/app_analytics.dart';
 
 class CreateMatchPage extends StatefulWidget {
   final List<MatchDetails> matches;
@@ -99,14 +100,26 @@ class _CreateMatchPageState extends State<CreateMatchPage> {
             onTap: () => Navigator.pop(context, false),
             child: Icon(CupertinoIcons.clear, color: appColors.textPrimary),
           ),
-          trailing: GestureDetector(
-            onTap: () async {
-              final created = await _createMatch();
-              if (created && context.mounted) Navigator.pop(context, true);
+          trailing: BlocBuilder<MatchProgrammeCubit, MatchProgrammeState>(
+            builder: (context, state) {
+              return GestureDetector(
+                onTap: state.isCreating
+                    ? null
+                    : () async {
+                        final created = await _createMatch();
+                        if (created && context.mounted) {
+                          Navigator.pop(context, true);
+                        }
+                      },
+                child: state.isCreating
+                    ? const CupertinoActivityIndicator()
+                    : Text(
+                        'Opret',
+                        style: appTextStyles.bodyBold
+                            .copyWith(color: appColors.primary),
+                      ),
+              );
             },
-            child: Text('Opret',
-                style:
-                    appTextStyles.bodyBold.copyWith(color: appColors.primary)),
           ),
         ),
         child: Container(
@@ -184,18 +197,18 @@ class _CreateMatchPageState extends State<CreateMatchPage> {
       return false;
     }
 
-    // Create match
-    await MatchRepository.createMatch(
-      teamA,
-      teamB,
-      date,
-      location,
-      meetingTime,
-      notes: notes,
-    );
-    AppAnalytics.logEvent('match_created');
-
-    return true;
+    final created = await context.read<MatchProgrammeCubit>().createMatch(
+          homeTeam: teamA,
+          awayTeam: teamB,
+          date: date,
+          location: location,
+          meetingTime: meetingTime,
+          notes: notes,
+        );
+    if (!created) {
+      await _showError('Kunne ikke oprette kampen.');
+    }
+    return created;
   }
 
   Future<void> _showError(String message) async {

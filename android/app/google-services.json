@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "387318523179",
+    "project_id": "kopa-358fe",
+    "storage_bucket": "kopa-358fe.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:387318523179:android:d5ef70ca25f6ed43e0d16e",
+        "android_client_info": {
+          "package_name": "com.example.kopa"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdMoySXYKCqBhZsqqnP-4YpxUPoijmVYU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:387318523179:android:14133a8392ec6135e0d16e",
+        "android_client_info": {
+          "package_name": "dk.kopa.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdMoySXYKCqBhZsqqnP-4YpxUPoijmVYU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

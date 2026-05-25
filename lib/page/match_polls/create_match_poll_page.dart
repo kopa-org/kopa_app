@@ -1,23 +1,13 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopa/component/match_poll_row_item.dart';
-import 'package:kopa/model/match_details.dart';
-import 'package:kopa/model/match_poll_details.dart';
-import 'package:kopa/model/user_details.dart';
-import 'package:kopa/repository/match_polls_repository.dart';
-import 'package:kopa/model/user_vote.dart';
+import 'package:kopa/cubits/match_polls_cubit.dart';
+import 'package:kopa/cubits/match_polls_state.dart';
 import 'package:kopa/state/user_votes_state.dart';
-import 'package:kopa/utils/app_analytics.dart';
 import 'package:provider/provider.dart';
 
 class CreateMatchPollPage extends StatefulWidget {
-  final List<UserDetails> squad;
-  final List<MatchDetails> matches;
-  final List<MatchPollDetails> matchPolls;
-
-  CreateMatchPollPage(
-      {required this.squad,
-      this.matches = const [],
-      this.matchPolls = const []});
+  const CreateMatchPollPage({super.key});
 
   @override
   State<CreateMatchPollPage> createState() => _CreateMatchPollPageState();
@@ -39,9 +29,10 @@ class _CreateMatchPollPageState extends State<CreateMatchPollPage> {
   @override
   Widget build(BuildContext context) {
     var userVotes = context.watch<UserVotesState>().userVotes;
+    final state = context.watch<MatchPollsCubit>().state;
 
-    final hasMatches = widget.matches.isNotEmpty;
-    final matchNames = widget.matches.map((x) => x.matchName).toList();
+    final hasMatches = state.matches.isNotEmpty;
+    final matchNames = state.matches.map((x) => x.matchName).toList();
     final safeIdx = _safeIndex(matchNames.length);
 
     return CupertinoPageScaffold(
@@ -59,18 +50,37 @@ class _CreateMatchPollPageState extends State<CreateMatchPollPage> {
           middle: Text('Tilføj afstemning'),
           trailing: CupertinoButton(
             padding: EdgeInsets.zero,
-            onPressed: () async {
-              var createdMatchPollDetails =
-                  await createMatchPoll(context, userVotes);
+            onPressed: state.isSubmitting
+                ? null
+                : () async {
+                    final createdMatchPollDetails =
+                        await context.read<MatchPollsCubit>().createMatchPoll(
+                              selectedMatchIndex: safeIdx,
+                              userVotes: userVotes,
+                            );
 
-              if (createdMatchPollDetails != null && context.mounted) {
-                Navigator.pop(context, createdMatchPollDetails);
-              }
-            },
-            child: Text('Opret',
-                style: TextStyle(
-                    color: CupertinoColors.systemIndigo,
-                    fontWeight: FontWeight.bold)),
+                    if (context.mounted) {
+                      final errorMessage = context
+                          .read<MatchPollsCubit>()
+                          .state
+                          .formErrorMessage;
+                      if (createdMatchPollDetails != null) {
+                        context.read<UserVotesState>().removeAllUserVotes();
+                        Navigator.pop(context, createdMatchPollDetails);
+                      } else if (errorMessage != null) {
+                        await _showError(errorMessage);
+                        if (context.mounted) {
+                          context.read<MatchPollsCubit>().clearFormError();
+                        }
+                      }
+                    }
+                  },
+            child: state.isSubmitting
+                ? const CupertinoActivityIndicator()
+                : Text('Opret',
+                    style: TextStyle(
+                        color: CupertinoColors.systemIndigo,
+                        fontWeight: FontWeight.bold)),
           ),
         ),
         child: SafeArea(
@@ -126,7 +136,7 @@ class _CreateMatchPollPageState extends State<CreateMatchPollPage> {
                   additionalDividerMargin: 0,
                   margin: EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 30.0),
                   header: const Text('Stem på kampens spiller'),
-                  children: getMatchPollRowItems()),
+                  children: getMatchPollRowItems(state)),
             ],
           ),
         )));
@@ -163,76 +173,26 @@ class _CreateMatchPollPageState extends State<CreateMatchPollPage> {
     );
   }
 
-  Future<MatchPollDetails?> createMatchPoll(
-      BuildContext context, List<UserVote> userVotes) async {
-    if (widget.matches.isEmpty) {
-      await showCupertinoDialog(
-        context: context,
-        builder: (_) => const CupertinoAlertDialog(
-          title: Text('Ingen kampe'),
-          content: Text('Der er ingen kampe at oprette en afstemning for.'),
-        ),
-      );
-      return null;
-    }
-
-    final idx = _safeIndex(widget.matches.length);
-    final matchId = widget.matches[idx].id;
-
-    final exists = widget.matchPolls.any((x) => x.eventId == matchId);
-    if (exists) {
-      await showCupertinoDialog(
-        context: context,
-        builder: (BuildContext modalContext) => CupertinoAlertDialog(
-          title: const Text('Fejl'),
-          content: const Text(
-              'Afstemning til kampen eksisterer allerede. Vælg en anden kamp.'),
-          actions: [
-            CupertinoDialogAction(
-              child: const Text('OK'),
-              onPressed: () => Navigator.of(modalContext).pop(),
-            ),
-          ],
-        ),
-      );
-      return null;
-    }
-
-    if (userVotes.isEmpty) {
-      await showCupertinoDialog(
-        context: context,
-        builder: (BuildContext modalContext) => CupertinoAlertDialog(
-          title: Text('Fejl'),
-          content: Text('Afgiv mindst én stemme for at oprette en afstemning.'),
-          actions: [
-            CupertinoDialogAction(
-              child: const Text('OK'),
-              onPressed: () => Navigator.of(modalContext).pop(),
-            ),
-          ],
-        ),
-      );
-      return null;
-    }
-
-    final matchPollId =
-        await MatchPollsRepository.createMatchPoll(matchId, userVotes);
-    AppAnalytics.logEvent(
-      'match_poll_created',
-      parameters: {'vote_count': userVotes.length},
+  Future<void> _showError(String message) {
+    return showCupertinoDialog(
+      context: context,
+      builder: (BuildContext modalContext) => CupertinoAlertDialog(
+        title: const Text('Fejl'),
+        content: Text(message),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('OK'),
+            onPressed: () => Navigator.of(modalContext).pop(),
+          ),
+        ],
+      ),
     );
-
-    if (context.mounted) {
-      Provider.of<UserVotesState>(context, listen: false).removeAllUserVotes();
-    }
-
-    return await MatchPollsRepository.getMatchPoll(matchPollId);
   }
 
-  List<MatchPollRowItem> getMatchPollRowItems() {
+  List<MatchPollRowItem> getMatchPollRowItems(MatchPollsState state) {
     List<MatchPollRowItem> matchPollRowItems = [];
 
-    for (var user in widget.squad) {
+    for (var user in state.squad) {
       var matchPollItem =
           MatchPollRowItem(userId: user.id, userName: user.name);
 

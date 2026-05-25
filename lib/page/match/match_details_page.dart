@@ -1,10 +1,12 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopa/state/user_votes_state.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/button/button.dart';
 import 'package:kopa/component/error_message.dart';
 import 'package:kopa/component/loading_indicator.dart';
+import 'package:kopa/cubits/match_polls_cubit.dart';
 import 'package:kopa/helpers/date_helper.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/match_event_details.dart';
@@ -213,9 +215,16 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
               final result = await showCupertinoModalBottomSheet(
                 expand: true,
                 context: context,
-                builder: (context) => ChangeNotifierProvider(
-                  create: (context) => UserVotesState(),
-                  child: CreateMatchPollPage(squad: squad, matches: [match]),
+                builder: (context) => BlocProvider(
+                  create: (_) => MatchPollsCubit()
+                    ..setData(
+                      squad: squad,
+                      matches: [match],
+                    ),
+                  child: ChangeNotifierProvider(
+                    create: (context) => UserVotesState(),
+                    child: const CreateMatchPollPage(),
+                  ),
                 ),
               );
               if (result != null) _setMatchPollDetails(result);

@@ -1,20 +1,21 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kopa/component/card/match_hero_card.dart';
 import 'package:kopa/component/error_message.dart';
 import 'package:kopa/component/future_handler.dart';
 import 'package:kopa/component/loading_indicator.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
+import 'package:kopa/cubits/auth_cubit.dart';
+import 'package:kopa/cubits/match_programme_cubit.dart';
+import 'package:kopa/cubits/match_programme_state.dart';
 import 'package:kopa/model/match_details.dart';
+import 'package:kopa/model/user_details.dart';
 import 'package:kopa/page/match/create_match_page.dart';
 import 'package:kopa/page/match/match_details_page.dart';
-import 'package:kopa/repository/match_repository.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kopa/cubits/auth_cubit.dart';
-import 'package:kopa/model/user_details.dart';
-import 'package:kopa/component/card/match_hero_card.dart';
 import 'package:kopa/theme/spacing.dart';
 import 'package:kopa/utils/app_analytics.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class MatchProgrammePage extends StatefulWidget {
   const MatchProgrammePage({super.key});
@@ -24,15 +25,11 @@ class MatchProgrammePage extends StatefulWidget {
 }
 
 class _MatchProgrammePageState extends State<MatchProgrammePage> {
-  List<MatchDetails>? _matches;
-  Object? _matchesError;
   late Future<UserDetails> currentUser;
 
   @override
   void initState() {
     super.initState();
-    _loadMatches();
-
     final user = context.read<AuthCubit>().state.user;
     if (user == null) {
       currentUser = Future.error(
@@ -42,76 +39,72 @@ class _MatchProgrammePageState extends State<MatchProgrammePage> {
     }
   }
 
-  Future<void> _loadMatches() async {
-    try {
-      final nextMatches = await MatchRepository.getMatches();
-      if (!mounted) return;
-      setState(() {
-        _matches = nextMatches;
-        _matchesError = null;
-      });
-    } catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _matchesError = error;
-      });
-    }
-  }
-
-  Future<void> _refreshMatches() async {
-    await _loadMatches();
-  }
-
   @override
   Widget build(BuildContext context) {
-    return PageScaffold(
-      title: 'Kampprogram',
-      trailing: [
-        FutureHandler<UserDetails>(
-          future: currentUser,
-          loadingIndicator: const SizedBox.shrink(),
-          onError: (_) => const SizedBox.shrink(),
-          onSuccess: (context, user) {
-            if (!user.isTeamOwner) return const SizedBox.shrink();
+    return BlocProvider(
+      create: (_) => MatchProgrammeCubit()..loadMatches(),
+      child: PageScaffold(
+        title: 'Kampprogram',
+        trailing: [
+          FutureHandler<UserDetails>(
+            future: currentUser,
+            loadingIndicator: const SizedBox.shrink(),
+            onError: (_) => const SizedBox.shrink(),
+            onSuccess: (context, user) {
+              if (!user.isTeamOwner) return const SizedBox.shrink();
 
-            return CupertinoButton(
-              padding: EdgeInsets.zero,
-              onPressed: () async {
-                final data = _matches ?? await MatchRepository.getMatches();
-                if (!context.mounted) return;
-
-                final result = await showCupertinoModalBottomSheet(
-                  expand: true,
-                  context: context,
-                  builder: (context) => CreateMatchPage(matches: data),
-                );
-
-                if (result == true) {
-                  await _refreshMatches();
-                }
-              },
-              child:
-                  const Icon(CupertinoIcons.add, semanticLabel: 'Opret kamp'),
-            );
-          },
-        ),
-      ],
-      body: _buildMatchList(),
+              return CupertinoButton(
+                padding: EdgeInsets.zero,
+                onPressed: () => _showCreateMatch(context),
+                child: const Icon(
+                  CupertinoIcons.add,
+                  semanticLabel: 'Opret kamp',
+                ),
+              );
+            },
+          ),
+        ],
+        body: const _MatchList(),
+      ),
     );
   }
 
-  Widget _buildMatchList() {
-    if (_matchesError != null && _matches == null) {
-      return const ErrorMessage(
-        message: 'Der skete en fejl. Prøv venligst igen senere.',
-      );
-    }
+  Future<void> _showCreateMatch(BuildContext context) async {
+    final cubit = context.read<MatchProgrammeCubit>();
+    await showCupertinoModalBottomSheet(
+      expand: true,
+      context: context,
+      builder: (modalContext) => BlocProvider.value(
+        value: cubit,
+        child: CreateMatchPage(matches: cubit.state.matches),
+      ),
+    );
+  }
+}
 
-    final matches = _matches;
-    if (matches == null) {
-      return const LoadingIndicator();
-    }
+class _MatchList extends StatelessWidget {
+  const _MatchList();
 
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<MatchProgrammeCubit, MatchProgrammeState>(
+      builder: (context, state) {
+        if (state.status == MatchProgrammeStatus.failure) {
+          return const ErrorMessage(
+            message: 'Der skete en fejl. Prøv venligst igen senere.',
+          );
+        }
+
+        if (state.isLoading) {
+          return const LoadingIndicator();
+        }
+
+        return _buildMatchList(context, state.matches);
+      },
+    );
+  }
+
+  Widget _buildMatchList(BuildContext context, List<MatchDetails> matches) {
     if (matches.isEmpty) {
       return const Center(child: Text('Ingen kampe fundet.'));
     }
@@ -139,12 +132,12 @@ class _MatchProgrammePageState extends State<MatchProgrammePage> {
                 ),
               ),
             );
-            if (!mounted) return;
             await Future<void>.delayed(
               const Duration(milliseconds: 350),
             );
-            if (!mounted) return;
-            _refreshMatches();
+            if (context.mounted) {
+              context.read<MatchProgrammeCubit>().loadMatches();
+            }
           },
         );
       },
