@@ -98,6 +98,24 @@
       "languageVersion": "3.0"
     },
     {
+      "name": "firebase_analytics",
+      "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/firebase_analytics-12.3.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "firebase_analytics_platform_interface",
+      "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/firebase_analytics_platform_interface-5.1.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "firebase_analytics_web",
+      "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/firebase_analytics_web-0.6.1+5",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
       "name": "firebase_core",
       "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/firebase_core-4.7.0",
       "packageUri": "lib/",

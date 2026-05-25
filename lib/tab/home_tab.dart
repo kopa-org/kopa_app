@@ -23,6 +23,7 @@ import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 import 'package:kopa/page/match/match_details_page.dart';
 import 'package:kopa/page/team_fines/team_fines_page.dart';
+import 'package:kopa/utils/app_analytics.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class HomeTab extends StatelessWidget {
@@ -108,6 +109,10 @@ class _HomeTabView extends StatelessWidget {
                       MatchHeroCard(
                         match: nextMatch,
                         onTap: () async {
+                          AppAnalytics.logEvent(
+                            'match_opened',
+                            parameters: {'source': 'home_next_match'},
+                          );
                           final homeCubit = context.read<HomeCubit>();
                           await Navigator.of(context)
                               .push(MaterialWithModalsPageRoute(
@@ -123,6 +128,10 @@ class _HomeTabView extends StatelessWidget {
                         FullWidthButton(
                           buttonText: 'Tilmeld til kamp',
                           onPressed: () {
+                            AppAnalytics.logEvent(
+                              'match_registered',
+                              parameters: {'source': 'home_next_match'},
+                            );
                             context.read<HomeCubit>().registerForMatch(
                                 nextMatch.id, currentUser.teamDetails!.id);
                           },
@@ -235,6 +244,10 @@ class _HomeTabView extends StatelessWidget {
 
     return KopaCard(
       onTap: () {
+        AppAnalytics.logEvent(
+          'match_opened',
+          parameters: {'source': 'home_last_match'},
+        );
         Navigator.of(context).push(MaterialWithModalsPageRoute(
           builder: (context) => MatchDetailsPage(matchId: match.id),
         ));
@@ -305,6 +318,7 @@ class _HomeTabView extends StatelessWidget {
 
     return KopaCard(
       onTap: () {
+        AppAnalytics.logEvent('fine_box_opened');
         Navigator.of(context).push(MaterialWithModalsPageRoute(
           builder: (context) => const TeamFinesPage(),
         ));

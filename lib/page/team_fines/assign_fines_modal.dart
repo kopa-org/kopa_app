@@ -9,6 +9,7 @@ import 'package:kopa/repository/fines_repository.dart';
 import 'package:kopa/repository/users_repository.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
+import 'package:kopa/utils/app_analytics.dart';
 
 class AssignFinesModal extends StatefulWidget {
   const AssignFinesModal({super.key});
@@ -302,6 +303,10 @@ class _AssignFinesModalState extends State<AssignFinesModal> {
     }
 
     await FinesRepository.addFineForUsers(createUserFineCommand);
+    AppAnalytics.logEvent(
+      'fine_assigned',
+      parameters: {'fine_count': createUserFineCommand.length},
+    );
     return true;
   }
 }

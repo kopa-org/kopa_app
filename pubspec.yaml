@@ -54,6 +54,7 @@ dependencies:
   sqlite3_flutter_libs: ^0.5.39
   firebase_core: ^4.6.0
   firebase_crashlytics: ^5.1.0
+  firebase_analytics: ^12.1.0
   google_nav_bar: ^5.0.7
   webview_flutter: ^4.8.0
   icalendar_parser: ^2.1.0

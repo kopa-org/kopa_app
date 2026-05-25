@@ -18,6 +18,7 @@ import 'package:kopa/repository/users_repository.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
+import 'package:kopa/utils/app_analytics.dart';
 import 'package:kopa/utils/crash_reporting.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:kopa/template/match_detail_template.dart';
@@ -55,6 +56,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
   @override
   void initState() {
     super.initState();
+    AppAnalytics.logScreenView('match_details');
+    AppAnalytics.logEvent('match_opened');
     final user = context.read<AuthCubit>().state.user;
     if (user == null) {
       _currentUserError =
@@ -364,6 +367,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
               final h = int.parse(homeCtl.text);
               final a = int.parse(awayCtl.text);
               await MatchRepository.updateMatchScore(matchDetailsId, h, a);
+              AppAnalytics.logEvent('match_score_updated');
               if (mounted) {
                 setState(() {
                   _homeGoals = h;

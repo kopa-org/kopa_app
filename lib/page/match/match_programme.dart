@@ -14,6 +14,7 @@ import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/component/card/match_hero_card.dart';
 import 'package:kopa/theme/spacing.dart';
+import 'package:kopa/utils/app_analytics.dart';
 
 class MatchProgrammePage extends StatefulWidget {
   const MatchProgrammePage({super.key});
@@ -126,6 +127,10 @@ class _MatchProgrammePageState extends State<MatchProgrammePage> {
         return MatchHeroCard(
           match: matchDetails,
           onTap: () async {
+            AppAnalytics.logEvent(
+              'match_opened',
+              parameters: {'source': 'match_programme'},
+            );
             await Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) => MatchDetailsPage(

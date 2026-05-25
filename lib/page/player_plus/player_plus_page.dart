@@ -2,9 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
+import 'package:kopa/utils/app_analytics.dart';
 
-class PlayerPlusPage extends StatelessWidget {
+class PlayerPlusPage extends StatefulWidget {
   const PlayerPlusPage({super.key});
+
+  @override
+  State<PlayerPlusPage> createState() => _PlayerPlusPageState();
+}
+
+class _PlayerPlusPageState extends State<PlayerPlusPage> {
+  @override
+  void initState() {
+    super.initState();
+    AppAnalytics.logEvent('player_plus_opened');
+  }
 
   @override
   Widget build(BuildContext context) {

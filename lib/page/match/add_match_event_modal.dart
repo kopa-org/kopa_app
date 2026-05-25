@@ -9,6 +9,7 @@ import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 import 'package:kopa/component/list_item/player_list_item.dart';
 import 'package:kopa/component/avatar/app_avatar.dart';
+import 'package:kopa/utils/app_analytics.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class _EventDraft {
@@ -417,6 +418,12 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
       }
 
       await MatchRepository.createMatchEvents(commands);
+      for (final command in commands) {
+        AppAnalytics.logEvent(
+          'match_event_added',
+          parameters: {'event_type': command.type.name},
+        );
+      }
       await widget.onSaved();
       if (mounted) Navigator.of(context).pop();
     } catch (e) {

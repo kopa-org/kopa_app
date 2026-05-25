@@ -6,6 +6,7 @@ import 'package:kopa/model/user_details.dart';
 import 'package:kopa/repository/match_polls_repository.dart';
 import 'package:kopa/model/user_vote.dart';
 import 'package:kopa/state/user_votes_state.dart';
+import 'package:kopa/utils/app_analytics.dart';
 import 'package:provider/provider.dart';
 
 class CreateMatchPollPage extends StatefulWidget {
@@ -216,6 +217,10 @@ class _CreateMatchPollPageState extends State<CreateMatchPollPage> {
 
     final matchPollId =
         await MatchPollsRepository.createMatchPoll(matchId, userVotes);
+    AppAnalytics.logEvent(
+      'match_poll_created',
+      parameters: {'vote_count': userVotes.length},
+    );
 
     if (context.mounted) {
       Provider.of<UserVotesState>(context, listen: false).removeAllUserVotes();

@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopa/repository/onboarding_repository.dart';
+import 'package:kopa/utils/app_analytics.dart';
 
 enum OnboardingStatus {
   initial,
@@ -70,6 +71,7 @@ class OnboardingCubit extends Cubit<OnboardingState> {
   OnboardingCubit(this._repository) : super(OnboardingState());
 
   Future<void> handleDeepLink(String token) async {
+    AppAnalytics.logEvent('onboarding_started');
     emit(state.copyWith(status: OnboardingStatus.loading, inviteToken: token));
 
     final result = await _repository.validateToken(token);
@@ -96,6 +98,7 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     final result = await _repository.joinTeam(state.inviteToken!);
 
     if (result['success'] == true) {
+      AppAnalytics.logEvent('team_joined');
       emit(state.copyWith(status: OnboardingStatus.success, inviteToken: null));
     } else {
       emit(state.copyWith(
@@ -124,6 +127,10 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     emit(state.copyWith(status: OnboardingStatus.loading));
     final result = await _repository.sendEmailInvites(teamId, emails);
     if (result.containsKey('sent')) {
+      AppAnalytics.logEvent(
+        'email_invites_sent',
+        parameters: {'invite_count': emails.length},
+      );
       emit(state.copyWith(status: OnboardingStatus.validated)); // Reset status
       return result;
     } else {
@@ -150,6 +157,14 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     );
 
     if (result['success'] == true) {
+      AppAnalytics.logEvent(
+        'team_created',
+        parameters: {
+          'has_dbu_calendar': dbuCalendarUrl?.isNotEmpty == true ? 1 : 0,
+          'match_count': matches.length,
+          'invite_count': inviteEmails.length,
+        },
+      );
       emit(state.copyWith(status: OnboardingStatus.success));
       return true;
     }
@@ -186,6 +201,7 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     emit(state.copyWith(status: OnboardingStatus.loading, errorMessage: null));
     final result = await _repository.requestToJoinTeam(teamId);
     if (result['success'] == true) {
+      AppAnalytics.logEvent('team_join_requested');
       final request = result['join_request'] as Map<String, dynamic>?;
       emit(state.copyWith(
         status: OnboardingStatus.waitingApproval,

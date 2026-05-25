@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kopa/repository/scraper_repository.dart';
+import 'package:kopa/utils/app_analytics.dart';
 
 class DbuWebviewPage extends StatefulWidget {
   const DbuWebviewPage({super.key});
@@ -27,6 +28,7 @@ class _DbuWebviewPageState extends State<DbuWebviewPage> {
           if (mounted) {
             final String rawJson = message.message;
             try {
+              AppAnalytics.logEvent('dbu_calendar_import_success');
               context.pop(rawJson);
             } catch (e) {
               context.pop(rawJson);
@@ -66,6 +68,7 @@ class _DbuWebviewPageState extends State<DbuWebviewPage> {
         Uri.parse('https://mit.dbu.dk/MyTeam/MyTeams.aspx#'),
       );
     } catch (e) {
+      AppAnalytics.logEvent('dbu_calendar_import_failure');
       if (!mounted) return;
       setState(() {
         _isLoadingScraper = false;

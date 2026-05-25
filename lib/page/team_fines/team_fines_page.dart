@@ -17,6 +17,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
+import 'package:kopa/utils/app_analytics.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 enum TeamOwnerFinesSegments { overview, fineTypes, personal }
@@ -39,6 +40,8 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
   @override
   void initState() {
     super.initState();
+    AppAnalytics.logScreenView('team_fines');
+    AppAnalytics.logEvent('fine_box_opened');
     fineBoxDetails = FinesRepository.getFineBox();
     fineTypeDetails = FinesRepository.getFineTypes();
     final user = context.read<AuthCubit>().state.user;
@@ -88,6 +91,10 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
                   groupValue: _selectedSegment,
                   onValueChanged: (TeamOwnerFinesSegments? value) {
                     if (value != null) {
+                      AppAnalytics.logEvent(
+                        'fine_box_segment_selected',
+                        parameters: {'segment': value.name},
+                      );
                       setState(() {
                         _selectedSegment = value;
                       });
@@ -356,6 +363,7 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
           children: [
             getButtonItem('Indbetal', CupertinoIcons.arrow_up_square, appColors,
                 appTextStyles, onTap: () async {
+              AppAnalytics.logEvent('fine_deposit_started');
               var hasUserPaidAllFines = userFineDetails.fineDetailsList
                   .where((x) => !x.hasBeenPaid)
                   .isEmpty;
@@ -411,6 +419,7 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
             getButtonItem(
                 'Tildel', CupertinoIcons.money_dollar, appColors, appTextStyles,
                 onTap: () async {
+              AppAnalytics.logEvent('fine_assign_started');
               final result = await showCupertinoModalBottomSheet(
                 expand: true,
                 context: context,
@@ -423,6 +432,7 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
             const SizedBox(width: 30),
             getButtonItem('Indbetal', CupertinoIcons.arrow_up_square, appColors,
                 appTextStyles, onTap: () async {
+              AppAnalytics.logEvent('fine_deposit_started');
               final result = await showCupertinoModalBottomSheet(
                 expand: true,
                 context: context,

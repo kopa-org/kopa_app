@@ -12,6 +12,7 @@ import 'package:kopa/page/profile/dbu_webview_page.dart';
 import 'package:kopa/page/player_plus/player_plus_page.dart';
 import 'package:kopa/page/statistics/statistics_page.dart';
 import 'package:kopa/page/match/match_programme.dart';
+import 'package:kopa/utils/app_analytics.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -36,6 +37,7 @@ abstract final class AppRouter {
     return GoRouter(
       initialLocation: home,
       refreshListenable: refreshListenable,
+      observers: AppAnalytics.routeObservers,
       redirect: (context, state) {
         final authState = authCubit.state;
         final isLoggedIn = authState.status == AuthStatus.authenticated;
@@ -144,6 +146,12 @@ abstract final class AppRouter {
                       color: theme.unselectedWidgetColor,
                       selectedIndex: navigationShell.currentIndex,
                       onTabChange: (index) {
+                        AppAnalytics.logEvent(
+                          'main_tab_selected',
+                          parameters: {
+                            'tab_name': _tabNameForIndex(index),
+                          },
+                        );
                         navigationShell.goBranch(index);
                       },
                       tabs: [
@@ -251,5 +259,15 @@ abstract final class AppRouter {
         ),
       ],
     );
+  }
+
+  static String _tabNameForIndex(int index) {
+    return switch (index) {
+      0 => 'home',
+      1 => 'matches',
+      2 => 'statistics',
+      3 => 'profile',
+      _ => 'unknown',
+    };
   }
 }

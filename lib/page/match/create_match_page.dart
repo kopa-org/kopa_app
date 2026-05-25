@@ -5,6 +5,7 @@ import 'package:kopa/model/match_details.dart';
 import 'package:kopa/repository/match_repository.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
+import 'package:kopa/utils/app_analytics.dart';
 
 class CreateMatchPage extends StatefulWidget {
   final List<MatchDetails> matches;
@@ -192,6 +193,7 @@ class _CreateMatchPageState extends State<CreateMatchPage> {
       meetingTime,
       notes: notes,
     );
+    AppAnalytics.logEvent('match_created');
 
     return true;
   }

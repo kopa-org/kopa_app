@@ -13,12 +13,14 @@ import 'package:kopa/repository/onboarding_repository.dart';
 import 'package:kopa/cubits/onboarding_cubit.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/theme/app_theme.dart';
+import 'package:kopa/utils/app_analytics.dart';
 
 void main() async {
   await CrashReporting.runAppGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
     await dotenv.load(fileName: '.env');
     await CrashReporting.initialize();
+    await AppAnalytics.initialize();
 
     final authRepository = ApiAuthRepository();
     final onboardingRepository = OnboardingRepository();

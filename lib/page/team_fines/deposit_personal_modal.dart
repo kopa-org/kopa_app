@@ -9,6 +9,7 @@ import 'package:kopa/model/user_fine_details.dart';
 import 'package:kopa/repository/fines_repository.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
+import 'package:kopa/utils/app_analytics.dart';
 
 class DepositPersonalModal extends StatefulWidget {
   final int fineBoxId;
@@ -270,6 +271,10 @@ class _DepositPersonalModalState extends State<DepositPersonalModal> {
 
     await FinesRepository.depositAmountToFineBox(widget.fineBoxId,
         selectedAmountToDeposit.toString(), selectedFinesToBePaid);
+    AppAnalytics.logEvent(
+      'fine_deposit_completed',
+      parameters: {'fine_count': selectedFinesToBePaid.length},
+    );
 
     return selectedAmountToDeposit.toString();
   }

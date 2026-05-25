@@ -15,6 +15,7 @@ import 'package:http/http.dart' as http;
 import 'package:icalendar_parser/icalendar_parser.dart';
 import 'package:kopa/repository/users_repository.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:kopa/utils/app_analytics.dart';
 
 class ProfileTab extends StatefulWidget {
   const ProfileTab({super.key});
@@ -81,6 +82,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 FullWidthButton(
                   buttonText: 'Importér kampprogram',
                   onPressed: () async {
+                    AppAnalytics.logEvent('dbu_webview_opened');
                     final result =
                         await context.push<String>(AppRouter.dbuWebview);
                     if (result != null && context.mounted) {
@@ -118,6 +120,13 @@ class _ProfileTabState extends State<ProfileTab> {
                               print(
                                   'Failed to save calendar URL to backend: $e');
                             }
+                            AppAnalytics.logEvent(
+                              'dbu_calendar_import_success',
+                              parameters: {
+                                'match_count': scrapedMatches.length,
+                                'player_count': scrapedPlayers.length,
+                              },
+                            );
 
                             List<Map<String, dynamic>> combinedEvents =
                                 List.from(events);
@@ -187,6 +196,7 @@ class _ProfileTabState extends State<ProfileTab> {
                             }
                           }
                         } catch (fetchError) {
+                          AppAnalytics.logEvent('dbu_calendar_import_failure');
                           print(
                               'Error fetching or parsing calendar: $fetchError');
                         }
@@ -201,6 +211,7 @@ class _ProfileTabState extends State<ProfileTab> {
                           );
                         }
                       } catch (e) {
+                        AppAnalytics.logEvent('dbu_calendar_import_failure');
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
@@ -261,6 +272,7 @@ class _ProfileTabState extends State<ProfileTab> {
                           await SharePlus.instance.share(ShareParams(
                               text:
                                   'Bliv en del af mit hold på Kopa! Klik her: https://kopa.ntthyssen.com/join?team_token=$token'));
+                          AppAnalytics.logEvent('invite_link_shared');
                         }
                       },
                     );

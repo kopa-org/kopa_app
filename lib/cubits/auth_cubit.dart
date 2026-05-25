@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopa/repositories/auth_repository.dart';
+import 'package:kopa/utils/app_analytics.dart';
 import 'auth_state.dart';
 
 class AuthCubit extends Cubit<AuthState> {
@@ -14,8 +15,10 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       final user = await _authRepository.getCurrentUser();
       if (user != null) {
+        await AppAnalytics.setCurrentUser(user);
         emit(state.copyWith(status: AuthStatus.authenticated, user: user));
       } else {
+        await AppAnalytics.setCurrentUser(null);
         emit(state.copyWith(status: AuthStatus.unauthenticated));
       }
     } catch (e) {
@@ -29,8 +32,11 @@ class AuthCubit extends Cubit<AuthState> {
     final success = await _authRepository.login(email, password);
     if (success) {
       final user = await _authRepository.getCurrentUser();
+      await AppAnalytics.logLogin(success: true);
+      await AppAnalytics.setCurrentUser(user);
       emit(state.copyWith(status: AuthStatus.authenticated, user: user));
     } else {
+      await AppAnalytics.logLogin(success: false);
       emit(state.copyWith(
         status: AuthStatus.failure,
         errorMessage: 'Login failed. Please check your credentials.',
@@ -40,6 +46,7 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<void> logout() async {
     await _authRepository.logout();
+    await AppAnalytics.setCurrentUser(null);
     emit(state.copyWith(status: AuthStatus.unauthenticated, user: null));
   }
 
@@ -53,15 +60,18 @@ class AuthCubit extends Cubit<AuthState> {
         roleId: 2, // Default roleId from previous register page
       );
       if (success) {
+        await AppAnalytics.logRegister(success: true);
         // Automatically login after successful registration
         await login(email, password);
       } else {
+        await AppAnalytics.logRegister(success: false);
         emit(state.copyWith(
           status: AuthStatus.failure,
           errorMessage: 'Registration failed. Please try again.',
         ));
       }
     } catch (e) {
+      await AppAnalytics.logRegister(success: false);
       emit(state.copyWith(
         status: AuthStatus.failure,
         errorMessage: e.toString(),

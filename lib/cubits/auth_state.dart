@@ -2,6 +2,8 @@ import 'package:kopa/model/user_details.dart';
 
 enum AuthStatus { initial, loading, authenticated, unauthenticated, failure }
 
+const Object _unset = Object();
+
 class AuthState {
   final AuthStatus status;
   final UserDetails? user;
@@ -17,12 +19,12 @@ class AuthState {
 
   AuthState copyWith({
     AuthStatus? status,
-    UserDetails? user,
+    Object? user = _unset,
     String? errorMessage,
   }) {
     return AuthState(
       status: status ?? this.status,
-      user: user ?? this.user,
+      user: user == _unset ? this.user : user as UserDetails?,
       errorMessage: errorMessage ?? this.errorMessage,
     );
   }
