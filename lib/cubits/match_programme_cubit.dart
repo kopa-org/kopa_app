@@ -6,11 +6,13 @@ import 'package:kopa/utils/app_analytics.dart';
 class MatchProgrammeCubit extends Cubit<MatchProgrammeState> {
   MatchProgrammeCubit() : super(const MatchProgrammeState());
 
-  Future<void> loadMatches() async {
-    emit(state.copyWith(
-      status: MatchProgrammeStatus.loading,
-      errorMessage: null,
-    ));
+  Future<void> loadMatches({bool showLoading = true}) async {
+    if (showLoading || state.status == MatchProgrammeStatus.initial) {
+      emit(state.copyWith(
+        status: MatchProgrammeStatus.loading,
+        errorMessage: null,
+      ));
+    }
 
     try {
       final matches = await MatchRepository.getMatches();

@@ -10,8 +10,10 @@ import 'package:kopa/repository/statistics_repository.dart';
 class HomeCubit extends Cubit<HomeState> {
   HomeCubit() : super(const HomeState());
 
-  Future<void> fetchDashboardData(int teamId) async {
-    emit(state.copyWith(status: HomeStatus.loading));
+  Future<void> fetchDashboardData(int teamId, {bool showLoading = true}) async {
+    if (showLoading || state.status == HomeStatus.initial) {
+      emit(state.copyWith(status: HomeStatus.loading));
+    }
     try {
       final results = await Future.wait([
         MatchRepository.getMatches(),

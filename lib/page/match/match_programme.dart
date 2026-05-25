@@ -139,7 +139,9 @@ class _MatchList extends StatelessWidget {
               const Duration(milliseconds: 350),
             );
             if (context.mounted) {
-              context.read<MatchProgrammeCubit>().loadMatches();
+              context.read<MatchProgrammeCubit>().loadMatches(
+                    showLoading: false,
+                  );
             }
           },
         );

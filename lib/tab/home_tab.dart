@@ -120,15 +120,21 @@ class _HomeTabView extends StatelessWidget {
                                   parameters: {'source': 'home_next_match'},
                                 );
                                 final homeCubit = context.read<HomeCubit>();
-                                await Navigator.of(context)
-                                    .push(MaterialWithModalsPageRoute(
-                                  builder: (context) => MatchDetailsPage(
-                                    matchId: nextMatch.id,
-                                    heroTag: heroTag,
+                                await Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => MatchDetailsPage(
+                                      matchId: nextMatch.id,
+                                      initialMatch: nextMatch,
+                                      heroTag: heroTag,
+                                    ),
                                   ),
-                                ));
+                                );
+                                await Future<void>.delayed(
+                                  const Duration(milliseconds: 350),
+                                );
                                 homeCubit.fetchDashboardData(
                                   currentUser.teamDetails!.id,
+                                  showLoading: false,
                                 );
                               },
                             ),
