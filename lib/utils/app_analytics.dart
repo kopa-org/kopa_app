@@ -27,6 +27,7 @@ abstract final class AppAnalytics {
 
     await _analytics.setAnalyticsCollectionEnabled(true);
     _initialized = true;
+    await _setDefaultEventParameters();
   }
 
   static Future<void> setCurrentUser(UserDetails? user) async {
@@ -42,6 +43,7 @@ abstract final class AppAnalytics {
         await _analytics.setUserProperty(name: 'is_team_owner', value: null);
         await _analytics.setUserProperty(name: 'has_team', value: null);
       });
+      await _setDefaultEventParameters();
       return;
     }
 
@@ -64,6 +66,7 @@ abstract final class AppAnalytics {
         value: (user.teamDetails != null).toString(),
       );
     });
+    await _setDefaultEventParameters(user: user);
   }
 
   static Future<void> logScreenView(String screenName) {
@@ -102,5 +105,24 @@ abstract final class AppAnalytics {
         debugPrintStack(stackTrace: stack);
       }
     }
+  }
+
+  static Future<void> _setDefaultEventParameters({UserDetails? user}) async {
+    if (!CrashReporting.isFirebaseSupported || kIsWeb) {
+      return;
+    }
+
+    final teamId = user?.teamDetails?.id.toString();
+    final roleId = user?.roleId.toString();
+    final isTeamOwner = user?.isTeamOwner.toString();
+
+    await _guard(() {
+      return _analytics.setDefaultEventParameters({
+        'team_id': teamId,
+        'role_id': roleId,
+        'is_team_owner': isTeamOwner,
+        'has_team': (user?.teamDetails != null).toString(),
+      });
+    });
   }
 }

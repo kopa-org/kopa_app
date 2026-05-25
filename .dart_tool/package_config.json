@@ -80,6 +80,12 @@
       "languageVersion": "2.17"
     },
     {
+      "name": "dbus",
+      "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/dbus-0.7.12",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
+    },
+    {
       "name": "fake_async",
       "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/fake_async-1.3.3",
       "packageUri": "lib/",
@@ -146,6 +152,24 @@
       "languageVersion": "3.2"
     },
     {
+      "name": "firebase_messaging",
+      "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/firebase_messaging-16.2.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "firebase_messaging_platform_interface",
+      "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/firebase_messaging_platform_interface-4.7.9",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "firebase_messaging_web",
+      "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/firebase_messaging_web-4.1.5",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
       "name": "fixnum",
       "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/fixnum-1.1.1",
       "packageUri": "lib/",
@@ -174,6 +198,30 @@
       "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/flutter_lints-5.0.0",
       "packageUri": "lib/",
       "languageVersion": "3.5"
+    },
+    {
+      "name": "flutter_local_notifications",
+      "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/flutter_local_notifications-19.5.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "flutter_local_notifications_linux",
+      "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/flutter_local_notifications_linux-6.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "flutter_local_notifications_platform_interface",
+      "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/flutter_local_notifications_platform_interface-9.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "flutter_local_notifications_windows",
+      "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/flutter_local_notifications_windows-1.0.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
     },
     {
       "name": "flutter_localizations",
@@ -516,6 +564,12 @@
       "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/test_api-0.7.10",
       "packageUri": "lib/",
       "languageVersion": "3.7"
+    },
+    {
+      "name": "timezone",
+      "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/timezone-0.10.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.19"
     },
     {
       "name": "typed_data",

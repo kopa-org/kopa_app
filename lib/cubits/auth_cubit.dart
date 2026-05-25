@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopa/repositories/auth_repository.dart';
 import 'package:kopa/utils/app_analytics.dart';
+import 'package:kopa/services/push_notifications_service.dart';
 import 'auth_state.dart';
 
 class AuthCubit extends Cubit<AuthState> {
@@ -45,6 +46,7 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   Future<void> logout() async {
+    await PushNotificationsService.instance.unregisterCurrentToken();
     await _authRepository.logout();
     await AppAnalytics.setCurrentUser(null);
     emit(state.copyWith(status: AuthStatus.unauthenticated, user: null));

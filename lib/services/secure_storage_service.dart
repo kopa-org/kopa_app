@@ -24,6 +24,18 @@ class SecureStorageService {
     return await _storage.read(key: 'token');
   }
 
+  static Future<void> setPushToken(String token) async {
+    await _storage.write(key: 'pushToken', value: token);
+  }
+
+  static Future<String?> getPushToken() async {
+    return await _storage.read(key: 'pushToken');
+  }
+
+  static Future<void> deletePushToken() async {
+    await _storage.delete(key: 'pushToken');
+  }
+
   // ------------------------
   // User info methods
   // ------------------------

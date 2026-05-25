@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
+import 'package:kopa/cubits/auth_state.dart';
 import 'package:kopa/navigation/app_router.dart';
 import 'package:kopa/navigation/router_refresh_notifier.dart';
 import 'package:kopa/repositories/auth_repository.dart';
@@ -13,6 +16,7 @@ import 'package:kopa/repository/onboarding_repository.dart';
 import 'package:kopa/cubits/onboarding_cubit.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/theme/app_theme.dart';
+import 'package:kopa/services/push_notifications_service.dart';
 import 'package:kopa/utils/app_analytics.dart';
 
 void main() async {
@@ -21,6 +25,7 @@ void main() async {
     await dotenv.load(fileName: '.env');
     await CrashReporting.initialize();
     await AppAnalytics.initialize();
+    await PushNotificationsService.instance.initialize();
 
     final authRepository = ApiAuthRepository();
     final onboardingRepository = OnboardingRepository();
@@ -63,6 +68,7 @@ class KopaApp extends StatefulWidget {
 class _KopaAppState extends State<KopaApp> {
   late final RouterRefreshNotifier _refreshNotifier;
   late final GoRouter _router;
+  StreamSubscription<AuthState>? _authSubscription;
 
   @override
   void initState() {
@@ -73,12 +79,23 @@ class _KopaAppState extends State<KopaApp> {
       onboardingCubit: widget.onboardingCubit,
       refreshListenable: _refreshNotifier,
     );
+    _authSubscription = widget.authCubit.stream.listen(_handleAuthStateChanged);
+    _handleAuthStateChanged(widget.authCubit.state);
   }
 
   @override
   void dispose() {
+    _authSubscription?.cancel();
     _refreshNotifier.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleAuthStateChanged(AuthState state) async {
+    if (!state.isAuthenticated) {
+      return;
+    }
+
+    await PushNotificationsService.instance.syncForUser(state.user);
   }
 
   @override
