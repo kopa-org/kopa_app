@@ -4,6 +4,7 @@ class EventAttendanceDetails {
   final int id;
   final UserDetails userDetails;
   final bool isAttending;
+  final bool? isSelected;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -11,6 +12,7 @@ class EventAttendanceDetails {
     required this.id,
     required this.userDetails,
     required this.isAttending,
+    this.isSelected,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -20,6 +22,7 @@ class EventAttendanceDetails {
       id: json['id'],
       userDetails: UserDetails.fromJson(json['user_details']),
       isAttending: json['is_attending'],
+      isSelected: json['is_selected'],
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
     );

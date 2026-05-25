@@ -9,6 +9,7 @@ class MatchDetailTemplate extends StatelessWidget {
   final List<Widget> attendanceList;
   final List<Widget> timelineItems;
   final Widget? votingModule;
+  final Widget? ratingsSection;
   final Future<void> Function()? onRefresh;
 
   const MatchDetailTemplate({
@@ -18,6 +19,7 @@ class MatchDetailTemplate extends StatelessWidget {
     this.attendanceList = const [],
     this.timelineItems = const [],
     this.votingModule,
+    this.ratingsSection,
     this.onRefresh,
   });
 
@@ -46,11 +48,17 @@ class MatchDetailTemplate extends StatelessWidget {
             if (attendanceList.isNotEmpty) ...[
               const SizedBox(height: Spacing.lg),
               SectionHeader(
-                title: 'Holdopstilling',
+                title: 'Tilmeldte spillere',
                 actionText: 'Se alle',
                 onActionPressed: () {},
               ),
               ...attendanceList,
+            ],
+            if (ratingsSection != null) ...[
+              const SizedBox(height: Spacing.lg),
+              const SectionHeader(title: 'Kamprating'),
+              const SizedBox(height: Spacing.md),
+              ratingsSection!,
             ],
             if (timelineItems.isNotEmpty) ...[
               const SizedBox(height: Spacing.lg),

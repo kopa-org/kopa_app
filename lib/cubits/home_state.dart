@@ -11,6 +11,7 @@ class HomeState {
   final StatisticsResponse? statistics;
   final FineBoxDetails? fineBox;
   final String? errorMessage;
+  final bool isRegisteringForNextMatch;
 
   const HomeState({
     this.status = HomeStatus.initial,
@@ -19,6 +20,7 @@ class HomeState {
     this.statistics,
     this.fineBox,
     this.errorMessage,
+    this.isRegisteringForNextMatch = false,
   });
 
   HomeState copyWith({
@@ -28,6 +30,7 @@ class HomeState {
     StatisticsResponse? statistics,
     FineBoxDetails? fineBox,
     String? errorMessage,
+    bool? isRegisteringForNextMatch,
   }) {
     return HomeState(
       status: status ?? this.status,
@@ -36,6 +39,8 @@ class HomeState {
       statistics: statistics ?? this.statistics,
       fineBox: fineBox ?? this.fineBox,
       errorMessage: errorMessage ?? this.errorMessage,
+      isRegisteringForNextMatch:
+          isRegisteringForNextMatch ?? this.isRegisteringForNextMatch,
     );
   }
 }

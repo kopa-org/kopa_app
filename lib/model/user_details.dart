@@ -6,6 +6,8 @@ class UserDetails {
   final String email;
   final bool isTeamOwner;
   final int roleId;
+  final DateTime? dateOfBirth;
+  final String? position;
   final DateTime createdAt;
   final DateTime updatedAt;
   final TeamDetails? teamDetails;
@@ -16,6 +18,8 @@ class UserDetails {
       required this.email,
       required this.isTeamOwner,
       required this.roleId,
+      this.dateOfBirth,
+      this.position,
       required this.createdAt,
       required this.updatedAt,
       required this.teamDetails});
@@ -27,6 +31,10 @@ class UserDetails {
       email: json['email'],
       isTeamOwner: json['is_team_owner'],
       roleId: json['role_id'],
+      dateOfBirth: json['date_of_birth'] == null
+          ? null
+          : DateTime.tryParse(json['date_of_birth']),
+      position: json['position'],
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
       teamDetails: json['team_details'] == null

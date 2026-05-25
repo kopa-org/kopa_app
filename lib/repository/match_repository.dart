@@ -130,7 +130,7 @@ class MatchRepository {
     }
   }
 
-  static Future<int> registerForMatch(int matchId) async {
+  static Future<void> registerForMatch(int matchId) async {
     await dotenv.load(); // Initialize dotenv
 
     final token = await _secureStorage.read(key: 'token');
@@ -160,11 +160,10 @@ class MatchRepository {
       throw Exception('Failed to register for match');
     }
 
-    final jsonResponse = jsonDecode(response.body);
-    return jsonResponse['id'];
+    return;
   }
 
-  static Future<int> unregisterFromMatch(int matchId) async {
+  static Future<void> unregisterFromMatch(int matchId) async {
     await dotenv.load(); // Initialize dotenv
 
     final token = await _secureStorage.read(key: 'token');
@@ -194,8 +193,7 @@ class MatchRepository {
       throw Exception('Failed to unregister from match');
     }
 
-    final jsonResponse = jsonDecode(response.body);
-    return jsonResponse['id'];
+    return;
   }
 
   static Future<void> updateMatchScore(

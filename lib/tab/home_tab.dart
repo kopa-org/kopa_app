@@ -5,8 +5,6 @@ import 'package:kopa/component/button/full_width_button.dart';
 import 'package:kopa/component/card/kopa_card.dart';
 import 'package:kopa/component/card/match_hero_card.dart';
 import 'package:kopa/component/card/stat_card.dart';
-import 'package:kopa/component/card/task_card.dart';
-import 'package:kopa/component/chip/status_chip.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/component/section_header/section_header.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
@@ -25,6 +23,7 @@ import 'package:kopa/page/match/match_details_page.dart';
 import 'package:kopa/page/team_fines/team_fines_page.dart';
 import 'package:kopa/utils/app_analytics.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
@@ -138,28 +137,18 @@ class _HomeTabView extends StatelessWidget {
                                 );
                               },
                             ),
+                            const SizedBox(height: 12),
+                            _buildNextMatchSummary(
+                              context,
+                              nextMatch,
+                              appColors,
+                              appTextStyles,
+                            ),
                           ],
                         );
                       }),
-                      const SizedBox(height: 12),
-                      if (!nextMatch.isCurrentUserRegistered)
-                        FullWidthButton(
-                          buttonText: 'Tilmeld til kamp',
-                          onPressed: () {
-                            AppAnalytics.logEvent(
-                              'match_registered',
-                              parameters: {'source': 'home_next_match'},
-                            );
-                            context.read<HomeCubit>().registerForMatch(
-                                nextMatch.id, currentUser.teamDetails!.id);
-                          },
-                        ),
                       const SizedBox(height: 32),
                     ],
-                    const SectionHeader(title: 'Praktiske opgaver'),
-                    const SizedBox(height: 12),
-                    _buildTasksSection(),
-                    const SizedBox(height: 32),
                     if (lastMatch != null) ...[
                       const SectionHeader(title: 'Seneste kamp'),
                       const SizedBox(height: 12),
@@ -204,7 +193,7 @@ class _HomeTabView extends StatelessWidget {
       children: [
         Expanded(
           child: Text(
-            'Personlig velkommen til\n$firstName',
+            'Velkommen \n$firstName',
             style: styles.pageTitle.copyWith(fontSize: 24),
           ),
         ),
@@ -217,30 +206,84 @@ class _HomeTabView extends StatelessWidget {
     );
   }
 
-  Widget _buildTasksSection() {
-    return Column(
-      children: const [
-        TaskCard(
-          title: 'Snacks',
-          statusLabel: 'Manglet',
-          status: ChipStatus.warning,
-          assignedPersonName: 'Jonas',
-        ),
-        SizedBox(height: 8),
-        TaskCard(
-          title: 'Tøjvask',
-          statusLabel: 'Klar',
-          status: ChipStatus.success,
-          assignedPersonName: 'Emil',
-        ),
-        SizedBox(height: 8),
-        TaskCard(
-          title: 'Carpool (3 pladser)',
-          statusLabel: 'Åben',
-          status: ChipStatus.info,
-          assignedPersonName: 'Peter',
-        ),
-      ],
+  Widget _buildNextMatchSummary(BuildContext context, MatchDetails match,
+      AppColors colors, AppTextStyles styles) {
+    final countdown = match.countdown;
+    final isPast = countdown.isNegative;
+    final days = countdown.inDays.abs();
+    final hours = countdown.inHours.abs() % 24;
+    final minutes = countdown.inMinutes.abs() % 60;
+    final countdownLabel = isPast
+        ? 'Kampen er startet'
+        : '$days dage · $hours timer · $minutes min';
+
+    return KopaCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildFineRow('Countdown', countdownLabel, styles),
+          const SizedBox(height: 8),
+          _buildFineRow(
+            'Dato og tid',
+            '${DateHelper.getFormattedDate(match.date)} kl. ${DateHelper.getFormattedTime(match.date)}',
+            styles,
+          ),
+          const SizedBox(height: 8),
+          _buildFineRow(
+            'Tilmeldte',
+            '${match.registeredCount}',
+            styles,
+          ),
+          const SizedBox(height: 8),
+          _buildFineRow(
+            'Din status',
+            match.isCurrentUserRegistered ? 'Tilmeldt' : 'Ikke tilmeldt',
+            styles,
+          ),
+          const SizedBox(height: 8),
+          _buildFineRow(
+            'Udtagelse',
+            match.isCurrentUserSelected == true
+                ? 'Udtaget'
+                : match.isCurrentUserSelected == false
+                    ? 'Ikke udtaget'
+                    : 'Afventer',
+            styles,
+          ),
+          const SizedBox(height: 16),
+          if (!match.isCurrentUserRegistered)
+            FullWidthButton(
+              buttonText:
+                  context.watch<HomeCubit>().state.isRegisteringForNextMatch
+                      ? 'Tilmelder...'
+                      : 'Tilmeld til kamp',
+              onPressed:
+                  context.watch<HomeCubit>().state.isRegisteringForNextMatch
+                      ? () {}
+                      : () {
+                          AppAnalytics.logEvent(
+                            'match_registered',
+                            parameters: {'source': 'home_next_match'},
+                          );
+                          final teamId = context
+                                  .read<AuthCubit>()
+                                  .state
+                                  .user
+                                  ?.teamDetails
+                                  ?.id ??
+                              0;
+                          context
+                              .read<HomeCubit>()
+                              .registerForMatch(match.id, teamId);
+                        },
+            ),
+          const SizedBox(height: 8),
+          FullWidthButton(
+            buttonText: 'Åbn navigation',
+            onPressed: () => _openNavigation(match),
+          ),
+        ],
+      ),
     );
   }
 
@@ -319,6 +362,14 @@ class _HomeTabView extends StatelessWidget {
         )),
       ],
     );
+  }
+
+  Future<void> _openNavigation(MatchDetails match) async {
+    final query = Uri.encodeComponent(match.location);
+    final uri = Uri.parse(
+      'https://www.google.com/maps/search/?api=1&query=$query',
+    );
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   Widget _buildFineBoxCard(BuildContext context, FineBoxDetails fineBox,

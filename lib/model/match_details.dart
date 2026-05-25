@@ -1,6 +1,7 @@
 import 'package:kopa/model/match_event_details.dart';
 import 'package:kopa/model/match_poll_details.dart';
 import 'package:kopa/model/event_attendance_details.dart';
+import 'package:kopa/model/player_rating_summary.dart';
 
 class MatchDetails {
   final int id;
@@ -18,8 +19,14 @@ class MatchDetails {
   final int? awayTeamScore;
   final bool? isHomeTeam;
   final bool isCurrentUserRegistered;
+  final bool? isCurrentUserSelected;
+  final int registeredCount;
+  final int unavailableCount;
+  final double? latitude;
+  final double? longitude;
   final List<EventAttendanceDetails>? attendanceDetailsList;
   final List<MatchEventDetails>? matchEventDetailsList;
+  final List<PlayerRatingSummary>? playerRatingDetailsList;
 
   MatchDetails({
     required this.id,
@@ -37,8 +44,14 @@ class MatchDetails {
     this.awayTeamScore,
     this.isHomeTeam,
     this.isCurrentUserRegistered = false,
+    this.isCurrentUserSelected,
+    this.registeredCount = 0,
+    this.unavailableCount = 0,
+    this.latitude,
+    this.longitude,
     this.attendanceDetailsList = const [],
     this.matchEventDetailsList = const [],
+    this.playerRatingDetailsList = const [],
   });
 
   factory MatchDetails.fromJson(Map<String, dynamic> json) {
@@ -60,6 +73,11 @@ class MatchDetails {
       awayTeamScore: json['away_team_score'],
       isHomeTeam: json['is_home_team'],
       isCurrentUserRegistered: json['is_current_user_registered'] ?? false,
+      isCurrentUserSelected: json['is_current_user_selected'],
+      registeredCount: json['registered_count'] ?? 0,
+      unavailableCount: json['unavailable_count'] ?? 0,
+      latitude: (json['latitude'] as num?)?.toDouble(),
+      longitude: (json['longitude'] as num?)?.toDouble(),
       attendanceDetailsList: json['attendance_details_list'] != null
           ? List<EventAttendanceDetails>.from(json['attendance_details_list']
               .map((x) => EventAttendanceDetails.fromJson(x)))
@@ -67,6 +85,10 @@ class MatchDetails {
       matchEventDetailsList: json['match_event_details_list'] != null
           ? List<MatchEventDetails>.from(json['match_event_details_list']
               .map((x) => MatchEventDetails.fromJson(x)))
+          : [],
+      playerRatingDetailsList: json['player_rating_details_list'] != null
+          ? List<PlayerRatingSummary>.from(json['player_rating_details_list']
+              .map((x) => PlayerRatingSummary.fromJson(x)))
           : [],
     );
   }
@@ -78,6 +100,8 @@ class MatchDetails {
   bool get hasMatchBeenPlayed {
     return homeTeamScore != null && awayTeamScore != null;
   }
+
+  Duration get countdown => date.difference(DateTime.now());
 }
 
 DateTime? _parseMeetingTime(dynamic v) {

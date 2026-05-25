@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kopa/model/statistics.dart';
+import 'package:kopa/page/player_plus/player_plus_live_page.dart';
 import 'package:kopa/page/statistics/widgets/stat_card.dart';
 import 'package:kopa/page/statistics/widgets/attendance_card.dart';
 import 'package:kopa/page/statistics/widgets/fines_card.dart';
@@ -24,14 +25,36 @@ class PlayerStatsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
-          child: Text(
-            'Mine Stats',
-            style: appTextStyles.sectionHeader.copyWith(
-              color: appColors.primary,
+        Row(
+          children: [
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+              child: Text(
+                'Mine Stats',
+                style: appTextStyles.sectionHeader.copyWith(
+                  color: appColors.primary,
+                ),
+              ),
             ),
-          ),
+            const Spacer(),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PlayerPlusLivePage(),
+                  ),
+                );
+              },
+              child: Text(
+                'Player+ Stats',
+                style: appTextStyles.button.copyWith(
+                  color: appColors.primary,
+                ),
+              ),
+            ),
+          ],
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),

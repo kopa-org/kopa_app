@@ -40,7 +40,7 @@ class ClubStats {
   final int losses;
   final int goalsFor;
   final int goalsAgainst;
-  final List<int> lastFiveMatchesForm; // 1 for win, 0 for draw, -1 for loss
+  final List<int> lastFiveMatchesForm;
 
   ClubStats({
     required this.wins,
@@ -65,39 +65,125 @@ class ClubStats {
   }
 }
 
+class LeaderboardRow {
+  final int userId;
+  final String userName;
+  final num value;
+
+  LeaderboardRow({
+    required this.userId,
+    required this.userName,
+    required this.value,
+  });
+
+  factory LeaderboardRow.fromJson(Map<String, dynamic> json) {
+    return LeaderboardRow(
+      userId: json['user_id'] ?? 0,
+      userName: json['user_name'] ?? 'Ukendt',
+      value: json['value'] ?? 0,
+    );
+  }
+}
+
+class InFormRow {
+  final int userId;
+  final String userName;
+  final int points;
+
+  InFormRow({
+    required this.userId,
+    required this.userName,
+    required this.points,
+  });
+
+  factory InFormRow.fromJson(Map<String, dynamic> json) {
+    return InFormRow(
+      userId: json['user_id'] ?? 0,
+      userName: json['user_name'] ?? 'Ukendt',
+      points: json['points'] ?? 0,
+    );
+  }
+}
+
+class TeamMetrics {
+  final double? teamAveragePoints;
+  final List<int> teamForm;
+  final int goalsScored;
+  final int goalsConceded;
+
+  TeamMetrics({
+    required this.teamAveragePoints,
+    required this.teamForm,
+    required this.goalsScored,
+    required this.goalsConceded,
+  });
+
+  factory TeamMetrics.fromJson(Map<String, dynamic> json) {
+    return TeamMetrics(
+      teamAveragePoints: (json['team_average_points'] as num?)?.toDouble(),
+      teamForm: (json['team_form'] as List<dynamic>? ?? []).cast<int>(),
+      goalsScored: json['goals_scored'] ?? 0,
+      goalsConceded: json['goals_conceded'] ?? 0,
+    );
+  }
+}
+
+class Leaderboards {
+  final List<LeaderboardRow> topScorers;
+  final List<LeaderboardRow> assists;
+  final List<LeaderboardRow> matchesPlayed;
+  final List<LeaderboardRow> mostVotes;
+  final List<LeaderboardRow> bestPointsAverage;
+
+  Leaderboards({
+    required this.topScorers,
+    required this.assists,
+    required this.matchesPlayed,
+    required this.mostVotes,
+    required this.bestPointsAverage,
+  });
+
+  factory Leaderboards.fromJson(Map<String, dynamic> json) {
+    List<LeaderboardRow> parse(String key) {
+      return (json[key] as List<dynamic>? ?? [])
+          .map((row) => LeaderboardRow.fromJson(row))
+          .toList();
+    }
+
+    return Leaderboards(
+      topScorers: parse('top_scorers'),
+      assists: parse('assists'),
+      matchesPlayed: parse('matches_played'),
+      mostVotes: parse('most_votes'),
+      bestPointsAverage: parse('best_points_average'),
+    );
+  }
+}
+
 class StatisticsResponse {
   final PlayerStats player;
   final ClubStats club;
+  final List<InFormRow> inFormRows;
+  final Leaderboards leaderboards;
+  final TeamMetrics teamMetrics;
 
-  StatisticsResponse({required this.player, required this.club});
+  StatisticsResponse({
+    required this.player,
+    required this.club,
+    required this.inFormRows,
+    required this.leaderboards,
+    required this.teamMetrics,
+  });
 
   factory StatisticsResponse.fromJson(Map<String, dynamic> json) {
     return StatisticsResponse(
       player: PlayerStats.fromJson(json['player']),
       club: ClubStats.fromJson(json['club']),
+      inFormRows: (json['in_form_rows'] as List<dynamic>? ?? [])
+          .map((row) => InFormRow.fromJson(row))
+          .toList(),
+      leaderboards: Leaderboards.fromJson(json['leaderboards'] ?? {}),
+      teamMetrics: TeamMetrics.fromJson(json['team_metrics'] ?? {}),
     );
   }
-}
-
-/// Hardcoded mock data for UI development before the backend is connected.
-class MockData {
-  static final playerStats = PlayerStats(
-    name: 'Mads Futte',
-    matchesPlayed: 14,
-    trainingAttendancePercentage: 82.5,
-    goalsScored: 6,
-    assists: 4,
-    yellowCards: 2,
-    redCards: 0,
-    finesTotal: 250.0,
-  );
-
-  static final clubStats = ClubStats(
-    wins: 9,
-    draws: 3,
-    losses: 2,
-    goalsFor: 28,
-    goalsAgainst: 12,
-    lastFiveMatchesForm: [1, 1, 0, -1, 1], // W, W, D, L, W
-  );
 }

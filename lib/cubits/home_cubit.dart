@@ -51,11 +51,14 @@ class HomeCubit extends Cubit<HomeState> {
         lastMatch: lastMatch,
         statistics: statistics,
         fineBox: fineBox,
+        isRegisteringForNextMatch: false,
+        errorMessage: null,
       ));
     } catch (e) {
       emit(state.copyWith(
         status: HomeStatus.failure,
         errorMessage: e.toString(),
+        isRegisteringForNextMatch: false,
       ));
     }
   }
@@ -63,11 +66,8 @@ class HomeCubit extends Cubit<HomeState> {
   Future<StatisticsResponse?> _safeFetchStats(int teamId) async {
     try {
       return await StatisticsRepository.getStatistics(teamId);
-    } catch (e) {
-      return StatisticsResponse(
-        player: MockData.playerStats,
-        club: MockData.clubStats,
-      );
+    } catch (_) {
+      return null;
     }
   }
 
@@ -80,11 +80,53 @@ class HomeCubit extends Cubit<HomeState> {
   }
 
   Future<void> registerForMatch(int matchId, int teamId) async {
+    if (state.isRegisteringForNextMatch) return;
+
+    final nextMatch = state.nextMatch;
+    if (nextMatch != null && nextMatch.id == matchId) {
+      emit(state.copyWith(
+        nextMatch: MatchDetails(
+          id: nextMatch.id,
+          type: nextMatch.type,
+          homeTeam: nextMatch.homeTeam,
+          awayTeam: nextMatch.awayTeam,
+          date: nextMatch.date,
+          meetingTime: nextMatch.meetingTime,
+          location: nextMatch.location,
+          createdAt: nextMatch.createdAt,
+          updatedAt: nextMatch.updatedAt,
+          notes: nextMatch.notes,
+          matchPollDetails: nextMatch.matchPollDetails,
+          homeTeamScore: nextMatch.homeTeamScore,
+          awayTeamScore: nextMatch.awayTeamScore,
+          isHomeTeam: nextMatch.isHomeTeam,
+          isCurrentUserRegistered: true,
+          isCurrentUserSelected: nextMatch.isCurrentUserSelected,
+          registeredCount: nextMatch.isCurrentUserRegistered
+              ? nextMatch.registeredCount
+              : nextMatch.registeredCount + 1,
+          unavailableCount: nextMatch.unavailableCount,
+          latitude: nextMatch.latitude,
+          longitude: nextMatch.longitude,
+          attendanceDetailsList: nextMatch.attendanceDetailsList,
+          matchEventDetailsList: nextMatch.matchEventDetailsList,
+          playerRatingDetailsList: nextMatch.playerRatingDetailsList,
+        ),
+        isRegisteringForNextMatch: true,
+      ));
+    } else {
+      emit(state.copyWith(isRegisteringForNextMatch: true));
+    }
+
     try {
       await MatchRepository.registerForMatch(matchId);
-      await fetchDashboardData(teamId);
+      await fetchDashboardData(teamId, showLoading: false);
     } catch (e) {
-      // Intentionally swallow or log?
+      emit(state.copyWith(
+        isRegisteringForNextMatch: false,
+        errorMessage: e.toString(),
+      ));
+      await fetchDashboardData(teamId, showLoading: false);
     }
   }
 }

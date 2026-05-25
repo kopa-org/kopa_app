@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:kopa/helpers/api_config.dart';
 import 'package:kopa/model/add_user_to_team_command.dart';
+import 'package:kopa/model/player_profile.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/services/secure_storage_service.dart';
 import 'package:http/http.dart' as http;
@@ -71,5 +72,24 @@ class UsersRepository {
     if (response.statusCode != 200) {
       throw Exception('Failed to update calendar URL');
     }
+  }
+
+  static Future<PlayerProfile> getPlayerProfile(int playerId) async {
+    await dotenv.load();
+
+    final token = await SecureStorageService.getToken();
+    final url = Uri.parse('${ApiConfig.baseUrl}/user/$playerId/profile');
+
+    final response = await http.get(url, headers: {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+    });
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to fetch player profile');
+    }
+
+    final json = jsonDecode(response.body)['profile'];
+    return PlayerProfile.fromJson(json);
   }
 }

@@ -1,21 +1,14 @@
-import 'dart:convert';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:kopa/component/button/full_width_button.dart';
-import 'package:kopa/component/loading_indicator.dart';
+import 'package:kopa/component/future_handler.dart';
+import 'package:kopa/component/list_item/player_list_item.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
-import 'package:go_router/go_router.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kopa/cubits/auth_cubit.dart';
-import 'package:kopa/cubits/onboarding_cubit.dart';
-import 'package:kopa/navigation/app_router.dart';
+import 'package:kopa/model/user_details.dart';
+import 'package:kopa/page/profile/player_profile_page.dart';
+import 'package:kopa/page/profile/profile_settings_page.dart';
+import 'package:kopa/repository/users_repository.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:http/http.dart' as http;
-import 'package:icalendar_parser/icalendar_parser.dart';
-import 'package:kopa/repository/users_repository.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:kopa/utils/app_analytics.dart';
 
 class ProfileTab extends StatefulWidget {
   const ProfileTab({super.key});
@@ -25,14 +18,18 @@ class ProfileTab extends StatefulWidget {
 }
 
 class _ProfileTabState extends State<ProfileTab> {
-  bool _isLoading = false;
-  String? _errorMessage;
-  final _emailController = TextEditingController();
+  late Future<List<UserDetails>> _squadFuture;
 
   @override
-  void dispose() {
-    _emailController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    _squadFuture = UsersRepository.getSquad();
+  }
+
+  Future<void> _refresh() async {
+    setState(() {
+      _squadFuture = UsersRepository.getSquad();
+    });
   }
 
   @override
@@ -41,390 +38,86 @@ class _ProfileTabState extends State<ProfileTab> {
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
-    final currentUser = context.read<AuthCubit>().state.user;
-
-    Future<void> logout() async {
-      setState(() {
-        _isLoading = true;
-        _errorMessage = null;
-      });
-
-      try {
-        await context.read<AuthCubit>().logout();
-      } catch (e) {
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-            _errorMessage = 'Brugeren kunne ikke logges ud: ${e.toString()}';
-          });
-        }
-      }
-    }
 
     return PageScaffold(
-        title: 'Profil',
-        showBackButton: false,
-        backgroundColor: appColors.background,
-        body: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(30, 50, 30, 30),
-            child: Column(children: <Widget>[
-              if (_errorMessage != null)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
-                  child: Text(
-                    _errorMessage!,
-                    style: appTextStyles.body
-                        .copyWith(color: appColors.error, fontSize: 14),
-                    textAlign: TextAlign.center,
+      title: 'Profil',
+      showBackButton: false,
+      backgroundColor: appColors.background,
+      trailing: [
+        CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const ProfileSettingsPage(),
+              ),
+            );
+          },
+          child: const Icon(CupertinoIcons.gear_alt),
+        ),
+      ],
+      body: RefreshIndicator(
+        onRefresh: _refresh,
+        child: FutureHandler<List<UserDetails>>(
+          future: _squadFuture,
+          noDataFoundMessage: 'Ingen spillere fundet.',
+          onSuccess: (context, squad) {
+            return ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(16, 24, 16, 32),
+              children: [
+                Text(
+                  'Truppen',
+                  style: appTextStyles.pageTitle,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Alle spillere på holdet. Tryk på en spiller for at se profil, kampe og bøder.',
+                  style: appTextStyles.body.copyWith(
+                    color: appColors.textSecondary,
                   ),
                 ),
-              if (!_isLoading) ...[
-                FullWidthButton(
-                  buttonText: 'Importér kampprogram',
-                  onPressed: () async {
-                    AppAnalytics.logEvent('dbu_webview_opened');
-                    final result =
-                        await context.push<String>(AppRouter.dbuWebview);
-                    if (result != null && context.mounted) {
-                      try {
-                        Map<String, dynamic> resultData;
-                        try {
-                          resultData = jsonDecode(result);
-                        } catch (e) {
-                          resultData = {'webcal': result, 'matches': []};
-                        }
-
-                        final String webcalLink = resultData['webcal'] ?? '';
-                        final List<dynamic> scrapedMatches =
-                            resultData['matches'] ?? [];
-                        final List<dynamic> scrapedPlayers =
-                            resultData['players'] ?? [];
-                        if (webcalLink.isEmpty) return;
-
-                        final uri = Uri.parse(webcalLink);
-
-                        try {
-                          final httpUrl =
-                              webcalLink.replaceFirst('webcal://', 'https://');
-                          final response = await http.get(Uri.parse(httpUrl));
-                          if (response.statusCode == 200) {
-                            final iCalendar =
-                                ICalendar.fromString(response.body);
-                            final events = iCalendar.data
-                                .where((e) => e['type'] == 'VEVENT')
-                                .toList();
-
-                            try {
-                              await UsersRepository.setCalendarUrl(httpUrl);
-                            } catch (e) {
-                              print(
-                                  'Failed to save calendar URL to backend: $e');
-                            }
-                            AppAnalytics.logEvent(
-                              'dbu_calendar_import_success',
-                              parameters: {
-                                'match_count': scrapedMatches.length,
-                                'player_count': scrapedPlayers.length,
-                              },
-                            );
-
-                            List<Map<String, dynamic>> combinedEvents =
-                                List.from(events);
-                            final now = DateTime.now();
-
-                            for (var scraped in scrapedMatches) {
-                              final String scrapedDate =
-                                  scraped['dtstart']?.toString() ?? '';
-                              bool isFuture = false;
-
-                              if (scrapedDate.length == 16) {
-                                try {
-                                  final parsedDate = DateTime.parse(
-                                          '${scrapedDate.substring(0, 4)}-${scrapedDate.substring(4, 6)}-${scrapedDate.substring(6, 11)}:${scrapedDate.substring(11, 13)}:${scrapedDate.substring(13, 16)}')
-                                      .toLocal();
-                                  if (parsedDate.isAfter(now)) {
-                                    isFuture = true;
-                                  }
-                                } catch (_) {}
-                              }
-
-                              if (isFuture) continue;
-
-                              combinedEvents.add({
-                                'summary': scraped['summary'],
-                                'dtstart': scraped['dtstart'],
-                                'dtend': '',
-                                'location': scraped['result'] != null &&
-                                        scraped['result'].toString().isNotEmpty
-                                    ? "Resultat: ${scraped['result']}"
-                                    : '',
-                              });
-                            }
-
-                            combinedEvents.sort((a, b) {
-                              final aDateStr = (a['dtstart'] is IcsDateTime
-                                  ? (a['dtstart'] as IcsDateTime).dt
-                                  : a['dtstart'].toString());
-                              final bDateStr = (b['dtstart'] is IcsDateTime
-                                  ? (b['dtstart'] as IcsDateTime).dt
-                                  : b['dtstart'].toString());
-                              return bDateStr.compareTo(aDateStr);
-                            });
-
-                            if (context.mounted &&
-                                (combinedEvents.isNotEmpty ||
-                                    scrapedPlayers.isNotEmpty)) {
-                              await showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                useSafeArea: true,
-                                builder: (context) {
-                                  return DraggableScrollableSheet(
-                                    expand: false,
-                                    initialChildSize: 0.8,
-                                    minChildSize: 0.5,
-                                    maxChildSize: 0.95,
-                                    builder: (context, scrollController) {
-                                      return ScrapedMembersWidget(
-                                        players: scrapedPlayers,
-                                        scrollController: scrollController,
-                                      );
-                                    },
-                                  );
-                                },
+                const SizedBox(height: 20),
+                Container(
+                  decoration: BoxDecoration(
+                    color: appColors.surface,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
+                    children: List.generate(squad.length, (index) {
+                      final player = squad[index];
+                      return Column(
+                        children: [
+                          PlayerListItem(
+                            name: player.name,
+                            subtitle: player.position ??
+                                (player.isTeamOwner ? 'Holdleder' : 'Spiller'),
+                            trailing:
+                                const Icon(CupertinoIcons.chevron_forward),
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      PlayerProfilePage(player: player),
+                                ),
                               );
-                            }
-                          }
-                        } catch (fetchError) {
-                          AppAnalytics.logEvent('dbu_calendar_import_failure');
-                          print(
-                              'Error fetching or parsing calendar: $fetchError');
-                        }
-
-                        final launched = await launchUrl(uri,
-                            mode: LaunchMode.externalApplication);
-                        if (!launched && context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content:
-                                    Text('Kunne ikke åbne kalenderlinket.')),
-                          );
-                        }
-                      } catch (e) {
-                        AppAnalytics.logEvent('dbu_calendar_import_failure');
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text(
-                                    'Der skete en fejl ved åbning af linket.')),
-                          );
-                        }
-                      }
-                    }
-                  },
-                ),
-                const SizedBox(height: 32),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text('Onboarding Test (ADMIN)',
-                      style: appTextStyles.sectionHeader),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Test Email Invite',
-                    border: OutlineInputBorder(),
-                    hintText: 'indtast email',
+                            },
+                          ),
+                          if (index < squad.length - 1)
+                            Divider(
+                              height: 1,
+                              color: appColors.divider,
+                            ),
+                        ],
+                      );
+                    }),
                   ),
                 ),
-                const SizedBox(height: 8),
-                FullWidthButton(
-                  buttonText: 'Send Test Email',
-                  onPressed: () async {
-                    if (_emailController.text.isEmpty) return;
-                    final teamId = currentUser?.teamDetails?.id ?? 0;
-                    final onboardingCubit = context.read<OnboardingCubit>();
-                    await onboardingCubit.sendEmailInvites(
-                        teamId, [_emailController.text.trim()]);
-                    if (!context.mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content:
-                              Text('Invite sent to ${_emailController.text}')),
-                    );
-                  },
-                ),
-                const SizedBox(height: 8),
-                BlocBuilder<OnboardingCubit, OnboardingState>(
-                  builder: (context, state) {
-                    return FullWidthButton(
-                      buttonText: 'Del Hold-Link',
-                      onPressed: () async {
-                        final teamId = currentUser?.teamDetails?.id ?? 0;
-                        final onboardingCubit = context.read<OnboardingCubit>();
-                        if (state.joinToken == null) {
-                          await onboardingCubit.fetchTeamJoinToken(teamId);
-                        }
-                        if (!context.mounted) return;
-                        final token = onboardingCubit.state.joinToken;
-                        if (token != null) {
-                          await SharePlus.instance.share(ShareParams(
-                              text:
-                                  'Bliv en del af mit hold på Kopa! Klik her: https://kopa.ntthyssen.com/join?team_token=$token'));
-                          AppAnalytics.logEvent('invite_link_shared');
-                        }
-                      },
-                    );
-                  },
-                ),
-                const SizedBox(height: 32),
-                FullWidthButton(
-                  buttonText: 'Log ud',
-                  onPressed: logout,
-                ),
-              ] else
-                const LoadingIndicator(),
-            ])));
-  }
-}
-
-class ScrapedMatchesWidget extends StatelessWidget {
-  final List<Map<String, dynamic>> combinedEvents;
-  final ScrollController? scrollController;
-
-  const ScrapedMatchesWidget(
-      {super.key, required this.combinedEvents, this.scrollController});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final appTextStyles =
-        theme.extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            'Fundne kampe',
-            style: appTextStyles.sectionHeader,
-          ),
+              ],
+            );
+          },
         ),
-        Expanded(
-          child: ListView.separated(
-            controller: scrollController,
-            itemCount: combinedEvents.length,
-            separatorBuilder: (context, index) => const Divider(),
-            itemBuilder: (context, index) {
-              final event = combinedEvents[index];
-              final summary = event['summary'] ?? 'Ukendt';
-              final dtstart = event['dtstart'];
-              final start =
-                  dtstart is IcsDateTime ? dtstart.dt : dtstart.toString();
-              final dtend = event['dtend'];
-              final end =
-                  dtend is IcsDateTime ? dtend.dt : dtend?.toString() ?? '';
-              final location = event['location'] ?? '';
-
-              return ListTile(
-                title: Text(summary.toString(), style: appTextStyles.bodyBold),
-                subtitle: Text(
-                  'Start: $start${end.isNotEmpty ? '\nSlut: $end' : ''}${location.isNotEmpty ? '\nLokation/Resultat: $location' : ''}',
-                  style: appTextStyles.caption,
-                ),
-              );
-            },
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: FullWidthButton(
-            buttonText: 'Fortsæt til kalender',
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class ScrapedMembersWidget extends StatelessWidget {
-  final List<dynamic> players;
-  final ScrollController? scrollController;
-
-  const ScrapedMembersWidget(
-      {super.key, required this.players, this.scrollController});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final appTextStyles =
-        theme.extension<AppTextStyles>() ?? AppTextStyles.light;
-    final currentUser = context.read<AuthCubit>().state.user;
-
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            'Fundne holdmedlemmer',
-            style: appTextStyles.sectionHeader,
-          ),
-        ),
-        Expanded(
-          child: ListView.separated(
-            controller: scrollController,
-            itemCount: players.length,
-            separatorBuilder: (context, index) => const Divider(),
-            itemBuilder: (context, index) {
-              final player = players[index];
-              final name = player['name'] ?? 'Ukendt';
-              final contact = player['contact'] ?? '';
-
-              return ListTile(
-                leading: const CircleAvatar(child: Icon(Icons.person)),
-                title: Text(name.toString(), style: appTextStyles.bodyBold),
-                subtitle:
-                    Text(contact.toString(), style: appTextStyles.caption),
-              );
-            },
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: FullWidthButton(
-            buttonText: 'Invitier holdet til Kopa',
-            onPressed: () async {
-              final emails = players
-                  .map((p) => p['contact']?.toString() ?? '')
-                  .where((c) => c.contains('@'))
-                  .toList();
-
-              if (emails.isNotEmpty) {
-                final teamId = currentUser?.teamDetails?.id ?? 0;
-                await context
-                    .read<OnboardingCubit>()
-                    .sendEmailInvites(teamId, emails);
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('Invitationer sendt til holdet!')),
-                  );
-                  Navigator.of(context).pop();
-                }
-              } else {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('Ingen gyldige emails fundet.')),
-                  );
-                }
-              }
-            },
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

@@ -29,6 +29,7 @@ import 'package:kopa/component/info_row/info_row.dart';
 import 'package:kopa/component/voting/voting_module.dart';
 import 'package:kopa/component/list_item/player_list_item.dart';
 import 'package:kopa/component/timeline/timeline_item.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MatchDetailsPage extends StatefulWidget {
   final int matchId;
@@ -189,14 +190,43 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
           value: matchDetails.location,
         ),
         InfoRow(
+          icon: CupertinoIcons.clock,
+          title: 'Countdown',
+          value: _countdownLabel(matchDetails),
+        ),
+        InfoRow(
+          icon: CupertinoIcons.person_2,
+          title: 'Tilmeldinger',
+          value:
+              '${matchDetails.registeredCount} tilmeldte / ${matchDetails.unavailableCount} frameldte',
+        ),
+        InfoRow(
+          icon: CupertinoIcons.checkmark_seal,
+          title: 'Din udtagelse',
+          value: matchDetails.isCurrentUserSelected == true
+              ? 'Udtaget'
+              : matchDetails.isCurrentUserSelected == false
+                  ? 'Ikke udtaget'
+                  : 'Afventer',
+        ),
+        InfoRow(
           icon: CupertinoIcons.pencil,
           title: 'Noter',
           value: matchDetails.notes ?? 'Ingen noter',
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Button(
+            buttonText: 'Åbn navigation',
+            onPressed: () => _openNavigation(matchDetails),
+            icon: CupertinoIcons.map,
+          ),
         ),
       ],
       votingModule:
           _buildVotingModule(matchDetails, squad, appColors, appTextStyles),
       attendanceList: _buildAttendanceList(matchDetails, squad),
+      ratingsSection: _buildRatingsSection(matchDetails),
       timelineItems: _buildTimelineItems(matchDetails, user),
     );
   }
@@ -275,9 +305,46 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     return attending
         .map((a) => PlayerListItem(
               name: a.userDetails.name,
-              subtitle: a.userDetails.email,
+              subtitle: a.isSelected == true
+                  ? 'Udtaget'
+                  : a.isSelected == false
+                      ? 'Ikke udtaget'
+                      : a.userDetails.email,
             ))
         .toList();
+  }
+
+  Widget? _buildRatingsSection(MatchDetails match) {
+    final ratings = match.playerRatingDetailsList ?? [];
+    if (ratings.isEmpty) return null;
+
+    return Column(
+      children: ratings
+          .map(
+            (rating) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      rating.userName,
+                      style: Theme.of(context)
+                              .extension<AppTextStyles>()
+                              ?.bodyBold ??
+                          AppTextStyles.light.bodyBold,
+                    ),
+                  ),
+                  Text(
+                    '${rating.averageRating.toStringAsFixed(1)} (${rating.voteCount})',
+                    style: Theme.of(context).extension<AppTextStyles>()?.body ??
+                        AppTextStyles.light.body,
+                  ),
+                ],
+              ),
+            ),
+          )
+          .toList(),
+    );
   }
 
   List<Widget> _buildTimelineItems(MatchDetails match, UserDetails user) {
@@ -501,5 +568,22 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     } catch (e, stack) {
       CrashReporting.logWebError(e, stack);
     }
+  }
+
+  String _countdownLabel(MatchDetails match) {
+    final countdown = match.countdown;
+    if (countdown.isNegative) {
+      return 'I gang eller afsluttet';
+    }
+
+    return '${countdown.inDays} dage ${countdown.inHours % 24} timer ${countdown.inMinutes % 60} min';
+  }
+
+  Future<void> _openNavigation(MatchDetails match) async {
+    final query = Uri.encodeComponent(match.location);
+    final uri = Uri.parse(
+      'https://www.google.com/maps/search/?api=1&query=$query',
+    );
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 }

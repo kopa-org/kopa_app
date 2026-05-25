@@ -17,7 +17,7 @@ class FineTypeDetails {
     return FineTypeDetails(
       id: json['id'],
       title: json['title'],
-      defaultAmount: json['default_amount'],
+      defaultAmount: (json['default_amount'] as num).toInt(),
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
     );
