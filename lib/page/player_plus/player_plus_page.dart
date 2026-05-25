@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:kopa/component/button/full_width_button.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
+import 'package:kopa/navigation/app_router.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 import 'package:kopa/utils/app_analytics.dart';
@@ -64,9 +67,20 @@ class _PlayerPlusPageState extends State<PlayerPlusPage> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Hvem bliver holdets bedste spiller, hvem tager flest kampens spiller, og hvem ender øverst i de sjove lister? Betaling er ikke slået til endnu, så siden fungerer som første kig på Player+ universet.',
+                  'Hvem bliver holdets bedste spiller, hvem tager flest kampens spiller, og hvem ender øverst i de sjove lister? Brug siden som overblik over Player+ universet og hop videre til de live ranglister, når du vil se de rigtige placeringer.',
                   style: appTextStyles.body
                       .copyWith(color: appColors.dirt, height: 1.35),
+                ),
+                const SizedBox(height: 18),
+                FullWidthButton(
+                  buttonText: 'Åbn live ranglister',
+                  onPressed: () {
+                    AppAnalytics.logEvent(
+                      'player_plus_live_cta_tapped',
+                    );
+                    context.push(AppRouter.playerPlusLive);
+                  },
+                  icon: Icons.arrow_outward,
                 ),
               ],
             ),
