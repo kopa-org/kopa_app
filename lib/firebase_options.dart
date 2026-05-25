@@ -58,7 +58,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDdMoySXYKCqBhZsqqnP-4YpxUPoijmVYU',
-    appId: '1:387318523179:android:d5ef70ca25f6ed43e0d16e',
+    appId: '1:387318523179:android:14133a8392ec6135e0d16e',
     messagingSenderId: '387318523179',
     projectId: 'kopa-358fe',
     storageBucket: 'kopa-358fe.firebasestorage.app',
@@ -66,10 +66,10 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyAEGNYTgNI41c6yClVnfa30ZVRy01_eujE',
-    appId: '1:387318523179:ios:616c2b9d1b91c7bae0d16e',
+    appId: '1:387318523179:ios:000ac6ac0c51cac6e0d16e',
     messagingSenderId: '387318523179',
     projectId: 'kopa-358fe',
     storageBucket: 'kopa-358fe.firebasestorage.app',
-    iosBundleId: 'kopa.app',
+    iosBundleId: 'dk.kopa.app',
   );
 }

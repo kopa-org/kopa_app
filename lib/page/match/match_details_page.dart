@@ -33,11 +33,13 @@ import 'package:kopa/component/timeline/timeline_item.dart';
 class MatchDetailsPage extends StatefulWidget {
   final int matchId;
   final MatchDetails? initialMatch;
+  final String? heroTag;
 
   const MatchDetailsPage({
     super.key,
     required this.matchId,
     this.initialMatch,
+    this.heroTag,
   });
 
   @override
@@ -163,6 +165,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       onRefresh: _refreshMatchAndSquad,
       heroCard: MatchHeroCard(
         match: matchDetails,
+        heroTag: widget.heroTag,
+        animateCard: widget.heroTag != null,
         onTap: user.isTeamOwner && !matchDetails.hasMatchBeenPlayed
             ? () => setMatchScore(matchDetails.id)
             : null,
@@ -199,7 +203,11 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
 
   Widget _buildInitialLoadingState(MatchDetails match) {
     return MatchDetailTemplate(
-      heroCard: MatchHeroCard(match: match),
+      heroCard: MatchHeroCard(
+        match: match,
+        heroTag: widget.heroTag,
+        animateCard: widget.heroTag != null,
+      ),
     );
   }
 

@@ -117,8 +117,10 @@ class _MatchList extends StatelessWidget {
       separatorBuilder: (context, index) => const SizedBox(height: Spacing.md),
       itemBuilder: (context, index) {
         final matchDetails = sorted[index];
+        final heroTag = 'match-programme-${matchDetails.id}-hero-card';
         return MatchHeroCard(
           match: matchDetails,
+          heroTag: heroTag,
           onTap: () async {
             AppAnalytics.logEvent(
               'match_opened',
@@ -129,6 +131,7 @@ class _MatchList extends StatelessWidget {
                 builder: (context) => MatchDetailsPage(
                   matchId: matchDetails.id,
                   initialMatch: matchDetails,
+                  heroTag: heroTag,
                 ),
               ),
             );

@@ -11,12 +11,14 @@ class MatchHeroCard extends StatelessWidget {
   final MatchDetails match;
   final VoidCallback? onTap;
   final bool animateCard;
+  final String? heroTag;
 
   const MatchHeroCard({
     super.key,
     required this.match,
     this.onTap,
     this.animateCard = true,
+    this.heroTag,
   });
 
   @override
@@ -149,7 +151,7 @@ class MatchHeroCard extends StatelessWidget {
     if (!animateCard) return card;
 
     return Hero(
-      tag: 'match-${match.id}-hero-card',
+      tag: heroTag ?? defaultHeroTag(match.id),
       transitionOnUserGestures: true,
       createRectTween: (begin, end) {
         return MaterialRectCenterArcTween(begin: begin, end: end);
@@ -160,6 +162,8 @@ class MatchHeroCard extends StatelessWidget {
       ),
     );
   }
+
+  static String defaultHeroTag(int matchId) => 'match-$matchId-hero-card';
 
   String _getInitials(String? teamName) {
     if (teamName == null || teamName.isEmpty) return '?';

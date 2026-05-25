@@ -4,29 +4,27 @@
 <dict>
 	<key>API_KEY</key>
 	<string>AIzaSyAEGNYTgNI41c6yClVnfa30ZVRy01_eujE</string>
-	<key>APP_ID</key>
-	<string>1:387318523179:ios:616c2b9d1b91c7bae0d16e</string>
-	<key>PROJECT_ID</key>
-	<string>kopa-358fe</string>
 	<key>GCM_SENDER_ID</key>
 	<string>387318523179</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.100.klubhusetApp</string>
+	<string>dk.kopa.app</string>
+	<key>PROJECT_ID</key>
+	<string>kopa-358fe</string>
 	<key>STORAGE_BUCKET</key>
 	<string>kopa-358fe.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
-	<false/>
+	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
-	<false/>
+	<false></false>
 	<key>IS_APPINVITE_ENABLED</key>
-	<true/>
+	<true></true>
 	<key>IS_GCM_ENABLED</key>
-	<true/>
+	<true></true>
 	<key>IS_SIGNIN_ENABLED</key>
-	<true/>
+	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:387318523179:ios:616c2b9d1b91c7bae0d16e</string>
+	<string>1:387318523179:ios:0b32d91df9303531e0d16e</string>
 </dict>
 </plist>

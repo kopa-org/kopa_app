@@ -100,29 +100,41 @@ class _HomeTabView extends StatelessWidget {
                         currentUser, appColors, appTextStyles),
                     const SizedBox(height: 32),
                     if (nextMatch != null) ...[
-                      SectionHeader(
-                        title: 'Næste Kamp',
-                        actionText: 'Se alle',
-                        onActionPressed: () {},
-                      ),
-                      const SizedBox(height: 12),
-                      MatchHeroCard(
-                        match: nextMatch,
-                        onTap: () async {
-                          AppAnalytics.logEvent(
-                            'match_opened',
-                            parameters: {'source': 'home_next_match'},
-                          );
-                          final homeCubit = context.read<HomeCubit>();
-                          await Navigator.of(context)
-                              .push(MaterialWithModalsPageRoute(
-                            builder: (context) =>
-                                MatchDetailsPage(matchId: nextMatch.id),
-                          ));
-                          homeCubit
-                              .fetchDashboardData(currentUser.teamDetails!.id);
-                        },
-                      ),
+                      Builder(builder: (context) {
+                        final heroTag =
+                            'home-next-match-${nextMatch.id}-hero-card';
+                        return Column(
+                          children: [
+                            SectionHeader(
+                              title: 'Næste Kamp',
+                              actionText: 'Se alle',
+                              onActionPressed: () {},
+                            ),
+                            const SizedBox(height: 12),
+                            MatchHeroCard(
+                              match: nextMatch,
+                              heroTag: heroTag,
+                              onTap: () async {
+                                AppAnalytics.logEvent(
+                                  'match_opened',
+                                  parameters: {'source': 'home_next_match'},
+                                );
+                                final homeCubit = context.read<HomeCubit>();
+                                await Navigator.of(context)
+                                    .push(MaterialWithModalsPageRoute(
+                                  builder: (context) => MatchDetailsPage(
+                                    matchId: nextMatch.id,
+                                    heroTag: heroTag,
+                                  ),
+                                ));
+                                homeCubit.fetchDashboardData(
+                                  currentUser.teamDetails!.id,
+                                );
+                              },
+                            ),
+                          ],
+                        );
+                      }),
                       const SizedBox(height: 12),
                       if (!nextMatch.isCurrentUserRegistered)
                         FullWidthButton(
