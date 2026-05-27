@@ -7,7 +7,7 @@ class ApiConfig {
   static String get baseUrl {
     final raw = dotenv.env['API_BASE_URL'];
     if (raw == null || raw.isEmpty) {
-      throw Exception('API_BASE_URL is not set in .env');
+      throw Exception('API_BASE_URL is not set in the active env file');
     }
 
     return raw;

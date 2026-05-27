@@ -18,10 +18,10 @@ abstract final class AppAnalytics {
   }
 
   static bool get isSupported =>
-      _initialized && CrashReporting.isFirebaseSupported;
+      _initialized && CrashReporting.isFirebaseSupported && !kIsWeb;
 
   static Future<void> initialize() async {
-    if (!CrashReporting.isFirebaseSupported) {
+    if (!CrashReporting.isFirebaseSupported || kIsWeb) {
       return;
     }
 

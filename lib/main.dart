@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -19,10 +20,15 @@ import 'package:kopa/theme/app_theme.dart';
 import 'package:kopa/services/push_notifications_service.dart';
 import 'package:kopa/utils/app_analytics.dart';
 
+const _envFileFromDefine = String.fromEnvironment('ENV_FILE');
+
 void main() async {
   await CrashReporting.runAppGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
-    await dotenv.load(fileName: '.env');
+    final envFile = _envFileFromDefine.isNotEmpty
+        ? _envFileFromDefine
+        : (kReleaseMode ? '.env.deploy' : '.env.local');
+    await dotenv.load(fileName: envFile);
     await CrashReporting.initialize();
     await AppAnalytics.initialize();
     await PushNotificationsService.instance.initialize();

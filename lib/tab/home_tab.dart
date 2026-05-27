@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kopa/component/button/full_width_button.dart';
+import 'package:kopa/component/card/latest_match_card.dart';
 import 'package:kopa/component/card/kopa_card.dart';
 import 'package:kopa/component/card/match_hero_card.dart';
 import 'package:kopa/component/card/stat_card.dart';
@@ -13,7 +14,6 @@ import 'package:kopa/cubits/home_state.dart';
 import 'package:kopa/helpers/date_helper.dart';
 import 'package:kopa/model/fine_box_details.dart';
 import 'package:kopa/model/match_details.dart';
-import 'package:kopa/model/match_event_type.dart';
 import 'package:kopa/model/statistics.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/navigation/app_router.dart';
@@ -152,8 +152,21 @@ class _HomeTabView extends StatelessWidget {
                     if (lastMatch != null) ...[
                       const SectionHeader(title: 'Seneste kamp'),
                       const SizedBox(height: 12),
-                      _buildLastMatchCard(
-                          context, lastMatch, appColors, appTextStyles),
+                      LatestMatchCard(
+                        match: lastMatch,
+                        onTap: () {
+                          AppAnalytics.logEvent(
+                            'match_opened',
+                            parameters: {'source': 'home_last_match'},
+                          );
+                          Navigator.of(context).push(
+                            MaterialWithModalsPageRoute(
+                              builder: (context) =>
+                                  MatchDetailsPage(matchId: lastMatch.id),
+                            ),
+                          );
+                        },
+                      ),
                       const SizedBox(height: 32),
                     ],
                     if (stats != null) ...[
@@ -283,56 +296,6 @@ class _HomeTabView extends StatelessWidget {
             onPressed: () => _openNavigation(match),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildLastMatchCard(BuildContext context, MatchDetails match,
-      AppColors colors, AppTextStyles styles) {
-    final resultStr =
-        '${match.homeTeam ?? "Hjemme"} ${match.homeTeamScore ?? 0} - ${match.awayTeamScore ?? 0} ${match.awayTeam ?? "Ude"}';
-
-    final motm =
-        match.matchPollDetails?.playerOfTheMatchDetails.name ?? 'Ingen valgt';
-
-    final goalScorers = match.matchEventDetailsList
-            ?.where((e) => e.type == MatchEventType.goal)
-            .map((e) => e.goalscorerUserName)
-            .toList() ??
-        [];
-
-    final goalStr = goalScorers.isEmpty ? 'Ingen mål' : goalScorers.join(', ');
-
-    return KopaCard(
-      onTap: () {
-        AppAnalytics.logEvent(
-          'match_opened',
-          parameters: {'source': 'home_last_match'},
-        );
-        Navigator.of(context).push(MaterialWithModalsPageRoute(
-          builder: (context) => MatchDetailsPage(matchId: match.id),
-        ));
-      },
-      child: SizedBox(
-        width: double.infinity,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              resultStr,
-              style: styles.bodyBold.copyWith(fontSize: 18),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              DateHelper.getFormattedDate(match.date),
-              style: styles.caption,
-            ),
-            const SizedBox(height: 16),
-            Text('Kampens spiller: $motm', style: styles.body),
-            const SizedBox(height: 4),
-            Text('Mål: $goalStr', style: styles.body),
-          ],
-        ),
       ),
     );
   }

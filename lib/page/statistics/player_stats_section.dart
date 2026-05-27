@@ -47,11 +47,22 @@ class PlayerStatsSection extends StatelessWidget {
                   ),
                 );
               },
-              child: Text(
-                'Player+ Stats',
-                style: appTextStyles.button.copyWith(
-                  color: appColors.primary,
-                ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Player+ Stats',
+                    style: appTextStyles.button.copyWith(
+                      color: appColors.primary,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                    color: appColors.primary,
+                  ),
+                ],
               ),
             ),
           ],
