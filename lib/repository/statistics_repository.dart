@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:kopa/helpers/api_config.dart';
 import 'package:kopa/model/statistics.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -9,8 +8,6 @@ class StatisticsRepository {
   static final _secureStorage = FlutterSecureStorage();
 
   static Future<StatisticsResponse> getStatistics(int teamId) async {
-    await dotenv.load();
-
     final token = await _secureStorage.read(key: 'token');
 
     if (token == null) {

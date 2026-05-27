@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:kopa/helpers/api_config.dart';
 import 'package:kopa/services/secure_storage_service.dart';
@@ -27,8 +26,6 @@ class ScraperManifest {
 
 class ScraperRepository {
   static Future<ScraperManifest> getDbuScraper() async {
-    await dotenv.load();
-
     final token = await SecureStorageService.getToken();
     final url = Uri.parse('${ApiConfig.baseUrl}/scraper/dbu');
 

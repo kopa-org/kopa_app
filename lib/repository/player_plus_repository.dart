@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:kopa/helpers/api_config.dart';
@@ -62,7 +61,6 @@ class PlayerPlusRepository {
     String path, {
     Map<String, String>? query,
   }) async {
-    await dotenv.load();
     final token = await _token();
     final url =
         Uri.parse('${ApiConfig.baseUrl}$path').replace(queryParameters: query);
@@ -79,7 +77,6 @@ class PlayerPlusRepository {
     String path,
     Map<String, dynamic> body,
   ) async {
-    await dotenv.load();
     final token = await _token();
     final url = Uri.parse('${ApiConfig.baseUrl}$path');
 

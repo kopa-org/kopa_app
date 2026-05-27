@@ -4,7 +4,6 @@ import 'package:kopa/helpers/api_config.dart';
 import 'package:kopa/model/create_match_poll_command.dart';
 import 'package:kopa/model/create_match_poll_user_command.dart';
 import 'package:kopa/model/match_poll_details.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:kopa/model/user_vote.dart';
@@ -13,7 +12,6 @@ class MatchPollsRepository {
   static final _secureStorage = FlutterSecureStorage();
 
   static Future<List<MatchPollDetails>> getMatchPolls() async {
-    await dotenv.load(); // Initialize dotenv
     final token = await _secureStorage.read(key: 'token');
 
     var url = Uri.parse('${ApiConfig.baseUrl}/match/matchpoll/all');
@@ -32,7 +30,6 @@ class MatchPollsRepository {
   }
 
   static Future<MatchPollDetails> getMatchPoll(int id) async {
-    await dotenv.load(); // Initialize dotenv
     final token = await _secureStorage.read(key: 'token');
 
     var url = Uri.parse('${ApiConfig.baseUrl}/match/matchpoll/$id');
@@ -51,8 +48,6 @@ class MatchPollsRepository {
 
   static Future<int> createMatchPoll(
       int matchId, List<UserVote> userVotes) async {
-    await dotenv.load(); // Initialize dotenv
-
     var url = Uri.parse('${ApiConfig.baseUrl}/match/matchpoll');
 
     List<CreateMatchPollUserVoteCommand> createMatchPollUserVoteCommands =

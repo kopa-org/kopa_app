@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:kopa/helpers/api_config.dart';
@@ -14,7 +13,6 @@ import 'package:kopa/model/fine_type_details.dart';
 class FinesRepository {
   static final _secureStorage = FlutterSecureStorage();
   static Future<List<FineTypeDetails>> getFineTypes() async {
-    await dotenv.load(); // Initialize dotenv
     final token = await _secureStorage.read(key: 'token');
 
     var url = Uri.parse('${ApiConfig.baseUrl}/fine/types');
@@ -34,7 +32,6 @@ class FinesRepository {
   }
 
   static Future<FineBoxDetails> getFineBox() async {
-    await dotenv.load(); // Initialize dotenv
     final token = await _secureStorage.read(key: 'token');
     var url = Uri.parse('${ApiConfig.baseUrl}/fine/fine_box');
 
@@ -53,7 +50,6 @@ class FinesRepository {
 
   static Future<List<int>> addFineForUsers(
       List<CreateUserFineCommand> createUserFineCommands) async {
-    await dotenv.load(); // Initialize dotenv
     final token = await _secureStorage.read(key: 'token');
 
     var url = Uri.parse('${ApiConfig.baseUrl}/fine/users');
@@ -76,7 +72,6 @@ class FinesRepository {
 
   static Future<bool> depositAmountToFineBox(
       int fineBoxId, String amountToDeposit, List<int> userFineIds) async {
-    await dotenv.load(); // Initialize dotenv
     final token = await _secureStorage.read(key: 'token');
     var url = Uri.parse('${ApiConfig.baseUrl}/fine/fine_box/deposit');
 
@@ -98,7 +93,6 @@ class FinesRepository {
   }
 
   static Future<bool> createFineType(String title, String defaultAmount) async {
-    await dotenv.load(); // Initialize dotenv
     final token = await _secureStorage.read(key: 'token');
     var url = Uri.parse('${ApiConfig.baseUrl}/fine/type');
 

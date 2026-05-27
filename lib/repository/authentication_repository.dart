@@ -1,4 +1,3 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
@@ -9,8 +8,6 @@ import 'package:kopa/services/secure_storage_service.dart';
 class AuthenticationRepository {
   static Future<Map<String, dynamic>> login(
       String email, String password) async {
-    await dotenv.load(); // Initialize dotenv
-
     final url = Uri.parse('${ApiConfig.baseUrl}/authentication/login');
     try {
       final response = await http.post(
@@ -44,8 +41,6 @@ class AuthenticationRepository {
 
   static Future<Map<String, dynamic>> register(
       String name, String email, String password, int roleId) async {
-    await dotenv.load(); // Initialize dotenv
-
     final url = Uri.parse('${ApiConfig.baseUrl}/authentication/register');
     try {
       final response = await http.post(

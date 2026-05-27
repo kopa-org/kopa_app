@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:kopa/helpers/api_config.dart';
 import 'package:kopa/model/add_user_to_team_command.dart';
 import 'package:kopa/model/player_profile.dart';
@@ -10,8 +9,6 @@ import 'package:http/http.dart' as http;
 
 class UsersRepository {
   static Future<List<UserDetails>> getSquad() async {
-    await dotenv.load(); // Initialize dotenv
-
     final token = await SecureStorageService.getToken();
     var url = Uri.parse('${ApiConfig.baseUrl}/user/all');
 
@@ -30,8 +27,6 @@ class UsersRepository {
   }
 
   static Future<int> createPlayer(String name, String email) async {
-    await dotenv.load(); // Initialize dotenv
-
     final token = await SecureStorageService.getToken();
     var url = Uri.parse('${ApiConfig.baseUrl}/user');
 
@@ -55,8 +50,6 @@ class UsersRepository {
   }
 
   static Future<void> setCalendarUrl(String calendarUrl) async {
-    await dotenv.load();
-
     final token = await SecureStorageService.getToken();
     var url = Uri.parse('${ApiConfig.baseUrl}/team/calendar_url');
 
@@ -75,8 +68,6 @@ class UsersRepository {
   }
 
   static Future<PlayerProfile> getPlayerProfile(int playerId) async {
-    await dotenv.load();
-
     final token = await SecureStorageService.getToken();
     final url = Uri.parse('${ApiConfig.baseUrl}/user/$playerId/profile');
 
