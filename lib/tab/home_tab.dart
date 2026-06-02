@@ -107,7 +107,7 @@ class _HomeTabView extends StatelessWidget {
                             SectionHeader(
                               title: 'Næste Kamp',
                               actionText: 'Se alle',
-                              onActionPressed: () {},
+                              onActionPressed: () => context.go(AppRouter.match),
                             ),
                             const SizedBox(height: 12),
                             MatchHeroCard(
