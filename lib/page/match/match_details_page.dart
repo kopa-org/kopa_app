@@ -4,6 +4,7 @@ import 'package:kopa/state/user_votes_state.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/button/button.dart';
+import 'package:kopa/component/card/kopa_card.dart';
 import 'package:kopa/component/error_message.dart';
 import 'package:kopa/component/loading_indicator.dart';
 import 'package:kopa/cubits/match_polls_cubit.dart';
@@ -20,9 +21,9 @@ import 'package:kopa/repository/users_repository.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
+import 'package:kopa/theme/spacing.dart';
 import 'package:kopa/utils/app_analytics.dart';
 import 'package:kopa/utils/crash_reporting.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:kopa/template/match_detail_template.dart';
 import 'package:kopa/component/card/match_hero_card.dart';
 import 'package:kopa/component/info_row/info_row.dart';
@@ -216,10 +217,12 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         ),
         Padding(
           padding: const EdgeInsets.only(top: 8),
-          child: Button(
-            buttonText: 'Åbn navigation',
-            onPressed: () => _openNavigation(matchDetails),
-            icon: CupertinoIcons.map,
+          child: Center(
+            child: Button(
+              buttonText: 'Åbn navigation',
+              onPressed: () => _openNavigation(matchDetails),
+              icon: CupertinoIcons.map,
+            ),
           ),
         ),
       ],
@@ -244,30 +247,46 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
   Widget? _buildVotingModule(MatchDetails match, List<UserDetails> squad,
       AppColors colors, AppTextStyles styles) {
     if (!_isManOfTheMatchVoted || matchPollDetails == null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20),
-          child: Button(
-            buttonText: 'Stem på kampens spiller',
-            onPressed: () async {
-              final result = await showCupertinoModalBottomSheet(
-                expand: true,
-                context: context,
-                builder: (context) => BlocProvider(
-                  create: (_) => MatchPollsCubit()
-                    ..setData(
-                      squad: squad,
-                      matches: [match],
-                    ),
-                  child: ChangeNotifierProvider(
-                    create: (context) => UserVotesState(),
-                    child: const CreateMatchPollPage(),
+      return KopaCard(
+        onTap: () => _openCreateMatchPoll(match, squad),
+        padding: const EdgeInsets.all(Spacing.md),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: colors.lightGrass.withValues(alpha: 0.38),
+                borderRadius: BorderRadius.circular(Spacing.borderRadiusSmall),
+              ),
+              child: Icon(
+                CupertinoIcons.star_fill,
+                color: colors.primary,
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: Spacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Stem på kampens spiller',
+                    style: styles.bodyBold,
                   ),
-                ),
-              );
-              if (result != null) _setMatchPollDetails(result);
-            },
-          ),
+                  Text(
+                    'Fordel dine stemmer efter kampen',
+                    style: styles.caption,
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              CupertinoIcons.chevron_right,
+              color: colors.textSecondary,
+              size: 18,
+            ),
+          ],
         ),
       );
     }
@@ -296,6 +315,27 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       options: options,
       hasVoted: true,
     );
+  }
+
+  Future<void> _openCreateMatchPoll(
+      MatchDetails match, List<UserDetails> squad) async {
+    final result = await Navigator.of(context).push(
+      createMatchPollPageRoute<MatchPollDetails?>(
+        child: BlocProvider(
+          create: (_) => MatchPollsCubit()
+            ..setData(
+              squad: squad,
+              matches: [match],
+            ),
+          child: ChangeNotifierProvider(
+            create: (context) => UserVotesState(),
+            child: const CreateMatchPollPage(),
+          ),
+        ),
+      ),
+    );
+
+    if (result != null) _setMatchPollDetails(result);
   }
 
   List<Widget> _buildAttendanceList(

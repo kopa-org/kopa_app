@@ -11,6 +11,11 @@ class UserVotesState extends ChangeNotifier {
   UnmodifiableListView<UserVote> get userVotes =>
       UnmodifiableListView(_userVotes);
 
+  int votesForUser(int userId) {
+    final index = _userVotes.indexWhere((x) => x.userId == userId);
+    return index == -1 ? 0 : _userVotes[index].votes;
+  }
+
   void addUserVote(UserVote userVote) {
     bool doesUserHaveNotVotesYet =
         !_userVotes.any((x) => x.userId == userVote.userId);
@@ -24,11 +29,14 @@ class UserVotesState extends ChangeNotifier {
   }
 
   void updateUserVote(int userId, int votes) {
+    final index = _userVotes.indexWhere((x) => x.userId == userId);
+
     if (votes == 0) {
       _userVotes.removeWhere((x) => x.userId == userId);
+    } else if (index == -1) {
+      _userVotes.add(UserVote(userId: userId, votes: votes));
     } else {
-      _userVotes[_userVotes.indexWhere((x) => x.userId == userId)]
-          .setVotes(votes);
+      _userVotes[index].setVotes(votes);
     }
 
     notifyListeners();

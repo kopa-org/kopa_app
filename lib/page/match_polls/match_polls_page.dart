@@ -7,7 +7,6 @@ import 'package:kopa/page/match_polls/create_match_poll_page.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/match_polls_cubit.dart';
 import 'package:kopa/cubits/match_polls_state.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class MatchPollsListPage extends StatefulWidget {
   const MatchPollsListPage({super.key});
@@ -128,14 +127,14 @@ class _MatchPollsListView extends StatelessWidget {
   }
 
   Future<void> _showCreateMatchPoll(BuildContext context) async {
-    await showCupertinoModalBottomSheet(
-      expand: true,
-      context: context,
-      builder: (modalContext) => BlocProvider.value(
-        value: context.read<MatchPollsCubit>(),
-        child: ChangeNotifierProvider(
-          create: (context) => UserVotesState(),
-          child: const CreateMatchPollPage(),
+    await Navigator.of(context).push(
+      createMatchPollPageRoute<Object?>(
+        child: BlocProvider.value(
+          value: context.read<MatchPollsCubit>(),
+          child: ChangeNotifierProvider(
+            create: (context) => UserVotesState(),
+            child: const CreateMatchPollPage(),
+          ),
         ),
       ),
     );
