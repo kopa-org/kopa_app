@@ -653,6 +653,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.0"
+  segmented_button_slide:
+    dependency: "direct main"
+    description:
+      name: segmented_button_slide
+      sha256: d0563010c79a101340cfc127ee5a27c8c7d8640d5ef857a36e9d0b46bc01fed4
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   share_plus:
     dependency: "direct main"
     description:

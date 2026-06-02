@@ -61,6 +61,7 @@ dependencies:
   icalendar_parser: ^2.1.0
   share_plus: ^12.0.2
   flutter_local_notifications: ^19.4.2
+  segmented_button_slide: ^2.0.0
 
 dev_dependencies:
   flutter_test:

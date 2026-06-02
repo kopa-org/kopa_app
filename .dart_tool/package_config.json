@@ -500,6 +500,12 @@
       "languageVersion": "3.10"
     },
     {
+      "name": "segmented_button_slide",
+      "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/segmented_button_slide-2.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.1"
+    },
+    {
       "name": "share_plus",
       "rootUri": "file:///home/futte/.pub-cache/hosted/pub.dev/share_plus-12.0.2",
       "packageUri": "lib/",

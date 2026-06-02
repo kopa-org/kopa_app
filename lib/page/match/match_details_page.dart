@@ -58,6 +58,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
   MatchPollDetails? matchPollDetails;
   int _homeGoals = 0;
   int _awayGoals = 0;
+  MatchDetailSegment _selectedSegment = MatchDetailSegment.overview;
 
   @override
   void initState() {
@@ -165,6 +166,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
 
     return MatchDetailTemplate(
       onRefresh: _refreshMatchAndSquad,
+      selectedSegment: _selectedSegment,
+      onSegmentChanged: _selectSegment,
       heroCard: MatchHeroCard(
         match: matchDetails,
         heroTag: widget.heroTag,
@@ -234,8 +237,20 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     );
   }
 
+  void _selectSegment(MatchDetailSegment segment) {
+    AppAnalytics.logEvent(
+      'match_details_segment_selected',
+      parameters: {'segment': segment.name},
+    );
+    setState(() {
+      _selectedSegment = segment;
+    });
+  }
+
   Widget _buildInitialLoadingState(MatchDetails match) {
     return MatchDetailTemplate(
+      selectedSegment: _selectedSegment,
+      onSegmentChanged: _selectSegment,
       heroCard: MatchHeroCard(
         match: match,
         heroTag: widget.heroTag,

@@ -48,6 +48,12 @@ class MatchPollsRepository {
 
   static Future<int> createMatchPoll(
       int matchId, List<UserVote> userVotes) async {
+    final token = await _secureStorage.read(key: 'token');
+
+    if (token == null) {
+      throw Exception('No token found. User might not be logged in.');
+    }
+
     var url = Uri.parse('${ApiConfig.baseUrl}/match/matchpoll');
 
     List<CreateMatchPollUserVoteCommand> createMatchPollUserVoteCommands =
@@ -61,9 +67,15 @@ class MatchPollsRepository {
     CreateMatchPollCommand createMatchPollCommand = CreateMatchPollCommand(
         matchId.toString(), createMatchPollUserVoteCommands);
 
-    var response = await http.post(url, body: createMatchPollCommand.toJson());
+    var response = await http.post(
+      url,
+      body: createMatchPollCommand.toJson(),
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
 
-    if (response.statusCode == 201) {
+    if (response.statusCode != 201) {
       throw Exception('Failed to create match poll');
     }
 
