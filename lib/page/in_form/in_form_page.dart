@@ -214,8 +214,10 @@ class _InFormViewState extends State<_InFormView> {
   Future<void> _savePosition(String position) async {
     setState(() => _savingPosition = true);
     try {
-      await UsersRepository.updatePosition(position);
-      if (mounted) setState(() => _profilePosition = position);
+      final user = await UsersRepository.updatePosition(position);
+      if (!mounted) return;
+      context.read<AuthCubit>().updateUser(user);
+      setState(() => _profilePosition = user.position);
     } finally {
       if (mounted) setState(() => _savingPosition = false);
     }
