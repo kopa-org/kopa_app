@@ -5,6 +5,7 @@ class FineDetails {
   final FineTypeDetails fineTypeDetails;
   final int owedAmount;
   final bool hasBeenPaid;
+  final String? note;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -13,6 +14,7 @@ class FineDetails {
     required this.fineTypeDetails,
     required this.owedAmount,
     required this.hasBeenPaid,
+    this.note,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -23,6 +25,7 @@ class FineDetails {
       fineTypeDetails: FineTypeDetails.fromJson(json['fine_type_details']),
       owedAmount: (json['owed_amount'] as num).toInt(),
       hasBeenPaid: json['has_been_paid'],
+      note: json['note'],
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
     );

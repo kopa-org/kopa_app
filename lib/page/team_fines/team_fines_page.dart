@@ -525,8 +525,21 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
                     rows: userFineDetails.fineDetailsList.map((fineDetail) {
                       return DataRow(
                         cells: [
-                          DataCell(Text(fineDetail.fineTypeDetails.title,
-                              style: appTextStyles.body)),
+                          DataCell(Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(fineDetail.fineTypeDetails.title,
+                                  style: appTextStyles.body),
+                              if (fineDetail.note != null &&
+                                  fineDetail.note!.isNotEmpty)
+                                Text(
+                                  fineDetail.note!,
+                                  style: appTextStyles.caption
+                                      .copyWith(color: appColors.textSecondary),
+                                ),
+                            ],
+                          )),
                           DataCell(Text('${fineDetail.owedAmount},-',
                               style: appTextStyles.body)),
                           DataCell(fineDetail.hasBeenPaid

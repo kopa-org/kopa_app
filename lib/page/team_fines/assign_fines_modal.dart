@@ -23,6 +23,7 @@ class _AssignFinesModalState extends State<AssignFinesModal> {
   List<Map<String, dynamic>> fineTypesExpanded = [];
   Map<int, Map<int, bool>> selectedUsers = {};
   Map<String, String> userFinePrices = {};
+  Map<String, String> userFineNotes = {};
 
   @override
   void initState() {
@@ -178,12 +179,8 @@ class _AssignFinesModalState extends State<AssignFinesModal> {
                                       builder: (context) {
                                         return GestureDetector(
                                           onTap: () {
-                                            setState(() {
-                                              selectedUsers[fine['id']]![
-                                                  user.id] = !(selectedUsers[
-                                                      fine['id']]![user.id] ??
-                                                  false);
-                                            });
+                                            toggleUserSelection(
+                                                fine['id'], user.id);
                                           },
                                           child: Padding(
                                             padding: const EdgeInsets.symmetric(
@@ -229,6 +226,46 @@ class _AssignFinesModalState extends State<AssignFinesModal> {
                                                     ),
                                                   ],
                                                 ),
+                                                if (selectedUsers[fine['id']]![
+                                                        user.id] ==
+                                                    true) ...[
+                                                  const SizedBox(height: 10),
+                                                  GestureDetector(
+                                                    behavior:
+                                                        HitTestBehavior.opaque,
+                                                    onTap: () {},
+                                                    child: CupertinoTextField(
+                                                      placeholder:
+                                                          'Tilføj note (valgfri)',
+                                                      minLines: 1,
+                                                      maxLines: 3,
+                                                      textInputAction:
+                                                          TextInputAction.done,
+                                                      onChanged: (value) {
+                                                        userFineNotes[
+                                                                fineUserKey(
+                                                                    fine['id'],
+                                                                    user.id)] =
+                                                            value;
+                                                      },
+                                                      decoration: BoxDecoration(
+                                                        color: appColors
+                                                            .background,
+                                                        border: Border.all(
+                                                            color: appColors
+                                                                .divider),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(8),
+                                                      ),
+                                                      padding: const EdgeInsets
+                                                          .symmetric(
+                                                        horizontal: 12,
+                                                        vertical: 10,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
                                                 if (user.id !=
                                                     squad.map((x) => x.id).last)
                                                   Padding(
@@ -268,6 +305,19 @@ class _AssignFinesModalState extends State<AssignFinesModal> {
     });
   }
 
+  void toggleUserSelection(int fineId, int userId) {
+    final isSelected = selectedUsers[fineId]![userId] ?? false;
+
+    setState(() {
+      selectedUsers[fineId]![userId] = !isSelected;
+      if (isSelected) {
+        userFineNotes.remove(fineUserKey(fineId, userId));
+      }
+    });
+  }
+
+  String fineUserKey(int fineId, int userId) => '$fineId:$userId';
+
   Future<bool> addFines(BuildContext context) async {
     List<CreateUserFineCommand> createUserFineCommand = [];
     for (var fine in fineTypesExpanded) {
@@ -278,9 +328,11 @@ class _AssignFinesModalState extends State<AssignFinesModal> {
           .toList();
       for (var userId in selectedUsersIds) {
         createUserFineCommand.add(CreateUserFineCommand(
-            userId: userId.toString(),
-            fineTypeId: fine['id'].toString(),
-            owedAmount: fine['price'].toString()));
+          userId: userId.toString(),
+          fineTypeId: fine['id'].toString(),
+          owedAmount: fine['price'].toString(),
+          note: userFineNotes[fineUserKey(fine['id'], userId)],
+        ));
       }
     }
 

@@ -1,123 +1,110 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:kopa/component/future_handler.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/model/statistics.dart';
+import 'package:kopa/model/user_details.dart';
+import 'package:kopa/navigation/app_router.dart';
 import 'package:kopa/page/statistics/club_stats_section.dart';
-import 'package:kopa/page/statistics/player_stats_section.dart';
 import 'package:kopa/repository/statistics_repository.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 
-class StatisticsPage extends StatelessWidget {
+class StatisticsPage extends StatefulWidget {
   const StatisticsPage({super.key});
 
   @override
+  State<StatisticsPage> createState() => _StatisticsPageState();
+}
+
+class _StatisticsPageState extends State<StatisticsPage> {
+  int? _loadedTeamId;
+  Future<_StatisticsPageData>? _statisticsFuture;
+  bool _hasTemporaryPlayerPlus = false;
+
+  @override
   Widget build(BuildContext context) {
-    final teamId = context.read<AuthCubit>().state.user?.teamDetails?.id;
+    final user = context.read<AuthCubit>().state.user;
+    final teamId = user?.teamDetails?.id;
+
+    if (teamId != null &&
+        (_loadedTeamId != teamId || _statisticsFuture == null)) {
+      _loadedTeamId = teamId;
+      _statisticsFuture = _loadStatisticsPageData(teamId);
+    }
 
     return PageScaffold(
       title: 'Statistik',
       body: teamId == null
           ? const Center(child: Text('Ingen hold valgt.'))
-          : FutureHandler<StatisticsResponse>(
-              future: StatisticsRepository.getStatistics(teamId),
-              onSuccess: (context, stats) => _StatisticsView(stats: stats),
+          : FutureHandler<_StatisticsPageData>(
+              future: _statisticsFuture!,
+              onSuccess: (context, data) => _StatisticsView(
+                stats: data.stats,
+                currentUser: user,
+                hasPlayerPlus: data.hasPlayerPlus || _hasTemporaryPlayerPlus,
+                onBuyPlayerPlus: _buyPlayerPlus,
+              ),
             ),
     );
   }
+
+  Future<_StatisticsPageData> _loadStatisticsPageData(int teamId) async {
+    final stats = await StatisticsRepository.getStatistics(teamId);
+
+    return _StatisticsPageData(
+      stats: stats,
+      hasPlayerPlus: false,
+    );
+  }
+
+  Future<void> _buyPlayerPlus() async {
+    setState(() {
+      _hasTemporaryPlayerPlus = true;
+    });
+  }
+}
+
+class _StatisticsPageData {
+  final StatisticsResponse stats;
+  final bool hasPlayerPlus;
+
+  const _StatisticsPageData({
+    required this.stats,
+    required this.hasPlayerPlus,
+  });
 }
 
 class _StatisticsView extends StatelessWidget {
   final StatisticsResponse stats;
+  final UserDetails? currentUser;
+  final bool hasPlayerPlus;
+  final Future<void> Function() onBuyPlayerPlus;
 
-  const _StatisticsView({required this.stats});
+  const _StatisticsView({
+    required this.stats,
+    required this.currentUser,
+    required this.hasPlayerPlus,
+    required this.onBuyPlayerPlus,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final appColors = theme.extension<AppColors>() ?? AppColors.light;
-    final styles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
-
     return CustomScrollView(
       slivers: [
-        SliverToBoxAdapter(child: PlayerStatsSection(player: stats.player)),
+        SliverToBoxAdapter(
+          child: _PlayerPlusStatsSection(
+            stats: stats,
+            currentUser: currentUser,
+            hasPlayerPlus: hasPlayerPlus,
+            onBuyPlayerPlus: onBuyPlayerPlus,
+          ),
+        ),
         SliverToBoxAdapter(child: ClubStatsSection(club: stats.club)),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-            child: _SectionCard(
-              title: 'In-form tabel',
-              child: stats.inFormRows.isEmpty
-                  ? Text('Ingen ratings registreret endnu.', style: styles.body)
-                  : Column(
-                      children: stats.inFormRows.asMap().entries.map((entry) {
-                        final index = entry.key;
-                        final row = entry.value;
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Row(
-                            children: [
-                              SizedBox(
-                                width: 28,
-                                child: Text(
-                                  '${index + 1}',
-                                  style: styles.bodyBold.copyWith(
-                                    color: appColors.primary,
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child:
-                                    Text(row.userName, style: styles.bodyBold),
-                              ),
-                              Text('${row.points} point', style: styles.body),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                    ),
-            ),
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-            child: _SectionCard(
-              title: 'Lister med statistikker',
-              child: Column(
-                children: [
-                  _LeaderboardGroup(
-                    title: 'Topscorerliste',
-                    rows: stats.leaderboards.topScorers,
-                  ),
-                  const SizedBox(height: 16),
-                  _LeaderboardGroup(
-                    title: 'Assistliste',
-                    rows: stats.leaderboards.assists,
-                  ),
-                  const SizedBox(height: 16),
-                  _LeaderboardGroup(
-                    title: 'Kampe spillet',
-                    rows: stats.leaderboards.matchesPlayed,
-                  ),
-                  const SizedBox(height: 16),
-                  _LeaderboardGroup(
-                    title: 'Flest stemmer',
-                    rows: stats.leaderboards.mostVotes,
-                  ),
-                  const SizedBox(height: 16),
-                  _LeaderboardGroup(
-                    title: 'Bedste pointsnit',
-                    rows: stats.leaderboards.bestPointsAverage,
-                    decimal: true,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
@@ -164,6 +151,619 @@ class _StatisticsView extends StatelessWidget {
   }
 }
 
+class _PlayerPlusStatsSection extends StatelessWidget {
+  final StatisticsResponse stats;
+  final UserDetails? currentUser;
+  final bool hasPlayerPlus;
+  final Future<void> Function() onBuyPlayerPlus;
+
+  const _PlayerPlusStatsSection({
+    required this.stats,
+    required this.currentUser,
+    required this.hasPlayerPlus,
+    required this.onBuyPlayerPlus,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final appColors = theme.extension<AppColors>() ?? AppColors.light;
+    final styles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final tiles = _buildTiles(appColors);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Player+',
+            style: styles.pageTitle.copyWith(color: appColors.primary),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            hasPlayerPlus
+                ? 'Dine tal og placeringer på holdets ranglister.'
+                : 'Få Player+ for at låse alle placeringer op.',
+            style: styles.body.copyWith(color: appColors.textSecondary),
+          ),
+          if (!hasPlayerPlus) ...[
+            const SizedBox(height: 12),
+            _PlayerPlusLockedCallout(
+              onTap: () => context.push(AppRouter.playerPlus),
+            ),
+          ],
+          const SizedBox(height: 18),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: tiles.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              childAspectRatio: 1.04,
+            ),
+            itemBuilder: (context, index) => _PlayerPlusStatTile(
+              tile: tiles[index],
+              currentUserId: currentUser?.id,
+              locked: !hasPlayerPlus,
+              obscureValue: !hasPlayerPlus && index >= tiles.length - 2,
+              onBuyPlayerPlus: onBuyPlayerPlus,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<_PlayerPlusTileData> _buildTiles(AppColors appColors) {
+    return [
+      _leaderboardTile(
+        title: 'Pointsnit',
+        value: _currentLeaderboardValue(
+          stats.leaderboards.bestPointsAverage,
+          decimal: true,
+        ),
+        rows: stats.leaderboards.bestPointsAverage,
+        icon: Icons.trending_up,
+        accentColor: appColors.grass,
+        decimal: true,
+      ),
+      _leaderboardTile(
+        title: 'Mål',
+        value: stats.player.goalsScored.toString(),
+        rows: stats.leaderboards.topScorers,
+        icon: Icons.sports_score,
+        accentColor: appColors.sky,
+      ),
+      _leaderboardTile(
+        title: 'Assists',
+        value: stats.player.assists.toString(),
+        rows: stats.leaderboards.assists,
+        icon: Icons.handshake,
+        accentColor: appColors.success,
+      ),
+      _leaderboardTile(
+        title: 'Kampe',
+        value: stats.player.matchesPlayed.toString(),
+        rows: stats.leaderboards.matchesPlayed,
+        icon: Icons.sports_soccer,
+        accentColor: appColors.sunset,
+      ),
+      _leaderboardTile(
+        title: 'Stemmer',
+        value: _currentLeaderboardValue(stats.leaderboards.mostVotes),
+        rows: stats.leaderboards.mostVotes,
+        icon: Icons.how_to_vote,
+        accentColor: appColors.dirt,
+      ),
+      _inFormTile(appColors),
+    ];
+  }
+
+  _PlayerPlusTileData _leaderboardTile({
+    required String title,
+    required String value,
+    required List<LeaderboardRow> rows,
+    required IconData icon,
+    required Color accentColor,
+    bool decimal = false,
+  }) {
+    final rankingRows = rows
+        .map(
+          (row) => _StatRankingRow(
+            userId: row.userId,
+            userName: row.userName,
+            value: decimal
+                ? row.value.toDouble().toStringAsFixed(1)
+                : '${row.value}',
+          ),
+        )
+        .toList();
+
+    return _PlayerPlusTileData(
+      title: title,
+      value: value,
+      rows: rankingRows,
+      icon: icon,
+      accentColor: accentColor,
+    );
+  }
+
+  _PlayerPlusTileData _inFormTile(AppColors appColors) {
+    final rows = stats.inFormRows
+        .map(
+          (row) => _StatRankingRow(
+            userId: row.userId,
+            userName: row.userName,
+            value: '${row.points}',
+            suffix: 'point',
+          ),
+        )
+        .toList();
+
+    final currentRow = _findCurrentRow(rows);
+
+    return _PlayerPlusTileData(
+      title: 'In-form',
+      value: currentRow?.value ?? '-',
+      rows: rows,
+      icon: Icons.local_fire_department,
+      accentColor: appColors.error,
+    );
+  }
+
+  String _currentLeaderboardValue(
+    List<LeaderboardRow> rows, {
+    bool decimal = false,
+  }) {
+    final currentRow = rows.cast<dynamic>().where((row) {
+      if (currentUser != null && row.userId == currentUser!.id) {
+        return true;
+      }
+      return row.userName == stats.player.name;
+    }).firstOrNull;
+
+    if (currentRow == null) {
+      return '-';
+    }
+
+    return decimal
+        ? currentRow.value.toDouble().toStringAsFixed(1)
+        : '${currentRow.value}';
+  }
+
+  _StatRankingRow? _findCurrentRow(List<_StatRankingRow> rows) {
+    return rows.where((row) {
+      if (currentUser != null && row.userId == currentUser!.id) {
+        return true;
+      }
+      return row.userName == stats.player.name;
+    }).firstOrNull;
+  }
+}
+
+class _PlayerPlusTileData {
+  final String title;
+  final String value;
+  final List<_StatRankingRow> rows;
+  final IconData icon;
+  final Color accentColor;
+
+  const _PlayerPlusTileData({
+    required this.title,
+    required this.value,
+    required this.rows,
+    required this.icon,
+    required this.accentColor,
+  });
+}
+
+class _StatRankingRow {
+  final int userId;
+  final String userName;
+  final String value;
+  final String? suffix;
+
+  const _StatRankingRow({
+    required this.userId,
+    required this.userName,
+    required this.value,
+    this.suffix,
+  });
+}
+
+class _PlayerPlusStatTile extends StatelessWidget {
+  final _PlayerPlusTileData tile;
+  final int? currentUserId;
+  final bool locked;
+  final bool obscureValue;
+  final Future<void> Function() onBuyPlayerPlus;
+
+  const _PlayerPlusStatTile({
+    required this.tile,
+    required this.currentUserId,
+    required this.locked,
+    required this.obscureValue,
+    required this.onBuyPlayerPlus,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final appColors = theme.extension<AppColors>() ?? AppColors.light;
+    final styles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final currentIndex =
+        tile.rows.indexWhere((row) => row.userId == currentUserId);
+    final rank = currentIndex == -1 ? null : currentIndex + 1;
+    final obscureRank = locked;
+
+    return Material(
+      color: appColors.surface,
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: () => locked
+            ? _showPlayerPlusRequiredDialog(context, onBuyPlayerPlus)
+            : _showLeaderboardSheet(context),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(tile.icon, color: tile.accentColor, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      tile.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: styles.bodyBold,
+                    ),
+                  ),
+                ],
+              ),
+              const Spacer(),
+              _BlurredValue(
+                blurred: obscureValue,
+                child: Text(
+                  tile.value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: styles.pageTitle.copyWith(
+                    color: appColors.textPrimary,
+                    fontSize: 34,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: tile.accentColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: _BlurredValue(
+                  blurred: obscureRank,
+                  sigma: 3,
+                  child: Text(
+                    rank == null ? 'Ingen placering' : '#$rank på holdet',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: styles.caption.copyWith(
+                      color: appColors.textPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showLeaderboardSheet(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _LeaderboardSheet(
+        tile: tile,
+        currentUserId: currentUserId,
+        locked: locked,
+      ),
+    );
+  }
+
+  void _showPlayerPlusRequiredDialog(
+    BuildContext context,
+    Future<void> Function() onBuyPlayerPlus,
+  ) {
+    final theme = Theme.of(context);
+    final appColors = theme.extension<AppColors>() ?? AppColors.light;
+    final styles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        title: Row(
+          children: [
+            Icon(Icons.workspace_premium, color: appColors.primary),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Player+ påkrævet',
+                style: styles.sectionHeader.copyWith(
+                  color: appColors.primary,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          'Ranglisten kan ikke vises, fordi spilleren ikke har Player+.',
+          style: styles.body.copyWith(color: appColors.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Luk'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              await onBuyPlayerPlus();
+            },
+            child: const Text('Køb Player+'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LeaderboardSheet extends StatelessWidget {
+  final _PlayerPlusTileData tile;
+  final int? currentUserId;
+  final bool locked;
+
+  const _LeaderboardSheet({
+    required this.tile,
+    required this.currentUserId,
+    required this.locked,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final appColors = theme.extension<AppColors>() ?? AppColors.light;
+    final styles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return DraggableScrollableSheet(
+      initialChildSize: 0.72,
+      minChildSize: 0.45,
+      maxChildSize: 0.92,
+      builder: (context, scrollController) {
+        return Container(
+          decoration: BoxDecoration(
+            color: appColors.background,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 10),
+              Container(
+                width: 44,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: appColors.divider,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 18, 12, 10),
+                child: Row(
+                  children: [
+                    Icon(tile.icon, color: tile.accentColor),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        tile.title,
+                        style: styles.sectionHeader.copyWith(
+                          color: appColors.primary,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.close),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: tile.rows.isEmpty
+                    ? Center(
+                        child: Text('Ingen data endnu.', style: styles.body),
+                      )
+                    : ListView.separated(
+                        controller: scrollController,
+                        padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
+                        itemCount: tile.rows.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 8),
+                        itemBuilder: (context, index) {
+                          final row = tile.rows[index];
+                          final isCurrentUser = row.userId == currentUserId;
+                          return _LeaderboardSheetRow(
+                            rank: index + 1,
+                            row: row,
+                            isCurrentUser: isCurrentUser,
+                            accentColor: tile.accentColor,
+                            locked: locked,
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _LeaderboardSheetRow extends StatelessWidget {
+  final int rank;
+  final _StatRankingRow row;
+  final bool isCurrentUser;
+  final Color accentColor;
+  final bool locked;
+
+  const _LeaderboardSheetRow({
+    required this.rank,
+    required this.row,
+    required this.isCurrentUser,
+    required this.accentColor,
+    required this.locked,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final appColors = theme.extension<AppColors>() ?? AppColors.light;
+    final styles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final obscureFirstPlace = locked;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: isCurrentUser
+            ? accentColor.withValues(alpha: 0.14)
+            : appColors.surface,
+        borderRadius: BorderRadius.circular(8),
+        border:
+            isCurrentUser ? Border.all(color: accentColor, width: 1.4) : null,
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 34,
+            child: _BlurredValue(
+              blurred: obscureFirstPlace,
+              sigma: 3,
+              child: Text(
+                '$rank.',
+                style: styles.bodyBold.copyWith(
+                  color: isCurrentUser ? accentColor : appColors.textSecondary,
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: _BlurredValue(
+              blurred: obscureFirstPlace,
+              sigma: 4,
+              child: Text(
+                row.userName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: styles.bodyBold,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          _BlurredValue(
+            blurred: obscureFirstPlace,
+            sigma: 4,
+            child: Text(
+              row.suffix == null ? row.value : '${row.value} ${row.suffix}',
+              style: styles.bodyBold.copyWith(
+                color: isCurrentUser ? accentColor : appColors.textPrimary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PlayerPlusLockedCallout extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _PlayerPlusLockedCallout({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final appColors = theme.extension<AppColors>() ?? AppColors.light;
+    final styles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return Material(
+      color: appColors.lightGrass.withValues(alpha: 0.5),
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          child: Row(
+            children: [
+              Icon(Icons.workspace_premium, color: appColors.primary),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Nogle resultater er låst. Se Player+ for at låse hele ranglisten op.',
+                  style: styles.caption.copyWith(
+                    color: appColors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(Icons.arrow_forward, color: appColors.primary, size: 18),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BlurredValue extends StatelessWidget {
+  final bool blurred;
+  final double sigma;
+  final Widget child;
+
+  const _BlurredValue({
+    required this.blurred,
+    required this.child,
+    this.sigma = 5,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (!blurred) {
+      return child;
+    }
+
+    return ImageFiltered(
+      imageFilter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
+      child: Opacity(
+        opacity: 0.72,
+        child: child,
+      ),
+    );
+  }
+}
+
 class _SectionCard extends StatelessWidget {
   final String title;
   final Widget child;
@@ -193,55 +793,6 @@ class _SectionCard extends StatelessWidget {
           child,
         ],
       ),
-    );
-  }
-}
-
-class _LeaderboardGroup extends StatelessWidget {
-  final String title;
-  final List<LeaderboardRow> rows;
-  final bool decimal;
-
-  const _LeaderboardGroup({
-    required this.title,
-    required this.rows,
-    this.decimal = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final styles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(title, style: styles.bodyBold),
-        const SizedBox(height: 8),
-        if (rows.isEmpty)
-          Text('Ingen data endnu.', style: styles.body)
-        else
-          ...rows.take(5).toList().asMap().entries.map((entry) {
-            final index = entry.key;
-            final row = entry.value;
-            final value = decimal
-                ? row.value.toDouble().toStringAsFixed(1)
-                : '${row.value}';
-
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              child: Row(
-                children: [
-                  SizedBox(
-                      width: 28,
-                      child: Text('${index + 1}', style: styles.caption)),
-                  Expanded(child: Text(row.userName, style: styles.body)),
-                  Text(value, style: styles.bodyBold),
-                ],
-              ),
-            );
-          }),
-      ],
     );
   }
 }

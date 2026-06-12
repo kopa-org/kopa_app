@@ -165,8 +165,20 @@ class _DepositPersonalModalState extends State<DepositPersonalModal> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Expanded(
-                                child: Text(fd.fineTypeDetails.title,
-                                    style: appTextStyles.body)),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(fd.fineTypeDetails.title,
+                                      style: appTextStyles.body),
+                                  if (fd.note != null && fd.note!.isNotEmpty)
+                                    Text(
+                                      fd.note!,
+                                      style: appTextStyles.caption.copyWith(
+                                          color: appColors.textSecondary),
+                                    ),
+                                ],
+                              ),
+                            ),
                             Text('${fd.owedAmount} kr',
                                 style: appTextStyles.body),
                             const SizedBox(width: 10),
