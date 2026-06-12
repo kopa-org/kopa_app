@@ -83,4 +83,24 @@ class UsersRepository {
     final json = jsonDecode(response.body)['profile'];
     return PlayerProfile.fromJson(json);
   }
+
+  static Future<UserDetails> updatePosition(String position) async {
+    final token = await SecureStorageService.getToken();
+    final url = Uri.parse('${ApiConfig.baseUrl}/user/profile');
+
+    final response = await http.patch(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({'position': position}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update position');
+    }
+
+    return UserDetails.fromJson(jsonDecode(response.body)['user']);
+  }
 }

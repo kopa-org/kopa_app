@@ -97,6 +97,14 @@ class _StatisticsView extends StatelessWidget {
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+            child: _InFormCallout(
+              onTap: () => context.push(AppRouter.inForm),
+            ),
+          ),
+        ),
+        SliverToBoxAdapter(
           child: _PlayerPlusStatsSection(
             stats: stats,
             currentUser: currentUser,
@@ -147,6 +155,62 @@ class _StatisticsView extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _InFormCallout extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _InFormCallout({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final styles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return Material(
+      color: colors.lightGrass,
+      borderRadius: BorderRadius.circular(22),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(22),
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: colors.grass,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(
+                  Icons.local_fire_department,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('In-form', style: styles.sectionHeader),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Se formranglisten, streaks og point.',
+                      style: styles.caption,
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.arrow_forward, color: colors.grass),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
