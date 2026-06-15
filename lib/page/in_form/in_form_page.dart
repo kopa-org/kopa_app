@@ -171,19 +171,12 @@ class _InFormViewState extends State<_InFormView> {
                     SliverPadding(
                       padding:
                           const EdgeInsets.symmetric(horizontal: Spacing.md),
-                      sliver: SliverList.builder(
-                        itemCount: rows.length - 3,
-                        itemBuilder: (context, index) {
-                          final row = rows[index + 3];
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: Spacing.sm),
-                            child: _LeaderboardRow(
-                              row: row,
-                              isCurrentUser: row.userId == widget.currentUserId,
-                              onTap: () => _openPlayer(row),
-                            ),
-                          );
-                        },
+                      sliver: SliverToBoxAdapter(
+                        child: _LeaderboardList(
+                          rows: rows.skip(3).toList(),
+                          currentUserId: widget.currentUserId,
+                          onPlayerTap: _openPlayer,
+                        ),
                       ),
                     ),
                 ],
@@ -464,67 +457,50 @@ class _Podium extends StatelessWidget {
   Widget build(BuildContext context) {
     if (rows.isEmpty) return const SizedBox.shrink();
     final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final leader = rows.first;
 
-    return Column(
-      children: [
-        _PodiumCard(
-          row: leader,
-          color: colors.lightGrass,
-          accent: colors.grass,
-          large: true,
-          isCurrentUser: leader.userId == currentUserId,
-          onTap: () => onPlayerTap(leader),
-        ),
-        if (rows.length > 1) ...[
-          const SizedBox(height: Spacing.sm),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: _PodiumCard(
-                  row: rows[1],
-                  color: colors.lightSky,
-                  accent: colors.sky,
-                  isCurrentUser: rows[1].userId == currentUserId,
-                  onTap: () => onPlayerTap(rows[1]),
-                ),
+    return InFormPanel(
+      padding: EdgeInsets.zero,
+      child: Column(
+        children: [
+          for (var index = 0; index < rows.length; index++) ...[
+            _PodiumRow(
+              row: rows[index],
+              accent: switch (index) {
+                0 => colors.grass,
+                1 => colors.sky,
+                _ => colors.sunset,
+              },
+              leader: index == 0,
+              isCurrentUser: rows[index].userId == currentUserId,
+              onTap: () => onPlayerTap(rows[index]),
+            ),
+            if (index < rows.length - 1)
+              Divider(
+                height: 1,
+                indent: Spacing.md,
+                endIndent: Spacing.md,
+                color: colors.divider,
               ),
-              if (rows.length > 2) ...[
-                const SizedBox(width: Spacing.sm),
-                Expanded(
-                  child: _PodiumCard(
-                    row: rows[2],
-                    color: colors.sunset.withValues(alpha: .22),
-                    accent: colors.sunset,
-                    isCurrentUser: rows[2].userId == currentUserId,
-                    onTap: () => onPlayerTap(rows[2]),
-                  ),
-                ),
-              ],
-            ],
-          ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }
 
-class _PodiumCard extends StatelessWidget {
+class _PodiumRow extends StatelessWidget {
   final InFormLeaderboardRow row;
-  final Color color;
   final Color accent;
-  final bool large;
+  final bool leader;
   final bool isCurrentUser;
   final VoidCallback onTap;
 
-  const _PodiumCard({
+  const _PodiumRow({
     required this.row,
-    required this.color,
     required this.accent,
+    required this.leader,
     required this.isCurrentUser,
     required this.onTap,
-    this.large = false,
   });
 
   @override
@@ -533,67 +509,102 @@ class _PodiumCard extends StatelessWidget {
     final styles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
 
-    return InFormPanel(
-      color: color,
+    return InkWell(
       onTap: onTap,
-      border: isCurrentUser ? Border.all(color: colors.dirt, width: 2) : null,
-      child: large
-          ? Row(
-              children: [
-                _RankBadge(rank: row.rank, color: accent),
-                const SizedBox(width: Spacing.md),
-                InFormAvatar(name: row.userName, radius: 27),
-                const SizedBox(width: Spacing.md),
-                Expanded(child: _PlayerLabel(row: row)),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      _number(row.total),
-                      style: styles.pageTitle.copyWith(
-                        color: colors.dirt,
-                        height: 1,
-                      ),
-                    ),
-                    Text('point', style: styles.caption),
-                    const SizedBox(height: Spacing.xs),
-                    _Movement(row: row),
-                  ],
-                ),
-              ],
-            )
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _RankBadge(rank: row.rank, color: accent),
-                    _Movement(row: row),
-                  ],
-                ),
-                const SizedBox(height: Spacing.md),
-                InFormAvatar(name: row.userName, radius: 23),
-                const SizedBox(height: Spacing.sm),
-                Text(
-                  row.userName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: styles.bodyBold,
-                ),
-                Text(
-                  inFormPositionLabel(row.position),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: styles.caption,
-                ),
-                const SizedBox(height: Spacing.md),
-                Text(
-                  '${_number(row.total)} point',
-                  style: styles.sectionHeader.copyWith(color: colors.dirt),
-                ),
-              ],
+      child: Container(
+        decoration: BoxDecoration(
+          color: leader ? colors.lightGrass.withValues(alpha: .36) : null,
+          border: isCurrentUser
+              ? Border(left: BorderSide(color: colors.grass, width: 3))
+              : null,
+        ),
+        padding: EdgeInsets.symmetric(
+          horizontal: isCurrentUser ? Spacing.md - 3 : Spacing.md,
+          vertical: leader ? 14 : 11,
+        ),
+        child: Row(
+          children: [
+            _RankBadge(
+              rank: row.rank,
+              color: leader ? accent : accent.withValues(alpha: .14),
+              foregroundColor: leader ? Colors.white : accent,
+              size: leader ? 34 : 30,
             ),
+            const SizedBox(width: 12),
+            InFormAvatar(
+              name: row.userName,
+              radius: leader ? 22 : 19,
+              backgroundColor: leader ? colors.surface : colors.offWhite,
+              foregroundColor: accent,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                row.userName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: styles.bodyBold.copyWith(
+                  fontSize: leader ? 17 : 15,
+                ),
+              ),
+            ),
+            const SizedBox(width: Spacing.sm),
+            Text(
+              _number(row.total),
+              style: (leader ? styles.sectionHeader : styles.bodyBold).copyWith(
+                color: colors.dirt,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(width: 3),
+            Text(
+              'pt',
+              style: styles.caption.copyWith(color: colors.textSecondary),
+            ),
+            const SizedBox(width: Spacing.xs),
+            Icon(Icons.chevron_right, color: colors.textSecondary, size: 18),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LeaderboardList extends StatelessWidget {
+  final List<InFormLeaderboardRow> rows;
+  final int? currentUserId;
+  final ValueChanged<InFormLeaderboardRow> onPlayerTap;
+
+  const _LeaderboardList({
+    required this.rows,
+    required this.currentUserId,
+    required this.onPlayerTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
+
+    return InFormPanel(
+      padding: EdgeInsets.zero,
+      child: Column(
+        children: [
+          for (var index = 0; index < rows.length; index++) ...[
+            _LeaderboardRow(
+              row: rows[index],
+              isCurrentUser: rows[index].userId == currentUserId,
+              onTap: () => onPlayerTap(rows[index]),
+            ),
+            if (index < rows.length - 1)
+              Divider(
+                height: 1,
+                indent: Spacing.md,
+                endIndent: Spacing.md,
+                color: colors.divider,
+              ),
+          ],
+        ],
+      ),
     );
   }
 }
@@ -615,58 +626,56 @@ class _LeaderboardRow extends StatelessWidget {
     final styles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
 
-    return InFormPanel(
+    return InkWell(
       onTap: onTap,
-      border: isCurrentUser ? Border.all(color: colors.grass, width: 2) : null,
-      child: Row(
-        children: [
-          _RankBadge(rank: row.rank, color: colors.offWhite),
-          const SizedBox(width: Spacing.md),
-          InFormAvatar(name: row.userName),
-          const SizedBox(width: Spacing.md),
-          Expanded(child: _PlayerLabel(row: row)),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text('${_number(row.total)} point', style: styles.bodyBold),
-              const SizedBox(height: Spacing.xs),
-              _Movement(row: row),
-            ],
-          ),
-          const SizedBox(width: Spacing.xs),
-          Icon(Icons.chevron_right, color: colors.dirt, size: 20),
-        ],
+      child: Container(
+        decoration: BoxDecoration(
+          color:
+              isCurrentUser ? colors.lightGrass.withValues(alpha: .18) : null,
+          border: isCurrentUser
+              ? Border(left: BorderSide(color: colors.grass, width: 3))
+              : null,
+        ),
+        padding: EdgeInsets.symmetric(
+          horizontal: isCurrentUser ? Spacing.md - 3 : Spacing.md,
+          vertical: 11,
+        ),
+        child: Row(
+          children: [
+            _RankBadge(
+              rank: row.rank,
+              color: colors.offWhite,
+              size: 30,
+            ),
+            const SizedBox(width: 12),
+            InFormAvatar(name: row.userName, radius: 19),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                row.userName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: styles.bodyBold.copyWith(fontSize: 15),
+              ),
+            ),
+            const SizedBox(width: Spacing.sm),
+            Text(
+              _number(row.total),
+              style: styles.bodyBold.copyWith(
+                color: colors.dirt,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(width: 3),
+            Text(
+              'pt',
+              style: styles.caption.copyWith(color: colors.textSecondary),
+            ),
+            const SizedBox(width: Spacing.xs),
+            Icon(Icons.chevron_right, color: colors.textSecondary, size: 18),
+          ],
+        ),
       ),
-    );
-  }
-}
-
-class _PlayerLabel extends StatelessWidget {
-  final InFormLeaderboardRow row;
-
-  const _PlayerLabel({required this.row});
-
-  @override
-  Widget build(BuildContext context) {
-    final styles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          row.userName,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: styles.bodyBold,
-        ),
-        const SizedBox(height: 2),
-        Text(
-          '${inFormPositionLabel(row.position)} · Senest ${_signed(row.latestRound)}',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: styles.caption,
-        ),
-      ],
     );
   }
 }
@@ -674,8 +683,15 @@ class _PlayerLabel extends StatelessWidget {
 class _RankBadge extends StatelessWidget {
   final int rank;
   final Color color;
+  final Color? foregroundColor;
+  final double size;
 
-  const _RankBadge({required this.rank, required this.color});
+  const _RankBadge({
+    required this.rank,
+    required this.color,
+    this.foregroundColor,
+    this.size = 38,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -683,60 +699,18 @@ class _RankBadge extends StatelessWidget {
     final styles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
     return Container(
-      width: 38,
-      height: 38,
+      width: size,
+      height: size,
       alignment: Alignment.center,
       decoration: BoxDecoration(color: color, shape: BoxShape.circle),
       child: Text(
         '#$rank',
         style: styles.caption.copyWith(
-          color: colors.dirt,
+          color: foregroundColor ?? colors.dirt,
           fontWeight: FontWeight.w800,
+          fontSize: size < 34 ? 12 : null,
         ),
       ),
-    );
-  }
-}
-
-class _Movement extends StatelessWidget {
-  final InFormLeaderboardRow row;
-
-  const _Movement({required this.row});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final styles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final rising = row.rankChange > 0;
-    final falling = row.rankChange < 0;
-    final color = rising
-        ? colors.grass
-        : falling
-            ? colors.error
-            : colors.textSecondary;
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          rising
-              ? Icons.arrow_upward
-              : falling
-                  ? Icons.arrow_downward
-                  : Icons.remove,
-          size: 15,
-          color: color,
-        ),
-        const SizedBox(width: 2),
-        Text(
-          row.rankChange == 0 ? 'Stabil' : '${row.rankChange.abs()}',
-          style: styles.caption.copyWith(
-            color: color,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ],
     );
   }
 }
@@ -799,8 +773,3 @@ String _number(double value) {
 }
 
 String _points(double value) => '${_number(value)} point';
-
-String _signed(double value) {
-  final prefix = value > 0 ? '+' : '';
-  return '$prefix${_number(value)}';
-}
