@@ -18,14 +18,14 @@ import 'package:kopa/utils/app_analytics.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class ProfileSettingsPage extends StatefulWidget {
-  const ProfileSettingsPage({super.key});
+class SettingsTab extends StatefulWidget {
+  const SettingsTab({super.key});
 
   @override
-  State<ProfileSettingsPage> createState() => _ProfileSettingsPageState();
+  State<SettingsTab> createState() => _SettingsTabState();
 }
 
-class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
+class _SettingsTabState extends State<SettingsTab> {
   bool _isLoading = false;
   String? _errorMessage;
   final _emailController = TextEditingController();
@@ -46,7 +46,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
 
     return PageScaffold(
       title: 'Settings',
-      showBackButton: true,
+      showBackButton: false,
       backgroundColor: appColors.background,
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),

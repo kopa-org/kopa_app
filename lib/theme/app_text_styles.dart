@@ -19,34 +19,46 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
   });
 
   static AppTextStyles get light => AppTextStyles(
+        // Overskrift: line height 110%, letter spacing -3% (brand guide p.22)
         pageTitle: GoogleFonts.rethinkSans(
           fontSize: 28,
           fontWeight: FontWeight.bold,
+          height: 1.1,
+          letterSpacing: -0.84,
           color: const Color(0xFF101010),
         ),
+        // Underoverskrift: line height 110%, letter spacing -3%
         sectionHeader: GoogleFonts.rethinkSans(
           fontSize: 20,
           fontWeight: FontWeight.w600,
+          height: 1.1,
+          letterSpacing: -0.6,
           color: const Color(0xFF101010),
         ),
         bodyBold: GoogleFonts.rethinkSans(
           fontSize: 16,
           fontWeight: FontWeight.w600,
+          height: 1.1,
+          letterSpacing: -0.48,
           color: const Color(0xFF101010),
         ),
+        // Brødtekst: line height 120%, letter spacing 0%
         body: GoogleFonts.rethinkSans(
           fontSize: 16,
           fontWeight: FontWeight.normal,
+          height: 1.2,
           color: const Color(0xFF101010),
         ),
         caption: GoogleFonts.rethinkSans(
           fontSize: 13,
           fontWeight: FontWeight.normal,
+          height: 1.2,
           color: const Color(0xFF2D1000),
         ),
         button: GoogleFonts.rethinkSans(
           fontSize: 16,
           fontWeight: FontWeight.w600,
+          height: 1.2,
           color: const Color(0xFFFFFFFF),
         ),
       );

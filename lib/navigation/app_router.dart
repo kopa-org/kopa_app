@@ -1,22 +1,25 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/auth_state.dart';
 import 'package:kopa/cubits/onboarding_cubit.dart';
+import 'package:kopa/navigation/app_router.dart';
+import 'package:kopa/page/in_form/in_form_match_editor_page.dart';
+import 'package:kopa/page/in_form/in_form_page.dart';
+import 'package:kopa/page/match/match_programme.dart';
+import 'package:kopa/page/player_plus/player_plus_page.dart';
+import 'package:kopa/page/profile/dbu_webview_page.dart';
+import 'package:kopa/page/statistics/statistics_page.dart';
 import 'package:kopa/pages/login_page.dart';
 import 'package:kopa/pages/onboarding_page.dart';
 import 'package:kopa/pages/register_page.dart';
 import 'package:kopa/tab/home_tab.dart';
 import 'package:kopa/tab/profile_tab.dart';
-import 'package:kopa/page/profile/dbu_webview_page.dart';
-import 'package:kopa/page/player_plus/player_plus_page.dart';
-import 'package:kopa/page/statistics/statistics_page.dart';
-import 'package:kopa/page/match/match_programme.dart';
-import 'package:kopa/page/in_form/in_form_match_editor_page.dart';
-import 'package:kopa/page/in_form/in_form_page.dart';
+import 'package:kopa/tab/settings_tab.dart';
 import 'package:kopa/utils/app_analytics.dart';
-import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 abstract final class AppRouter {
   static const login = '/login';
@@ -27,6 +30,7 @@ abstract final class AppRouter {
   static const playerPlus = '/player-plus';
   static const inForm = '/in-form';
   static const profile = '/profile';
+  static const settings = '/settings';
   static const dbuWebview = '/dbu-webview';
   static const invite = '/invite';
   static const join = '/join';
@@ -127,6 +131,25 @@ abstract final class AppRouter {
         StatefulShellRoute.indexedStack(
           builder: (context, state, navigationShell) {
             final theme = Theme.of(context);
+            const tabs = [
+              (Icons.home, 'Hjem', 'assets/logos/home-simple-door.svg'),
+              (
+                Icons.sports_soccer,
+                'Kampe',
+                'assets/logos/soccer-ball.svg'
+              ),
+              (
+                Icons.bar_chart,
+                'Statistik',
+                'assets/logos/graph-up.svg'
+              ),
+              (Icons.person, 'Profil', 'assets/logos/piggy-bank.svg'),
+              (
+                CupertinoIcons.gear_alt,
+                'Settings',
+                'assets/logos/settings-gear.svg'
+              ),
+            ];
             return Scaffold(
               body: navigationShell,
               bottomNavigationBar: Container(
@@ -142,7 +165,9 @@ abstract final class AppRouter {
                 child: SafeArea(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 15.0, vertical: 8),
+                      horizontal: 8.0,
+                      vertical: 8,
+                    ),
                     child: GNav(
                       rippleColor:
                           theme.colorScheme.primary.withValues(alpha: 0.1),
@@ -152,7 +177,9 @@ abstract final class AppRouter {
                       activeColor: theme.colorScheme.primary,
                       iconSize: 24,
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 12),
+                        horizontal: 12,
+                        vertical: 12,
+                      ),
                       duration: const Duration(milliseconds: 400),
                       tabBackgroundColor:
                           theme.colorScheme.primary.withValues(alpha: 0.1),
@@ -168,66 +195,22 @@ abstract final class AppRouter {
                         navigationShell.goBranch(index);
                       },
                       tabs: [
-                        GButton(
-                          icon: Icons.home,
-                          leading: SvgPicture.asset(
-                            'assets/logos/home-simple-door.svg',
-                            width: 24,
-                            height: 24,
-                            colorFilter: ColorFilter.mode(
-                              navigationShell.currentIndex == 0
-                                  ? theme.colorScheme.primary
-                                  : theme.unselectedWidgetColor,
-                              BlendMode.srcIn,
+                        for (int i = 0; i < tabs.length; i++)
+                          GButton(
+                            icon: tabs[i].$1,
+                            leading: SvgPicture.asset(
+                              tabs[i].$3,
+                              width: 24,
+                              height: 24,
+                              colorFilter: ColorFilter.mode(
+                                navigationShell.currentIndex == i
+                                    ? theme.colorScheme.primary
+                                    : theme.unselectedWidgetColor,
+                                BlendMode.srcIn,
+                              ),
                             ),
+                            text: tabs[i].$2,
                           ),
-                          text: 'Hjem',
-                        ),
-                        GButton(
-                          icon: Icons.sports_soccer,
-                          leading: SvgPicture.asset(
-                            'assets/logos/soccer-ball.svg',
-                            width: 24,
-                            height: 24,
-                            colorFilter: ColorFilter.mode(
-                              navigationShell.currentIndex == 1
-                                  ? theme.colorScheme.primary
-                                  : theme.unselectedWidgetColor,
-                              BlendMode.srcIn,
-                            ),
-                          ),
-                          text: 'Kampe',
-                        ),
-                        GButton(
-                          icon: Icons.bar_chart,
-                          leading: SvgPicture.asset(
-                            'assets/logos/graph-up.svg',
-                            width: 24,
-                            height: 24,
-                            colorFilter: ColorFilter.mode(
-                              navigationShell.currentIndex == 2
-                                  ? theme.colorScheme.primary
-                                  : theme.unselectedWidgetColor,
-                              BlendMode.srcIn,
-                            ),
-                          ),
-                          text: 'Statistik',
-                        ),
-                        GButton(
-                          icon: Icons.person,
-                          leading: SvgPicture.asset(
-                            'assets/logos/piggy-bank.svg',
-                            width: 24,
-                            height: 24,
-                            colorFilter: ColorFilter.mode(
-                              navigationShell.currentIndex == 3
-                                  ? theme.colorScheme.primary
-                                  : theme.unselectedWidgetColor,
-                              BlendMode.srcIn,
-                            ),
-                          ),
-                          text: 'Profil',
-                        ),
                       ],
                     ),
                   ),
@@ -268,6 +251,14 @@ abstract final class AppRouter {
                 ),
               ],
             ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: settings,
+                  builder: (context, state) => const SettingsTab(),
+                ),
+              ],
+            ),
           ],
         ),
       ],
@@ -280,6 +271,7 @@ abstract final class AppRouter {
       1 => 'matches',
       2 => 'statistics',
       3 => 'profile',
+      4 => 'settings',
       _ => 'unknown',
     };
   }

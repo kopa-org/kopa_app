@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:kopa/component/avatar/app_avatar.dart';
 import 'package:kopa/component/card/kopa_card.dart';
-import 'package:kopa/helpers/date_helper.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/match_event_type.dart';
 import 'package:kopa/theme/app_colors.dart';
@@ -24,6 +25,7 @@ class LatestMatchCard extends StatelessWidget {
     final appTextStyles =
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
+    final dateFormat = DateFormat('EEE d. MMM', 'da_DK');
     final motm =
         match.matchPollDetails?.playerOfTheMatchDetails.name ?? 'Ingen valgt';
     final scorers = match.matchEventDetailsList
@@ -36,180 +38,170 @@ class LatestMatchCard extends StatelessWidget {
 
     return KopaCard(
       onTap: onTap,
+      padding: EdgeInsets.zero,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: Spacing.sm,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: appColors.offWhite,
-                  border: Border.all(
-                    color: appColors.divider,
-                  ),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  'Seneste opgør',
-                  style: appTextStyles.caption.copyWith(
-                    color: appColors.textSecondary,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              const Spacer(),
-              Text(
-                DateHelper.getFormattedDate(match.date),
-                style: appTextStyles.caption.copyWith(
-                  color: appColors.textSecondary.withValues(alpha: 0.82),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: Spacing.lg),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: _TeamColumn(
-                  label: match.homeTeam ?? 'Hjemme',
-                  alignEnd: false,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: Spacing.sm),
-                child: Column(
-                  children: [
-                    Text(
-                      score,
-                      style: appTextStyles.pageTitle.copyWith(
-                        color: appColors.black,
-                        fontSize: 34,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(height: Spacing.xs),
-                    Container(
-                      width: 52,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: appColors.primary,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: _TeamColumn(
-                  label: match.awayTeam ?? 'Ude',
-                  alignEnd: true,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: Spacing.lg),
+          // Header bar — mirrors MatchHeroCard for a shared match-card language.
           Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(Spacing.sm),
+            padding: const EdgeInsets.symmetric(
+              horizontal: Spacing.md,
+              vertical: Spacing.sm,
+            ),
             decoration: BoxDecoration(
-              color: appColors.offWhite,
-              borderRadius: BorderRadius.circular(Spacing.borderRadiusLarge),
-              border: Border.all(
-                color: appColors.lightGrass.withValues(alpha: 0.85),
+              color: appColors.primary,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(12),
               ),
             ),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
-                    color: appColors.sun.withValues(alpha: 0.88),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Icon(
-                    Icons.workspace_premium_rounded,
-                    color: appColors.black,
+                Text(
+                  dateFormat.format(match.date).toUpperCase(),
+                  style: appTextStyles.caption.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(width: Spacing.sm),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Kampens spiller',
-                        style: appTextStyles.caption.copyWith(
-                          color: appColors.textSecondary,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        motm,
-                        style: appTextStyles.bodyBold.copyWith(
-                          color: appColors.black,
-                          fontSize: 17,
-                        ),
-                      ),
-                    ],
+                Flexible(
+                  child: Text(
+                    match.location,
+                    style: appTextStyles.caption.copyWith(
+                      color: Colors.white,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: Spacing.md),
-          Text(
-            'Målscorere',
-            style: appTextStyles.caption.copyWith(
-              color: appColors.textSecondary,
-              fontWeight: FontWeight.w700,
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: Spacing.lg,
+              horizontal: Spacing.md,
             ),
-          ),
-          const SizedBox(height: Spacing.sm),
-          Wrap(
-            spacing: Spacing.sm,
-            runSpacing: Spacing.sm,
-            children: scorers.isEmpty
-                ? [
-                    _ScorerChip(
-                      label: 'Ingen mål registreret',
-                      color: appColors.sky,
-                    ),
-                  ]
-                : scorers
-                    .map(
-                      (scorer) => _ScorerChip(
-                        label: scorer,
-                        color: appColors.lightSky,
+            child: Column(
+              children: [
+                // Teams + score — same layout as MatchHeroCard.
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: _TeamColumn(
+                        label: match.homeTeam ?? 'Hjemme',
+                        alignEnd: false,
                       ),
-                    )
-                    .toList(),
-          ),
-          const SizedBox(height: Spacing.md),
-          Row(
-            children: [
-              Text(
-                'Åbn kampdetaljer',
-                style: appTextStyles.bodyBold.copyWith(
-                  color: appColors.black,
+                    ),
+                    Expanded(
+                      flex: 4,
+                      child: Column(
+                        children: [
+                          Text(
+                            score,
+                            style: appTextStyles.pageTitle.copyWith(
+                              color: appColors.black,
+                              fontSize: 32,
+                            ),
+                          ),
+                          const SizedBox(height: Spacing.xs),
+                          Text(
+                            match.type,
+                            style: appTextStyles.caption,
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      flex: 3,
+                      child: _TeamColumn(
+                        label: match.awayTeam ?? 'Ude',
+                        alignEnd: true,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              const Spacer(),
-              Icon(
-                Icons.arrow_forward_rounded,
-                color: appColors.primary,
-              ),
-            ],
+                const SizedBox(height: Spacing.md),
+                // Kampens spiller — muted, flat (no sun-yellow fill, no nested box).
+                Row(
+                  children: [
+                    AppAvatar(
+                      initials: _getInitials(motm),
+                      radius: 20,
+                    ),
+                    const SizedBox(width: Spacing.sm),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Kampens spiller',
+                            style: appTextStyles.caption.copyWith(
+                              color: appColors.textSecondary,
+                            ),
+                          ),
+                          Text(
+                            motm,
+                            style: appTextStyles.bodyBold.copyWith(
+                              color: appColors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: Spacing.md),
+                // Målscorere.
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Målscorere',
+                    style: appTextStyles.caption.copyWith(
+                      color: appColors.textSecondary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: Spacing.sm),
+                Wrap(
+                  spacing: Spacing.sm,
+                  runSpacing: Spacing.sm,
+                  children: scorers.isEmpty
+                      ? [
+                          _ScorerChip(
+                            label: 'Ingen mål registreret',
+                            color: appColors.sky,
+                          ),
+                        ]
+                      : scorers
+                          .map(
+                            (scorer) => _ScorerChip(
+                              label: scorer,
+                              color: appColors.lightSky,
+                            ),
+                          )
+                          .toList(),
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
+  }
+
+  String _getInitials(String name) {
+    if (name == 'Ingen valgt') return '?';
+    final parts = name
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((part) => part.isNotEmpty)
+        .toList();
+    if (parts.isEmpty) return '?';
+    if (parts.length == 1) return parts.first.substring(0, 1).toUpperCase();
+    return (parts.first.substring(0, 1) + parts.last.substring(0, 1))
+        .toUpperCase();
   }
 }
 
@@ -232,32 +224,16 @@ class _TeamColumn extends StatelessWidget {
       crossAxisAlignment:
           alignEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 42,
-          height: 42,
-          decoration: BoxDecoration(
-            color: appColors.offWhite,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: appColors.divider),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            _getInitials(label),
-            style: appTextStyles.bodyBold.copyWith(
-              color: appColors.primary,
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
+        AppAvatar(
+          initials: _getInitial(label),
+          radius: 30,
         ),
-        const SizedBox(height: Spacing.xs),
+        const SizedBox(height: Spacing.sm),
         Text(
           label,
           textAlign: alignEnd ? TextAlign.end : TextAlign.start,
           style: appTextStyles.bodyBold.copyWith(
-            color: const Color(0xFF101010),
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
+            color: appColors.black,
           ),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
@@ -266,18 +242,10 @@ class _TeamColumn extends StatelessWidget {
     );
   }
 
-  String _getInitials(String teamName) {
-    final parts = teamName
-        .trim()
-        .split(RegExp(r'\s+'))
-        .where((part) => part.isNotEmpty)
-        .toList();
-
-    if (parts.isEmpty) return '?';
-    if (parts.length == 1) return parts.first.substring(0, 1).toUpperCase();
-
-    return (parts.first.substring(0, 1) + parts.last.substring(0, 1))
-        .toUpperCase();
+  String _getInitial(String teamName) {
+    final trimmed = teamName.trim();
+    if (trimmed.isEmpty) return '?';
+    return trimmed.substring(0, 1).toUpperCase();
   }
 }
 

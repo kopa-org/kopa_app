@@ -5,7 +5,6 @@ import 'package:kopa/component/list_item/player_list_item.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/page/profile/player_profile_page.dart';
-import 'package:kopa/page/profile/profile_settings_page.dart';
 import 'package:kopa/repository/users_repository.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
@@ -43,19 +42,6 @@ class _ProfileTabState extends State<ProfileTab> {
       title: 'Profil',
       showBackButton: false,
       backgroundColor: appColors.background,
-      trailing: [
-        CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => const ProfileSettingsPage(),
-              ),
-            );
-          },
-          child: const Icon(CupertinoIcons.gear_alt),
-        ),
-      ],
       body: RefreshIndicator(
         onRefresh: _refresh,
         child: FutureHandler<List<UserDetails>>(
