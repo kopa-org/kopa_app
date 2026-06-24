@@ -25,20 +25,36 @@ void main() {
     expect(leaderboard.rows.single.rankChange, 2);
   });
 
-  test('serializes canonical performance fields', () {
-    const performance = InFormPerformance(
-      userId: 4,
-      position: 'goalkeeper',
-      played: true,
-      penaltiesSaved: 1,
-      motmVotes: 2,
-    );
+  test('parses player breakdown entries', () {
+    final breakdown = InFormPlayerBreakdown.fromJson({
+      'user_id': 4,
+      'period': 'all_time',
+      'total': 12.5,
+      'entries': [
+        {
+          'id': 1,
+          'event_id': 7,
+          'rule': 'goal',
+          'description': 'Mål',
+          'value': 5,
+          'awarded_on': '2026-05-01',
+        },
+        {
+          'id': 2,
+          'event_id': null,
+          'rule': 'goal_streak_2',
+          'description': 'Målstreak x2',
+          'value': 2.5,
+          'awarded_on': '2026-05-01',
+        },
+      ],
+    });
 
-    final json = performance.toJson();
-    expect(json['user_id'], 4);
-    expect(json['played'], isTrue);
-    expect(json['penalties_saved'], 1);
-    expect(json['motm_votes'], 2);
-    expect(json.containsKey('position'), isFalse);
+    expect(breakdown.total, 12.5);
+    expect(breakdown.entries.length, 2);
+    expect(breakdown.entries.first.rule, 'goal');
+    expect(breakdown.entries.first.value, 5);
+    expect(breakdown.entries.last.eventId, isNull);
+    expect(breakdown.entries.last.value, 2.5);
   });
 }

@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopa/state/user_votes_state.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:kopa/component/button/button.dart';
 import 'package:kopa/component/card/kopa_card.dart';
 import 'package:kopa/component/error_message.dart';
@@ -32,7 +31,6 @@ import 'package:kopa/component/voting/voting_module.dart';
 import 'package:kopa/component/list_item/player_list_item.dart';
 import 'package:kopa/component/timeline/timeline_item.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:kopa/navigation/app_router.dart';
 
 class MatchDetailsPage extends StatefulWidget {
   final int matchId;
@@ -231,19 +229,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
           ),
         ),
         if (matchDetails.hasMatchBeenPlayed)
-          Padding(
-            padding: const EdgeInsets.only(top: 12),
-            child: Center(
-              child: Button(
-                buttonText: 'Registrer In-form',
-                onPressed: () => context.push(
-                  '${AppRouter.inForm}/match/${matchDetails.id}',
-                ),
-                icon: Icons.local_fire_department,
-                outlined: true,
-              ),
-            ),
-          ),
+          const SizedBox(height: 12),
       ],
       votingModule:
           _buildVotingModule(matchDetails, squad, appColors, appTextStyles),

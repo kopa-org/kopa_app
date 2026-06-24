@@ -100,7 +100,7 @@ class _StatisticsView extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
             child: _InFormCallout(
-              onTap: () => context.push(AppRouter.inForm),
+              onTap: () => context.push(AppRouter.playerPlusInForm),
             ),
           ),
         ),

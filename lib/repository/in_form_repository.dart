@@ -5,20 +5,18 @@ import 'package:kopa/helpers/api_config.dart';
 import 'package:kopa/model/in_form.dart';
 import 'package:kopa/services/secure_storage_service.dart';
 
-class InFormConflictException implements Exception {}
-
 class InFormRepository {
   static Future<InFormLeaderboard> getLeaderboard({
     required int teamId,
     required InFormPeriod period,
     String? position,
   }) async {
-    final json = await _get('/in_form/leaderboard', {
+    final json = await _get('/player_plus/in_form/leaderboard', {
       'team_id': '$teamId',
       'period': period.wire,
       if (position != null) 'position': position,
     });
-    return InFormLeaderboard.fromJson(json['leaderboard']);
+    return InFormLeaderboard.fromJson(json['in_form_leaderboard']);
   }
 
   static Future<InFormPlayerBreakdown> getPlayerBreakdown({
@@ -26,51 +24,17 @@ class InFormRepository {
     required int playerId,
     required InFormPeriod period,
   }) async {
-    final json = await _get('/in_form/player/$playerId', {
+    final json = await _get('/player_plus/in_form/player/$playerId', {
       'team_id': '$teamId',
       'period': period.wire,
     });
-    return InFormPlayerBreakdown.fromJson(json['player']);
-  }
-
-  static Future<InFormMatchRecord> getMatchRecord(int eventId) async {
-    final json = await _get('/in_form/matches/$eventId', const {});
-    return InFormMatchRecord.fromJson(json['match_record']);
-  }
-
-  static Future<InFormMatchRecord> updateMatchRecord({
-    required InFormMatchRecord record,
-    required List<InFormPerformance> performances,
-    required bool cancelled,
-  }) async {
-    final json = await _request(
-      'PUT',
-      '/in_form/matches/${record.eventId}',
-      body: {
-        'version': record.version,
-        'data': {
-          'cancelled': cancelled,
-          'performances':
-              performances.map((performance) => performance.toJson()).toList(),
-        },
-      },
-    );
-    return InFormMatchRecord.fromJson(json['match_record']);
+    return InFormPlayerBreakdown.fromJson(json['in_form_player']);
   }
 
   static Future<Map<String, dynamic>> _get(
     String path,
     Map<String, String> query,
-  ) {
-    return _request('GET', path, query: query);
-  }
-
-  static Future<Map<String, dynamic>> _request(
-    String method,
-    String path, {
-    Map<String, String>? query,
-    Map<String, dynamic>? body,
-  }) async {
+  ) async {
     final token = await SecureStorageService.getToken();
     final uri =
         Uri.parse('${ApiConfig.baseUrl}$path').replace(queryParameters: query);
@@ -79,11 +43,8 @@ class InFormRepository {
       'Content-Type': 'application/json',
     };
 
-    final response = method == 'PUT'
-        ? await http.put(uri, headers: headers, body: jsonEncode(body))
-        : await http.get(uri, headers: headers);
+    final response = await http.get(uri, headers: headers);
 
-    if (response.statusCode == 409) throw InFormConflictException();
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw Exception('In-form request failed (${response.statusCode})');
     }

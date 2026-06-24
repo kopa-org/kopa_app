@@ -7,7 +7,6 @@ import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/auth_state.dart';
 import 'package:kopa/cubits/onboarding_cubit.dart';
 import 'package:kopa/navigation/app_router.dart';
-import 'package:kopa/page/in_form/in_form_match_editor_page.dart';
 import 'package:kopa/page/in_form/in_form_page.dart';
 import 'package:kopa/page/match/match_programme.dart';
 import 'package:kopa/page/player_plus/player_plus_page.dart';
@@ -28,7 +27,7 @@ abstract final class AppRouter {
   static const match = '/match';
   static const statistics = '/statistics';
   static const playerPlus = '/player-plus';
-  static const inForm = '/in-form';
+  static const playerPlusInForm = '/player-plus/in-form';
   static const profile = '/profile';
   static const settings = '/settings';
   static const dbuWebview = '/dbu-webview';
@@ -111,14 +110,8 @@ abstract final class AppRouter {
           builder: (context, state) => const PlayerPlusPage(),
         ),
         GoRoute(
-          path: inForm,
+          path: '$playerPlus/in-form',
           builder: (context, state) => const InFormPage(),
-        ),
-        GoRoute(
-          path: '$inForm/match/:eventId',
-          builder: (context, state) => InFormMatchEditorPage(
-            eventId: int.parse(state.pathParameters['eventId']!),
-          ),
         ),
         GoRoute(
           path: login,

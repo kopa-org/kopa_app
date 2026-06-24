@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
+import 'package:kopa/navigation/app_router.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 import 'package:kopa/utils/app_analytics.dart';
@@ -72,6 +74,8 @@ class _PlayerPlusPageState extends State<PlayerPlusPage> {
             ),
           ),
           const SizedBox(height: 20),
+          _InFormCard(onTap: () => context.push(AppRouter.playerPlusInForm)),
+          const SizedBox(height: 20),
           Text(
             'Sæsondueller',
             style:
@@ -141,6 +145,67 @@ class _PlayerPlusPageState extends State<PlayerPlusPage> {
             color: appColors.grass,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _InFormCard extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _InFormCard({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final appColors = theme.extension<AppColors>() ?? AppColors.light;
+    final appTextStyles =
+        theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return Material(
+      color: appColors.surface,
+      borderRadius: BorderRadius.circular(18),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: appColors.grass.withValues(alpha: 0.3)),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: appColors.lightGrass,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.local_fire_department,
+                    color: appColors.grass),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('In-Form', style: appTextStyles.bodyBold),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Holdkonkurrencen bygget automatisk ud fra jeres kampdata — mål, assists, streaks og bonusser.',
+                      style: appTextStyles.caption.copyWith(height: 1.35),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right,
+                  color: appColors.textSecondary, size: 22),
+            ],
+          ),
+        ),
       ),
     );
   }
