@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/button/button.dart';
 import 'package:kopa/component/card/kopa_card.dart';
+import 'package:kopa/component/card/player_positions_card.dart';
 import 'package:kopa/component/error_message.dart';
 import 'package:kopa/component/loading_indicator.dart';
 import 'package:kopa/cubits/match_polls_cubit.dart';
@@ -228,11 +229,18 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
             ),
           ),
         ),
-        if (matchDetails.hasMatchBeenPlayed)
-          const SizedBox(height: 12),
+        if (matchDetails.hasMatchBeenPlayed) const SizedBox(height: 12),
       ],
       votingModule:
           _buildVotingModule(matchDetails, squad, appColors, appTextStyles),
+      playerPositions: PlayerPositionsCard(
+        playerCount: _teamPlayerCount(matchDetails, user),
+        formation: matchDetails.formation,
+        players: _lineupPlayers(matchDetails),
+        onEditFormation: user.isTeamOwner
+            ? () => _showFormationPicker(matchDetails, user)
+            : null,
+      ),
       attendanceList: _buildAttendanceList(matchDetails, squad),
       ratingsSection: _buildRatingsSection(matchDetails),
       timelineItems: _buildTimelineItems(matchDetails, user),
@@ -369,6 +377,220 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
                       : a.userDetails.email,
             ))
         .toList();
+  }
+
+  int _teamPlayerCount(MatchDetails match, UserDetails user) {
+    final count = match.teamPlayerCount;
+    if (count == 7 || count == 11) return count;
+
+    final userTeamCount = user.teamDetails?.playerCount ?? 7;
+    return userTeamCount == 11 ? 11 : 7;
+  }
+
+  List<UserDetails> _lineupPlayers(MatchDetails match) {
+    final attendances = match.attendanceDetailsList ?? [];
+    final selected = attendances
+        .where((attendance) =>
+            attendance.isAttending && attendance.isSelected == true)
+        .map((attendance) => attendance.userDetails)
+        .toList();
+
+    if (selected.isNotEmpty) return selected;
+
+    return attendances
+        .where((attendance) => attendance.isAttending)
+        .map((attendance) => attendance.userDetails)
+        .toList();
+  }
+
+  Future<void> _showFormationPicker(
+      MatchDetails match, UserDetails user) async {
+    final theme = Theme.of(context);
+    final appColors = theme.extension<AppColors>() ?? AppColors.light;
+    final appTextStyles =
+        theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final formationCtl = TextEditingController(text: match.formation);
+    var selectedFormation = match.formation;
+    var isSaving = false;
+
+    try {
+      await showCupertinoModalPopup(
+        context: context,
+        builder: (modalContext) => StatefulBuilder(
+          builder: (modalContext, setModalState) {
+            final suggestions =
+                _suggestedFormations(_teamPlayerCount(match, user));
+            final normalized = _normalizeFormation(formationCtl.text);
+            final canSave = _isValidFormation(normalized) && !isSaving;
+
+            Future<void> save() async {
+              if (!canSave) return;
+              setModalState(() => isSaving = true);
+              try {
+                await MatchRepository.updateMatchFormation(
+                    match.id, normalized);
+                AppAnalytics.logEvent(
+                  'match_formation_updated',
+                  parameters: {'formation': normalized},
+                );
+                if (mounted) await _refreshMatchAndSquad();
+                if (modalContext.mounted) Navigator.of(modalContext).pop();
+              } catch (error, stack) {
+                CrashReporting.logWebError(error, stack);
+                if (modalContext.mounted) {
+                  setModalState(() => isSaving = false);
+                }
+              }
+            }
+
+            return Container(
+              color: appColors.surface,
+              child: AnimatedPadding(
+                duration: const Duration(milliseconds: 200),
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(modalContext).viewInsets.bottom,
+                ),
+                child: SafeArea(
+                  top: false,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CupertinoNavigationBar(
+                        backgroundColor: appColors.surface,
+                        middle: Text(
+                          'Vælg opstilling',
+                          style: appTextStyles.sectionHeader,
+                        ),
+                        leading: CupertinoButton(
+                          padding: EdgeInsets.zero,
+                          onPressed: () => Navigator.of(modalContext).pop(),
+                          child: Text(
+                            'Annullér',
+                            style: TextStyle(color: appColors.error),
+                          ),
+                        ),
+                        trailing: CupertinoButton(
+                          padding: EdgeInsets.zero,
+                          onPressed: canSave ? save : null,
+                          child: isSaving
+                              ? const CupertinoActivityIndicator()
+                              : Text(
+                                  'Gem',
+                                  style: TextStyle(
+                                    color: canSave
+                                        ? appColors.primary
+                                        : appColors.divider,
+                                  ),
+                                ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(Spacing.lg),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Standard er 2-3-1, men du kan skrive enhver opstilling som f.eks. 3-2-1 eller 2-2-3.',
+                              style: appTextStyles.body,
+                            ),
+                            const SizedBox(height: Spacing.md),
+                            Wrap(
+                              spacing: Spacing.sm,
+                              runSpacing: Spacing.sm,
+                              children: suggestions.map((formation) {
+                                final selected = formation == selectedFormation;
+                                return GestureDetector(
+                                  onTap: () {
+                                    setModalState(() {
+                                      selectedFormation = formation;
+                                      formationCtl.text = formation;
+                                    });
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: Spacing.md,
+                                      vertical: Spacing.sm,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: selected
+                                          ? appColors.lightGrass
+                                          : appColors.grey2,
+                                      borderRadius: BorderRadius.circular(
+                                        Spacing.borderRadiusFull,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      formation,
+                                      style: appTextStyles.caption.copyWith(
+                                        color: selected
+                                            ? appColors.primary
+                                            : appColors.dirt,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                            const SizedBox(height: Spacing.md),
+                            CupertinoTextField(
+                              controller: formationCtl,
+                              placeholder: '2-3-1',
+                              keyboardType: TextInputType.text,
+                              padding: const EdgeInsets.all(Spacing.md),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: appColors.divider),
+                                borderRadius: BorderRadius.circular(
+                                  Spacing.borderRadiusSmall,
+                                ),
+                              ),
+                              onChanged: (value) {
+                                setModalState(() {
+                                  selectedFormation =
+                                      _normalizeFormation(value);
+                                });
+                              },
+                            ),
+                            const SizedBox(height: Spacing.xs),
+                            Text(
+                              'Brug bindestreger mellem kæderne. Målmanden er altid medregnet automatisk.',
+                              style: appTextStyles.caption,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    } finally {
+      formationCtl.dispose();
+    }
+  }
+
+  List<String> _suggestedFormations(int playerCount) {
+    if (playerCount == 11) {
+      return const ['4-3-3', '4-4-2', '3-5-2', '4-2-3-1'];
+    }
+
+    return const ['2-3-1', '3-2-1', '2-2-2', '1-3-2', '2-2-3'];
+  }
+
+  String _normalizeFormation(String value) {
+    return value.replaceAll(RegExp(r'\s+'), '');
+  }
+
+  bool _isValidFormation(String formation) {
+    if (!RegExp(r'^\d+(?:-\d+)*$').hasMatch(formation)) return false;
+    return formation
+        .split('-')
+        .map(int.tryParse)
+        .every((count) => count != null && count > 0 && count <= 5);
   }
 
   Widget? _buildRatingsSection(MatchDetails match) {

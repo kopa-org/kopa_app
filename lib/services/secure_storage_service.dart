@@ -53,8 +53,13 @@ class SecureStorageService {
         key: 'updatedAt', value: user.updatedAt.toIso8601String());
     if (user.teamDetails != null) {
       await _storage.write(key: 'teamName', value: user.teamDetails!.title);
+      await _storage.write(
+        key: 'teamPlayerCount',
+        value: user.teamDetails!.playerCount.toString(),
+      );
     } else {
       await _storage.delete(key: 'teamName');
+      await _storage.delete(key: 'teamPlayerCount');
     }
   }
 
@@ -75,6 +80,7 @@ class SecureStorageService {
     final createdAtStr = await _storage.read(key: 'createdAt');
     final updatedAtStr = await _storage.read(key: 'updatedAt');
     final teamName = await _storage.read(key: 'teamName');
+    final teamPlayerCount = await _storage.read(key: 'teamPlayerCount');
 
     if ([
       idStr,
@@ -104,6 +110,7 @@ class SecureStorageService {
             : TeamDetails(
                 id: 1,
                 title: teamName,
+                playerCount: int.tryParse(teamPlayerCount ?? '') ?? 7,
                 createdAt: DateTime.now(),
                 updatedAt: DateTime.now(),
               ),

@@ -19,6 +19,7 @@ class MatchDetailTemplate extends StatelessWidget {
   final List<Widget> timelineItems;
   final Widget? votingModule;
   final Widget? ratingsSection;
+  final Widget? playerPositions;
   final Future<void> Function()? onRefresh;
   final MatchDetailSegment selectedSegment;
   final ValueChanged<MatchDetailSegment>? onSegmentChanged;
@@ -31,6 +32,7 @@ class MatchDetailTemplate extends StatelessWidget {
     this.timelineItems = const [],
     this.votingModule,
     this.ratingsSection,
+    this.playerPositions,
     this.onRefresh,
     this.selectedSegment = MatchDetailSegment.overview,
     this.onSegmentChanged,
@@ -147,6 +149,10 @@ class MatchDetailTemplate extends StatelessWidget {
             const SizedBox(height: Spacing.lg),
             const SectionHeader(title: 'Afstemning'),
             votingModule!,
+          ],
+          if (playerPositions != null) ...[
+            const SizedBox(height: Spacing.lg),
+            playerPositions!,
           ],
           if (ratingsSection != null) ...[
             const SizedBox(height: Spacing.lg),

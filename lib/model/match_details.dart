@@ -22,6 +22,8 @@ class MatchDetails {
   final bool? isCurrentUserSelected;
   final int registeredCount;
   final int unavailableCount;
+  final int teamPlayerCount;
+  final String formation;
   final double? latitude;
   final double? longitude;
   final List<EventAttendanceDetails>? attendanceDetailsList;
@@ -47,6 +49,8 @@ class MatchDetails {
     this.isCurrentUserSelected,
     this.registeredCount = 0,
     this.unavailableCount = 0,
+    this.teamPlayerCount = 7,
+    this.formation = '2-3-1',
     this.latitude,
     this.longitude,
     this.attendanceDetailsList = const [],
@@ -76,6 +80,8 @@ class MatchDetails {
       isCurrentUserSelected: json['is_current_user_selected'],
       registeredCount: json['registered_count'] ?? 0,
       unavailableCount: json['unavailable_count'] ?? 0,
+      teamPlayerCount: json['team_player_count'] ?? 7,
+      formation: json['formation'] ?? '2-3-1',
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
       attendanceDetailsList: json['attendance_details_list'] != null

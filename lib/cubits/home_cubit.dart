@@ -49,6 +49,7 @@ class HomeCubit extends Cubit<HomeState> {
         status: HomeStatus.loaded,
         nextMatch: nextMatch,
         lastMatch: lastMatch,
+        matches: matches,
         statistics: statistics,
         fineBox: fineBox,
         isRegisteringForNextMatch: false,

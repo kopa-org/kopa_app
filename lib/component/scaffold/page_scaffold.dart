@@ -13,6 +13,7 @@ class PageScaffold extends StatelessWidget {
   final Color? backgroundColor;
   final Future<void> Function()? onRefresh;
   final bool showBackButton;
+  final bool showTopBar;
   final ObstructingPreferredSizeWidget? navigationBar;
 
   const PageScaffold({
@@ -26,6 +27,7 @@ class PageScaffold extends StatelessWidget {
     this.onRefresh,
     this.navigationBar,
     this.showBackButton = false,
+    this.showTopBar = true,
   });
 
   @override
@@ -41,24 +43,26 @@ class PageScaffold extends StatelessWidget {
     if (isIOS) {
       return CupertinoPageScaffold(
         backgroundColor: bgColor,
-        navigationBar: navigationBar ??
-            CupertinoNavigationBar(
-              backgroundColor: bgColor.withValues(alpha: 0.8),
-              middle: title == 'Kopa'
-                  ? SvgPicture.asset(
-                      'assets/logos/Logo.svg',
-                      height: 24,
-                    )
-                  : Text(
-                      title,
-                      style: appTextStyles.sectionHeader,
-                    ),
-              leading: leading ??
-                  (showBackButton ? _defaultBackButton(context) : null),
-              trailing: trailing != null
-                  ? Row(mainAxisSize: MainAxisSize.min, children: trailing!)
-                  : null,
-            ),
+        navigationBar: showTopBar
+            ? navigationBar ??
+                CupertinoNavigationBar(
+                  backgroundColor: bgColor.withValues(alpha: 0.8),
+                  middle: title == 'Kopa'
+                      ? SvgPicture.asset(
+                          'assets/logos/Logo.svg',
+                          height: 24,
+                        )
+                      : Text(
+                          title,
+                          style: appTextStyles.sectionHeader,
+                        ),
+                  leading: leading ??
+                      (showBackButton ? _defaultBackButton(context) : null),
+                  trailing: trailing != null
+                      ? Row(mainAxisSize: MainAxisSize.min, children: trailing!)
+                      : null,
+                )
+            : null,
         child: SafeArea(
           child: onRefresh != null
               ? CustomScrollView(
@@ -74,24 +78,26 @@ class PageScaffold extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: bgColor,
-      appBar: AppBar(
-        title: title == 'Kopa'
-            ? SvgPicture.asset(
-                'assets/logos/Logo.svg',
-                height: 24,
-              )
-            : Text(
-                title,
-                style: appTextStyles.sectionHeader,
-              ),
-        backgroundColor: bgColor,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        leading: leading ??
-            (showBackButton ? _defaultMaterialBackButton(context) : null),
-        automaticallyImplyLeading: showBackButton,
-        actions: trailing ?? [],
-      ),
+      appBar: showTopBar
+          ? AppBar(
+              title: title == 'Kopa'
+                  ? SvgPicture.asset(
+                      'assets/logos/Logo.svg',
+                      height: 24,
+                    )
+                  : Text(
+                      title,
+                      style: appTextStyles.sectionHeader,
+                    ),
+              backgroundColor: bgColor,
+              elevation: 0,
+              scrolledUnderElevation: 0,
+              leading: leading ??
+                  (showBackButton ? _defaultMaterialBackButton(context) : null),
+              automaticallyImplyLeading: showBackButton,
+              actions: trailing ?? [],
+            )
+          : null,
       body: SafeArea(child: body),
       floatingActionButton: floatingActionButton,
     );

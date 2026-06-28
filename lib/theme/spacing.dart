@@ -25,6 +25,11 @@ class Spacing {
   );
 
   static const double borderRadius = 12;
+  static const double borderRadiusExtraSmall = 4;
   static const double borderRadiusSmall = 8;
+  static const double borderRadiusMedium = 12;
   static const double borderRadiusLarge = 16;
+  static const double borderRadiusLargeIncreased = 20;
+  static const double borderRadiusExtraLarge = 28;
+  static const double borderRadiusFull = 1000;
 }

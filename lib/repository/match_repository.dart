@@ -215,6 +215,35 @@ class MatchRepository {
     }
   }
 
+  static Future<void> updateMatchFormation(
+      int matchId, String formation) async {
+    final token = await _secureStorage.read(key: 'token');
+
+    if (token == null) {
+      throw Exception('No token found. User might not be logged in.');
+    }
+
+    final url = Uri.parse('${ApiConfig.baseUrl}/match/formation');
+
+    final response = await http.patch(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({
+        'event_id': matchId,
+        'formation': formation,
+      }),
+    );
+
+    if (response.statusCode == 401) {
+      throw Exception('Unauthorized. Please log in again.');
+    } else if (response.statusCode != 200) {
+      throw Exception('Failed to update match formation');
+    }
+  }
+
   static Future<List<int>> createMatchEvents(
       List<CreateMatchEventCommand> createMatchEventCommands) async {
     final token = await _secureStorage.read(key: 'token');

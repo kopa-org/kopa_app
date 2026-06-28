@@ -1,8 +1,7 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kopa/component/card/player_plus_stat_tile.dart';
 import 'package:kopa/component/future_handler.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
@@ -46,7 +45,9 @@ class _StatisticsPageState extends State<StatisticsPage> {
               onSuccess: (context, data) => _StatisticsView(
                 stats: data.stats,
                 currentUser: user,
-                hasPlayerPlus: data.hasPlayerPlus || _hasTemporaryPlayerPlus,
+                hasPlayerPlus: data.hasPlayerPlus ||
+                    _hasTemporaryPlayerPlus ||
+                    PlayerPlusAccess.temporaryUnlocked.value,
                 onBuyPlayerPlus: _buyPlayerPlus,
               ),
             ),
@@ -63,6 +64,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
   }
 
   Future<void> _buyPlayerPlus() async {
+    PlayerPlusAccess.temporaryUnlocked.value = true;
     setState(() {
       _hasTemporaryPlayerPlus = true;
     });
@@ -455,80 +457,34 @@ class _PlayerPlusStatTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final appColors = theme.extension<AppColors>() ?? AppColors.light;
-    final styles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
     final currentIndex =
         tile.rows.indexWhere((row) => row.userId == currentUserId);
     final rank = currentIndex == -1 ? null : currentIndex + 1;
     final obscureRank = locked;
 
-    return Material(
-      color: appColors.surface,
-      borderRadius: BorderRadius.circular(8),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(8),
-        onTap: () => locked
-            ? _showPlayerPlusRequiredDialog(context, onBuyPlayerPlus)
-            : _showLeaderboardSheet(context),
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(tile.icon, color: tile.accentColor, size: 20),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      tile.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: styles.bodyBold,
-                    ),
-                  ),
-                ],
+    return PlayerPlusStatTile(
+      data: PlayerPlusStatTileData(
+        title: tile.title,
+        value: tile.value,
+        rank: rank,
+        rows: tile.rows
+            .map(
+              (row) => PlayerPlusStatRankingRow(
+                userId: row.userId,
+                userName: row.userName,
+                value: row.value,
+                suffix: row.suffix,
               ),
-              const Spacer(),
-              _BlurredValue(
-                blurred: obscureValue,
-                child: Text(
-                  tile.value,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: styles.pageTitle.copyWith(
-                    color: appColors.textPrimary,
-                    fontSize: 34,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: tile.accentColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: _BlurredValue(
-                  blurred: obscureRank,
-                  sigma: 3,
-                  child: Text(
-                    rank == null ? 'Ingen placering' : '#$rank på holdet',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: styles.caption.copyWith(
-                      color: appColors.textPrimary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+            )
+            .toList(),
+        icon: tile.icon,
+        accentColor: tile.accentColor,
       ),
+      obscureValue: obscureValue,
+      obscureRank: obscureRank,
+      onTap: () => locked
+          ? _showPlayerPlusRequiredDialog(context, onBuyPlayerPlus)
+          : _showLeaderboardSheet(context),
     );
   }
 
@@ -719,7 +675,7 @@ class _LeaderboardSheetRow extends StatelessWidget {
         children: [
           SizedBox(
             width: 34,
-            child: _BlurredValue(
+            child: BlurredValue(
               blurred: obscureFirstPlace,
               sigma: 3,
               child: Text(
@@ -731,7 +687,7 @@ class _LeaderboardSheetRow extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: _BlurredValue(
+            child: BlurredValue(
               blurred: obscureFirstPlace,
               sigma: 4,
               child: Text(
@@ -743,7 +699,7 @@ class _LeaderboardSheetRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          _BlurredValue(
+          BlurredValue(
             blurred: obscureFirstPlace,
             sigma: 4,
             child: Text(
@@ -796,33 +752,6 @@ class _PlayerPlusLockedCallout extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _BlurredValue extends StatelessWidget {
-  final bool blurred;
-  final double sigma;
-  final Widget child;
-
-  const _BlurredValue({
-    required this.blurred,
-    required this.child,
-    this.sigma = 5,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (!blurred) {
-      return child;
-    }
-
-    return ImageFiltered(
-      imageFilter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
-      child: Opacity(
-        opacity: 0.72,
-        child: child,
       ),
     );
   }

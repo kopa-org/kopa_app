@@ -6,7 +6,6 @@ import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/auth_state.dart';
 import 'package:kopa/cubits/onboarding_cubit.dart';
-import 'package:kopa/navigation/app_router.dart';
 import 'package:kopa/page/in_form/in_form_page.dart';
 import 'package:kopa/page/match/match_programme.dart';
 import 'package:kopa/page/player_plus/player_plus_page.dart';
@@ -126,16 +125,8 @@ abstract final class AppRouter {
             final theme = Theme.of(context);
             const tabs = [
               (Icons.home, 'Hjem', 'assets/logos/home-simple-door.svg'),
-              (
-                Icons.sports_soccer,
-                'Kampe',
-                'assets/logos/soccer-ball.svg'
-              ),
-              (
-                Icons.bar_chart,
-                'Statistik',
-                'assets/logos/graph-up.svg'
-              ),
+              (Icons.sports_soccer, 'Kampe', 'assets/logos/soccer-ball.svg'),
+              (Icons.bar_chart, 'Statistik', 'assets/logos/graph-up.svg'),
               (Icons.person, 'Profil', 'assets/logos/piggy-bank.svg'),
               (
                 CupertinoIcons.gear_alt,
