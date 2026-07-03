@@ -105,15 +105,13 @@ class _HomeTabView extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          if (state.nextMatch != null) ...[
+                          if (_playedMatches(state).isNotEmpty ||
+                              _upcomingMatches(state).isNotEmpty) ...[
                             _NextMatchCarousel(
-                              matches: _upcomingMatches(state),
+                              playedMatches: _playedMatches(state),
+                              upcomingMatches: _upcomingMatches(state),
                               currentUser: currentUser,
                             ),
-                            const SizedBox(height: Spacing.xl),
-                          ],
-                          if (state.lastMatch != null) ...[
-                            _LatestMatchCard(match: state.lastMatch!),
                             const SizedBox(height: Spacing.xl),
                           ],
                           if (state.statistics != null) ...[
@@ -557,12 +555,25 @@ List<MatchDetails> _upcomingMatches(HomeState state) {
   return matches;
 }
 
+List<MatchDetails> _playedMatches(HomeState state) {
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  return state.matches
+      .where(
+        (match) => match.hasMatchBeenPlayed && match.date.isBefore(today),
+      )
+      .toList()
+    ..sort((a, b) => a.date.compareTo(b.date));
+}
+
 class _NextMatchCarousel extends StatefulWidget {
-  final List<MatchDetails> matches;
+  final List<MatchDetails> playedMatches;
+  final List<MatchDetails> upcomingMatches;
   final UserDetails currentUser;
 
   const _NextMatchCarousel({
-    required this.matches,
+    required this.playedMatches,
+    required this.upcomingMatches,
     required this.currentUser,
   });
 
@@ -571,13 +582,29 @@ class _NextMatchCarousel extends StatefulWidget {
 }
 
 class _NextMatchCarouselState extends State<_NextMatchCarousel> {
-  static const _cardHeight = 680.0;
+  static const _upcomingCardHeight = 680.0;
+  static const _playedCardHeight = 420.0;
   late final PageController _controller;
+  late int _currentPage;
+
+  int get _initialPage {
+    if (widget.upcomingMatches.isNotEmpty) {
+      return widget.playedMatches.length;
+    }
+    return math.max(0, widget.playedMatches.length - 1);
+  }
+
+  int get _pageCount =>
+      widget.playedMatches.length + widget.upcomingMatches.length;
 
   @override
   void initState() {
     super.initState();
-    _controller = PageController(viewportFraction: 0.94);
+    _currentPage = _initialPage;
+    _controller = PageController(
+      initialPage: _initialPage,
+      viewportFraction: 0.94,
+    );
   }
 
   @override
@@ -588,28 +615,58 @@ class _NextMatchCarouselState extends State<_NextMatchCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.matches.length == 1) {
+    if (_pageCount == 1 && widget.playedMatches.isNotEmpty) {
+      return SizedBox(
+        height: _playedCardHeight,
+        child: _LatestMatchCard(match: widget.playedMatches.first),
+      );
+    }
+
+    if (_pageCount == 1) {
       return _NextMatchCard(
-        match: widget.matches.first,
+        match: widget.upcomingMatches.first,
         currentUser: widget.currentUser,
       );
     }
 
-    return SizedBox(
-      height: _cardHeight,
+    final selectedPageIsPlayed = _currentPage < widget.playedMatches.length;
+
+    return AnimatedContainer(
+      height: selectedPageIsPlayed ? _playedCardHeight : _upcomingCardHeight,
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOut,
       child: PageView.builder(
         controller: _controller,
-        padEnds: false,
-        itemCount: widget.matches.length,
+        padEnds: true,
+        itemCount: _pageCount,
         physics: const PageScrollPhysics(),
+        onPageChanged: (index) => setState(() => _currentPage = index),
         itemBuilder: (context, index) {
+          final isPlayedMatch = index < widget.playedMatches.length;
+          final match = isPlayedMatch
+              ? widget.playedMatches[index]
+              : widget.upcomingMatches[index - widget.playedMatches.length];
+          final itemHeight =
+              isPlayedMatch ? _playedCardHeight : _upcomingCardHeight;
+
           return Semantics(
-            label: 'Kommende kamp ${index + 1} af ${widget.matches.length}',
+            label: isPlayedMatch
+                ? 'Spillet kamp ${index + 1} af ${widget.playedMatches.length}'
+                : 'Kommende kamp ${index - widget.playedMatches.length + 1} '
+                    'af ${widget.upcomingMatches.length}',
             child: Padding(
               padding: const EdgeInsets.only(right: Spacing.sm),
-              child: _NextMatchCard(
-                match: widget.matches[index],
-                currentUser: widget.currentUser,
+              child: SingleChildScrollView(
+                physics: const NeverScrollableScrollPhysics(),
+                child: SizedBox(
+                  height: itemHeight,
+                  child: isPlayedMatch
+                      ? _LatestMatchCard(match: match)
+                      : _NextMatchCard(
+                          match: match,
+                          currentUser: widget.currentUser,
+                        ),
+                ),
               ),
             ),
           );
@@ -1042,7 +1099,7 @@ class _LatestMatchCard extends StatelessWidget {
           Text('Kampens spiller', style: appTextStyles.body3),
           Text(motm,
               style: appTextStyles.caption2.copyWith(color: appColors.grey5)),
-          const SizedBox(height: Spacing.md),
+          const Spacer(),
           _SecondaryFigmaButton(
             label: 'Se kampdetaljer',
             onTap: () => _openMatch(context, match, 'home_last_match'),
