@@ -18,6 +18,7 @@ import 'package:kopa/tab/home_tab.dart';
 import 'package:kopa/tab/profile_tab.dart';
 import 'package:kopa/tab/settings_tab.dart';
 import 'package:kopa/utils/app_analytics.dart';
+import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 abstract final class AppRouter {
   static const login = '/login';
@@ -33,6 +34,9 @@ abstract final class AppRouter {
   static const invite = '/invite';
   static const join = '/join';
   static const onboarding = '/onboarding';
+
+  static final List<GlobalKey<NavigatorState>> _branchNavigatorKeys =
+      List.generate(5, (_) => GlobalKey<NavigatorState>());
 
   static GoRouter create({
     required AuthCubit authCubit,
@@ -134,6 +138,69 @@ abstract final class AppRouter {
                 'assets/logos/settings-gear.svg'
               ),
             ];
+            void selectTab(int index) {
+              final isCurrentTab = index == navigationShell.currentIndex;
+              AppAnalytics.logEvent(
+                'main_tab_selected',
+                parameters: {
+                  'tab_name': _tabNameForIndex(index),
+                },
+              );
+              if (isCurrentTab) {
+                _branchNavigatorKeys[index]
+                    .currentState
+                    ?.popUntil((route) => route.isFirst);
+              }
+              navigationShell.goBranch(
+                index,
+                initialLocation: isCurrentTab,
+              );
+            }
+
+            if (theme.platform == TargetPlatform.iOS) {
+              return Scaffold(
+                extendBody: true,
+                body: navigationShell,
+                bottomNavigationBar: GlassTabBar.bottom(
+                  selectedIndex: navigationShell.currentIndex,
+                  onTabSelected: selectTab,
+                  selectedIconColor: theme.colorScheme.primary,
+                  selectedLabelColor: theme.colorScheme.primary,
+                  unselectedIconColor: theme.unselectedWidgetColor,
+                  unselectedLabelColor: theme.unselectedWidgetColor,
+                  indicatorColor:
+                      theme.colorScheme.primary.withValues(alpha: 0.12),
+                  tabs: const [
+                    GlassTab(
+                      icon: Icon(CupertinoIcons.house),
+                      activeIcon: Icon(CupertinoIcons.house_fill),
+                      label: 'Hjem',
+                    ),
+                    GlassTab(
+                      icon: Icon(CupertinoIcons.sportscourt),
+                      activeIcon: Icon(CupertinoIcons.sportscourt_fill),
+                      label: 'Kampe',
+                    ),
+                    GlassTab(
+                      icon: Icon(CupertinoIcons.chart_bar),
+                      activeIcon: Icon(CupertinoIcons.chart_bar_fill),
+                      label: 'Statistik',
+                    ),
+                    GlassTab(
+                      icon: Icon(CupertinoIcons.person),
+                      activeIcon: Icon(CupertinoIcons.person_fill),
+                      label: 'Profil',
+                    ),
+                    GlassTab(
+                      icon: Icon(CupertinoIcons.gear),
+                      activeIcon: Icon(CupertinoIcons.gear_solid),
+                      label: 'Settings',
+                    ),
+                  ],
+                ),
+              );
+            }
+
             return Scaffold(
               body: navigationShell,
               bottomNavigationBar: Container(
@@ -169,15 +236,7 @@ abstract final class AppRouter {
                           theme.colorScheme.primary.withValues(alpha: 0.1),
                       color: theme.unselectedWidgetColor,
                       selectedIndex: navigationShell.currentIndex,
-                      onTabChange: (index) {
-                        AppAnalytics.logEvent(
-                          'main_tab_selected',
-                          parameters: {
-                            'tab_name': _tabNameForIndex(index),
-                          },
-                        );
-                        navigationShell.goBranch(index);
-                      },
+                      onTabChange: selectTab,
                       tabs: [
                         for (int i = 0; i < tabs.length; i++)
                           GButton(
@@ -204,6 +263,7 @@ abstract final class AppRouter {
           },
           branches: [
             StatefulShellBranch(
+              navigatorKey: _branchNavigatorKeys[0],
               routes: [
                 GoRoute(
                   path: home,
@@ -212,6 +272,7 @@ abstract final class AppRouter {
               ],
             ),
             StatefulShellBranch(
+              navigatorKey: _branchNavigatorKeys[1],
               routes: [
                 GoRoute(
                   path: match,
@@ -220,6 +281,7 @@ abstract final class AppRouter {
               ],
             ),
             StatefulShellBranch(
+              navigatorKey: _branchNavigatorKeys[2],
               routes: [
                 GoRoute(
                   path: statistics,
@@ -228,6 +290,7 @@ abstract final class AppRouter {
               ],
             ),
             StatefulShellBranch(
+              navigatorKey: _branchNavigatorKeys[3],
               routes: [
                 GoRoute(
                   path: profile,
@@ -236,6 +299,7 @@ abstract final class AppRouter {
               ],
             ),
             StatefulShellBranch(
+              navigatorKey: _branchNavigatorKeys[4],
               routes: [
                 GoRoute(
                   path: settings,

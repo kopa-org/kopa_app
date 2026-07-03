@@ -19,6 +19,7 @@ import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/theme/app_theme.dart';
 import 'package:kopa/services/push_notifications_service.dart';
 import 'package:kopa/utils/app_analytics.dart';
+import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 const _envFileFromDefine = String.fromEnvironment('ENV_FILE');
 
@@ -32,6 +33,9 @@ void main() async {
     await CrashReporting.initialize();
     await AppAnalytics.initialize();
     await PushNotificationsService.instance.initialize();
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      await LiquidGlassWidgets.initialize();
+    }
 
     final authRepository = ApiAuthRepository();
     final onboardingRepository = OnboardingRepository();
@@ -42,13 +46,16 @@ void main() async {
     // Initialize auth state
     await authCubit.init();
 
+    final app = KopaApp(
+      authRepository: authRepository,
+      onboardingRepository: onboardingRepository,
+      authCubit: authCubit,
+      onboardingCubit: onboardingCubit,
+    );
     runApp(
-      KopaApp(
-        authRepository: authRepository,
-        onboardingRepository: onboardingRepository,
-        authCubit: authCubit,
-        onboardingCubit: onboardingCubit,
-      ),
+      defaultTargetPlatform == TargetPlatform.iOS
+          ? LiquidGlassWidgets.wrap(child: app)
+          : app,
     );
   });
 }

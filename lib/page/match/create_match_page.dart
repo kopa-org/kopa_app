@@ -187,8 +187,8 @@ class _CreateMatchPageState extends State<CreateMatchPage> {
     final date = _selectedDate;
     final meetingTime = _selectedMeetingTime;
 
-    if (teamA.isEmpty || teamB.isEmpty || date == null) {
-      await _showError('Udfyld begge hold og vælg dato.');
+    if (teamA.isEmpty || teamB.isEmpty || location.isEmpty || date == null) {
+      await _showError('Udfyld begge hold, lokation og vælg dato.');
       return false;
     }
 

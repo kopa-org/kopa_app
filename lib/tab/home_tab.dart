@@ -467,7 +467,9 @@ class _NextMatchCard extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: Text('Næste kamp', style: appTextStyles.h5),
           ),
-                const SizedBox(height: Spacing.md),
+          const SizedBox(height: Spacing.sm),
+          _MatchTimes(match: match),
+          const SizedBox(height: Spacing.md),
           Container(
             padding: const EdgeInsets.symmetric(
                 horizontal: Spacing.md, vertical: Spacing.md),
@@ -490,7 +492,6 @@ class _NextMatchCard extends StatelessWidget {
                     ],
                   ),
           ),
-          const SizedBox(height: 2),
           const SizedBox(height: Spacing.lg),
           Row(
             children: [
@@ -522,7 +523,7 @@ class _NextMatchCard extends StatelessWidget {
           const SizedBox(height: Spacing.md),
           Divider(color: appColors.divider.withValues(alpha: 0.45)),
           const SizedBox(height: Spacing.md),
-          _TaskList(match: match),
+          const _TaskList(),
           const SizedBox(height: Spacing.md),
           Divider(color: appColors.divider.withValues(alpha: 0.45)),
           const SizedBox(height: Spacing.md),
@@ -717,55 +718,93 @@ class _AttendancePanel extends StatelessWidget {
             ],
           ),
           const Spacer(),
-          Align(
-            alignment: Alignment.centerRight,
-            child: InkWell(
-              onTap: state.isRegisteringForNextMatch ||
-                      match.isCurrentUserRegistered
-                  ? null
-                  : () {
-                      AppAnalytics.logEvent(
-                        'match_registered',
-                        parameters: {'source': 'home_next_match'},
-                      );
-                      final teamId = currentUser.teamDetails?.id ?? 0;
-                      context
-                          .read<HomeCubit>()
-                          .registerForMatch(match.id, teamId);
-                    },
-              borderRadius: BorderRadius.circular(Spacing.borderRadiusSmall),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: Spacing.sm, vertical: 6),
-                decoration: BoxDecoration(
-                  color: appColors.lightSky65,
-                  borderRadius:
-                      BorderRadius.circular(Spacing.borderRadiusSmall),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      state.isRegisteringForNextMatch ? 'Tilmelder' : 'Tilmeld',
-                      style: appTextStyles.buttonSmall,
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(Icons.arrow_forward, size: 16),
-                  ],
+          if (!match.isCurrentUserRegistered)
+            Align(
+              alignment: Alignment.centerRight,
+              child: InkWell(
+                onTap: state.isRegisteringForNextMatch
+                    ? null
+                    : () {
+                        AppAnalytics.logEvent(
+                          'match_registered',
+                          parameters: {'source': 'home_next_match'},
+                        );
+                        final teamId = currentUser.teamDetails?.id ?? 0;
+                        context
+                            .read<HomeCubit>()
+                            .registerForMatch(match.id, teamId);
+                      },
+                borderRadius: BorderRadius.circular(Spacing.borderRadiusSmall),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: Spacing.sm, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: appColors.lightSky65,
+                    borderRadius:
+                        BorderRadius.circular(Spacing.borderRadiusSmall),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        state.isRegisteringForNextMatch
+                            ? 'Tilmelder'
+                            : 'Tilmeld',
+                        style: appTextStyles.buttonSmall,
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.arrow_forward, size: 16),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
         ],
       ),
     );
   }
 }
 
-class _TaskList extends StatelessWidget {
+class _MatchTimes extends StatelessWidget {
   final MatchDetails match;
 
-  const _TaskList({required this.match});
+  const _MatchTimes({required this.match});
+
+  @override
+  Widget build(BuildContext context) {
+    final dateTimeFormat = DateFormat('dd-MM-yy HH:mm');
+    final matchStart = match.date.toLocal();
+    final meetingTime = match.meetingTime;
+    final meetingDateTime = meetingTime == null
+        ? null
+        : DateTime(
+            matchStart.year,
+            matchStart.month,
+            matchStart.day,
+            meetingTime.hour,
+            meetingTime.minute,
+          );
+
+    return Column(
+      children: [
+        _MatchTimeRow(
+          label: 'Kampstart',
+          value: dateTimeFormat.format(matchStart),
+        ),
+        const SizedBox(height: Spacing.xs),
+        _MatchTimeRow(
+          label: 'Mødetid',
+          value: meetingDateTime == null
+              ? 'Ikke angivet'
+              : dateTimeFormat.format(meetingDateTime),
+        ),
+      ],
+    );
+  }
+}
+
+class _TaskList extends StatelessWidget {
+  const _TaskList();
 
   @override
   Widget build(BuildContext context) {
@@ -773,52 +812,54 @@ class _TaskList extends StatelessWidget {
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final rows = <(String, String)>[
-      (
-        'Mødetid:',
-        match.meetingTime == null
-            ? 'Afventer'
-            : DateFormat.Hm().format(match.meetingTime!)
-      ),
-      (
-        'Udtagelse:',
-        match.isCurrentUserSelected == true
-            ? 'Udtaget'
-            : match.isCurrentUserSelected == false
-                ? 'Ikke udtaget'
-                : 'Afventer'
-      ),
-      ('Type:', match.type),
-    ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Opgaver:',
-            style: appTextStyles.caption3.copyWith(color: appColors.grey4)),
+        Text(
+          'Opgaver:',
+          style: appTextStyles.caption3.copyWith(color: appColors.grey4),
+        ),
         const SizedBox(height: Spacing.sm),
-        for (final row in rows) ...[
-          Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: 6),
-            decoration: BoxDecoration(
-              color: appColors.white,
-              borderRadius: BorderRadius.circular(Spacing.borderRadiusSmall),
-            ),
-            child: Row(
-              children: [
-                Text(row.$1, style: appTextStyles.body4),
-                const Spacer(),
-                Flexible(
-                  child: Text(row.$2,
-                      style: appTextStyles.body3,
-                      overflow: TextOverflow.ellipsis),
-                ),
-              ],
-            ),
+        Container(
+          width: double.infinity,
+          padding:
+              const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: 10),
+          decoration: BoxDecoration(
+            color: appColors.white,
+            borderRadius: BorderRadius.circular(Spacing.borderRadiusSmall),
           ),
-          const SizedBox(height: 4),
-        ],
+          child: Text(
+            'Ingen opgaver',
+            style: appTextStyles.body3.copyWith(color: appColors.grey4),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _MatchTimeRow extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _MatchTimeRow({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return Row(
+      children: [
+        Text('$label:', style: appTextStyles.body4),
+        const Spacer(),
+        Text(
+          value,
+          style: appTextStyles.body3.copyWith(color: appColors.grey7),
+        ),
       ],
     );
   }
@@ -1019,7 +1060,7 @@ class _PlacementCard extends StatelessWidget {
     final rows = List.generate(10, (index) => index + 1);
 
     return Container(
-      padding: const EdgeInsets.all(Spacing.sm),
+      padding: const EdgeInsets.all(Spacing.md),
       decoration: BoxDecoration(
         color: appColors.primary,
         borderRadius: BorderRadius.circular(Spacing.borderRadiusMedium),
@@ -1032,7 +1073,7 @@ class _PlacementCard extends StatelessWidget {
             stats: stats,
             teamName: teamName,
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: Spacing.sm),
           for (final number in rows)
             _PlacementRow(
               cells: [
@@ -1048,10 +1089,10 @@ class _PlacementCard extends StatelessWidget {
               teamName: teamName,
               shaded: number.isOdd,
             ),
-          const SizedBox(height: 4),
+          const SizedBox(height: Spacing.sm),
           Text(
             'Målscore ${stats.goalsFor}-${stats.goalsAgainst}',
-            style: appTextStyles.caption3.copyWith(color: appColors.lightGrass),
+            style: appTextStyles.caption1.copyWith(color: appColors.lightGrass),
           ),
         ],
       ),
@@ -1080,11 +1121,14 @@ class _PlacementRow extends StatelessWidget {
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final style = (isHeader ? appTextStyles.caption3 : appTextStyles.caption1)
+    final style = (isHeader ? appTextStyles.caption2 : appTextStyles.body4)
         .copyWith(color: isHeader ? appColors.offWhite : appColors.lightGrass);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: 6),
+      padding: const EdgeInsets.symmetric(
+        horizontal: Spacing.sm,
+        vertical: Spacing.sm,
+      ),
       decoration: BoxDecoration(
         color: shaded
             ? appColors.black.withValues(alpha: 0.1)
@@ -1093,13 +1137,13 @@ class _PlacementRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          SizedBox(width: 64, child: Text(cells[0], style: style)),
+          SizedBox(width: 72, child: Text(cells[0], style: style)),
           Expanded(
             child: Row(
               children: [
                 if (!isHeader) ...[
-                  AppAvatar(initials: _initials(teamName), radius: 8),
-                  const SizedBox(width: 4),
+                  AppAvatar(initials: _initials(teamName), radius: 10),
+                  const SizedBox(width: Spacing.xs),
                 ],
                 Expanded(
                   child: Text(cells[1],
@@ -1110,8 +1154,9 @@ class _PlacementRow extends StatelessWidget {
           ),
           for (final cell in cells.skip(2))
             SizedBox(
-                width: 22,
-                child: Text(cell, style: style, textAlign: TextAlign.right)),
+              width: 28,
+              child: Text(cell, style: style, textAlign: TextAlign.right),
+            ),
         ],
       ),
     );
@@ -1306,6 +1351,16 @@ class _FineBoxCard extends StatelessWidget {
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final personalFines = _personalFines(fineBox, currentUser);
+
+    if (!currentUser.isTeamOwner) {
+      return _PlayerFineBoxCard(
+        totalAmount: personalFines.$1,
+        owedAmount: personalFines.$2,
+      );
+    }
+
+    final personalAmount = personalFines.$2;
     final projectedTotal = fineBox.currentAmount + fineBox.totalOwedAmount;
 
     return InkWell(
@@ -1326,9 +1381,19 @@ class _FineBoxCard extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            CustomPaint(
-              size: const Size(double.infinity, 190),
-              painter: _FineGaugePainter(appColors: appColors),
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 150,
+              child: CustomPaint(
+                painter: _FineGaugePainter(
+                  appColors: appColors,
+                  currentAmount: fineBox.currentAmount,
+                  owedAmount: fineBox.totalOwedAmount,
+                  personalAmount: personalAmount,
+                ),
+              ),
             ),
             Center(
               child: Column(
@@ -1360,7 +1425,7 @@ class _FineBoxCard extends StatelessWidget {
                   _FineChip(
                       label: 'Din bødekasse',
                       color: appColors.sky,
-                      value: _myFines(fineBox, currentUser)),
+                      value: personalAmount),
                 ],
               ),
             ),
@@ -1381,16 +1446,136 @@ class _FineBoxCard extends StatelessWidget {
     );
   }
 
-  double _myFines(FineBoxDetails fineBox, UserDetails currentUser) {
+  (double, double) _personalFines(
+      FineBoxDetails fineBox, UserDetails currentUser) {
     try {
       final myFineDetails = fineBox.userFineDetails
           .firstWhere((u) => u.userDetails.id == currentUser.id);
-      return myFineDetails.fineDetailsList
-          .where((f) => !f.hasBeenPaid)
-          .fold(0.0, (sum, f) => sum + f.owedAmount);
+      final totalAmount = myFineDetails.fineDetailsList
+          .fold(0.0, (sum, fine) => sum + fine.owedAmount);
+      final owedAmount = myFineDetails.fineDetailsList
+          .where((fine) => !fine.hasBeenPaid)
+          .fold(0.0, (sum, fine) => sum + fine.owedAmount);
+      return (totalAmount, owedAmount);
     } catch (_) {
-      return 0.0;
+      return (0.0, 0.0);
     }
+  }
+}
+
+class _PlayerFineBoxCard extends StatelessWidget {
+  final double totalAmount;
+  final double owedAmount;
+
+  const _PlayerFineBoxCard({
+    required this.totalAmount,
+    required this.owedAmount,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return InkWell(
+      onTap: () {
+        AppAnalytics.logEvent('fine_box_opened');
+        Navigator.of(context).push(MaterialWithModalsPageRoute(
+          builder: (context) => const TeamFinesPage(),
+        ));
+      },
+      borderRadius: BorderRadius.circular(Spacing.borderRadiusLargeIncreased),
+      child: Container(
+        padding: const EdgeInsets.all(Spacing.md),
+        decoration: BoxDecoration(
+          color: appColors.lightSky55,
+          borderRadius:
+              BorderRadius.circular(Spacing.borderRadiusLargeIncreased),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Din bødekasse', style: appTextStyles.h3),
+            const SizedBox(height: Spacing.md),
+            Row(
+              children: [
+                Expanded(
+                  child: _PersonalFineMetric(
+                    label: 'Samlet beløb i bøder',
+                    value: totalAmount,
+                    color: appColors.sky,
+                  ),
+                ),
+                const SizedBox(width: Spacing.sm),
+                Expanded(
+                  child: _PersonalFineMetric(
+                    label: 'Du skylder',
+                    value: owedAmount,
+                    color: appColors.sunset,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: Spacing.md),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('Gå til bødekassen', style: appTextStyles.buttonSmall),
+                  const SizedBox(width: Spacing.sm),
+                  Icon(Icons.arrow_forward, color: appColors.dirt),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PersonalFineMetric extends StatelessWidget {
+  final String label;
+  final double value;
+  final Color color;
+
+  const _PersonalFineMetric({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return Container(
+      padding: const EdgeInsets.all(Spacing.md),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(Spacing.borderRadiusMedium),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${value.toStringAsFixed(0)},-',
+            style: appTextStyles.h3.copyWith(color: appColors.dirt),
+          ),
+          const SizedBox(height: Spacing.xs),
+          Text(
+            label,
+            style: appTextStyles.caption3.copyWith(color: appColors.dirt),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -1619,28 +1804,71 @@ class _MapLinesPainter extends CustomPainter {
 
 class _FineGaugePainter extends CustomPainter {
   final AppColors appColors;
+  final double currentAmount;
+  final double owedAmount;
+  final double personalAmount;
 
-  _FineGaugePainter({required this.appColors});
+  _FineGaugePainter({
+    required this.appColors,
+    required this.currentAmount,
+    required this.owedAmount,
+    required this.personalAmount,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final rect = Rect.fromLTWH(8, 10, size.width - 16, 180);
-    void arc(Color color, double start, double sweep) {
-      final paint = Paint()
-        ..color = color
-        ..strokeWidth = 20
-        ..style = PaintingStyle.stroke
-        ..strokeCap = StrokeCap.round;
-      canvas.drawArc(rect, start, sweep, false, paint);
+    const strokeWidth = 20.0;
+    const visibleGap = 5.0;
+    final diameter = math.min(size.width - strokeWidth, size.height * 2);
+    final radius = diameter / 2;
+    final rect = Rect.fromCenter(
+      center: Offset(size.width / 2, size.height),
+      width: diameter,
+      height: diameter,
+    );
+    final trackPaint = Paint()
+      ..color = appColors.white.withValues(alpha: 0.7)
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.butt;
+
+    canvas.drawArc(rect, math.pi, math.pi, false, trackPaint);
+
+    final segments = <(double, Color)>[
+      (math.max(0, currentAmount), appColors.lightGrass),
+      (math.max(0, owedAmount), appColors.sunset),
+      (math.max(0, personalAmount), appColors.sky),
+    ];
+    final total = segments.fold<double>(0, (sum, segment) => sum + segment.$1);
+    if (total == 0) {
+      return;
     }
 
-    arc(appColors.lightGrass, math.pi, math.pi * .55);
-    arc(appColors.sunset, math.pi * 1.6, math.pi * .45);
-    arc(appColors.sky, math.pi * 2.08, math.pi * .25);
+    final visibleSegments =
+        segments.where((segment) => segment.$1 > 0).toList();
+    final gapAngle = (strokeWidth + visibleGap) / radius;
+    final totalGapAngle = gapAngle * (visibleSegments.length - 1);
+    final availableSweep = math.pi - totalGapAngle;
+    var startAngle = math.pi;
+    for (final segment in visibleSegments) {
+      final sweepAngle = availableSweep * (segment.$1 / total);
+      final segmentPaint = Paint()
+        ..color = segment.$2
+        ..strokeWidth = strokeWidth
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round;
+      canvas.drawArc(rect, startAngle, sweepAngle, false, segmentPaint);
+      startAngle += sweepAngle + gapAngle;
+    }
   }
 
   @override
-  bool shouldRepaint(covariant _FineGaugePainter oldDelegate) => false;
+  bool shouldRepaint(covariant _FineGaugePainter oldDelegate) {
+    return oldDelegate.appColors != appColors ||
+        oldDelegate.currentAmount != currentAmount ||
+        oldDelegate.owedAmount != owedAmount ||
+        oldDelegate.personalAmount != personalAmount;
+  }
 }
 
 String _initials(String? name) {

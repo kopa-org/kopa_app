@@ -50,20 +50,35 @@ class MatchRepository {
     DateTime? meetingTime, {
     String? notes,
   }) async {
-    var url = Uri.parse('${ApiConfig.baseUrl}/match');
+    final token = await _secureStorage.read(key: 'token');
 
-    CreateMatchCommand createMatchCommand = CreateMatchCommand(
+    if (token == null) {
+      throw Exception('No token found. User might not be logged in.');
+    }
+
+    final url = Uri.parse('${ApiConfig.baseUrl}/match');
+
+    final createMatchCommand = CreateMatchCommand(
         firstTeam, secondTeam, location, meetingTime, date, notes);
 
-    var response = await http.post(url, body: createMatchCommand.toJson());
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode(createMatchCommand.toJson()),
+    );
 
-    if (response.statusCode != 200) {
+    if (response.statusCode == 401) {
+      throw Exception('Unauthorized. Please log in again.');
+    } else if (response.statusCode != 200 && response.statusCode != 201) {
       throw Exception('Failed to create match');
     }
 
-    var json = jsonDecode(response.body);
+    final decodedJson = jsonDecode(response.body);
 
-    return json['id'];
+    return decodedJson['id'] ?? decodedJson['match']['id'];
   }
 
   static Future<void> deleteMatch(int id) async {
