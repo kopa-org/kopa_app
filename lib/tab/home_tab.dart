@@ -106,8 +106,8 @@ class _HomeTabView extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           if (state.nextMatch != null) ...[
-                            _NextMatchCard(
-                              match: state.nextMatch!,
+                            _NextMatchCarousel(
+                              matches: _upcomingMatches(state),
                               currentUser: currentUser,
                             ),
                             const SizedBox(height: Spacing.xl),
@@ -532,6 +532,88 @@ class _NextMatchCard extends StatelessWidget {
             onTap: () => _openMatch(context, match, 'home_next_match'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+List<MatchDetails> _upcomingMatches(HomeState state) {
+  final now = DateTime.now();
+  final matches = state.matches
+      .where(
+        (match) =>
+            !match.hasMatchBeenPlayed &&
+            match.date.isAfter(now.subtract(const Duration(days: 1))),
+      )
+      .map(
+        (match) => match.id == state.nextMatch?.id ? state.nextMatch! : match,
+      )
+      .toList()
+    ..sort((a, b) => a.date.compareTo(b.date));
+
+  if (matches.isEmpty && state.nextMatch != null) {
+    return [state.nextMatch!];
+  }
+  return matches;
+}
+
+class _NextMatchCarousel extends StatefulWidget {
+  final List<MatchDetails> matches;
+  final UserDetails currentUser;
+
+  const _NextMatchCarousel({
+    required this.matches,
+    required this.currentUser,
+  });
+
+  @override
+  State<_NextMatchCarousel> createState() => _NextMatchCarouselState();
+}
+
+class _NextMatchCarouselState extends State<_NextMatchCarousel> {
+  static const _cardHeight = 680.0;
+  late final PageController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = PageController(viewportFraction: 0.94);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.matches.length == 1) {
+      return _NextMatchCard(
+        match: widget.matches.first,
+        currentUser: widget.currentUser,
+      );
+    }
+
+    return SizedBox(
+      height: _cardHeight,
+      child: PageView.builder(
+        controller: _controller,
+        padEnds: false,
+        itemCount: widget.matches.length,
+        physics: const PageScrollPhysics(),
+        itemBuilder: (context, index) {
+          return Semantics(
+            label: 'Kommende kamp ${index + 1} af ${widget.matches.length}',
+            child: Padding(
+              padding: const EdgeInsets.only(right: Spacing.sm),
+              child: _NextMatchCard(
+                match: widget.matches[index],
+                currentUser: widget.currentUser,
+              ),
+            ),
+          );
+        },
       ),
     );
   }
