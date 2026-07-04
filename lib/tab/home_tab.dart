@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -13,6 +14,7 @@ import 'package:kopa/cubits/home_state.dart';
 import 'package:kopa/helpers/date_helper.dart';
 import 'package:kopa/model/fine_box_details.dart';
 import 'package:kopa/model/match_details.dart';
+import 'package:kopa/model/match_event_details.dart';
 import 'package:kopa/model/match_event_type.dart';
 import 'package:kopa/model/statistics.dart';
 import 'package:kopa/model/user_details.dart';
@@ -479,13 +481,6 @@ class _NextMatchCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final appColors =
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final countdown = match.countdown;
-    final isPast = countdown.isNegative;
-    final days = countdown.inDays;
-    final hours = countdown.inHours % 24;
-    final minutes = countdown.inMinutes % 60;
     final matchStart = match.date.toLocal();
 
     return Container(
@@ -517,9 +512,9 @@ class _NextMatchCard extends StatelessWidget {
               Expanded(child: _TeamBadge(name: match.homeTeam ?? 'Hjemme')),
               const SizedBox(width: Spacing.sm),
               Container(
-                width: 128,
+                width: 144,
                 padding: const EdgeInsets.symmetric(
-                  horizontal: Spacing.sm,
+                  horizontal: 6,
                   vertical: Spacing.md,
                 ),
                 decoration: BoxDecoration(
@@ -527,21 +522,7 @@ class _NextMatchCard extends StatelessWidget {
                   borderRadius:
                       BorderRadius.circular(Spacing.borderRadiusMedium),
                 ),
-                child: isPast
-                    ? Text(
-                        'Kampen er startet',
-                        style:
-                            appTextStyles.body4.copyWith(color: appColors.sun),
-                        textAlign: TextAlign.center,
-                      )
-                    : Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          _CountdownUnit(value: days, label: 'd'),
-                          _CountdownUnit(value: hours, label: 't'),
-                          _CountdownUnit(value: minutes, label: 'm'),
-                        ],
-                      ),
+                child: _LiveCountdown(target: match.date),
               ),
               const SizedBox(width: Spacing.sm),
               Expanded(child: _TeamBadge(name: match.awayTeam ?? 'Ude')),
@@ -631,7 +612,7 @@ class _NextMatchCarousel extends StatefulWidget {
 }
 
 class _NextMatchCarouselState extends State<_NextMatchCarousel> {
-  static const _upcomingCardHeight = 580.0;
+  static const _upcomingCardHeight = 540.0;
   static const _playedCardHeight = 420.0;
   late final PageController _controller;
   late int _currentPage;
@@ -725,6 +706,78 @@ class _NextMatchCarouselState extends State<_NextMatchCarousel> {
   }
 }
 
+class _LiveCountdown extends StatefulWidget {
+  final DateTime target;
+
+  const _LiveCountdown({required this.target});
+
+  @override
+  State<_LiveCountdown> createState() => _LiveCountdownState();
+}
+
+class _LiveCountdownState extends State<_LiveCountdown> {
+  late Timer _timer;
+  late Duration _remaining;
+
+  @override
+  void initState() {
+    super.initState();
+    _remaining = _calculateRemaining();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+  }
+
+  @override
+  void didUpdateWidget(covariant _LiveCountdown oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.target != widget.target) {
+      _remaining = _calculateRemaining();
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  Duration _calculateRemaining() {
+    final remaining = widget.target.difference(DateTime.now());
+    return remaining.isNegative ? Duration.zero : remaining;
+  }
+
+  void _tick() {
+    if (!mounted) {
+      return;
+    }
+    setState(() => _remaining = _calculateRemaining());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    if (_remaining == Duration.zero) {
+      return Text(
+        'Kampen er startet',
+        style: appTextStyles.body4.copyWith(color: appColors.dirt),
+        textAlign: TextAlign.center,
+      );
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _CountdownUnit(value: _remaining.inDays, label: 'd'),
+        _CountdownUnit(value: _remaining.inHours % 24, label: 't'),
+        _CountdownUnit(value: _remaining.inMinutes % 60, label: 'm'),
+      ],
+    );
+  }
+}
+
 class _CountdownUnit extends StatelessWidget {
   final int value;
   final String label;
@@ -742,12 +795,40 @@ class _CountdownUnit extends StatelessWidget {
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.baseline,
-      textBaseline: TextBaseline.alphabetic,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Text(
-          value.toString().padLeft(2, '0'),
-          style: appTextStyles.subtitle1.copyWith(color: appColors.dirt),
+        SizedBox(
+          width: 22,
+          height: 22,
+          child: ClipRect(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 320),
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
+              transitionBuilder: (child, animation) {
+                final isIncoming = child.key == ValueKey(value);
+                final offset = isIncoming
+                    ? Tween<Offset>(
+                        begin: const Offset(0, -1),
+                        end: Offset.zero,
+                      )
+                    : Tween<Offset>(
+                        begin: const Offset(0, 1),
+                        end: Offset.zero,
+                      );
+                return SlideTransition(
+                  position: offset.animate(animation),
+                  child: child,
+                );
+              },
+              child: Text(
+                value.toString().padLeft(2, '0'),
+                key: ValueKey(value),
+                style: appTextStyles.subtitle1.copyWith(color: appColors.dirt),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
         ),
         const SizedBox(width: 2),
         Text(
@@ -1135,13 +1216,10 @@ class _LatestMatchCard extends StatelessWidget {
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final score = '${match.homeTeamScore ?? 0}:${match.awayTeamScore ?? 0}';
-    final scorers = match.matchEventDetailsList
-            ?.where((event) => event.type == MatchEventType.goal)
-            .take(2)
-            .map((event) => _goalLine(event.goalscorerUserName, event.minute))
-            .toList() ??
-        [];
+    final score = '${match.homeTeamScore ?? 0} - ${match.awayTeamScore ?? 0}';
+    final events = [...?match.matchEventDetailsList]
+      ..sort((a, b) => (b.minute ?? 0).compareTo(a.minute ?? 0));
+    final visibleEvents = events.take(2).toList();
     final motm =
         match.matchPollDetails?.playerOfTheMatchDetails.name ?? 'Ingen valgt';
 
@@ -1165,27 +1243,77 @@ class _LatestMatchCard extends StatelessWidget {
           const SizedBox(height: Spacing.md),
           Row(
             children: [
-              Expanded(child: _TeamBadge(name: match.homeTeam ?? 'Hjemme')),
-              Text(score, style: appTextStyles.h2),
-              Expanded(child: _TeamBadge(name: match.awayTeam ?? 'Ude')),
+              Expanded(
+                flex: 3,
+                child: _TeamBadge(name: match.homeTeam ?? 'Hjemme'),
+              ),
+              Expanded(
+                flex: 4,
+                child: Column(
+                  children: [
+                    Text(
+                      score,
+                      style: appTextStyles.h3,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: Spacing.xs),
+                    Text(
+                      match.type,
+                      style: appTextStyles.caption2
+                          .copyWith(color: appColors.grey5),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                flex: 3,
+                child: _TeamBadge(name: match.awayTeam ?? 'Ude'),
+              ),
             ],
           ),
-          if (scorers.isNotEmpty) ...[
-            const SizedBox(height: Spacing.sm),
-            Row(
-              children: [
-                Expanded(child: _ScorerList(scorers: scorers)),
-                Expanded(child: _ScorerList(scorers: scorers)),
-              ],
-            ),
-          ],
           const SizedBox(height: Spacing.md),
           Divider(color: appColors.grey5.withValues(alpha: 0.4)),
           const SizedBox(height: Spacing.sm),
-          Text('Kampens spiller', style: appTextStyles.body3),
-          Text(motm,
-              style: appTextStyles.caption2.copyWith(color: appColors.grey5)),
-          const Spacer(),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Kamphistorik',
+              style: appTextStyles.caption2.copyWith(color: appColors.grey5),
+            ),
+          ),
+          const SizedBox(height: Spacing.sm),
+          if (visibleEvents.isEmpty)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Ingen hændelser registreret',
+                style: appTextStyles.caption1.copyWith(color: appColors.grey5),
+              ),
+            )
+          else
+            for (final event in visibleEvents) _MatchHistoryRow(event: event),
+          const SizedBox(height: Spacing.md),
+          Row(
+            children: [
+              AppAvatar(initials: _initials(motm), radius: 18),
+              const SizedBox(width: Spacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Kampens spiller',
+                      style: appTextStyles.caption1
+                          .copyWith(color: appColors.grey5),
+                    ),
+                    Text(motm, style: appTextStyles.body4),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: Spacing.md),
           _SecondaryFigmaButton(
             label: 'Se kampdetaljer',
             onTap: () => _openMatch(context, match, 'home_last_match'),
@@ -1196,23 +1324,73 @@ class _LatestMatchCard extends StatelessWidget {
   }
 }
 
-class _ScorerList extends StatelessWidget {
-  final List<String> scorers;
+class _MatchHistoryRow extends StatelessWidget {
+  final MatchEventDetails event;
 
-  const _ScorerList({required this.scorers});
+  const _MatchHistoryRow({required this.event});
 
   @override
   Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        for (final scorer in scorers)
-          Text(scorer,
-              style:
-                  appTextStyles.caption3.copyWith(color: AppColors.light.dirt)),
-      ],
+
+    final (icon, color, label) = switch (event.type) {
+      MatchEventType.goal => (
+          Icons.sports_soccer,
+          appColors.primary,
+          'Mål',
+        ),
+      MatchEventType.yellowCard => (
+          Icons.crop_portrait,
+          appColors.warning,
+          'Gult kort',
+        ),
+      MatchEventType.redCard => (
+          Icons.crop_portrait,
+          appColors.error,
+          'Rødt kort',
+        ),
+      MatchEventType.substitution => (
+          Icons.swap_horiz,
+          appColors.sky,
+          'Udskiftning',
+        ),
+      MatchEventType.penaltyKick => (
+          Icons.sports_soccer,
+          appColors.sunset,
+          'Straffespark',
+        ),
+    };
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: Spacing.xs),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 34,
+            child: Text(
+              event.minute == null ? '–' : '${event.minute}′',
+              style: appTextStyles.caption2.copyWith(color: appColors.grey5),
+            ),
+          ),
+          Icon(icon, size: 16, color: color),
+          const SizedBox(width: Spacing.sm),
+          Expanded(
+            child: Text(
+              event.goalscorerUserName,
+              style: appTextStyles.caption2.copyWith(color: appColors.dirt),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: Spacing.sm),
+          Text(
+            label,
+            style: appTextStyles.caption3.copyWith(color: appColors.grey5),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -2097,11 +2275,6 @@ String _initials(String? name) {
   if (parts.length == 1) return parts.first.substring(0, 1).toUpperCase();
   return (parts.first.substring(0, 1) + parts.last.substring(0, 1))
       .toUpperCase();
-}
-
-String _goalLine(String name, int? minute) {
-  if (minute == null) return name;
-  return '$name   $minute\'';
 }
 
 void _openMatch(BuildContext context, MatchDetails match, String source) {
