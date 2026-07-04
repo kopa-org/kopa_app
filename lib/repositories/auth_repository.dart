@@ -40,8 +40,8 @@ class ApiAuthRepository implements AuthRepository {
         await SecureStorageService.setUserInfo(user);
         return user;
       }
-    } catch (_) {
-      // Handle error or rethrow
+    } catch (e) {
+      throw Exception('Failed to fetch current user');
     }
     return null;
   }

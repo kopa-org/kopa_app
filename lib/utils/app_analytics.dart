@@ -31,6 +31,8 @@ abstract final class AppAnalytics {
   }
 
   static Future<void> setCurrentUser(UserDetails? user) async {
+    await CrashReporting.setUserIdentifier(user?.id);
+
     if (!isSupported) {
       return;
     }

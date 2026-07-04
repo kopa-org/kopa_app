@@ -99,50 +99,84 @@ class _HomeTabView extends StatelessWidget {
                       matches: state.matches,
                     ),
                     const SizedBox(height: Spacing.xl),
-                    Padding(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: Spacing.md),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          if (_playedMatches(state).isNotEmpty ||
-                              _upcomingMatches(state).isNotEmpty) ...[
-                            _NextMatchCarousel(
-                              playedMatches: _playedMatches(state),
-                              upcomingMatches: _upcomingMatches(state),
-                              currentUser: currentUser,
-                            ),
-                            const SizedBox(height: Spacing.xl),
-                          ],
-                          if (state.statistics != null) ...[
-                            _SectionTitle('Placering'),
-                            _PlacementCard(
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (_playedMatches(state).isNotEmpty ||
+                            _upcomingMatches(state).isNotEmpty) ...[
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: Spacing.md),
+                            child: _SectionTitle('Næste kamp'),
+                          ),
+                          _NextMatchCarousel(
+                            playedMatches: _playedMatches(state),
+                            upcomingMatches: _upcomingMatches(state),
+                            currentUser: currentUser,
+                          ),
+                          const SizedBox(height: Spacing.xl),
+                        ],
+                        if (state.statistics != null) ...[
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: Spacing.md),
+                            child: _SectionTitle('Placering'),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: Spacing.md),
+                            child: _PlacementCard(
                               stats: state.statistics!.club,
                               teamName:
                                   currentUser.teamDetails?.title ?? 'Hold',
                             ),
-                            const SizedBox(height: Spacing.xl),
-                            _SectionTitle('Statistik'),
-                            _StatisticsStrip(
+                          ),
+                          const SizedBox(height: Spacing.xl),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: Spacing.md),
+                            child: _SectionTitle('Statistik'),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: Spacing.md),
+                            child: _StatisticsStrip(
                               stats: state.statistics!,
                               currentUser: currentUser,
                             ),
-                            const SizedBox(height: Spacing.xl),
-                          ],
-                          if (state.fineBox != null) ...[
-                            _SectionTitle('Bødekassen'),
-                            _FineBoxCard(
+                          ),
+                          const SizedBox(height: Spacing.xl),
+                        ],
+                        if (state.fineBox != null) ...[
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: Spacing.md),
+                            child: _SectionTitle('Bødekassen'),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: Spacing.md),
+                            child: _FineBoxCard(
                               fineBox: state.fineBox!,
                               currentUser: currentUser,
                             ),
-                            const SizedBox(height: Spacing.xl),
-                          ],
-                          if (state.matches.isNotEmpty) ...[
-                            _AllGamesCard(matches: state.matches),
-                            const SizedBox(height: Spacing.xl),
-                          ],
+                          ),
+                          const SizedBox(height: Spacing.xl),
                         ],
-                      ),
+                        if (state.matches.isNotEmpty) ...[
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: Spacing.md),
+                            child: _SectionTitle('Alle kampe'),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: Spacing.md),
+                            child: _AllGamesCard(matches: state.matches),
+                          ),
+                          const SizedBox(height: Spacing.xl),
+                        ],
+                      ],
                     ),
                   ],
                 ),
@@ -452,6 +486,7 @@ class _NextMatchCard extends StatelessWidget {
     final days = countdown.inDays;
     final hours = countdown.inHours % 24;
     final minutes = countdown.inMinutes % 60;
+    final matchStart = match.date.toLocal();
 
     return Container(
       padding: const EdgeInsets.all(Spacing.md),
@@ -461,59 +496,73 @@ class _NextMatchCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text('Næste kamp', style: appTextStyles.h5),
-          ),
-          const SizedBox(height: Spacing.sm),
-          _MatchTimes(match: match),
-          const SizedBox(height: Spacing.md),
-          Container(
-            padding: const EdgeInsets.symmetric(
-                horizontal: Spacing.md, vertical: Spacing.md),
-            decoration: BoxDecoration(
-              color: appColors.grass,
-              borderRadius: BorderRadius.circular(Spacing.borderRadiusMedium),
-            ),
-            child: isPast
-                ? Text(
-                    'Kampen er startet',
-                    style: appTextStyles.h5.copyWith(color: appColors.sun),
-                    textAlign: TextAlign.center,
-                  )
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _CountdownUnit(value: days, label: 'd'),
-                      _CountdownUnit(value: hours, label: 't'),
-                      _CountdownUnit(value: minutes, label: 'm'),
-                    ],
-                  ),
-          ),
-          const SizedBox(height: Spacing.lg),
           Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _MatchDateItem(
+                label: 'Dag',
+                value: DateFormat('EEEE', 'da_DK').format(matchStart),
+              ),
+              const SizedBox(width: Spacing.xl),
+              _MatchDateItem(
+                label: 'Dato',
+                value: DateFormat('dd.MM.yy').format(matchStart),
+              ),
+            ],
+          ),
+          const SizedBox(height: Spacing.md),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(child: _TeamBadge(name: match.homeTeam ?? 'Hjemme')),
-              Text('vs', style: appTextStyles.body3),
+              const SizedBox(width: Spacing.sm),
+              Container(
+                width: 128,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: Spacing.sm,
+                  vertical: Spacing.md,
+                ),
+                decoration: BoxDecoration(
+                  //color: appColors.grass,
+                  borderRadius:
+                      BorderRadius.circular(Spacing.borderRadiusMedium),
+                ),
+                child: isPast
+                    ? Text(
+                        'Kampen er startet',
+                        style:
+                            appTextStyles.body4.copyWith(color: appColors.sun),
+                        textAlign: TextAlign.center,
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _CountdownUnit(value: days, label: 'd'),
+                          _CountdownUnit(value: hours, label: 't'),
+                          _CountdownUnit(value: minutes, label: 'm'),
+                        ],
+                      ),
+              ),
+              const SizedBox(width: Spacing.sm),
               Expanded(child: _TeamBadge(name: match.awayTeam ?? 'Ude')),
             ],
           ),
           const SizedBox(height: Spacing.md),
-          Divider(color: appColors.divider.withValues(alpha: 0.45)),
+          _MatchTimes(match: match),
           const SizedBox(height: Spacing.md),
           Row(
             children: [
               Expanded(
-                child: _MapPreview(
-                  location: match.location,
-                  onTap: () => _openNavigation(match),
+                child: _AttendancePanel(
+                  match: match,
+                  currentUser: currentUser,
                 ),
               ),
               const SizedBox(width: Spacing.md),
               Expanded(
-                child: _AttendancePanel(
-                  match: match,
-                  currentUser: currentUser,
+                child: _MapPreview(
+                  location: match.location,
+                  onTap: () => _openNavigation(match),
                 ),
               ),
             ],
@@ -582,7 +631,7 @@ class _NextMatchCarousel extends StatefulWidget {
 }
 
 class _NextMatchCarouselState extends State<_NextMatchCarousel> {
-  static const _upcomingCardHeight = 680.0;
+  static const _upcomingCardHeight = 580.0;
   static const _playedCardHeight = 420.0;
   late final PageController _controller;
   late int _currentPage;
@@ -603,7 +652,7 @@ class _NextMatchCarouselState extends State<_NextMatchCarousel> {
     _currentPage = _initialPage;
     _controller = PageController(
       initialPage: _initialPage,
-      viewportFraction: 0.94,
+      viewportFraction: 0.90,
     );
   }
 
@@ -698,12 +747,41 @@ class _CountdownUnit extends StatelessWidget {
       children: [
         Text(
           value.toString().padLeft(2, '0'),
-          style: appTextStyles.h4.copyWith(color: appColors.sun),
+          style: appTextStyles.subtitle1.copyWith(color: appColors.dirt),
         ),
-        const SizedBox(width: 3),
+        const SizedBox(width: 2),
         Text(
           label,
-          style: appTextStyles.caption2.copyWith(color: appColors.sun),
+          style: appTextStyles.caption3.copyWith(color: appColors.dirt),
+        ),
+      ],
+    );
+  }
+}
+
+class _MatchDateItem extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _MatchDateItem({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return Column(
+      children: [
+        Text(
+          label,
+          style: appTextStyles.caption3.copyWith(color: appColors.grey4),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: appTextStyles.body4.copyWith(color: appColors.dirt),
         ),
       ],
     );
@@ -721,7 +799,7 @@ class _TeamBadge extends StatelessWidget {
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
     return Column(
       children: [
-        AppAvatar(initials: _initials(name), radius: 33),
+        AppAvatar(initials: _initials(name), radius: 30),
         const SizedBox(height: Spacing.sm),
         Text(
           name,
@@ -911,7 +989,7 @@ class _MatchTimes extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dateTimeFormat = DateFormat('dd-MM-yy HH:mm');
+    final dateTimeFormat = DateFormat('HH:mm');
     final matchStart = match.date.toLocal();
     final meetingTime = match.meetingTime;
     final meetingDateTime = meetingTime == null
@@ -924,18 +1002,22 @@ class _MatchTimes extends StatelessWidget {
             meetingTime.minute,
           );
 
-    return Column(
+    return Row(
       children: [
-        _MatchTimeRow(
-          label: 'Kampstart',
-          value: dateTimeFormat.format(matchStart),
+        Expanded(
+          child: _MatchTimeItem(
+            label: 'Kampstart',
+            value: dateTimeFormat.format(matchStart),
+          ),
         ),
-        const SizedBox(height: Spacing.xs),
-        _MatchTimeRow(
-          label: 'Mødetid',
-          value: meetingDateTime == null
-              ? 'Ikke angivet'
-              : dateTimeFormat.format(meetingDateTime),
+        const SizedBox(width: Spacing.md),
+        Expanded(
+          child: _MatchTimeItem(
+            label: 'Mødetid',
+            value: meetingDateTime == null
+                ? 'Ikke angivet'
+                : dateTimeFormat.format(meetingDateTime),
+          ),
         ),
       ],
     );
@@ -978,11 +1060,11 @@ class _TaskList extends StatelessWidget {
   }
 }
 
-class _MatchTimeRow extends StatelessWidget {
+class _MatchTimeItem extends StatelessWidget {
   final String label;
   final String value;
 
-  const _MatchTimeRow({required this.label, required this.value});
+  const _MatchTimeItem({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -991,13 +1073,17 @@ class _MatchTimeRow extends StatelessWidget {
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
 
-    return Row(
+    return Column(
       children: [
-        Text('$label:', style: appTextStyles.body4),
-        const Spacer(),
+        Text(
+          label,
+          style: appTextStyles.caption3.copyWith(color: appColors.grey4),
+        ),
+        const SizedBox(height: 2),
         Text(
           value,
-          style: appTextStyles.body3.copyWith(color: appColors.grey7),
+          style: appTextStyles.body4.copyWith(color: appColors.grey7),
+          textAlign: TextAlign.center,
         ),
       ],
     );
@@ -1770,11 +1856,6 @@ class _AllGamesCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text('Alle kampe', style: appTextStyles.h5),
-          ),
-          const SizedBox(height: Spacing.lg),
           Align(
             alignment: Alignment.centerLeft,
             child: Text('Serie 1',

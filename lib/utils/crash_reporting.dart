@@ -69,6 +69,23 @@ abstract final class CrashReporting {
         Future<void>.value();
   }
 
+  static Future<void> setUserIdentifier(int? userId) async {
+    if (!isCrashlyticsSupported) {
+      return;
+    }
+
+    try {
+      await FirebaseCrashlytics.instance.setUserIdentifier(
+        userId?.toString() ?? '',
+      );
+    } catch (error, stack) {
+      if (kDebugMode) {
+        debugPrint('Crashlytics user identifier error: $error');
+        debugPrintStack(stackTrace: stack);
+      }
+    }
+  }
+
   static void logWebError(Object error, StackTrace? stack) {
     // Use print directly for release mode visibility in browser console
     // ignore: avoid_print
