@@ -1,6 +1,7 @@
 import 'package:kopa/model/fine_box_details.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/statistics.dart';
+import 'package:kopa/model/dbu_standings.dart';
 
 enum HomeStatus { initial, loading, loaded, failure }
 
@@ -11,6 +12,7 @@ class HomeState {
   final List<MatchDetails> matches;
   final StatisticsResponse? statistics;
   final FineBoxDetails? fineBox;
+  final DbuStandings? dbuStandings;
   final String? errorMessage;
   final bool isRegisteringForNextMatch;
 
@@ -21,6 +23,7 @@ class HomeState {
     this.matches = const [],
     this.statistics,
     this.fineBox,
+    this.dbuStandings,
     this.errorMessage,
     this.isRegisteringForNextMatch = false,
   });
@@ -32,6 +35,7 @@ class HomeState {
     List<MatchDetails>? matches,
     StatisticsResponse? statistics,
     FineBoxDetails? fineBox,
+    DbuStandings? dbuStandings,
     String? errorMessage,
     bool? isRegisteringForNextMatch,
   }) {
@@ -42,6 +46,7 @@ class HomeState {
       matches: matches ?? this.matches,
       statistics: statistics ?? this.statistics,
       fineBox: fineBox ?? this.fineBox,
+      dbuStandings: dbuStandings ?? this.dbuStandings,
       errorMessage: errorMessage ?? this.errorMessage,
       isRegisteringForNextMatch:
           isRegisteringForNextMatch ?? this.isRegisteringForNextMatch,

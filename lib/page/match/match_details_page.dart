@@ -443,124 +443,126 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
               }
             }
 
-            return Container(
-              color: appColors.surface,
-              child: AnimatedPadding(
-                duration: const Duration(milliseconds: 200),
-                padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(modalContext).viewInsets.bottom,
-                ),
-                child: SafeArea(
-                  top: false,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      CupertinoNavigationBar(
-                        backgroundColor: appColors.surface,
-                        middle: Text(
-                          'Vælg opstilling',
-                          style: appTextStyles.sectionHeader,
-                        ),
-                        leading: CupertinoButton(
-                          padding: EdgeInsets.zero,
-                          onPressed: () => Navigator.of(modalContext).pop(),
-                          child: Text(
-                            'Annullér',
-                            style: TextStyle(color: appColors.error),
+            return Material(
+              child: Container(
+                color: appColors.surface,
+                child: AnimatedPadding(
+                  duration: const Duration(milliseconds: 200),
+                  padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(modalContext).viewInsets.bottom,
+                  ),
+                  child: SafeArea(
+                    top: false,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CupertinoNavigationBar(
+                          backgroundColor: appColors.surface,
+                          middle: Text(
+                            'Vælg opstilling',
+                            style: appTextStyles.sectionHeader,
+                          ),
+                          leading: CupertinoButton(
+                            padding: EdgeInsets.zero,
+                            onPressed: () => Navigator.of(modalContext).pop(),
+                            child: Text(
+                              'Annullér',
+                              style: TextStyle(color: appColors.error),
+                            ),
+                          ),
+                          trailing: CupertinoButton(
+                            padding: EdgeInsets.zero,
+                            onPressed: canSave ? save : null,
+                            child: isSaving
+                                ? const CupertinoActivityIndicator()
+                                : Text(
+                                    'Gem',
+                                    style: TextStyle(
+                                      color: canSave
+                                          ? appColors.primary
+                                          : appColors.divider,
+                                    ),
+                                  ),
                           ),
                         ),
-                        trailing: CupertinoButton(
-                          padding: EdgeInsets.zero,
-                          onPressed: canSave ? save : null,
-                          child: isSaving
-                              ? const CupertinoActivityIndicator()
-                              : Text(
-                                  'Gem',
-                                  style: TextStyle(
-                                    color: canSave
-                                        ? appColors.primary
-                                        : appColors.divider,
-                                  ),
-                                ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(Spacing.lg),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Standard er 2-3-1, men du kan skrive enhver opstilling som f.eks. 3-2-1 eller 2-2-3.',
-                              style: appTextStyles.body,
-                            ),
-                            const SizedBox(height: Spacing.md),
-                            Wrap(
-                              spacing: Spacing.sm,
-                              runSpacing: Spacing.sm,
-                              children: suggestions.map((formation) {
-                                final selected = formation == selectedFormation;
-                                return GestureDetector(
-                                  onTap: () {
-                                    setModalState(() {
-                                      selectedFormation = formation;
-                                      formationCtl.text = formation;
-                                    });
-                                  },
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: Spacing.md,
-                                      vertical: Spacing.sm,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: selected
-                                          ? appColors.lightGrass
-                                          : appColors.grey2,
-                                      borderRadius: BorderRadius.circular(
-                                        Spacing.borderRadiusFull,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      formation,
-                                      style: appTextStyles.caption.copyWith(
-                                        color: selected
-                                            ? appColors.primary
-                                            : appColors.dirt,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
-                            ),
-                            const SizedBox(height: Spacing.md),
-                            CupertinoTextField(
-                              controller: formationCtl,
-                              placeholder: '2-3-1',
-                              keyboardType: TextInputType.text,
-                              padding: const EdgeInsets.all(Spacing.md),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: appColors.divider),
-                                borderRadius: BorderRadius.circular(
-                                  Spacing.borderRadiusSmall,
-                                ),
+                        Padding(
+                          padding: const EdgeInsets.all(Spacing.lg),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Standard er 2-3-1, men du kan skrive enhver opstilling som f.eks. 3-2-1 eller 2-2-3.',
+                                style: appTextStyles.body,
                               ),
-                              onChanged: (value) {
-                                setModalState(() {
-                                  selectedFormation =
-                                      _normalizeFormation(value);
-                                });
-                              },
-                            ),
-                            const SizedBox(height: Spacing.xs),
-                            Text(
-                              'Brug bindestreger mellem kæderne. Målmanden er altid medregnet automatisk.',
-                              style: appTextStyles.caption,
-                            ),
-                          ],
+                              const SizedBox(height: Spacing.md),
+                              Wrap(
+                                spacing: Spacing.sm,
+                                runSpacing: Spacing.sm,
+                                children: suggestions.map((formation) {
+                                  final selected = formation == selectedFormation;
+                                  return GestureDetector(
+                                    onTap: () {
+                                      setModalState(() {
+                                        selectedFormation = formation;
+                                        formationCtl.text = formation;
+                                      });
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: Spacing.md,
+                                        vertical: Spacing.sm,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: selected
+                                            ? appColors.lightGrass
+                                            : appColors.grey2,
+                                        borderRadius: BorderRadius.circular(
+                                          Spacing.borderRadiusFull,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        formation,
+                                        style: appTextStyles.caption.copyWith(
+                                          color: selected
+                                              ? appColors.primary
+                                              : appColors.dirt,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                              const SizedBox(height: Spacing.md),
+                              CupertinoTextField(
+                                controller: formationCtl,
+                                placeholder: '2-3-1',
+                                keyboardType: TextInputType.text,
+                                padding: const EdgeInsets.all(Spacing.md),
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: appColors.divider),
+                                  borderRadius: BorderRadius.circular(
+                                    Spacing.borderRadiusSmall,
+                                  ),
+                                ),
+                                onChanged: (value) {
+                                  setModalState(() {
+                                    selectedFormation =
+                                        _normalizeFormation(value);
+                                  });
+                                },
+                              ),
+                              const SizedBox(height: Spacing.xs),
+                              Text(
+                                'Brug bindestreger mellem kæderne. Målmanden er altid medregnet automatisk.',
+                                style: appTextStyles.caption,
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),

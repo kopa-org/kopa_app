@@ -102,7 +102,11 @@ abstract final class AppRouter {
         ),
         GoRoute(
           path: dbuWebview,
-          builder: (context, state) => const DbuWebviewPage(),
+          builder: (context, state) => DbuWebviewPage(
+            operation: state.extra is DbuWebviewOperation
+                ? state.extra! as DbuWebviewOperation
+                : DbuWebviewOperation.fullImport,
+          ),
         ),
         GoRoute(
           path: onboarding,

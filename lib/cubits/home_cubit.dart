@@ -1,11 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopa/cubits/home_state.dart';
 import 'package:kopa/model/fine_box_details.dart';
+import 'package:kopa/model/dbu_standings.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/statistics.dart';
 import 'package:kopa/repository/fines_repository.dart';
 import 'package:kopa/repository/match_repository.dart';
 import 'package:kopa/repository/statistics_repository.dart';
+import 'package:kopa/repository/team_dbu_repository.dart';
 
 class HomeCubit extends Cubit<HomeState> {
   HomeCubit() : super(const HomeState());
@@ -19,11 +21,13 @@ class HomeCubit extends Cubit<HomeState> {
         MatchRepository.getMatches(),
         _safeFetchStats(teamId),
         _safeFetchFineBox(),
+        _safeFetchDbuStandings(teamId),
       ]);
 
       final matches = results[0] as List<MatchDetails>;
       final statistics = results[1] as StatisticsResponse?;
       final fineBox = results[2] as FineBoxDetails?;
+      final dbuStandings = results[3] as DbuStandings?;
 
       MatchDetails? nextMatch;
       MatchDetails? lastMatch;
@@ -52,6 +56,7 @@ class HomeCubit extends Cubit<HomeState> {
         matches: matches,
         statistics: statistics,
         fineBox: fineBox,
+        dbuStandings: dbuStandings,
         isRegisteringForNextMatch: false,
         errorMessage: null,
       ));
@@ -76,6 +81,14 @@ class HomeCubit extends Cubit<HomeState> {
     try {
       return await FinesRepository.getFineBox();
     } catch (e) {
+      return null;
+    }
+  }
+
+  Future<DbuStandings?> _safeFetchDbuStandings(int teamId) async {
+    try {
+      return await TeamDbuRepository.getStandings(teamId);
+    } catch (_) {
       return null;
     }
   }

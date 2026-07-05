@@ -29,18 +29,26 @@ class PlayerPlusEntitlement {
 class PlayerPlusTeamContext {
   final String? clubName;
   final String? dbuTeamLabel;
+  final int? dbuTeamId;
+  final int? dbuPoolId;
   final String? season;
   final String? region;
   final String? seriesName;
   final DateTime? dbuSyncedAt;
+  final Map<String, dynamic>? standings;
+  final List<Map<String, dynamic>> poolTeams;
 
   PlayerPlusTeamContext({
     this.clubName,
     this.dbuTeamLabel,
+    this.dbuTeamId,
+    this.dbuPoolId,
     this.season,
     this.region,
     this.seriesName,
     this.dbuSyncedAt,
+    this.standings,
+    this.poolTeams = const [],
   });
 
   factory PlayerPlusTeamContext.fromJson(Map<String, dynamic>? json) {
@@ -49,12 +57,18 @@ class PlayerPlusTeamContext {
     return PlayerPlusTeamContext(
       clubName: json['club_name'],
       dbuTeamLabel: json['dbu_team_label'],
+      dbuTeamId: json['dbu_team_id'],
+      dbuPoolId: json['dbu_pool_id'],
       season: json['season'],
       region: json['region'],
       seriesName: json['series_name'],
       dbuSyncedAt: json['dbu_synced_at'] == null
           ? null
           : DateTime.tryParse(json['dbu_synced_at']),
+      standings: json['standings'] as Map<String, dynamic>?,
+      poolTeams: (json['pool_teams'] as List<dynamic>? ?? [])
+          .whereType<Map<String, dynamic>>()
+          .toList(),
     );
   }
 }
