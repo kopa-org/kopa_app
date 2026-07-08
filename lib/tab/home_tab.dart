@@ -1,24 +1,19 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:intl/intl.dart';
 import 'package:kopa/component/avatar/app_avatar.dart';
 import 'package:kopa/component/avatar/team_avatar.dart';
-import 'package:kopa/component/button/full_width_button.dart';
-import 'package:kopa/component/card/player_plus_stat_tile.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/home_cubit.dart';
 import 'package:kopa/cubits/home_state.dart';
-import 'package:kopa/model/fine_box_details.dart';
 import 'package:kopa/model/dbu_standings.dart';
+import 'package:kopa/model/fine_box_details.dart';
 import 'package:kopa/model/match_details.dart';
-import 'package:kopa/model/match_event_details.dart';
-import 'package:kopa/model/match_event_type.dart';
 import 'package:kopa/model/statistics.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/page/match/match_details_page.dart';
@@ -28,7 +23,20 @@ import 'package:kopa/theme/app_text_styles.dart';
 import 'package:kopa/theme/spacing.dart';
 import 'package:kopa/utils/app_analytics.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:url_launcher/url_launcher.dart';
+
+const _surface = Color(0xFFFAF8FF);
+const _onSurface = Color(0xFF131B2E);
+const _onSurfaceVariant = Color(0xFF404943);
+const _outlineVariant = Color(0xFFC0C9C1);
+const _heroStart = Color(0xFF33684F);
+const _heroEnd = Color(0xFF185038);
+const _primaryFixed = Color(0xFFB5EFCE);
+const _surfaceContainerLow = Color(0xFFF2F3FF);
+const _surfaceContainerHigh = Color(0xFFE2E7FF);
+const _surfaceContainerHighest = Color(0xFFDAE2FD);
+const _secondary = Color(0xFF3F6653);
+const _tertiaryContainer = Color(0xFFFFE1B1);
+const _onTertiaryContainer = Color(0xFF865F00);
 
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
@@ -51,12 +59,12 @@ class _HomeTabView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final appColors = theme.extension<AppColors>() ?? AppColors.light;
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
-        theme.extension<AppTextStyles>() ?? AppTextStyles.light;
-
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
     final currentUser = context.read<AuthCubit>().state.user;
+
     if (currentUser == null) {
       return const Center(child: Text('User not logged in'));
     }
@@ -65,8 +73,9 @@ class _HomeTabView extends StatelessWidget {
       title: 'Forside',
       showBackButton: false,
       showTopBar: false,
-      backgroundColor: appColors.offWhite,
+      backgroundColor: _surface,
       body: RefreshIndicator(
+        color: appColors.primary,
         onRefresh: () async {
           await context
               .read<HomeCubit>()
@@ -92,110 +101,40 @@ class _HomeTabView extends StatelessWidget {
               );
             }
 
+            final upcomingMatches = _upcomingMatches(state);
+            final playedMatches = _playedMatches(state);
+            final nextMatch = upcomingMatches.isEmpty
+                ? state.nextMatch
+                : upcomingMatches.first;
+            final latestMatch =
+                playedMatches.isEmpty ? null : playedMatches.last;
+
             return SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
-              child: ColoredBox(
-                color: appColors.white,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _TopIntro(
-                      currentUser: currentUser,
-                      matches: state.matches,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _HomeTopBar(currentUser: currentUser),
+                  _HeroSection(
+                    currentUser: currentUser,
+                    nextMatch: nextMatch,
+                  ),
+                  Transform.translate(
+                    offset: const Offset(0, -32),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: Spacing.md,
+                      ),
+                      child: _BentoGrid(
+                        currentUser: currentUser,
+                        latestMatch: latestMatch,
+                        standings: state.dbuStandings,
+                        statistics: state.statistics,
+                        fineBox: state.fineBox,
+                      ),
                     ),
-                    const SizedBox(height: Spacing.xl),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        if (_playedMatches(state).isNotEmpty ||
-                            _upcomingMatches(state).isNotEmpty) ...[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: Spacing.md),
-                                child: _SectionTitle('Næste kamp'),
-                              ),
-                              /*Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
-                            child: Container(
-                              width: 126,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: Spacing.sm,
-                                vertical: 10,
-                              ),
-                              decoration: BoxDecoration(
-                                color: appColors.white,
-                                borderRadius:
-                                    BorderRadius.circular(Spacing.borderRadiusMedium),
-                              ),
-                              child: _LiveCountdown(target: state.nextMatch?.date ?? DateTime.now()),
-                            ),
-                          ),*/
-                            ],
-                          ),
-                          _NextMatchCarousel(
-                            playedMatches: _playedMatches(state),
-                            upcomingMatches: _upcomingMatches(state),
-                            currentUser: currentUser,
-                          ),
-                          const SizedBox(height: Spacing.xl),
-                        ],
-                        if (state.dbuStandings?.rows.isNotEmpty == true) ...[
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: Spacing.md),
-                            child: _SectionTitle('Placering'),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: Spacing.md),
-                            child: _PlacementCard(
-                              standings: state.dbuStandings!,
-                              currentTeamId: state.dbuStandings!.currentTeamId,
-                              currentTeamName:
-                                  currentUser.teamDetails?.title ?? 'Hold',
-                            ),
-                          ),
-                          const SizedBox(height: Spacing.xl),
-                        ],
-                        if (state.statistics != null) ...[
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: Spacing.md),
-                            child: _SectionTitle('Statistik'),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: Spacing.md),
-                            child: _StatisticsStrip(
-                              stats: state.statistics!,
-                              currentUser: currentUser,
-                            ),
-                          ),
-                          const SizedBox(height: Spacing.xl),
-                        ],
-                        if (state.fineBox != null) ...[
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: Spacing.md),
-                            child: _SectionTitle('Bødekassen'),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: Spacing.md),
-                            child: _FineBoxCard(
-                              fineBox: state.fineBox!,
-                              currentUser: currentUser,
-                            ),
-                          ),
-                          const SizedBox(height: Spacing.xl),
-                        ],
-                      ],
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             );
           },
@@ -205,240 +144,257 @@ class _HomeTabView extends StatelessWidget {
   }
 }
 
-class _TopIntro extends StatefulWidget {
+class _HomeTopBar extends StatelessWidget {
   final UserDetails currentUser;
-  final List<MatchDetails> matches;
 
-  const _TopIntro({
+  const _HomeTopBar({required this.currentUser});
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return Container(
+      height: 64,
+      padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+      decoration: BoxDecoration(
+        color: _surface.withValues(alpha: 0.94),
+        border: Border(
+          bottom: BorderSide(color: _outlineVariant.withValues(alpha: 0.8)),
+        ),
+      ),
+      child: Row(
+        children: [
+          SvgPicture.asset(
+            'assets/logos/Logo.svg',
+            height: 30,
+            colorFilter: ColorFilter.mode(appColors.primary, BlendMode.srcIn),
+          ),
+          const SizedBox(width: Spacing.sm),
+          Text(
+            'Kopa',
+            style: appTextStyles.h5.copyWith(
+              color: appColors.primary,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const Spacer(),
+          IconButton(
+            tooltip: 'Notifikationer',
+            onPressed: () {},
+            icon: const Icon(Icons.notifications_outlined),
+            color: _onSurfaceVariant,
+          ),
+          IconButton(
+            tooltip: 'Indstillinger',
+            onPressed: () {},
+            icon: const Icon(Icons.settings_outlined),
+            color: _onSurfaceVariant,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeroSection extends StatelessWidget {
+  final UserDetails currentUser;
+  final MatchDetails? nextMatch;
+
+  const _HeroSection({
     required this.currentUser,
-    required this.matches,
+    required this.nextMatch,
   });
 
   @override
-  State<_TopIntro> createState() => _TopIntroState();
+  Widget build(BuildContext context) {
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final firstName = currentUser.name.split(' ').first;
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(
+        Spacing.md,
+        Spacing.lg,
+        Spacing.md,
+        Spacing.xl + 40,
+      ),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [_heroStart, _heroEnd],
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              AppAvatar(initials: _initials(currentUser.name), radius: 24),
+              const SizedBox(width: Spacing.md),
+              Expanded(
+                child: Text(
+                  'Hej $firstName!',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: appTextStyles.h4.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: Spacing.lg),
+          Text(
+            nextMatch == null ? 'Ingen kommende kamp' : 'Næste kamp om',
+            style: appTextStyles.caption2.copyWith(
+              color: Colors.white.withValues(alpha: 0.78),
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.2,
+            ),
+          ),
+          const SizedBox(height: Spacing.sm),
+          _HeroCountdown(target: nextMatch?.date),
+          const SizedBox(height: Spacing.lg),
+          _HeroTeamPanel(
+            match: nextMatch,
+            currentUser: currentUser,
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-class _TopIntroState extends State<_TopIntro> {
-  static const _dayWidth = 44.0;
+class _HeroCountdown extends StatefulWidget {
+  final DateTime? target;
 
-  late final DateTime _today;
-  late final DateTime _calendarStart;
-  late final int _todayIndex;
-  late final int _dayCount;
-  late final ScrollController _calendarController;
-  late DateTime _firstVisibleDay;
+  const _HeroCountdown({required this.target});
+
+  @override
+  State<_HeroCountdown> createState() => _HeroCountdownState();
+}
+
+class _HeroCountdownState extends State<_HeroCountdown> {
+  Timer? _timer;
+  late Duration _remaining;
 
   @override
   void initState() {
     super.initState();
-    final now = DateTime.now();
-    _today = DateTime(now.year, now.month, now.day);
-    _calendarStart = DateTime(_today.year - 10, _today.month, _today.day);
-    final calendarEnd = DateTime(_today.year + 10, _today.month, _today.day);
-    _todayIndex = _today.difference(_calendarStart).inDays;
-    _dayCount = calendarEnd.difference(_calendarStart).inDays + 1;
-    _firstVisibleDay = _today;
-    _calendarController = ScrollController(
-      initialScrollOffset: _todayIndex * _dayWidth,
-    );
+    _remaining = _calculateRemaining();
+    _timer = Timer.periodic(const Duration(minutes: 1), (_) => _tick());
+  }
+
+  @override
+  void didUpdateWidget(covariant _HeroCountdown oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.target != widget.target) {
+      _remaining = _calculateRemaining();
+    }
   }
 
   @override
   void dispose() {
-    _calendarController.dispose();
+    _timer?.cancel();
     super.dispose();
   }
 
-  bool _handleCalendarScroll(ScrollNotification notification) {
-    final firstVisibleIndex =
-        (notification.metrics.pixels / _dayWidth).floor().clamp(0, _dayCount);
-    final firstVisibleDay =
-        _calendarStart.add(Duration(days: firstVisibleIndex));
-    if (!_sameDay(firstVisibleDay, _firstVisibleDay)) {
-      setState(() => _firstVisibleDay = firstVisibleDay);
-    }
-    return false;
+  Duration _calculateRemaining() {
+    final target = widget.target;
+    if (target == null) return Duration.zero;
+    final remaining = target.difference(DateTime.now());
+    return remaining.isNegative ? Duration.zero : remaining;
+  }
+
+  void _tick() {
+    if (!mounted) return;
+    setState(() => _remaining = _calculateRemaining());
   }
 
   @override
   Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final firstName = widget.currentUser.name.split(' ').first;
-    final sortedMatches = [...widget.matches]
-      ..sort((a, b) => a.date.compareTo(b.date));
-    MatchDetails? nextMatch;
-    for (final candidate in sortedMatches) {
-      if (!candidate.hasMatchBeenPlayed &&
-          candidate.date.isAfter(DateTime.now())) {
-        nextMatch = candidate;
-        break;
-      }
-    }
-
-    return Container(
-      padding: const EdgeInsets.fromLTRB(Spacing.md, Spacing.md, Spacing.md, 0),
-      decoration: BoxDecoration(
-        color: appColors.offWhite,
-        borderRadius: const BorderRadius.vertical(
-          bottom: Radius.circular(Spacing.borderRadiusLargeIncreased),
+    if (widget.target == null) {
+      return Text(
+        'Planen opdateres',
+        style: _displayStyle(context).copyWith(
+          fontSize: 36,
+          color: Colors.white,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: appColors.black.withValues(alpha: 0.08),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: appColors.white,
-                  shape: BoxShape.circle,
-                ),
-                child: SvgPicture.asset(
-                  'assets/illustrations/kopa_thumb.svg',
-                  colorFilter:
-                      ColorFilter.mode(appColors.grass, BlendMode.srcIn),
-                  fit: BoxFit.contain,
-                ),
-              ),
-              const SizedBox(width: Spacing.md),
-              Expanded(
-                child: Text(
-                  'Velkommen, $firstName!',
-                  style: appTextStyles.h5.copyWith(color: appColors.primary),
-                ),
-              ),
-            ],
-          ),
-          Text(
-            'Du har kamp igen om:',
-            style: appTextStyles.body1.copyWith(color: appColors.primary),
-          ),
-          SizedBox(height: Spacing.md),
-          if (nextMatch != null)
-            SizedBox(
-              width: 120,
-              child: _LiveCountdown(target: nextMatch.date),
-            ),
-          const SizedBox(height: Spacing.md),
-          Divider(color: appColors.primary.withValues(alpha: 0.25), height: 1),
-          const SizedBox(height: Spacing.md),
-          Row(
-            children: [
-              Text(
-                _monthLabel(
-                  _firstVisibleDay,
-                  _firstVisibleDay.add(const Duration(days: 6)),
-                ),
-                style: appTextStyles.body3.copyWith(color: appColors.grey4),
-              ),
-              const Spacer(),
-              _LegendDot(label: 'Kamp', color: appColors.sunset),
-              const SizedBox(width: Spacing.md),
-              _LegendDot(label: 'træning', color: appColors.sky),
-            ],
-          ),
-          const SizedBox(height: Spacing.sm),
-          SizedBox(
-            height: 66,
-            child: NotificationListener<ScrollNotification>(
-              onNotification: _handleCalendarScroll,
-              child: ListView.builder(
-                controller: _calendarController,
-                scrollDirection: Axis.horizontal,
-                itemExtent: _dayWidth,
-                itemCount: _dayCount,
-                itemBuilder: (context, index) {
-                  final day = _calendarStart.add(Duration(days: index));
-                  return _CalendarDay(
-                    date: day,
-                    isToday: _sameDay(day, _today),
-                    match: _matchOn(day, sortedMatches),
-                    onMatchTap: (match) =>
-                        _openMatch(context, match, 'home_calendar'),
-                  );
-                },
-              ),
-            ),
-          ),
-          const SizedBox(height: Spacing.sm),
-        ],
-      ),
-    );
-  }
-
-  static bool _sameDay(DateTime a, DateTime b) =>
-      a.toLocal().year == b.toLocal().year &&
-      a.toLocal().month == b.toLocal().month &&
-      a.toLocal().day == b.toLocal().day;
-
-  static MatchDetails? _matchOn(
-    DateTime day,
-    List<MatchDetails> sortedMatches,
-  ) {
-    for (final match in sortedMatches) {
-      if (_sameDay(day, match.date)) return match;
+      );
     }
-    return null;
-  }
 
-  static String _monthLabel(DateTime first, DateTime last) {
-    final formatter = DateFormat.MMMM('da_DK');
-    final firstMonth = formatter.format(first);
-    if (first.month == last.month && first.year == last.year) {
-      return firstMonth;
-    }
-    return '$firstMonth–${formatter.format(last)}';
-  }
-}
-
-class _LegendDot extends StatelessWidget {
-  final String label;
-  final Color color;
-
-  const _LegendDot({required this.label, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
     return Row(
       children: [
-        Container(
-            width: 4,
-            height: 4,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
-        const SizedBox(width: 4),
-        Text(label,
-            style: appTextStyles.caption3.copyWith(color: appColors.grey4)),
+        _HeroCountdownBlock(
+          value: _remaining.inDays,
+          label: 'Dag',
+        ),
+        const SizedBox(width: 22),
+        _HeroCountdownBlock(
+          value: _remaining.inHours % 24,
+          label: 'Timer',
+        ),
+        const SizedBox(width: 22),
+        _HeroCountdownBlock(
+          value: _remaining.inMinutes % 60,
+          label: 'Min',
+        ),
       ],
     );
   }
 }
 
-class _CalendarDay extends StatelessWidget {
-  final DateTime date;
-  final bool isToday;
-  final MatchDetails? match;
-  final ValueChanged<MatchDetails> onMatchTap;
+class _HeroCountdownBlock extends StatelessWidget {
+  final int value;
+  final String label;
 
-  const _CalendarDay({
-    required this.date,
-    required this.isToday,
+  const _HeroCountdownBlock({
+    required this.value,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          value.toString().padLeft(2, '0'),
+          style: _displayStyle(context).copyWith(
+            color: Colors.white,
+            fontSize: 50,
+            height: 0.98,
+          ),
+        ),
+        const SizedBox(height: 5),
+        Text(
+          label.toUpperCase(),
+          style: appTextStyles.label.copyWith(
+            color: Colors.white.withValues(alpha: 0.62),
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.2,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _HeroTeamPanel extends StatelessWidget {
+  final MatchDetails? match;
+  final UserDetails currentUser;
+
+  const _HeroTeamPanel({
     required this.match,
-    required this.onMatchTap,
+    required this.currentUser,
   });
 
   @override
@@ -447,57 +403,187 @@ class _CalendarDay extends StatelessWidget {
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final hasMatch = match != null;
+    final homeTeam =
+        match?.homeTeam ?? currentUser.teamDetails?.title ?? 'Hold';
+    final awayTeam = match?.awayTeam ?? 'Modstander';
 
-    return Semantics(
-      button: hasMatch,
-      label: hasMatch
-          ? 'Åbn kamp ${DateFormat.yMMMMd('da_DK').format(date)}'
-          : DateFormat.yMMMMd('da_DK').format(date),
-      child: InkWell(
-        onTap: hasMatch ? () => onMatchTap(match!) : null,
-        customBorder: const StadiumBorder(),
-        child: SizedBox(
-          width: 34,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: BackdropFilter(
+        filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: Container(
+          padding: const EdgeInsets.all(Spacing.md),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
+          ),
           child: Column(
             children: [
-              Text(
-                DateFormat.E('da_DK')
-                    .format(date)
-                    .substring(0, 1)
-                    .toUpperCase(),
-                style: appTextStyles.caption3.copyWith(color: appColors.grey4),
-              ),
-              const SizedBox(height: Spacing.sm),
-              Container(
-                width: 30,
-                height: 30,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: isToday ? appColors.white : Colors.transparent,
-                  shape: BoxShape.circle,
-                  border: isToday
-                      ? Border.all(
-                          color: appColors.primary.withValues(alpha: 0.2),
-                        )
-                      : null,
-                ),
-                child: Text(
-                  '${date.day}',
-                  style: appTextStyles.body3.copyWith(
-                    color: appColors.primary,
-                    fontWeight: isToday ? FontWeight.w700 : FontWeight.w400,
+              Row(
+                children: [
+                  Expanded(
+                    child: _HeroTeam(
+                      name: homeTeam,
+                      teamId: currentUser.teamDetails?.id ?? 0,
+                    ),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+                    child: Text(
+                      'vs',
+                      style: appTextStyles.subtitle2.copyWith(
+                        color: Colors.white.withValues(alpha: 0.48),
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: _HeroTeam(
+                      name: awayTeam,
+                      teamId: _stableTeamSeed(awayTeam),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: Spacing.md),
+              if (match == null)
+                Container(
+                  width: double.infinity,
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Text(
+                    'Ingen kamp planlagt',
+                    style: appTextStyles.buttonSmall.copyWith(
+                      color: appColors.primary,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                )
+              else
+                _HeroMatchCta(
+                  match: match!,
+                  currentUser: currentUser,
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HeroTeam extends StatelessWidget {
+  final String name;
+  final int? teamId;
+
+  const _HeroTeam({
+    required this.name,
+    required this.teamId,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return Column(
+      children: [
+        Container(
+          width: 58,
+          height: 58,
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: TeamAvatar(
+            teamName: name,
+            teamId: teamId ?? 0,
+            radius: 21,
+          ),
+        ),
+        const SizedBox(height: Spacing.sm),
+        Text(
+          _shortName(name),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+          style: appTextStyles.caption2.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _HeroMatchCta extends StatelessWidget {
+  final MatchDetails match;
+  final UserDetails currentUser;
+
+  const _HeroMatchCta({
+    required this.match,
+    required this.currentUser,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final state = context.watch<HomeCubit>().state;
+    final isRegistering = state.isRegisteringForNextMatch;
+    final isRegistered = match.isCurrentUserRegistered;
+
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(14),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: isRegistered
+            ? () => _openMatch(context, match, 'home_hero')
+            : isRegistering
+                ? null
+                : () {
+                    AppAnalytics.logEvent(
+                      'match_registered',
+                      parameters: {'source': 'home_hero'},
+                    );
+                    final teamId = currentUser.teamDetails?.id ?? 0;
+                    context
+                        .read<HomeCubit>()
+                        .registerForMatch(match.id, teamId);
+                  },
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                isRegistered
+                    ? 'SE KAMPDETALJER'
+                    : isRegistering
+                        ? 'TILMELDES'
+                        : 'TILMELD NU',
+                style: appTextStyles.buttonSmall.copyWith(
+                  color: appColors.primary,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.6,
                 ),
               ),
-              const SizedBox(height: 2),
-              Container(
-                width: 5,
-                height: 5,
-                decoration: BoxDecoration(
-                  color: hasMatch ? appColors.sunset : Colors.transparent,
-                  shape: BoxShape.circle,
-                ),
+              const SizedBox(width: Spacing.sm),
+              Icon(
+                isRegistered ? Icons.arrow_forward : Icons.how_to_reg,
+                color: appColors.primary,
+                size: 20,
               ),
             ],
           ),
@@ -507,105 +593,743 @@ class _CalendarDay extends StatelessWidget {
   }
 }
 
-class _NextMatchCard extends StatelessWidget {
-  final MatchDetails match;
+class _BentoGrid extends StatelessWidget {
+  final UserDetails currentUser;
+  final MatchDetails? latestMatch;
+  final DbuStandings? standings;
+  final StatisticsResponse? statistics;
+  final FineBoxDetails? fineBox;
+
+  const _BentoGrid({
+    required this.currentUser,
+    required this.latestMatch,
+    required this.standings,
+    required this.statistics,
+    required this.fineBox,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final currentStanding = _currentStandingRow(standings, currentUser);
+    final topScorer = _topScorer(statistics);
+
+    return Column(
+      children: [
+        _LatestResultCard(
+          match: latestMatch,
+          currentUser: currentUser,
+        ),
+        const SizedBox(height: Spacing.md),
+        Row(
+          children: [
+            Expanded(child: _TopScorerCard(row: topScorer)),
+            const SizedBox(width: Spacing.md),
+            Expanded(
+              child: _PlacementMiniCard(
+                standing: currentStanding,
+                poolId: standings?.poolId?.toString(),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: Spacing.md),
+        _TasksCard(),
+        const SizedBox(height: Spacing.md),
+        _QuickTableCard(
+          standings: standings,
+          currentUser: currentUser,
+        ),
+        const SizedBox(height: Spacing.md),
+        _FineBoxBentoCard(
+          fineBox: fineBox,
+          currentUser: currentUser,
+        ),
+      ],
+    );
+  }
+}
+
+class _LatestResultCard extends StatelessWidget {
+  final MatchDetails? match;
   final UserDetails currentUser;
 
-  const _NextMatchCard({required this.match, required this.currentUser});
+  const _LatestResultCard({
+    required this.match,
+    required this.currentUser,
+  });
 
   @override
   Widget build(BuildContext context) {
     final appColors =
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final matchStart = match.date.toLocal();
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final score = match == null
+        ? '-:-'
+        : '${match!.homeTeamScore ?? 0}:${match!.awayTeamScore ?? 0}';
+    final resultLabel = _resultLabel(match, currentUser);
+    final motm = match?.matchPollDetails?.playerOfTheMatchDetails.name;
 
-    return Container(
-      padding: const EdgeInsets.all(Spacing.md),
-      decoration: BoxDecoration(
-        color: appColors.grey2,
-        borderRadius: BorderRadius.circular(Spacing.borderRadiusLarge),
-      ),
-      child: Column(
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(child: _TeamBadge(name: match.homeTeam ?? 'Hjemme')),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: Spacing.sm),
-                child: Text(
-                  '-',
-                  style: (Theme.of(context).extension<AppTextStyles>() ??
-                          AppTextStyles.light)
-                      .h2
-                      .copyWith(color: appColors.dirt),
-                ),
-              ),
-              Expanded(child: _TeamBadge(name: match.awayTeam ?? 'Ude')),
-            ],
-          ),
-          const SizedBox(height: Spacing.lg),
-          Row(
-            children: [
-              Expanded(
-                child: _MatchInfoRow(
-                  icon: Icons.calendar_month_outlined,
-                  child: Expanded(
-                    child: Text(
-                      _formattedMatchDate(matchStart),
-                      maxLines: 2,
-                      softWrap: true,
-                      style: (Theme.of(context).extension<AppTextStyles>() ??
-                              AppTextStyles.light)
-                          .body3
-                          .copyWith(
-                            color: appColors.dirt,
-                            fontWeight: FontWeight.w700,
-                          ),
+    return _BentoCard(
+      padding: const EdgeInsets.all(Spacing.lg),
+      color: _surfaceContainerLow,
+      child: InkWell(
+        onTap: match == null
+            ? null
+            : () => _openMatch(context, match!, 'home_latest'),
+        borderRadius: BorderRadius.circular(16),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'SENESTE RESULTAT',
+                    style: appTextStyles.label.copyWith(
+                      color: _onSurfaceVariant,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.2,
                     ),
                   ),
                 ),
+                if (resultLabel != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: Spacing.sm,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _primaryFixed,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      resultLabel,
+                      style: appTextStyles.label.copyWith(
+                        color: appColors.primary,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: Spacing.lg),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _SmallTeamMark(
+                  name: match?.homeTeam ?? 'Hjemme',
+                  teamId: _stableTeamSeed(match?.homeTeam ?? 'Hjemme'),
+                ),
+                Text(
+                  score,
+                  style: _displayStyle(context).copyWith(
+                    color: _onSurface,
+                    fontSize: 42,
+                  ),
+                ),
+                _SmallTeamMark(
+                  name: match?.awayTeam ?? 'Ude',
+                  teamId: _stableTeamSeed(match?.awayTeam ?? 'Ude'),
+                ),
+              ],
+            ),
+            const SizedBox(height: Spacing.sm),
+            Text(
+              motm == null
+                  ? 'Ingen kampens spiller valgt endnu'
+                  : '$motm valgt til kampens spiller',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: appTextStyles.caption1.copyWith(
+                color: _onSurfaceVariant,
+                fontWeight: FontWeight.w600,
               ),
-              const SizedBox(width: Spacing.sm),
-              /*Container(
-                width: 120,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: Spacing.sm,
-                  vertical: 10,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  borderRadius:
-                      BorderRadius.circular(Spacing.borderRadiusMedium),
-                ),
-                child: _LiveCountdown(target: match.date),
-              ),*/
-            ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SmallTeamMark extends StatelessWidget {
+  final String name;
+  final int? teamId;
+
+  const _SmallTeamMark({
+    required this.name,
+    required this.teamId,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Opacity(
+      opacity: 0.62,
+      child: TeamAvatar(
+        teamName: name,
+        teamId: teamId ?? 0,
+        radius: 22,
+      ),
+    );
+  }
+}
+
+class _TopScorerCard extends StatelessWidget {
+  final LeaderboardRow? row;
+
+  const _TopScorerCard({required this.row});
+
+  @override
+  Widget build(BuildContext context) {
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final name = row?.userName.split(' ').first ?? '-';
+    final goals = row?.value.toInt() ?? 0;
+
+    return _BentoCard(
+      color: _secondary,
+      padding: const EdgeInsets.all(Spacing.md),
+      child: SizedBox(
+        height: 136,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'TOPSCORER',
+              style: appTextStyles.label.copyWith(
+                color: Colors.white.withValues(alpha: 0.72),
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1,
+              ),
+            ),
+            const SizedBox(height: Spacing.md),
+            Text(
+              name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: appTextStyles.subtitle1.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 3),
+            Text(
+              '$goals mål',
+              style: appTextStyles.caption3.copyWith(
+                color: Colors.white.withValues(alpha: 0.78),
+              ),
+            ),
+            const Spacer(),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: Icon(
+                Icons.track_changes,
+                color: Colors.white.withValues(alpha: 0.20),
+                size: 42,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PlacementMiniCard extends StatelessWidget {
+  final DbuStandingRow? standing;
+  final String? poolId;
+
+  const _PlacementMiniCard({
+    required this.standing,
+    required this.poolId,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return _BentoCard(
+      color: _tertiaryContainer,
+      padding: const EdgeInsets.all(Spacing.md),
+      child: SizedBox(
+        height: 136,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'PLACERING',
+              style: appTextStyles.label.copyWith(
+                color: _onTertiaryContainer.withValues(alpha: 0.72),
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1,
+              ),
+            ),
+            const SizedBox(height: Spacing.md),
+            Text(
+              standing == null ? '-' : '${standing!.position}.',
+              style: _displayStyle(context).copyWith(
+                color: _onTertiaryContainer,
+                fontSize: 36,
+              ),
+            ),
+            Text(
+              poolId == null ? 'Serie' : 'Serie $poolId',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: appTextStyles.label.copyWith(
+                color: _onTertiaryContainer,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1,
+              ),
+            ),
+            const Spacer(),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: Icon(
+                Icons.leaderboard_outlined,
+                color: _onTertiaryContainer.withValues(alpha: 0.18),
+                size: 42,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TasksCard extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return _BentoCard(
+      color: _surfaceContainerHighest,
+      padding: const EdgeInsets.all(Spacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'OPGAVER',
+            style: appTextStyles.label.copyWith(
+              color: _onSurfaceVariant,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.2,
+            ),
           ),
-          const SizedBox(height: 12),
-          _MatchTimes(match: match),
-          const SizedBox(height: 12),
-          _MatchLogisticsPanel(
-            match: match,
-            currentUser: currentUser,
-          ),
-          const SizedBox(height: Spacing.xl),
-          const _TaskList(),
           const SizedBox(height: Spacing.md),
-          FullWidthButton(
-            buttonText: 'Se kampdetaljer',
-            onPressed: () => _openMatch(context, match, 'home_next_match'),
+          _TaskEmptyRow(),
+          const SizedBox(height: Spacing.md),
+          Center(
+            child: Text(
+              'SE ALLE OPGAVER',
+              style: appTextStyles.label.copyWith(
+                color: _onSurfaceVariant,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.8,
+              ),
+            ),
           ),
         ],
       ),
     );
   }
+}
 
-  String _formattedMatchDate(DateTime date) {
-    final weekday = DateFormat('EEEE', 'da_DK').format(date);
-    final capitalizedWeekday =
-        '${weekday.substring(0, 1).toUpperCase()}${weekday.substring(1)}';
-    return '$capitalizedWeekday d. ${DateFormat('d. MMMM yyyy', 'da_DK').format(date)}';
+class _TaskEmptyRow extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return Container(
+      padding: const EdgeInsets.all(Spacing.sm),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.52),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.assignment_outlined, color: _heroStart, size: 18),
+          const SizedBox(width: Spacing.sm),
+          Text(
+            'Ingen opgaver',
+            style: appTextStyles.caption2.copyWith(
+              color: _onSurface,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuickTableCard extends StatelessWidget {
+  final DbuStandings? standings;
+  final UserDetails currentUser;
+
+  const _QuickTableCard({
+    required this.standings,
+    required this.currentUser,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final rows = standings?.rows.take(4).toList() ?? const <DbuStandingRow>[];
+
+    return _BentoCard(
+      padding: EdgeInsets.zero,
+      clip: true,
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(Spacing.md),
+            color: _secondary,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'STILLING - SERIE ${standings?.poolId ?? ''}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: appTextStyles.label.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(Spacing.md),
+            child: Column(
+              children: [
+                _TableHeader(),
+                const Divider(color: _outlineVariant),
+                if (rows.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: Spacing.lg),
+                    child: Text(
+                      'Ingen stilling tilgængelig',
+                      style: appTextStyles.caption1.copyWith(
+                        color: _onSurfaceVariant,
+                      ),
+                    ),
+                  )
+                else
+                  for (final row in rows)
+                    _StandingPreviewRow(
+                      row: row,
+                      isCurrentTeam: _isCurrentTeam(row, currentUser),
+                    ),
+                const SizedBox(height: Spacing.md),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 11),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: _outlineVariant),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    'VIS FULD TABEL',
+                    style: appTextStyles.label.copyWith(
+                      color: _onSurfaceVariant,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TableHeader extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final style = appTextStyles.label.copyWith(
+      color: _onSurfaceVariant,
+      fontWeight: FontWeight.w800,
+    );
+
+    return Row(
+      children: [
+        SizedBox(width: 28, child: Text('#', style: style)),
+        Expanded(child: Text('Hold', style: style)),
+        SizedBox(
+          width: 30,
+          child: Text('K', style: style, textAlign: TextAlign.center),
+        ),
+        SizedBox(
+          width: 34,
+          child: Text('P', style: style, textAlign: TextAlign.right),
+        ),
+      ],
+    );
+  }
+}
+
+class _StandingPreviewRow extends StatelessWidget {
+  final DbuStandingRow row;
+  final bool isCurrentTeam;
+
+  const _StandingPreviewRow({
+    required this.row,
+    required this.isCurrentTeam,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final color = isCurrentTeam ? appColors.primary : _onSurface;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 9),
+      decoration: BoxDecoration(
+        color: isCurrentTeam
+            ? appColors.primary.withValues(alpha: 0.05)
+            : Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 28,
+            child: Text(
+              '${row.position}.',
+              style: appTextStyles.caption2.copyWith(
+                color: color,
+                fontWeight: isCurrentTeam ? FontWeight.w900 : FontWeight.w500,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Row(
+              children: [
+                if (isCurrentTeam) ...[
+                  Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: appColors.primary,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: Spacing.sm),
+                ],
+                Expanded(
+                  child: Text(
+                    row.teamName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: appTextStyles.caption2.copyWith(
+                      color: color,
+                      fontWeight:
+                          isCurrentTeam ? FontWeight.w800 : FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
+            width: 30,
+            child: Text(
+              '${row.matchesPlayed}',
+              textAlign: TextAlign.center,
+              style: appTextStyles.caption2.copyWith(color: _onSurfaceVariant),
+            ),
+          ),
+          SizedBox(
+            width: 34,
+            child: Text(
+              '${row.points}',
+              textAlign: TextAlign.right,
+              style: appTextStyles.caption2.copyWith(
+                color: color,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FineBoxBentoCard extends StatelessWidget {
+  final FineBoxDetails? fineBox;
+  final UserDetails currentUser;
+
+  const _FineBoxBentoCard({
+    required this.fineBox,
+    required this.currentUser,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final personalAmounts = fineBox == null
+        ? (0.0, 0.0)
+        : _personalFineAmounts(fineBox!, currentUser);
+    final totalBalance = fineBox == null
+        ? 0.0
+        : fineBox!.currentAmount + fineBox!.totalOwedAmount;
+    final primaryAmount =
+        currentUser.isTeamOwner ? totalBalance : personalAmounts.$2;
+    final collected = fineBox?.currentAmount ?? 0;
+    final target = math.max(totalBalance, 1);
+    final progress = (collected / target).clamp(0.0, 1.0);
+
+    return _BentoCard(
+      padding: const EdgeInsets.all(Spacing.lg),
+      child: InkWell(
+        onTap: fineBox == null ? null : () => _openFineBox(context),
+        borderRadius: BorderRadius.circular(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'BØDEKASSEN',
+                        style: appTextStyles.label.copyWith(
+                          color: _onSurfaceVariant,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                      const SizedBox(height: Spacing.sm),
+                      Text(
+                        '${primaryAmount.toStringAsFixed(0)},-',
+                        style: _displayStyle(context).copyWith(
+                          color: appColors.primary,
+                          fontSize: 42,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(Spacing.sm),
+                  decoration: BoxDecoration(
+                    color: appColors.primary.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(Icons.savings_outlined, color: appColors.primary),
+                ),
+              ],
+            ),
+            const SizedBox(height: Spacing.lg),
+            Row(
+              children: [
+                Text(
+                  currentUser.isTeamOwner ? 'Indsamlet' : 'Samlet bøder',
+                  style: appTextStyles.caption2.copyWith(
+                    color: _onSurfaceVariant,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  currentUser.isTeamOwner
+                      ? '${collected.toStringAsFixed(0)},-'
+                      : '${personalAmounts.$1.toStringAsFixed(0)},-',
+                  style: appTextStyles.caption2.copyWith(
+                    color: _onSurface,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: Spacing.sm),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(999),
+              child: LinearProgressIndicator(
+                minHeight: 8,
+                value: progress,
+                backgroundColor: _surfaceContainerHigh,
+                valueColor: AlwaysStoppedAnimation<Color>(appColors.primary),
+              ),
+            ),
+            const SizedBox(height: Spacing.lg),
+            Row(
+              children: [
+                Text(
+                  currentUser.isTeamOwner ? 'Gå til bødekassen' : 'Betal nu',
+                  style: appTextStyles.buttonSmall.copyWith(
+                    color: appColors.primary,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Icon(Icons.arrow_forward, color: appColors.primary, size: 17),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BentoCard extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final Color color;
+  final bool clip;
+
+  const _BentoCard({
+    required this.child,
+    this.padding = const EdgeInsets.all(Spacing.md),
+    this.color = Colors.white,
+    this.clip = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      clipBehavior: clip ? Clip.antiAlias : Clip.none,
+      padding: padding,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _outlineVariant.withValues(alpha: 0.35)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: child,
+    );
   }
 }
 
@@ -640,1712 +1364,92 @@ List<MatchDetails> _playedMatches(HomeState state) {
     ..sort((a, b) => a.date.compareTo(b.date));
 }
 
-class _NextMatchCarousel extends StatefulWidget {
-  final List<MatchDetails> playedMatches;
-  final List<MatchDetails> upcomingMatches;
-  final UserDetails currentUser;
-
-  const _NextMatchCarousel({
-    required this.playedMatches,
-    required this.upcomingMatches,
-    required this.currentUser,
-  });
-
-  @override
-  State<_NextMatchCarousel> createState() => _NextMatchCarouselState();
-}
-
-class _NextMatchCarouselState extends State<_NextMatchCarousel> {
-  static const _initialCardHeight = 440.0;
-  late final PageController _controller;
-  late int _currentPage;
-  final Map<int, double> _pageHeights = {};
-
-  int get _initialPage {
-    if (widget.upcomingMatches.isNotEmpty) {
-      return widget.playedMatches.length;
-    }
-    return math.max(0, widget.playedMatches.length - 1);
-  }
-
-  int get _pageCount =>
-      widget.playedMatches.length + widget.upcomingMatches.length;
-
-  @override
-  void initState() {
-    super.initState();
-    _currentPage = _initialPage;
-    _controller = PageController(
-      initialPage: _initialPage,
-      viewportFraction: 0.90,
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_pageCount == 1 && widget.playedMatches.isNotEmpty) {
-      return _LatestMatchCard(match: widget.playedMatches.first);
-    }
-
-    if (_pageCount == 1) {
-      return _NextMatchCard(
-        match: widget.upcomingMatches.first,
-        currentUser: widget.currentUser,
-      );
-    }
-
-    return AnimatedContainer(
-      height: _pageHeights[_currentPage] ?? _initialCardHeight,
-      duration: const Duration(milliseconds: 220),
-      curve: Curves.easeOut,
-      child: PageView.builder(
-        controller: _controller,
-        padEnds: true,
-        itemCount: _pageCount,
-        physics: const PageScrollPhysics(),
-        onPageChanged: (index) => setState(() => _currentPage = index),
-        itemBuilder: (context, index) {
-          final isPlayedMatch = index < widget.playedMatches.length;
-          final match = isPlayedMatch
-              ? widget.playedMatches[index]
-              : widget.upcomingMatches[index - widget.playedMatches.length];
-
-          return Semantics(
-            label: isPlayedMatch
-                ? 'Spillet kamp ${index + 1} af ${widget.playedMatches.length}'
-                : 'Kommende kamp ${index - widget.playedMatches.length + 1} '
-                    'af ${widget.upcomingMatches.length}',
-            child: Padding(
-              padding: const EdgeInsets.only(right: Spacing.sm),
-              child: OverflowBox(
-                minHeight: 0,
-                maxHeight: double.infinity,
-                alignment: Alignment.topCenter,
-                child: _MeasureSize(
-                  onChange: (size) => _updatePageHeight(index, size.height),
-                  child: isPlayedMatch
-                      ? _LatestMatchCard(match: match)
-                      : _NextMatchCard(
-                          match: match,
-                          currentUser: widget.currentUser,
-                        ),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  void _updatePageHeight(int index, double height) {
-    if (!mounted || height <= 0) {
-      return;
-    }
-
-    final previousHeight = _pageHeights[index];
-    if (previousHeight != null && (previousHeight - height).abs() < 0.5) {
-      return;
-    }
-
-    setState(() => _pageHeights[index] = height);
-  }
-}
-
-class _MeasureSize extends SingleChildRenderObjectWidget {
-  final ValueChanged<Size> onChange;
-
-  const _MeasureSize({
-    required this.onChange,
-    required super.child,
-  });
-
-  @override
-  RenderObject createRenderObject(BuildContext context) {
-    return _MeasureSizeRenderObject(onChange);
-  }
-
-  @override
-  void updateRenderObject(
-    BuildContext context,
-    covariant _MeasureSizeRenderObject renderObject,
-  ) {
-    renderObject.onChange = onChange;
-  }
-}
-
-class _MeasureSizeRenderObject extends RenderProxyBox {
-  ValueChanged<Size> onChange;
-  Size? _previousSize;
-
-  _MeasureSizeRenderObject(this.onChange);
-
-  @override
-  void performLayout() {
-    super.performLayout();
-    if (size == _previousSize) {
-      return;
-    }
-
-    _previousSize = size;
-    WidgetsBinding.instance.addPostFrameCallback((_) => onChange(size));
-  }
-}
-
-class _LiveCountdown extends StatefulWidget {
-  final DateTime target;
-
-  const _LiveCountdown({required this.target});
-
-  @override
-  State<_LiveCountdown> createState() => _LiveCountdownState();
-}
-
-class _LiveCountdownState extends State<_LiveCountdown> {
-  late Timer _timer;
-  late Duration _remaining;
-
-  @override
-  void initState() {
-    super.initState();
-    _remaining = _calculateRemaining();
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
-  }
-
-  @override
-  void didUpdateWidget(covariant _LiveCountdown oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.target != widget.target) {
-      _remaining = _calculateRemaining();
-    }
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
-  }
-
-  Duration _calculateRemaining() {
-    final remaining = widget.target.difference(DateTime.now());
-    return remaining.isNegative ? Duration.zero : remaining;
-  }
-
-  void _tick() {
-    if (!mounted) {
-      return;
-    }
-    setState(() => _remaining = _calculateRemaining());
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    if (_remaining == Duration.zero) {
-      return Text(
-        'Kampen er startet',
-        style: appTextStyles.body4.copyWith(color: appColors.dirt),
-        textAlign: TextAlign.center,
-      );
-    }
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        _CountdownUnit(value: _remaining.inDays, label: 'd'),
-        _CountdownUnit(value: _remaining.inHours % 24, label: 't'),
-        _CountdownUnit(value: _remaining.inMinutes % 60, label: 'm'),
-        _CountdownUnit(value: _remaining.inSeconds % 60, label: 's'),
-      ],
-    );
-  }
-}
-
-class _CountdownUnit extends StatelessWidget {
-  final int value;
-  final String label;
-
-  const _CountdownUnit({
-    required this.value,
-    required this.label,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        SizedBox(
-          width: 22,
-          height: 22,
-          child: ClipRect(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 320),
-              switchInCurve: Curves.easeOutCubic,
-              switchOutCurve: Curves.easeInCubic,
-              transitionBuilder: (child, animation) {
-                final isIncoming = child.key == ValueKey(value);
-                final offset = isIncoming
-                    ? Tween<Offset>(
-                        begin: const Offset(0, -1),
-                        end: Offset.zero,
-                      )
-                    : Tween<Offset>(
-                        begin: const Offset(0, 1),
-                        end: Offset.zero,
-                      );
-                return SlideTransition(
-                  position: offset.animate(animation),
-                  child: child,
-                );
-              },
-              child: Text(
-                value.toString().padLeft(2, '0'),
-                key: ValueKey(value),
-                style: appTextStyles.subtitle1.copyWith(color: appColors.dirt),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 2),
-        Text(
-          label,
-          style: appTextStyles.caption3.copyWith(color: appColors.dirt),
-        ),
-      ],
-    );
-  }
-}
-
-class _TeamBadge extends StatelessWidget {
-  final String name;
-
-  const _TeamBadge({required this.name});
-
-  @override
-  Widget build(BuildContext context) {
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    return Column(
-      children: [
-        AppAvatar(initials: _initials(name), radius: 30),
-        //const SizedBox(height: Spacing.sm),
-        Text(
-          name,
-          style: appTextStyles.caption1.copyWith(color: AppColors.light.dirt),
-          textAlign: TextAlign.center,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
-    );
-  }
-}
-
-class _MatchLogisticsPanel extends StatelessWidget {
-  final MatchDetails match;
-  final UserDetails currentUser;
-
-  const _MatchLogisticsPanel({
-    required this.match,
-    required this.currentUser,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final state = context.watch<HomeCubit>().state;
-    final isRegistering = state.isRegisteringForNextMatch;
-    final canNavigate = match.location.isNotEmpty;
-
-    void register() {
-      AppAnalytics.logEvent(
-        'match_registered',
-        parameters: {'source': 'home_next_match'},
-      );
-      final teamId = currentUser.teamDetails?.id ?? 0;
-      context.read<HomeCubit>().registerForMatch(match.id, teamId);
-    }
-
-    return SizedBox(
-      height: 70,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: Material(
-              color: appColors.grey2,
-              borderRadius: BorderRadius.circular(Spacing.borderRadiusMedium),
-              clipBehavior: Clip.antiAlias,
-              child: InkWell(
-                onTap: canNavigate ? () => _openNavigation(match) : null,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Image.asset(
-                      'assets/googlemaps.png',
-                      fit: BoxFit.cover,
-                      color: canNavigate ? null : appColors.grey3,
-                      colorBlendMode: canNavigate ? null : BlendMode.saturation,
-                    ),
-                     Positioned(
-                      left: Spacing.sm,
-                      top: Spacing.sm,
-                      child: Container(
-                        width: 120,
-                        height: 22,
-                        decoration: BoxDecoration(
-                          color: appColors.white,
-                          borderRadius:
-                              BorderRadius.circular(Spacing.borderRadiusSmall),
-                          boxShadow: [
-                            BoxShadow(
-                              color: appColors.black.withValues(alpha: 0.12),
-                              blurRadius: 8,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            const SizedBox(width: Spacing.xs),
-                            Icon(
-                              Icons.place_outlined,
-                              color: canNavigate ? appColors.dirt : appColors.grey4,
-                              size: 16,
-                            ),
-                            const SizedBox(width: Spacing.xs),
-                            Text( 
-                              match.location.isNotEmpty ? match.location : 'Ingen adresse',
-                              style: appTextStyles.caption3.copyWith(
-                                color: canNavigate
-                                    ? appColors.dirt
-                                    : appColors.grey4,
-                              ),
-                            ),
-                      
-                          ],
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      right: Spacing.sm,
-                      bottom: Spacing.sm,
-                      child: Container(
-                        width: 24,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          color: appColors.white,
-                          borderRadius:
-                              BorderRadius.circular(Spacing.borderRadiusSmall),
-                          boxShadow: [
-                            BoxShadow(
-                              color: appColors.black.withValues(alpha: 0.12),
-                              blurRadius: 8,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          Icons.navigation_outlined,
-                          color: canNavigate ? appColors.dirt : appColors.grey4,
-                          size: 18,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: Spacing.sm),
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.all(Spacing.sm),
-              decoration: BoxDecoration(
-                color: appColors.white,
-                borderRadius: BorderRadius.circular(Spacing.borderRadiusMedium),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Tilmeldte:',
-                              style: appTextStyles.caption3.copyWith(
-                                color: appColors.grey4,
-                              ),
-                            ),
-                            Text(
-                              '${match.registeredCount}',
-                              style: appTextStyles.h4.copyWith(
-                                color: appColors.dirt,
-                              ),
-                            ),
-                          ],
-                        ),
-                      
-                      /*Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: Spacing.xs,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: appColors.grey2,
-                          borderRadius:
-                              BorderRadius.circular(Spacing.borderRadiusSmall),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            /*Text(
-                              'Din status:',
-                              style: appTextStyles.caption3.copyWith(
-                                color: appColors.grey4,
-                              ),
-                            ),*/
-                            Text(
-                              match.isCurrentUserRegistered
-                                  ? 'Tilmeldt'
-                                  : 'Ikke tilmeldt',
-                              style: appTextStyles.caption2.copyWith(
-                                color: match.isCurrentUserRegistered
-                                    ? appColors.grass
-                                    : appColors.error,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),*/
-                    if (!match.isCurrentUserRegistered)
-                    SizedBox(width: Spacing.md),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Column(
-                        children: [
-                          Text("Tilmeld"),
-                          Icon( 
-                            Icons.add,
-                            size: 16,
-                            color: appColors.primary,
-                          ),
-                        ],
-                      )
-                        
-                    ),
-                    ],
-                  ),
-
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MatchTimes extends StatelessWidget {
-  final MatchDetails match;
-
-  const _MatchTimes({required this.match});
-
-  @override
-  Widget build(BuildContext context) {
-    final dateTimeFormat = DateFormat('HH:mm');
-    final matchStart = match.date.toLocal();
-    final meetingTime = match.meetingTime;
-    final meetingDateTime = meetingTime == null
-        ? null
-        : DateTime(
-            matchStart.year,
-            matchStart.month,
-            matchStart.day,
-            meetingTime.hour,
-            meetingTime.minute,
-          );
-
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    return _MatchInfoRow(
-      icon: Icons.schedule,
-      child: Text.rich(
-        TextSpan(
-          text: dateTimeFormat.format(matchStart),
-          children: [
-            TextSpan(
-              text: meetingDateTime == null
-                  ? ''
-                  : ' (${dateTimeFormat.format(meetingDateTime)})',
-              style: const TextStyle(fontWeight: FontWeight.w400),
-            ),
-          ],
-        ),
-        style: appTextStyles.body3.copyWith(
-          color: appColors.dirt,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-    );
-  }
-}
-
-class _TaskList extends StatelessWidget {
-  const _TaskList();
-
-  @override
-  Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    return Container(
-      width: 260,
-      alignment: Alignment.center,
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: 12),
-      decoration: BoxDecoration(
-        color: appColors.white,
-        borderRadius: BorderRadius.circular(Spacing.borderRadiusSmall),
-      ),
-      child: Text(
-        'Ingen opgaver',
-        style: appTextStyles.body3.copyWith(
-          color: appColors.grey4,
-        ),
-      ),
-    );
-  }
-}
-
-class _MatchInfoRow extends StatelessWidget {
-  final IconData icon;
-  final Widget child;
-
-  const _MatchInfoRow({required this.icon, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    return Row(
-      children: [
-        Icon(icon, color: appColors.dirt, size: 24),
-        const SizedBox(width: 12),
-        child,
-      ],
-    );
-  }
-}
-
-class _LatestMatchCard extends StatefulWidget {
-  final MatchDetails match;
-
-  const _LatestMatchCard({required this.match});
-
-  @override
-  State<_LatestMatchCard> createState() => _LatestMatchCardState();
-}
-
-class _LatestMatchCardState extends State<_LatestMatchCard> {
-  bool _showAllEvents = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final match = widget.match;
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final score = '${match.homeTeamScore ?? 0} - ${match.awayTeamScore ?? 0}';
-    final events = [...?match.matchEventDetailsList]
-      ..sort((a, b) => (b.minute ?? 0).compareTo(a.minute ?? 0));
-    final goalCount =
-        events.where((event) => event.type == MatchEventType.goal).length;
-    final yellowCardCount =
-        events.where((event) => event.type == MatchEventType.yellowCard).length;
-    final redCardCount =
-        events.where((event) => event.type == MatchEventType.redCard).length;
-    final motm =
-        match.matchPollDetails?.playerOfTheMatchDetails.name ?? 'Ingen valgt';
-
-    return Container(
-      padding: const EdgeInsets.all(Spacing.md),
-      decoration: BoxDecoration(
-        color: appColors.lightSky95,
-        borderRadius: BorderRadius.circular(Spacing.borderRadiusLargeIncreased),
-      ),
-      child: Column(
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text('Seneste kamp', style: appTextStyles.h5),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            DateFormat('EEE dd.MM', 'da_DK').format(match.date),
-            style: appTextStyles.caption2.copyWith(color: appColors.grey5),
-          ),
-          const SizedBox(height: Spacing.md),
-          Row(
-            children: [
-              Expanded(
-                flex: 3,
-                child: _TeamBadge(name: match.homeTeam ?? 'Hjemme'),
-              ),
-              Expanded(
-                flex: 4,
-                child: Column(
-                  children: [
-                    Text(
-                      score,
-                      style: appTextStyles.h3,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: Spacing.xs),
-                    Text(
-                      match.type,
-                      style: appTextStyles.caption2
-                          .copyWith(color: appColors.grey5),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                flex: 3,
-                child: _TeamBadge(name: match.awayTeam ?? 'Ude'),
-              ),
-            ],
-          ),
-          const SizedBox(height: Spacing.md),
-          Divider(color: appColors.grey5.withValues(alpha: 0.4)),
-          const SizedBox(height: Spacing.sm),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              'Kamphistorik',
-              style: appTextStyles.caption2.copyWith(color: appColors.grey5),
-            ),
-          ),
-          const SizedBox(height: Spacing.sm),
-          if (events.isEmpty)
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Ingen hændelser registreret',
-                style: appTextStyles.caption1.copyWith(color: appColors.grey5),
-              ),
-            )
-          else ...[
-            Row(
-              children: [
-                Expanded(
-                  child: _MatchEventSummary(
-                    icon: Icons.sports_soccer,
-                    label: 'Mål',
-                    count: goalCount,
-                    color: appColors.primary,
-                  ),
-                ),
-                const SizedBox(width: Spacing.sm),
-                Expanded(
-                  child: _MatchEventSummary(
-                    icon: Icons.crop_portrait,
-                    label: 'Gule kort',
-                    count: yellowCardCount,
-                    color: appColors.warning,
-                  ),
-                ),
-                const SizedBox(width: Spacing.sm),
-                Expanded(
-                  child: _MatchEventSummary(
-                    icon: Icons.crop_portrait,
-                    label: 'Røde kort',
-                    count: redCardCount,
-                    color: appColors.error,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: Spacing.xs),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                onPressed: () =>
-                    setState(() => _showAllEvents = !_showAllEvents),
-                iconAlignment: IconAlignment.end,
-                icon: AnimatedRotation(
-                  turns: _showAllEvents ? 0.5 : 0,
-                  duration: const Duration(milliseconds: 0),
-                  child: const Icon(Icons.keyboard_arrow_down, size: 20),
-                ),
-                label: Text(
-                  _showAllEvents
-                      ? 'Skjul hændelser'
-                      : 'Vis alle hændelser (${events.length})',
-                ),
-                style: TextButton.styleFrom(
-                  foregroundColor: appColors.dirt,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: Spacing.xs,
-                    vertical: Spacing.xs,
-                  ),
-                  textStyle: appTextStyles.caption2,
-                ),
-              ),
-            ),
-            AnimatedSize(
-              duration: const Duration(milliseconds: 220),
-              curve: Curves.easeOut,
-              alignment: Alignment.topCenter,
-              child: _showAllEvents
-                  ? Padding(
-                      padding: const EdgeInsets.only(top: Spacing.xs),
-                      child: Column(
-                        children: [
-                          for (final event in events)
-                            _MatchHistoryRow(event: event),
-                        ],
-                      ),
-                    )
-                  : const SizedBox.shrink(),
-            ),
-          ],
-          const SizedBox(height: Spacing.md),
-          Center(
-            child: Row(
-              children: [
-                AppAvatar(initials: _initials(motm), radius: 18),
-                const SizedBox(width: Spacing.sm),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Kampens spiller',
-                        style: appTextStyles.caption1
-                            .copyWith(color: appColors.grey5),
-                      ),
-                      Text(motm, style: appTextStyles.body4),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: Spacing.md),
-          FullWidthButton(
-            buttonText: 'Se kampdetaljer',
-            variant: FullWidthButtonVariant.sky,
-            onPressed: () => _openMatch(context, match, 'home_last_match'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MatchEventSummary extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final int count;
-  final Color color;
-
-  const _MatchEventSummary({
-    required this.icon,
-    required this.label,
-    required this.count,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: Spacing.xs,
-        vertical: Spacing.sm,
-      ),
-      decoration: BoxDecoration(
-        color: appColors.lightSky95,
-        borderRadius: BorderRadius.circular(Spacing.borderRadiusSmall),
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 16, color: color),
-              const SizedBox(width: Spacing.xs),
-              Text('$count', style: appTextStyles.subtitle2),
-            ],
-          ),
-          const SizedBox(height: 3),
-          Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: appTextStyles.caption3.copyWith(color: appColors.grey5),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MatchHistoryRow extends StatelessWidget {
-  final MatchEventDetails event;
-
-  const _MatchHistoryRow({required this.event});
-
-  @override
-  Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    final (icon, color, label) = switch (event.type) {
-      MatchEventType.goal => (
-          Icons.sports_soccer,
-          appColors.primary,
-          'Mål',
-        ),
-      MatchEventType.yellowCard => (
-          Icons.crop_portrait,
-          appColors.warning,
-          'Gult kort',
-        ),
-      MatchEventType.redCard => (
-          Icons.crop_portrait,
-          appColors.error,
-          'Rødt kort',
-        ),
-      MatchEventType.substitution => (
-          Icons.swap_horiz,
-          appColors.sky,
-          'Udskiftning',
-        ),
-      MatchEventType.penaltyKick => (
-          Icons.sports_soccer,
-          appColors.sunset,
-          'Straffespark',
-        ),
-    };
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: Spacing.xs),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 34,
-            child: Text(
-              event.minute == null ? '–' : '${event.minute}′',
-              style: appTextStyles.caption2.copyWith(color: appColors.grey5),
-            ),
-          ),
-          Icon(icon, size: 16, color: color),
-          const SizedBox(width: Spacing.sm),
-          Expanded(
-            child: Text(
-              event.goalscorerUserName,
-              style: appTextStyles.caption2.copyWith(color: appColors.dirt),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          const SizedBox(width: Spacing.sm),
-          Text(
-            label,
-            style: appTextStyles.caption3.copyWith(color: appColors.grey5),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SectionTitle extends StatelessWidget {
-  final String title;
-
-  const _SectionTitle(this.title);
-
-  @override
-  Widget build(BuildContext context) {
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: Spacing.sm),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Text(title, style: appTextStyles.h5),
-      ),
-    );
-  }
-}
-
-class _PlacementCard extends StatelessWidget {
-  final DbuStandings standings;
-  final int? currentTeamId;
-  final String currentTeamName;
-
-  const _PlacementCard({
-    required this.standings,
-    required this.currentTeamId,
-    required this.currentTeamName,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final currentRow = standings.rows.cast<DbuStandingRow?>().firstWhere(
-          (row) =>
-              row?.dbuTeamId == currentTeamId ||
-              row?.teamName.toLowerCase() == currentTeamName.toLowerCase(),
-          orElse: () => null,
-        );
-    final solidBoundaries = standings.rows
-        .where((row) => row.boundaryAfter == 'solid')
-        .map((row) => row.position)
-        .toList();
-    final relegationBoundary = solidBoundaries.length > 1
-        ? solidBoundaries.last
-        : solidBoundaries.firstWhere(
-            (position) => position > standings.rows.length / 2,
-            orElse: () => -1,
-          );
-
-    return Container(
-      padding: const EdgeInsets.all(Spacing.md),
-      decoration: BoxDecoration(
-        color: appColors.primary,
-        borderRadius: BorderRadius.circular(Spacing.borderRadiusMedium),
-      ),
-      child: Column(
-        children: [
-          _PlacementRow(
-            cells: const ['#', 'Hold', 'K', 'V', 'U', 'T', 'P'],
-            isHeader: true,
-          ),
-          const SizedBox(height: Spacing.sm),
-          for (final row in standings.rows) ...[
-            _PlacementRow(
-              cells: [
-                '${row.position}.',
-                row.teamName,
-                '${row.matchesPlayed}',
-                '${row.wins}',
-                '${row.draws}',
-                '${row.losses}',
-                '${row.points}',
-              ],
-              isHeader: false,
-              teamId: row.dbuTeamId,
-              logoUrl: row.logoUrl,
-              isCurrentTeam: row.dbuTeamId == currentTeamId ||
-                  row.teamName.toLowerCase() == currentTeamName.toLowerCase(),
-            ),
-            if (row.boundaryAfter != null)
-              _PlacementBoundary(
-                style: row.boundaryAfter!,
-                isRelegation: row.boundaryAfter == 'solid' &&
-                    row.position == relegationBoundary,
-              ),
-          ],
-          const SizedBox(height: Spacing.sm),
-          Text(
-            currentRow == null
-                ? 'DBU pulje ${standings.poolId ?? ''}'
-                : 'Målscore ${currentRow.goalsFor}-${currentRow.goalsAgainst}',
-            style: appTextStyles.caption1.copyWith(color: appColors.lightGrass),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PlacementBoundary extends StatelessWidget {
-  final String style;
-  final bool isRelegation;
-
-  const _PlacementBoundary({
-    required this.style,
-    required this.isRelegation,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-
-    return SizedBox(
-      height: Spacing.sm,
-      width: double.infinity,
-      child: CustomPaint(
-        painter: _BoundaryLinePainter(
-          color: isRelegation ? appColors.error : appColors.success,
-          dotted: style == 'dotted',
-        ),
-      ),
-    );
-  }
-}
-
-class _BoundaryLinePainter extends CustomPainter {
-  final Color color;
-  final bool dotted;
-
-  const _BoundaryLinePainter({
-    required this.color,
-    required this.dotted,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 2
-      ..strokeCap = StrokeCap.round;
-    const dashWidth = 6.0;
-    const dashGap = 5.0;
-    final y = size.height / 2;
-    final lineEnd = size.width - Spacing.sm;
-
-    if (!dotted) {
-      canvas.drawLine(Offset(Spacing.sm, y), Offset(lineEnd, y), paint);
-      return;
-    }
-
-    for (double x = Spacing.sm; x < lineEnd;) {
-      final end = (x + dashWidth).clamp(0.0, lineEnd);
-      canvas.drawLine(Offset(x, y), Offset(end, y), paint);
-      x += dashWidth + dashGap;
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _BoundaryLinePainter oldDelegate) =>
-      oldDelegate.color != color || oldDelegate.dotted != dotted;
-}
-
-class _PlacementRow extends StatelessWidget {
-  final List<String> cells;
-  final bool isHeader;
-  final bool isCurrentTeam;
-  final int? teamId;
-  final String? logoUrl;
-
-  const _PlacementRow({
-    required this.cells,
-    required this.isHeader,
-    this.isCurrentTeam = false,
-    this.teamId,
-    this.logoUrl,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final style = (isHeader ? appTextStyles.caption2 : appTextStyles.body4)
-        .copyWith(color: isHeader ? appColors.offWhite : appColors.lightGrass);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: Spacing.sm,
-        vertical: Spacing.sm,
-      ),
-      decoration: BoxDecoration(
-        color: isCurrentTeam
-            ? appColors.lightGrass.withValues(alpha: 0.18)
-            : Colors.transparent,
-        borderRadius: BorderRadius.circular(Spacing.borderRadiusSmall),
-      ),
-      child: Row(
-        children: [
-          SizedBox(width: 22, child: Text(cells[0], style: style)),
-          Expanded(
-            child: Row(
-              children: [
-                if (!isHeader) ...[
-                  TeamAvatar(
-                    teamName: cells[1],
-                    teamId: teamId ?? 0,
-                    colorSourceUrl: logoUrl,
-                    radius: 12,
-                  ),
-                  const SizedBox(width: Spacing.xs),
-                ],
-                Expanded(
-                  child: Text(cells[1],
-                      style: style, overflow: TextOverflow.ellipsis),
-                ),
-              ],
-            ),
-          ),
-          for (final cell in cells.skip(2))
-            SizedBox(
-              width: 28,
-              child: Text(cell, style: style, textAlign: TextAlign.right),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StatisticsStrip extends StatelessWidget {
-  final StatisticsResponse stats;
-  final UserDetails currentUser;
-
-  const _StatisticsStrip({required this.stats, required this.currentUser});
-
-  @override
-  Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final tiles = [
-      PlayerPlusStatTileData(
-        title: 'Pointsnit',
-        value: _currentLeaderboardValue(
-          stats.leaderboards.bestPointsAverage,
-          decimal: true,
-        ),
-        rank: _rankFor(stats.leaderboards.bestPointsAverage),
-        rows: _leaderboardRows(
-          stats.leaderboards.bestPointsAverage,
-          decimal: true,
-        ),
-        icon: Icons.trending_up,
-        accentColor: appColors.grass,
-      ),
-      PlayerPlusStatTileData(
-        title: 'Mål',
-        value: stats.player.goalsScored.toString(),
-        rank: _rankFor(stats.leaderboards.topScorers),
-        rows: _leaderboardRows(stats.leaderboards.topScorers),
-        icon: Icons.sports_score,
-        accentColor: appColors.sky,
-      ),
-      PlayerPlusStatTileData(
-        title: 'Assists',
-        value: stats.player.assists.toString(),
-        rank: _rankFor(stats.leaderboards.assists),
-        rows: _leaderboardRows(stats.leaderboards.assists),
-        icon: Icons.handshake,
-        accentColor: appColors.success,
-      ),
-      PlayerPlusStatTileData(
-        title: 'Kampe',
-        value: stats.player.matchesPlayed.toString(),
-        rank: _rankFor(stats.leaderboards.matchesPlayed),
-        rows: _leaderboardRows(stats.leaderboards.matchesPlayed),
-        icon: Icons.sports_soccer,
-        accentColor: appColors.sunset,
-      ),
-      PlayerPlusStatTileData(
-        title: 'Stemmer',
-        value: _currentLeaderboardValue(stats.leaderboards.mostVotes),
-        rank: _rankFor(stats.leaderboards.mostVotes),
-        rows: _leaderboardRows(stats.leaderboards.mostVotes),
-        icon: Icons.how_to_vote,
-        accentColor: appColors.dirt,
-      ),
-      PlayerPlusStatTileData(
-        title: 'In-form',
-        value: _currentInFormValue(),
-        rank: _rankForInForm(),
-        rows: _inFormRows(),
-        icon: Icons.local_fire_department,
-        accentColor: appColors.error,
-      ),
-    ];
-
-    return ValueListenableBuilder<bool>(
-      valueListenable: PlayerPlusAccess.temporaryUnlocked,
-      builder: (context, hasPlayerPlus, _) => SizedBox(
-        height: 150,
-        child: ListView(
-          scrollDirection: Axis.horizontal,
-          clipBehavior: Clip.none,
-          children: [
-            for (var i = 0; i < tiles.length; i++) ...[
-              if (i > 0) const SizedBox(width: 20),
-              PlayerPlusStatTile(
-                data: tiles[i],
-                currentUserId: currentUser.id,
-                locked: !hasPlayerPlus,
-                width: 156,
-                padding: const EdgeInsets.all(12),
-                valueFontSize: 28,
-                titleFontSize: 14,
-                rankFontSize: 11,
-                obscureValue: !hasPlayerPlus && i >= tiles.length - 2,
-                obscureRank: !hasPlayerPlus,
-                showShadow: true,
-                backgroundColor: appColors.white,
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  List<PlayerPlusStatRankingRow> _leaderboardRows(
-    List<LeaderboardRow> rows, {
-    bool decimal = false,
-  }) {
-    return rows
-        .map(
-          (row) => PlayerPlusStatRankingRow(
-            userId: row.userId,
-            userName: row.userName,
-            value: decimal
-                ? row.value.toDouble().toStringAsFixed(1)
-                : '${row.value}',
-          ),
-        )
-        .toList();
-  }
-
-  List<PlayerPlusStatRankingRow> _inFormRows() {
-    return stats.inFormRows
-        .map(
-          (row) => PlayerPlusStatRankingRow(
-            userId: row.userId,
-            userName: row.userName,
-            value: '${row.points}',
-            suffix: 'point',
-          ),
-        )
-        .toList();
-  }
-
-  String _currentLeaderboardValue(
-    List<LeaderboardRow> rows, {
-    bool decimal = false,
-  }) {
-    final row = _currentLeaderboardRow(rows);
-    if (row == null) return '-';
-    return decimal ? row.value.toDouble().toStringAsFixed(1) : '${row.value}';
-  }
-
-  LeaderboardRow? _currentLeaderboardRow(List<LeaderboardRow> rows) {
-    for (final row in rows) {
-      if (row.userId == currentUser.id || row.userName == stats.player.name) {
-        return row;
-      }
-    }
+DbuStandingRow? _currentStandingRow(
+  DbuStandings? standings,
+  UserDetails currentUser,
+) {
+  if (standings == null) {
     return null;
   }
 
-  int? _rankFor(List<LeaderboardRow> rows) {
-    for (var i = 0; i < rows.length; i++) {
-      final row = rows[i];
-      if (row.userId == currentUser.id || row.userName == stats.player.name) {
-        return i + 1;
-      }
-    }
-    return null;
-  }
-
-  String _currentInFormValue() {
-    for (final row in stats.inFormRows) {
-      if (row.userId == currentUser.id || row.userName == stats.player.name) {
-        return '${row.points}';
-      }
-    }
-    return '-';
-  }
-
-  int? _rankForInForm() {
-    for (var i = 0; i < stats.inFormRows.length; i++) {
-      final row = stats.inFormRows[i];
-      if (row.userId == currentUser.id || row.userName == stats.player.name) {
-        return i + 1;
-      }
-    }
-    return null;
-  }
-}
-
-class _FineBoxCard extends StatelessWidget {
-  final FineBoxDetails fineBox;
-  final UserDetails currentUser;
-
-  const _FineBoxCard({required this.fineBox, required this.currentUser});
-
-  @override
-  Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final personalFines = _personalFines(fineBox, currentUser);
-
-    if (!currentUser.isTeamOwner) {
-      return _PlayerFineBoxCard(
-        totalAmount: personalFines.$1,
-        owedAmount: personalFines.$2,
+  final currentTeamId = standings.currentTeamId;
+  final currentTeamName = currentUser.teamDetails?.title.toLowerCase();
+  return standings.rows.cast<DbuStandingRow?>().firstWhere(
+        (row) =>
+            row?.dbuTeamId == currentTeamId ||
+            row?.teamName.toLowerCase() == currentTeamName,
+        orElse: () => null,
       );
-    }
+}
 
-    final personalAmount = personalFines.$2;
-    final projectedTotal = fineBox.currentAmount + fineBox.totalOwedAmount;
-
-    return InkWell(
-      onTap: () {
-        AppAnalytics.logEvent('fine_box_opened');
-        Navigator.of(context).push(MaterialWithModalsPageRoute(
-          builder: (context) => const TeamFinesPage(),
-        ));
-      },
-      borderRadius: BorderRadius.circular(Spacing.borderRadiusLargeIncreased),
-      child: Container(
-        height: 278,
-        padding: const EdgeInsets.all(Spacing.md),
-        decoration: BoxDecoration(
-          color: appColors.lightSky55,
-          borderRadius:
-              BorderRadius.circular(Spacing.borderRadiusLargeIncreased),
-        ),
-        child: Stack(
-          children: [
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 150,
-              child: CustomPaint(
-                painter: _FineGaugePainter(
-                  appColors: appColors,
-                  currentAmount: fineBox.currentAmount,
-                  owedAmount: fineBox.totalOwedAmount,
-                  personalAmount: personalAmount,
-                ),
-              ),
-            ),
-            Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('Total saldo:',
-                      style: appTextStyles.caption3
-                          .copyWith(color: appColors.grey4)),
-                  Text('${projectedTotal.toStringAsFixed(0)},-',
-                      style: appTextStyles.h3),
-                ],
-              ),
-            ),
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 42,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _FineChip(
-                      label: 'Nuværende saldo',
-                      color: appColors.lightGrass,
-                      value: fineBox.currentAmount),
-                  _FineChip(
-                      label: 'Manglende beløb',
-                      color: appColors.sunset,
-                      value: fineBox.totalOwedAmount),
-                  _FineChip(
-                      label: 'Din bødekasse',
-                      color: appColors.sky,
-                      value: personalAmount),
-                ],
-              ),
-            ),
-            Positioned(
-              right: 0,
-              bottom: 0,
-              child: Row(
-                children: [
-                  Text('Gå til bødekassen', style: appTextStyles.buttonSmall),
-                  const SizedBox(width: Spacing.sm),
-                  Icon(Icons.arrow_forward, color: appColors.dirt),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+LeaderboardRow? _topScorer(StatisticsResponse? statistics) {
+  final rows = statistics?.leaderboards.topScorers;
+  if (rows == null || rows.isEmpty) {
+    return null;
   }
+  return rows.first;
+}
 
-  (double, double) _personalFines(
-      FineBoxDetails fineBox, UserDetails currentUser) {
-    try {
-      final myFineDetails = fineBox.userFineDetails
-          .firstWhere((u) => u.userDetails.id == currentUser.id);
-      final totalAmount = myFineDetails.fineDetailsList
-          .fold(0.0, (sum, fine) => sum + fine.owedAmount);
-      final owedAmount = myFineDetails.fineDetailsList
-          .where((fine) => !fine.hasBeenPaid)
-          .fold(0.0, (sum, fine) => sum + fine.owedAmount);
-      return (totalAmount, owedAmount);
-    } catch (_) {
-      return (0.0, 0.0);
-    }
+(double, double) _personalFineAmounts(
+  FineBoxDetails fineBox,
+  UserDetails currentUser,
+) {
+  try {
+    final myFineDetails = fineBox.userFineDetails
+        .firstWhere((userFine) => userFine.userDetails.id == currentUser.id);
+    final totalAmount = myFineDetails.fineDetailsList
+        .fold(0.0, (sum, fine) => sum + fine.owedAmount);
+    final owedAmount = myFineDetails.fineDetailsList
+        .where((fine) => !fine.hasBeenPaid)
+        .fold(0.0, (sum, fine) => sum + fine.owedAmount);
+    return (totalAmount, owedAmount);
+  } catch (_) {
+    return (0.0, 0.0);
   }
 }
 
-class _PlayerFineBoxCard extends StatelessWidget {
-  final double totalAmount;
-  final double owedAmount;
-
-  const _PlayerFineBoxCard({
-    required this.totalAmount,
-    required this.owedAmount,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    return InkWell(
-      onTap: () {
-        AppAnalytics.logEvent('fine_box_opened');
-        Navigator.of(context).push(MaterialWithModalsPageRoute(
-          builder: (context) => const TeamFinesPage(),
-        ));
-      },
-      borderRadius: BorderRadius.circular(Spacing.borderRadiusLargeIncreased),
-      child: Container(
-        padding: const EdgeInsets.all(Spacing.md),
-        decoration: BoxDecoration(
-          color: appColors.lightSky55,
-          borderRadius:
-              BorderRadius.circular(Spacing.borderRadiusLargeIncreased),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Din bødekasse', style: appTextStyles.h3),
-            const SizedBox(height: Spacing.md),
-            Row(
-              children: [
-                Expanded(
-                  child: _PersonalFineMetric(
-                    label: 'Samlet beløb i bøder',
-                    value: totalAmount,
-                    color: appColors.sky,
-                  ),
-                ),
-                const SizedBox(width: Spacing.sm),
-                Expanded(
-                  child: _PersonalFineMetric(
-                    label: 'Du skylder',
-                    value: owedAmount,
-                    color: appColors.sunset,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: Spacing.md),
-            Align(
-              alignment: Alignment.centerRight,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('Gå til bødekassen', style: appTextStyles.buttonSmall),
-                  const SizedBox(width: Spacing.sm),
-                  Icon(Icons.arrow_forward, color: appColors.dirt),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+bool _isCurrentTeam(DbuStandingRow row, UserDetails currentUser) {
+  final currentTeamName = currentUser.teamDetails?.title.toLowerCase();
+  return row.teamName.toLowerCase() == currentTeamName;
 }
 
-class _PersonalFineMetric extends StatelessWidget {
-  final String label;
-  final double value;
-  final Color color;
-
-  const _PersonalFineMetric({
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    return Container(
-      padding: const EdgeInsets.all(Spacing.md),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(Spacing.borderRadiusMedium),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '${value.toStringAsFixed(0)},-',
-            style: appTextStyles.h3.copyWith(color: appColors.dirt),
-          ),
-          const SizedBox(height: Spacing.xs),
-          Text(
-            label,
-            style: appTextStyles.caption3.copyWith(color: appColors.dirt),
-          ),
-        ],
-      ),
-    );
+int _stableTeamSeed(String name) {
+  var hash = 0;
+  for (final codeUnit in name.codeUnits) {
+    hash = 0x1fffffff & (hash + codeUnit);
+    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
+    hash ^= hash >> 6;
   }
+  hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
+  hash ^= hash >> 11;
+  return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
 }
 
-class _FineChip extends StatelessWidget {
-  final String label;
-  final Color color;
-  final double value;
-
-  const _FineChip(
-      {required this.label, required this.color, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    return Tooltip(
-      message: '${value.toStringAsFixed(0)} kr.',
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(Spacing.borderRadiusFull),
-        ),
-        child: Text(
-          label.toUpperCase(),
-          style: appTextStyles.label.copyWith(color: AppColors.light.dirt),
-        ),
-      ),
-    );
+String? _resultLabel(MatchDetails? match, UserDetails currentUser) {
+  if (match == null ||
+      match.homeTeamScore == null ||
+      match.awayTeamScore == null) {
+    return null;
   }
+
+  final currentTeamName = currentUser.teamDetails?.title.toLowerCase();
+  final isHome = match.homeTeam?.toLowerCase() == currentTeamName;
+  final currentScore = isHome ? match.homeTeamScore! : match.awayTeamScore!;
+  final opponentScore = isHome ? match.awayTeamScore! : match.homeTeamScore!;
+
+  if (currentScore > opponentScore) return 'SEJR';
+  if (currentScore == opponentScore) return 'UAFGJORT';
+  return 'TABT';
 }
 
-class _FineGaugePainter extends CustomPainter {
-  final AppColors appColors;
-  final double currentAmount;
-  final double owedAmount;
-  final double personalAmount;
-
-  _FineGaugePainter({
-    required this.appColors,
-    required this.currentAmount,
-    required this.owedAmount,
-    required this.personalAmount,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    const strokeWidth = 20.0;
-    const visibleGap = 5.0;
-    final diameter = math.min(size.width - strokeWidth, size.height * 2);
-    final radius = diameter / 2;
-    final rect = Rect.fromCenter(
-      center: Offset(size.width / 2, size.height),
-      width: diameter,
-      height: diameter,
-    );
-    final trackPaint = Paint()
-      ..color = appColors.white.withValues(alpha: 0.7)
-      ..strokeWidth = strokeWidth
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.butt;
-
-    canvas.drawArc(rect, math.pi, math.pi, false, trackPaint);
-
-    final segments = <(double, Color)>[
-      (math.max(0, currentAmount), appColors.lightGrass),
-      (math.max(0, owedAmount), appColors.sunset),
-      (math.max(0, personalAmount), appColors.sky),
-    ];
-    final total = segments.fold<double>(0, (sum, segment) => sum + segment.$1);
-    if (total == 0) {
-      return;
-    }
-
-    final visibleSegments =
-        segments.where((segment) => segment.$1 > 0).toList();
-    final gapAngle = (strokeWidth + visibleGap) / radius;
-    final totalGapAngle = gapAngle * (visibleSegments.length - 1);
-    final availableSweep = math.pi - totalGapAngle;
-    var startAngle = math.pi;
-    for (final segment in visibleSegments) {
-      final sweepAngle = availableSweep * (segment.$1 / total);
-      final segmentPaint = Paint()
-        ..color = segment.$2
-        ..strokeWidth = strokeWidth
-        ..style = PaintingStyle.stroke
-        ..strokeCap = StrokeCap.round;
-      canvas.drawArc(rect, startAngle, sweepAngle, false, segmentPaint);
-      startAngle += sweepAngle + gapAngle;
-    }
+String _shortName(String name) {
+  final trimmed = name.trim();
+  if (trimmed.length <= 12) return trimmed;
+  final parts = trimmed.split(RegExp(r'\s+'));
+  if (parts.length > 1) {
+    return '${parts.first} ${parts.last.substring(0, 1)}.';
   }
-
-  @override
-  bool shouldRepaint(covariant _FineGaugePainter oldDelegate) {
-    return oldDelegate.appColors != appColors ||
-        oldDelegate.currentAmount != currentAmount ||
-        oldDelegate.owedAmount != owedAmount ||
-        oldDelegate.personalAmount != personalAmount;
-  }
+  return trimmed;
 }
 
 String _initials(String? name) {
@@ -2354,6 +1458,15 @@ String _initials(String? name) {
   if (parts.length == 1) return parts.first.substring(0, 1).toUpperCase();
   return (parts.first.substring(0, 1) + parts.last.substring(0, 1))
       .toUpperCase();
+}
+
+TextStyle _displayStyle(BuildContext context) {
+  final appTextStyles =
+      Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+  return appTextStyles.h2.copyWith(
+    fontWeight: FontWeight.w900,
+    letterSpacing: -1.2,
+  );
 }
 
 void _openMatch(BuildContext context, MatchDetails match, String source) {
@@ -2369,9 +1482,9 @@ void _openMatch(BuildContext context, MatchDetails match, String source) {
   );
 }
 
-Future<void> _openNavigation(MatchDetails match) async {
-  final query = Uri.encodeComponent(match.location);
-  final uri =
-      Uri.parse('https://www.google.com/maps/search/?api=1&query=$query');
-  await launchUrl(uri, mode: LaunchMode.externalApplication);
+void _openFineBox(BuildContext context) {
+  AppAnalytics.logEvent('fine_box_opened');
+  Navigator.of(context).push(MaterialWithModalsPageRoute(
+    builder: (context) => const TeamFinesPage(),
+  ));
 }
