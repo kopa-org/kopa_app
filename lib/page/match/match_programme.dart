@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kopa/component/card/match_hero_card.dart';
+import 'package:kopa/component/card/all_games_card.dart';
 import 'package:kopa/component/error_message.dart';
 import 'package:kopa/component/future_handler.dart';
 import 'package:kopa/component/loading_indicator.dart';
@@ -109,43 +109,38 @@ class _MatchList extends StatelessWidget {
       return const Center(child: Text('Ingen kampe fundet.'));
     }
 
-    final sorted = [...matches]..sort((a, b) => b.date.compareTo(a.date));
-
-    return ListView.separated(
+    return ListView(
       padding: Spacing.screenPadding,
-      itemCount: sorted.length,
-      separatorBuilder: (context, index) => const SizedBox(height: Spacing.md),
-      itemBuilder: (context, index) {
-        final matchDetails = sorted[index];
-        final heroTag = 'match-programme-${matchDetails.id}-hero-card';
-        return MatchHeroCard(
-          match: matchDetails,
-          heroTag: heroTag,
-          onTap: () async {
-            AppAnalytics.logEvent(
-              'match_opened',
-              parameters: {'source': 'match_programme'},
-            );
-            await Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => MatchDetailsPage(
-                  matchId: matchDetails.id,
-                  initialMatch: matchDetails,
-                  heroTag: heroTag,
-                ),
-              ),
-            );
-            await Future<void>.delayed(
-              const Duration(milliseconds: 350),
-            );
-            if (context.mounted) {
-              context.read<MatchProgrammeCubit>().loadMatches(
-                    showLoading: false,
-                  );
-            }
-          },
-        );
-      },
+      children: [
+        AllGamesCard(
+          matches: matches,
+          onMatchTap: (match) => _openMatch(context, match),
+        ),
+      ],
     );
+  }
+
+  Future<void> _openMatch(
+    BuildContext context,
+    MatchDetails matchDetails,
+  ) async {
+    final heroTag = 'match-programme-${matchDetails.id}-all-games';
+    AppAnalytics.logEvent(
+      'match_opened',
+      parameters: {'source': 'match_programme'},
+    );
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => MatchDetailsPage(
+          matchId: matchDetails.id,
+          initialMatch: matchDetails,
+          heroTag: heroTag,
+        ),
+      ),
+    );
+    await Future<void>.delayed(const Duration(milliseconds: 350));
+    if (context.mounted) {
+      context.read<MatchProgrammeCubit>().loadMatches(showLoading: false);
+    }
   }
 }

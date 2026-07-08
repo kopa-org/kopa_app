@@ -12,12 +12,27 @@ class DbuStandings {
   factory DbuStandings.fromJson(Map<String, dynamic>? json) {
     if (json == null) return const DbuStandings();
 
+    final poolTeams = (json['poolTeams'] as List<dynamic>? ?? [])
+        .whereType<Map<String, dynamic>>();
+    final logoUrlsByTeamId = <int, String?>{
+      for (final team in poolTeams)
+        if (_asInt(team['dbu_team_id'] ?? team['dbuTeamId']) case final int id)
+          id: team['logo_url'] as String? ?? team['logoUrl'] as String?,
+    };
+
     return DbuStandings(
       poolId: json['poolId'],
       currentTeamId: json['currentTeamId'],
       rows: (json['rows'] as List<dynamic>? ?? [])
           .whereType<Map<String, dynamic>>()
-          .map(DbuStandingRow.fromJson)
+          .map(
+            (row) => DbuStandingRow.fromJson({
+              ...row,
+              'logoUrl': row['logoUrl'] ??
+                  row['logo_url'] ??
+                  logoUrlsByTeamId[_asInt(row['dbuTeamId'])],
+            }),
+          )
           .toList(),
     );
   }
@@ -35,6 +50,7 @@ class DbuStandingRow {
   final int goalsAgainst;
   final int points;
   final String? boundaryAfter;
+  final String? logoUrl;
 
   const DbuStandingRow({
     required this.position,
@@ -48,6 +64,7 @@ class DbuStandingRow {
     required this.goalsAgainst,
     required this.points,
     this.boundaryAfter,
+    this.logoUrl,
   });
 
   factory DbuStandingRow.fromJson(Map<String, dynamic> json) {
@@ -63,6 +80,13 @@ class DbuStandingRow {
       goalsAgainst: json['goalsAgainst'] ?? 0,
       points: json['points'] ?? 0,
       boundaryAfter: json['boundaryAfter'],
+      logoUrl: json['logoUrl'] as String?,
     );
   }
 }
+
+int? _asInt(Object? value) => switch (value) {
+      int value => value,
+      String value => int.tryParse(value),
+      _ => null,
+    };

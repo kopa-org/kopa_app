@@ -3,11 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 
+enum FullWidthButtonVariant { grass, sky }
+
 class FullWidthButton extends StatelessWidget {
   final String buttonText;
   final VoidCallback onPressed;
   final bool outlined;
   final IconData? icon;
+  final FullWidthButtonVariant variant;
 
   const FullWidthButton({
     super.key,
@@ -15,6 +18,7 @@ class FullWidthButton extends StatelessWidget {
     required this.onPressed,
     this.outlined = false,
     this.icon = Icons.arrow_forward,
+    this.variant = FullWidthButtonVariant.grass,
   });
 
   @override
@@ -23,6 +27,10 @@ class FullWidthButton extends StatelessWidget {
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final backgroundColor = switch (variant) {
+      FullWidthButtonVariant.grass => appColors.lightGrass,
+      FullWidthButtonVariant.sky => appColors.lightSky65,
+    };
 
     return CupertinoButton(
       padding: EdgeInsets.zero,
@@ -31,7 +39,7 @@ class FullWidthButton extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 14.0),
         decoration: BoxDecoration(
-          color: outlined ? appColors.surface : appColors.lightGrass,
+          color: outlined ? appColors.surface : backgroundColor,
           borderRadius: BorderRadius.circular(12.0),
           border: outlined
               ? Border.all(color: appColors.divider, width: 2.0)

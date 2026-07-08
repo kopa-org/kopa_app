@@ -7,12 +7,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:kopa/component/avatar/app_avatar.dart';
+import 'package:kopa/component/avatar/team_avatar.dart';
+import 'package:kopa/component/button/full_width_button.dart';
 import 'package:kopa/component/card/player_plus_stat_tile.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/home_cubit.dart';
 import 'package:kopa/cubits/home_state.dart';
-import 'package:kopa/helpers/date_helper.dart';
 import 'package:kopa/model/fine_box_details.dart';
 import 'package:kopa/model/dbu_standings.dart';
 import 'package:kopa/model/match_details.dart';
@@ -116,7 +117,7 @@ class _HomeTabView extends StatelessWidget {
                                     horizontal: Spacing.md),
                                 child: _SectionTitle('Næste kamp'),
                               ),
-                          Padding(
+                              /*Padding(
                             padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
                             child: Container(
                               width: 126,
@@ -131,7 +132,7 @@ class _HomeTabView extends StatelessWidget {
                               ),
                               child: _LiveCountdown(target: state.nextMatch?.date ?? DateTime.now()),
                             ),
-                          ),
+                          ),*/
                             ],
                           ),
                           _NextMatchCarousel(
@@ -188,19 +189,6 @@ class _HomeTabView extends StatelessWidget {
                               fineBox: state.fineBox!,
                               currentUser: currentUser,
                             ),
-                          ),
-                          const SizedBox(height: Spacing.xl),
-                        ],
-                        if (state.matches.isNotEmpty) ...[
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: Spacing.md),
-                            child: _SectionTitle('Alle kampe'),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: Spacing.md),
-                            child: _AllGamesCard(matches: state.matches),
                           ),
                           const SizedBox(height: Spacing.xl),
                         ],
@@ -281,6 +269,14 @@ class _TopIntroState extends State<_TopIntro> {
     final firstName = widget.currentUser.name.split(' ').first;
     final sortedMatches = [...widget.matches]
       ..sort((a, b) => a.date.compareTo(b.date));
+    MatchDetails? nextMatch;
+    for (final candidate in sortedMatches) {
+      if (!candidate.hasMatchBeenPlayed &&
+          candidate.date.isAfter(DateTime.now())) {
+        nextMatch = candidate;
+        break;
+      }
+    }
 
     return Container(
       padding: const EdgeInsets.fromLTRB(Spacing.md, Spacing.md, Spacing.md, 0),
@@ -302,29 +298,41 @@ class _TopIntroState extends State<_TopIntro> {
           Row(
             children: [
               Container(
-                width: 60,
-                height: 60,
+                width: 52,
+                height: 52,
                 decoration: BoxDecoration(
-                  color: appColors.sunset,
+                  color: appColors.white,
                   shape: BoxShape.circle,
                 ),
                 child: SvgPicture.asset(
                   'assets/illustrations/kopa_thumb.svg',
+                  colorFilter:
+                      ColorFilter.mode(appColors.grass, BlendMode.srcIn),
                   fit: BoxFit.contain,
                 ),
               ),
               const SizedBox(width: Spacing.md),
               Expanded(
                 child: Text(
-                  'Velkommen,\n$firstName!',
+                  'Velkommen, $firstName!',
                   style: appTextStyles.h5.copyWith(color: appColors.primary),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: Spacing.lg),
+          Text(
+            'Du har kamp igen om:',
+            style: appTextStyles.body1.copyWith(color: appColors.primary),
+          ),
+          SizedBox(height: Spacing.md),
+          if (nextMatch != null)
+            SizedBox(
+              width: 120,
+              child: _LiveCountdown(target: nextMatch.date),
+            ),
+          const SizedBox(height: Spacing.md),
           Divider(color: appColors.primary.withValues(alpha: 0.25), height: 1),
-          const SizedBox(height: Spacing.lg),
+          const SizedBox(height: Spacing.md),
           Row(
             children: [
               Text(
@@ -336,6 +344,8 @@ class _TopIntroState extends State<_TopIntro> {
               ),
               const Spacer(),
               _LegendDot(label: 'Kamp', color: appColors.sunset),
+              const SizedBox(width: Spacing.md),
+              _LegendDot(label: 'træning', color: appColors.sky),
             ],
           ),
           const SizedBox(height: Spacing.sm),
@@ -361,7 +371,7 @@ class _TopIntroState extends State<_TopIntro> {
               ),
             ),
           ),
-          const SizedBox(height: Spacing.lg),
+          const SizedBox(height: Spacing.sm),
         ],
       ),
     );
@@ -557,14 +567,14 @@ class _NextMatchCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: Spacing.sm),
-            /*  Container(
-                width: 126,
+              /*Container(
+                width: 120,
                 padding: const EdgeInsets.symmetric(
                   horizontal: Spacing.sm,
                   vertical: 10,
                 ),
                 decoration: BoxDecoration(
-                  color: appColors.white,
+                  color: Colors.transparent,
                   borderRadius:
                       BorderRadius.circular(Spacing.borderRadiusMedium),
                 ),
@@ -575,59 +585,16 @@ class _NextMatchCard extends StatelessWidget {
           const SizedBox(height: 12),
           _MatchTimes(match: match),
           const SizedBox(height: 12),
-          _MatchInfoRow(
-            icon: Icons.location_on,
-            child: Expanded(
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      match.location.isEmpty
-                          ? 'Lokation ikke angivet'
-                          : match.location,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: (Theme.of(context).extension<AppTextStyles>() ??
-                              AppTextStyles.light)
-                          .body3
-                          .copyWith(
-                            color: appColors.dirt,
-                            fontWeight: FontWeight.w700,
-                          ),
-                    ),
-                  ),
-                  const SizedBox(width: Spacing.sm),
-                  TextButton.icon(
-                    onPressed: match.location.isEmpty
-                        ? null
-                        : () => _openNavigation(match),
-                    icon: const Icon(Icons.navigation_outlined, size: 16),
-                    label: const Text('Naviger'),
-                    style: TextButton.styleFrom(
-                      elevation: 10,
-                      foregroundColor: appColors.white,
-                      backgroundColor: appColors.sky,
-                      visualDensity: VisualDensity.compact,
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(Spacing.borderRadiusSmall),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          _MatchLogisticsPanel(
+            match: match,
+            currentUser: currentUser,
           ),
           const SizedBox(height: Spacing.xl),
           const _TaskList(),
-          const SizedBox(height: 12),
-          _AttendancePanel(
-            match: match,
-            currentUser: currentUser,
+          const SizedBox(height: Spacing.md),
+          FullWidthButton(
+            buttonText: 'Se kampdetaljer',
+            onPressed: () => _openMatch(context, match, 'home_next_match'),
           ),
         ],
       ),
@@ -893,11 +860,12 @@ class _LiveCountdownState extends State<_LiveCountdown> {
     }
 
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         _CountdownUnit(value: _remaining.inDays, label: 'd'),
         _CountdownUnit(value: _remaining.inHours % 24, label: 't'),
         _CountdownUnit(value: _remaining.inMinutes % 60, label: 'm'),
+        _CountdownUnit(value: _remaining.inSeconds % 60, label: 's'),
       ],
     );
   }
@@ -977,7 +945,7 @@ class _TeamBadge extends StatelessWidget {
     return Column(
       children: [
         AppAvatar(initials: _initials(name), radius: 30),
-        const SizedBox(height: Spacing.sm),
+        //const SizedBox(height: Spacing.sm),
         Text(
           name,
           style: appTextStyles.caption1.copyWith(color: AppColors.light.dirt),
@@ -990,11 +958,14 @@ class _TeamBadge extends StatelessWidget {
   }
 }
 
-class _AttendancePanel extends StatelessWidget {
+class _MatchLogisticsPanel extends StatelessWidget {
   final MatchDetails match;
   final UserDetails currentUser;
 
-  const _AttendancePanel({required this.match, required this.currentUser});
+  const _MatchLogisticsPanel({
+    required this.match,
+    required this.currentUser,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1003,54 +974,199 @@ class _AttendancePanel extends StatelessWidget {
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
     final state = context.watch<HomeCubit>().state;
+    final isRegistering = state.isRegisteringForNextMatch;
+    final canNavigate = match.location.isNotEmpty;
 
-    return InkWell(
-      onTap: match.isCurrentUserRegistered || state.isRegisteringForNextMatch
-          ? null
-          : () {
-              AppAnalytics.logEvent(
-                'match_registered',
-                parameters: {'source': 'home_next_match'},
-              );
-              final teamId = currentUser.teamDetails?.id ?? 0;
-              context.read<HomeCubit>().registerForMatch(match.id, teamId);
-            },
-      borderRadius: BorderRadius.circular(Spacing.borderRadiusSmall),
-      child: Container(
-        width: 260,
-        padding: const EdgeInsets.symmetric(
-          horizontal: Spacing.md,
-          vertical: 10,
-        ),
-        decoration: BoxDecoration(
-          color: appColors.white,
-          borderRadius: BorderRadius.circular(Spacing.borderRadiusSmall),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.group, color: appColors.dirt, size: 22),
-            const SizedBox(width: Spacing.sm),
-            Text(
-              '${match.registeredCount}',
-              style: appTextStyles.body3.copyWith(color: appColors.dirt),
-            ),
-            const SizedBox(width: Spacing.lg),
-            Text(
-              match.isCurrentUserRegistered
-                  ? 'Tilmeldt'
-                  : state.isRegisteringForNextMatch
-                      ? 'Tilmelder…'
-                      : 'Tilmeld +',
-              style: appTextStyles.body3.copyWith(
-                color: match.isCurrentUserRegistered
-                    ? appColors.grass
-                    : appColors.sky,
-                fontWeight: FontWeight.w700,
+    void register() {
+      AppAnalytics.logEvent(
+        'match_registered',
+        parameters: {'source': 'home_next_match'},
+      );
+      final teamId = currentUser.teamDetails?.id ?? 0;
+      context.read<HomeCubit>().registerForMatch(match.id, teamId);
+    }
+
+    return SizedBox(
+      height: 70,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: Material(
+              color: appColors.grey2,
+              borderRadius: BorderRadius.circular(Spacing.borderRadiusMedium),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: canNavigate ? () => _openNavigation(match) : null,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image.asset(
+                      'assets/googlemaps.png',
+                      fit: BoxFit.cover,
+                      color: canNavigate ? null : appColors.grey3,
+                      colorBlendMode: canNavigate ? null : BlendMode.saturation,
+                    ),
+                     Positioned(
+                      left: Spacing.sm,
+                      top: Spacing.sm,
+                      child: Container(
+                        width: 120,
+                        height: 22,
+                        decoration: BoxDecoration(
+                          color: appColors.white,
+                          borderRadius:
+                              BorderRadius.circular(Spacing.borderRadiusSmall),
+                          boxShadow: [
+                            BoxShadow(
+                              color: appColors.black.withValues(alpha: 0.12),
+                              blurRadius: 8,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            const SizedBox(width: Spacing.xs),
+                            Icon(
+                              Icons.place_outlined,
+                              color: canNavigate ? appColors.dirt : appColors.grey4,
+                              size: 16,
+                            ),
+                            const SizedBox(width: Spacing.xs),
+                            Text( 
+                              match.location.isNotEmpty ? match.location : 'Ingen adresse',
+                              style: appTextStyles.caption3.copyWith(
+                                color: canNavigate
+                                    ? appColors.dirt
+                                    : appColors.grey4,
+                              ),
+                            ),
+                      
+                          ],
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      right: Spacing.sm,
+                      bottom: Spacing.sm,
+                      child: Container(
+                        width: 24,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          color: appColors.white,
+                          borderRadius:
+                              BorderRadius.circular(Spacing.borderRadiusSmall),
+                          boxShadow: [
+                            BoxShadow(
+                              color: appColors.black.withValues(alpha: 0.12),
+                              blurRadius: 8,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          Icons.navigation_outlined,
+                          color: canNavigate ? appColors.dirt : appColors.grey4,
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ],
-        ),
+          ),
+          const SizedBox(width: Spacing.sm),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.all(Spacing.sm),
+              decoration: BoxDecoration(
+                color: appColors.white,
+                borderRadius: BorderRadius.circular(Spacing.borderRadiusMedium),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Tilmeldte:',
+                              style: appTextStyles.caption3.copyWith(
+                                color: appColors.grey4,
+                              ),
+                            ),
+                            Text(
+                              '${match.registeredCount}',
+                              style: appTextStyles.h4.copyWith(
+                                color: appColors.dirt,
+                              ),
+                            ),
+                          ],
+                        ),
+                      
+                      /*Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: Spacing.xs,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: appColors.grey2,
+                          borderRadius:
+                              BorderRadius.circular(Spacing.borderRadiusSmall),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            /*Text(
+                              'Din status:',
+                              style: appTextStyles.caption3.copyWith(
+                                color: appColors.grey4,
+                              ),
+                            ),*/
+                            Text(
+                              match.isCurrentUserRegistered
+                                  ? 'Tilmeldt'
+                                  : 'Ikke tilmeldt',
+                              style: appTextStyles.caption2.copyWith(
+                                color: match.isCurrentUserRegistered
+                                    ? appColors.grass
+                                    : appColors.error,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),*/
+                    if (!match.isCurrentUserRegistered)
+                    SizedBox(width: Spacing.md),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Column(
+                        children: [
+                          Text("Tilmeld"),
+                          Icon( 
+                            Icons.add,
+                            size: 16,
+                            color: appColors.primary,
+                          ),
+                        ],
+                      )
+                        
+                    ),
+                    ],
+                  ),
+
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1152,13 +1268,21 @@ class _MatchInfoRow extends StatelessWidget {
   }
 }
 
-class _LatestMatchCard extends StatelessWidget {
+class _LatestMatchCard extends StatefulWidget {
   final MatchDetails match;
 
   const _LatestMatchCard({required this.match});
 
   @override
+  State<_LatestMatchCard> createState() => _LatestMatchCardState();
+}
+
+class _LatestMatchCardState extends State<_LatestMatchCard> {
+  bool _showAllEvents = false;
+
+  @override
   Widget build(BuildContext context) {
+    final match = widget.match;
     final appColors =
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
@@ -1166,7 +1290,12 @@ class _LatestMatchCard extends StatelessWidget {
     final score = '${match.homeTeamScore ?? 0} - ${match.awayTeamScore ?? 0}';
     final events = [...?match.matchEventDetailsList]
       ..sort((a, b) => (b.minute ?? 0).compareTo(a.minute ?? 0));
-    final visibleEvents = events.take(2).toList();
+    final goalCount =
+        events.where((event) => event.type == MatchEventType.goal).length;
+    final yellowCardCount =
+        events.where((event) => event.type == MatchEventType.yellowCard).length;
+    final redCardCount =
+        events.where((event) => event.type == MatchEventType.redCard).length;
     final motm =
         match.matchPollDetails?.playerOfTheMatchDetails.name ?? 'Ingen valgt';
 
@@ -1230,7 +1359,7 @@ class _LatestMatchCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: Spacing.sm),
-          if (visibleEvents.isEmpty)
+          if (events.isEmpty)
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -1238,32 +1367,160 @@ class _LatestMatchCard extends StatelessWidget {
                 style: appTextStyles.caption1.copyWith(color: appColors.grey5),
               ),
             )
-          else
-            for (final event in visibleEvents) _MatchHistoryRow(event: event),
-          const SizedBox(height: Spacing.md),
-          Row(
-            children: [
-              AppAvatar(initials: _initials(motm), radius: 18),
-              const SizedBox(width: Spacing.sm),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Kampens spiller',
-                      style: appTextStyles.caption1
-                          .copyWith(color: appColors.grey5),
-                    ),
-                    Text(motm, style: appTextStyles.body4),
-                  ],
+          else ...[
+            Row(
+              children: [
+                Expanded(
+                  child: _MatchEventSummary(
+                    icon: Icons.sports_soccer,
+                    label: 'Mål',
+                    count: goalCount,
+                    color: appColors.primary,
+                  ),
+                ),
+                const SizedBox(width: Spacing.sm),
+                Expanded(
+                  child: _MatchEventSummary(
+                    icon: Icons.crop_portrait,
+                    label: 'Gule kort',
+                    count: yellowCardCount,
+                    color: appColors.warning,
+                  ),
+                ),
+                const SizedBox(width: Spacing.sm),
+                Expanded(
+                  child: _MatchEventSummary(
+                    icon: Icons.crop_portrait,
+                    label: 'Røde kort',
+                    count: redCardCount,
+                    color: appColors.error,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: Spacing.xs),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: () =>
+                    setState(() => _showAllEvents = !_showAllEvents),
+                iconAlignment: IconAlignment.end,
+                icon: AnimatedRotation(
+                  turns: _showAllEvents ? 0.5 : 0,
+                  duration: const Duration(milliseconds: 0),
+                  child: const Icon(Icons.keyboard_arrow_down, size: 20),
+                ),
+                label: Text(
+                  _showAllEvents
+                      ? 'Skjul hændelser'
+                      : 'Vis alle hændelser (${events.length})',
+                ),
+                style: TextButton.styleFrom(
+                  foregroundColor: appColors.dirt,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: Spacing.xs,
+                    vertical: Spacing.xs,
+                  ),
+                  textStyle: appTextStyles.caption2,
                 ),
               ),
-            ],
+            ),
+            AnimatedSize(
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOut,
+              alignment: Alignment.topCenter,
+              child: _showAllEvents
+                  ? Padding(
+                      padding: const EdgeInsets.only(top: Spacing.xs),
+                      child: Column(
+                        children: [
+                          for (final event in events)
+                            _MatchHistoryRow(event: event),
+                        ],
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+          ],
+          const SizedBox(height: Spacing.md),
+          Center(
+            child: Row(
+              children: [
+                AppAvatar(initials: _initials(motm), radius: 18),
+                const SizedBox(width: Spacing.sm),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Kampens spiller',
+                        style: appTextStyles.caption1
+                            .copyWith(color: appColors.grey5),
+                      ),
+                      Text(motm, style: appTextStyles.body4),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: Spacing.md),
-          _SecondaryFigmaButton(
-            label: 'Se kampdetaljer',
-            onTap: () => _openMatch(context, match, 'home_last_match'),
+          FullWidthButton(
+            buttonText: 'Se kampdetaljer',
+            variant: FullWidthButtonVariant.sky,
+            onPressed: () => _openMatch(context, match, 'home_last_match'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MatchEventSummary extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final int count;
+  final Color color;
+
+  const _MatchEventSummary({
+    required this.icon,
+    required this.label,
+    required this.count,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: Spacing.xs,
+        vertical: Spacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: appColors.lightSky95,
+        borderRadius: BorderRadius.circular(Spacing.borderRadiusSmall),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 16, color: color),
+              const SizedBox(width: Spacing.xs),
+              Text('$count', style: appTextStyles.subtitle2),
+            ],
+          ),
+          const SizedBox(height: 3),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: appTextStyles.caption3.copyWith(color: appColors.grey5),
           ),
         ],
       ),
@@ -1337,40 +1594,6 @@ class _MatchHistoryRow extends StatelessWidget {
             style: appTextStyles.caption3.copyWith(color: appColors.grey5),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _SecondaryFigmaButton extends StatelessWidget {
-  final String label;
-  final VoidCallback onTap;
-
-  const _SecondaryFigmaButton({required this.label, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(Spacing.borderRadiusMedium),
-      child: Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: Spacing.lg, vertical: 14),
-        decoration: BoxDecoration(
-          color: appColors.lightSky65,
-          borderRadius: BorderRadius.circular(Spacing.borderRadiusMedium),
-        ),
-        child: Row(
-          children: [
-            Text(label, style: appTextStyles.subtitle1),
-            const Spacer(),
-            Icon(Icons.arrow_forward, color: appColors.dirt),
-          ],
-        ),
       ),
     );
   }
@@ -1454,6 +1677,8 @@ class _PlacementCard extends StatelessWidget {
                 '${row.points}',
               ],
               isHeader: false,
+              teamId: row.dbuTeamId,
+              logoUrl: row.logoUrl,
               isCurrentTeam: row.dbuTeamId == currentTeamId ||
                   row.teamName.toLowerCase() == currentTeamName.toLowerCase(),
             ),
@@ -1545,11 +1770,15 @@ class _PlacementRow extends StatelessWidget {
   final List<String> cells;
   final bool isHeader;
   final bool isCurrentTeam;
+  final int? teamId;
+  final String? logoUrl;
 
   const _PlacementRow({
     required this.cells,
     required this.isHeader,
     this.isCurrentTeam = false,
+    this.teamId,
+    this.logoUrl,
   });
 
   @override
@@ -1574,12 +1803,17 @@ class _PlacementRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          SizedBox(width: 28, child: Text(cells[0], style: style)),
+          SizedBox(width: 22, child: Text(cells[0], style: style)),
           Expanded(
             child: Row(
               children: [
                 if (!isHeader) ...[
-                  AppAvatar(initials: _initials(cells[1]), radius: 10),
+                  TeamAvatar(
+                    teamName: cells[1],
+                    teamId: teamId ?? 0,
+                    colorSourceUrl: logoUrl,
+                    radius: 12,
+                  ),
                   const SizedBox(width: Spacing.xs),
                 ],
                 Expanded(
@@ -2041,165 +2275,6 @@ class _FineChip extends StatelessWidget {
           style: appTextStyles.label.copyWith(color: AppColors.light.dirt),
         ),
       ),
-    );
-  }
-}
-
-class _AllGamesCard extends StatelessWidget {
-  final List<MatchDetails> matches;
-
-  const _AllGamesCard({required this.matches});
-
-  @override
-  Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final sortedMatches = [...matches]
-      ..sort((a, b) => b.date.compareTo(a.date));
-    final rows = sortedMatches.take(8).toList();
-
-    return Container(
-      padding: const EdgeInsets.all(Spacing.md),
-      decoration: BoxDecoration(
-        color: appColors.grey2,
-        borderRadius: BorderRadius.circular(Spacing.borderRadiusLargeIncreased),
-      ),
-      child: Column(
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text('Serie 1',
-                style: appTextStyles.caption3.copyWith(color: appColors.grey3)),
-          ),
-          const SizedBox(height: Spacing.md),
-          if (rows.isEmpty)
-            Text('Ingen kampe endnu', style: appTextStyles.body3)
-          else
-            ...rows.indexed.expand((entry) sync* {
-              final index = entry.$1;
-              final match = entry.$2;
-              yield _GameResultRow(match: match);
-              if (index != rows.length - 1) {
-                yield const SizedBox(height: Spacing.md);
-              }
-            }),
-        ],
-      ),
-    );
-  }
-}
-
-class _GameResultRow extends StatelessWidget {
-  final MatchDetails match;
-
-  const _GameResultRow({required this.match});
-
-  @override
-  Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final homeScore = match.homeTeamScore;
-    final awayScore = match.awayTeamScore;
-    final homeScoreValue = homeScore ?? 0;
-    final awayScoreValue = awayScore ?? 0;
-    final result = homeScoreValue == awayScoreValue
-        ? 'UAFGJORT'
-        : homeScoreValue > awayScoreValue
-            ? 'SEJR'
-            : 'TABT';
-    final resultColor = result == 'SEJR'
-        ? appColors.success
-        : result == 'TABT'
-            ? appColors.error
-            : appColors.sunset;
-    final resultTextColor =
-        result == 'SEJR' ? appColors.lightGrass : appColors.offWhite;
-
-    return InkWell(
-      onTap: () => _openMatch(context, match, 'home_all_games'),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            DateFormat('EEE dd.MM', 'da_DK').format(match.date),
-            style: appTextStyles.caption3.copyWith(color: appColors.grey5),
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 6),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(
-                width: 72,
-                child: match.hasMatchBeenPlayed
-                    ? Align(
-                        alignment: Alignment.centerLeft,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 6, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: resultColor,
-                            borderRadius:
-                                BorderRadius.circular(Spacing.borderRadiusFull),
-                          ),
-                          child: Text(result,
-                              style: appTextStyles.label
-                                  .copyWith(color: resultTextColor)),
-                        ),
-                      )
-                    : Text(DateHelper.getFormattedTime(match.date),
-                        style: appTextStyles.buttonSmall
-                            .copyWith(color: appColors.grey5)),
-              ),
-              const SizedBox(width: Spacing.sm),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _GameTeamLine(
-                        name: match.homeTeam ?? 'Hjemme', score: homeScore),
-                    const SizedBox(height: 6),
-                    _GameTeamLine(
-                        name: match.awayTeam ?? 'Ude', score: awayScore),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _GameTeamLine extends StatelessWidget {
-  final String name;
-  final int? score;
-
-  const _GameTeamLine({required this.name, required this.score});
-
-  @override
-  Widget build(BuildContext context) {
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    return Row(
-      children: [
-        AppAvatar(initials: _initials(name), radius: 10),
-        const SizedBox(width: Spacing.sm),
-        Expanded(
-            child: Text(name,
-                style: appTextStyles.caption1.copyWith(color: appColors.dirt),
-                overflow: TextOverflow.ellipsis)),
-        if (score != null)
-          Text('$score',
-              style: appTextStyles.caption1.copyWith(color: appColors.dirt)),
-      ],
     );
   }
 }

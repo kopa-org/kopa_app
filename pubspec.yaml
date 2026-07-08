@@ -96,6 +96,7 @@ flutter:
   assets:
     - assets/mindful.jpg
     - assets/mobilepay_logo.png
+    - assets/googlemaps.png
     - assets/logos/
     - assets/illustrations/
     - .env.local

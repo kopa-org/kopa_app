@@ -6,6 +6,13 @@ void main() {
     final standings = DbuStandings.fromJson({
       'poolId': 489363,
       'currentTeamId': 449594,
+      'poolTeams': [
+        {
+          'dbu_team_id': 449594,
+          'name': 'Skjold 6',
+          'logo_url': 'https://file.dbu.dk/images/club/1581/skjold.png',
+        },
+      ],
       'rows': [
         {
           'position': 6,
@@ -28,5 +35,9 @@ void main() {
     expect(standings.rows.single.teamName, 'Skjold 6');
     expect(standings.rows.single.points, 9);
     expect(standings.rows.single.boundaryAfter, 'solid');
+    expect(
+      standings.rows.single.logoUrl,
+      'https://file.dbu.dk/images/club/1581/skjold.png',
+    );
   });
 }
