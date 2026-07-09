@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kopa/component/avatar/team_avatar.dart';
+import 'package:kopa/component/avatar/team_badge_label.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/model/dbu_standings.dart';
 import 'package:kopa/model/user_details.dart';
@@ -226,26 +226,15 @@ class _StandingsRow extends StatelessWidget {
             weight: weight,
           ),
           Expanded(
-            child: Row(
-              children: [
-                if (!compact) ...[
-                  TeamAvatar(
-                    teamName: row.teamName,
-                    teamId: row.dbuTeamId,
-                    colorSourceUrl: row.logoUrl,
-                    radius: 11,
-                  ),
-                  const SizedBox(width: Spacing.xs),
-                ],
-                Expanded(
-                  child: Text(
-                    row.teamName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: teamStyle,
-                  ),
-                ),
-              ],
+            child: TeamBadgeLabel(
+              teamName: row.teamName,
+              teamId: row.dbuTeamId,
+              colorSourceUrl: row.logoUrl,
+              radius: 11,
+              showAvatar: !compact,
+              badgePadding: 5,
+              labelStyle: teamStyle,
+              layout: TeamBadgeLabelLayout.horizontal,
             ),
           ),
           _ValueCell(
