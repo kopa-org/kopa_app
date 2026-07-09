@@ -63,10 +63,10 @@ class _HomeTabView extends StatelessWidget {
     }
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light.copyWith(
-        statusBarColor: appColors.black,
-        statusBarIconBrightness: Brightness.light,
-        statusBarBrightness: Brightness.dark,
+      value: SystemUiOverlayStyle.dark.copyWith(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
       ),
       child: PageScaffold(
         title: 'Forside',
@@ -177,7 +177,7 @@ class _HomeTopBar extends StatelessWidget {
         0,
       ),
       decoration: BoxDecoration(
-        color: appColors.offWhite,
+        color: appColors.white,
         boxShadow: [
           BoxShadow(
             color: appColors.black,
@@ -190,13 +190,13 @@ class _HomeTopBar extends StatelessWidget {
         children: [
           SvgPicture.asset(
             'assets/logos/logomark_outline_foreground.svg',
-            height: 30,
+            height: 40,
             colorFilter: ColorFilter.mode(appColors.grass, BlendMode.srcIn),
           ),
           const SizedBox(width: Spacing.sm),
           Text(
             'Kopa',
-            style: appTextStyles.h5.copyWith(
+            style: appTextStyles.h3.copyWith(
               color: appColors.grass,
               fontWeight: FontWeight.w800,
             ),
@@ -468,7 +468,7 @@ class _HeroCountdownBlock extends StatelessWidget {
           value.toString().padLeft(2, '0'),
           style: _displayStyle(context).copyWith(
             color: appColors.grass.withValues(alpha: 0.62),
-            fontSize: 36,
+            fontSize: 28,
             height: 0.98,
           ),
         ),
@@ -567,6 +567,10 @@ class _HeroMatchCarouselState extends State<_HeroMatchCarousel> {
                             child: _HeroTeamPanel(
                               match: pages[index],
                               currentUser: widget.currentUser,
+                              titleOverride: _heroPanelTitle(
+                                pages[index],
+                                isFirst: index == 0,
+                              ),
                               reserveRegistrationActions: true,
                             ),
                           ),
@@ -595,6 +599,10 @@ class _HeroMatchCarouselState extends State<_HeroMatchCarousel> {
                             child: _HeroTeamPanel(
                               match: pages[index],
                               currentUser: widget.currentUser,
+                              titleOverride: _heroPanelTitle(
+                                pages[index],
+                                isFirst: index == 0,
+                              ),
                               reserveRegistrationActions: true,
                             ),
                           ),
@@ -644,6 +652,11 @@ class _HeroMatchCarouselState extends State<_HeroMatchCarousel> {
       ),
     );
   }
+
+  String? _heroPanelTitle(MatchDetails? match, {required bool isFirst}) {
+    if (match == null || match.hasMatchBeenPlayed || isFirst) return null;
+    return _matchDate(match.date);
+  }
 }
 
 class _CarouselDots extends StatelessWidget {
@@ -685,11 +698,13 @@ class _CarouselDots extends StatelessWidget {
 class _HeroTeamPanel extends StatelessWidget {
   final MatchDetails? match;
   final UserDetails currentUser;
+  final String? titleOverride;
   final bool reserveRegistrationActions;
 
   const _HeroTeamPanel({
     required this.match,
     required this.currentUser,
+    this.titleOverride,
     this.reserveRegistrationActions = false,
   });
 
@@ -703,6 +718,12 @@ class _HeroTeamPanel extends StatelessWidget {
     final homeTeam =
         match?.homeTeam ?? currentUser.teamDetails?.title ?? 'Hold';
     final awayTeam = match?.awayTeam ?? 'Modstander';
+    final title = titleOverride ??
+        (match == null
+            ? 'Ingen kamp'
+            : match.hasMatchBeenPlayed
+                ? _matchDate(match.date)
+                : 'Næste kamp');
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -711,8 +732,9 @@ class _HeroTeamPanel extends StatelessWidget {
 
         return CustomPaint(
           foregroundPainter: _SideAndBottomBorderPainter(
-            color: appColors.grey3.withValues(alpha: 0.35),
-            radius: 28,
+            color: appColors.grass,
+            fadeColor: appColors.white,
+            radius: 40,
           ),
           child: Container(
             width: double.infinity,
@@ -752,7 +774,7 @@ class _HeroTeamPanel extends StatelessWidget {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          'NÆSTE KAMP',
+                          title,
                           style: appTextStyles.label.copyWith(
                             color: appColors.grass,
                             fontWeight: FontWeight.w900,
@@ -766,27 +788,26 @@ class _HeroTeamPanel extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Expanded(
-                              child: _HeroTeamStrip(
+                              child: _SmallTeamMark(
                                 name: homeTeam,
-                                accentColor: appColors.grass,
+                                teamId: _stableTeamSeed(homeTeam),
                               ),
                             ),
                             SizedBox(
                               width: 54,
                               child: Text(
-                                'vs',
+                                'VS',
                                 textAlign: TextAlign.center,
                                 style: appTextStyles.h5.copyWith(
                                   color: appColors.grass,
-                                  //fontWeight: FontWeight.w800,
+                                  fontWeight: FontWeight.w800,
                                 ),
                               ),
                             ),
                             Expanded(
-                              child: _HeroTeamStrip(
+                              child: _SmallTeamMark(
                                 name: awayTeam,
-                                accentColor: appColors.sunset,
-                                alignEnd: true,
+                                teamId: _stableTeamSeed(awayTeam),
                               ),
                             ),
                           ],
@@ -917,12 +938,17 @@ class _HeroTeamPanel extends StatelessWidget {
 
 class _SideAndBottomBorderPainter extends CustomPainter {
   final Color color;
+  final Color fadeColor;
   final double radius;
 
   static const double _strokeWidth = 1;
+  static const double _sideTopInset = 20;
+  static const double _bottomInset = 0;
+  static const double _topFadeLength = 48;
 
   const _SideAndBottomBorderPainter({
     required this.color,
+    required this.fadeColor,
     required this.radius,
   });
 
@@ -933,9 +959,10 @@ class _SideAndBottomBorderPainter extends CustomPainter {
     final effectiveRadius = math.max(0.0, radius - inset);
     final left = inset;
     final right = size.width - inset;
-    final bottom = size.height - inset;
-    final fadeEnd = math.min(effectiveRadius * 3.2, size.height);
-    final fadeStop = size.height == 0 ? 1.0 : fadeEnd / size.height;
+    final bottom = math.max(inset, size.height - _bottomInset - inset);
+    final sideStart = _sideTopInset.clamp(0.0, bottom);
+    final sideHeight = math.max(1.0, bottom - sideStart);
+    final fadeStop = (_topFadeLength / sideHeight).clamp(0.0, 1.0);
 
     final paint = Paint()
       ..color = color
@@ -948,7 +975,7 @@ class _SideAndBottomBorderPainter extends CustomPainter {
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [
-          color.withValues(alpha: 0),
+          fadeColor,
           color,
           color,
         ],
@@ -957,15 +984,15 @@ class _SideAndBottomBorderPainter extends CustomPainter {
           fadeStop,
           1,
         ],
-      ).createShader(Offset.zero & size);
+      ).createShader(Rect.fromLTRB(0, sideStart, size.width, bottom));
 
     canvas.drawLine(
-      Offset(left, 0),
+      Offset(left, sideStart),
       Offset(left, bottom - effectiveRadius),
       sidePaint,
     );
     canvas.drawLine(
-      Offset(right, 0),
+      Offset(right, sideStart),
       Offset(right, bottom - effectiveRadius),
       sidePaint,
     );
@@ -981,75 +1008,9 @@ class _SideAndBottomBorderPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _SideAndBottomBorderPainter oldDelegate) {
-    return oldDelegate.color != color || oldDelegate.radius != radius;
-  }
-}
-
-class _HeroTeamStrip extends StatelessWidget {
-  final String name;
-  final Color accentColor;
-  final bool alignEnd;
-
-  const _HeroTeamStrip({
-    required this.name,
-    required this.accentColor,
-    this.alignEnd = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    final children = [
-      Container(
-        width: 5,
-        height: 34,
-        decoration: BoxDecoration(
-          color: accentColor,
-          borderRadius: BorderRadius.circular(999),
-        ),
-      ),
-      const SizedBox(width: Spacing.sm),
-      Flexible(
-        child: Column(
-          crossAxisAlignment:
-              alignEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-          children: [
-            Text(
-              _initials(name),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: alignEnd ? TextAlign.right : TextAlign.left,
-              style: appTextStyles.h4.copyWith(
-                color: appColors.dirt,
-                fontWeight: FontWeight.w900,
-                height: 0.95,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: alignEnd ? TextAlign.right : TextAlign.left,
-              style: appTextStyles.caption3.copyWith(
-                color: appColors.grey5,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
-        ),
-      ),
-    ];
-
-    return Row(
-      mainAxisAlignment:
-          alignEnd ? MainAxisAlignment.end : MainAxisAlignment.start,
-      children: alignEnd ? children.reversed.toList() : children,
-    );
+    return oldDelegate.color != color ||
+        oldDelegate.fadeColor != fadeColor ||
+        oldDelegate.radius != radius;
   }
 }
 
@@ -1261,7 +1222,7 @@ class _MatchSignupSummary extends StatelessWidget {
       decoration: BoxDecoration(
         color: appColors.white.withValues(alpha: 0.58),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: palette.outline.withValues(alpha: 0.32)),
+        border: Border.all(color: palette.statCard),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -2077,8 +2038,24 @@ class _SmallTeamMark extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Opacity(
-            opacity: 0.62,
+          Container(
+            padding: const EdgeInsets.all(5),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: appColors.white.withValues(alpha: 0.74),
+              boxShadow: [
+                BoxShadow(
+                  color: appColors.dirt.withValues(alpha: 0.16),
+                  blurRadius: 18,
+                  spreadRadius: 2,
+                ),
+                BoxShadow(
+                  color: appColors.dirt.withValues(alpha: 0.10),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
             child: TeamAvatar(
               teamName: name,
               teamId: teamId ?? 0,
@@ -2516,7 +2493,7 @@ class _BentoCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: color ?? appColors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: palette.outline.withValues(alpha: 0.35)),
+        border: Border.all(color: palette.statCard),
         boxShadow: [
           BoxShadow(
             color: appColors.black.withValues(alpha: 0.06),
@@ -2650,14 +2627,6 @@ String _matchTime(DateTime date) {
 String _clockTime(DateTime date) {
   return '${date.hour.toString().padLeft(2, '0')}:'
       '${date.minute.toString().padLeft(2, '0')}';
-}
-
-String _initials(String? name) {
-  if (name == null || name.trim().isEmpty) return '?';
-  final parts = name.trim().split(RegExp(r'\s+'));
-  if (parts.length == 1) return parts.first.substring(0, 1).toUpperCase();
-  return (parts.first.substring(0, 1) + parts.last.substring(0, 1))
-      .toUpperCase();
 }
 
 TextStyle _displayStyle(BuildContext context) {

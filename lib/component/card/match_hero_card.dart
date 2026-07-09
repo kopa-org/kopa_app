@@ -36,47 +36,6 @@ class MatchHeroCard extends StatelessWidget {
       padding: EdgeInsets.zero,
       child: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: Spacing.md,
-              vertical: Spacing.sm,
-            ),
-            decoration: BoxDecoration(
-              color: appColors.grass,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(12),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    dateLabel,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: appTextStyles.label.copyWith(
-                      color: appColors.white,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: Spacing.sm),
-                Flexible(
-                  flex: 2,
-                  child: Text(
-                    match.location,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: appTextStyles.label.copyWith(
-                      color: appColors.white,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
           Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: Spacing.lg,
@@ -151,8 +110,24 @@ class _TeamMark extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Opacity(
-          opacity: 0.72,
+        Container(
+          padding: const EdgeInsets.all(5),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: appColors.white.withValues(alpha: 0.74),
+            boxShadow: [
+              BoxShadow(
+                color: appColors.dirt.withValues(alpha: 0.16),
+                blurRadius: 18,
+                spreadRadius: 2,
+              ),
+              BoxShadow(
+                color: appColors.dirt.withValues(alpha: 0.10),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
           child: TeamAvatar(
             teamName: name,
             teamId: teamId,

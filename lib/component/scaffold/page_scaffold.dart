@@ -48,7 +48,7 @@ class PageScaffold extends StatelessWidget {
         navigationBar: showTopBar
             ? navigationBar ??
                 CupertinoNavigationBar(
-                  backgroundColor: bgColor.withValues(alpha: 0.8),
+                  backgroundColor: bgColor,
                   middle: title == 'Kopa'
                       ? SvgPicture.asset(
                           'assets/logos/Logo.svg',

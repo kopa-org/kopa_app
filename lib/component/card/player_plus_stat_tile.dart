@@ -112,7 +112,7 @@ class PlayerPlusStatTile extends StatelessWidget {
           width: width,
           padding: padding,
           decoration: BoxDecoration(
-        border: Border.all(color: appColors.grey3.withValues(alpha: 0.35)),
+        border: Border.all(color: appColors.grass),
             color: appColors.lightGrass55,
             borderRadius: BorderRadius.circular(borderRadius),
             boxShadow: showShadow
@@ -379,7 +379,7 @@ class _PlayerPlusLeaderboardSheetRow extends StatelessWidget {
             : appColors.surface,
         borderRadius: BorderRadius.circular(8),
         border:
-            isCurrentUser ? Border.all(color: accentColor, width: 1.4) : null,
+            isCurrentUser ? Border.all(color: appColors.grass, width: 1.4) : null,
       ),
       child: Row(
         children: [
