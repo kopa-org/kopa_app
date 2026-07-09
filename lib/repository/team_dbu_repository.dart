@@ -26,6 +26,7 @@ abstract final class TeamDbuRepository {
       return DbuStandings.fromJson({
         ...standings,
         'currentTeamId': decoded['dbu_team_id'],
+        'seriesName': decoded['series_name'],
         'poolTeams': decoded['pool_teams'],
       });
     }

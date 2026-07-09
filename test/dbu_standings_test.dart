@@ -6,6 +6,7 @@ void main() {
     final standings = DbuStandings.fromJson({
       'poolId': 489363,
       'currentTeamId': 449594,
+      'seriesName': 'Herre Senior 2 7:7 Forår',
       'poolTeams': [
         {
           'dbu_team_id': 449594,
@@ -32,6 +33,7 @@ void main() {
 
     expect(standings.poolId, 489363);
     expect(standings.currentTeamId, 449594);
+    expect(standings.seriesName, 'Herre Senior 2 7:7 Forår');
     expect(standings.rows.single.teamName, 'Skjold 6');
     expect(standings.rows.single.points, 9);
     expect(standings.rows.single.boundaryAfter, 'solid');

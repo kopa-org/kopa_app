@@ -112,7 +112,8 @@ class PlayerPlusStatTile extends StatelessWidget {
           width: width,
           padding: padding,
           decoration: BoxDecoration(
-            color: tileColor,
+        border: Border.all(color: appColors.grey3.withValues(alpha: 0.35)),
+            color: appColors.lightGrass55,
             borderRadius: BorderRadius.circular(borderRadius),
             boxShadow: showShadow
                 ? [

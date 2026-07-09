@@ -1,11 +1,13 @@
 class DbuStandings {
   final int? poolId;
   final int? currentTeamId;
+  final String? seriesName;
   final List<DbuStandingRow> rows;
 
   const DbuStandings({
     this.poolId,
     this.currentTeamId,
+    this.seriesName,
     this.rows = const [],
   });
 
@@ -23,6 +25,7 @@ class DbuStandings {
     return DbuStandings(
       poolId: json['poolId'],
       currentTeamId: json['currentTeamId'],
+      seriesName: json['seriesName'] ?? json['series_name'],
       rows: (json['rows'] as List<dynamic>? ?? [])
           .whereType<Map<String, dynamic>>()
           .map(

@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:kopa/component/avatar/team_avatar.dart';
+import 'package:kopa/component/card/player_plus_stat_tile.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/home_cubit.dart';
@@ -198,12 +199,6 @@ class _HomeTopBar extends StatelessWidget {
             tooltip: 'Notifikationer',
             onPressed: () {},
             icon: const Icon(Icons.notifications_outlined),
-            color: appColors.white,
-          ),
-          IconButton(
-            tooltip: 'Indstillinger',
-            onPressed: () {},
-            icon: const Icon(Icons.settings_outlined),
             color: appColors.white,
           ),
         ],
@@ -499,7 +494,7 @@ class _HeroMatchCarousel extends StatefulWidget {
 }
 
 class _HeroMatchCarouselState extends State<_HeroMatchCarousel> {
-  static const double _animationSlack = 32;
+  static const double _animationSlack = 0;
   static const double _viewportFraction = 1;
 
   late final PageController _controller;
@@ -707,201 +702,251 @@ class _HeroTeamPanel extends StatelessWidget {
         final pinDetailsToBottom =
             match != null && constraints.hasBoundedHeight;
 
-        return Container(
-          width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(
-            0,
-            0,
-            0,
-            Spacing.md,
+        return CustomPaint(
+          foregroundPainter: _SideAndBottomBorderPainter(
+            color: appColors.grey3.withValues(alpha: 0.35),
+            radius: 28,
           ),
-          decoration: BoxDecoration(
-            color: appColors.lightGrass55,
-            borderRadius: BorderRadius.circular(28),
-            //border: Border.all(color: appColors.grey3.withValues(alpha: 0.35)),
-            boxShadow: [
-              BoxShadow(
-                color: appColors.black.withValues(alpha: 0.06),
-                blurRadius: 18,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(
-                  Spacing.md,
-                  Spacing.lg,
-                  Spacing.md,
-                  Spacing.md,
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(
+              0,
+              0,
+              0,
+              Spacing.md,
+            ),
+            decoration: BoxDecoration(
+              color: appColors.lightGrass55,
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: [
+                BoxShadow(
+                  color: appColors.black.withValues(alpha: 0.06),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
                 ),
-                decoration: BoxDecoration(
-                  color: appColors.lightGrass,
-                  borderRadius: BorderRadius.circular(28),
-                ),
-                child: Column(
-                  children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'NÆSTE KAMP',
-                        style: appTextStyles.label.copyWith(
-                          color: appColors.grass,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: _HeroTeamStrip(
-                            name: homeTeam,
-                            accentColor: appColors.grass,
-                          ),
-                        ),
-                        SizedBox(
-                          width: 54,
-                          child: Text(
-                            'vs',
-                            textAlign: TextAlign.center,
-                            style: appTextStyles.h5.copyWith(
-                              color: appColors.grass,
-                              //fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: _HeroTeamStrip(
-                            name: awayTeam,
-                            accentColor: appColors.sunset,
-                            alignEnd: true,
-                          ),
-                        ),
-                      ],
-                    ),
-                    if (match == null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: Spacing.md),
-                        child: Text(
-                          'Ingen kamp planlagt',
-                          style: appTextStyles.buttonSmall.copyWith(
-                            color: appColors.primary,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      )
-                  ],
-                ),
-              ),
-              if (match != null) ...[
-                const SizedBox(height: Spacing.md),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Row(
-                    children: [
-                      _FactIcon(icon: Icons.schedule, color: appColors.sky),
-                      const SizedBox(width: Spacing.md),
-                      Expanded(
-                        child: _MatchFactColumn(
-                          label: 'KAMPSTART',
-                          value: _matchTime(match.date),
-                        ),
-                      ),
-                      Expanded(
-                        child: _MatchFactColumn(
-                          label: 'MØDETID',
-                          value: match.meetingTime == null
-                              ? '--:--'
-                              : _clockTime(match.meetingTime!),
-                          alignEnd: true,
-                        ),
-                      ),
-                    ],
+              ],
+            ),
+            child: Column(
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.fromLTRB(
+                    Spacing.md,
+                    Spacing.lg,
+                    Spacing.md,
+                    Spacing.md,
                   ),
-                ),
-                const SizedBox(height: Spacing.md),
-                //Divider(color: appColors.grey3.withValues(alpha: 0.5), height: 1),
-                //const SizedBox(height: Spacing.md),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 0),
-                  child: Row(
+                  decoration: BoxDecoration(
+                    color: appColors.lightGrass,
+                    borderRadius: BorderRadius.circular(28),
+                  ),
+                  child: Column(
                     children: [
-                      _FactIcon(
-                        icon: Icons.location_on,
-                        color: appColors.error,
-                      ),
-                      const SizedBox(width: Spacing.md),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              match.location.isEmpty
-                                  ? 'Ingen lokation'
-                                  : match.location,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: appTextStyles.subtitle2.copyWith(
-                                color: appColors.dirt,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              _matchDate(match.date),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: appTextStyles.caption2.copyWith(
-                                color: appColors.grey5,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: match.location.isEmpty
-                            ? null
-                            : () => _openNavigation(match),
+                      Align(
+                        alignment: Alignment.centerLeft,
                         child: Text(
-                          'Kort ›',
-                          style: appTextStyles.buttonSmall.copyWith(
+                          'NÆSTE KAMP',
+                          style: appTextStyles.label.copyWith(
                             color: appColors.grass,
                             fontWeight: FontWeight.w900,
                           ),
                         ),
                       ),
+                      const SizedBox(height: 14),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: _HeroTeamStrip(
+                                name: homeTeam,
+                                accentColor: appColors.grass,
+                              ),
+                            ),
+                            SizedBox(
+                              width: 54,
+                              child: Text(
+                                'vs',
+                                textAlign: TextAlign.center,
+                                style: appTextStyles.h5.copyWith(
+                                  color: appColors.grass,
+                                  //fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: _HeroTeamStrip(
+                                name: awayTeam,
+                                accentColor: appColors.sunset,
+                                alignEnd: true,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (match == null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: Spacing.md),
+                          child: Text(
+                            'Ingen kamp planlagt',
+                            style: appTextStyles.buttonSmall.copyWith(
+                              color: appColors.primary,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        )
                     ],
                   ),
                 ),
-                const SizedBox(height: Spacing.md),
-                Divider(
-                  color: appColors.grey3.withValues(alpha: 0.5),
-                  height: 1,
-                ),
-                const SizedBox(height: Spacing.md),
-                _MatchResponseCard(
-                  match: match,
-                  currentUser: currentUser,
-                  reserveRegistrationActions: reserveRegistrationActions,
-                ),
-                if (pinDetailsToBottom)
-                  const Spacer()
-                else
+                if (match != null) ...[
+                  const SizedBox(height: Spacing.md),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Row(
+                      children: [
+                        _FactIcon(icon: Icons.schedule, color: appColors.sky),
+                        const SizedBox(width: Spacing.md),
+                        Expanded(
+                          child: _MatchFactColumn(
+                            label: 'KAMPSTART',
+                            value: _matchTime(match.date),
+                          ),
+                        ),
+                        Expanded(
+                          child: _MatchFactColumn(
+                            label: 'MØDETID',
+                            value: match.meetingTime == null
+                                ? '--:--'
+                                : _clockTime(match.meetingTime!),
+                            alignEnd: true,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: Spacing.md),
+                  //Divider(color: appColors.grey3.withValues(alpha: 0.5), height: 1),
+                  //const SizedBox(height: Spacing.md),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 0),
+                    child: Row(
+                      children: [
+                        _FactIcon(
+                          icon: Icons.location_on,
+                          color: appColors.error,
+                        ),
+                        const SizedBox(width: Spacing.md),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                match.location.isEmpty
+                                    ? 'Ingen lokation'
+                                    : match.location,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: appTextStyles.subtitle2.copyWith(
+                                  color: appColors.dirt,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                _matchDate(match.date),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: appTextStyles.caption2.copyWith(
+                                  color: appColors.grey5,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: match.location.isEmpty
+                              ? null
+                              : () => _openNavigation(match),
+                          child: Text(
+                            'Kort ›',
+                            style: appTextStyles.buttonSmall.copyWith(
+                              color: appColors.grass,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: Spacing.md),
+                  Divider(
+                    color: appColors.grey3.withValues(alpha: 0.5),
+                    height: 1,
+                  ),
                   const SizedBox(height: Spacing.sm),
-                _QuietDetailsLink(
-                  onPressed: () => _openMatch(context, match, 'home_hero'),
-                ),
+                  _MatchResponseCard(
+                    match: match,
+                    currentUser: currentUser,
+                    reserveRegistrationActions: reserveRegistrationActions,
+                  ),
+                  if (pinDetailsToBottom)
+                    const Spacer()
+                  else
+                    const SizedBox(height: Spacing.sm),
+                  _QuietDetailsLink(
+                    onPressed: () => _openMatch(context, match, 'home_hero'),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         );
       },
     );
+  }
+}
+
+class _SideAndBottomBorderPainter extends CustomPainter {
+  final Color color;
+  final double radius;
+
+  static const double _strokeWidth = 1;
+
+  const _SideAndBottomBorderPainter({
+    required this.color,
+    required this.radius,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const strokeWidth = _strokeWidth;
+    const inset = strokeWidth / 2;
+    final effectiveRadius = math.max(0.0, radius - inset);
+    final left = inset;
+    final right = size.width - inset;
+    final bottom = size.height - inset;
+
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth;
+
+    final path = Path()
+      ..moveTo(left, 0)
+      ..lineTo(left, bottom - effectiveRadius)
+      ..quadraticBezierTo(left, bottom, left + effectiveRadius, bottom)
+      ..lineTo(right - effectiveRadius, bottom)
+      ..quadraticBezierTo(right, bottom, right, bottom - effectiveRadius)
+      ..lineTo(right, 0);
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _SideAndBottomBorderPainter oldDelegate) {
+    return oldDelegate.color != color || oldDelegate.radius != radius;
   }
 }
 
@@ -1054,9 +1099,6 @@ class _MatchResponseCard extends StatelessWidget {
     final state = context.watch<HomeCubit>().state;
     final isRegistering = state.isRegisteringForNextMatch;
     final isRegistered = match.isCurrentUserRegistered;
-    final meetingTime = match.meetingTime == null
-        ? 'mødetid ikke angivet'
-        : 'mød ${_clockTime(match.meetingTime!)}';
 
     void register() {
       AppAnalytics.logEvent(
@@ -1081,19 +1123,15 @@ class _MatchResponseCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  isRegistered ? 'Du kommer' : 'Kommer du?',
+                  isRegistered ? 'Du er tilmeldt' : 'Kommer du?',
                   style: appTextStyles.subtitle2.copyWith(
                     color: appColors.dirt,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
               ),
-              Text(
-                '${match.registeredCount} tilmeldt · $meetingTime',
-                style: appTextStyles.caption2.copyWith(
-                  color: appColors.grey5,
-                  fontWeight: FontWeight.w800,
-                ),
+              _MatchSignupSummary(
+                count: match.registeredCount,
               ),
             ],
           ),
@@ -1130,7 +1168,7 @@ class _MatchResponseCard extends StatelessWidget {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Du er tilmeldt kampen',
+                    'ingen opgaver',
                     style: appTextStyles.caption2.copyWith(
                       color: appColors.grass,
                       fontWeight: FontWeight.w800,
@@ -1160,6 +1198,55 @@ class _MatchResponseCard extends StatelessWidget {
                   ],
                 ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MatchSignupSummary extends StatelessWidget {
+  final int count;
+
+  const _MatchSignupSummary({required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final palette = _HomePalette(appColors);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: Spacing.sm,
+        vertical: Spacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: appColors.white.withValues(alpha: 0.58),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: palette.outline.withValues(alpha: 0.32)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.groups_2_outlined, size: 16, color: appColors.primary),
+          const SizedBox(width: Spacing.xs),
+          Text(
+            '$count',
+            style: appTextStyles.subtitle2.copyWith(
+              color: palette.onSurface,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(width: 3),
+          Text(
+            'tilmeldt',
+            style: appTextStyles.caption3.copyWith(
+              color: palette.onSurfaceMuted,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ],
       ),
@@ -1286,42 +1373,272 @@ class _BentoGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currentStanding = _currentStandingRow(standings, currentUser);
-    final topScorer = _topScorer(statistics);
-
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        const _BentoSectionTitle(title: 'Seneste kamp'),
+        const SizedBox(height: Spacing.sm),
         _LatestResultCard(
           match: latestMatch,
           currentUser: currentUser,
         ),
         const SizedBox(height: Spacing.md),
-        Row(
-          children: [
-            Expanded(child: _TopScorerCard(row: topScorer)),
-            const SizedBox(width: Spacing.md),
-            Expanded(
-              child: _PlacementMiniCard(
-                standing: currentStanding,
-                poolId: standings?.poolId?.toString(),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: Spacing.md),
-        _TasksCard(),
-        const SizedBox(height: Spacing.md),
+        const _BentoSectionTitle(title: 'Stilling'),
+        const SizedBox(height: Spacing.sm),
         _QuickTableCard(
           standings: standings,
           currentUser: currentUser,
         ),
         const SizedBox(height: Spacing.md),
+        const _BentoSectionTitle(title: 'Statistikker'),
+        const SizedBox(height: Spacing.sm),
+        _StatisticsStrip(
+          stats: statistics,
+          currentUser: currentUser,
+        ),
+        const SizedBox(height: Spacing.md),
+        const _BentoSectionTitle(title: 'Bødekasse'),
+        const SizedBox(height: Spacing.sm),
         _FineBoxBentoCard(
           fineBox: fineBox,
           currentUser: currentUser,
         ),
       ],
     );
+  }
+}
+
+class _BentoSectionTitle extends StatelessWidget {
+  final String title;
+
+  const _BentoSectionTitle({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final palette = _HomePalette(appColors);
+
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Text(
+        title,
+        textAlign: TextAlign.left,
+        style: appTextStyles.h5.copyWith(
+          color: palette.onSurface,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+    );
+  }
+}
+
+class _StatisticsStrip extends StatelessWidget {
+  final StatisticsResponse? stats;
+  final UserDetails currentUser;
+
+  const _StatisticsStrip({
+    required this.stats,
+    required this.currentUser,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final stats = this.stats;
+
+    if (stats == null) {
+      return _BentoCard(
+        color: appColors.grey2,
+        padding: const EdgeInsets.all(Spacing.lg),
+        child: Text(
+          'Ingen statistik tilgængelig',
+          style: appTextStyles.caption1.copyWith(color: appColors.grey5),
+        ),
+      );
+    }
+
+    final tiles = [
+      PlayerPlusStatTileData(
+        title: 'Pointsnit',
+        value: _currentLeaderboardValue(
+          stats.leaderboards.bestPointsAverage,
+          decimal: true,
+        ),
+        rank: _rankFor(stats.leaderboards.bestPointsAverage),
+        rows: _leaderboardRows(
+          stats.leaderboards.bestPointsAverage,
+          decimal: true,
+        ),
+        icon: Icons.trending_up,
+        accentColor: appColors.grass,
+      ),
+      PlayerPlusStatTileData(
+        title: 'Mål',
+        value: stats.player.goalsScored.toString(),
+        rank: _rankFor(stats.leaderboards.topScorers),
+        rows: _leaderboardRows(stats.leaderboards.topScorers),
+        icon: Icons.sports_score,
+        accentColor: appColors.sky,
+      ),
+      PlayerPlusStatTileData(
+        title: 'Assists',
+        value: stats.player.assists.toString(),
+        rank: _rankFor(stats.leaderboards.assists),
+        rows: _leaderboardRows(stats.leaderboards.assists),
+        icon: Icons.handshake,
+        accentColor: appColors.success,
+      ),
+      PlayerPlusStatTileData(
+        title: 'Kampe',
+        value: stats.player.matchesPlayed.toString(),
+        rank: _rankFor(stats.leaderboards.matchesPlayed),
+        rows: _leaderboardRows(stats.leaderboards.matchesPlayed),
+        icon: Icons.sports_soccer,
+        accentColor: appColors.sunset,
+      ),
+      PlayerPlusStatTileData(
+        title: 'Stemmer',
+        value: _currentLeaderboardValue(stats.leaderboards.mostVotes),
+        rank: _rankFor(stats.leaderboards.mostVotes),
+        rows: _leaderboardRows(stats.leaderboards.mostVotes),
+        icon: Icons.how_to_vote,
+        accentColor: appColors.dirt,
+      ),
+      PlayerPlusStatTileData(
+        title: 'In-form',
+        value: _currentInFormValue(),
+        rank: _rankForInForm(),
+        rows: _inFormRows(),
+        icon: Icons.local_fire_department,
+        accentColor: appColors.error,
+      ),
+    ];
+
+    return ValueListenableBuilder<bool>(
+      valueListenable: PlayerPlusAccess.temporaryUnlocked,
+      builder: (context, hasPlayerPlus, _) => SizedBox(
+        height: 150,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          clipBehavior: Clip.none,
+          itemCount: tiles.length,
+          separatorBuilder: (context, index) =>
+              const SizedBox(width: Spacing.md),
+          itemBuilder: (context, index) => PlayerPlusStatTile(
+            data: tiles[index],
+            currentUserId: currentUser.id,
+            locked: !hasPlayerPlus,
+            width: 156,
+            padding: const EdgeInsets.all(12),
+            valueFontSize: 28,
+            titleFontSize: 14,
+            rankFontSize: 11,
+            obscureValue: !hasPlayerPlus && index >= tiles.length - 2,
+            obscureRank: !hasPlayerPlus,
+            showShadow: true,
+            backgroundColor: appColors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<PlayerPlusStatRankingRow> _leaderboardRows(
+    List<LeaderboardRow> rows, {
+    bool decimal = false,
+  }) {
+    return rows
+        .map(
+          (row) => PlayerPlusStatRankingRow(
+            userId: row.userId,
+            userName: row.userName,
+            value: decimal
+                ? row.value.toDouble().toStringAsFixed(1)
+                : '${row.value}',
+          ),
+        )
+        .toList();
+  }
+
+  List<PlayerPlusStatRankingRow> _inFormRows() {
+    final stats = this.stats;
+    if (stats == null) return const [];
+
+    return stats.inFormRows
+        .map(
+          (row) => PlayerPlusStatRankingRow(
+            userId: row.userId,
+            userName: row.userName,
+            value: '${row.points}',
+            suffix: 'point',
+          ),
+        )
+        .toList();
+  }
+
+  String _currentLeaderboardValue(
+    List<LeaderboardRow> rows, {
+    bool decimal = false,
+  }) {
+    final row = _currentLeaderboardRow(rows);
+    if (row == null) return '-';
+    return decimal ? row.value.toDouble().toStringAsFixed(1) : '${row.value}';
+  }
+
+  LeaderboardRow? _currentLeaderboardRow(List<LeaderboardRow> rows) {
+    final stats = this.stats;
+    if (stats == null) return null;
+
+    for (final row in rows) {
+      if (row.userId == currentUser.id || row.userName == stats.player.name) {
+        return row;
+      }
+    }
+    return null;
+  }
+
+  int? _rankFor(List<LeaderboardRow> rows) {
+    final stats = this.stats;
+    if (stats == null) return null;
+
+    for (var i = 0; i < rows.length; i++) {
+      final row = rows[i];
+      if (row.userId == currentUser.id || row.userName == stats.player.name) {
+        return i + 1;
+      }
+    }
+    return null;
+  }
+
+  String _currentInFormValue() {
+    final stats = this.stats;
+    if (stats == null) return '-';
+
+    for (final row in stats.inFormRows) {
+      if (row.userId == currentUser.id || row.userName == stats.player.name) {
+        return '${row.points}';
+      }
+    }
+    return '-';
+  }
+
+  int? _rankForInForm() {
+    final stats = this.stats;
+    if (stats == null) return null;
+
+    for (var i = 0; i < stats.inFormRows.length; i++) {
+      final row = stats.inFormRows[i];
+      if (row.userId == currentUser.id || row.userName == stats.player.name) {
+        return i + 1;
+      }
+    }
+    return null;
   }
 }
 
@@ -1714,208 +2031,33 @@ class _SmallTeamMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Opacity(
-      opacity: 0.62,
-      child: TeamAvatar(
-        teamName: name,
-        teamId: teamId ?? 0,
-        radius: 22,
-      ),
-    );
-  }
-}
-
-class _TopScorerCard extends StatelessWidget {
-  final LeaderboardRow? row;
-
-  const _TopScorerCard({required this.row});
-
-  @override
-  Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final palette = _HomePalette(appColors);
-    final name = row?.userName.split(' ').first ?? '-';
-    final goals = row?.value.toInt() ?? 0;
-
-    return _BentoCard(
-      color: palette.statCard,
-      padding: const EdgeInsets.all(Spacing.md),
-      child: SizedBox(
-        height: 136,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'TOPSCORER',
-              style: appTextStyles.label.copyWith(
-                color: appColors.white.withValues(alpha: 0.72),
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-            const SizedBox(height: Spacing.md),
-            Text(
-              name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: appTextStyles.subtitle1.copyWith(
-                color: appColors.white,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const SizedBox(height: 3),
-            Text(
-              '$goals mål',
-              style: appTextStyles.caption3.copyWith(
-                color: appColors.white.withValues(alpha: 0.78),
-              ),
-            ),
-            const Spacer(),
-            Align(
-              alignment: Alignment.bottomRight,
-              child: Icon(
-                Icons.track_changes,
-                color: appColors.white.withValues(alpha: 0.20),
-                size: 42,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PlacementMiniCard extends StatelessWidget {
-  final DbuStandingRow? standing;
-  final String? poolId;
-
-  const _PlacementMiniCard({
-    required this.standing,
-    required this.poolId,
-  });
-
-  @override
-  Widget build(BuildContext context) {
     final appColors =
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
     final palette = _HomePalette(appColors);
 
-    return _BentoCard(
-      color: palette.highlightCard,
-      padding: const EdgeInsets.all(Spacing.md),
-      child: SizedBox(
-        height: 136,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'PLACERING',
-              style: appTextStyles.label.copyWith(
-                color: palette.onHighlight.withValues(alpha: 0.72),
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-            const SizedBox(height: Spacing.md),
-            Text(
-              standing == null ? '-' : '${standing!.position}.',
-              style: _displayStyle(context).copyWith(
-                color: palette.onHighlight,
-                fontSize: 36,
-              ),
-            ),
-            Text(
-              poolId == null ? 'Serie' : 'Serie $poolId',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: appTextStyles.label.copyWith(
-                color: palette.onHighlight,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-            const Spacer(),
-            Align(
-              alignment: Alignment.bottomRight,
-              child: Icon(
-                Icons.leaderboard_outlined,
-                color: palette.onHighlight.withValues(alpha: 0.18),
-                size: 42,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _TasksCard extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final palette = _HomePalette(appColors);
-
-    return _BentoCard(
-      color: palette.surfaceRaised,
-      padding: const EdgeInsets.all(Spacing.lg),
+    return SizedBox(
+      width: 86,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
+          Opacity(
+            opacity: 0.62,
+            child: TeamAvatar(
+              teamName: name,
+              teamId: teamId ?? 0,
+              radius: 22,
+            ),
+          ),
+          const SizedBox(height: Spacing.xs),
           Text(
-            'OPGAVER',
-            style: appTextStyles.label.copyWith(
+            name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: appTextStyles.caption3.copyWith(
               color: palette.onSurfaceMuted,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          const SizedBox(height: Spacing.md),
-          _TaskEmptyRow(),
-          const SizedBox(height: Spacing.md),
-          Center(
-            child: Text(
-              'SE ALLE OPGAVER',
-              style: appTextStyles.label.copyWith(
-                color: palette.onSurfaceMuted,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TaskEmptyRow extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final palette = _HomePalette(appColors);
-
-    return Container(
-      padding: const EdgeInsets.all(Spacing.sm),
-      decoration: BoxDecoration(
-        color: appColors.white.withValues(alpha: 0.52),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.assignment_outlined, color: appColors.primary, size: 18),
-          const SizedBox(width: Spacing.sm),
-          Text(
-            'Ingen opgaver',
-            style: appTextStyles.caption2.copyWith(
-              color: palette.onSurface,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -1941,7 +2083,19 @@ class _QuickTableCard extends StatelessWidget {
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
     final palette = _HomePalette(appColors);
-    final rows = standings?.rows.take(4).toList() ?? const <DbuStandingRow>[];
+    final allRows = standings?.rows ?? const <DbuStandingRow>[];
+    final topRows = allRows.take(3).toList();
+    final standingsLabel = standings?.seriesName?.trim().isNotEmpty == true
+        ? standings!.seriesName!.trim()
+        : standings?.poolId == null
+            ? 'Serie'
+            : 'Serie ${standings!.poolId}';
+    final currentTeamRow = allRows.cast<DbuStandingRow?>().firstWhere(
+          (row) => row != null && _isCurrentTeam(row, currentUser, standings),
+          orElse: () => null,
+        );
+    final showCurrentTeamBelow = currentTeamRow != null &&
+        !topRows.any((row) => _isSameStandingRow(row, currentTeamRow));
 
     return _BentoCard(
       padding: EdgeInsets.zero,
@@ -1955,7 +2109,7 @@ class _QuickTableCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    'STILLING - SERIE ${standings?.poolId ?? ''}',
+                    'STILLING - $standingsLabel',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: appTextStyles.label.copyWith(
@@ -1973,7 +2127,7 @@ class _QuickTableCard extends StatelessWidget {
               children: [
                 _TableHeader(),
                 Divider(color: palette.outline),
-                if (rows.isEmpty)
+                if (topRows.isEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: Spacing.lg),
                     child: Text(
@@ -1983,12 +2137,24 @@ class _QuickTableCard extends StatelessWidget {
                       ),
                     ),
                   )
-                else
-                  for (final row in rows)
+                else ...[
+                  for (final row in topRows)
                     _StandingPreviewRow(
                       row: row,
-                      isCurrentTeam: _isCurrentTeam(row, currentUser),
+                      isCurrentTeam: _isCurrentTeam(
+                        row,
+                        currentUser,
+                        standings,
+                      ),
                     ),
+                  if (showCurrentTeamBelow) ...[
+                    _StandingPreviewGap(color: palette.outline),
+                    _StandingPreviewRow(
+                      row: currentTeamRow,
+                      isCurrentTeam: true,
+                    ),
+                  ],
+                ],
                 const SizedBox(height: Spacing.md),
                 Container(
                   width: double.infinity,
@@ -2015,6 +2181,35 @@ class _QuickTableCard extends StatelessWidget {
   }
 }
 
+class _StandingPreviewGap extends StatelessWidget {
+  final Color color;
+
+  const _StandingPreviewGap({required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: Spacing.xs),
+      child: Row(
+        children: [
+          Expanded(child: Divider(color: color)),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: Spacing.sm),
+            child: Text(
+              '...',
+              style: appTextStyles.caption2.copyWith(color: color),
+            ),
+          ),
+          Expanded(child: Divider(color: color)),
+        ],
+      ),
+    );
+  }
+}
+
 class _TableHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -2031,6 +2226,7 @@ class _TableHeader extends StatelessWidget {
     return Row(
       children: [
         SizedBox(width: 28, child: Text('#', style: style)),
+        const SizedBox(width: 28),
         Expanded(child: Text('Hold', style: style)),
         SizedBox(
           width: 30,
@@ -2064,11 +2260,13 @@ class _StandingPreviewRow extends StatelessWidget {
     final color = isCurrentTeam ? appColors.primary : palette.onSurface;
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 9),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: Spacing.sm,
+        vertical: 9,
+      ),
       decoration: BoxDecoration(
-        color: isCurrentTeam
-            ? appColors.primary.withValues(alpha: 0.05)
-            : Colors.transparent,
+        color: isCurrentTeam ? appColors.lightGrass55 : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -2086,17 +2284,13 @@ class _StandingPreviewRow extends StatelessWidget {
           Expanded(
             child: Row(
               children: [
-                if (isCurrentTeam) ...[
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: appColors.primary,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: Spacing.sm),
-                ],
+                TeamAvatar(
+                  teamName: row.teamName,
+                  teamId: row.dbuTeamId,
+                  colorSourceUrl: row.logoUrl,
+                  radius: 10,
+                ),
+                const SizedBox(width: Spacing.sm),
                 Expanded(
                   child: Text(
                     row.teamName,
@@ -2332,32 +2526,6 @@ List<MatchDetails> _playedMatches(HomeState state) {
     ..sort((a, b) => a.date.compareTo(b.date));
 }
 
-DbuStandingRow? _currentStandingRow(
-  DbuStandings? standings,
-  UserDetails currentUser,
-) {
-  if (standings == null) {
-    return null;
-  }
-
-  final currentTeamId = standings.currentTeamId;
-  final currentTeamName = currentUser.teamDetails?.title.toLowerCase();
-  return standings.rows.cast<DbuStandingRow?>().firstWhere(
-        (row) =>
-            row?.dbuTeamId == currentTeamId ||
-            row?.teamName.toLowerCase() == currentTeamName,
-        orElse: () => null,
-      );
-}
-
-LeaderboardRow? _topScorer(StatisticsResponse? statistics) {
-  final rows = statistics?.leaderboards.topScorers;
-  if (rows == null || rows.isEmpty) {
-    return null;
-  }
-  return rows.first;
-}
-
 (double, double) _personalFineAmounts(
   FineBoxDetails fineBox,
   UserDetails currentUser,
@@ -2376,9 +2544,31 @@ LeaderboardRow? _topScorer(StatisticsResponse? statistics) {
   }
 }
 
-bool _isCurrentTeam(DbuStandingRow row, UserDetails currentUser) {
-  final currentTeamName = currentUser.teamDetails?.title.toLowerCase();
-  return row.teamName.toLowerCase() == currentTeamName;
+bool _isCurrentTeam(
+  DbuStandingRow row,
+  UserDetails currentUser,
+  DbuStandings? standings,
+) {
+  final currentTeamId = standings?.currentTeamId;
+  if (currentTeamId != null && row.dbuTeamId == currentTeamId) {
+    return true;
+  }
+
+  final currentTeamName = _normalizeTeamName(currentUser.teamDetails?.title);
+  if (currentTeamName == null) return false;
+
+  return _normalizeTeamName(row.teamName) == currentTeamName;
+}
+
+bool _isSameStandingRow(DbuStandingRow first, DbuStandingRow second) {
+  return first.position == second.position &&
+      first.teamName.toLowerCase() == second.teamName.toLowerCase();
+}
+
+String? _normalizeTeamName(String? name) {
+  final normalized = name?.trim().toLowerCase();
+  if (normalized == null || normalized.isEmpty) return null;
+  return normalized;
 }
 
 int _stableTeamSeed(String name) {
