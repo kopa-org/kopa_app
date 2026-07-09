@@ -49,6 +49,8 @@ class MatchDetailTemplate extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            heroCard,
+            const SizedBox(height: Spacing.lg),
             _buildSegmentedControl(context),
             const SizedBox(height: Spacing.lg),
             ..._buildSelectedSegment(context),
@@ -66,7 +68,7 @@ class MatchDetailTemplate extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: colors.offWhite,
+        color: colors.white,
         borderRadius: BorderRadius.circular(Spacing.borderRadiusSmall),
         border: Border.all(
           color: colors.grass.withValues(alpha: 0.22),
@@ -139,9 +141,7 @@ class MatchDetailTemplate extends StatelessWidget {
     switch (selectedSegment) {
       case MatchDetailSegment.overview:
         return [
-          heroCard,
           if (infoRows.isNotEmpty) ...[
-            const SizedBox(height: Spacing.lg),
             const SectionHeader(title: 'Praktisk information'),
             ...infoRows,
           ],

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:kopa/component/avatar/team_avatar.dart';
 import 'package:kopa/component/card/kopa_card.dart';
-import 'package:kopa/component/avatar/app_avatar.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
@@ -28,8 +28,8 @@ class MatchHeroCard extends StatelessWidget {
     final appTextStyles =
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
-    final dateFormat = DateFormat('EEE d. MMM', 'da_DK');
-    final timeFormat = DateFormat('HH:mm');
+    final dateLabel =
+        DateFormat('EEE d. MMM', 'da_DK').format(match.date).toUpperCase();
 
     final card = KopaCard(
       onTap: onTap,
@@ -42,7 +42,7 @@ class MatchHeroCard extends StatelessWidget {
               vertical: Spacing.sm,
             ),
             decoration: BoxDecoration(
-              color: appColors.primary,
+              color: appColors.grass,
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(12),
               ),
@@ -50,20 +50,28 @@ class MatchHeroCard extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  dateFormat.format(match.date).toUpperCase(),
-                  style: appTextStyles.caption.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Text(
+                    dateLabel,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: appTextStyles.label.copyWith(
+                      color: appColors.white,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
+                const SizedBox(width: Spacing.sm),
                 Flexible(
+                  flex: 2,
                   child: Text(
                     match.location,
-                    style: appTextStyles.caption.copyWith(
-                      color: Colors.white,
-                    ),
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
+                    style: appTextStyles.label.copyWith(
+                      color: appColors.white,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
               ],
@@ -71,74 +79,32 @@ class MatchHeroCard extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(
+              horizontal: Spacing.lg,
               vertical: Spacing.lg,
-              horizontal: Spacing.md,
             ),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 Expanded(
-                  flex: 3,
-                  child: Column(
-                    children: [
-                      AppAvatar(
-                        initials: _getInitials(match.homeTeam),
-                        radius: 30,
-                      ),
-                      const SizedBox(height: Spacing.sm),
-                      Text(
-                        match.homeTeam ?? 'Hjemme',
-                        style: appTextStyles.bodyBold,
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+                  child: _TeamMark(
+                    name: match.homeTeam ?? 'Hjemme',
+                    teamId: _stableTeamSeed(match.homeTeam ?? 'Hjemme'),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+                  child: Text(
+                    'VS',
+                    style: appTextStyles.h5.copyWith(
+                      color: appColors.grass,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
                 Expanded(
-                  flex: 4,
-                  child: Column(
-                    children: [
-                      if (match.hasMatchBeenPlayed)
-                        Text(
-                          '${match.homeTeamScore} - ${match.awayTeamScore}',
-                          style: appTextStyles.pageTitle.copyWith(
-                            fontSize: 32,
-                          ),
-                        )
-                      else
-                        Text(
-                          timeFormat.format(match.date),
-                          style: appTextStyles.pageTitle.copyWith(
-                            fontSize: 32,
-                          ),
-                        ),
-                      const SizedBox(height: Spacing.xs),
-                      Text(
-                        match.type,
-                        style: appTextStyles.caption,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  flex: 3,
-                  child: Column(
-                    children: [
-                      AppAvatar(
-                        initials: _getInitials(match.awayTeam),
-                        radius: 30,
-                      ),
-                      const SizedBox(height: Spacing.sm),
-                      Text(
-                        match.awayTeam ?? 'Ude',
-                        style: appTextStyles.bodyBold,
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+                  child: _TeamMark(
+                    name: match.awayTeam ?? 'Ude',
+                    teamId: _stableTeamSeed(match.awayTeam ?? 'Ude'),
                   ),
                 ),
               ],
@@ -164,9 +130,59 @@ class MatchHeroCard extends StatelessWidget {
   }
 
   static String defaultHeroTag(int matchId) => 'match-$matchId-hero-card';
+}
 
-  String _getInitials(String? teamName) {
-    if (teamName == null || teamName.isEmpty) return '?';
-    return teamName.substring(0, 1).toUpperCase();
+class _TeamMark extends StatelessWidget {
+  final String name;
+  final int teamId;
+
+  const _TeamMark({
+    required this.name,
+    required this.teamId,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Opacity(
+          opacity: 0.72,
+          child: TeamAvatar(
+            teamName: name,
+            teamId: teamId,
+            radius: 28,
+          ),
+        ),
+        const SizedBox(height: Spacing.sm),
+        Text(
+          name,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+          style: appTextStyles.caption.copyWith(
+            color: appColors.textSecondary,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
   }
+}
+
+int _stableTeamSeed(String name) {
+  var hash = 0;
+  for (final codeUnit in name.codeUnits) {
+    hash = 0x1fffffff & (hash + codeUnit);
+    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
+    hash ^= hash >> 6;
+  }
+  hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
+  hash ^= hash >> 11;
+  return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
 }

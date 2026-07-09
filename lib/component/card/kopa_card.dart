@@ -26,8 +26,9 @@ class KopaCard extends StatelessWidget {
       margin: margin,
       padding: padding ?? const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: appColors.surface,
+        color: appColors.lightGrass55,
         borderRadius: BorderRadius.circular(borderRadius),
+        border: Border.all(color: appColors.grey2),
         boxShadow: [
           BoxShadow(
             color: appColors.black.withValues(alpha: 0.05),

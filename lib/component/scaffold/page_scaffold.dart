@@ -40,7 +40,7 @@ class PageScaffold extends StatelessWidget {
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     final isIOS = theme.platform == TargetPlatform.iOS;
-    final bgColor = backgroundColor ?? appColors.background;
+    final bgColor = backgroundColor ?? appColors.white;
 
     if (isIOS) {
       return CupertinoPageScaffold(
