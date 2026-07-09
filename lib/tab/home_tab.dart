@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
 import 'package:kopa/component/avatar/app_avatar.dart';
 import 'package:kopa/component/avatar/team_avatar.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
@@ -24,8 +24,9 @@ import 'package:kopa/theme/app_text_styles.dart';
 import 'package:kopa/theme/spacing.dart';
 import 'package:kopa/utils/app_analytics.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-const double _heroPanelGradientOverlap = 32;
+const double _heroPanelGradientOverlap = 45;
 
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
@@ -484,89 +485,287 @@ class _HeroTeamPanel extends StatelessWidget {
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final match = this.match;
     final homeTeam =
         match?.homeTeam ?? currentUser.teamDetails?.title ?? 'Hold';
     final awayTeam = match?.awayTeam ?? 'Modstander';
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
-      child: BackdropFilter(
-        filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-        child: Container(
-          padding: const EdgeInsets.all(Spacing.md),
-          decoration: BoxDecoration(
-            color: appColors.lightGrass,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: appColors.white.withValues(alpha: 0.22),
-            ),
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(
+        0,0,0,
+        Spacing.md,
+      ),
+      decoration: BoxDecoration(
+        color: appColors.lightGrass55,
+        borderRadius: BorderRadius.circular(28),
+        //border: Border.all(color: appColors.grey3.withValues(alpha: 0.35)),
+        boxShadow: [
+          BoxShadow(
+            color: appColors.black.withValues(alpha: 0.06),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
           ),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: _HeroTeam(
-                      name: homeTeam,
-                      teamId: currentUser.teamDetails?.id ?? 0,
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(
+              Spacing.md,
+              Spacing.lg,
+              Spacing.md,
+              Spacing.md,
+            ),
+            decoration: BoxDecoration(
+              color: appColors.lightGrass,
+              borderRadius: BorderRadius.circular(28),
+            ),
+            child: Column(
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'NÆSTE KAMP',
+                    style: appTextStyles.label.copyWith(
+                      color: appColors.grass,
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
-                    child: Text(
-                      'vs',
-                      style: appTextStyles.subtitle2.copyWith(
-                        color: appColors.grass.withValues(alpha: 0.48),
-                        fontStyle: FontStyle.italic,
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: _HeroTeamStrip(
+                        name: homeTeam,
+                        accentColor: appColors.grass,
                       ),
                     ),
+                    SizedBox(
+                      width: 54,
+                      child: Text(
+                        'vs',
+                        textAlign: TextAlign.center,
+                        style: appTextStyles.h5.copyWith(
+                          color: appColors.grass,
+                          //fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: _HeroTeamStrip(
+                        name: awayTeam,
+                        accentColor: appColors.sunset,
+                        alignEnd: true,
+                      ),
+                    ),
+                  ],
+                ),
+                if (match == null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: Spacing.md),
+                    child: Text(
+                      'Ingen kamp planlagt',
+                      style: appTextStyles.buttonSmall.copyWith(
+                        color: appColors.primary,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  )
+              ],
+            ),
+          ),
+          if (match != null) ...[
+            const SizedBox(height: Spacing.md),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                children: [
+                  _FactIcon(icon: Icons.schedule, color: appColors.sky),
+                  const SizedBox(width: Spacing.md),
+                  Expanded(
+                    child: _MatchFactColumn(
+                      label: 'KAMPSTART',
+                      value: _matchTime(match.date),
+                    ),
                   ),
                   Expanded(
-                    child: _HeroTeam(
-                      name: awayTeam,
-                      teamId: _stableTeamSeed(awayTeam),
+                    child: _MatchFactColumn(
+                      label: 'MØDETID',
+                      value: match.meetingTime == null
+                          ? '--:--'
+                          : _clockTime(match.meetingTime!),
+                      alignEnd: true,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: Spacing.md),
-              if (match == null)
-                Container(
-                  width: double.infinity,
-                  alignment: Alignment.center,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  decoration: BoxDecoration(
-                    color: appColors.grass,
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Text(
-                    'Ingen kamp planlagt',
-                    style: appTextStyles.buttonSmall.copyWith(
-                      color: appColors.primary,
-                      fontWeight: FontWeight.w800,
+            ),
+            const SizedBox(height: Spacing.md),
+            //Divider(color: appColors.grey3.withValues(alpha: 0.5), height: 1),
+            //const SizedBox(height: Spacing.md),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16.0,  0,  0,  0),
+              child: Row(
+                children: [
+                  _FactIcon(icon: Icons.location_on, color: appColors.error),
+                  const SizedBox(width: Spacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          match.location.isEmpty
+                              ? 'Ingen lokation'
+                              : match.location,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: appTextStyles.subtitle2.copyWith(
+                            color: appColors.dirt,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          _matchDate(match.date),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: appTextStyles.caption2.copyWith(
+                            color: appColors.grey5,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                )
-              else
-                _HeroMatchCta(
-                  match: match!,
-                  currentUser: currentUser,
-                ),
-            ],
-          ),
-        ),
+                  TextButton(
+                    onPressed: match.location.isEmpty
+                        ? null
+                        : () => _openNavigation(match),
+                    child: Text(
+                      'Kort ›',
+                      style: appTextStyles.buttonSmall.copyWith(
+                        color: appColors.grass,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: Spacing.md),
+            Divider(color: appColors.grey3.withValues(alpha: 0.5), height: 1),
+            const SizedBox(height: Spacing.md),
+            _MatchResponseCard(
+              match: match,
+              currentUser: currentUser,
+            ),
+            const SizedBox(height: Spacing.sm),
+            _QuietDetailsLink(
+              onPressed: () => _openMatch(context, match, 'home_hero'),
+            ),
+          ],
+        ],
       ),
     );
   }
 }
 
-class _HeroTeam extends StatelessWidget {
+class _HeroTeamStrip extends StatelessWidget {
   final String name;
-  final int? teamId;
+  final Color accentColor;
+  final bool alignEnd;
 
-  const _HeroTeam({
+  const _HeroTeamStrip({
     required this.name,
-    required this.teamId,
+    required this.accentColor,
+    this.alignEnd = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    final children = [
+      Container(
+        width: 5,
+        height: 34,
+        decoration: BoxDecoration(
+          color: accentColor,
+          borderRadius: BorderRadius.circular(999),
+        ),
+      ),
+      const SizedBox(width: Spacing.sm),
+      Flexible(
+        child: Column(
+          crossAxisAlignment:
+              alignEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          children: [
+            Text(
+              _initials(name),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: alignEnd ? TextAlign.right : TextAlign.left,
+              style: appTextStyles.h4.copyWith(
+                color: appColors.dirt,
+                fontWeight: FontWeight.w900,
+                height: 0.95,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: alignEnd ? TextAlign.right : TextAlign.left,
+              style: appTextStyles.caption3.copyWith(
+                color: appColors.grey5,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ];
+
+    return Row(
+      mainAxisAlignment:
+          alignEnd ? MainAxisAlignment.end : MainAxisAlignment.start,
+      children: alignEnd ? children.reversed.toList() : children,
+    );
+  }
+}
+
+class _FactIcon extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+
+  const _FactIcon({
+    required this.icon,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Icon(icon, size: 17, color: color);
+  }
+}
+
+class _MatchFactColumn extends StatelessWidget {
+  final String label;
+  final String value;
+  final bool alignEnd;
+
+  const _MatchFactColumn({
+    required this.label,
+    required this.value,
+    this.alignEnd = false,
   });
 
   @override
@@ -577,30 +776,26 @@ class _HeroTeam extends StatelessWidget {
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return Column(
+      crossAxisAlignment:
+          alignEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 58,
-          height: 58,
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: TeamAvatar(
-            teamName: name,
-            teamId: teamId ?? 0,
-            radius: 21,
-          ),
-        ),
-        const SizedBox(height: Spacing.sm),
         Text(
-          _shortName(name),
+          label,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          textAlign: TextAlign.center,
-          style: appTextStyles.caption2.copyWith(
-            color: appColors.grass,
-            fontWeight: FontWeight.w800,
+          style: appTextStyles.label.copyWith(
+            color: appColors.grey5,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: appTextStyles.subtitle2.copyWith(
+            color: appColors.black,
+            fontWeight: FontWeight.w900,
           ),
         ),
       ],
@@ -608,11 +803,11 @@ class _HeroTeam extends StatelessWidget {
   }
 }
 
-class _HeroMatchCta extends StatelessWidget {
+class _MatchResponseCard extends StatelessWidget {
   final MatchDetails match;
   final UserDetails currentUser;
 
-  const _HeroMatchCta({
+  const _MatchResponseCard({
     required this.match,
     required this.currentUser,
   });
@@ -626,50 +821,183 @@ class _HeroMatchCta extends StatelessWidget {
     final state = context.watch<HomeCubit>().state;
     final isRegistering = state.isRegisteringForNextMatch;
     final isRegistered = match.isCurrentUserRegistered;
+    final meetingTime = match.meetingTime == null
+        ? 'mødetid ikke angivet'
+        : 'mød ${_clockTime(match.meetingTime!)}';
 
-    return Material(
-      color: appColors.white,
-      borderRadius: BorderRadius.circular(14),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: isRegistered
-            ? () => _openMatch(context, match, 'home_hero')
-            : isRegistering
-                ? null
-                : () {
-                    AppAnalytics.logEvent(
-                      'match_registered',
-                      parameters: {'source': 'home_hero'},
-                    );
-                    final teamId = currentUser.teamDetails?.id ?? 0;
-                    context
-                        .read<HomeCubit>()
-                        .registerForMatch(match.id, teamId);
-                  },
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+    void register() {
+      AppAnalytics.logEvent(
+        'match_registered',
+        parameters: {'source': 'home_next_match'},
+      );
+      final teamId = currentUser.teamDetails?.id ?? 0;
+      context.read<HomeCubit>().registerForMatch(match.id, teamId);
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(Spacing.md),
+      decoration: BoxDecoration(
+        color: appColors.lightGrass55,
+        borderRadius: BorderRadius.circular(Spacing.borderRadiusLarge),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
             children: [
-              Text(
-                isRegistered
-                    ? 'SE KAMPDETALJER'
-                    : isRegistering
-                        ? 'TILMELDES'
-                        : 'TILMELD NU',
-                style: appTextStyles.buttonSmall.copyWith(
-                  color: appColors.primary,
-                  fontWeight: FontWeight.w900,
+              Expanded(
+                child: Text(
+                  isRegistered ? 'Du kommer' : 'Kommer du?',
+                  style: appTextStyles.subtitle2.copyWith(
+                    color: appColors.dirt,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
               ),
-              const SizedBox(width: Spacing.sm),
-              Icon(
-                isRegistered ? Icons.arrow_forward : Icons.how_to_reg,
-                color: appColors.primary,
-                size: 20,
+              Text(
+                '${match.registeredCount} tilmeldt · $meetingTime',
+                style: appTextStyles.caption2.copyWith(
+                  color: appColors.grey5,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ],
+          ),
+          const SizedBox(height: Spacing.sm),
+          if (isRegistered)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Du er tilmeldt kampen',
+                style: appTextStyles.caption2.copyWith(
+                  color: appColors.grass,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            )
+          else
+            Row(
+              children: [
+                Expanded(
+                  child: _KopaChoiceButton(
+                    label: isRegistering ? 'Tilmeldes' : 'Ja, jeg kommer',
+                    icon: Icons.how_to_reg,
+                    onPressed: isRegistering ? null : register,
+                  ),
+                ),
+                const SizedBox(width: Spacing.sm),
+                Expanded(
+                  child: _KopaChoiceButton(
+                    label: 'Nej',
+                    icon: Icons.close,
+                    outlined: true,
+                    onPressed: () => _openMatch(context, match, 'home_decline'),
+                  ),
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuietDetailsLink extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const _QuietDetailsLink({required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return Align(
+      alignment: Alignment.center,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(Spacing.borderRadiusFull),
+          onTap: onPressed,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: Spacing.md,
+              vertical: Spacing.sm,
+            ),
+            child: Text(
+              'Se kampdetaljer →',
+              style: appTextStyles.buttonSmall.copyWith(
+                color: appColors.grass,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _KopaChoiceButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final VoidCallback? onPressed;
+  final bool outlined;
+
+  const _KopaChoiceButton({
+    required this.label,
+    required this.icon,
+    required this.onPressed,
+    this.outlined = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final enabled = onPressed != null;
+    final backgroundColor = outlined ? appColors.white : appColors.grass;
+    final foregroundColor = outlined ? appColors.grass : appColors.white;
+    final borderColor = outlined ? appColors.grass : appColors.grass;
+
+    return Opacity(
+      opacity: enabled ? 1 : 0.55,
+      child: Material(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(Spacing.borderRadiusFull),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onPressed,
+          child: Container(
+            height: 42,
+            padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(Spacing.borderRadiusFull),
+              border: Border.all(color: borderColor, width: outlined ? 1.5 : 0),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, color: foregroundColor, size: 18),
+                const SizedBox(width: Spacing.sm),
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: appTextStyles.buttonSmall.copyWith(
+                      color: foregroundColor,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -1544,14 +1872,21 @@ String? _resultLabel(MatchDetails? match, UserDetails currentUser) {
   return 'TABT';
 }
 
-String _shortName(String name) {
-  final trimmed = name.trim();
-  if (trimmed.length <= 12) return trimmed;
-  final parts = trimmed.split(RegExp(r'\s+'));
-  if (parts.length > 1) {
-    return '${parts.first} ${parts.last.substring(0, 1)}.';
-  }
-  return trimmed;
+String _matchDate(DateTime date) {
+  final localDate = date.toLocal();
+  final weekday = DateFormat('EEEE', 'da_DK').format(localDate);
+  final capitalizedWeekday =
+      '${weekday.substring(0, 1).toUpperCase()}${weekday.substring(1)}';
+  return '$capitalizedWeekday ${DateFormat('d. MMMM', 'da_DK').format(localDate)}';
+}
+
+String _matchTime(DateTime date) {
+  return DateFormat('HH:mm').format(date.toLocal());
+}
+
+String _clockTime(DateTime date) {
+  return '${date.hour.toString().padLeft(2, '0')}:'
+      '${date.minute.toString().padLeft(2, '0')}';
 }
 
 String _initials(String? name) {
@@ -1588,6 +1923,13 @@ void _openFineBox(BuildContext context) {
   Navigator.of(context).push(MaterialWithModalsPageRoute(
     builder: (context) => const TeamFinesPage(),
   ));
+}
+
+Future<void> _openNavigation(MatchDetails match) async {
+  final query = Uri.encodeComponent(match.location);
+  final uri =
+      Uri.parse('https://www.google.com/maps/search/?api=1&query=$query');
+  await launchUrl(uri, mode: LaunchMode.externalApplication);
 }
 
 class _HomePalette {
