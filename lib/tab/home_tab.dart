@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:kopa/component/avatar/app_avatar.dart';
@@ -24,19 +25,7 @@ import 'package:kopa/theme/spacing.dart';
 import 'package:kopa/utils/app_analytics.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
-const _surface = Color(0xFFFAF8FF);
-const _onSurface = Color(0xFF131B2E);
-const _onSurfaceVariant = Color(0xFF404943);
-const _outlineVariant = Color(0xFFC0C9C1);
-const _heroStart = Color(0xFF33684F);
-const _heroEnd = Color(0xFF185038);
-const _primaryFixed = Color(0xFFB5EFCE);
-const _surfaceContainerLow = Color(0xFFF2F3FF);
-const _surfaceContainerHigh = Color(0xFFE2E7FF);
-const _surfaceContainerHighest = Color(0xFFDAE2FD);
-const _secondary = Color(0xFF3F6653);
-const _tertiaryContainer = Color(0xFFFFE1B1);
-const _onTertiaryContainer = Color(0xFF865F00);
+const double _heroPanelGradientOverlap = 32;
 
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
@@ -73,7 +62,7 @@ class _HomeTabView extends StatelessWidget {
       title: 'Forside',
       showBackButton: false,
       showTopBar: false,
-      backgroundColor: _surface,
+      backgroundColor: appColors.white,
       body: RefreshIndicator(
         color: appColors.primary,
         onRefresh: () async {
@@ -119,19 +108,31 @@ class _HomeTabView extends StatelessWidget {
                     currentUser: currentUser,
                     nextMatch: nextMatch,
                   ),
-                  Transform.translate(
-                    offset: const Offset(0, -32),
+                  _HeroPanelCutover(
+                    overlap: _heroPanelGradientOverlap,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: Spacing.md,
                       ),
-                      child: _BentoGrid(
+                      child: _HeroTeamPanel(
+                        match: nextMatch,
                         currentUser: currentUser,
-                        latestMatch: latestMatch,
-                        standings: state.dbuStandings,
-                        statistics: state.statistics,
-                        fineBox: state.fineBox,
                       ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      Spacing.md,
+                      Spacing.md,
+                      Spacing.md,
+                      0,
+                    ),
+                    child: _BentoGrid(
+                      currentUser: currentUser,
+                      latestMatch: latestMatch,
+                      standings: state.dbuStandings,
+                      statistics: state.statistics,
+                      fineBox: state.fineBox,
                     ),
                   ),
                 ],
@@ -160,23 +161,20 @@ class _HomeTopBar extends StatelessWidget {
       height: 64,
       padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
       decoration: BoxDecoration(
-        color: _surface.withValues(alpha: 0.94),
-        border: Border(
-          bottom: BorderSide(color: _outlineVariant.withValues(alpha: 0.8)),
-        ),
+        color: appColors.grass,
       ),
       child: Row(
         children: [
           SvgPicture.asset(
-            'assets/logos/Logo.svg',
+            'assets/logos/logomark_outline_foreground.svg',
             height: 30,
-            colorFilter: ColorFilter.mode(appColors.primary, BlendMode.srcIn),
+            colorFilter: ColorFilter.mode(appColors.white, BlendMode.srcIn),
           ),
           const SizedBox(width: Spacing.sm),
           Text(
             'Kopa',
             style: appTextStyles.h5.copyWith(
-              color: appColors.primary,
+              color: appColors.white,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -185,13 +183,13 @@ class _HomeTopBar extends StatelessWidget {
             tooltip: 'Notifikationer',
             onPressed: () {},
             icon: const Icon(Icons.notifications_outlined),
-            color: _onSurfaceVariant,
+            color: appColors.white,
           ),
           IconButton(
             tooltip: 'Indstillinger',
             onPressed: () {},
             icon: const Icon(Icons.settings_outlined),
-            color: _onSurfaceVariant,
+            color: appColors.white,
           ),
         ],
       ),
@@ -210,8 +208,11 @@ class _HeroSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final palette = _HomePalette(appColors);
     final firstName = currentUser.name.split(' ').first;
 
     return Container(
@@ -219,13 +220,13 @@ class _HeroSection extends StatelessWidget {
         Spacing.md,
         Spacing.lg,
         Spacing.md,
-        Spacing.xl + 40,
+        Spacing.lg + _heroPanelGradientOverlap,
       ),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [_heroStart, _heroEnd],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [palette.heroStart, palette.heroEnd],
         ),
       ),
       child: Column(
@@ -241,7 +242,7 @@ class _HeroSection extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: appTextStyles.h4.copyWith(
-                    color: Colors.white,
+                    color: appColors.white,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -252,21 +253,97 @@ class _HeroSection extends StatelessWidget {
           Text(
             nextMatch == null ? 'Ingen kommende kamp' : 'Næste kamp om',
             style: appTextStyles.caption2.copyWith(
-              color: Colors.white.withValues(alpha: 0.78),
+              color: appColors.white.withValues(alpha: 0.78),
               fontWeight: FontWeight.w800,
-              letterSpacing: 1.2,
             ),
           ),
           const SizedBox(height: Spacing.sm),
           _HeroCountdown(target: nextMatch?.date),
-          const SizedBox(height: Spacing.lg),
-          _HeroTeamPanel(
-            match: nextMatch,
-            currentUser: currentUser,
+        ],
+      ),
+    );
+  }
+}
+
+class _HeroPanelCutover extends StatefulWidget {
+  final Widget child;
+  final double overlap;
+
+  const _HeroPanelCutover({
+    required this.child,
+    required this.overlap,
+  });
+
+  @override
+  State<_HeroPanelCutover> createState() => _HeroPanelCutoverState();
+}
+
+class _HeroPanelCutoverState extends State<_HeroPanelCutover> {
+  Size _childSize = Size.zero;
+
+  @override
+  Widget build(BuildContext context) {
+    final height = math.max(0.0, _childSize.height - widget.overlap);
+
+    return SizedBox(
+      height: height,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned(
+            left: 0,
+            right: 0,
+            top: -widget.overlap,
+            child: _MeasureSize(
+              onChange: (size) {
+                if (!mounted || size == _childSize) return;
+                setState(() => _childSize = size);
+              },
+              child: widget.child,
+            ),
           ),
         ],
       ),
     );
+  }
+}
+
+class _MeasureSize extends SingleChildRenderObjectWidget {
+  final ValueChanged<Size> onChange;
+
+  const _MeasureSize({
+    required this.onChange,
+    required super.child,
+  });
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _MeasureSizeRenderObject(onChange);
+  }
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    covariant _MeasureSizeRenderObject renderObject,
+  ) {
+    renderObject.onChange = onChange;
+  }
+}
+
+class _MeasureSizeRenderObject extends RenderProxyBox {
+  ValueChanged<Size> onChange;
+  Size? _oldSize;
+
+  _MeasureSizeRenderObject(this.onChange);
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    final newSize = size;
+    if (_oldSize == newSize) return;
+
+    _oldSize = newSize;
+    WidgetsBinding.instance.addPostFrameCallback((_) => onChange(newSize));
   }
 }
 
@@ -318,12 +395,15 @@ class _HeroCountdownState extends State<_HeroCountdown> {
 
   @override
   Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
+
     if (widget.target == null) {
       return Text(
         'Planen opdateres',
         style: _displayStyle(context).copyWith(
           fontSize: 36,
-          color: Colors.white,
+          color: appColors.white,
         ),
       );
     }
@@ -360,6 +440,8 @@ class _HeroCountdownBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
 
@@ -369,7 +451,7 @@ class _HeroCountdownBlock extends StatelessWidget {
         Text(
           value.toString().padLeft(2, '0'),
           style: _displayStyle(context).copyWith(
-            color: Colors.white,
+            color: appColors.white,
             fontSize: 50,
             height: 0.98,
           ),
@@ -378,9 +460,8 @@ class _HeroCountdownBlock extends StatelessWidget {
         Text(
           label.toUpperCase(),
           style: appTextStyles.label.copyWith(
-            color: Colors.white.withValues(alpha: 0.62),
+            color: appColors.white.withValues(alpha: 0.62),
             fontWeight: FontWeight.w800,
-            letterSpacing: 1.2,
           ),
         ),
       ],
@@ -414,9 +495,11 @@ class _HeroTeamPanel extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(Spacing.md),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.15),
+            color: appColors.lightGrass,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
+            border: Border.all(
+              color: appColors.white.withValues(alpha: 0.22),
+            ),
           ),
           child: Column(
             children: [
@@ -433,7 +516,7 @@ class _HeroTeamPanel extends StatelessWidget {
                     child: Text(
                       'vs',
                       style: appTextStyles.subtitle2.copyWith(
-                        color: Colors.white.withValues(alpha: 0.48),
+                        color: appColors.grass.withValues(alpha: 0.48),
                         fontStyle: FontStyle.italic,
                       ),
                     ),
@@ -453,7 +536,7 @@ class _HeroTeamPanel extends StatelessWidget {
                   alignment: Alignment.center,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: appColors.grass,
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Text(
@@ -488,6 +571,8 @@ class _HeroTeam extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
 
@@ -498,7 +583,7 @@ class _HeroTeam extends StatelessWidget {
           height: 58,
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.2),
+            color: Colors.transparent,
             borderRadius: BorderRadius.circular(14),
           ),
           child: TeamAvatar(
@@ -514,7 +599,7 @@ class _HeroTeam extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           textAlign: TextAlign.center,
           style: appTextStyles.caption2.copyWith(
-            color: Colors.white,
+            color: appColors.grass,
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -543,7 +628,7 @@ class _HeroMatchCta extends StatelessWidget {
     final isRegistered = match.isCurrentUserRegistered;
 
     return Material(
-      color: Colors.white,
+      color: appColors.white,
       borderRadius: BorderRadius.circular(14),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -576,7 +661,6 @@ class _HeroMatchCta extends StatelessWidget {
                 style: appTextStyles.buttonSmall.copyWith(
                   color: appColors.primary,
                   fontWeight: FontWeight.w900,
-                  letterSpacing: 0.6,
                 ),
               ),
               const SizedBox(width: Spacing.sm),
@@ -664,6 +748,7 @@ class _LatestResultCard extends StatelessWidget {
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final palette = _HomePalette(appColors);
     final score = match == null
         ? '-:-'
         : '${match!.homeTeamScore ?? 0}:${match!.awayTeamScore ?? 0}';
@@ -672,7 +757,7 @@ class _LatestResultCard extends StatelessWidget {
 
     return _BentoCard(
       padding: const EdgeInsets.all(Spacing.lg),
-      color: _surfaceContainerLow,
+      color: palette.surfaceLow,
       child: InkWell(
         onTap: match == null
             ? null
@@ -686,9 +771,8 @@ class _LatestResultCard extends StatelessWidget {
                   child: Text(
                     'SENESTE RESULTAT',
                     style: appTextStyles.label.copyWith(
-                      color: _onSurfaceVariant,
+                      color: palette.onSurfaceMuted,
                       fontWeight: FontWeight.w900,
-                      letterSpacing: 1.2,
                     ),
                   ),
                 ),
@@ -699,7 +783,7 @@ class _LatestResultCard extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: _primaryFixed,
+                      color: appColors.lightGrass,
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: Text(
@@ -723,7 +807,7 @@ class _LatestResultCard extends StatelessWidget {
                 Text(
                   score,
                   style: _displayStyle(context).copyWith(
-                    color: _onSurface,
+                    color: palette.onSurface,
                     fontSize: 42,
                   ),
                 ),
@@ -742,7 +826,7 @@ class _LatestResultCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: appTextStyles.caption1.copyWith(
-                color: _onSurfaceVariant,
+                color: palette.onSurfaceMuted,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -782,13 +866,16 @@ class _TopScorerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final palette = _HomePalette(appColors);
     final name = row?.userName.split(' ').first ?? '-';
     final goals = row?.value.toInt() ?? 0;
 
     return _BentoCard(
-      color: _secondary,
+      color: palette.statCard,
       padding: const EdgeInsets.all(Spacing.md),
       child: SizedBox(
         height: 136,
@@ -798,9 +885,8 @@ class _TopScorerCard extends StatelessWidget {
             Text(
               'TOPSCORER',
               style: appTextStyles.label.copyWith(
-                color: Colors.white.withValues(alpha: 0.72),
+                color: appColors.white.withValues(alpha: 0.72),
                 fontWeight: FontWeight.w900,
-                letterSpacing: 1,
               ),
             ),
             const SizedBox(height: Spacing.md),
@@ -809,7 +895,7 @@ class _TopScorerCard extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: appTextStyles.subtitle1.copyWith(
-                color: Colors.white,
+                color: appColors.white,
                 fontWeight: FontWeight.w800,
               ),
             ),
@@ -817,7 +903,7 @@ class _TopScorerCard extends StatelessWidget {
             Text(
               '$goals mål',
               style: appTextStyles.caption3.copyWith(
-                color: Colors.white.withValues(alpha: 0.78),
+                color: appColors.white.withValues(alpha: 0.78),
               ),
             ),
             const Spacer(),
@@ -825,7 +911,7 @@ class _TopScorerCard extends StatelessWidget {
               alignment: Alignment.bottomRight,
               child: Icon(
                 Icons.track_changes,
-                color: Colors.white.withValues(alpha: 0.20),
+                color: appColors.white.withValues(alpha: 0.20),
                 size: 42,
               ),
             ),
@@ -847,11 +933,14 @@ class _PlacementMiniCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final palette = _HomePalette(appColors);
 
     return _BentoCard(
-      color: _tertiaryContainer,
+      color: palette.highlightCard,
       padding: const EdgeInsets.all(Spacing.md),
       child: SizedBox(
         height: 136,
@@ -861,16 +950,15 @@ class _PlacementMiniCard extends StatelessWidget {
             Text(
               'PLACERING',
               style: appTextStyles.label.copyWith(
-                color: _onTertiaryContainer.withValues(alpha: 0.72),
+                color: palette.onHighlight.withValues(alpha: 0.72),
                 fontWeight: FontWeight.w900,
-                letterSpacing: 1,
               ),
             ),
             const SizedBox(height: Spacing.md),
             Text(
               standing == null ? '-' : '${standing!.position}.',
               style: _displayStyle(context).copyWith(
-                color: _onTertiaryContainer,
+                color: palette.onHighlight,
                 fontSize: 36,
               ),
             ),
@@ -879,9 +967,8 @@ class _PlacementMiniCard extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: appTextStyles.label.copyWith(
-                color: _onTertiaryContainer,
+                color: palette.onHighlight,
                 fontWeight: FontWeight.w900,
-                letterSpacing: 1,
               ),
             ),
             const Spacer(),
@@ -889,7 +976,7 @@ class _PlacementMiniCard extends StatelessWidget {
               alignment: Alignment.bottomRight,
               child: Icon(
                 Icons.leaderboard_outlined,
-                color: _onTertiaryContainer.withValues(alpha: 0.18),
+                color: palette.onHighlight.withValues(alpha: 0.18),
                 size: 42,
               ),
             ),
@@ -903,11 +990,14 @@ class _PlacementMiniCard extends StatelessWidget {
 class _TasksCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final palette = _HomePalette(appColors);
 
     return _BentoCard(
-      color: _surfaceContainerHighest,
+      color: palette.surfaceRaised,
       padding: const EdgeInsets.all(Spacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -915,9 +1005,8 @@ class _TasksCard extends StatelessWidget {
           Text(
             'OPGAVER',
             style: appTextStyles.label.copyWith(
-              color: _onSurfaceVariant,
+              color: palette.onSurfaceMuted,
               fontWeight: FontWeight.w900,
-              letterSpacing: 1.2,
             ),
           ),
           const SizedBox(height: Spacing.md),
@@ -927,9 +1016,8 @@ class _TasksCard extends StatelessWidget {
             child: Text(
               'SE ALLE OPGAVER',
               style: appTextStyles.label.copyWith(
-                color: _onSurfaceVariant,
+                color: palette.onSurfaceMuted,
                 fontWeight: FontWeight.w900,
-                letterSpacing: 0.8,
               ),
             ),
           ),
@@ -942,23 +1030,26 @@ class _TasksCard extends StatelessWidget {
 class _TaskEmptyRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final palette = _HomePalette(appColors);
 
     return Container(
       padding: const EdgeInsets.all(Spacing.sm),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.52),
+        color: appColors.white.withValues(alpha: 0.52),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         children: [
-          const Icon(Icons.assignment_outlined, color: _heroStart, size: 18),
+          Icon(Icons.assignment_outlined, color: appColors.primary, size: 18),
           const SizedBox(width: Spacing.sm),
           Text(
             'Ingen opgaver',
             style: appTextStyles.caption2.copyWith(
-              color: _onSurface,
+              color: palette.onSurface,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -979,8 +1070,11 @@ class _QuickTableCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final palette = _HomePalette(appColors);
     final rows = standings?.rows.take(4).toList() ?? const <DbuStandingRow>[];
 
     return _BentoCard(
@@ -990,7 +1084,7 @@ class _QuickTableCard extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.all(Spacing.md),
-            color: _secondary,
+            color: palette.statCard,
             child: Row(
               children: [
                 Expanded(
@@ -999,9 +1093,8 @@ class _QuickTableCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: appTextStyles.label.copyWith(
-                      color: Colors.white,
+                      color: appColors.white,
                       fontWeight: FontWeight.w900,
-                      letterSpacing: 1.2,
                     ),
                   ),
                 ),
@@ -1013,14 +1106,14 @@ class _QuickTableCard extends StatelessWidget {
             child: Column(
               children: [
                 _TableHeader(),
-                const Divider(color: _outlineVariant),
+                Divider(color: palette.outline),
                 if (rows.isEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: Spacing.lg),
                     child: Text(
                       'Ingen stilling tilgængelig',
                       style: appTextStyles.caption1.copyWith(
-                        color: _onSurfaceVariant,
+                        color: palette.onSurfaceMuted,
                       ),
                     ),
                   )
@@ -1035,16 +1128,15 @@ class _QuickTableCard extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 11),
                   decoration: BoxDecoration(
-                    border: Border.all(color: _outlineVariant),
+                    border: Border.all(color: palette.outline),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   alignment: Alignment.center,
                   child: Text(
                     'VIS FULD TABEL',
                     style: appTextStyles.label.copyWith(
-                      color: _onSurfaceVariant,
+                      color: palette.onSurfaceMuted,
                       fontWeight: FontWeight.w900,
-                      letterSpacing: 1,
                     ),
                   ),
                 ),
@@ -1060,10 +1152,13 @@ class _QuickTableCard extends StatelessWidget {
 class _TableHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final palette = _HomePalette(appColors);
     final style = appTextStyles.label.copyWith(
-      color: _onSurfaceVariant,
+      color: palette.onSurfaceMuted,
       fontWeight: FontWeight.w800,
     );
 
@@ -1099,7 +1194,8 @@ class _StandingPreviewRow extends StatelessWidget {
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final color = isCurrentTeam ? appColors.primary : _onSurface;
+    final palette = _HomePalette(appColors);
+    final color = isCurrentTeam ? appColors.primary : palette.onSurface;
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 9),
@@ -1155,7 +1251,9 @@ class _StandingPreviewRow extends StatelessWidget {
             child: Text(
               '${row.matchesPlayed}',
               textAlign: TextAlign.center,
-              style: appTextStyles.caption2.copyWith(color: _onSurfaceVariant),
+              style: appTextStyles.caption2.copyWith(
+                color: palette.onSurfaceMuted,
+              ),
             ),
           ),
           SizedBox(
@@ -1190,6 +1288,7 @@ class _FineBoxBentoCard extends StatelessWidget {
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final palette = _HomePalette(appColors);
     final personalAmounts = fineBox == null
         ? (0.0, 0.0)
         : _personalFineAmounts(fineBox!, currentUser);
@@ -1220,9 +1319,8 @@ class _FineBoxBentoCard extends StatelessWidget {
                       Text(
                         'BØDEKASSEN',
                         style: appTextStyles.label.copyWith(
-                          color: _onSurfaceVariant,
+                          color: palette.onSurfaceMuted,
                           fontWeight: FontWeight.w900,
-                          letterSpacing: 1.2,
                         ),
                       ),
                       const SizedBox(height: Spacing.sm),
@@ -1252,7 +1350,7 @@ class _FineBoxBentoCard extends StatelessWidget {
                 Text(
                   currentUser.isTeamOwner ? 'Indsamlet' : 'Samlet bøder',
                   style: appTextStyles.caption2.copyWith(
-                    color: _onSurfaceVariant,
+                    color: palette.onSurfaceMuted,
                   ),
                 ),
                 const Spacer(),
@@ -1261,7 +1359,7 @@ class _FineBoxBentoCard extends StatelessWidget {
                       ? '${collected.toStringAsFixed(0)},-'
                       : '${personalAmounts.$1.toStringAsFixed(0)},-',
                   style: appTextStyles.caption2.copyWith(
-                    color: _onSurface,
+                    color: palette.onSurface,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
@@ -1273,7 +1371,7 @@ class _FineBoxBentoCard extends StatelessWidget {
               child: LinearProgressIndicator(
                 minHeight: 8,
                 value: progress,
-                backgroundColor: _surfaceContainerHigh,
+                backgroundColor: palette.surfaceRaised,
                 valueColor: AlwaysStoppedAnimation<Color>(appColors.primary),
               ),
             ),
@@ -1301,28 +1399,32 @@ class _FineBoxBentoCard extends StatelessWidget {
 class _BentoCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
-  final Color color;
+  final Color? color;
   final bool clip;
 
   const _BentoCard({
     required this.child,
     this.padding = const EdgeInsets.all(Spacing.md),
-    this.color = Colors.white,
+    this.color,
     this.clip = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final palette = _HomePalette(appColors);
+
     return Container(
       clipBehavior: clip ? Clip.antiAlias : Clip.none,
       padding: padding,
       decoration: BoxDecoration(
-        color: color,
+        color: color ?? appColors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _outlineVariant.withValues(alpha: 0.35)),
+        border: Border.all(color: palette.outline.withValues(alpha: 0.35)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
+            color: appColors.black.withValues(alpha: 0.06),
             blurRadius: 18,
             offset: const Offset(0, 8),
           ),
@@ -1465,7 +1567,6 @@ TextStyle _displayStyle(BuildContext context) {
       Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
   return appTextStyles.h2.copyWith(
     fontWeight: FontWeight.w900,
-    letterSpacing: -1.2,
   );
 }
 
@@ -1487,4 +1588,22 @@ void _openFineBox(BuildContext context) {
   Navigator.of(context).push(MaterialWithModalsPageRoute(
     builder: (context) => const TeamFinesPage(),
   ));
+}
+
+class _HomePalette {
+  final AppColors colors;
+
+  const _HomePalette(this.colors);
+
+  Color get surface => colors.white;
+  Color get surfaceLow => colors.lightGrass55;
+  Color get surfaceRaised => colors.grey2;
+  Color get highlightCard => colors.lightGrass;
+  Color get statCard => colors.grass;
+  Color get heroStart => colors.grass;
+  Color get heroEnd => colors.white;
+  Color get onSurface => colors.dirt;
+  Color get onSurfaceMuted => colors.grey5;
+  Color get onHighlight => colors.dirt;
+  Color get outline => colors.grey3;
 }

@@ -26,7 +26,7 @@ class AppAvatar extends StatelessWidget {
     final fallback = Text(
       initials ?? '',
       style: appTextStyles.bodyBold.copyWith(
-        color: appColors.dirt,
+        color: appColors.grass,
         fontSize: radius * 0.8,
       ),
     );
@@ -34,7 +34,7 @@ class AppAvatar extends StatelessWidget {
 
     return CircleAvatar(
       radius: radius,
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.white,
       child: normalizedImageUrl == null || normalizedImageUrl.isEmpty
           ? fallback
           : ClipOval(
