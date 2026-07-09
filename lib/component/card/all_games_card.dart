@@ -29,7 +29,8 @@ class AllGamesCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(Spacing.md),
       decoration: BoxDecoration(
-        color: appColors.grey2,
+        border: Border.all(color: appColors.grass),
+        color: appColors.lightGrass55,
         borderRadius: BorderRadius.circular(Spacing.borderRadiusLargeIncreased),
       ),
       child: Column(
