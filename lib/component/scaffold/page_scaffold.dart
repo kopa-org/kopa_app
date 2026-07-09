@@ -14,6 +14,7 @@ class PageScaffold extends StatelessWidget {
   final Future<void> Function()? onRefresh;
   final bool showBackButton;
   final bool showTopBar;
+  final bool useTopSafeArea;
   final ObstructingPreferredSizeWidget? navigationBar;
 
   const PageScaffold({
@@ -28,6 +29,7 @@ class PageScaffold extends StatelessWidget {
     this.navigationBar,
     this.showBackButton = false,
     this.showTopBar = true,
+    this.useTopSafeArea = true,
   });
 
   @override
@@ -64,6 +66,7 @@ class PageScaffold extends StatelessWidget {
                 )
             : null,
         child: SafeArea(
+          top: useTopSafeArea,
           child: onRefresh != null
               ? CustomScrollView(
                   slivers: [
@@ -98,7 +101,7 @@ class PageScaffold extends StatelessWidget {
               actions: trailing ?? [],
             )
           : null,
-      body: SafeArea(child: body),
+      body: SafeArea(top: useTopSafeArea, child: body),
       floatingActionButton: floatingActionButton,
     );
   }

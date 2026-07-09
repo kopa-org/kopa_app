@@ -3,10 +3,10 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
-import 'package:kopa/component/avatar/app_avatar.dart';
 import 'package:kopa/component/avatar/team_avatar.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
@@ -26,7 +26,7 @@ import 'package:kopa/utils/app_analytics.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-const double _heroPanelGradientOverlap = 45;
+const double _heroPanelGradientOverlap = 80;
 
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
@@ -59,87 +59,92 @@ class _HomeTabView extends StatelessWidget {
       return const Center(child: Text('User not logged in'));
     }
 
-    return PageScaffold(
-      title: 'Forside',
-      showBackButton: false,
-      showTopBar: false,
-      backgroundColor: appColors.white,
-      body: RefreshIndicator(
-        color: appColors.primary,
-        onRefresh: () async {
-          await context
-              .read<HomeCubit>()
-              .fetchDashboardData(currentUser.teamDetails!.id);
-        },
-        child: BlocBuilder<HomeCubit, HomeState>(
-          builder: (context, state) {
-            if (state.status == HomeStatus.initial ||
-                state.status == HomeStatus.loading) {
-              return const Center(child: CircularProgressIndicator());
-            }
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: appColors.grass,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
+      child: PageScaffold(
+        title: 'Forside',
+        showBackButton: false,
+        showTopBar: false,
+        useTopSafeArea: false,
+        backgroundColor: appColors.white,
+        body: RefreshIndicator(
+          color: appColors.primary,
+          onRefresh: () async {
+            await context
+                .read<HomeCubit>()
+                .fetchDashboardData(currentUser.teamDetails!.id);
+          },
+          child: BlocBuilder<HomeCubit, HomeState>(
+            builder: (context, state) {
+              if (state.status == HomeStatus.initial ||
+                  state.status == HomeStatus.loading) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-            if (state.status == HomeStatus.failure) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(Spacing.lg),
-                  child: Text(
-                    state.errorMessage ?? 'Kunne ikke hente dashboard data',
-                    style: appTextStyles.body.copyWith(color: appColors.error),
-                    textAlign: TextAlign.center,
+              if (state.status == HomeStatus.failure) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(Spacing.lg),
+                    child: Text(
+                      state.errorMessage ?? 'Kunne ikke hente dashboard data',
+                      style:
+                          appTextStyles.body.copyWith(color: appColors.error),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
-                ),
-              );
-            }
+                );
+              }
 
-            final upcomingMatches = _upcomingMatches(state);
-            final playedMatches = _playedMatches(state);
-            final nextMatch = upcomingMatches.isEmpty
-                ? state.nextMatch
-                : upcomingMatches.first;
-            final latestMatch =
-                playedMatches.isEmpty ? null : playedMatches.last;
+              final upcomingMatches = _upcomingMatches(state);
+              final playedMatches = _playedMatches(state);
+              final nextMatch = upcomingMatches.isEmpty
+                  ? state.nextMatch
+                  : upcomingMatches.first;
+              final latestMatch =
+                  playedMatches.isEmpty ? null : playedMatches.last;
 
-            return SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _HomeTopBar(currentUser: currentUser),
-                  _HeroSection(
-                    currentUser: currentUser,
-                    nextMatch: nextMatch,
-                  ),
-                  _HeroPanelCutover(
-                    overlap: _heroPanelGradientOverlap,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: Spacing.md,
-                      ),
-                      child: _HeroTeamPanel(
-                        match: nextMatch,
+              return SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _HomeTopBar(currentUser: currentUser),
+                    _HeroSection(
+                      currentUser: currentUser,
+                      nextMatch: nextMatch,
+                    ),
+                    _HeroPanelCutover(
+                      overlap: _heroPanelGradientOverlap,
+                      child: _HeroMatchCarousel(
+                        matches: upcomingMatches,
+                        fallbackMatch: nextMatch,
                         currentUser: currentUser,
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      Spacing.md,
-                      Spacing.md,
-                      Spacing.md,
-                      0,
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        Spacing.md,
+                        Spacing.md,
+                        Spacing.md,
+                        0,
+                      ),
+                      child: _BentoGrid(
+                        currentUser: currentUser,
+                        latestMatch: latestMatch,
+                        standings: state.dbuStandings,
+                        statistics: state.statistics,
+                        fineBox: state.fineBox,
+                      ),
                     ),
-                    child: _BentoGrid(
-                      currentUser: currentUser,
-                      latestMatch: latestMatch,
-                      standings: state.dbuStandings,
-                      statistics: state.statistics,
-                      fineBox: state.fineBox,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -158,9 +163,16 @@ class _HomeTopBar extends StatelessWidget {
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
 
+    final topInset = MediaQuery.paddingOf(context).top;
+
     return Container(
-      height: 64,
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+      height: 64 + topInset,
+      padding: EdgeInsets.fromLTRB(
+        Spacing.md,
+        topInset,
+        Spacing.md,
+        0,
+      ),
       decoration: BoxDecoration(
         color: appColors.grass,
       ),
@@ -214,12 +226,11 @@ class _HeroSection extends StatelessWidget {
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
     final palette = _HomePalette(appColors);
-    final firstName = currentUser.name.split(' ').first;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(
         Spacing.md,
-        Spacing.lg,
+        0,
         Spacing.md,
         Spacing.lg + _heroPanelGradientOverlap,
       ),
@@ -233,24 +244,24 @@ class _HeroSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          /*Row(
             children: [
-              AppAvatar(initials: _initials(currentUser.name), radius: 24),
+              AppAvatar(initials: _initials(currentUser.name), radius: 16),
               const SizedBox(width: Spacing.md),
               Expanded(
                 child: Text(
                   'Hej $firstName!',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: appTextStyles.h4.copyWith(
+                  style: appTextStyles.body4.copyWith(
                     color: appColors.white,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: Spacing.lg),
+          ),*/
+          const SizedBox(height: Spacing.sm),
           Text(
             nextMatch == null ? 'Ingen kommende kamp' : 'Næste kamp om',
             style: appTextStyles.caption2.copyWith(
@@ -470,13 +481,212 @@ class _HeroCountdownBlock extends StatelessWidget {
   }
 }
 
+class _HeroMatchCarousel extends StatefulWidget {
+  final List<MatchDetails> matches;
+  final MatchDetails? fallbackMatch;
+  final UserDetails currentUser;
+
+  const _HeroMatchCarousel({
+    required this.matches,
+    required this.fallbackMatch,
+    required this.currentUser,
+  });
+
+  @override
+  State<_HeroMatchCarousel> createState() => _HeroMatchCarouselState();
+}
+
+class _HeroMatchCarouselState extends State<_HeroMatchCarousel> {
+  static const double _animationSlack = 32;
+  static const double _viewportFraction = 1;
+
+  late final PageController _controller;
+  int _currentIndex = 0;
+
+  List<MatchDetails?> get _pages {
+    if (widget.matches.isNotEmpty) return widget.matches;
+    return <MatchDetails?>[widget.fallbackMatch];
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = PageController(viewportFraction: _viewportFraction);
+  }
+
+  @override
+  void didUpdateWidget(covariant _HeroMatchCarousel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final pageCount = _pages.length;
+    if (_currentIndex >= pageCount) {
+      _currentIndex = math.max(0, pageCount - 1);
+      if (_controller.hasClients) {
+        _controller.jumpToPage(_currentIndex);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pages = _pages;
+    return ColoredBox(
+      color: Colors.transparent,
+      child: Column(
+        children: [
+          AnimatedSize(
+            duration: const Duration(milliseconds: 260),
+            curve: Curves.easeOutCubic,
+            alignment: Alignment.topCenter,
+            child: Stack(
+              children: [
+                ...List.generate(
+                  pages.length,
+                  (index) => Opacity(
+                    opacity: 0,
+                    child: IgnorePointer(
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: Spacing.md),
+                        child: FractionallySizedBox(
+                          alignment: Alignment.centerLeft,
+                          widthFactor: _viewportFraction,
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                              right: Spacing.sm,
+                              bottom: _animationSlack,
+                            ),
+                            child: _HeroTeamPanel(
+                              match: pages[index],
+                              currentUser: widget.currentUser,
+                              reserveRegistrationActions: true,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned.fill(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: Spacing.md),
+                    child: PageView.builder(
+                      controller: _controller,
+                      itemCount: pages.length,
+                      padEnds: false,
+                      clipBehavior: Clip.none,
+                      allowImplicitScrolling: true,
+                      onPageChanged: (index) {
+                        setState(() => _currentIndex = index);
+                      },
+                      itemBuilder: (context, index) {
+                        return AnimatedBuilder(
+                          animation: _controller,
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: Spacing.sm),
+                            child: _HeroTeamPanel(
+                              match: pages[index],
+                              currentUser: widget.currentUser,
+                              reserveRegistrationActions: true,
+                            ),
+                          ),
+                          builder: (context, child) {
+                            var page = _currentIndex.toDouble();
+                            if (_controller.hasClients &&
+                                _controller.position.haveDimensions) {
+                              page = _controller.page ?? page;
+                            }
+
+                            final distance =
+                                (page - index).abs().clamp(0.0, 1.0);
+                            final eased = Curves.easeOutCubic.transform(
+                              1 - distance,
+                            );
+                            final scale = 0.95 + (0.05 * eased);
+                            final translateY = 14 * (1 - eased);
+
+                            return Transform.translate(
+                              offset: Offset(0, translateY),
+                              child: Transform.scale(
+                                scale: scale,
+                                alignment: Alignment.topCenter,
+                                child: Opacity(
+                                  opacity: 0.72 + (0.28 * eased),
+                                  child: child,
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (pages.length > 1) ...[
+            const SizedBox(height: Spacing.sm),
+            _CarouselDots(
+              count: pages.length,
+              currentIndex: _currentIndex,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _CarouselDots extends StatelessWidget {
+  final int count;
+  final int currentIndex;
+
+  const _CarouselDots({
+    required this.count,
+    required this.currentIndex,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(count, (index) {
+        final isActive = index == currentIndex;
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOutCubic,
+          width: isActive ? 18 : 6,
+          height: 6,
+          margin: const EdgeInsets.symmetric(horizontal: 3),
+          decoration: BoxDecoration(
+            color: isActive
+                ? appColors.grass
+                : appColors.grass.withValues(alpha: 0.24),
+            borderRadius: BorderRadius.circular(999),
+          ),
+        );
+      }),
+    );
+  }
+}
+
 class _HeroTeamPanel extends StatelessWidget {
   final MatchDetails? match;
   final UserDetails currentUser;
+  final bool reserveRegistrationActions;
 
   const _HeroTeamPanel({
     required this.match,
     required this.currentUser,
+    this.reserveRegistrationActions = false,
   });
 
   @override
@@ -490,186 +700,205 @@ class _HeroTeamPanel extends StatelessWidget {
         match?.homeTeam ?? currentUser.teamDetails?.title ?? 'Hold';
     final awayTeam = match?.awayTeam ?? 'Modstander';
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(
-        0,0,0,
-        Spacing.md,
-      ),
-      decoration: BoxDecoration(
-        color: appColors.lightGrass55,
-        borderRadius: BorderRadius.circular(28),
-        //border: Border.all(color: appColors.grey3.withValues(alpha: 0.35)),
-        boxShadow: [
-          BoxShadow(
-            color: appColors.black.withValues(alpha: 0.06),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final pinDetailsToBottom =
+            match != null && constraints.hasBoundedHeight;
+
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(
+            0,
+            0,
+            0,
+            Spacing.md,
           ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(
-              Spacing.md,
-              Spacing.lg,
-              Spacing.md,
-              Spacing.md,
-            ),
-            decoration: BoxDecoration(
-              color: appColors.lightGrass,
-              borderRadius: BorderRadius.circular(28),
-            ),
-            child: Column(
-              children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'NÆSTE KAMP',
-                    style: appTextStyles.label.copyWith(
-                      color: appColors.grass,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
+          decoration: BoxDecoration(
+            color: appColors.lightGrass55,
+            borderRadius: BorderRadius.circular(28),
+            //border: Border.all(color: appColors.grey3.withValues(alpha: 0.35)),
+            boxShadow: [
+              BoxShadow(
+                color: appColors.black.withValues(alpha: 0.06),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(
+                  Spacing.md,
+                  Spacing.lg,
+                  Spacing.md,
+                  Spacing.md,
                 ),
-                const SizedBox(height: 14),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                decoration: BoxDecoration(
+                  color: appColors.lightGrass,
+                  borderRadius: BorderRadius.circular(28),
+                ),
+                child: Column(
                   children: [
-                    Expanded(
-                      child: _HeroTeamStrip(
-                        name: homeTeam,
-                        accentColor: appColors.grass,
-                      ),
-                    ),
-                    SizedBox(
-                      width: 54,
+                    Align(
+                      alignment: Alignment.centerLeft,
                       child: Text(
-                        'vs',
-                        textAlign: TextAlign.center,
-                        style: appTextStyles.h5.copyWith(
+                        'NÆSTE KAMP',
+                        style: appTextStyles.label.copyWith(
                           color: appColors.grass,
-                          //fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w900,
                         ),
                       ),
                     ),
-                    Expanded(
-                      child: _HeroTeamStrip(
-                        name: awayTeam,
-                        accentColor: appColors.sunset,
-                        alignEnd: true,
-                      ),
-                    ),
-                  ],
-                ),
-                if (match == null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: Spacing.md),
-                    child: Text(
-                      'Ingen kamp planlagt',
-                      style: appTextStyles.buttonSmall.copyWith(
-                        color: appColors.primary,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  )
-              ],
-            ),
-          ),
-          if (match != null) ...[
-            const SizedBox(height: Spacing.md),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                children: [
-                  _FactIcon(icon: Icons.schedule, color: appColors.sky),
-                  const SizedBox(width: Spacing.md),
-                  Expanded(
-                    child: _MatchFactColumn(
-                      label: 'KAMPSTART',
-                      value: _matchTime(match.date),
-                    ),
-                  ),
-                  Expanded(
-                    child: _MatchFactColumn(
-                      label: 'MØDETID',
-                      value: match.meetingTime == null
-                          ? '--:--'
-                          : _clockTime(match.meetingTime!),
-                      alignEnd: true,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: Spacing.md),
-            //Divider(color: appColors.grey3.withValues(alpha: 0.5), height: 1),
-            //const SizedBox(height: Spacing.md),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16.0,  0,  0,  0),
-              child: Row(
-                children: [
-                  _FactIcon(icon: Icons.location_on, color: appColors.error),
-                  const SizedBox(width: Spacing.md),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    const SizedBox(height: 14),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(
-                          match.location.isEmpty
-                              ? 'Ingen lokation'
-                              : match.location,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: appTextStyles.subtitle2.copyWith(
-                            color: appColors.dirt,
-                            fontWeight: FontWeight.w900,
+                        Expanded(
+                          child: _HeroTeamStrip(
+                            name: homeTeam,
+                            accentColor: appColors.grass,
                           ),
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          _matchDate(match.date),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: appTextStyles.caption2.copyWith(
-                            color: appColors.grey5,
-                            fontWeight: FontWeight.w600,
+                        SizedBox(
+                          width: 54,
+                          child: Text(
+                            'vs',
+                            textAlign: TextAlign.center,
+                            style: appTextStyles.h5.copyWith(
+                              color: appColors.grass,
+                              //fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: _HeroTeamStrip(
+                            name: awayTeam,
+                            accentColor: appColors.sunset,
+                            alignEnd: true,
                           ),
                         ),
                       ],
                     ),
-                  ),
-                  TextButton(
-                    onPressed: match.location.isEmpty
-                        ? null
-                        : () => _openNavigation(match),
-                    child: Text(
-                      'Kort ›',
-                      style: appTextStyles.buttonSmall.copyWith(
-                        color: appColors.grass,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ),
-                ],
+                    if (match == null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: Spacing.md),
+                        child: Text(
+                          'Ingen kamp planlagt',
+                          style: appTextStyles.buttonSmall.copyWith(
+                            color: appColors.primary,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      )
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: Spacing.md),
-            Divider(color: appColors.grey3.withValues(alpha: 0.5), height: 1),
-            const SizedBox(height: Spacing.md),
-            _MatchResponseCard(
-              match: match,
-              currentUser: currentUser,
-            ),
-            const SizedBox(height: Spacing.sm),
-            _QuietDetailsLink(
-              onPressed: () => _openMatch(context, match, 'home_hero'),
-            ),
-          ],
-        ],
-      ),
+              if (match != null) ...[
+                const SizedBox(height: Spacing.md),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Row(
+                    children: [
+                      _FactIcon(icon: Icons.schedule, color: appColors.sky),
+                      const SizedBox(width: Spacing.md),
+                      Expanded(
+                        child: _MatchFactColumn(
+                          label: 'KAMPSTART',
+                          value: _matchTime(match.date),
+                        ),
+                      ),
+                      Expanded(
+                        child: _MatchFactColumn(
+                          label: 'MØDETID',
+                          value: match.meetingTime == null
+                              ? '--:--'
+                              : _clockTime(match.meetingTime!),
+                          alignEnd: true,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: Spacing.md),
+                //Divider(color: appColors.grey3.withValues(alpha: 0.5), height: 1),
+                //const SizedBox(height: Spacing.md),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 0),
+                  child: Row(
+                    children: [
+                      _FactIcon(
+                        icon: Icons.location_on,
+                        color: appColors.error,
+                      ),
+                      const SizedBox(width: Spacing.md),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              match.location.isEmpty
+                                  ? 'Ingen lokation'
+                                  : match.location,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: appTextStyles.subtitle2.copyWith(
+                                color: appColors.dirt,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              _matchDate(match.date),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: appTextStyles.caption2.copyWith(
+                                color: appColors.grey5,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: match.location.isEmpty
+                            ? null
+                            : () => _openNavigation(match),
+                        child: Text(
+                          'Kort ›',
+                          style: appTextStyles.buttonSmall.copyWith(
+                            color: appColors.grass,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: Spacing.md),
+                Divider(
+                  color: appColors.grey3.withValues(alpha: 0.5),
+                  height: 1,
+                ),
+                const SizedBox(height: Spacing.md),
+                _MatchResponseCard(
+                  match: match,
+                  currentUser: currentUser,
+                  reserveRegistrationActions: reserveRegistrationActions,
+                ),
+                if (pinDetailsToBottom)
+                  const Spacer()
+                else
+                  const SizedBox(height: Spacing.sm),
+                _QuietDetailsLink(
+                  onPressed: () => _openMatch(context, match, 'home_hero'),
+                ),
+              ],
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -806,10 +1035,12 @@ class _MatchFactColumn extends StatelessWidget {
 class _MatchResponseCard extends StatelessWidget {
   final MatchDetails match;
   final UserDetails currentUser;
+  final bool reserveRegistrationActions;
 
   const _MatchResponseCard({
     required this.match,
     required this.currentUser,
+    this.reserveRegistrationActions = false,
   });
 
   @override
@@ -865,38 +1096,69 @@ class _MatchResponseCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: Spacing.sm),
-          if (isRegistered)
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Du er tilmeldt kampen',
-                style: appTextStyles.caption2.copyWith(
-                  color: appColors.grass,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            )
-          else
-            Row(
-              children: [
-                Expanded(
-                  child: _KopaChoiceButton(
-                    label: isRegistering ? 'Tilmeldes' : 'Ja, jeg kommer',
-                    icon: Icons.how_to_reg,
-                    onPressed: isRegistering ? null : register,
+          Stack(
+            children: [
+              if (reserveRegistrationActions)
+                Opacity(
+                  opacity: 0,
+                  child: IgnorePointer(
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: _KopaChoiceButton(
+                            label: 'Ja, jeg kommer',
+                            icon: Icons.how_to_reg,
+                            onPressed: () {},
+                          ),
+                        ),
+                        const SizedBox(width: Spacing.sm),
+                        Expanded(
+                          child: _KopaChoiceButton(
+                            label: 'Nej',
+                            icon: Icons.close,
+                            outlined: true,
+                            onPressed: () {},
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                const SizedBox(width: Spacing.sm),
-                Expanded(
-                  child: _KopaChoiceButton(
-                    label: 'Nej',
-                    icon: Icons.close,
-                    outlined: true,
-                    onPressed: () => _openMatch(context, match, 'home_decline'),
+              if (isRegistered)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Du er tilmeldt kampen',
+                    style: appTextStyles.caption2.copyWith(
+                      color: appColors.grass,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
+                )
+              else
+                Row(
+                  children: [
+                    Expanded(
+                      child: _KopaChoiceButton(
+                        label: isRegistering ? 'Tilmeldes' : 'Ja, jeg kommer',
+                        icon: Icons.how_to_reg,
+                        onPressed: isRegistering ? null : register,
+                      ),
+                    ),
+                    const SizedBox(width: Spacing.sm),
+                    Expanded(
+                      child: _KopaChoiceButton(
+                        label: 'Nej',
+                        icon: Icons.close,
+                        outlined: true,
+                        onPressed: () =>
+                            _openMatch(context, match, 'home_decline'),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+            ],
+          ),
         ],
       ),
     );
@@ -1078,8 +1340,8 @@ class _LatestResultCard extends StatelessWidget {
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
     final palette = _HomePalette(appColors);
     final score = match == null
-        ? '-:-'
-        : '${match!.homeTeamScore ?? 0}:${match!.awayTeamScore ?? 0}';
+        ? '--'
+        : '${match!.homeTeamScore ?? 0} - ${match!.awayTeamScore ?? 0}';
     final resultLabel = _resultLabel(match, currentUser);
     final motm = match?.matchPollDetails?.playerOfTheMatchDetails.name;
 
