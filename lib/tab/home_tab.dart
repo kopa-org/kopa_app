@@ -64,7 +64,7 @@ class _HomeTabView extends StatelessWidget {
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light.copyWith(
-        statusBarColor: appColors.grass,
+        statusBarColor: appColors.black,
         statusBarIconBrightness: Brightness.light,
         statusBarBrightness: Brightness.dark,
       ),
@@ -177,20 +177,27 @@ class _HomeTopBar extends StatelessWidget {
         0,
       ),
       decoration: BoxDecoration(
-        color: appColors.grass,
+        color: appColors.offWhite,
+        boxShadow: [
+          BoxShadow(
+            color: appColors.black,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
           SvgPicture.asset(
             'assets/logos/logomark_outline_foreground.svg',
             height: 30,
-            colorFilter: ColorFilter.mode(appColors.white, BlendMode.srcIn),
+            colorFilter: ColorFilter.mode(appColors.grass, BlendMode.srcIn),
           ),
           const SizedBox(width: Spacing.sm),
           Text(
             'Kopa',
             style: appTextStyles.h5.copyWith(
-              color: appColors.white,
+              color: appColors.grass,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -199,7 +206,7 @@ class _HomeTopBar extends StatelessWidget {
             tooltip: 'Notifikationer',
             onPressed: () {},
             icon: const Icon(Icons.notifications_outlined),
-            color: appColors.white,
+            color: appColors.grass,
           ),
         ],
       ),
@@ -235,7 +242,7 @@ class _HeroSection extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [palette.heroStart, palette.heroEnd],
+          colors: [palette.surface, palette.surface],
         ),
       ),
       child: Column(
@@ -262,7 +269,7 @@ class _HeroSection extends StatelessWidget {
           Text(
             nextMatch == null ? 'Ingen kommende kamp' : 'Næste kamp om',
             style: appTextStyles.caption2.copyWith(
-              color: appColors.white.withValues(alpha: 0.78),
+              color: appColors.grass.withValues(alpha: 0.78),
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -460,8 +467,8 @@ class _HeroCountdownBlock extends StatelessWidget {
         Text(
           value.toString().padLeft(2, '0'),
           style: _displayStyle(context).copyWith(
-            color: appColors.white,
-            fontSize: 50,
+            color: appColors.grass.withValues(alpha: 0.62),
+            fontSize: 36,
             height: 0.98,
           ),
         ),
@@ -469,7 +476,7 @@ class _HeroCountdownBlock extends StatelessWidget {
         Text(
           label.toUpperCase(),
           style: appTextStyles.label.copyWith(
-            color: appColors.white.withValues(alpha: 0.62),
+            color: appColors.grass.withValues(alpha: 0.62),
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -927,21 +934,49 @@ class _SideAndBottomBorderPainter extends CustomPainter {
     final left = inset;
     final right = size.width - inset;
     final bottom = size.height - inset;
+    final fadeEnd = math.min(effectiveRadius * 3.2, size.height);
+    final fadeStop = size.height == 0 ? 1.0 : fadeEnd / size.height;
 
     final paint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth;
+    final sidePaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          color.withValues(alpha: 0),
+          color,
+          color,
+        ],
+        stops: [
+          0,
+          fadeStop,
+          1,
+        ],
+      ).createShader(Offset.zero & size);
 
-    final path = Path()
-      ..moveTo(left, 0)
-      ..lineTo(left, bottom - effectiveRadius)
+    canvas.drawLine(
+      Offset(left, 0),
+      Offset(left, bottom - effectiveRadius),
+      sidePaint,
+    );
+    canvas.drawLine(
+      Offset(right, 0),
+      Offset(right, bottom - effectiveRadius),
+      sidePaint,
+    );
+
+    final bottomPath = Path()
+      ..moveTo(left, bottom - effectiveRadius)
       ..quadraticBezierTo(left, bottom, left + effectiveRadius, bottom)
       ..lineTo(right - effectiveRadius, bottom)
-      ..quadraticBezierTo(right, bottom, right, bottom - effectiveRadius)
-      ..lineTo(right, 0);
+      ..quadraticBezierTo(right, bottom, right, bottom - effectiveRadius);
 
-    canvas.drawPath(path, paint);
+    canvas.drawPath(bottomPath, paint);
   }
 
   @override
@@ -1124,9 +1159,9 @@ class _MatchResponseCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   isRegistered ? 'Du er tilmeldt' : 'Kommer du?',
-                  style: appTextStyles.subtitle2.copyWith(
-                    color: appColors.dirt,
-                    fontWeight: FontWeight.w900,
+                  style: appTextStyles.body3.copyWith(
+                    color: appColors.grass,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -1170,7 +1205,7 @@ class _MatchResponseCard extends StatelessWidget {
                   child: Text(
                     'ingen opgaver',
                     style: appTextStyles.caption2.copyWith(
-                      color: appColors.grass,
+                      color: appColors.dirt,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
@@ -2670,7 +2705,7 @@ class _HomePalette {
   Color get surfaceRaised => colors.grey2;
   Color get highlightCard => colors.lightGrass;
   Color get statCard => colors.grass;
-  Color get heroStart => colors.grass;
+  Color get heroStart => colors.lightGrass;
   Color get heroEnd => colors.white;
   Color get onSurface => colors.dirt;
   Color get onSurfaceMuted => colors.grey5;
