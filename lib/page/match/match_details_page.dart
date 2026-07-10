@@ -55,6 +55,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
   UserDetails? _currentUser;
   Object? _currentUserError;
   bool _showLoadedContent = false;
+  bool _enableHeroCardActions = false;
   bool _isManOfTheMatchVoted = false;
   MatchPollDetails? matchPollDetails;
   int _homeGoals = 0;
@@ -96,6 +97,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
   void _showLoadedContentAfterTransition() {
     if (widget.initialMatch == null) {
       _showLoadedContent = true;
+      _enableHeroCardActions = true;
       return;
     }
 
@@ -104,6 +106,11 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       if (!mounted) return;
       setState(() {
         _showLoadedContent = true;
+      });
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+      if (!mounted) return;
+      setState(() {
+        _enableHeroCardActions = true;
       });
     });
   }
@@ -173,7 +180,9 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         match: matchDetails,
         heroTag: widget.heroTag,
         animateCard: widget.heroTag != null,
-        onTap: user.isTeamOwner && !matchDetails.hasMatchBeenPlayed
+        onTap: _enableHeroCardActions &&
+                user.isTeamOwner &&
+                !matchDetails.hasMatchBeenPlayed
             ? () => setMatchScore(matchDetails.id)
             : null,
       ),
@@ -500,7 +509,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
                                 spacing: Spacing.sm,
                                 runSpacing: Spacing.sm,
                                 children: suggestions.map((formation) {
-                                  final selected = formation == selectedFormation;
+                                  final selected =
+                                      formation == selectedFormation;
                                   return GestureDetector(
                                     onTap: () {
                                       setModalState(() {

@@ -108,7 +108,7 @@ class _StandingsTable extends StatelessWidget {
 
         return DecoratedBox(
           decoration: BoxDecoration(
-            color: appColors.lightGrass55,
+            color: appColors.white,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: palette.outline),
           ),
