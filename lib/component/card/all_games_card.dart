@@ -20,98 +20,38 @@ class AllGamesCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final upcomingMatches = matches
-        .where((match) => !match.hasMatchBeenPlayed)
-        .toList()
+    final sortedMatches = matches.toList()
       ..sort((a, b) => a.date.compareTo(b.date));
-    final completedMatches = matches
-        .where((match) => match.hasMatchBeenPlayed)
-        .toList()
-      ..sort((a, b) => b.date.compareTo(a.date));
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (upcomingMatches.isNotEmpty)
-          _MatchSection(
-            title: 'Kommende kampe',
-            matches: upcomingMatches,
-            onMatchTap: onMatchTap,
-          ),
-        if (upcomingMatches.isNotEmpty && completedMatches.isNotEmpty)
-          const SizedBox(height: Spacing.lg),
-        if (completedMatches.isNotEmpty)
-          _MatchSection(
-            title: 'Tidligere kampe',
-            matches: completedMatches,
-            onMatchTap: onMatchTap,
-          ),
-      ],
+    return _MatchList(
+      matches: sortedMatches,
+      onMatchTap: onMatchTap,
     );
   }
 }
 
-class _MatchSection extends StatelessWidget {
-  final String title;
+class _MatchList extends StatelessWidget {
   final List<MatchDetails> matches;
   final ValueChanged<MatchDetails> onMatchTap;
 
-  const _MatchSection({
-    required this.title,
+  const _MatchList({
     required this.matches,
     required this.onMatchTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                title,
-                style: appTextStyles.subtitle2.copyWith(
-                  color: appColors.dirt,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-            Container(
-              constraints: const BoxConstraints(minWidth: 24),
-              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
-              decoration: BoxDecoration(
-                color: appColors.grey2,
-                borderRadius: BorderRadius.circular(Spacing.borderRadiusFull),
-              ),
-              child: Text(
-                '${matches.length}',
-                textAlign: TextAlign.center,
-                style: appTextStyles.buttonTiny.copyWith(
-                  color: appColors.grass,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: Spacing.sm),
-        ...matches.indexed.expand((entry) sync* {
-          yield _GameResultRow(
-            match: entry.$2,
-            onTap: () => onMatchTap(entry.$2),
-          );
-          if (entry.$1 != matches.length - 1) {
-            yield const SizedBox(height: Spacing.sm);
-          }
-        }),
-      ],
+      children: matches.indexed.expand((entry) sync* {
+        yield _GameResultRow(
+          match: entry.$2,
+          onTap: () => onMatchTap(entry.$2),
+        );
+        if (entry.$1 != matches.length - 1) {
+          yield const SizedBox(height: Spacing.sm);
+        }
+      }).toList(),
     );
   }
 }
@@ -184,11 +124,13 @@ class _GameResultRow extends StatelessWidget {
                         _GameTeamLine(
                           name: match.homeTeam ?? 'Hjemme',
                           score: match.homeTeamScore,
+                          isOwnTeam: match.isHomeTeam != false,
                         ),
                         const SizedBox(height: Spacing.sm),
                         _GameTeamLine(
                           name: match.awayTeam ?? 'Ude',
                           score: match.awayTeamScore,
+                          isOwnTeam: match.isHomeTeam == false,
                         ),
                       ],
                     ),
@@ -248,10 +190,12 @@ class _StatusBadge extends StatelessWidget {
 class _GameTeamLine extends StatelessWidget {
   final String name;
   final int? score;
+  final bool isOwnTeam;
 
   const _GameTeamLine({
     required this.name,
     required this.score,
+    required this.isOwnTeam,
   });
 
   @override
@@ -269,9 +213,10 @@ class _GameTeamLine extends StatelessWidget {
             teamId: stableTeamSeed(name),
             radius: 10,
             badgePadding: 2,
+            isHighlighted: isOwnTeam,
             labelStyle: appTextStyles.body4.copyWith(
-              color: appColors.dirt,
-              fontWeight: FontWeight.w700,
+              color: isOwnTeam ? appColors.dirt : appColors.grey5,
+              fontWeight: isOwnTeam ? FontWeight.w900 : FontWeight.w600,
             ),
             layout: TeamBadgeLabelLayout.horizontal,
           ),

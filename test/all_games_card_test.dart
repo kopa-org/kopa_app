@@ -12,7 +12,7 @@ void main() {
     await initializeDateFormatting('da_DK');
   });
 
-  testWidgets('groups matches and makes every entry actionable',
+  testWidgets('sorts matches ascending and makes every entry actionable',
       (tester) async {
     final upcomingMatch = _match(
       id: 1,
@@ -28,6 +28,15 @@ void main() {
       homeScore: 3,
       awayScore: 1,
     );
+    final earliestMatch = _match(
+      id: 3,
+      date: DateTime(2026, 1, 9, 11),
+      homeTeam: 'Østerbro',
+      awayTeam: 'Kopa IF',
+      homeScore: 0,
+      awayScore: 2,
+      isHomeTeam: false,
+    );
     MatchDetails? tappedMatch;
 
     await tester.pumpWidget(
@@ -41,7 +50,7 @@ void main() {
         home: Scaffold(
           body: SingleChildScrollView(
             child: AllGamesCard(
-              matches: [completedMatch, upcomingMatch],
+              matches: [completedMatch, upcomingMatch, earliestMatch],
               onMatchTap: (match) => tappedMatch = match,
             ),
           ),
@@ -49,10 +58,26 @@ void main() {
       ),
     );
 
-    expect(find.text('Kommende kampe'), findsOneWidget);
-    expect(find.text('Tidligere kampe'), findsOneWidget);
-    expect(find.byIcon(CupertinoIcons.chevron_right), findsNWidgets(2));
+    expect(find.text('Kommende kampe'), findsNothing);
+    expect(find.text('Tidligere kampe'), findsNothing);
+    expect(find.byIcon(CupertinoIcons.chevron_right), findsNWidgets(3));
     expect(find.byType(Hero), findsNothing);
+    expect(
+      tester.getTopLeft(find.byKey(const ValueKey('match-entry-3'))).dy,
+      lessThan(
+          tester.getTopLeft(find.byKey(const ValueKey('match-entry-2'))).dy),
+    );
+    expect(
+      tester.getTopLeft(find.byKey(const ValueKey('match-entry-2'))).dy,
+      lessThan(
+          tester.getTopLeft(find.byKey(const ValueKey('match-entry-1'))).dy),
+    );
+
+    final kopaLabels = tester
+        .widgetList<Text>(find.text('Kopa IF'))
+        .map((text) => text.style?.fontWeight)
+        .toList();
+    expect(kopaLabels, everyElement(FontWeight.w900));
 
     await tester.tap(find.byKey(const ValueKey('match-entry-1')));
     await tester.pump();
@@ -68,6 +93,7 @@ MatchDetails _match({
   required String awayTeam,
   int? homeScore,
   int? awayScore,
+  bool isHomeTeam = true,
 }) {
   return MatchDetails(
     id: id,
@@ -79,6 +105,6 @@ MatchDetails _match({
     updatedAt: date,
     homeTeamScore: homeScore,
     awayTeamScore: awayScore,
-    isHomeTeam: true,
+    isHomeTeam: isHomeTeam,
   );
 }
