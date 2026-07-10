@@ -175,10 +175,7 @@ class _TeamBadgeHero extends StatelessWidget {
         final fromHero = fromHeroContext.widget as Hero;
         final toHero = toHeroContext.widget as Hero;
 
-        return ScaleTransition(
-          scale: Tween<double>(begin: 0.94, end: 1).animate(
-            CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
-          ),
+        return RepaintBoundary(
           child: flightDirection == HeroFlightDirection.push
               ? toHero.child
               : fromHero.child,
@@ -186,7 +183,7 @@ class _TeamBadgeHero extends StatelessWidget {
       },
       child: Material(
         type: MaterialType.transparency,
-        child: child,
+        child: RepaintBoundary(child: child),
       ),
     );
   }

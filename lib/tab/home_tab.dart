@@ -206,6 +206,12 @@ class _HomeTopBar extends StatelessWidget {
           ),
           const Spacer(),
           IconButton(
+            tooltip: 'Kalender',
+            onPressed: () {},
+            icon: const Icon(Icons.calendar_today_outlined),
+            color: appColors.grass,
+          ),
+          IconButton(
             tooltip: 'Notifikationer',
             onPressed: () {},
             icon: const Icon(Icons.notifications_outlined),
@@ -729,230 +735,224 @@ class _HeroTeamPanel extends StatelessWidget {
           child: InkWell(
             onTap: openDetails,
             borderRadius: BorderRadius.circular(28),
-            child: CustomPaint(
-              foregroundPainter: _SideAndBottomBorderPainter(
-                color: appColors.grass,
-                fadeColor: appColors.white,
-                radius: 40,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(
+                0,
+                0,
+                0,
+                Spacing.md,
               ),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(
-                  0,
-                  0,
-                  0,
-                  Spacing.md,
-                ),
-                decoration: BoxDecoration(
-                  color: appColors.lightGrass55,
-                  borderRadius: BorderRadius.circular(28),
-                  boxShadow: [
-                    BoxShadow(
-                      color: appColors.black.withValues(alpha: 0.06),
-                      blurRadius: 18,
-                      offset: const Offset(0, 8),
+              decoration: BoxDecoration(
+                color: appColors.lightGrass55,
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(color: appColors.grass),
+                boxShadow: [
+                  BoxShadow(
+                    color: appColors.black.withValues(alpha: 0.06),
+                    blurRadius: 18,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.fromLTRB(
+                      Spacing.md,
+                      Spacing.lg,
+                      Spacing.md,
+                      Spacing.md,
                     ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.fromLTRB(
-                        Spacing.md,
-                        Spacing.lg,
-                        Spacing.md,
-                        Spacing.md,
-                      ),
-                      decoration: BoxDecoration(
-                        color: appColors.lightGrass,
-                        borderRadius: BorderRadius.circular(28),
-                      ),
-                      child: Column(
-                        children: [
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              title,
-                              style: appTextStyles.label.copyWith(
-                                color: appColors.grass,
-                                fontWeight: FontWeight.w900,
-                              ),
+                    decoration: BoxDecoration(
+                      color: appColors.lightGrass,
+                      borderRadius: BorderRadius.circular(28),
+                    ),
+                    child: Column(
+                      children: [
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            title,
+                            style: appTextStyles.label.copyWith(
+                              color: appColors.grass,
+                              fontWeight: FontWeight.w900,
                             ),
                           ),
-                          const SizedBox(height: 14),
+                        ),
+                        const SizedBox(height: 14),
+                        Padding(
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: TeamBadgeLabel(
+                                  teamName: homeTeam,
+                                  teamId: stableTeamSeed(homeTeam),
+                                  heroTag: cardHeroTag == null
+                                      ? null
+                                      : MatchHeroCard.logoHeroTag(
+                                          cardHeroTag,
+                                          TeamSide.home,
+                                        ),
+                                  width: 86,
+                                  radius: 22,
+                                  labelStyle: appTextStyles.caption3.copyWith(
+                                    color: appColors.grey5,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 54,
+                                child: Text(
+                                  'VS',
+                                  textAlign: TextAlign.center,
+                                  style: appTextStyles.h5.copyWith(
+                                    color: appColors.grass,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: TeamBadgeLabel(
+                                  teamName: awayTeam,
+                                  teamId: stableTeamSeed(awayTeam),
+                                  heroTag: cardHeroTag == null
+                                      ? null
+                                      : MatchHeroCard.logoHeroTag(
+                                          cardHeroTag,
+                                          TeamSide.away,
+                                        ),
+                                  width: 86,
+                                  radius: 22,
+                                  labelStyle: appTextStyles.caption3.copyWith(
+                                    color: appColors.grey5,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (match == null)
                           Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
+                            padding: const EdgeInsets.only(top: Spacing.md),
+                            child: Text(
+                              'Ingen kamp planlagt',
+                              style: appTextStyles.buttonSmall.copyWith(
+                                color: appColors.primary,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          )
+                      ],
+                    ),
+                  ),
+                  if (match != null) ...[
+                    const SizedBox(height: Spacing.md),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Row(
+                        children: [
+                          _FactIcon(
+                            icon: Icons.schedule,
+                            color: appColors.sky,
+                          ),
+                          const SizedBox(width: Spacing.md),
+                          Expanded(
+                            child: _MatchFactColumn(
+                              label: 'KAMPSTART',
+                              value: _matchTime(match.date),
+                            ),
+                          ),
+                          Expanded(
+                            child: _MatchFactColumn(
+                              label: 'MØDETID',
+                              value: match.meetingTime == null
+                                  ? '--:--'
+                                  : _clockTime(match.meetingTime!),
+                              alignEnd: true,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: Spacing.md),
+            
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 0),
+                      child: Row(
+                        children: [
+                          _FactIcon(
+                            icon: Icons.location_on,
+                            color: appColors.error,
+                          ),
+                          const SizedBox(width: Spacing.md),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Expanded(
-                                  child: TeamBadgeLabel(
-                                    teamName: homeTeam,
-                                    teamId: stableTeamSeed(homeTeam),
-                                    heroTag: cardHeroTag == null
-                                        ? null
-                                        : MatchHeroCard.logoHeroTag(
-                                            cardHeroTag,
-                                            TeamSide.home,
-                                          ),
-                                    width: 86,
-                                    radius: 22,
-                                    labelStyle: appTextStyles.caption3.copyWith(
-                                      color: appColors.grey5,
-                                      fontWeight: FontWeight.w700,
-                                    ),
+                                Text(
+                                  match.location.isEmpty
+                                      ? 'Ingen lokation'
+                                      : match.location,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: appTextStyles.subtitle2.copyWith(
+                                    color: appColors.dirt,
+                                    fontWeight: FontWeight.w900,
                                   ),
                                 ),
-                                SizedBox(
-                                  width: 54,
-                                  child: Text(
-                                    'VS',
-                                    textAlign: TextAlign.center,
-                                    style: appTextStyles.h5.copyWith(
-                                      color: appColors.grass,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: TeamBadgeLabel(
-                                    teamName: awayTeam,
-                                    teamId: stableTeamSeed(awayTeam),
-                                    heroTag: cardHeroTag == null
-                                        ? null
-                                        : MatchHeroCard.logoHeroTag(
-                                            cardHeroTag,
-                                            TeamSide.away,
-                                          ),
-                                    width: 86,
-                                    radius: 22,
-                                    labelStyle: appTextStyles.caption3.copyWith(
-                                      color: appColors.grey5,
-                                      fontWeight: FontWeight.w700,
-                                    ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  _matchDate(match.date),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: appTextStyles.caption2.copyWith(
+                                    color: appColors.grey5,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          if (match == null)
-                            Padding(
-                              padding: const EdgeInsets.only(top: Spacing.md),
-                              child: Text(
-                                'Ingen kamp planlagt',
-                                style: appTextStyles.buttonSmall.copyWith(
-                                  color: appColors.primary,
-                                  fontWeight: FontWeight.w800,
-                                ),
+                          TextButton(
+                            onPressed: match.location.isEmpty
+                                ? null
+                                : () => _openNavigation(match),
+                            child: Text(
+                              'Kort ›',
+                              style: appTextStyles.buttonSmall.copyWith(
+                                color: appColors.grass,
+                                fontWeight: FontWeight.w900,
                               ),
-                            )
+                            ),
+                          ),
                         ],
                       ),
                     ),
-                    if (match != null) ...[
-                      const SizedBox(height: Spacing.md),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Row(
-                          children: [
-                            _FactIcon(
-                              icon: Icons.schedule,
-                              color: appColors.sky,
-                            ),
-                            const SizedBox(width: Spacing.md),
-                            Expanded(
-                              child: _MatchFactColumn(
-                                label: 'KAMPSTART',
-                                value: _matchTime(match.date),
-                              ),
-                            ),
-                            Expanded(
-                              child: _MatchFactColumn(
-                                label: 'MØDETID',
-                                value: match.meetingTime == null
-                                    ? '--:--'
-                                    : _clockTime(match.meetingTime!),
-                                alignEnd: true,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: Spacing.md),
-
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 0),
-                        child: Row(
-                          children: [
-                            _FactIcon(
-                              icon: Icons.location_on,
-                              color: appColors.error,
-                            ),
-                            const SizedBox(width: Spacing.md),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    match.location.isEmpty
-                                        ? 'Ingen lokation'
-                                        : match.location,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: appTextStyles.subtitle2.copyWith(
-                                      color: appColors.dirt,
-                                      fontWeight: FontWeight.w900,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    _matchDate(match.date),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: appTextStyles.caption2.copyWith(
-                                      color: appColors.grey5,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: match.location.isEmpty
-                                  ? null
-                                  : () => _openNavigation(match),
-                              child: Text(
-                                'Kort ›',
-                                style: appTextStyles.buttonSmall.copyWith(
-                                  color: appColors.grass,
-                                  fontWeight: FontWeight.w900,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: Spacing.md),
-                      Divider(
-                        color: appColors.grey3.withValues(alpha: 0.5),
-                        height: 1,
-                      ),
+                    const SizedBox(height: Spacing.md),
+                    Divider(
+                      color: appColors.grey3.withValues(alpha: 0.5),
+                      height: 1,
+                    ),
+                    const SizedBox(height: Spacing.sm),
+                    _MatchResponseCard(
+                      match: match,
+                      currentUser: currentUser,
+                      reserveRegistrationActions: reserveRegistrationActions,
+                    ),
+                    if (pinDetailsToBottom)
+                      const Spacer()
+                    else
                       const SizedBox(height: Spacing.sm),
-                      _MatchResponseCard(
-                        match: match,
-                        currentUser: currentUser,
-                        reserveRegistrationActions: reserveRegistrationActions,
-                      ),
-                      if (pinDetailsToBottom)
-                        const Spacer()
-                      else
-                        const SizedBox(height: Spacing.sm),
-                      _QuietDetailsLink(onPressed: openDetails!),
-                    ],
+                    _QuietDetailsLink(onPressed: openDetails!),
                   ],
-                ),
+                ],
               ),
             ),
           ),
