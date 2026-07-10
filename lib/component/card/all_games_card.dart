@@ -11,10 +11,12 @@ import 'package:kopa/theme/spacing.dart';
 class AllGamesCard extends StatelessWidget {
   final List<MatchDetails> matches;
   final ValueChanged<MatchDetails> onMatchTap;
+  final Map<int, GlobalKey>? matchItemKeys;
 
   const AllGamesCard({
     required this.matches,
     required this.onMatchTap,
+    this.matchItemKeys,
     super.key,
   });
 
@@ -26,6 +28,7 @@ class AllGamesCard extends StatelessWidget {
     return _MatchList(
       matches: sortedMatches,
       onMatchTap: onMatchTap,
+      matchItemKeys: matchItemKeys,
     );
   }
 }
@@ -33,10 +36,12 @@ class AllGamesCard extends StatelessWidget {
 class _MatchList extends StatelessWidget {
   final List<MatchDetails> matches;
   final ValueChanged<MatchDetails> onMatchTap;
+  final Map<int, GlobalKey>? matchItemKeys;
 
   const _MatchList({
     required this.matches,
     required this.onMatchTap,
+    this.matchItemKeys,
   });
 
   @override
@@ -44,10 +49,13 @@ class _MatchList extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: matches.indexed.expand((entry) sync* {
-        yield _GameResultRow(
+        final row = _GameResultRow(
           match: entry.$2,
           onTap: () => onMatchTap(entry.$2),
         );
+        final itemKey = matchItemKeys?[entry.$2.id];
+
+        yield itemKey == null ? row : KeyedSubtree(key: itemKey, child: row);
         if (entry.$1 != matches.length - 1) {
           yield const SizedBox(height: Spacing.sm);
         }

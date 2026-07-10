@@ -38,6 +38,7 @@ class _MatchProgrammePageState extends State<MatchProgrammePage> {
       currentUser = Future.value(user);
     }
   }
+
   final appColors = AppColors.light;
   @override
   Widget build(BuildContext context) {
@@ -55,9 +56,11 @@ class _MatchProgrammePageState extends State<MatchProgrammePage> {
             return FloatingActionButton(
               heroTag: 'create-match-fab',
               tooltip: 'Opret kamp',
-              backgroundColor: Theme.of(context).extension<AppColors>()?.lightGrass ?? Colors.green,
+              backgroundColor:
+                  Theme.of(context).extension<AppColors>()?.lightGrass ??
+                      Colors.green,
               onPressed: () => _showCreateMatch(context),
-              child:  Icon(Icons.add, color: appColors.dirt),
+              child: Icon(Icons.add, color: appColors.dirt),
             );
           },
         ),
@@ -79,8 +82,24 @@ class _MatchProgrammePageState extends State<MatchProgrammePage> {
   }
 }
 
-class _MatchList extends StatelessWidget {
+class _MatchList extends StatefulWidget {
   const _MatchList();
+
+  @override
+  State<_MatchList> createState() => _MatchListState();
+}
+
+class _MatchListState extends State<_MatchList> {
+  final _scrollController = ScrollController();
+  final _listViewKey = GlobalKey();
+  final Map<int, GlobalKey> _matchKeys = {};
+  bool _hasScheduledInitialScroll = false;
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -96,6 +115,9 @@ class _MatchList extends StatelessWidget {
           return const LoadingIndicator();
         }
 
+        _syncMatchKeys(state.matches);
+        _scheduleInitialScroll(state.matches);
+
         return _buildMatchList(context, state.matches);
       },
     );
@@ -107,14 +129,92 @@ class _MatchList extends StatelessWidget {
     }
 
     return ListView(
+      key: _listViewKey,
+      controller: _scrollController,
       padding: Spacing.screenPadding,
       children: [
         AllGamesCard(
           matches: matches,
+          matchItemKeys: _matchKeys,
           onMatchTap: (match) => _openMatch(context, match),
         ),
       ],
     );
+  }
+
+  void _syncMatchKeys(List<MatchDetails> matches) {
+    final matchIds = matches.map((match) => match.id).toSet();
+    _matchKeys.removeWhere((matchId, _) => !matchIds.contains(matchId));
+
+    for (final match in matches) {
+      _matchKeys.putIfAbsent(match.id, GlobalKey.new);
+    }
+  }
+
+  void _scheduleInitialScroll(List<MatchDetails> matches) {
+    if (_hasScheduledInitialScroll || matches.isEmpty) return;
+
+    _hasScheduledInitialScroll = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _scrollToLatestPlayedMatchIfNeeded(matches);
+    });
+  }
+
+  void _scrollToLatestPlayedMatchIfNeeded(List<MatchDetails> matches) {
+    if (!_scrollController.hasClients) return;
+
+    final sortedMatches = matches.toList()
+      ..sort((a, b) => a.date.compareTo(b.date));
+    final unplayedMatches = sortedMatches
+        .where((match) => !match.hasMatchBeenPlayed)
+        .toList(growable: false);
+
+    if (unplayedMatches.isNotEmpty &&
+        _areAllMatchesFullyVisible(unplayedMatches)) {
+      return;
+    }
+
+    final targetMatch = _latestPlayedMatch(sortedMatches);
+    if (targetMatch == null) return;
+
+    final targetContext = _matchKeys[targetMatch.id]?.currentContext;
+    if (targetContext == null) return;
+
+    Scrollable.ensureVisible(
+      targetContext,
+      alignment: 0,
+      duration: const Duration(milliseconds: 320),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  bool _areAllMatchesFullyVisible(List<MatchDetails> matches) {
+    final listRenderObject = _listViewKey.currentContext?.findRenderObject();
+    if (listRenderObject is! RenderBox) return false;
+
+    final viewportTop = listRenderObject.localToGlobal(Offset.zero).dy;
+    final viewportBottom = viewportTop + listRenderObject.size.height;
+
+    for (final match in matches) {
+      final renderObject =
+          _matchKeys[match.id]?.currentContext?.findRenderObject();
+      if (renderObject is! RenderBox) return false;
+
+      final itemTop = renderObject.localToGlobal(Offset.zero).dy;
+      final itemBottom = itemTop + renderObject.size.height;
+      if (itemTop < viewportTop || itemBottom > viewportBottom) return false;
+    }
+
+    return true;
+  }
+
+  MatchDetails? _latestPlayedMatch(List<MatchDetails> sortedMatches) {
+    for (final match in sortedMatches.reversed) {
+      if (match.hasMatchBeenPlayed) return match;
+    }
+
+    return null;
   }
 
   Future<void> _openMatch(
