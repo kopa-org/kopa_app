@@ -4,10 +4,12 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:kopa/component/avatar/team_badge_label.dart';
 import 'package:kopa/component/card/match_hero_card.dart';
 import 'package:kopa/component/home/home_bento_card.dart';
+import 'package:kopa/component/home/home_calendar_overlay.dart';
 import 'package:kopa/component/home/home_fine_box_card.dart';
 import 'package:kopa/component/home/home_statistics_strip.dart';
 import 'package:kopa/component/home/latest_result_card.dart';
@@ -65,11 +67,37 @@ class _HomeTabView extends StatelessWidget {
 
     return PageScaffold.tab(
       title: 'Kopa',
+      titleWidget: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SvgPicture.asset(
+            'assets/logos/logomark_outline_foreground.svg',
+            height: 32,
+            colorFilter: ColorFilter.mode(appColors.grass, BlendMode.srcIn),
+          ),
+          const SizedBox(width: Spacing.sm),
+          Text(
+            'Kopa',
+            style: appTextStyles.h5.copyWith(
+              color: appColors.grass,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
       trailing: [
-        IconButton(
-          tooltip: 'Kalender',
-          onPressed: () {},
-          icon: const Icon(Icons.calendar_today_outlined),
+        BlocBuilder<HomeCubit, HomeState>(
+          buildWhen: (previous, current) => previous.matches != current.matches,
+          builder: (context, state) => IconButton(
+            tooltip: 'Kalender',
+            onPressed: () => showHomeCalendarOverlay(
+              context: context,
+              events: state.matches,
+              onEventTap: (match) =>
+                  _openMatch(context, match, 'home_calendar'),
+            ),
+            icon: const Icon(Icons.calendar_today_outlined),
+          ),
         ),
         IconButton(
           tooltip: 'Notifikationer',
@@ -887,84 +915,6 @@ class _HeroTeamPanel extends StatelessWidget {
         );
       },
     );
-  }
-}
-
-class _SideAndBottomBorderPainter extends CustomPainter {
-  final Color color;
-  final Color fadeColor;
-  final double radius;
-
-  static const double _strokeWidth = 1;
-  static const double _sideTopInset = 20;
-  static const double _bottomInset = 0;
-  static const double _topFadeLength = 48;
-
-  const _SideAndBottomBorderPainter({
-    required this.color,
-    required this.fadeColor,
-    required this.radius,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    const strokeWidth = _strokeWidth;
-    const inset = strokeWidth / 2;
-    final effectiveRadius = math.max(0.0, radius - inset);
-    final left = inset;
-    final right = size.width - inset;
-    final bottom = math.max(inset, size.height - _bottomInset - inset);
-    final sideStart = _sideTopInset.clamp(0.0, bottom);
-    final sideHeight = math.max(1.0, bottom - sideStart);
-    final fadeStop = (_topFadeLength / sideHeight).clamp(0.0, 1.0);
-
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth;
-    final sidePaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          fadeColor,
-          color,
-          color,
-        ],
-        stops: [
-          0,
-          fadeStop,
-          1,
-        ],
-      ).createShader(Rect.fromLTRB(0, sideStart, size.width, bottom));
-
-    canvas.drawLine(
-      Offset(left, sideStart),
-      Offset(left, bottom - effectiveRadius),
-      sidePaint,
-    );
-    canvas.drawLine(
-      Offset(right, sideStart),
-      Offset(right, bottom - effectiveRadius),
-      sidePaint,
-    );
-
-    final bottomPath = Path()
-      ..moveTo(left, bottom - effectiveRadius)
-      ..quadraticBezierTo(left, bottom, left + effectiveRadius, bottom)
-      ..lineTo(right - effectiveRadius, bottom)
-      ..quadraticBezierTo(right, bottom, right, bottom - effectiveRadius);
-
-    canvas.drawPath(bottomPath, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _SideAndBottomBorderPainter oldDelegate) {
-    return oldDelegate.color != color ||
-        oldDelegate.fadeColor != fadeColor ||
-        oldDelegate.radius != radius;
   }
 }
 
