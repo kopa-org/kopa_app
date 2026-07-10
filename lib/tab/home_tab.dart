@@ -527,7 +527,7 @@ class _HeroMatchCarouselState extends State<_HeroMatchCarousel> {
                 ),
                 Positioned.fill(
                   child: Padding(
-                    padding: const EdgeInsets.only(left: Spacing.md),
+                    padding: const EdgeInsets.only(left: Spacing.sm),
                     child: PageView.builder(
                       controller: _controller,
                       itemCount: pages.length,
