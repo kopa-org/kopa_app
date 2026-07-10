@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopa/component/card/all_games_card.dart';
@@ -13,6 +12,7 @@ import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/page/match/create_match_page.dart';
 import 'package:kopa/page/match/match_details_page.dart';
+import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/spacing.dart';
 import 'package:kopa/utils/app_analytics.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -38,32 +38,29 @@ class _MatchProgrammePageState extends State<MatchProgrammePage> {
       currentUser = Future.value(user);
     }
   }
-
+  final appColors = AppColors.light;
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => MatchProgrammeCubit()..loadMatches(),
       child: PageScaffold.tab(
         title: 'Kampprogram',
-        trailing: [
-          FutureHandler<UserDetails>(
-            future: currentUser,
-            loadingIndicator: const SizedBox.shrink(),
-            onError: (_) => const SizedBox.shrink(),
-            onSuccess: (context, user) {
-              if (!user.isTeamOwner) return const SizedBox.shrink();
+        floatingActionButton: FutureHandler<UserDetails>(
+          future: currentUser,
+          loadingIndicator: const SizedBox.shrink(),
+          onError: (_) => const SizedBox.shrink(),
+          onSuccess: (context, user) {
+            if (!user.isTeamOwner) return const SizedBox.shrink();
 
-              return CupertinoButton(
-                padding: EdgeInsets.zero,
-                onPressed: () => _showCreateMatch(context),
-                child: const Icon(
-                  CupertinoIcons.add,
-                  semanticLabel: 'Opret kamp',
-                ),
-              );
-            },
-          ),
-        ],
+            return FloatingActionButton(
+              heroTag: 'create-match-fab',
+              tooltip: 'Opret kamp',
+              backgroundColor: Theme.of(context).extension<AppColors>()?.lightGrass ?? Colors.green,
+              onPressed: () => _showCreateMatch(context),
+              child:  Icon(Icons.add, color: appColors.dirt),
+            );
+          },
+        ),
         body: const _MatchList(),
       ),
     );

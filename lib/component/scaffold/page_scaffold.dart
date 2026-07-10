@@ -12,10 +12,12 @@ class PageScaffold extends StatelessWidget {
   final Widget? leading;
   final List<Widget>? trailing;
   final Widget? floatingActionButton;
+  final double floatingActionButtonBottomInset;
   final Color? backgroundColor;
   final Future<void> Function()? onRefresh;
   final bool showBackButton;
   final bool showTopBar;
+  final bool showTitle;
   final bool useTopSafeArea;
   final ObstructingPreferredSizeWidget? navigationBar;
   final SystemUiOverlayStyle? systemOverlayStyle;
@@ -28,11 +30,13 @@ class PageScaffold extends StatelessWidget {
     this.leading,
     this.trailing,
     this.floatingActionButton,
+    this.floatingActionButtonBottomInset = 16,
     this.backgroundColor,
     this.onRefresh,
     this.navigationBar,
     this.showBackButton = false,
     this.showTopBar = true,
+    this.showTitle = true,
     this.useTopSafeArea = true,
     this.systemOverlayStyle,
   });
@@ -45,12 +49,14 @@ class PageScaffold extends StatelessWidget {
     this.leading,
     this.trailing,
     this.floatingActionButton,
+    this.floatingActionButtonBottomInset = 120,
     this.backgroundColor,
     this.onRefresh,
     this.systemOverlayStyle,
     this.useTopSafeArea = true,
   })  : showBackButton = false,
         showTopBar = true,
+        showTitle = false,
         navigationBar = null;
 
   @override
@@ -62,11 +68,12 @@ class PageScaffold extends StatelessWidget {
 
     final isIOS = theme.platform == TargetPlatform.iOS;
     final bgColor = backgroundColor ?? appColors.white;
+    final shouldShowTopBar = showTopBar && _hasTopBarContent;
 
     final page = isIOS
         ? CupertinoPageScaffold(
             backgroundColor: bgColor,
-            navigationBar: showTopBar
+            navigationBar: shouldShowTopBar
                 ? navigationBar ??
                     CupertinoNavigationBar(
                       backgroundColor: bgColor,
@@ -76,21 +83,34 @@ class PageScaffold extends StatelessWidget {
                       trailing: _buildTrailing(appColors),
                     )
                 : null,
-            child: SafeArea(
-              top: useTopSafeArea,
-              child: onRefresh != null
-                  ? CustomScrollView(
-                      slivers: [
-                        CupertinoSliverRefreshControl(onRefresh: onRefresh!),
-                        SliverFillRemaining(child: body),
-                      ],
-                    )
-                  : body,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                SafeArea(
+                  top: useTopSafeArea,
+                  child: onRefresh != null
+                      ? CustomScrollView(
+                          slivers: [
+                            CupertinoSliverRefreshControl(
+                              onRefresh: onRefresh!,
+                            ),
+                            SliverFillRemaining(child: body),
+                          ],
+                        )
+                      : body,
+                ),
+                if (floatingActionButton != null)
+                  Positioned(
+                    right: 16,
+                    bottom: floatingActionButtonBottomInset,
+                    child: floatingActionButton!,
+                  ),
+              ],
             ),
           )
         : Scaffold(
             backgroundColor: bgColor,
-            appBar: showTopBar
+            appBar: shouldShowTopBar
                 ? AppBar(
                     title: _buildTitle(appTextStyles),
                     backgroundColor: bgColor,
@@ -121,6 +141,7 @@ class PageScaffold extends StatelessWidget {
   Widget _buildTitle(AppTextStyles appTextStyles) {
     final titleWidget = this.titleWidget;
     if (titleWidget != null) return titleWidget;
+    if (!showTitle) return const SizedBox.shrink();
 
     return title == 'Kopa'
         ? SvgPicture.asset(
@@ -131,6 +152,14 @@ class PageScaffold extends StatelessWidget {
             title,
             style: appTextStyles.sectionHeader,
           );
+  }
+
+  bool get _hasTopBarContent {
+    return showTitle ||
+        titleWidget != null ||
+        leading != null ||
+        showBackButton ||
+        (trailing?.isNotEmpty ?? false);
   }
 
   Widget? _buildTrailing(AppColors appColors) {

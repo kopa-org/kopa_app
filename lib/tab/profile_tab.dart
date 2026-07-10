@@ -39,7 +39,7 @@ class _ProfileTabState extends State<ProfileTab> {
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return PageScaffold.tab(
-      title: 'Profil',
+      title: 'Truppen',
       backgroundColor: appColors.background,
       body: RefreshIndicator(
         onRefresh: _refresh,

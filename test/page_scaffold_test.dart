@@ -34,7 +34,7 @@ void main() {
     );
 
     expect(find.byType(AppBar), findsOneWidget);
-    expect(find.text('Kampe'), findsOneWidget);
+    expect(find.text('Kampe'), findsNothing);
     expect(find.byIcon(Icons.arrow_back), findsNothing);
     expect(find.text('Indhold'), findsOneWidget);
 
@@ -46,6 +46,7 @@ void main() {
 
   testWidgets('tab scaffold applies the same policy on iOS', (tester) async {
     var actionPressed = false;
+    var fabPressed = false;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -57,7 +58,11 @@ void main() {
           ],
         ),
         home: PageScaffold.tab(
-          title: 'Profil',
+          title: 'Kopa',
+          titleWidget: const Icon(
+            Icons.shield_outlined,
+            key: ValueKey('custom-tab-title'),
+          ),
           trailing: [
             IconButton(
               key: const ValueKey('ios-tab-action'),
@@ -65,19 +70,53 @@ void main() {
               icon: const Icon(Icons.settings),
             ),
           ],
+          floatingActionButton: FloatingActionButton(
+            key: const ValueKey('ios-fab'),
+            onPressed: () => fabPressed = true,
+            child: const Icon(Icons.add),
+          ),
           body: const Text('Indhold'),
         ),
       ),
     );
 
     expect(find.byType(CupertinoNavigationBar), findsOneWidget);
-    expect(find.text('Profil'), findsOneWidget);
+    expect(find.byKey(const ValueKey('custom-tab-title')), findsOneWidget);
+    expect(find.text('Kopa'), findsNothing);
     expect(find.byIcon(CupertinoIcons.back), findsNothing);
     expect(find.text('Indhold'), findsOneWidget);
+    expect(find.byKey(const ValueKey('ios-fab')), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('ios-tab-action')));
     await tester.pump();
 
     expect(actionPressed, isTrue);
+
+    await tester.tap(find.byKey(const ValueKey('ios-fab')));
+    await tester.pump();
+
+    expect(fabPressed, isTrue);
+  });
+
+  testWidgets('tab scaffold removes an empty top bar', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          platform: TargetPlatform.android,
+          extensions: <ThemeExtension<dynamic>>[
+            AppColors.light,
+            AppTextStyles.light,
+          ],
+        ),
+        home: const PageScaffold.tab(
+          title: 'Statistik',
+          body: Text('Indhold'),
+        ),
+      ),
+    );
+
+    expect(find.byType(AppBar), findsNothing);
+    expect(find.text('Statistik'), findsNothing);
+    expect(find.text('Indhold'), findsOneWidget);
   });
 }

@@ -131,11 +131,11 @@ abstract final class AppRouter {
         StatefulShellRoute.indexedStack(
           builder: (context, state, navigationShell) {
             final theme = Theme.of(context);
-            const tabs = [
+            const tabs = <(IconData, String, String?)>[
               (Icons.home, 'Hjem', 'assets/logos/home-simple-door.svg'),
               (Icons.sports_soccer, 'Kampe', 'assets/logos/soccer-ball.svg'),
               (Icons.bar_chart, 'Statistik', 'assets/logos/graph-up.svg'),
-              (Icons.person, 'Profil', 'assets/logos/piggy-bank.svg'),
+              (Icons.groups_outlined, 'Truppen', null),
               (
                 CupertinoIcons.gear_alt,
                 'Settings',
@@ -191,9 +191,9 @@ abstract final class AppRouter {
                       label: 'Statistik',
                     ),
                     GlassTab(
-                      icon: Icon(CupertinoIcons.person),
-                      activeIcon: Icon(CupertinoIcons.person_fill),
-                      label: 'Profil',
+                      icon: Icon(CupertinoIcons.group),
+                      activeIcon: Icon(CupertinoIcons.group_solid),
+                      label: 'Truppen',
                     ),
                     GlassTab(
                       icon: Icon(CupertinoIcons.gear),
@@ -245,17 +245,25 @@ abstract final class AppRouter {
                         for (int i = 0; i < tabs.length; i++)
                           GButton(
                             icon: tabs[i].$1,
-                            leading: SvgPicture.asset(
-                              tabs[i].$3,
-                              width: 24,
-                              height: 24,
-                              colorFilter: ColorFilter.mode(
-                                navigationShell.currentIndex == i
-                                    ? theme.colorScheme.primary
-                                    : theme.unselectedWidgetColor,
-                                BlendMode.srcIn,
-                              ),
-                            ),
+                            leading: tabs[i].$3 == null
+                                ? Icon(
+                                    tabs[i].$1,
+                                    size: 24,
+                                    color: navigationShell.currentIndex == i
+                                        ? theme.colorScheme.primary
+                                        : theme.unselectedWidgetColor,
+                                  )
+                                : SvgPicture.asset(
+                                    tabs[i].$3!,
+                                    width: 24,
+                                    height: 24,
+                                    colorFilter: ColorFilter.mode(
+                                      navigationShell.currentIndex == i
+                                          ? theme.colorScheme.primary
+                                          : theme.unselectedWidgetColor,
+                                      BlendMode.srcIn,
+                                    ),
+                                  ),
                             text: tabs[i].$2,
                           ),
                       ],
@@ -322,7 +330,7 @@ abstract final class AppRouter {
       0 => 'home',
       1 => 'matches',
       2 => 'statistics',
-      3 => 'profile',
+      3 => 'squad',
       4 => 'settings',
       _ => 'unknown',
     };
