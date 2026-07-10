@@ -3,9 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:kopa/component/avatar/team_badge_label.dart';
 import 'package:kopa/component/card/match_hero_card.dart';
@@ -65,159 +63,93 @@ class _HomeTabView extends StatelessWidget {
       return const Center(child: Text('User not logged in'));
     }
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark.copyWith(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
-        statusBarBrightness: Brightness.light,
-      ),
-      child: PageScaffold(
-        title: 'Forside',
-        showBackButton: false,
-        showTopBar: false,
-        useTopSafeArea: false,
-        backgroundColor: appColors.white,
-        body: RefreshIndicator(
-          color: appColors.primary,
-          onRefresh: () async {
-            await context
-                .read<HomeCubit>()
-                .fetchDashboardData(currentUser.teamDetails!.id);
-          },
-          child: BlocBuilder<HomeCubit, HomeState>(
-            builder: (context, state) {
-              if (state.status == HomeStatus.initial ||
-                  state.status == HomeStatus.loading) {
-                return const Center(child: CircularProgressIndicator());
-              }
+    return PageScaffold.tab(
+      title: 'Kopa',
+      trailing: [
+        IconButton(
+          tooltip: 'Kalender',
+          onPressed: () {},
+          icon: const Icon(Icons.calendar_today_outlined),
+        ),
+        IconButton(
+          tooltip: 'Notifikationer',
+          onPressed: () {},
+          icon: const Icon(Icons.notifications_outlined),
+        ),
+      ],
+      backgroundColor: appColors.white,
+      body: RefreshIndicator(
+        color: appColors.primary,
+        onRefresh: () async {
+          await context
+              .read<HomeCubit>()
+              .fetchDashboardData(currentUser.teamDetails!.id);
+        },
+        child: BlocBuilder<HomeCubit, HomeState>(
+          builder: (context, state) {
+            if (state.status == HomeStatus.initial ||
+                state.status == HomeStatus.loading) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-              if (state.status == HomeStatus.failure) {
-                return Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(Spacing.lg),
-                    child: Text(
-                      state.errorMessage ?? 'Kunne ikke hente dashboard data',
-                      style:
-                          appTextStyles.body.copyWith(color: appColors.error),
-                      textAlign: TextAlign.center,
-                    ),
+            if (state.status == HomeStatus.failure) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(Spacing.lg),
+                  child: Text(
+                    state.errorMessage ?? 'Kunne ikke hente dashboard data',
+                    style: appTextStyles.body.copyWith(color: appColors.error),
+                    textAlign: TextAlign.center,
                   ),
-                );
-              }
-
-              final upcomingMatches = _upcomingMatches(state);
-              final playedMatches = _playedMatches(state);
-              final nextMatch = upcomingMatches.isEmpty
-                  ? state.nextMatch
-                  : upcomingMatches.first;
-              final latestMatch =
-                  playedMatches.isEmpty ? null : playedMatches.last;
-
-              return SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _HomeTopBar(currentUser: currentUser),
-                    _HeroSection(
-                      currentUser: currentUser,
-                      nextMatch: nextMatch,
-                    ),
-                    _HeroPanelCutover(
-                      overlap: _heroPanelGradientOverlap,
-                      child: _HeroMatchCarousel(
-                        matches: upcomingMatches,
-                        fallbackMatch: nextMatch,
-                        currentUser: currentUser,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        Spacing.md,
-                        Spacing.md,
-                        Spacing.md,
-                        0,
-                      ),
-                      child: _BentoGrid(
-                        currentUser: currentUser,
-                        latestMatch: latestMatch,
-                        standings: state.dbuStandings,
-                        statistics: state.statistics,
-                        fineBox: state.fineBox,
-                      ),
-                    ),
-                  ],
                 ),
               );
-            },
-          ),
+            }
+
+            final upcomingMatches = _upcomingMatches(state);
+            final playedMatches = _playedMatches(state);
+            final nextMatch = upcomingMatches.isEmpty
+                ? state.nextMatch
+                : upcomingMatches.first;
+            final latestMatch =
+                playedMatches.isEmpty ? null : playedMatches.last;
+
+            return SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _HeroSection(
+                    currentUser: currentUser,
+                    nextMatch: nextMatch,
+                  ),
+                  _HeroPanelCutover(
+                    overlap: _heroPanelGradientOverlap,
+                    child: _HeroMatchCarousel(
+                      matches: upcomingMatches,
+                      fallbackMatch: nextMatch,
+                      currentUser: currentUser,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      Spacing.md,
+                      Spacing.md,
+                      Spacing.md,
+                      0,
+                    ),
+                    child: _BentoGrid(
+                      currentUser: currentUser,
+                      latestMatch: latestMatch,
+                      standings: state.dbuStandings,
+                      statistics: state.statistics,
+                      fineBox: state.fineBox,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
-      ),
-    );
-  }
-}
-
-class _HomeTopBar extends StatelessWidget {
-  final UserDetails currentUser;
-
-  const _HomeTopBar({required this.currentUser});
-
-  @override
-  Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    final topInset = MediaQuery.paddingOf(context).top;
-
-    return Container(
-      height: 64 + topInset,
-      padding: EdgeInsets.fromLTRB(
-        Spacing.md,
-        topInset,
-        Spacing.md,
-        0,
-      ),
-      decoration: BoxDecoration(
-        color: appColors.white,
-        boxShadow: [
-          BoxShadow(
-            color: appColors.black,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          SvgPicture.asset(
-            'assets/logos/logomark_outline_foreground.svg',
-            height: 40,
-            colorFilter: ColorFilter.mode(appColors.grass, BlendMode.srcIn),
-          ),
-          const SizedBox(width: Spacing.sm),
-          Text(
-            'Kopa',
-            style: appTextStyles.h3.copyWith(
-              color: appColors.grass,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const Spacer(),
-          IconButton(
-            tooltip: 'Kalender',
-            onPressed: () {},
-            icon: const Icon(Icons.calendar_today_outlined),
-            color: appColors.grass,
-          ),
-          IconButton(
-            tooltip: 'Notifikationer',
-            onPressed: () {},
-            icon: const Icon(Icons.notifications_outlined),
-            color: appColors.grass,
-          ),
-        ],
       ),
     );
   }
@@ -246,9 +178,7 @@ class _HeroSection extends StatelessWidget {
         Spacing.md,
         Spacing.lg + _heroPanelGradientOverlap,
       ),
-      decoration: BoxDecoration(
-        color: appColors.white
-      ),
+      decoration: BoxDecoration(color: appColors.white),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -783,8 +713,7 @@ class _HeroTeamPanel extends StatelessWidget {
                         ),
                         const SizedBox(height: 14),
                         Padding(
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 8.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
@@ -882,7 +811,6 @@ class _HeroTeamPanel extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: Spacing.md),
-            
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 0),
                       child: Row(

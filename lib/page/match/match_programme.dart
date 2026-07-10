@@ -43,7 +43,7 @@ class _MatchProgrammePageState extends State<MatchProgrammePage> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => MatchProgrammeCubit()..loadMatches(),
-      child: PageScaffold(
+      child: PageScaffold.tab(
         title: 'Kampprogram',
         trailing: [
           FutureHandler<UserDetails>(

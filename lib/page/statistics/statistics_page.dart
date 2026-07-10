@@ -36,7 +36,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
       _statisticsFuture = _loadStatisticsPageData(teamId);
     }
 
-    return PageScaffold(
+    return PageScaffold.tab(
       title: 'Statistik',
       body: teamId == null
           ? const Center(child: Text('Ingen hold valgt.'))

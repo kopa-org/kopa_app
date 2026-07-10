@@ -47,9 +47,8 @@ class _SettingsTabState extends State<SettingsTab> {
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
     final currentUser = context.read<AuthCubit>().state.user;
 
-    return PageScaffold(
+    return PageScaffold.tab(
       title: 'Settings',
-      showBackButton: false,
       backgroundColor: appColors.background,
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
