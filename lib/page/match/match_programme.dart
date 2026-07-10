@@ -124,7 +124,6 @@ class _MatchList extends StatelessWidget {
     BuildContext context,
     MatchDetails matchDetails,
   ) async {
-    final heroTag = 'match-programme-${matchDetails.id}-all-games';
     AppAnalytics.logEvent(
       'match_opened',
       parameters: {'source': 'match_programme'},
@@ -134,7 +133,6 @@ class _MatchList extends StatelessWidget {
         builder: (context) => MatchDetailsPage(
           matchId: matchDetails.id,
           initialMatch: matchDetails,
-          heroTag: heroTag,
         ),
       ),
     );

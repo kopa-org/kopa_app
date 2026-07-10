@@ -1,6 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:kopa/component/avatar/app_avatar.dart';
+import 'package:kopa/component/avatar/team_badge_label.dart';
 import 'package:kopa/helpers/date_helper.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/theme/app_colors.dart';
@@ -19,46 +20,98 @@ class AllGamesCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final upcomingMatches = matches
+        .where((match) => !match.hasMatchBeenPlayed)
+        .toList()
+      ..sort((a, b) => a.date.compareTo(b.date));
+    final completedMatches = matches
+        .where((match) => match.hasMatchBeenPlayed)
+        .toList()
+      ..sort((a, b) => b.date.compareTo(a.date));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (upcomingMatches.isNotEmpty)
+          _MatchSection(
+            title: 'Kommende kampe',
+            matches: upcomingMatches,
+            onMatchTap: onMatchTap,
+          ),
+        if (upcomingMatches.isNotEmpty && completedMatches.isNotEmpty)
+          const SizedBox(height: Spacing.lg),
+        if (completedMatches.isNotEmpty)
+          _MatchSection(
+            title: 'Tidligere kampe',
+            matches: completedMatches,
+            onMatchTap: onMatchTap,
+          ),
+      ],
+    );
+  }
+}
+
+class _MatchSection extends StatelessWidget {
+  final String title;
+  final List<MatchDetails> matches;
+  final ValueChanged<MatchDetails> onMatchTap;
+
+  const _MatchSection({
+    required this.title,
+    required this.matches,
+    required this.onMatchTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     final appColors =
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final sortedMatches = [...matches]
-      ..sort((a, b) => b.date.compareTo(a.date));
 
-    return Container(
-      padding: const EdgeInsets.all(Spacing.md),
-      decoration: BoxDecoration(
-        border: Border.all(color: appColors.grass),
-        color: appColors.lightGrass55,
-        borderRadius: BorderRadius.circular(Spacing.borderRadiusLargeIncreased),
-      ),
-      child: Column(
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              'Serie 1',
-              style: appTextStyles.caption3.copyWith(color: appColors.grey3),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                style: appTextStyles.subtitle2.copyWith(
+                  color: appColors.dirt,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
             ),
-          ),
-          const SizedBox(height: Spacing.md),
-          if (sortedMatches.isEmpty)
-            Text('Ingen kampe endnu', style: appTextStyles.body3)
-          else
-            ...sortedMatches.indexed.expand((entry) sync* {
-              final index = entry.$1;
-              final match = entry.$2;
-              yield _GameResultRow(
-                match: match,
-                onTap: () => onMatchTap(match),
-              );
-              if (index != sortedMatches.length - 1) {
-                yield const SizedBox(height: Spacing.md);
-              }
-            }),
-        ],
-      ),
+            Container(
+              constraints: const BoxConstraints(minWidth: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+              decoration: BoxDecoration(
+                color: appColors.grey2,
+                borderRadius: BorderRadius.circular(Spacing.borderRadiusFull),
+              ),
+              child: Text(
+                '${matches.length}',
+                textAlign: TextAlign.center,
+                style: appTextStyles.buttonTiny.copyWith(
+                  color: appColors.grass,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: Spacing.sm),
+        ...matches.indexed.expand((entry) sync* {
+          yield _GameResultRow(
+            match: entry.$2,
+            onTap: () => onMatchTap(entry.$2),
+          );
+          if (entry.$1 != matches.length - 1) {
+            yield const SizedBox(height: Spacing.sm);
+          }
+        }),
+      ],
     );
   }
 }
@@ -75,85 +128,118 @@ class _GameResultRow extends StatelessWidget {
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final homeScore = match.homeTeamScore;
-    final awayScore = match.awayTeamScore;
-    final homeScoreValue = homeScore ?? 0;
-    final awayScoreValue = awayScore ?? 0;
-    final result = homeScoreValue == awayScoreValue
-        ? 'UAFGJORT'
-        : homeScoreValue > awayScoreValue
-            ? 'SEJR'
-            : 'TABT';
-    final resultColor = result == 'SEJR'
-        ? appColors.success
-        : result == 'TABT'
-            ? appColors.error
-            : appColors.sunset;
-    final resultTextColor =
-        result == 'SEJR' ? appColors.lightGrass : appColors.offWhite;
+    final status = _MatchStatus.from(match, appColors);
+    final borderRadius = BorderRadius.circular(Spacing.borderRadiusSmall);
 
-    return InkWell(
-      onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            DateFormat('EEE dd.MM', 'da_DK').format(match.date),
-            style: appTextStyles.caption3.copyWith(color: appColors.grey5),
-            overflow: TextOverflow.ellipsis,
+    return Semantics(
+      key: ValueKey('match-entry-${match.id}'),
+      button: true,
+      label: 'Åbn kamp: ${match.matchName}',
+      child: Material(
+        color: Colors.transparent,
+        child: Ink(
+          decoration: BoxDecoration(
+            color: appColors.white,
+            borderRadius: borderRadius,
+            border: Border.all(
+              color: appColors.grey3.withValues(alpha: 0.62),
+            ),
           ),
-          const SizedBox(height: 6),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(
-                width: 72,
-                child: match.hasMatchBeenPlayed
-                    ? Align(
-                        alignment: Alignment.centerLeft,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: resultColor,
-                            borderRadius:
-                                BorderRadius.circular(Spacing.borderRadiusFull),
-                          ),
-                          child: Text(
-                            result,
-                            style: appTextStyles.label
-                                .copyWith(color: resultTextColor),
-                          ),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: borderRadius,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(Spacing.md, 12, 12, 12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              CupertinoIcons.calendar,
+                              size: 14,
+                              color: appColors.grey5,
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                DateFormat('EEE d. MMM', 'da_DK')
+                                    .format(match.date)
+                                    .toUpperCase(),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: appTextStyles.buttonTiny.copyWith(
+                                  color: appColors.grey5,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                            _StatusBadge(status: status),
+                          ],
                         ),
-                      )
-                    : Text(
-                        DateHelper.getFormattedTime(match.date),
-                        style: appTextStyles.buttonSmall
-                            .copyWith(color: appColors.grey5),
-                      ),
-              ),
-              const SizedBox(width: Spacing.sm),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _GameTeamLine(
-                      name: match.homeTeam ?? 'Hjemme',
-                      score: homeScore,
+                        const SizedBox(height: 12),
+                        _GameTeamLine(
+                          name: match.homeTeam ?? 'Hjemme',
+                          score: match.homeTeamScore,
+                        ),
+                        const SizedBox(height: Spacing.sm),
+                        _GameTeamLine(
+                          name: match.awayTeam ?? 'Ude',
+                          score: match.awayTeamScore,
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 6),
-                    _GameTeamLine(
-                      name: match.awayTeam ?? 'Ude',
-                      score: awayScore,
+                  ),
+                  const SizedBox(width: 12),
+                  Container(
+                    width: 36,
+                    height: 36,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: appColors.lightGrass55,
+                      shape: BoxShape.circle,
                     ),
-                  ],
-                ),
+                    child: Icon(
+                      CupertinoIcons.chevron_right,
+                      size: 17,
+                      color: appColors.grass,
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StatusBadge extends StatelessWidget {
+  final _MatchStatus status;
+
+  const _StatusBadge({required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+      decoration: BoxDecoration(
+        color: status.backgroundColor,
+        borderRadius: BorderRadius.circular(Spacing.borderRadiusFull),
+      ),
+      child: Text(
+        status.label,
+        style: appTextStyles.buttonTiny.copyWith(
+          color: status.foregroundColor,
+          fontWeight: FontWeight.w800,
+        ),
       ),
     );
   }
@@ -163,7 +249,10 @@ class _GameTeamLine extends StatelessWidget {
   final String name;
   final int? score;
 
-  const _GameTeamLine({required this.name, required this.score});
+  const _GameTeamLine({
+    required this.name,
+    required this.score,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -174,30 +263,76 @@ class _GameTeamLine extends StatelessWidget {
 
     return Row(
       children: [
-        AppAvatar(initials: _initials(name), radius: 10),
-        const SizedBox(width: Spacing.sm),
         Expanded(
-          child: Text(
-            name,
-            style: appTextStyles.caption1.copyWith(color: appColors.dirt),
-            overflow: TextOverflow.ellipsis,
+          child: TeamBadgeLabel(
+            teamName: name,
+            teamId: stableTeamSeed(name),
+            radius: 10,
+            badgePadding: 2,
+            labelStyle: appTextStyles.body4.copyWith(
+              color: appColors.dirt,
+              fontWeight: FontWeight.w700,
+            ),
+            layout: TeamBadgeLabelLayout.horizontal,
           ),
         ),
-        if (score != null)
-          Text(
-            '$score',
-            style: appTextStyles.caption1.copyWith(color: appColors.dirt),
+        if (score != null) ...[
+          const SizedBox(width: Spacing.sm),
+          SizedBox(
+            width: 24,
+            child: Text(
+              '$score',
+              textAlign: TextAlign.end,
+              style: appTextStyles.subtitle2.copyWith(
+                color: appColors.dirt,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
           ),
+        ],
       ],
     );
   }
 }
 
-String _initials(String name) {
-  final words = name.trim().split(RegExp(r'\s+'));
-  return words
-      .where((word) => word.isNotEmpty)
-      .take(2)
-      .map((word) => word[0].toUpperCase())
-      .join();
+class _MatchStatus {
+  final String label;
+  final Color backgroundColor;
+  final Color foregroundColor;
+
+  const _MatchStatus({
+    required this.label,
+    required this.backgroundColor,
+    required this.foregroundColor,
+  });
+
+  factory _MatchStatus.from(MatchDetails match, AppColors colors) {
+    if (!match.hasMatchBeenPlayed) {
+      return _MatchStatus(
+        label: DateHelper.getFormattedTime(match.date),
+        backgroundColor: colors.lightSky55,
+        foregroundColor: colors.sky,
+      );
+    }
+
+    final isHomeTeam = match.isHomeTeam != false;
+    final teamScore = isHomeTeam ? match.homeTeamScore! : match.awayTeamScore!;
+    final opponentScore =
+        isHomeTeam ? match.awayTeamScore! : match.homeTeamScore!;
+
+    if (teamScore == opponentScore) {
+      return _MatchStatus(
+        label: 'UAFGJORT',
+        backgroundColor: colors.sunset,
+        foregroundColor: colors.offWhite,
+      );
+    }
+
+    final isWin = teamScore > opponentScore;
+    return _MatchStatus(
+      label: isWin ? 'SEJR' : 'TABT',
+      backgroundColor: isWin ? colors.success : colors.error,
+      foregroundColor: isWin ? colors.dirt : colors.offWhite,
+    );
+  }
 }
