@@ -19,6 +19,7 @@ void main() {
       date: DateTime(2027, 8, 12, 19),
       homeTeam: 'Kopa IF',
       awayTeam: 'Fremad',
+      isCurrentUserRegistered: true,
     );
     final completedMatch = _match(
       id: 2,
@@ -60,6 +61,7 @@ void main() {
 
     expect(find.text('Kommende kampe'), findsNothing);
     expect(find.text('Tidligere kampe'), findsNothing);
+    expect(find.text('Tilmeldt'), findsOneWidget);
     expect(find.byIcon(CupertinoIcons.chevron_right), findsNWidgets(3));
     expect(find.byType(Hero), findsNothing);
     expect(
@@ -94,6 +96,7 @@ MatchDetails _match({
   int? homeScore,
   int? awayScore,
   bool isHomeTeam = true,
+  bool isCurrentUserRegistered = false,
 }) {
   return MatchDetails(
     id: id,
@@ -106,5 +109,6 @@ MatchDetails _match({
     homeTeamScore: homeScore,
     awayTeamScore: awayScore,
     isHomeTeam: isHomeTeam,
+    isCurrentUserRegistered: isCurrentUserRegistered,
   );
 }

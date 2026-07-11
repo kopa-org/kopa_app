@@ -101,6 +101,7 @@ class _StandingsTable extends StatelessWidget {
     final appColors =
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final palette = _StandingsPalette(appColors);
+    final relegationBoundary = _relegationBoundary(rows);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -117,7 +118,7 @@ class _StandingsTable extends StatelessWidget {
             child: Column(
               children: [
                 _StandingsHeader(compact: compact),
-                for (final row in rows)
+                for (final row in rows) ...[
                   _StandingsRow(
                     row: row,
                     compact: compact,
@@ -127,11 +128,31 @@ class _StandingsTable extends StatelessWidget {
                       standings,
                     ),
                   ),
+                  if (row.boundaryAfter != null)
+                    _StandingsBoundary(
+                      style: row.boundaryAfter!,
+                      isRelegation: row.boundaryAfter == 'solid' &&
+                          row.position == relegationBoundary,
+                    ),
+                ],
               ],
             ),
           ),
         );
       },
+    );
+  }
+
+  int _relegationBoundary(List<DbuStandingRow> rows) {
+    final solidBoundaries = rows
+        .where((row) => row.boundaryAfter == 'solid')
+        .map((row) => row.position)
+        .toList();
+
+    if (solidBoundaries.length > 1) return solidBoundaries.last;
+    return solidBoundaries.firstWhere(
+      (position) => position > rows.length / 2,
+      orElse: () => -1,
     );
   }
 }
@@ -279,6 +300,70 @@ class _StandingsRow extends StatelessWidget {
       ),
     );
   }
+}
+
+class _StandingsBoundary extends StatelessWidget {
+  final String style;
+  final bool isRelegation;
+
+  const _StandingsBoundary({
+    required this.style,
+    required this.isRelegation,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
+
+    return SizedBox(
+      height: Spacing.sm,
+      width: double.infinity,
+      child: CustomPaint(
+        painter: _BoundaryLinePainter(
+          color: isRelegation ? appColors.error : appColors.success,
+          dotted: style == 'dotted',
+        ),
+      ),
+    );
+  }
+}
+
+class _BoundaryLinePainter extends CustomPainter {
+  final Color color;
+  final bool dotted;
+
+  const _BoundaryLinePainter({
+    required this.color,
+    required this.dotted,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 2
+      ..strokeCap = StrokeCap.round;
+    const dashWidth = 6.0;
+    const dashGap = 5.0;
+    final y = size.height / 2;
+    final lineEnd = size.width - Spacing.sm;
+
+    if (!dotted) {
+      canvas.drawLine(Offset(Spacing.sm, y), Offset(lineEnd, y), paint);
+      return;
+    }
+
+    for (double x = Spacing.sm; x < lineEnd;) {
+      final end = (x + dashWidth).clamp(0.0, lineEnd);
+      canvas.drawLine(Offset(x, y), Offset(end, y), paint);
+      x += dashWidth + dashGap;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _BoundaryLinePainter oldDelegate) =>
+      oldDelegate.color != color || oldDelegate.dotted != dotted;
 }
 
 class _HeaderCell extends StatelessWidget {

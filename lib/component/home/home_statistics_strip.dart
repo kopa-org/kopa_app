@@ -39,6 +39,8 @@ class HomeStatisticsStrip extends StatelessWidget {
     final tiles = [
       PlayerPlusStatTileData(
         title: 'Pointsnit',
+        backgroundColor: appColors.lightGrass.withValues(alpha: 0.27),
+        borderColor: appColors.grass,
         value: _currentLeaderboardValue(
           stats.leaderboards.bestPointsAverage,
           decimal: true,
@@ -53,6 +55,8 @@ class HomeStatisticsStrip extends StatelessWidget {
       ),
       PlayerPlusStatTileData(
         title: 'Mål',
+        backgroundColor: appColors.lightSky.withValues(alpha: 0.27),
+        borderColor: appColors.sky,
         value: stats.player.goalsScored.toString(),
         rank: _rankFor(stats.leaderboards.topScorers),
         rows: _leaderboardRows(stats.leaderboards.topScorers),
@@ -61,6 +65,8 @@ class HomeStatisticsStrip extends StatelessWidget {
       ),
       PlayerPlusStatTileData(
         title: 'Assists',
+        backgroundColor: appColors.lightGrass.withValues(alpha: 0.27),
+        borderColor: appColors.grass,
         value: stats.player.assists.toString(),
         rank: _rankFor(stats.leaderboards.assists),
         rows: _leaderboardRows(stats.leaderboards.assists),
@@ -69,6 +75,8 @@ class HomeStatisticsStrip extends StatelessWidget {
       ),
       PlayerPlusStatTileData(
         title: 'Kampe',
+        backgroundColor: appColors.sunset.withValues(alpha: 0.27),
+        borderColor: appColors.sunset,
         value: stats.player.matchesPlayed.toString(),
         rank: _rankFor(stats.leaderboards.matchesPlayed),
         rows: _leaderboardRows(stats.leaderboards.matchesPlayed),
@@ -77,6 +85,8 @@ class HomeStatisticsStrip extends StatelessWidget {
       ),
       PlayerPlusStatTileData(
         title: 'Stemmer',
+        backgroundColor: appColors.dirt.withValues(alpha: 0.27),
+        borderColor: appColors.dirt,
         value: _currentLeaderboardValue(stats.leaderboards.mostVotes),
         rank: _rankFor(stats.leaderboards.mostVotes),
         rows: _leaderboardRows(stats.leaderboards.mostVotes),
@@ -84,6 +94,8 @@ class HomeStatisticsStrip extends StatelessWidget {
         accentColor: appColors.dirt,
       ),
       PlayerPlusStatTileData(
+        backgroundColor: appColors.error.withValues(alpha: 0.27),
+        borderColor: appColors.error,
         title: 'In-form',
         value: _currentInFormValue(),
         rank: _rankForInForm(),
@@ -112,10 +124,9 @@ class HomeStatisticsStrip extends StatelessWidget {
             valueFontSize: 28,
             titleFontSize: 14,
             rankFontSize: 11,
-            obscureValue: !hasPlayerPlus && index >= tiles.length - 2,
+            obscureValue: hasPlayerPlus,
             obscureRank: !hasPlayerPlus,
             showShadow: true,
-            backgroundColor: appColors.white,
           ),
         ),
       ),

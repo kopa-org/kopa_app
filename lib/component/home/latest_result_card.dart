@@ -37,7 +37,6 @@ class _HomeLatestResultCardState extends State<HomeLatestResultCard> {
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final palette = _LatestResultPalette(appColors);
     final match = widget.match;
     final score = match == null
         ? '--'
@@ -57,7 +56,7 @@ class _HomeLatestResultCardState extends State<HomeLatestResultCard> {
 
     return HomeBentoCard(
       padding: const EdgeInsets.all(Spacing.lg),
-      color: palette.surfaceLow,
+      color: appColors.white,
       child: InkWell(
         onTap: match == null ? null : () => widget.onOpenMatch(match),
         borderRadius: BorderRadius.circular(16),
@@ -69,7 +68,7 @@ class _HomeLatestResultCardState extends State<HomeLatestResultCard> {
                   child: Text(
                     'SENESTE RESULTAT',
                     style: appTextStyles.label.copyWith(
-                      color: palette.onSurfaceMuted,
+                      color: appColors.grey5,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
@@ -110,14 +109,14 @@ class _HomeLatestResultCardState extends State<HomeLatestResultCard> {
                   width: 86,
                   radius: 22,
                   labelStyle: appTextStyles.caption3.copyWith(
-                    color: palette.onSurfaceMuted,
+                    color: appColors.grey5,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 Text(
                   score,
-                  style: _displayStyle(context).copyWith(
-                    color: palette.onSurface,
+                  style: appTextStyles.h2.copyWith(
+                    color: appColors.grass,
                     fontSize: 42,
                   ),
                 ),
@@ -133,7 +132,7 @@ class _HomeLatestResultCardState extends State<HomeLatestResultCard> {
                   width: 86,
                   radius: 22,
                   labelStyle: appTextStyles.caption3.copyWith(
-                    color: palette.onSurfaceMuted,
+                    color: appColors.grey5,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -148,7 +147,7 @@ class _HomeLatestResultCardState extends State<HomeLatestResultCard> {
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: appTextStyles.caption1.copyWith(
-                color: palette.onSurfaceMuted,
+                color: appColors.grey5,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -159,7 +158,7 @@ class _HomeLatestResultCardState extends State<HomeLatestResultCard> {
                 child: Text(
                   'Kamphistorik',
                   style: appTextStyles.label.copyWith(
-                    color: palette.onSurfaceMuted,
+                    color: appColors.grey5,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
@@ -171,7 +170,7 @@ class _HomeLatestResultCardState extends State<HomeLatestResultCard> {
                   child: Text(
                     'Ingen hændelser registreret',
                     style: appTextStyles.caption2.copyWith(
-                      color: palette.onSurfaceMuted,
+                      color: appColors.grey5,
                     ),
                   ),
                 )
@@ -224,7 +223,7 @@ class _HomeLatestResultCardState extends State<HomeLatestResultCard> {
                           : 'Vis alle hændelser (${events.length})',
                     ),
                     style: TextButton.styleFrom(
-                      foregroundColor: palette.onSurface,
+                      foregroundColor: appColors.dirt,
                       padding: const EdgeInsets.symmetric(
                         horizontal: Spacing.xs,
                         vertical: Spacing.xs,
@@ -279,7 +278,6 @@ class _LatestResultEventSummary extends StatelessWidget {
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final palette = _LatestResultPalette(appColors);
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -289,7 +287,7 @@ class _LatestResultEventSummary extends StatelessWidget {
       decoration: BoxDecoration(
         color: appColors.white.withValues(alpha: 0.58),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: palette.outline.withValues(alpha: 0.32)),
+        border: Border.all(color: appColors.grey3.withValues(alpha: 0.32)),
       ),
       child: Column(
         children: [
@@ -301,7 +299,7 @@ class _LatestResultEventSummary extends StatelessWidget {
               Text(
                 '$count',
                 style: appTextStyles.subtitle2.copyWith(
-                  color: palette.onSurface,
+                  color: appColors.grass,
                   fontWeight: FontWeight.w900,
                 ),
               ),
@@ -313,7 +311,7 @@ class _LatestResultEventSummary extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: appTextStyles.caption3.copyWith(
-              color: palette.onSurfaceMuted,
+              color: appColors.grey5,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -334,7 +332,6 @@ class _LatestResultHistoryRow extends StatelessWidget {
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final palette = _LatestResultPalette(appColors);
 
     final (icon, color, label) = switch (event.type) {
       MatchEventType.goal => (
@@ -373,7 +370,7 @@ class _LatestResultHistoryRow extends StatelessWidget {
             child: Text(
               event.minute == null ? '-' : '${event.minute}′',
               style: appTextStyles.caption2.copyWith(
-                color: palette.onSurfaceMuted,
+                color: appColors.grey5,
               ),
             ),
           ),
@@ -385,7 +382,7 @@ class _LatestResultHistoryRow extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: appTextStyles.caption2.copyWith(
-                color: palette.onSurface,
+                color:  appColors.grass,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -394,7 +391,7 @@ class _LatestResultHistoryRow extends StatelessWidget {
           Text(
             label,
             style: appTextStyles.caption3.copyWith(
-              color: palette.onSurfaceMuted,
+              color: appColors.grey5,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -404,25 +401,7 @@ class _LatestResultHistoryRow extends StatelessWidget {
   }
 }
 
-class _LatestResultPalette {
-  final AppColors colors;
 
-  const _LatestResultPalette(this.colors);
-
-  Color get surfaceLow => colors.lightGrass55;
-  Color get statCard => colors.grass;
-  Color get onSurface => colors.dirt;
-  Color get onSurfaceMuted => colors.grey5;
-  Color get outline => colors.grey3;
-}
-
-TextStyle _displayStyle(BuildContext context) {
-  final appTextStyles =
-      Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-  return appTextStyles.h2.copyWith(
-    fontWeight: FontWeight.w900,
-  );
-}
 
 String _latestResultEventLabel(MatchEventDetails event) {
   if (event.type == MatchEventType.goal && event.assistMakerUserName != null) {

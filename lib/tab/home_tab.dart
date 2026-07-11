@@ -702,7 +702,7 @@ class _HeroTeamPanel extends StatelessWidget {
                 Spacing.md,
               ),
               decoration: BoxDecoration(
-                color: appColors.lightGrass55,
+                color: appColors.white,
                 borderRadius: BorderRadius.circular(28),
                 border: Border.all(color: appColors.grass),
                 boxShadow: [
@@ -1013,7 +1013,7 @@ class _MatchResponseCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(Spacing.md),
       decoration: BoxDecoration(
-        color: appColors.lightGrass55,
+        color: appColors.white,
         borderRadius: BorderRadius.circular(Spacing.borderRadiusLarge),
       ),
       child: Column(
