@@ -664,7 +664,7 @@ class _HeroTeamPanel extends StatelessWidget {
                           child: Text(
                             title,
                             style: appTextStyles.caption.copyWith(
-                              color: appColors.grass,
+                              color: appColors.dirt,
                               fontWeight: FontWeight.w900,
                             ),
                           ),
@@ -904,7 +904,7 @@ class _MatchInfoListRow extends StatelessWidget {
               textAlign: TextAlign.end,
               style: appTextStyles.subtitle2.copyWith(
                 color: valueColor ?? _MatchInfoList._primaryTextColor,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w600,
               ),
             ),
         ],
