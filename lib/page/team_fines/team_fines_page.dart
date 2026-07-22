@@ -23,7 +23,9 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 enum TeamOwnerFinesSegments { overview, fineTypes, personal }
 
 class TeamFinesPage extends StatefulWidget {
-  const TeamFinesPage({super.key});
+  final bool showBackButton;
+
+  const TeamFinesPage({super.key, this.showBackButton = true});
 
   @override
   State<TeamFinesPage> createState() => _TeamFinesPageState();
@@ -75,7 +77,7 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
 
     return PageScaffold(
       title: 'Bødekassen',
-      showBackButton: true,
+      showBackButton: widget.showBackButton,
       backgroundColor: appColors.background,
       body: SingleChildScrollView(
         child: Container(

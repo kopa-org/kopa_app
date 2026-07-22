@@ -10,13 +10,13 @@ import 'package:kopa/page/in_form/in_form_page.dart';
 import 'package:kopa/page/match/match_programme.dart';
 import 'package:kopa/page/player_plus/player_plus_page.dart';
 import 'package:kopa/page/profile/dbu_webview_page.dart';
+import 'package:kopa/page/team_fines/team_fines_page.dart';
 import 'package:kopa/page/statistics/statistics_page.dart';
 import 'package:kopa/pages/login_page.dart';
 import 'package:kopa/pages/onboarding_page.dart';
 import 'package:kopa/pages/register_page.dart';
 import 'package:kopa/tab/home_tab.dart';
 import 'package:kopa/tab/profile_tab.dart';
-import 'package:kopa/tab/settings_tab.dart';
 import 'package:kopa/utils/app_analytics.dart';
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
@@ -137,9 +137,9 @@ abstract final class AppRouter {
               (Icons.bar_chart, 'Statistik', 'assets/logos/graph-up.svg'),
               (Icons.groups_outlined, 'Truppen', null),
               (
-                CupertinoIcons.gear_alt,
-                'Settings',
-                'assets/logos/settings-gear.svg'
+                CupertinoIcons.money_dollar_circle,
+                'Bødekasse',
+                'assets/logos/piggy-bank.svg'
               ),
             ];
             void selectTab(int index) {
@@ -196,9 +196,9 @@ abstract final class AppRouter {
                       label: 'Truppen',
                     ),
                     GlassTab(
-                      icon: Icon(CupertinoIcons.gear),
-                      activeIcon: Icon(CupertinoIcons.gear_solid),
-                      label: 'Settings',
+                      icon: Icon(CupertinoIcons.money_dollar_circle),
+                      activeIcon: Icon(CupertinoIcons.money_dollar_circle_fill),
+                      label: 'Bødekasse',
                     ),
                   ],
                 ),
@@ -315,7 +315,8 @@ abstract final class AppRouter {
               routes: [
                 GoRoute(
                   path: settings,
-                  builder: (context, state) => const SettingsTab(),
+                  builder: (context, state) =>
+                      const TeamFinesPage(showBackButton: false),
                 ),
               ],
             ),
@@ -331,7 +332,7 @@ abstract final class AppRouter {
       1 => 'matches',
       2 => 'statistics',
       3 => 'squad',
-      4 => 'settings',
+      4 => 'fine_box',
       _ => 'unknown',
     };
   }

@@ -24,6 +24,7 @@ import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/statistics.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/page/match/match_details_page.dart';
+import 'package:kopa/page/profile/profile_settings_page.dart';
 import 'package:kopa/page/team_fines/team_fines_page.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
@@ -31,6 +32,8 @@ import 'package:kopa/theme/spacing.dart';
 import 'package:kopa/utils/app_analytics.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+const double _homeHeaderActionSize = 40;
 
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
@@ -136,33 +139,25 @@ class _HomeTabView extends StatelessWidget {
                     ],
                   ),
                   actions: [
-                    IconButton(
-                      tooltip: 'Kalender',
-                      onPressed: () => showHomeCalendarOverlay(
-                        context: context,
-                        events: state.matches,
-                        onEventTap: (match) =>
-                            _openMatch(context, match, 'home_calendar'),
-                      ),
-                      icon: Icon(
-                        Icons.calendar_today_outlined,
-                        color: appColors.dirt,
-                      ),
-                    ),
-                    IconButton(
-                      tooltip: 'Notifikationer',
-                      onPressed: () {},
-                      icon: Icon(
-                        Icons.notifications_outlined,
-                        color: appColors.dirt,
+                    Padding(
+                      padding: const EdgeInsets.only(right: Spacing.md),
+                      child: _HomeHeaderActionButton(
+                        tooltip: 'Profil',
+                        icon: Icons.account_circle_outlined,
+                        onPressed: () => _openProfileSettings(context),
                       ),
                     ),
                   ],
                 ),
                 SliverToBoxAdapter(
                   child: _HeroSection(
-                    currentUser: currentUser,
                     nextMatch: nextMatch,
+                    onOpenCalendar: () => showHomeCalendarOverlay(
+                      context: context,
+                      events: state.matches,
+                      onEventTap: (match) =>
+                          _openMatch(context, match, 'home_calendar'),
+                    ),
                   ),
                 ),
                 SliverToBoxAdapter(
@@ -199,12 +194,12 @@ class _HomeTabView extends StatelessWidget {
 }
 
 class _HeroSection extends StatelessWidget {
-  final UserDetails currentUser;
   final MatchDetails? nextMatch;
+  final VoidCallback onOpenCalendar;
 
   const _HeroSection({
-    required this.currentUser,
     required this.nextMatch,
+    required this.onOpenCalendar,
   });
 
   @override
@@ -233,9 +228,58 @@ class _HeroSection extends StatelessWidget {
               fontWeight: FontWeight.w800,
             ),
           ),
-          const SizedBox(height: Spacing.sm),
-          _HeroCountdown(target: nextMatch?.date),
+          const SizedBox(height: 2),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: _HeroCountdown(target: nextMatch?.date),
+                ),
+              ),
+              const SizedBox(width: Spacing.sm),
+              _HomeHeaderActionButton(
+                tooltip: 'Kalender',
+                icon: Icons.calendar_today_outlined,
+                onPressed: onOpenCalendar,
+              ),
+            ],
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class _HomeHeaderActionButton extends StatelessWidget {
+  final String tooltip;
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  const _HomeHeaderActionButton({
+    required this.tooltip,
+    required this.icon,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
+
+    return IconButton(
+      tooltip: tooltip,
+      onPressed: onPressed,
+      style: IconButton.styleFrom(
+        fixedSize: const Size.square(_homeHeaderActionSize),
+        minimumSize: const Size.square(_homeHeaderActionSize),
+        padding: EdgeInsets.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      icon: Icon(
+        icon,
+        color: appColors.dirt,
       ),
     );
   }
@@ -1238,6 +1282,15 @@ void _openFineBox(BuildContext context) {
   Navigator.of(context).push(MaterialWithModalsPageRoute(
     builder: (context) => const TeamFinesPage(),
   ));
+}
+
+void _openProfileSettings(BuildContext context) {
+  AppAnalytics.logEvent('profile_settings_opened');
+  Navigator.of(context).push(
+    MaterialWithModalsPageRoute(
+      builder: (context) => const ProfileSettingsPage(),
+    ),
+  );
 }
 
 void _openStatistics(BuildContext context) {
