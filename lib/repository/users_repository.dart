@@ -49,7 +49,11 @@ class UsersRepository {
     return json['id'];
   }
 
-  static Future<void> setCalendarUrl(String calendarUrl) async {
+  static Future<void> setCalendarUrl(
+    String calendarUrl, {
+    String? calendarIcs,
+    List<dynamic>? calendarMatches,
+  }) async {
     final token = await SecureStorageService.getToken();
     var url = Uri.parse('${ApiConfig.baseUrl}/team/calendar_url');
 
@@ -59,7 +63,11 @@ class UsersRepository {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
-      body: jsonEncode({'calendar_url': calendarUrl}),
+      body: jsonEncode({
+        'calendar_url': calendarUrl,
+        if (calendarIcs != null) 'calendar_ics': calendarIcs,
+        if (calendarMatches != null) 'calendar_matches': calendarMatches,
+      }),
     );
 
     if (response.statusCode != 200) {

@@ -26,6 +26,7 @@ import 'package:kopa/model/user_details.dart';
 import 'package:kopa/page/match/match_details_page.dart';
 import 'package:kopa/page/profile/profile_settings_page.dart';
 import 'package:kopa/page/team_fines/team_fines_page.dart';
+import 'package:kopa/state/match_programme_refresh_notifier.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 import 'package:kopa/theme/spacing.dart';
@@ -51,8 +52,38 @@ class HomeTab extends StatelessWidget {
   }
 }
 
-class _HomeTabView extends StatelessWidget {
+class _HomeTabView extends StatefulWidget {
   const _HomeTabView();
+
+  @override
+  State<_HomeTabView> createState() => _HomeTabViewState();
+}
+
+class _HomeTabViewState extends State<_HomeTabView> {
+  late final MatchProgrammeRefreshNotifier _matchRefreshNotifier;
+
+  @override
+  void initState() {
+    super.initState();
+    _matchRefreshNotifier = context.read<MatchProgrammeRefreshNotifier>();
+    _matchRefreshNotifier.addListener(_refreshDashboardAfterImport);
+  }
+
+  @override
+  void dispose() {
+    _matchRefreshNotifier.removeListener(_refreshDashboardAfterImport);
+    super.dispose();
+  }
+
+  void _refreshDashboardAfterImport() {
+    final teamId = context.read<AuthCubit>().state.user?.teamDetails?.id;
+    if (teamId == null) return;
+
+    context.read<HomeCubit>().fetchDashboardData(
+          teamId,
+          showLoading: false,
+        );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1162,15 +1193,17 @@ class _BentoGrid extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const HomeBentoSectionTitle(title: 'Seneste kamp'),
-        const SizedBox(height: Spacing.sm),
-        HomeLatestResultCard(
-          match: latestMatch,
-          currentUser: currentUser,
-          onOpenMatch: (match) => _openMatch(context, match, 'home_latest'),
-          matchHeroTag: _matchHeroTag,
-        ),
-        const SizedBox(height: Spacing.lg),
+        if (latestMatch != null) ...[
+          const HomeBentoSectionTitle(title: 'Seneste kamp'),
+          const SizedBox(height: Spacing.sm),
+          HomeLatestResultCard(
+            match: latestMatch,
+            currentUser: currentUser,
+            onOpenMatch: (match) => _openMatch(context, match, 'home_latest'),
+            matchHeroTag: _matchHeroTag,
+          ),
+          const SizedBox(height: Spacing.lg),
+        ],
         const HomeBentoSectionTitle(title: 'Stilling'),
         const SizedBox(height: Spacing.sm),
         StandingsPreviewCard(

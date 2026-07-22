@@ -29,7 +29,7 @@ abstract final class AppRouter {
   static const playerPlus = '/player-plus';
   static const playerPlusInForm = '/player-plus/in-form';
   static const profile = '/profile';
-  static const settings = '/settings';
+  static const fineBox = '/fine-box';
   static const dbuWebview = '/dbu-webview';
   static const invite = '/invite';
   static const join = '/join';
@@ -314,7 +314,7 @@ abstract final class AppRouter {
               navigatorKey: _branchNavigatorKeys[4],
               routes: [
                 GoRoute(
-                  path: settings,
+                  path: fineBox,
                   builder: (context, state) =>
                       const TeamFinesPage(showBackButton: false),
                 ),

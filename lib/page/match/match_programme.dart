@@ -12,6 +12,7 @@ import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/page/match/create_match_page.dart';
 import 'package:kopa/page/match/match_details_page.dart';
+import 'package:kopa/state/match_programme_refresh_notifier.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/spacing.dart';
 import 'package:kopa/utils/app_analytics.dart';
@@ -64,7 +65,9 @@ class _MatchProgrammePageState extends State<MatchProgrammePage> {
             );
           },
         ),
-        body: const _MatchList(),
+        body: const _MatchProgrammeRefreshListener(
+          child: _MatchList(),
+        ),
       ),
     );
   }
@@ -80,6 +83,41 @@ class _MatchProgrammePageState extends State<MatchProgrammePage> {
       ),
     );
   }
+}
+
+class _MatchProgrammeRefreshListener extends StatefulWidget {
+  final Widget child;
+
+  const _MatchProgrammeRefreshListener({required this.child});
+
+  @override
+  State<_MatchProgrammeRefreshListener> createState() =>
+      _MatchProgrammeRefreshListenerState();
+}
+
+class _MatchProgrammeRefreshListenerState
+    extends State<_MatchProgrammeRefreshListener> {
+  late final MatchProgrammeRefreshNotifier _matchRefreshNotifier;
+
+  @override
+  void initState() {
+    super.initState();
+    _matchRefreshNotifier = context.read<MatchProgrammeRefreshNotifier>();
+    _matchRefreshNotifier.addListener(_refreshMatchesAfterImport);
+  }
+
+  @override
+  void dispose() {
+    _matchRefreshNotifier.removeListener(_refreshMatchesAfterImport);
+    super.dispose();
+  }
+
+  void _refreshMatchesAfterImport() {
+    context.read<MatchProgrammeCubit>().loadMatches(showLoading: false);
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 class _MatchList extends StatefulWidget {

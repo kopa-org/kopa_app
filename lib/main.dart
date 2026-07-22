@@ -18,8 +18,10 @@ import 'package:kopa/cubits/onboarding_cubit.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/theme/app_theme.dart';
 import 'package:kopa/services/push_notifications_service.dart';
+import 'package:kopa/state/match_programme_refresh_notifier.dart';
 import 'package:kopa/utils/app_analytics.dart';
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
+import 'package:provider/provider.dart';
 
 const _envFileFromDefine = String.fromEnvironment('ENV_FILE');
 const _minimumSplashDuration = Duration(seconds: 2);
@@ -155,6 +157,7 @@ class KopaApp extends StatefulWidget {
 
 class _KopaAppState extends State<KopaApp> {
   late final RouterRefreshNotifier _refreshNotifier;
+  late final MatchProgrammeRefreshNotifier _matchProgrammeRefreshNotifier;
   late final GoRouter _router;
   StreamSubscription<AuthState>? _authSubscription;
 
@@ -162,6 +165,7 @@ class _KopaAppState extends State<KopaApp> {
   void initState() {
     super.initState();
     _refreshNotifier = RouterRefreshNotifier(widget.authCubit.stream);
+    _matchProgrammeRefreshNotifier = MatchProgrammeRefreshNotifier();
     _router = AppRouter.create(
       authCubit: widget.authCubit,
       onboardingCubit: widget.onboardingCubit,
@@ -175,6 +179,7 @@ class _KopaAppState extends State<KopaApp> {
   void dispose() {
     _authSubscription?.cancel();
     _refreshNotifier.dispose();
+    _matchProgrammeRefreshNotifier.dispose();
     super.dispose();
   }
 
@@ -193,10 +198,11 @@ class _KopaAppState extends State<KopaApp> {
       DeviceOrientation.portraitDown,
     ]);
 
-    return MultiRepositoryProvider(
+    return MultiProvider(
       providers: [
         RepositoryProvider.value(value: widget.authRepository),
         RepositoryProvider.value(value: widget.onboardingRepository),
+        ChangeNotifierProvider.value(value: _matchProgrammeRefreshNotifier),
       ],
       child: MultiBlocProvider(
         providers: [
