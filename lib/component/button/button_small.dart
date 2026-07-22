@@ -23,7 +23,7 @@ class ButtonSmall extends StatelessWidget {
         decoration: BoxDecoration(
           color:
               outlined ? CupertinoColors.white : CupertinoColors.systemIndigo,
-          borderRadius: BorderRadius.circular(50.0),
+          borderRadius: BorderRadius.circular(8.0),
         ),
         padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
         child: Row(

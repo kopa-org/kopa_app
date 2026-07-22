@@ -24,6 +24,8 @@ import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 const _envFileFromDefine = String.fromEnvironment('ENV_FILE');
 const _minimumSplashDuration = Duration(seconds: 2);
 const _splashBackgroundColor = Color(0xFFE8F2ED);
+const _splashAnimationCacheWidth = 690;
+const _splashAnimationCacheHeight = 428;
 
 void main() async {
   await CrashReporting.runAppGuarded(() async {
@@ -251,7 +253,10 @@ class _AnimatedSplashScreen extends StatelessWidget {
               'assets/Walk_Kick_Animation_green.gif',
               width: width,
               fit: BoxFit.contain,
-              filterQuality: FilterQuality.high,
+              cacheWidth: _splashAnimationCacheWidth,
+              cacheHeight: _splashAnimationCacheHeight,
+              filterQuality: FilterQuality.medium,
+              gaplessPlayback: true,
             );
           },
         ),

@@ -49,7 +49,7 @@ class Button extends StatelessWidget {
             width: width,
             decoration: BoxDecoration(
               color: bgColor,
-              borderRadius: BorderRadius.circular(50.0),
+              borderRadius: BorderRadius.circular(8),
             ),
             padding:
                 const EdgeInsets.symmetric(vertical: 15.0, horizontal: 30.0),

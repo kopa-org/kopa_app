@@ -605,11 +605,7 @@ class _HeroTeamPanel extends StatelessWidget {
         match?.homeTeam ?? currentUser.teamDetails?.title ?? 'Hold';
     final awayTeam = match?.awayTeam ?? 'Modstander';
     final title = titleOverride ??
-        (match == null
-            ? 'Ingen kamp'
-            : match.hasMatchBeenPlayed
-                ? _matchDate(match.date)
-                : 'Næste kamp');
+        (match == null ? 'Ingen kamp' : _matchDate(match.date));
     final cardHeroTag = match == null || !enableLogoHeroes
         ? null
         : _matchHeroTag(match, logoHeroSource ?? 'home_hero');
@@ -750,83 +746,14 @@ class _HeroTeamPanel extends StatelessWidget {
                   if (match != null) ...[
                     const SizedBox(height: Spacing.md),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Row(
-                        children: [
-                          _FactIcon(
-                            icon: Icons.schedule,
-                            color: appColors.sky,
-                          ),
-                          const SizedBox(width: Spacing.md),
-                          Expanded(
-                            child: _MatchFactColumn(
-                              label: 'KAMPSTART',
-                              value: _matchTime(match.date),
-                            ),
-                          ),
-                          Expanded(
-                            child: _MatchFactColumn(
-                              label: 'MØDETID',
-                              value: match.meetingTime == null
-                                  ? '--:--'
-                                  : _clockTime(match.meetingTime!),
-                              alignEnd: true,
-                            ),
-                          ),
-                        ],
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: Spacing.md,
                       ),
-                    ),
-                    const SizedBox(height: Spacing.md),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 0),
-                      child: Row(
-                        children: [
-                          _FactIcon(
-                            icon: Icons.location_on,
-                            color: appColors.error,
-                          ),
-                          const SizedBox(width: Spacing.md),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  match.location.isEmpty
-                                      ? 'Ingen lokation'
-                                      : match.location,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: appTextStyles.subtitle2.copyWith(
-                                    color: appColors.dirt,
-                                    fontWeight: FontWeight.w900,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  _matchDate(match.date),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: appTextStyles.caption2.copyWith(
-                                    color: appColors.grey5,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: match.location.isEmpty
-                                ? null
-                                : () => _openNavigation(match),
-                            child: Text(
-                              'Kort ›',
-                              style: appTextStyles.buttonSmall.copyWith(
-                                color: appColors.grass,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                          ),
-                        ],
+                      child: _MatchInfoList(
+                        match: match,
+                        onOpenNavigation: match.location.isEmpty
+                            ? null
+                            : () => _openNavigation(match),
                       ),
                     ),
                     const SizedBox(height: Spacing.md),
@@ -840,11 +767,7 @@ class _HeroTeamPanel extends StatelessWidget {
                       currentUser: currentUser,
                       reserveRegistrationActions: reserveRegistrationActions,
                     ),
-                    if (pinDetailsToBottom)
-                      const Spacer()
-                    else
-                      const SizedBox(height: Spacing.sm),
-                    _QuietDetailsLink(onPressed: openDetails!),
+                    if (pinDetailsToBottom) const Spacer()
                   ],
                 ],
               ),
@@ -856,63 +779,152 @@ class _HeroTeamPanel extends StatelessWidget {
   }
 }
 
-class _FactIcon extends StatelessWidget {
-  final IconData icon;
-  final Color color;
+class _MatchInfoList extends StatelessWidget {
+  static const _primaryTextColor = Color(0xFF111827);
+  static const _labelTextColor = Color(0xFF4B5563);
+  static const _mutedTextColor = Color(0xFF9CA3AF);
+  static const _dividerColor = Color(0xFFE5E7EB);
+  static const _actionColor = Color(0xFF059669);
 
-  const _FactIcon({
-    required this.icon,
-    required this.color,
-  });
+  final MatchDetails match;
+  final VoidCallback? onOpenNavigation;
 
-  @override
-  Widget build(BuildContext context) {
-    return Icon(icon, size: 17, color: color);
-  }
-}
-
-class _MatchFactColumn extends StatelessWidget {
-  final String label;
-  final String value;
-  final bool alignEnd;
-
-  const _MatchFactColumn({
-    required this.label,
-    required this.value,
-    this.alignEnd = false,
+  const _MatchInfoList({
+    required this.match,
+    required this.onOpenNavigation,
   });
 
   @override
   Widget build(BuildContext context) {
     final appColors =
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final meetingTime = match.meetingTime;
+    final location = match.location.isEmpty ? 'Ingen lokation' : match.location;
 
     return Column(
-      crossAxisAlignment:
-          alignEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: appTextStyles.label.copyWith(
-            color: appColors.grey5,
-            fontWeight: FontWeight.w900,
-          ),
+        _MatchInfoListRow(
+          icon: Icons.schedule_outlined,
+          iconColor: appColors.sky,
+          label: 'Kampstart',
+          value: _matchTime(match.date),
+          valueColor: _primaryTextColor,
         ),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: appTextStyles.subtitle2.copyWith(
-            color: appColors.black,
-            fontWeight: FontWeight.w900,
-          ),
+        const _MatchInfoDivider(),
+        _MatchInfoListRow(
+          icon: Icons.access_time,
+          iconColor: appColors.sunset,
+          label: 'Mødetid',
+          value: meetingTime == null ? '--:--' : _clockTime(meetingTime),
+          valueColor: meetingTime == null ? _mutedTextColor : _primaryTextColor,
+        ),
+        const _MatchInfoDivider(),
+        _MatchInfoListRow(
+          icon: Icons.location_on_outlined,
+          iconColor: appColors.error,
+          label: location,
+          actionLabel: 'Kort ›',
+          onAction: onOpenNavigation,
         ),
       ],
+    );
+  }
+}
+
+class _MatchInfoListRow extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String label;
+  final String? value;
+  final Color? valueColor;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+
+  const _MatchInfoListRow({
+    required this.icon,
+    required this.iconColor,
+    required this.label,
+    this.value,
+    this.valueColor,
+    this.actionLabel,
+    this.onAction,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final actionLabel = this.actionLabel;
+    final value = this.value;
+
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 22),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: iconColor),
+          const SizedBox(width: Spacing.sm),
+          Expanded(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: appTextStyles.body3.copyWith(
+                color: _MatchInfoList._labelTextColor,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          const SizedBox(width: Spacing.md),
+          if (actionLabel != null)
+            TextButton(
+              onPressed: onAction,
+              style: TextButton.styleFrom(
+                minimumSize: Size.zero,
+                padding: EdgeInsets.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                foregroundColor: _MatchInfoList._actionColor,
+              ),
+              child: Text(
+                actionLabel,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: appTextStyles.body4.copyWith(
+                  color: _MatchInfoList._actionColor,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            )
+          else if (value != null)
+            Text(
+              value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.end,
+              style: appTextStyles.subtitle2.copyWith(
+                color: valueColor ?? _MatchInfoList._primaryTextColor,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MatchInfoDivider extends StatelessWidget {
+  const _MatchInfoDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 12),
+      child: Divider(
+        height: 1,
+        thickness: 1,
+        color: _MatchInfoList._dividerColor,
+      ),
     );
   }
 }
@@ -983,19 +995,16 @@ class _MatchResponseCard extends StatelessWidget {
                     child: Row(
                       children: [
                         Expanded(
-                          child: _KopaChoiceButton(
-                            label: 'Ja, jeg kommer',
-                            icon: Icons.how_to_reg,
+                          child: FilledButton(
                             onPressed: () {},
+                            child: const Text('Ja, jeg kommer'),
                           ),
                         ),
                         const SizedBox(width: Spacing.sm),
                         Expanded(
-                          child: _KopaChoiceButton(
-                            label: 'Nej',
-                            icon: Icons.close,
-                            outlined: true,
+                          child: OutlinedButton(
                             onPressed: () {},
+                            child: const Text('Nej'),
                           ),
                         ),
                       ],
@@ -1017,20 +1026,19 @@ class _MatchResponseCard extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: _KopaChoiceButton(
-                        label: isRegistering ? 'Tilmeldes' : 'Ja, jeg kommer',
-                        icon: Icons.how_to_reg,
+                      child: FilledButton(
                         onPressed: isRegistering ? null : register,
+                        child: Text(
+                          isRegistering ? 'Tilmeldes' : 'Ja, jeg kommer',
+                        ),
                       ),
                     ),
                     const SizedBox(width: Spacing.sm),
                     Expanded(
-                      child: _KopaChoiceButton(
-                        label: 'Nej',
-                        icon: Icons.close,
-                        outlined: true,
+                      child: OutlinedButton(
                         onPressed: () =>
                             _openMatch(context, match, 'home_decline'),
+                        child: const Text('Nej'),
                       ),
                     ),
                   ],
@@ -1085,106 +1093,6 @@ class _MatchSignupSummary extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _QuietDetailsLink extends StatelessWidget {
-  final VoidCallback onPressed;
-
-  const _QuietDetailsLink({required this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    return Align(
-      alignment: Alignment.center,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(Spacing.borderRadiusFull),
-          onTap: onPressed,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: Spacing.md,
-              vertical: Spacing.sm,
-            ),
-            child: Text(
-              'Se kampdetaljer →',
-              style: appTextStyles.buttonSmall.copyWith(
-                color: appColors.grass,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _KopaChoiceButton extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final VoidCallback? onPressed;
-  final bool outlined;
-
-  const _KopaChoiceButton({
-    required this.label,
-    required this.icon,
-    required this.onPressed,
-    this.outlined = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final enabled = onPressed != null;
-    final backgroundColor = outlined ? appColors.white : appColors.grass;
-    final foregroundColor = outlined ? appColors.grass : appColors.white;
-
-    return Opacity(
-      opacity: enabled ? 1 : 0.55,
-      child: Material(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(Spacing.borderRadiusFull),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onPressed,
-          child: Container(
-            height: 42,
-            padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(Spacing.borderRadiusFull),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(icon, color: foregroundColor, size: 18),
-                const SizedBox(width: Spacing.sm),
-                Flexible(
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: appTextStyles.buttonSmall.copyWith(
-                      color: foregroundColor,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }
