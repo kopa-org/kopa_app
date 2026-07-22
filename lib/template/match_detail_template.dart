@@ -14,6 +14,7 @@ enum MatchDetailSegment {
 
 class MatchDetailTemplate extends StatelessWidget {
   final Widget heroCard;
+  final List<Widget> overviewWidgets;
   final List<Widget> infoRows;
   final List<Widget> attendanceList;
   final List<Widget> timelineItems;
@@ -23,10 +24,19 @@ class MatchDetailTemplate extends StatelessWidget {
   final Future<void> Function()? onRefresh;
   final MatchDetailSegment selectedSegment;
   final ValueChanged<MatchDetailSegment>? onSegmentChanged;
+  final String overviewTitle;
+  final String attendanceTitle;
+  final String timelineTitle;
+  final String overviewSegmentLabel;
+  final String attendanceSegmentLabel;
+  final String timelineSegmentLabel;
+  final String attendanceEmptyMessage;
+  final String timelineEmptyMessage;
 
   const MatchDetailTemplate({
     super.key,
     required this.heroCard,
+    this.overviewWidgets = const [],
     this.infoRows = const [],
     this.attendanceList = const [],
     this.timelineItems = const [],
@@ -36,6 +46,14 @@ class MatchDetailTemplate extends StatelessWidget {
     this.onRefresh,
     this.selectedSegment = MatchDetailSegment.overview,
     this.onSegmentChanged,
+    this.overviewTitle = 'Praktisk information',
+    this.attendanceTitle = 'Tilmeldte spillere',
+    this.timelineTitle = 'Kampforløb',
+    this.overviewSegmentLabel = 'Overblik',
+    this.attendanceSegmentLabel = 'Tilmeldte',
+    this.timelineSegmentLabel = 'Kampforløb',
+    this.attendanceEmptyMessage = 'Ingen tilmeldte spillere endnu.',
+    this.timelineEmptyMessage = 'Ingen begivenheder registreret.',
   });
 
   @override
@@ -106,15 +124,15 @@ class MatchDetailTemplate extends StatelessWidget {
             offset: const Offset(0, 3),
           ),
         ],
-        entries: const [
+        entries: [
           SegmentedButtonSlideEntry(
-            label: 'Overblik',
+            label: overviewSegmentLabel,
           ),
           SegmentedButtonSlideEntry(
-            label: 'Tilmeldte',
+            label: attendanceSegmentLabel,
           ),
           SegmentedButtonSlideEntry(
-            label: 'Kampforløb',
+            label: timelineSegmentLabel,
           ),
         ],
       ),
@@ -141,8 +159,9 @@ class MatchDetailTemplate extends StatelessWidget {
     switch (selectedSegment) {
       case MatchDetailSegment.overview:
         return [
+          ...overviewWidgets,
           if (infoRows.isNotEmpty) ...[
-            const SectionHeader(title: 'Praktisk information'),
+            SectionHeader(title: overviewTitle),
             ...infoRows,
           ],
           if (votingModule != null) ...[
@@ -163,19 +182,19 @@ class MatchDetailTemplate extends StatelessWidget {
         ];
       case MatchDetailSegment.attendance:
         return [
-          const SectionHeader(title: 'Tilmeldte spillere'),
+          SectionHeader(title: attendanceTitle),
           const SizedBox(height: Spacing.md),
           if (attendanceList.isEmpty)
-            _EmptySegmentMessage(message: 'Ingen tilmeldte spillere endnu.')
+            _EmptySegmentMessage(message: attendanceEmptyMessage)
           else
             ...attendanceList,
         ];
       case MatchDetailSegment.timeline:
         return [
-          const SectionHeader(title: 'Kampforløb'),
+          SectionHeader(title: timelineTitle),
           const SizedBox(height: Spacing.md),
           if (timelineItems.isEmpty)
-            _EmptySegmentMessage(message: 'Ingen begivenheder registreret.')
+            _EmptySegmentMessage(message: timelineEmptyMessage)
           else
             ...timelineItems,
         ];

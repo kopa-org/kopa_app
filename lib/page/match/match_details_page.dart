@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:kopa/state/user_votes_state.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +15,9 @@ import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/match_event_details.dart';
 import 'package:kopa/model/match_event_type.dart';
 import 'package:kopa/model/match_poll_details.dart';
+import 'package:kopa/model/player_rating_summary.dart';
 import 'package:kopa/model/user_details.dart';
+import 'package:kopa/navigation/app_router.dart';
 import 'package:kopa/page/match_polls/create_match_poll_page.dart';
 import 'package:kopa/page/match/add_match_event_modal.dart';
 import 'package:kopa/repository/match_repository.dart';
@@ -171,6 +174,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
 
     final matchDetails = data['matchDetails'] as MatchDetails;
     final squad = data['squad'] as List<UserDetails>;
+    final hasBeenPlayed = matchDetails.hasMatchBeenPlayed;
 
     return MatchDetailTemplate(
       onRefresh: _refreshMatchAndSquad,
@@ -186,70 +190,32 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
             ? () => setMatchScore(matchDetails.id)
             : null,
       ),
-      infoRows: [
-        InfoRow(
-          icon: CupertinoIcons.calendar,
-          title: 'Dato',
-          value: DateHelper.getFormattedDate(matchDetails.date),
-        ),
-        InfoRow(
-          icon: CupertinoIcons.time,
-          title: 'Tidspunkt',
-          value:
-              '${DateHelper.getFormattedTime(matchDetails.date)} (Mødetid: ${DateHelper.getFormattedTime(matchDetails.meetingTime)})',
-        ),
-        InfoRow(
-          icon: CupertinoIcons.location_solid,
-          title: 'Lokation',
-          value: matchDetails.location,
-        ),
-        InfoRow(
-          icon: CupertinoIcons.clock,
-          title: 'Countdown',
-          value: _countdownLabel(matchDetails),
-        ),
-        InfoRow(
-          icon: CupertinoIcons.person_2,
-          title: 'Tilmeldinger',
-          value:
-              '${matchDetails.registeredCount} tilmeldte / ${matchDetails.unavailableCount} frameldte',
-        ),
-        InfoRow(
-          icon: CupertinoIcons.checkmark_seal,
-          title: 'Din udtagelse',
-          value: matchDetails.isCurrentUserSelected == true
-              ? 'Udtaget'
-              : matchDetails.isCurrentUserSelected == false
-                  ? 'Ikke udtaget'
-                  : 'Afventer',
-        ),
-        InfoRow(
-          icon: CupertinoIcons.pencil,
-          title: 'Noter',
-          value: matchDetails.notes ?? 'Ingen noter',
-        ),
-        Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: Center(
-            child: Button(
-              buttonText: 'Åbn navigation',
-              onPressed: () => _openNavigation(matchDetails),
-              icon: CupertinoIcons.map,
+      overviewTitle: hasBeenPlayed ? 'Efter kampen' : 'Praktisk information',
+      attendanceTitle: hasBeenPlayed ? 'Kamptrup' : 'Tilmeldte spillere',
+      timelineTitle: hasBeenPlayed ? 'Kampbegivenheder' : 'Kampforløb',
+      attendanceSegmentLabel: hasBeenPlayed ? 'Kamptrup' : 'Tilmeldte',
+      timelineSegmentLabel: hasBeenPlayed ? 'Begivenheder' : 'Kampforløb',
+      timelineEmptyMessage: hasBeenPlayed
+          ? 'Ingen kampbegivenheder registreret endnu.'
+          : 'Ingen begivenheder registreret.',
+      overviewWidgets: hasBeenPlayed
+          ? _buildPostMatchOverview(matchDetails, user)
+          : const [],
+      infoRows:
+          hasBeenPlayed ? const [] : _buildPracticalInfoRows(matchDetails),
+      votingModule: hasBeenPlayed
+          ? _buildVotingModule(matchDetails, squad, appColors, appTextStyles)
+          : null,
+      playerPositions: hasBeenPlayed
+          ? null
+          : PlayerPositionsCard(
+              playerCount: _teamPlayerCount(matchDetails, user),
+              formation: matchDetails.formation,
+              players: _lineupPlayers(matchDetails),
+              onEditFormation: user.isTeamOwner
+                  ? () => _showFormationPicker(matchDetails, user)
+                  : null,
             ),
-          ),
-        ),
-        if (matchDetails.hasMatchBeenPlayed) const SizedBox(height: 12),
-      ],
-      votingModule:
-          _buildVotingModule(matchDetails, squad, appColors, appTextStyles),
-      playerPositions: PlayerPositionsCard(
-        playerCount: _teamPlayerCount(matchDetails, user),
-        formation: matchDetails.formation,
-        players: _lineupPlayers(matchDetails),
-        onEditFormation: user.isTeamOwner
-            ? () => _showFormationPicker(matchDetails, user)
-            : null,
-      ),
       attendanceList: _buildAttendanceList(matchDetails, squad),
       ratingsSection: _buildRatingsSection(matchDetails),
       timelineItems: _buildTimelineItems(matchDetails, user),
@@ -276,6 +242,135 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         animateCard: widget.heroTag != null,
       ),
     );
+  }
+
+  List<Widget> _buildPracticalInfoRows(MatchDetails matchDetails) {
+    return [
+      InfoRow(
+        icon: CupertinoIcons.calendar,
+        title: 'Dato',
+        value: DateHelper.getFormattedDate(matchDetails.date),
+      ),
+      InfoRow(
+        icon: CupertinoIcons.time,
+        title: 'Tidspunkt',
+        value:
+            '${DateHelper.getFormattedTime(matchDetails.date)} (Mødetid: ${DateHelper.getFormattedTime(matchDetails.meetingTime)})',
+      ),
+      InfoRow(
+        icon: CupertinoIcons.location_solid,
+        title: 'Lokation',
+        value: matchDetails.location,
+      ),
+      InfoRow(
+        icon: CupertinoIcons.clock,
+        title: 'Countdown',
+        value: _countdownLabel(matchDetails),
+      ),
+      InfoRow(
+        icon: CupertinoIcons.person_2,
+        title: 'Tilmeldinger',
+        value:
+            '${matchDetails.registeredCount} tilmeldte / ${matchDetails.unavailableCount} frameldte',
+      ),
+      InfoRow(
+        icon: CupertinoIcons.checkmark_seal,
+        title: 'Din udtagelse',
+        value: matchDetails.isCurrentUserSelected == true
+            ? 'Udtaget'
+            : matchDetails.isCurrentUserSelected == false
+                ? 'Ikke udtaget'
+                : 'Afventer',
+      ),
+      InfoRow(
+        icon: CupertinoIcons.pencil,
+        title: 'Noter',
+        value: matchDetails.notes ?? 'Ingen noter',
+      ),
+      Padding(
+        padding: const EdgeInsets.only(top: 8),
+        child: Center(
+          child: Button(
+            buttonText: 'Åbn navigation',
+            onPressed: () => _openNavigation(matchDetails),
+            icon: CupertinoIcons.map,
+          ),
+        ),
+      ),
+    ];
+  }
+
+  List<Widget> _buildPostMatchOverview(MatchDetails match, UserDetails user) {
+    final stats = _personalMatchStats(match, user);
+
+    return [
+      _PostMatchSummaryCard(
+        match: match,
+        eventCount: match.matchEventDetailsList?.length ?? 0,
+      ),
+      const SizedBox(height: Spacing.lg),
+      _PersonalMatchStatsCard(stats: stats),
+      const SizedBox(height: Spacing.lg),
+      Button(
+        buttonText: 'Se statistik breakdown',
+        onPressed: _openStatisticsBreakdown,
+        icon: CupertinoIcons.chart_bar_alt_fill,
+        width: double.infinity,
+      ),
+    ];
+  }
+
+  _PersonalMatchStats _personalMatchStats(
+      MatchDetails match, UserDetails user) {
+    final events = match.matchEventDetailsList ?? [];
+    final goals = events
+        .where((event) =>
+            event.type == MatchEventType.goal &&
+            event.goalscorerUserId == user.id)
+        .length;
+    final assists = events
+        .where((event) =>
+            event.type == MatchEventType.goal &&
+            event.assistMakerUserId == user.id)
+        .length;
+    final yellowCards = events
+        .where((event) =>
+            event.type == MatchEventType.yellowCard &&
+            event.goalscorerUserId == user.id)
+        .length;
+    final redCards = events
+        .where((event) =>
+            event.type == MatchEventType.redCard &&
+            event.goalscorerUserId == user.id)
+        .length;
+    final rating = _currentUserRating(match, user);
+    final isPlayerOfTheMatch =
+        match.matchPollDetails?.playerOfTheMatchDetails.id == user.id;
+
+    return _PersonalMatchStats(
+      goals: goals,
+      assists: assists,
+      yellowCards: yellowCards,
+      redCards: redCards,
+      rating: rating?.averageRating,
+      ratingVotes: rating?.voteCount ?? 0,
+      isPlayerOfTheMatch: isPlayerOfTheMatch,
+    );
+  }
+
+  PlayerRatingSummary? _currentUserRating(
+    MatchDetails match,
+    UserDetails user,
+  ) {
+    for (final rating in match.playerRatingDetailsList ?? []) {
+      if (rating.userId == user.id) return rating;
+    }
+    return null;
+  }
+
+  void _openStatisticsBreakdown() {
+    AppAnalytics.logEvent('match_statistics_breakdown_opened');
+    context.go(AppRouter.statistics);
   }
 
   Widget? _buildVotingModule(MatchDetails match, List<UserDetails> squad,
@@ -877,4 +972,294 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     );
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
+}
+
+class _PostMatchSummaryCard extends StatelessWidget {
+  final MatchDetails match;
+  final int eventCount;
+
+  const _PostMatchSummaryCard({
+    required this.match,
+    required this.eventCount,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final styles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final resultLabel = _resultLabel(match);
+    final eventLabel =
+        eventCount == 1 ? '1 begivenhed' : '$eventCount begivenheder';
+    final playerOfTheMatch =
+        match.matchPollDetails?.playerOfTheMatchDetails.name;
+
+    return KopaCard(
+      padding: const EdgeInsets.all(Spacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: colors.grass.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(
+                    Spacing.borderRadiusSmall,
+                  ),
+                ),
+                child: Icon(
+                  CupertinoIcons.checkmark_seal_fill,
+                  color: colors.grass,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: Spacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Efter kampen', style: styles.bodyBold),
+                    Text(resultLabel, style: styles.caption),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: Spacing.md),
+          Wrap(
+            spacing: Spacing.sm,
+            runSpacing: Spacing.sm,
+            children: [
+              _PostMatchPill(
+                icon: CupertinoIcons.calendar,
+                label: DateHelper.getFormattedDate(match.date),
+              ),
+              _PostMatchPill(
+                icon: CupertinoIcons.list_bullet,
+                label: eventLabel,
+              ),
+              if (playerOfTheMatch != null)
+                _PostMatchPill(
+                  icon: CupertinoIcons.star_fill,
+                  label: playerOfTheMatch,
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _resultLabel(MatchDetails match) {
+    final homeScore = match.homeTeamScore;
+    final awayScore = match.awayTeamScore;
+    if (homeScore == null || awayScore == null) return 'Resultat registreret';
+
+    final isHome = match.isHomeTeam == true;
+    final ownScore = isHome ? homeScore : awayScore;
+    final opponentScore = isHome ? awayScore : homeScore;
+    final result = ownScore > opponentScore
+        ? 'Sejr'
+        : ownScore == opponentScore
+            ? 'Uafgjort'
+            : 'Nederlag';
+
+    return '$result · $homeScore-$awayScore';
+  }
+}
+
+class _PostMatchPill extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _PostMatchPill({
+    required this.icon,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final styles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: Spacing.sm,
+        vertical: Spacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: colors.white.withValues(alpha: 0.72),
+        borderRadius: BorderRadius.circular(Spacing.borderRadiusFull),
+        border: Border.all(color: colors.grass.withValues(alpha: 0.18)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: colors.grass),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: styles.caption.copyWith(
+              color: colors.dirt,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PersonalMatchStatsCard extends StatelessWidget {
+  final _PersonalMatchStats stats;
+
+  const _PersonalMatchStatsCard({required this.stats});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final styles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final ratingLabel = stats.rating == null
+        ? '-'
+        : '${stats.rating!.toStringAsFixed(1)} (${stats.ratingVotes})';
+
+    return KopaCard(
+      padding: const EdgeInsets.all(Spacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Din kamp', style: styles.bodyBold),
+          const SizedBox(height: Spacing.sm),
+          GridView.count(
+            crossAxisCount: 2,
+            childAspectRatio: 2.65,
+            mainAxisSpacing: Spacing.sm,
+            crossAxisSpacing: Spacing.sm,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            children: [
+              _PersonalStatTile(
+                label: 'Mål',
+                value: '${stats.goals}',
+                icon: Icons.sports_soccer,
+              ),
+              _PersonalStatTile(
+                label: 'Assists',
+                value: '${stats.assists}',
+                icon: CupertinoIcons.arrowshape_turn_up_right_fill,
+              ),
+              _PersonalStatTile(
+                label: 'Kort',
+                value: '${stats.yellowCards + stats.redCards}',
+                icon: CupertinoIcons.square_fill,
+              ),
+              _PersonalStatTile(
+                label: 'Rating',
+                value: ratingLabel,
+                icon: CupertinoIcons.star_lefthalf_fill,
+              ),
+            ],
+          ),
+          if (stats.isPlayerOfTheMatch) ...[
+            const SizedBox(height: Spacing.sm),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(Spacing.sm),
+              decoration: BoxDecoration(
+                color: colors.grass.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(Spacing.borderRadiusSmall),
+              ),
+              child: Text(
+                'Du blev kampens spiller',
+                style: styles.caption.copyWith(
+                  color: colors.grass,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _PersonalStatTile extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+
+  const _PersonalStatTile({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final styles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: Spacing.sm,
+        vertical: Spacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: colors.white.withValues(alpha: 0.72),
+        borderRadius: BorderRadius.circular(Spacing.borderRadiusSmall),
+        border: Border.all(color: colors.grass.withValues(alpha: 0.16)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: colors.grass, size: 18),
+          const SizedBox(width: Spacing.xs),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: styles.caption.copyWith(color: colors.textSecondary),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  value,
+                  style: styles.bodyBold,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PersonalMatchStats {
+  final int goals;
+  final int assists;
+  final int yellowCards;
+  final int redCards;
+  final double? rating;
+  final int ratingVotes;
+  final bool isPlayerOfTheMatch;
+
+  const _PersonalMatchStats({
+    required this.goals,
+    required this.assists,
+    required this.yellowCards,
+    required this.redCards,
+    required this.rating,
+    required this.ratingVotes,
+    required this.isPlayerOfTheMatch,
+  });
 }
