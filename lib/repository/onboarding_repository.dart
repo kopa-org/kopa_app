@@ -115,6 +115,7 @@ class OnboardingRepository {
   Future<Map<String, dynamic>> createTeam({
     required String title,
     String? dbuCalendarUrl,
+    Map<String, dynamic>? dbuContext,
     List<Map<String, dynamic>> matches = const [],
     List<Map<String, dynamic>> standings = const [],
     List<String> inviteEmails = const [],
@@ -135,6 +136,7 @@ class OnboardingRepository {
         body: json.encode({
           'title': title,
           if (dbuCalendarUrl != null) 'dbu_calendar_url': dbuCalendarUrl,
+          if (dbuContext != null) ..._dbuContextPayload(dbuContext),
           'matches': matches,
           'standings': standings,
           'invite_emails': inviteEmails,
@@ -155,6 +157,19 @@ class OnboardingRepository {
       if (kDebugMode) print('Create team error: $e');
       return {'success': false, 'error': 'Netværksfejl'};
     }
+  }
+
+  Map<String, dynamic> _dbuContextPayload(Map<String, dynamic> context) {
+    return {
+      if (context['clubName'] != null) 'club_name': context['clubName'],
+      if (context['dbuTeamLabel'] != null)
+        'dbu_team_label': context['dbuTeamLabel'],
+      if (context['dbuTeamId'] != null) 'dbu_team_id': context['dbuTeamId'],
+      if (context['dbuPoolId'] != null) 'dbu_pool_id': context['dbuPoolId'],
+      if (context['season'] != null) 'season': context['season'],
+      if (context['region'] != null) 'region': context['region'],
+      if (context['seriesName'] != null) 'series_name': context['seriesName'],
+    };
   }
 
   Future<Map<String, dynamic>> searchTeams(String query) async {

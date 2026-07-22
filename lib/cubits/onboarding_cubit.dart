@@ -143,6 +143,7 @@ class OnboardingCubit extends Cubit<OnboardingState> {
   Future<bool> createTeam({
     required String title,
     String? dbuCalendarUrl,
+    Map<String, dynamic>? dbuContext,
     List<Map<String, dynamic>> matches = const [],
     List<Map<String, dynamic>> standings = const [],
     List<String> inviteEmails = const [],
@@ -151,6 +152,7 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     final result = await _repository.createTeam(
       title: title,
       dbuCalendarUrl: dbuCalendarUrl,
+      dbuContext: dbuContext,
       matches: matches,
       standings: standings,
       inviteEmails: inviteEmails,

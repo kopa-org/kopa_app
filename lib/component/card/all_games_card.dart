@@ -12,11 +12,13 @@ class AllGamesCard extends StatelessWidget {
   final List<MatchDetails> matches;
   final ValueChanged<MatchDetails> onMatchTap;
   final Map<int, GlobalKey>? matchItemKeys;
+  final String? ownTeamName;
 
   const AllGamesCard({
     required this.matches,
     required this.onMatchTap,
     this.matchItemKeys,
+    this.ownTeamName,
     super.key,
   });
 
@@ -24,11 +26,13 @@ class AllGamesCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final sortedMatches = matches.toList()
       ..sort((a, b) => a.date.compareTo(b.date));
+    final resolvedOwnTeamName = _inferOwnTeamName(sortedMatches, ownTeamName);
 
     return _MatchList(
       matches: sortedMatches,
       onMatchTap: onMatchTap,
       matchItemKeys: matchItemKeys,
+      ownTeamName: resolvedOwnTeamName,
     );
   }
 }
@@ -37,11 +41,13 @@ class _MatchList extends StatelessWidget {
   final List<MatchDetails> matches;
   final ValueChanged<MatchDetails> onMatchTap;
   final Map<int, GlobalKey>? matchItemKeys;
+  final String? ownTeamName;
 
   const _MatchList({
     required this.matches,
     required this.onMatchTap,
     this.matchItemKeys,
+    this.ownTeamName,
   });
 
   @override
@@ -52,6 +58,7 @@ class _MatchList extends StatelessWidget {
         final row = _GameResultRow(
           match: entry.$2,
           onTap: () => onMatchTap(entry.$2),
+          ownTeamName: ownTeamName,
         );
         final itemKey = matchItemKeys?[entry.$2.id];
 
@@ -67,8 +74,13 @@ class _MatchList extends StatelessWidget {
 class _GameResultRow extends StatelessWidget {
   final MatchDetails match;
   final VoidCallback onTap;
+  final String? ownTeamName;
 
-  const _GameResultRow({required this.match, required this.onTap});
+  const _GameResultRow({
+    required this.match,
+    required this.onTap,
+    required this.ownTeamName,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +88,8 @@ class _GameResultRow extends StatelessWidget {
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final status = _MatchStatus.from(match, appColors);
+    final ownSide = _OwnTeamSide.from(match, ownTeamName);
+    final status = _MatchStatus.from(match, appColors, ownSide);
     final borderRadius = BorderRadius.circular(Spacing.borderRadiusSmall);
 
     return Semantics(
@@ -141,13 +154,13 @@ class _GameResultRow extends StatelessWidget {
                         _GameTeamLine(
                           name: match.homeTeam ?? 'Hjemme',
                           score: match.homeTeamScore,
-                          isOwnTeam: match.isHomeTeam != false,
+                          isOwnTeam: ownSide.isHome,
                         ),
                         const SizedBox(height: Spacing.sm),
                         _GameTeamLine(
                           name: match.awayTeam ?? 'Ude',
                           score: match.awayTeamScore,
-                          isOwnTeam: match.isHomeTeam == false,
+                          isOwnTeam: ownSide.isAway,
                         ),
                       ],
                     ),
@@ -306,7 +319,11 @@ class _MatchStatus {
     required this.foregroundColor,
   });
 
-  factory _MatchStatus.from(MatchDetails match, AppColors colors) {
+  factory _MatchStatus.from(
+    MatchDetails match,
+    AppColors colors,
+    _OwnTeamSide ownSide,
+  ) {
     if (!match.hasMatchBeenPlayed) {
       return _MatchStatus(
         label: DateHelper.getFormattedTime(match.date),
@@ -315,10 +332,10 @@ class _MatchStatus {
       );
     }
 
-    final isHomeTeam = match.isHomeTeam != false;
-    final teamScore = isHomeTeam ? match.homeTeamScore! : match.awayTeamScore!;
+    final teamScore =
+        ownSide.isAway ? match.awayTeamScore! : match.homeTeamScore!;
     final opponentScore =
-        isHomeTeam ? match.awayTeamScore! : match.homeTeamScore!;
+        ownSide.isAway ? match.homeTeamScore! : match.awayTeamScore!;
 
     if (teamScore == opponentScore) {
       return _MatchStatus(
@@ -335,4 +352,67 @@ class _MatchStatus {
       foregroundColor: isWin ? colors.dirt : colors.offWhite,
     );
   }
+}
+
+enum _OwnTeamSide {
+  home,
+  away;
+
+  bool get isHome => this == _OwnTeamSide.home;
+  bool get isAway => this == _OwnTeamSide.away;
+
+  factory _OwnTeamSide.from(MatchDetails match, String? ownTeamName) {
+    final normalizedOwnTeamName = _normalizeTeamName(ownTeamName);
+    if (normalizedOwnTeamName != null) {
+      if (_normalizeTeamName(match.homeTeam) == normalizedOwnTeamName) {
+        return _OwnTeamSide.home;
+      }
+      if (_normalizeTeamName(match.awayTeam) == normalizedOwnTeamName) {
+        return _OwnTeamSide.away;
+      }
+    }
+
+    return match.isHomeTeam == false ? _OwnTeamSide.away : _OwnTeamSide.home;
+  }
+}
+
+String? _normalizeTeamName(String? value) {
+  final normalized = value?.trim().toLowerCase();
+  return normalized == null || normalized.isEmpty ? null : normalized;
+}
+
+String? _inferOwnTeamName(List<MatchDetails> matches, String? fallbackName) {
+  if (matches.length < 2) {
+    return fallbackName;
+  }
+
+  final appearancesByTeam = <String, ({String displayName, int count})>{};
+
+  for (final match in matches) {
+    final namesInMatch = <String, String>{};
+    for (final name in [match.homeTeam, match.awayTeam]) {
+      final normalized = _normalizeTeamName(name);
+      if (normalized != null) {
+        namesInMatch[normalized] = name!.trim();
+      }
+    }
+
+    for (final entry in namesInMatch.entries) {
+      final previous = appearancesByTeam[entry.key];
+      appearancesByTeam[entry.key] = (
+        displayName: previous?.displayName ?? entry.value,
+        count: (previous?.count ?? 0) + 1,
+      );
+    }
+  }
+
+  final commonTeams = appearancesByTeam.values
+      .where((team) => team.count == matches.length)
+      .toList(growable: false);
+
+  if (commonTeams.length == 1) {
+    return commonTeams.single.displayName;
+  }
+
+  return fallbackName;
 }

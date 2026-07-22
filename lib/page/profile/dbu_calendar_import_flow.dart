@@ -70,6 +70,7 @@ class DbuCalendarImportFlow {
       httpUrl,
       calendarIcs: response.body,
       calendarMatches: scrapedMatches is List<dynamic> ? scrapedMatches : null,
+      dbuContext: resultData,
     );
 
     return mode == _CalendarImportMode.startNewSeason

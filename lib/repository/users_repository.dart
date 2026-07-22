@@ -53,6 +53,7 @@ class UsersRepository {
     String calendarUrl, {
     String? calendarIcs,
     List<dynamic>? calendarMatches,
+    Map<String, dynamic>? dbuContext,
   }) async {
     final token = await SecureStorageService.getToken();
     var url = Uri.parse('${ApiConfig.baseUrl}/team/calendar_url');
@@ -67,12 +68,26 @@ class UsersRepository {
         'calendar_url': calendarUrl,
         if (calendarIcs != null) 'calendar_ics': calendarIcs,
         if (calendarMatches != null) 'calendar_matches': calendarMatches,
+        if (dbuContext != null) ..._dbuContextPayload(dbuContext),
       }),
     );
 
     if (response.statusCode != 200) {
       throw Exception('Failed to update calendar URL');
     }
+  }
+
+  static Map<String, dynamic> _dbuContextPayload(Map<String, dynamic> context) {
+    return {
+      if (context['clubName'] != null) 'club_name': context['clubName'],
+      if (context['dbuTeamLabel'] != null)
+        'dbu_team_label': context['dbuTeamLabel'],
+      if (context['dbuTeamId'] != null) 'dbu_team_id': context['dbuTeamId'],
+      if (context['dbuPoolId'] != null) 'dbu_pool_id': context['dbuPoolId'],
+      if (context['season'] != null) 'season': context['season'],
+      if (context['region'] != null) 'region': context['region'],
+      if (context['seriesName'] != null) 'series_name': context['seriesName'],
+    };
   }
 
   static Future<PlayerProfile> getPlayerProfile(int playerId) async {

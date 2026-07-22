@@ -166,6 +166,9 @@ class _MatchListState extends State<_MatchList> {
       return const Center(child: Text('Ingen kampe fundet.'));
     }
 
+    final ownTeamName =
+        context.read<AuthCubit>().state.user?.teamDetails?.title;
+
     return ListView(
       key: _listViewKey,
       controller: _scrollController,
@@ -173,6 +176,7 @@ class _MatchListState extends State<_MatchList> {
       children: [
         AllGamesCard(
           matches: matches,
+          ownTeamName: ownTeamName,
           matchItemKeys: _matchKeys,
           onMatchTap: (match) => _openMatch(context, match),
         ),

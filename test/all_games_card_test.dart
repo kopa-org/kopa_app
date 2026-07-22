@@ -36,7 +36,6 @@ void main() {
       awayTeam: 'Kopa IF',
       homeScore: 0,
       awayScore: 2,
-      isHomeTeam: false,
     );
     MatchDetails? tappedMatch;
 
@@ -52,6 +51,7 @@ void main() {
           body: SingleChildScrollView(
             child: AllGamesCard(
               matches: [completedMatch, upcomingMatch, earliestMatch],
+              ownTeamName: 'Profile team name',
               onMatchTap: (match) => tappedMatch = match,
             ),
           ),
@@ -62,6 +62,7 @@ void main() {
     expect(find.text('Kommende kampe'), findsNothing);
     expect(find.text('Tidligere kampe'), findsNothing);
     expect(find.text('Tilmeldt'), findsOneWidget);
+    expect(find.text('SEJR'), findsNWidgets(2));
     expect(find.byIcon(CupertinoIcons.chevron_right), findsNWidgets(3));
     expect(find.byType(Hero), findsNothing);
     expect(
@@ -80,6 +81,10 @@ void main() {
         .map((text) => text.style?.fontWeight)
         .toList();
     expect(kopaLabels, everyElement(FontWeight.w900));
+    expect(
+      tester.widget<Text>(find.text('Østerbro')).style?.fontWeight,
+      isNot(FontWeight.w900),
+    );
 
     await tester.tap(find.byKey(const ValueKey('match-entry-1')));
     await tester.pump();

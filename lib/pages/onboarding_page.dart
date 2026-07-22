@@ -64,6 +64,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     final success = await context.read<OnboardingCubit>().createTeam(
           title: title,
           dbuCalendarUrl: _dbuData?['webcal'] as String?,
+          dbuContext: _dbuData,
           matches: (_dbuData?['matches'] as List<dynamic>? ?? [])
               .cast<Map<String, dynamic>>(),
           standings: (_dbuData?['standings'] as List<dynamic>? ?? [])

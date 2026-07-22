@@ -44,8 +44,24 @@ abstract final class TeamDbuRepository {
       'dbu_team_label': scrapedData['dbuTeamLabel'],
       'series_name': scrapedData['seriesName'],
       'standings': scrapedData['standings'],
-      'pool_teams': scrapedData['poolTeams'],
+      'pool_teams': _poolTeamsWithoutLogos(scrapedData['poolTeams']),
     });
+  }
+
+  static List<dynamic> _poolTeamsWithoutLogos(dynamic poolTeams) {
+    if (poolTeams is! List<dynamic>) {
+      return const [];
+    }
+
+    return poolTeams
+        .whereType<Map<dynamic, dynamic>>()
+        .map((team) => {
+              if (team['dbuTeamId'] != null) 'dbuTeamId': team['dbuTeamId'],
+              if (team['dbu_team_id'] != null)
+                'dbu_team_id': team['dbu_team_id'],
+              if (team['name'] != null) 'name': team['name'],
+            })
+        .toList(growable: false);
   }
 
   static Future<Map<String, dynamic>> _post(
