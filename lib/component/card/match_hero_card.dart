@@ -50,8 +50,8 @@ class MatchHeroCard extends StatelessWidget {
                     radius: 22,
                     labelMaxLines: 2,
                     labelStyle: appTextStyles.caption.copyWith(
-                      color: appColors.textSecondary,
-                      fontWeight: FontWeight.w700,
+                      color: appColors.dirt,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 ),
@@ -75,8 +75,8 @@ class MatchHeroCard extends StatelessWidget {
                     radius: 22,
                     labelMaxLines: 2,
                     labelStyle: appTextStyles.caption.copyWith(
-                      color: appColors.textSecondary,
-                      fontWeight: FontWeight.w700,
+                      color: appColors.dirt,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 ),

@@ -55,8 +55,8 @@ class TeamBadgeLabel extends StatelessWidget {
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
     final effectiveLabelStyle = labelStyle ??
-        appTextStyles.caption2.copyWith(
-          color: isHighlighted ? appColors.primary : appColors.textSecondary,
+        appTextStyles.caption.copyWith(
+          color: isHighlighted ? appColors.primary : appColors.dirt,
           fontWeight: isHighlighted ? FontWeight.w800 : FontWeight.w600,
         );
 

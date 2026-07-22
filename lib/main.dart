@@ -22,10 +22,46 @@ import 'package:kopa/utils/app_analytics.dart';
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 const _envFileFromDefine = String.fromEnvironment('ENV_FILE');
+const _minimumSplashDuration = Duration(seconds: 2);
+const _splashBackgroundColor = Color(0xFFE8F2ED);
 
 void main() async {
   await CrashReporting.runAppGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
+    runApp(const KopaBootstrapApp());
+  });
+}
+
+class KopaBootstrapApp extends StatefulWidget {
+  const KopaBootstrapApp({super.key});
+
+  @override
+  State<KopaBootstrapApp> createState() => _KopaBootstrapAppState();
+}
+
+class _KopaBootstrapAppState extends State<KopaBootstrapApp> {
+  late final Future<_BootstrapResult> _bootstrapFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _bootstrapFuture = _bootstrapWithMinimumSplash();
+  }
+
+  Future<_BootstrapResult> _bootstrapWithMinimumSplash() async {
+    final minimumSplash = Future<void>.delayed(_minimumSplashDuration);
+
+    try {
+      final result = await _bootstrap();
+      await minimumSplash;
+      return result;
+    } catch (_) {
+      await minimumSplash;
+      rethrow;
+    }
+  }
+
+  Future<_BootstrapResult> _bootstrap() async {
     final envFile = _envFileFromDefine.isNotEmpty
         ? _envFileFromDefine
         : (kReleaseMode ? '.env.deploy' : '.env.local');
@@ -46,18 +82,55 @@ void main() async {
     // Initialize auth state
     await authCubit.init();
 
-    final app = KopaApp(
+    return _BootstrapResult(
       authRepository: authRepository,
       onboardingRepository: onboardingRepository,
       authCubit: authCubit,
       onboardingCubit: onboardingCubit,
     );
-    runApp(
-      defaultTargetPlatform == TargetPlatform.iOS
-          ? LiquidGlassWidgets.wrap(child: app)
-          : app,
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<_BootstrapResult>(
+      future: _bootstrapFuture,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          final result = snapshot.requireData;
+          final app = KopaApp(
+            authRepository: result.authRepository,
+            onboardingRepository: result.onboardingRepository,
+            authCubit: result.authCubit,
+            onboardingCubit: result.onboardingCubit,
+          );
+
+          return defaultTargetPlatform == TargetPlatform.iOS
+              ? LiquidGlassWidgets.wrap(child: app)
+              : app;
+        }
+
+        if (snapshot.hasError) {
+          return _SplashErrorApp(error: snapshot.error);
+        }
+
+        return const _AnimatedSplashApp();
+      },
     );
+  }
+}
+
+class _BootstrapResult {
+  const _BootstrapResult({
+    required this.authRepository,
+    required this.onboardingRepository,
+    required this.authCubit,
+    required this.onboardingCubit,
   });
+
+  final AuthRepository authRepository;
+  final OnboardingRepository onboardingRepository;
+  final AuthCubit authCubit;
+  final OnboardingCubit onboardingCubit;
 }
 
 class KopaApp extends StatefulWidget {
@@ -143,6 +216,76 @@ class _KopaAppState extends State<KopaApp> {
             Locale('en'),
           ],
           routerConfig: _router,
+        ),
+      ),
+    );
+  }
+}
+
+class _AnimatedSplashApp extends StatelessWidget {
+  const _AnimatedSplashApp();
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: _AnimatedSplashScreen(),
+    );
+  }
+}
+
+class _AnimatedSplashScreen extends StatelessWidget {
+  const _AnimatedSplashScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: _splashBackgroundColor,
+      body: Center(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final shortestSide = constraints.biggest.shortestSide;
+            final width = shortestSide < 360 ? shortestSide * 0.62 : 230.0;
+
+            return Image.asset(
+              'assets/Walk_Kick_Animation_green.gif',
+              width: width,
+              fit: BoxFit.contain,
+              filterQuality: FilterQuality.high,
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _SplashErrorApp extends StatelessWidget {
+  const _SplashErrorApp({required this.error});
+
+  final Object? error;
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        backgroundColor: _splashBackgroundColor,
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(
+              kReleaseMode
+                  ? 'Kopa kunne ikke starte.'
+                  : 'Kopa kunne ikke starte.\n$error',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Color(0xFF00943C),
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         ),
       ),
     );

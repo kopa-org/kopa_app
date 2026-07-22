@@ -721,9 +721,9 @@ class _HeroTeamPanel extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.fromLTRB(
                       Spacing.md,
-                      Spacing.lg,
+                      14,
                       Spacing.md,
-                      Spacing.md,
+                      28,
                     ),
                     decoration: BoxDecoration(
                       color: appColors.lightGrass,
@@ -735,33 +735,35 @@ class _HeroTeamPanel extends StatelessWidget {
                           alignment: Alignment.centerLeft,
                           child: Text(
                             title,
-                            style: appTextStyles.label.copyWith(
+                            style: appTextStyles.caption.copyWith(
                               color: appColors.grass,
                               fontWeight: FontWeight.w900,
                             ),
                           ),
                         ),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: 10),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Expanded(
-                                child: TeamBadgeLabel(
-                                  teamName: homeTeam,
-                                  teamId: stableTeamSeed(homeTeam),
-                                  heroTag: cardHeroTag == null
-                                      ? null
-                                      : MatchHeroCard.logoHeroTag(
-                                          cardHeroTag,
-                                          TeamSide.home,
-                                        ),
-                                  width: 86,
-                                  radius: 22,
-                                  labelStyle: appTextStyles.caption3.copyWith(
-                                    color: appColors.grey5,
-                                    fontWeight: FontWeight.w700,
+                                child: Center(
+                                  child: TeamBadgeLabel(
+                                    teamName: homeTeam,
+                                    teamId: stableTeamSeed(homeTeam),
+                                    heroTag: cardHeroTag == null
+                                        ? null
+                                        : MatchHeroCard.logoHeroTag(
+                                            cardHeroTag,
+                                            TeamSide.home,
+                                          ),
+                                    width: 86,
+                                    radius: 22,
+                                    labelStyle: appTextStyles.caption.copyWith(
+                                      color: appColors.dirt,
+                                      fontWeight: FontWeight.w800,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -777,20 +779,22 @@ class _HeroTeamPanel extends StatelessWidget {
                                 ),
                               ),
                               Expanded(
-                                child: TeamBadgeLabel(
-                                  teamName: awayTeam,
-                                  teamId: stableTeamSeed(awayTeam),
-                                  heroTag: cardHeroTag == null
-                                      ? null
-                                      : MatchHeroCard.logoHeroTag(
-                                          cardHeroTag,
-                                          TeamSide.away,
-                                        ),
-                                  width: 86,
-                                  radius: 22,
-                                  labelStyle: appTextStyles.caption3.copyWith(
-                                    color: appColors.grey5,
-                                    fontWeight: FontWeight.w700,
+                                child: Center(
+                                  child: TeamBadgeLabel(
+                                    teamName: awayTeam,
+                                    teamId: stableTeamSeed(awayTeam),
+                                    heroTag: cardHeroTag == null
+                                        ? null
+                                        : MatchHeroCard.logoHeroTag(
+                                            cardHeroTag,
+                                            TeamSide.away,
+                                          ),
+                                    width: 86,
+                                    radius: 22,
+                                    labelStyle: appTextStyles.caption.copyWith(
+                                      color: appColors.dirt,
+                                      fontWeight: FontWeight.w800,
+                                    ),
                                   ),
                                 ),
                               ),

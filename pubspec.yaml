@@ -94,6 +94,8 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+    - assets/Splash_Transition_Asset_Green.png
+    - assets/Walk_Kick_Animation_green.gif
     - assets/mindful.jpg
     - assets/mobilepay_logo.png
     - assets/googlemaps.png

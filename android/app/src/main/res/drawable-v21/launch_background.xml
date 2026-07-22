@@ -4,6 +4,6 @@
     <item android:drawable="@color/kopa_off_white" />
 
     <item
-        android:drawable="@drawable/splash_icon_vector"
+        android:drawable="@drawable/splash_transition_asset_green"
         android:gravity="center" />
 </layer-list>

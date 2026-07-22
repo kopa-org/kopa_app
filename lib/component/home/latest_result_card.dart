@@ -108,9 +108,9 @@ class _HomeLatestResultCardState extends State<HomeLatestResultCard> {
                         ),
                   width: 86,
                   radius: 22,
-                  labelStyle: appTextStyles.caption3.copyWith(
-                    color: appColors.grey5,
-                    fontWeight: FontWeight.w700,
+                  labelStyle: appTextStyles.caption.copyWith(
+                    color: appColors.dirt,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
                 Text(
@@ -131,28 +131,17 @@ class _HomeLatestResultCardState extends State<HomeLatestResultCard> {
                         ),
                   width: 86,
                   radius: 22,
-                  labelStyle: appTextStyles.caption3.copyWith(
-                    color: appColors.grey5,
-                    fontWeight: FontWeight.w700,
+                  labelStyle: appTextStyles.caption.copyWith(
+                    color: appColors.dirt,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: Spacing.sm),
-            Text(
-              motm == null
-                  ? 'Ingen kampens spiller valgt endnu'
-                  : '$motm valgt til kampens spiller',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: appTextStyles.caption1.copyWith(
-                color: appColors.grey5,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            const SizedBox(height: Spacing.lg),
+            _LatestResultPlayerOfMatch(playerName: motm),
             if (match != null) ...[
-              const SizedBox(height: Spacing.md),
+              const SizedBox(height: Spacing.lg),
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -254,6 +243,86 @@ class _HomeLatestResultCardState extends State<HomeLatestResultCard> {
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _LatestResultPlayerOfMatch extends StatelessWidget {
+  final String? playerName;
+
+  const _LatestResultPlayerOfMatch({required this.playerName});
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final winnerName = playerName?.trim();
+    final hasWinner = winnerName != null && winnerName.isNotEmpty;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: Spacing.md,
+        vertical: 12,
+      ),
+      decoration: BoxDecoration(
+        color: hasWinner
+            ? appColors.lightGrass.withValues(alpha: 0.62)
+            : appColors.offWhite,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: hasWinner
+              ? appColors.grass.withValues(alpha: 0.24)
+              : appColors.grey3.withValues(alpha: 0.36),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: hasWinner ? appColors.sunset : appColors.grey3,
+            ),
+            child: Icon(
+              Icons.emoji_events_rounded,
+              size: 21,
+              color: appColors.white,
+            ),
+          ),
+          const SizedBox(width: Spacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Kampens spiller',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: appTextStyles.label.copyWith(
+                    color: hasWinner ? appColors.grass : appColors.grey5,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  hasWinner ? winnerName : 'Ikke valgt endnu',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: appTextStyles.subtitle2.copyWith(
+                    color: hasWinner ? appColors.dirt : appColors.grey5,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
