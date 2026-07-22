@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
@@ -32,8 +31,6 @@ import 'package:kopa/theme/spacing.dart';
 import 'package:kopa/utils/app_analytics.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-const double _heroPanelGradientOverlap = 80;
 
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
@@ -69,44 +66,7 @@ class _HomeTabView extends StatelessWidget {
     return PageScaffold.tab(
       title: 'Kopa',
       backgroundColor: appColors.offWhite,
-      titleWidget: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SvgPicture.asset(
-            'assets/logos/logomark_outline_foreground.svg',
-            height: 32,
-            colorFilter: ColorFilter.mode(appColors.grass, BlendMode.srcIn),
-          ),
-          const SizedBox(width: Spacing.sm),
-          Text(
-            'Kopa',
-            style: appTextStyles.h5.copyWith(
-              color: appColors.grass,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
-      ),
-      trailing: [
-        BlocBuilder<HomeCubit, HomeState>(
-          buildWhen: (previous, current) => previous.matches != current.matches,
-          builder: (context, state) => IconButton(
-            tooltip: 'Kalender',
-            onPressed: () => showHomeCalendarOverlay(
-              context: context,
-              events: state.matches,
-              onEventTap: (match) =>
-                  _openMatch(context, match, 'home_calendar'),
-            ),
-            icon: Icon(Icons.calendar_today_outlined, color: appColors.dirt),
-          ),
-        ),
-        IconButton(
-          tooltip: 'Notifikationer',
-          onPressed: () {},
-          icon: Icon(Icons.notifications_outlined, color: appColors.dirt),
-        ),
-      ],
+      showTopBar: false,
       body: RefreshIndicator(
         color: appColors.primary,
         onRefresh: () async {
@@ -142,24 +102,78 @@ class _HomeTabView extends StatelessWidget {
             final latestMatch =
                 playedMatches.isEmpty ? null : playedMatches.last;
 
-            return SingleChildScrollView(
+            return CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _HeroSection(
+              slivers: [
+                SliverAppBar(
+                  backgroundColor: appColors.offWhite,
+                  foregroundColor: appColors.grass,
+                  elevation: 0,
+                  scrolledUnderElevation: 0,
+                  pinned: false,
+                  floating: false,
+                  snap: false,
+                  centerTitle: true,
+                  title: Row(
+                    //mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SvgPicture.asset(
+                        'assets/logos/logomark_outline_foreground.svg',
+                        height: 32,
+                        colorFilter: ColorFilter.mode(
+                          appColors.grass,
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                      const SizedBox(width: Spacing.sm),
+                      Text(
+                        'Kopa',
+                        style: appTextStyles.h5.copyWith(
+                          color: appColors.grass,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  ),
+                  actions: [
+                    IconButton(
+                      tooltip: 'Kalender',
+                      onPressed: () => showHomeCalendarOverlay(
+                        context: context,
+                        events: state.matches,
+                        onEventTap: (match) =>
+                            _openMatch(context, match, 'home_calendar'),
+                      ),
+                      icon: Icon(
+                        Icons.calendar_today_outlined,
+                        color: appColors.dirt,
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: 'Notifikationer',
+                      onPressed: () {},
+                      icon: Icon(
+                        Icons.notifications_outlined,
+                        color: appColors.dirt,
+                      ),
+                    ),
+                  ],
+                ),
+                SliverToBoxAdapter(
+                  child: _HeroSection(
                     currentUser: currentUser,
                     nextMatch: nextMatch,
                   ),
-                  _HeroPanelCutover(
-                    overlap: _heroPanelGradientOverlap,
-                    child: _HeroMatchCarousel(
-                      matches: upcomingMatches,
-                      fallbackMatch: nextMatch,
-                      currentUser: currentUser,
-                    ),
+                ),
+                SliverToBoxAdapter(
+                  child: _HeroMatchCarousel(
+                    matches: upcomingMatches,
+                    fallbackMatch: nextMatch,
+                    currentUser: currentUser,
                   ),
-                  Padding(
+                ),
+                SliverToBoxAdapter(
+                  child: Padding(
                     padding: const EdgeInsets.fromLTRB(
                       Spacing.md,
                       Spacing.md,
@@ -174,8 +188,8 @@ class _HomeTabView extends StatelessWidget {
                       fineBox: state.fineBox,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             );
           },
         ),
@@ -205,7 +219,7 @@ class _HeroSection extends StatelessWidget {
         Spacing.md,
         0,
         Spacing.md,
-        Spacing.lg + _heroPanelGradientOverlap,
+        Spacing.lg,
       ),
       decoration: BoxDecoration(color: appColors.offWhite),
       child: Column(
@@ -224,88 +238,6 @@ class _HeroSection extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-class _HeroPanelCutover extends StatefulWidget {
-  final Widget child;
-  final double overlap;
-
-  const _HeroPanelCutover({
-    required this.child,
-    required this.overlap,
-  });
-
-  @override
-  State<_HeroPanelCutover> createState() => _HeroPanelCutoverState();
-}
-
-class _HeroPanelCutoverState extends State<_HeroPanelCutover> {
-  Size _childSize = Size.zero;
-
-  @override
-  Widget build(BuildContext context) {
-    final height = math.max(0.0, _childSize.height - widget.overlap);
-
-    return SizedBox(
-      height: height,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Positioned(
-            left: 0,
-            right: 0,
-            top: -widget.overlap,
-            child: _MeasureSize(
-              onChange: (size) {
-                if (!mounted || size == _childSize) return;
-                setState(() => _childSize = size);
-              },
-              child: widget.child,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MeasureSize extends SingleChildRenderObjectWidget {
-  final ValueChanged<Size> onChange;
-
-  const _MeasureSize({
-    required this.onChange,
-    required super.child,
-  });
-
-  @override
-  RenderObject createRenderObject(BuildContext context) {
-    return _MeasureSizeRenderObject(onChange);
-  }
-
-  @override
-  void updateRenderObject(
-    BuildContext context,
-    covariant _MeasureSizeRenderObject renderObject,
-  ) {
-    renderObject.onChange = onChange;
-  }
-}
-
-class _MeasureSizeRenderObject extends RenderProxyBox {
-  ValueChanged<Size> onChange;
-  Size? _oldSize;
-
-  _MeasureSizeRenderObject(this.onChange);
-
-  @override
-  void performLayout() {
-    super.performLayout();
-    final newSize = size;
-    if (_oldSize == newSize) return;
-
-    _oldSize = newSize;
-    WidgetsBinding.instance.addPostFrameCallback((_) => onChange(newSize));
   }
 }
 
