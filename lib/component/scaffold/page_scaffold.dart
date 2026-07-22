@@ -185,7 +185,7 @@ class PageScaffold extends StatelessWidget {
 
   Widget _defaultMaterialBackButton(BuildContext context) {
     return IconButton(
-      icon: const Icon(Icons.arrow_back),
+      icon: const Icon(Icons.arrow_back), color: Theme.of(context).extension<AppColors>()?.dirt,
       onPressed: () => Navigator.of(context).pop(),
     );
   }

@@ -43,10 +43,14 @@ class HomeBentoCard extends StatelessWidget {
 
 class HomeBentoSectionTitle extends StatelessWidget {
   final String title;
+  final String? actionLabel;
+  final VoidCallback? onAction;
 
   const HomeBentoSectionTitle({
     super.key,
     required this.title,
+    this.actionLabel,
+    this.onAction,
   });
 
   @override
@@ -55,17 +59,45 @@ class HomeBentoSectionTitle extends StatelessWidget {
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Text(
-        title,
-        textAlign: TextAlign.left,
-        style: appTextStyles.h5.copyWith(
-          color: appColors.dirt,
-          fontWeight: FontWeight.w900,
-        ),
+    final titleWidget = Text(
+      title,
+      textAlign: TextAlign.left,
+      style: appTextStyles.h5.copyWith(
+        color: appColors.dirt,
+        fontWeight: FontWeight.w900,
       ),
+    );
+
+    final onAction = this.onAction;
+    if (onAction == null) {
+      return Align(
+        alignment: Alignment.centerLeft,
+        child: titleWidget,
+      );
+    }
+
+    return Row(
+      children: [
+        Expanded(child: titleWidget),
+        TextButton.icon(
+          onPressed: onAction,
+          style: TextButton.styleFrom(
+            foregroundColor: appColors.dirt,
+            minimumSize: const Size(0, 34),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+          iconAlignment: IconAlignment.end,
+          icon: const Icon(Icons.arrow_forward, size: 16),
+          label: Text(
+            actionLabel ?? 'Gå til',
+            style: appTextStyles.buttonTiny.copyWith(
+              color: appColors.dirt,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -55,7 +55,7 @@ class StandingsPreviewCard extends StatelessWidget {
             children: [
               Container(
                 padding: const EdgeInsets.all(Spacing.md),
-                color: palette.statCard,
+                color: appColors.lightGrass,
                 child: Row(
                   children: [
                     Expanded(
@@ -64,7 +64,7 @@ class StandingsPreviewCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: appTextStyles.label.copyWith(
-                          color: appColors.white,
+                          color: appColors.dirt,
                           fontWeight: FontWeight.w900,
                         ),
                       ),

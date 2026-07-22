@@ -55,8 +55,8 @@ class StandingsPage extends StatelessWidget {
                           label,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: appTextStyles.h3.copyWith(
-                            color: appColors.grass,
+                          style: appTextStyles.h5.copyWith(
+                            color: appColors.dirt,
                             fontWeight: FontWeight.w900,
                           ),
                         ),
@@ -122,6 +122,10 @@ class _StandingsTable extends StatelessWidget {
             child: Column(
               children: [
                 _StandingsHeader(compact: compact),
+                         Divider(
+                    height: 1,
+                    color: appColors.dirt,
+                  ),
                 for (final row in rows) ...[
                   _StandingsRow(
                     row: row,
@@ -132,6 +136,7 @@ class _StandingsTable extends StatelessWidget {
                       standings,
                     ),
                   ),
+         
                   if (row.boundaryAfter != null)
                     _StandingsBoundary(
                       style: row.boundaryAfter!,
@@ -173,14 +178,14 @@ class _StandingsHeader extends StatelessWidget {
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
     final style = appTextStyles.label.copyWith(
-      color: appColors.white,
+      color: appColors.dirt,
       fontSize: compact ? 10 : null,
       fontWeight: FontWeight.w900,
     );
 
     return Container(
       height: 44,
-      color: appColors.grass,
+      color: appColors.white,
       padding: EdgeInsets.symmetric(horizontal: compact ? 6 : Spacing.sm),
       child: Row(
         children: [

@@ -113,20 +113,7 @@ class HomeFineBoxCard extends StatelessWidget {
                 valueColor: AlwaysStoppedAnimation<Color>(appColors.primary),
               ),
             ),
-            const SizedBox(height: Spacing.lg),
-            Row(
-              children: [
-                Text(
-                  currentUser.isTeamOwner ? 'Gå til bødekassen' : 'Betal nu',
-                  style: appTextStyles.buttonSmall.copyWith(
-                    color: appColors.primary,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                Icon(Icons.arrow_forward, color: appColors.primary, size: 17),
-              ],
-            ),
+            const SizedBox(height: Spacing.sm),
           ],
         ),
       ),

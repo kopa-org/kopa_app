@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:kopa/component/avatar/team_badge_label.dart';
 import 'package:kopa/component/card/match_hero_card.dart';
@@ -67,7 +68,7 @@ class _HomeTabView extends StatelessWidget {
 
     return PageScaffold.tab(
       title: 'Kopa',
-      backgroundColor: appColors.white,
+      backgroundColor: appColors.offWhite,
       titleWidget: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -97,13 +98,13 @@ class _HomeTabView extends StatelessWidget {
               onEventTap: (match) =>
                   _openMatch(context, match, 'home_calendar'),
             ),
-            icon: const Icon(Icons.calendar_today_outlined),
+            icon: Icon(Icons.calendar_today_outlined, color: appColors.dirt),
           ),
         ),
         IconButton(
           tooltip: 'Notifikationer',
           onPressed: () {},
-          icon: const Icon(Icons.notifications_outlined),
+          icon: Icon(Icons.notifications_outlined, color: appColors.dirt),
         ),
       ],
       body: RefreshIndicator(
@@ -206,7 +207,7 @@ class _HeroSection extends StatelessWidget {
         Spacing.md,
         Spacing.lg + _heroPanelGradientOverlap,
       ),
-      decoration: BoxDecoration(color: appColors.white),
+      decoration: BoxDecoration(color: appColors.offWhite),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -214,7 +215,7 @@ class _HeroSection extends StatelessWidget {
           Text(
             nextMatch == null ? 'Ingen kommende kamp' : 'Næste kamp om',
             style: appTextStyles.caption2.copyWith(
-              color: appColors.grass.withValues(alpha: 0.78),
+              color: appColors.dirt,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -358,71 +359,73 @@ class _HeroCountdownState extends State<_HeroCountdown> {
   Widget build(BuildContext context) {
     final appColors =
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final styles = _displayStyle(context).copyWith(
+      color: appColors.dirt,
+      fontSize: 32,
+      height: 0.98,
+    );
 
     if (widget.target == null) {
       return Text(
         'Planen opdateres',
-        style: _displayStyle(context).copyWith(
-          fontSize: 36,
-          color: appColors.white,
-        ),
+        style: styles.copyWith(fontSize: 30),
       );
     }
 
     return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        _HeroCountdownBlock(
+        _HeroCountdownPart(
           value: _remaining.inDays,
-          label: 'Dag',
+          suffix: 'd',
+          style: styles,
         ),
-        const SizedBox(width: 22),
-        _HeroCountdownBlock(
+        const SizedBox(width: 24),
+        _HeroCountdownPart(
           value: _remaining.inHours % 24,
-          label: 'Timer',
+          suffix: 't',
+          style: styles,
         ),
-        const SizedBox(width: 22),
-        _HeroCountdownBlock(
+        const SizedBox(width: 24),
+        _HeroCountdownPart(
           value: _remaining.inMinutes % 60,
-          label: 'Min',
+          suffix: 'm',
+          style: styles,
         ),
       ],
     );
   }
 }
 
-class _HeroCountdownBlock extends StatelessWidget {
+class _HeroCountdownPart extends StatelessWidget {
   final int value;
-  final String label;
+  final String suffix;
+  final TextStyle style;
 
-  const _HeroCountdownBlock({
+  const _HeroCountdownPart({
     required this.value,
-    required this.label,
+    required this.suffix,
+    required this.style,
   });
 
   @override
   Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
       children: [
         Text(
           value.toString().padLeft(2, '0'),
-          style: _displayStyle(context).copyWith(
-            color: appColors.grass,
-            fontSize: 28,
-            height: 0.98,
-          ),
+          style: style,
         ),
-        const SizedBox(height: 5),
+        const SizedBox(width: 2),
         Text(
-          label.toUpperCase(),
-          style: appTextStyles.label.copyWith(
-            color: appColors.grass,
-            fontWeight: FontWeight.w800,
+          suffix,
+          style: style.copyWith(
+            fontSize: 11,
+            fontWeight: FontWeight.w900,
           ),
         ),
       ],
@@ -1279,22 +1282,28 @@ class _BentoGrid extends StatelessWidget {
           onOpenMatch: (match) => _openMatch(context, match, 'home_latest'),
           matchHeroTag: _matchHeroTag,
         ),
-        const SizedBox(height: Spacing.md),
+        const SizedBox(height: Spacing.lg),
         const HomeBentoSectionTitle(title: 'Stilling'),
         const SizedBox(height: Spacing.sm),
         StandingsPreviewCard(
           standings: standings,
           currentUser: currentUser,
         ),
-        const SizedBox(height: Spacing.md),
-        const HomeBentoSectionTitle(title: 'Statistikker'),
+        const SizedBox(height: Spacing.lg),
+        HomeBentoSectionTitle(
+          title: 'Statistikker',
+          onAction: () => _openStatistics(context),
+        ),
         const SizedBox(height: Spacing.sm),
         HomeStatisticsStrip(
           stats: statistics,
           currentUser: currentUser,
         ),
-        const SizedBox(height: Spacing.md),
-        const HomeBentoSectionTitle(title: 'Bødekasse'),
+        const SizedBox(height: Spacing.lg),
+        HomeBentoSectionTitle(
+          title: 'Bødekasse',
+          onAction: () => _openFineBox(context),
+        ),
         const SizedBox(height: Spacing.sm),
         HomeFineBoxCard(
           fineBox: fineBox,
@@ -1385,6 +1394,11 @@ void _openFineBox(BuildContext context) {
   Navigator.of(context).push(MaterialWithModalsPageRoute(
     builder: (context) => const TeamFinesPage(),
   ));
+}
+
+void _openStatistics(BuildContext context) {
+  AppAnalytics.logEvent('statistics_opened');
+  StatefulNavigationShell.of(context).goBranch(2, initialLocation: true);
 }
 
 Future<void> _openNavigation(MatchDetails match) async {
