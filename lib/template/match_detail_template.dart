@@ -88,9 +88,6 @@ class MatchDetailTemplate extends StatelessWidget {
       decoration: BoxDecoration(
         color: colors.white,
         borderRadius: BorderRadius.circular(Spacing.borderRadiusSmall),
-        border: Border.all(
-          color: colors.grass.withValues(alpha: 0.22),
-        ),
       ),
       child: SegmentedButtonSlide(
         selectedEntry: _segmentIndex(selectedSegment),

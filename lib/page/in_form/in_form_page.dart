@@ -230,7 +230,6 @@ class _LeaderboardHero extends StatelessWidget {
 
     return InFormPanel(
       color: colors.surface,
-      border: Border.all(color: colors.grass, width: 2),
       padding: const EdgeInsets.all(Spacing.lg),
       child: Stack(
         children: [
@@ -514,9 +513,6 @@ class _PodiumRow extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: leader ? colors.lightGrass.withValues(alpha: .36) : null,
-          border: isCurrentUser
-              ? Border(left: BorderSide(color: colors.grass, width: 3))
-              : null,
         ),
         padding: EdgeInsets.symmetric(
           horizontal: isCurrentUser ? Spacing.md - 3 : Spacing.md,
@@ -632,9 +628,6 @@ class _LeaderboardRow extends StatelessWidget {
         decoration: BoxDecoration(
           color:
               isCurrentUser ? colors.lightGrass.withValues(alpha: .18) : null,
-          border: isCurrentUser
-              ? Border(left: BorderSide(color: colors.grass, width: 3))
-              : null,
         ),
         padding: EdgeInsets.symmetric(
           horizontal: isCurrentUser ? Spacing.md - 3 : Spacing.md,

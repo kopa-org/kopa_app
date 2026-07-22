@@ -150,8 +150,6 @@ class _AssignFinesModalState extends State<AssignFinesModal> {
                                     });
                                   },
                                   decoration: BoxDecoration(
-                                    border: Border.all(
-                                        color: appColors.black, width: 1.0),
                                     borderRadius: const BorderRadius.all(
                                         Radius.circular(5.0)),
                                   ),
@@ -201,10 +199,6 @@ class _AssignFinesModalState extends State<AssignFinesModal> {
                                                       height: 22,
                                                       decoration: BoxDecoration(
                                                         shape: BoxShape.circle,
-                                                        border: Border.all(
-                                                            color:
-                                                                appColors.black,
-                                                            width: 2),
                                                         color: selectedUsers[fine[
                                                                         'id']]![
                                                                     user.id] ==
@@ -251,9 +245,6 @@ class _AssignFinesModalState extends State<AssignFinesModal> {
                                                       decoration: BoxDecoration(
                                                         color: appColors
                                                             .background,
-                                                        border: Border.all(
-                                                            color: appColors
-                                                                .divider),
                                                         borderRadius:
                                                             BorderRadius
                                                                 .circular(8),

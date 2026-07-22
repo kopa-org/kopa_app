@@ -74,7 +74,7 @@ class AppColors extends ThemeExtension<AppColors> {
   });
 
   static const AppColors light = AppColors(
-    background: Color(0xFFFDFDFD),//Color(0xFFE8F2ED), // Off White
+    background: Color(0xFFE8F2ED), // Off White
     surface: Color(0xFFFDFDFD), // Figma White
     primary: Color(0xFF00943C), // Græs / Grass
     divider: Color(0xFFB7B7B7), // Grey 3

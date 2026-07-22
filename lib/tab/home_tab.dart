@@ -67,6 +67,7 @@ class _HomeTabView extends StatelessWidget {
 
     return PageScaffold.tab(
       title: 'Kopa',
+      backgroundColor: appColors.white,
       titleWidget: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -105,7 +106,6 @@ class _HomeTabView extends StatelessWidget {
           icon: const Icon(Icons.notifications_outlined),
         ),
       ],
-      backgroundColor: appColors.white,
       body: RefreshIndicator(
         color: appColors.primary,
         onRefresh: () async {
@@ -704,7 +704,6 @@ class _HeroTeamPanel extends StatelessWidget {
               decoration: BoxDecoration(
                 color: appColors.white,
                 borderRadius: BorderRadius.circular(28),
-                border: Border.all(color: appColors.grass),
                 boxShadow: [
                   BoxShadow(
                     color: appColors.black.withValues(alpha: 0.06),
@@ -1125,9 +1124,6 @@ class _MatchSignupSummary extends StatelessWidget {
       decoration: BoxDecoration(
         color: appColors.white.withValues(alpha: 0.58),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: appColors.grass,
-        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1215,7 +1211,6 @@ class _KopaChoiceButton extends StatelessWidget {
     final enabled = onPressed != null;
     final backgroundColor = outlined ? appColors.white : appColors.grass;
     final foregroundColor = outlined ? appColors.grass : appColors.white;
-    final borderColor = outlined ? appColors.grass : appColors.grass;
 
     return Opacity(
       opacity: enabled ? 1 : 0.55,
@@ -1230,7 +1225,6 @@ class _KopaChoiceButton extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(Spacing.borderRadiusFull),
-              border: Border.all(color: borderColor, width: outlined ? 1.5 : 0),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,

@@ -646,7 +646,6 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
                                 keyboardType: TextInputType.text,
                                 padding: const EdgeInsets.all(Spacing.md),
                                 decoration: BoxDecoration(
-                                  border: Border.all(color: appColors.divider),
                                   borderRadius: BorderRadius.circular(
                                     Spacing.borderRadiusSmall,
                                   ),
@@ -925,9 +924,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       textAlign: TextAlign.center,
       keyboardType: TextInputType.number,
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-          border: Border.all(color: appColors.black, width: 2),
-          borderRadius: BorderRadius.circular(8)),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
       onSubmitted: (_) =>
           next != null ? next.requestFocus() : onSubmitted?.call(),
     );
@@ -1094,7 +1091,6 @@ class _PostMatchPill extends StatelessWidget {
       decoration: BoxDecoration(
         color: colors.white.withValues(alpha: 0.72),
         borderRadius: BorderRadius.circular(Spacing.borderRadiusFull),
-        border: Border.all(color: colors.grass.withValues(alpha: 0.18)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1214,7 +1210,6 @@ class _PersonalStatTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: colors.white.withValues(alpha: 0.72),
         borderRadius: BorderRadius.circular(Spacing.borderRadiusSmall),
-        border: Border.all(color: colors.grass.withValues(alpha: 0.16)),
       ),
       child: Row(
         children: [

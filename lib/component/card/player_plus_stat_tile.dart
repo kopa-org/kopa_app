@@ -30,7 +30,6 @@ class PlayerPlusStatTileData {
   final IconData icon;
   final Color accentColor;
   final Color? backgroundColor;
-  final Color? borderColor;
 
   const PlayerPlusStatTileData({
     required this.title,
@@ -40,7 +39,6 @@ class PlayerPlusStatTileData {
     required this.icon,
     required this.accentColor,
     this.backgroundColor,
-    this.borderColor,
   });
 
   String get rankLabel => rank == null ? 'Ingen placering' : '#$rank på holdet';
@@ -61,7 +59,6 @@ class PlayerPlusStatTile extends StatelessWidget {
   final double valueRankGap;
   final bool showShadow;
   final Color? backgroundColor;
-  final Color? borderColor;
   final int? currentUserId;
   final bool locked;
   final Future<void> Function()? onBuyPlayerPlus;
@@ -82,7 +79,6 @@ class PlayerPlusStatTile extends StatelessWidget {
     this.valueRankGap = 8,
     this.showShadow = false,
     this.backgroundColor,
-    this.borderColor,
     this.currentUserId,
     this.locked = false,
     this.onBuyPlayerPlus,
@@ -106,13 +102,10 @@ class PlayerPlusStatTile extends StatelessWidget {
       icon: data.icon,
       accentColor: data.accentColor,
       backgroundColor: data.backgroundColor,
-      borderColor: data.borderColor,
     );
     final effectiveBackgroundColor = backgroundColor ??
         displayData.backgroundColor ??
         appColors.lightGrass55;
-    final effectiveBorderColor =
-        borderColor ?? displayData.borderColor ?? appColors.grass;
 
     final content = Material(
       color: effectiveBackgroundColor,
@@ -124,7 +117,6 @@ class PlayerPlusStatTile extends StatelessWidget {
           width: width,
           padding: padding,
           decoration: BoxDecoration(
-            border: Border.all(color: effectiveBorderColor),
             color: effectiveBackgroundColor,
             borderRadius: BorderRadius.circular(borderRadius),
             boxShadow: showShadow
@@ -390,9 +382,6 @@ class _PlayerPlusLeaderboardSheetRow extends StatelessWidget {
             ? accentColor.withValues(alpha: 0.14)
             : appColors.surface,
         borderRadius: BorderRadius.circular(8),
-        border: isCurrentUser
-            ? Border.all(color: appColors.grass, width: 1.4)
-            : null,
       ),
       child: Row(
         children: [

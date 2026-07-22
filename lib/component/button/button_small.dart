@@ -24,9 +24,6 @@ class ButtonSmall extends StatelessWidget {
           color:
               outlined ? CupertinoColors.white : CupertinoColors.systemIndigo,
           borderRadius: BorderRadius.circular(50.0),
-          border: outlined
-              ? Border.all(color: CupertinoColors.systemIndigo, width: 2.0)
-              : null,
         ),
         padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
         child: Row(

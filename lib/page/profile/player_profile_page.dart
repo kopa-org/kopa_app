@@ -182,8 +182,6 @@ class _PlayerProfileView extends StatelessWidget {
                                     decoration: BoxDecoration(
                                       color: appColors.surface,
                                       borderRadius: BorderRadius.circular(999),
-                                      border:
-                                          Border.all(color: appColors.divider),
                                     ),
                                     child: Text(tag, style: styles.caption),
                                   ),

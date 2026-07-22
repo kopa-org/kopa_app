@@ -668,8 +668,6 @@ class _LeaderboardSheetRow extends StatelessWidget {
             ? accentColor.withValues(alpha: 0.14)
             : appColors.surface,
         borderRadius: BorderRadius.circular(8),
-        border:
-            isCurrentUser ? Border.all(color: accentColor, width: 1.4) : null,
       ),
       child: Row(
         children: [

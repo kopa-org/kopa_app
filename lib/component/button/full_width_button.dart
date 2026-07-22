@@ -41,9 +41,6 @@ class FullWidthButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: outlined ? appColors.surface : backgroundColor,
           borderRadius: BorderRadius.circular(12.0),
-          border: outlined
-              ? Border.all(color: appColors.divider, width: 2.0)
-              : null,
         ),
         alignment: Alignment.center,
         child: Row(

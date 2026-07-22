@@ -495,10 +495,7 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
       height: 60,
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-          color: appColors.surface,
-          border:
-              Border(bottom: BorderSide(color: appColors.divider, width: 0.5))),
+      decoration: BoxDecoration(color: appColors.surface),
       child: Row(
         children: [
           _buildHeaderChip(
@@ -542,10 +539,6 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
               ? appColors.primary.withValues(alpha: 0.1)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-              color: value != null
-                  ? Colors.transparent
-                  : appColors.divider.withValues(alpha: 0.3)),
         ),
         child: Text(value ?? '-',
             style: appTextStyles.bodyBold.copyWith(
@@ -570,10 +563,6 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
               ? appColors.primary.withValues(alpha: 0.1)
               : Colors.transparent,
           shape: BoxShape.circle,
-          border: Border.all(
-              color: initials != null
-                  ? Colors.transparent
-                  : appColors.divider.withValues(alpha: 0.3)),
         ),
         alignment: Alignment.center,
         child: initials != null
@@ -623,8 +612,7 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
             key: type.$4,
             decoration: BoxDecoration(
                 color: appColors.surface,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: appColors.divider, width: 2)),
+                borderRadius: BorderRadius.circular(16)),
             child:
                 Column(mainAxisAlignment: MainAxisAlignment.center, children: [
               Text(type.$3, style: const TextStyle(fontSize: 32)),
@@ -784,10 +772,8 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
 
   Widget _buildStagedDraft(AppTextStyles appTextStyles, AppColors appColors) {
     return Container(
-      decoration: BoxDecoration(
-          color: appColors.primary.withValues(alpha: 0.05),
-          border:
-              Border(top: BorderSide(color: appColors.divider, width: 0.5))),
+      decoration:
+          BoxDecoration(color: appColors.primary.withValues(alpha: 0.05)),
       child: ListView.builder(
         controller: _stagedScrollController,
         scrollDirection: Axis.horizontal,
@@ -806,8 +792,7 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                   color: appColors.surface,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: appColors.divider)),
+                  borderRadius: BorderRadius.circular(16)),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -873,8 +858,7 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                             color: appColors.surface,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: appColors.primary)),
+                            borderRadius: BorderRadius.circular(12)),
                         child: Text('Tilføj flere',
                             style: TextStyle(
                                 color: appColors.primary,

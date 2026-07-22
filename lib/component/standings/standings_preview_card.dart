@@ -39,7 +39,6 @@ class StandingsPreviewCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: appColors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: palette.statCard),
         boxShadow: [
           BoxShadow(
             color: appColors.black.withValues(alpha: 0.06),
@@ -61,7 +60,7 @@ class StandingsPreviewCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        'STILLING - $standingsLabel',
+                        standingsLabel,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: appTextStyles.label.copyWith(
@@ -113,7 +112,6 @@ class StandingsPreviewCard extends StatelessWidget {
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(vertical: 11),
                       decoration: BoxDecoration(
-                        border: Border.all(color: palette.outline),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       alignment: Alignment.center,

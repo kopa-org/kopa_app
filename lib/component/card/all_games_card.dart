@@ -89,9 +89,13 @@ class _GameResultRow extends StatelessWidget {
           decoration: BoxDecoration(
             color: appColors.white,
             borderRadius: borderRadius,
-            border: Border.all(
-              color: appColors.grey3.withValues(alpha: 0.62),
-            ),
+            boxShadow: [
+              BoxShadow(
+                color: appColors.black.withValues(alpha: 0.04),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child: InkWell(
             onTap: onTap,
@@ -188,7 +192,6 @@ class _SignupBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: appColors.lightGrass55,
         borderRadius: BorderRadius.circular(Spacing.borderRadiusFull),
-        border: Border.all(color: appColors.grass.withValues(alpha: 0.32)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

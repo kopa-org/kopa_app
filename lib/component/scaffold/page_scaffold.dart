@@ -67,7 +67,7 @@ class PageScaffold extends StatelessWidget {
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     final isIOS = theme.platform == TargetPlatform.iOS;
-    final bgColor = backgroundColor ?? appColors.white;
+    final bgColor = backgroundColor ?? appColors.background;
     final shouldShowTopBar = showTopBar && _hasTopBarContent;
 
     final page = isIOS

@@ -138,7 +138,6 @@ class _PlayerHero extends StatelessWidget {
 
     return InFormPanel(
       color: colors.surface,
-      border: Border.all(color: colors.grass, width: 2),
       padding: const EdgeInsets.all(Spacing.lg),
       child: Stack(
         children: [

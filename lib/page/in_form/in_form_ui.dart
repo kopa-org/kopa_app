@@ -234,7 +234,6 @@ class InFormPill extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(999),
-            border: selected ? null : Border.all(color: colors.divider),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,

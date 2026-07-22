@@ -280,10 +280,6 @@ class _PositionedPlayer extends StatelessWidget {
             decoration: BoxDecoration(
               color: player == null ? colors.lightGrass95 : colors.lightGrass,
               shape: BoxShape.circle,
-              border: Border.all(
-                color: colors.lightGrass55,
-                width: 2,
-              ),
             ),
             child: Text(
               label,

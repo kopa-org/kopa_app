@@ -29,10 +29,6 @@ class CustomCheckbox extends StatelessWidget {
         height: 22,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(
-            color: appColors.black,
-            width: 2,
-          ),
           color: value == true ? appColors.black : appColors.surface,
         ),
         child: value
@@ -46,44 +42,3 @@ class CustomCheckbox extends StatelessWidget {
     );
   }
 }
-
-/*
-                                                      Container(
-                                                        width: 22,
-                                                        height: 22,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          shape:
-                                                              BoxShape.circle,
-                                                          border: Border.all(
-                                                            color:
-                                                                CupertinoColors
-                                                                    .black,
-                                                            width: 2,
-                                                          ),
-                                                          color: selectedPlayers[
-                                                                          fine[
-                                                                              'id']]![
-                                                                      player
-                                                                          .id] ==
-                                                                  true
-                                                              ? CupertinoColors
-                                                                  .black
-                                                              : CupertinoColors
-                                                                  .white,
-                                                        ),
-                                                        child: selectedPlayers[fine[
-                                                                        'id']]![
-                                                                    player
-                                                                        .id] ==
-                                                                true
-                                                            ? Icon(
-                                                                CupertinoIcons
-                                                                    .checkmark,
-                                                                color:
-                                                                    CupertinoColors
-                                                                        .white,
-                                                                size: 16)
-                                                            : null,
-                                                      ),
- */

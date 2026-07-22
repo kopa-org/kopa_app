@@ -40,11 +40,6 @@ class MatchPollRowItem extends StatelessWidget {
             ? appColors.lightGrass.withValues(alpha: 0.22)
             : appColors.surface,
         borderRadius: BorderRadius.circular(Spacing.borderRadiusSmall),
-        border: Border.all(
-          color: votes > 0
-              ? appColors.primary.withValues(alpha: 0.32)
-              : appColors.divider,
-        ),
       ),
       child: Row(
         children: [
@@ -121,7 +116,6 @@ class _VoteStepper extends StatelessWidget {
       decoration: BoxDecoration(
         color: appColors.background,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: appColors.divider),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

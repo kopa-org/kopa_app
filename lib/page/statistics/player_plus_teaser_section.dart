@@ -105,7 +105,6 @@ class _HeroTeaserCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: appColors.lightGrass,
             borderRadius: BorderRadius.circular(26),
-            border: Border.all(color: appColors.grass, width: 2),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -249,7 +248,6 @@ class _MiniTeaserCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: appColors.surface,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: color.withValues(alpha: 0.35)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

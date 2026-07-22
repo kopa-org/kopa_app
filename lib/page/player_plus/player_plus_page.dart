@@ -38,7 +38,6 @@ class _PlayerPlusPageState extends State<PlayerPlusPage> {
             decoration: BoxDecoration(
               color: appColors.lightGrass,
               borderRadius: BorderRadius.circular(28),
-              border: Border.all(color: appColors.grass, width: 2),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -172,7 +171,6 @@ class _InFormCard extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: appColors.grass.withValues(alpha: 0.3)),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -184,8 +182,8 @@ class _InFormCard extends StatelessWidget {
                   color: appColors.lightGrass,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.local_fire_department,
-                    color: appColors.grass),
+                child:
+                    Icon(Icons.local_fire_department, color: appColors.grass),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -266,7 +264,6 @@ class _CompetitionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: appColors.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: competition.color.withValues(alpha: 0.35)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -335,7 +332,6 @@ class _FeaturePreviewCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: appColors.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

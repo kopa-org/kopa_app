@@ -29,7 +29,6 @@ class StandingsPage extends StatelessWidget {
     return PageScaffold(
       title: 'Stilling',
       showBackButton: true,
-      backgroundColor: appColors.white,
       body: rows.isEmpty
           ? Center(
               child: Text(
@@ -100,7 +99,6 @@ class _StandingsTable extends StatelessWidget {
   Widget build(BuildContext context) {
     final appColors =
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final palette = _StandingsPalette(appColors);
     final relegationBoundary = _relegationBoundary(rows);
 
     return LayoutBuilder(
@@ -111,7 +109,13 @@ class _StandingsTable extends StatelessWidget {
           decoration: BoxDecoration(
             color: appColors.white,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: palette.outline),
+            boxShadow: [
+              BoxShadow(
+                color: appColors.black.withValues(alpha: 0.05),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
+            ],
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
@@ -217,7 +221,6 @@ class _StandingsRow extends StatelessWidget {
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final palette = _StandingsPalette(appColors);
     final color = isCurrentTeam ? appColors.primary : appColors.textPrimary;
     final goalDifference = row.goalsFor - row.goalsAgainst;
     final weight = isCurrentTeam ? FontWeight.w900 : FontWeight.w600;
@@ -233,9 +236,6 @@ class _StandingsRow extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: compact ? 6 : Spacing.sm),
       decoration: BoxDecoration(
         color: isCurrentTeam ? appColors.lightGrass : Colors.transparent,
-        border: Border(
-          bottom: BorderSide(color: palette.outline),
-        ),
       ),
       child: Row(
         children: [
@@ -429,14 +429,6 @@ class _ValueCell extends StatelessWidget {
       ),
     );
   }
-}
-
-class _StandingsPalette {
-  final AppColors colors;
-
-  const _StandingsPalette(this.colors);
-
-  Color get outline => colors.grass.withValues(alpha: 0.16);
 }
 
 String _standingsLabel(DbuStandings? standings) {

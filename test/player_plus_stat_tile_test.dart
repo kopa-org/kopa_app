@@ -5,9 +5,8 @@ import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 
 void main() {
-  testWidgets('uses custom background and border colors', (tester) async {
+  testWidgets('uses custom background color without a border', (tester) async {
     const backgroundColor = Color(0xFFEAF6F0);
-    const borderColor = Color(0xFF225844);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -26,7 +25,6 @@ void main() {
               icon: Icons.sports_score,
               accentColor: Colors.blue,
               backgroundColor: backgroundColor,
-              borderColor: borderColor,
             ),
           ),
         ),
@@ -44,9 +42,9 @@ void main() {
         isA<BoxDecoration>()
             .having((decoration) => decoration.color, 'color', backgroundColor)
             .having(
-              (decoration) => decoration.border?.top.color,
-              'border color',
-              borderColor,
+              (decoration) => decoration.border,
+              'border',
+              isNull,
             ),
       ),
     );

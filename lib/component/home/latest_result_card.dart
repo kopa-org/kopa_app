@@ -287,7 +287,6 @@ class _LatestResultEventSummary extends StatelessWidget {
       decoration: BoxDecoration(
         color: appColors.white.withValues(alpha: 0.58),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: appColors.grey3.withValues(alpha: 0.32)),
       ),
       child: Column(
         children: [
@@ -382,7 +381,7 @@ class _LatestResultHistoryRow extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: appTextStyles.caption2.copyWith(
-                color:  appColors.grass,
+                color: appColors.grass,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -400,8 +399,6 @@ class _LatestResultHistoryRow extends StatelessWidget {
     );
   }
 }
-
-
 
 String _latestResultEventLabel(MatchEventDetails event) {
   if (event.type == MatchEventType.goal && event.assistMakerUserName != null) {

@@ -118,7 +118,6 @@ class _DepositModalState extends State<DepositModal> {
                     keyboardType: TextInputType.number,
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      border: Border.all(color: appColors.black, width: 2),
                       borderRadius: BorderRadius.circular(10.0),
                     ),
                   ),

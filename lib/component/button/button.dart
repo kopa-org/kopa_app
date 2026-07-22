@@ -32,10 +32,6 @@ class Button extends StatelessWidget {
         ? appColors.surface
         : (enabled ? appColors.primary : appColors.divider);
 
-    final Color borderColor = outlined
-        ? (enabled ? appColors.primary : appColors.divider)
-        : Colors.transparent;
-
     final Color textColor = outlined
         ? (enabled ? appColors.primary : appColors.textSecondary)
         : (enabled ? Colors.white : appColors.textSecondary);
@@ -54,8 +50,6 @@ class Button extends StatelessWidget {
             decoration: BoxDecoration(
               color: bgColor,
               borderRadius: BorderRadius.circular(50.0),
-              border:
-                  outlined ? Border.all(color: borderColor, width: 2.0) : null,
             ),
             padding:
                 const EdgeInsets.symmetric(vertical: 15.0, horizontal: 30.0),

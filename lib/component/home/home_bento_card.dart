@@ -28,7 +28,6 @@ class HomeBentoCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: color ?? appColors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: appColors.grass),
         boxShadow: [
           BoxShadow(
             color: appColors.black.withValues(alpha: 0.06),
