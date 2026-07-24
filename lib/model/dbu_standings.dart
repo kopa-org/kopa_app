@@ -25,7 +25,8 @@ class DbuStandings {
     return DbuStandings(
       poolId: json['poolId'],
       currentTeamId: json['currentTeamId'],
-      seriesName: json['seriesName'] ?? json['series_name'],
+      seriesName:
+          _decodeHtmlEntities(json['seriesName'] ?? json['series_name']),
       rows: (json['rows'] as List<dynamic>? ?? [])
           .whereType<Map<String, dynamic>>()
           .map(
@@ -74,7 +75,7 @@ class DbuStandingRow {
     return DbuStandingRow(
       position: json['position'] ?? 0,
       dbuTeamId: json['dbuTeamId'] ?? 0,
-      teamName: json['teamName'] ?? '',
+      teamName: _decodeHtmlEntities(json['teamName']) ?? '',
       matchesPlayed: json['matchesPlayed'] ?? 0,
       wins: json['wins'] ?? 0,
       draws: json['draws'] ?? 0,
@@ -93,3 +94,35 @@ int? _asInt(Object? value) => switch (value) {
       String value => int.tryParse(value),
       _ => null,
     };
+
+String? _decodeHtmlEntities(Object? value) {
+  if (value is! String) return null;
+
+  var decoded = value;
+  for (var i = 0; i < 2; i++) {
+    final next = decoded
+        .replaceAll('&nbsp;', ' ')
+        .replaceAll('&amp;', '&')
+        .replaceAll('&quot;', '"')
+        .replaceAll('&#39;', "'")
+        .replaceAll('&lt;', '<')
+        .replaceAll('&gt;', '>')
+        .replaceAllMapped(RegExp(r'&#(x[0-9a-fA-F]+|\d+);'), (match) {
+      final rawCodepoint = match.group(1)!;
+      final codepoint = rawCodepoint.startsWith('x')
+          ? int.tryParse(rawCodepoint.substring(1), radix: 16)
+          : int.tryParse(rawCodepoint);
+
+      if (codepoint == null || codepoint < 0 || codepoint > 0x10FFFF) {
+        return match.group(0)!;
+      }
+
+      return String.fromCharCode(codepoint);
+    });
+
+    if (next == decoded) break;
+    decoded = next;
+  }
+
+  return decoded.trim();
+}

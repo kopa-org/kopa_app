@@ -31,6 +31,7 @@ class TeamSeasonRepository {
   static Future<SeasonDetails> startSeason({
     required int teamId,
     required DateTime startsOn,
+    String? name,
     bool allowUnsettledMatches = false,
   }) async {
     final token = await SecureStorageService.getToken();
@@ -44,6 +45,7 @@ class TeamSeasonRepository {
       },
       body: jsonEncode({
         'starts_on': _dateOnly(startsOn),
+        if (name != null && name.trim().isNotEmpty) 'name': name.trim(),
         if (allowUnsettledMatches) 'allow_unsettled_matches': true,
       }),
     );

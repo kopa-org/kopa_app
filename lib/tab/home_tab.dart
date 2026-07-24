@@ -512,13 +512,14 @@ class _HeroMatchCarouselState extends State<_HeroMatchCarousel> {
                     opacity: 0,
                     child: IgnorePointer(
                       child: Padding(
-                        padding: const EdgeInsets.only(left: Spacing.md),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: Spacing.md,
+                        ),
                         child: FractionallySizedBox(
                           alignment: Alignment.centerLeft,
                           widthFactor: _viewportFraction,
                           child: Padding(
                             padding: const EdgeInsets.only(
-                              right: Spacing.sm,
                               bottom: _animationSlack,
                             ),
                             child: _HeroTeamPanel(
@@ -539,7 +540,9 @@ class _HeroMatchCarouselState extends State<_HeroMatchCarousel> {
                 ),
                 Positioned.fill(
                   child: Padding(
-                    padding: const EdgeInsets.only(left: Spacing.sm),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: Spacing.md,
+                    ),
                     child: PageView.builder(
                       controller: _controller,
                       itemCount: pages.length,
@@ -552,18 +555,15 @@ class _HeroMatchCarouselState extends State<_HeroMatchCarousel> {
                       itemBuilder: (context, index) {
                         return AnimatedBuilder(
                           animation: _controller,
-                          child: Padding(
-                            padding: const EdgeInsets.only(right: Spacing.sm),
-                            child: _HeroTeamPanel(
-                              match: pages[index],
-                              currentUser: widget.currentUser,
-                              titleOverride: _heroPanelTitle(
-                                pages[index],
-                                isFirst: index == 0,
-                              ),
-                              reserveRegistrationActions: true,
-                              logoHeroSource: 'home_hero',
+                          child: _HeroTeamPanel(
+                            match: pages[index],
+                            currentUser: widget.currentUser,
+                            titleOverride: _heroPanelTitle(
+                              pages[index],
+                              isFirst: index == 0,
                             ),
+                            reserveRegistrationActions: true,
+                            logoHeroSource: 'home_hero',
                           ),
                           builder: (context, child) {
                             var page = _currentIndex.toDouble();

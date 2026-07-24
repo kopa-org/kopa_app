@@ -42,4 +42,16 @@ void main() {
       'https://file.dbu.dk/images/club/1581/skjold.png',
     );
   });
+
+  test('decodes HTML entities in DBU labels', () {
+    final standings = DbuStandings.fromJson({
+      'seriesName': 'Herre Senior 2 7:7 Efter&amp;#xE5;r dommerl&amp;#xF8;s',
+      'rows': [
+        {'teamName': 'Skjold &amp;#xD8;sterbro', 'points': 3},
+      ],
+    });
+
+    expect(standings.seriesName, 'Herre Senior 2 7:7 Efterår dommerløs');
+    expect(standings.rows.single.teamName, 'Skjold Østerbro');
+  });
 }

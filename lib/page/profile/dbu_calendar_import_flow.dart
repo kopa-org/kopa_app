@@ -59,6 +59,7 @@ class DbuCalendarImportFlow {
         context,
         teamId: teamId,
         startsOn: _earliestMatchDate(resultData) ?? DateTime.now(),
+        name: _seasonName(resultData),
       );
       if (!seasonStarted) {
         return null;
@@ -132,11 +133,13 @@ class DbuCalendarImportFlow {
     BuildContext context, {
     required int teamId,
     required DateTime startsOn,
+    required String name,
   }) async {
     try {
       await TeamSeasonRepository.startSeason(
         teamId: teamId,
         startsOn: startsOn,
+        name: name,
       );
       return true;
     } on UnsettledMatchesWarning catch (warning) {
@@ -152,6 +155,7 @@ class DbuCalendarImportFlow {
       await TeamSeasonRepository.startSeason(
         teamId: teamId,
         startsOn: startsOn,
+        name: name,
         allowUnsettledMatches: true,
       );
       return true;
@@ -217,6 +221,23 @@ class DbuCalendarImportFlow {
       ..sort();
 
     return dates.isEmpty ? null : dates.first;
+  }
+
+  static String _seasonName(Map<String, dynamic> resultData) {
+    final season = resultData['season']?.toString().trim();
+    if (season != null && season.isNotEmpty) {
+      return season;
+    }
+
+    final firstMatchDate = _earliestMatchDate(resultData) ?? DateTime.now();
+    return '${_seasonLabel(firstMatchDate.month)} ${firstMatchDate.year}';
+  }
+
+  static String _seasonLabel(int month) {
+    if (month >= 3 && month <= 5) return 'Forår';
+    if (month >= 6 && month <= 8) return 'Sommer';
+    if (month >= 9 && month <= 11) return 'Efterår';
+    return 'Vinter';
   }
 
   static DateTime? _parseDbuDate(String value) {
