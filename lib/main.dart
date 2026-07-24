@@ -6,11 +6,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kopa/config/app_feature_flags.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/auth_state.dart';
 import 'package:kopa/navigation/app_router.dart';
 import 'package:kopa/navigation/router_refresh_notifier.dart';
 import 'package:kopa/repositories/auth_repository.dart';
+import 'package:kopa/repository/feature_flags_repository.dart';
 import 'package:kopa/utils/crash_reporting.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:kopa/repository/onboarding_repository.dart';
@@ -78,8 +80,10 @@ class _KopaBootstrapAppState extends State<KopaBootstrapApp> {
     }
 
     final authRepository = ApiAuthRepository();
+    final featureFlagsRepository = FeatureFlagsRepository();
     final onboardingRepository = OnboardingRepository();
 
+    final featureFlags = await featureFlagsRepository.getFeatureFlags();
     final authCubit = AuthCubit(authRepository: authRepository);
     final onboardingCubit = OnboardingCubit(onboardingRepository);
 
@@ -89,6 +93,7 @@ class _KopaBootstrapAppState extends State<KopaBootstrapApp> {
     return _BootstrapResult(
       authRepository: authRepository,
       onboardingRepository: onboardingRepository,
+      featureFlags: featureFlags,
       authCubit: authCubit,
       onboardingCubit: onboardingCubit,
     );
@@ -104,6 +109,7 @@ class _KopaBootstrapAppState extends State<KopaBootstrapApp> {
           final app = KopaApp(
             authRepository: result.authRepository,
             onboardingRepository: result.onboardingRepository,
+            featureFlags: result.featureFlags,
             authCubit: result.authCubit,
             onboardingCubit: result.onboardingCubit,
           );
@@ -127,12 +133,14 @@ class _BootstrapResult {
   const _BootstrapResult({
     required this.authRepository,
     required this.onboardingRepository,
+    required this.featureFlags,
     required this.authCubit,
     required this.onboardingCubit,
   });
 
   final AuthRepository authRepository;
   final OnboardingRepository onboardingRepository;
+  final AppFeatureFlags featureFlags;
   final AuthCubit authCubit;
   final OnboardingCubit onboardingCubit;
 }
@@ -140,6 +148,7 @@ class _BootstrapResult {
 class KopaApp extends StatefulWidget {
   final AuthRepository authRepository;
   final OnboardingRepository onboardingRepository;
+  final AppFeatureFlags featureFlags;
   final AuthCubit authCubit;
   final OnboardingCubit onboardingCubit;
 
@@ -147,6 +156,7 @@ class KopaApp extends StatefulWidget {
     super.key,
     required this.authRepository,
     required this.onboardingRepository,
+    required this.featureFlags,
     required this.authCubit,
     required this.onboardingCubit,
   });
@@ -169,6 +179,7 @@ class _KopaAppState extends State<KopaApp> {
     _router = AppRouter.create(
       authCubit: widget.authCubit,
       onboardingCubit: widget.onboardingCubit,
+      featureFlags: widget.featureFlags,
       refreshListenable: _refreshNotifier,
     );
     _authSubscription = widget.authCubit.stream.listen(_handleAuthStateChanged);
@@ -202,6 +213,7 @@ class _KopaAppState extends State<KopaApp> {
       providers: [
         RepositoryProvider.value(value: widget.authRepository),
         RepositoryProvider.value(value: widget.onboardingRepository),
+        Provider.value(value: widget.featureFlags),
         ChangeNotifierProvider.value(value: _matchProgrammeRefreshNotifier),
       ],
       child: MultiBlocProvider(

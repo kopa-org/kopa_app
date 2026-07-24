@@ -8,6 +8,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:kopa/config/app_feature_flags.dart';
 import 'package:kopa/main.dart';
 import 'package:kopa/repositories/auth_repository.dart';
 import 'package:kopa/repository/onboarding_repository.dart';
@@ -25,6 +26,7 @@ void main() {
     await tester.pumpWidget(KopaApp(
       authRepository: authRepository,
       onboardingRepository: onboardingRepository,
+      featureFlags: const AppFeatureFlags(),
       authCubit: authCubit,
       onboardingCubit: onboardingCubit,
     ));

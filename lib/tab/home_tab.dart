@@ -15,6 +15,7 @@ import 'package:kopa/component/home/home_statistics_strip.dart';
 import 'package:kopa/component/home/latest_result_card.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/component/standings/standings_preview_card.dart';
+import 'package:kopa/config/app_feature_flags.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/home_cubit.dart';
 import 'package:kopa/cubits/home_state.dart';
@@ -23,6 +24,7 @@ import 'package:kopa/model/fine_box_details.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/statistics.dart';
 import 'package:kopa/model/user_details.dart';
+import 'package:kopa/navigation/app_router.dart';
 import 'package:kopa/page/match/match_details_page.dart';
 import 'package:kopa/page/profile/profile_settings_page.dart';
 import 'package:kopa/page/team_fines/team_fines_page.dart';
@@ -1190,6 +1192,8 @@ class _BentoGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final featureFlags = context.watch<AppFeatureFlags>();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -1210,27 +1214,31 @@ class _BentoGrid extends StatelessWidget {
           standings: standings,
           currentUser: currentUser,
         ),
-        const SizedBox(height: Spacing.lg),
-        HomeBentoSectionTitle(
-          title: 'Statistikker',
-          onAction: () => _openStatistics(context),
-        ),
-        const SizedBox(height: Spacing.sm),
-        HomeStatisticsStrip(
-          stats: statistics,
-          currentUser: currentUser,
-        ),
-        const SizedBox(height: Spacing.lg),
-        HomeBentoSectionTitle(
-          title: 'Bødekasse',
-          onAction: () => _openFineBox(context),
-        ),
-        const SizedBox(height: Spacing.sm),
-        HomeFineBoxCard(
-          fineBox: fineBox,
-          currentUser: currentUser,
-          onOpenFineBox: () => _openFineBox(context),
-        ),
+        if (featureFlags.showStatistics) ...[
+          const SizedBox(height: Spacing.lg),
+          HomeBentoSectionTitle(
+            title: 'Statistikker',
+            onAction: () => _openStatistics(context),
+          ),
+          const SizedBox(height: Spacing.sm),
+          HomeStatisticsStrip(
+            stats: statistics,
+            currentUser: currentUser,
+          ),
+        ],
+        if (featureFlags.showFineBox) ...[
+          const SizedBox(height: Spacing.lg),
+          HomeBentoSectionTitle(
+            title: 'Bødekasse',
+            onAction: () => _openFineBox(context),
+          ),
+          const SizedBox(height: Spacing.sm),
+          HomeFineBoxCard(
+            fineBox: fineBox,
+            currentUser: currentUser,
+            onOpenFineBox: () => _openFineBox(context),
+          ),
+        ],
         const SizedBox(height: Spacing.sm),
       ],
     );
@@ -1328,7 +1336,7 @@ void _openProfileSettings(BuildContext context) {
 
 void _openStatistics(BuildContext context) {
   AppAnalytics.logEvent('statistics_opened');
-  StatefulNavigationShell.of(context).goBranch(2, initialLocation: true);
+  context.go(AppRouter.statistics);
 }
 
 Future<void> _openNavigation(MatchDetails match) async {

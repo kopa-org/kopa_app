@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kopa/config/app_feature_flags.dart';
 import 'package:kopa/state/user_votes_state.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
@@ -302,6 +303,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
 
   List<Widget> _buildPostMatchOverview(MatchDetails match, UserDetails user) {
     final stats = _personalMatchStats(match, user);
+    final featureFlags = context.watch<AppFeatureFlags>();
 
     return [
       _PostMatchSummaryCard(
@@ -310,13 +312,15 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       ),
       const SizedBox(height: Spacing.lg),
       _PersonalMatchStatsCard(stats: stats),
-      const SizedBox(height: Spacing.lg),
-      Button(
-        buttonText: 'Se statistik breakdown',
-        onPressed: _openStatisticsBreakdown,
-        icon: CupertinoIcons.chart_bar_alt_fill,
-        width: double.infinity,
-      ),
+      if (featureFlags.showStatistics) ...[
+        const SizedBox(height: Spacing.lg),
+        Button(
+          buttonText: 'Se statistik breakdown',
+          onPressed: _openStatisticsBreakdown,
+          icon: CupertinoIcons.chart_bar_alt_fill,
+          width: double.infinity,
+        ),
+      ],
     ];
   }
 

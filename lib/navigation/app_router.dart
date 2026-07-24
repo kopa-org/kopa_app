@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:kopa/config/app_feature_flags.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/auth_state.dart';
 import 'package:kopa/cubits/onboarding_cubit.dart';
@@ -35,14 +36,16 @@ abstract final class AppRouter {
   static const join = '/join';
   static const onboarding = '/onboarding';
 
-  static final List<GlobalKey<NavigatorState>> _branchNavigatorKeys =
-      List.generate(5, (_) => GlobalKey<NavigatorState>());
-
   static GoRouter create({
     required AuthCubit authCubit,
     required OnboardingCubit onboardingCubit,
+    required AppFeatureFlags featureFlags,
     required Listenable refreshListenable,
   }) {
+    final visibleMainTabs = _visibleMainTabs(featureFlags);
+    final branchNavigatorKeys = List.generate(
+        visibleMainTabs.length, (_) => GlobalKey<NavigatorState>());
+
     return GoRouter(
       initialLocation: home,
       refreshListenable: refreshListenable,
@@ -128,30 +131,30 @@ abstract final class AppRouter {
           path: register,
           builder: (context, state) => const RegisterPage(),
         ),
+        if (!featureFlags.showStatistics)
+          GoRoute(
+            path: statistics,
+            builder: (context, state) => const StatisticsPage(),
+          ),
+        if (!featureFlags.showFineBox)
+          GoRoute(
+            path: fineBox,
+            builder: (context, state) => const TeamFinesPage(),
+          ),
         StatefulShellRoute.indexedStack(
           builder: (context, state, navigationShell) {
             final theme = Theme.of(context);
-            const tabs = <(IconData, String, String?)>[
-              (Icons.home, 'Hjem', 'assets/logos/home-simple-door.svg'),
-              (Icons.sports_soccer, 'Kampe', 'assets/logos/soccer-ball.svg'),
-              (Icons.bar_chart, 'Statistik', 'assets/logos/graph-up.svg'),
-              (Icons.groups_outlined, 'Truppen', null),
-              (
-                CupertinoIcons.money_dollar_circle,
-                'Bødekasse',
-                'assets/logos/piggy-bank.svg'
-              ),
-            ];
+            final tabs = visibleMainTabs;
             void selectTab(int index) {
               final isCurrentTab = index == navigationShell.currentIndex;
               AppAnalytics.logEvent(
                 'main_tab_selected',
                 parameters: {
-                  'tab_name': _tabNameForIndex(index),
+                  'tab_name': tabs[index].analyticsName,
                 },
               );
               if (isCurrentTab) {
-                _branchNavigatorKeys[index]
+                branchNavigatorKeys[index]
                     .currentState
                     ?.popUntil((route) => route.isFirst);
               }
@@ -174,32 +177,13 @@ abstract final class AppRouter {
                   unselectedLabelColor: theme.unselectedWidgetColor,
                   indicatorColor:
                       theme.colorScheme.primary.withValues(alpha: 0.12),
-                  tabs: const [
-                    GlassTab(
-                      icon: Icon(CupertinoIcons.house),
-                      activeIcon: Icon(CupertinoIcons.house_fill),
-                      label: 'Hjem',
-                    ),
-                    GlassTab(
-                      icon: Icon(CupertinoIcons.sportscourt),
-                      activeIcon: Icon(CupertinoIcons.sportscourt_fill),
-                      label: 'Kampe',
-                    ),
-                    GlassTab(
-                      icon: Icon(CupertinoIcons.chart_bar),
-                      activeIcon: Icon(CupertinoIcons.chart_bar_fill),
-                      label: 'Statistik',
-                    ),
-                    GlassTab(
-                      icon: Icon(CupertinoIcons.group),
-                      activeIcon: Icon(CupertinoIcons.group_solid),
-                      label: 'Truppen',
-                    ),
-                    GlassTab(
-                      icon: Icon(CupertinoIcons.money_dollar_circle),
-                      activeIcon: Icon(CupertinoIcons.money_dollar_circle_fill),
-                      label: 'Bødekasse',
-                    ),
+                  tabs: [
+                    for (final tab in tabs)
+                      GlassTab(
+                        icon: Icon(tab.cupertinoIcon),
+                        activeIcon: Icon(tab.activeCupertinoIcon),
+                        label: tab.label,
+                      ),
                   ],
                 ),
               );
@@ -244,17 +228,17 @@ abstract final class AppRouter {
                       tabs: [
                         for (int i = 0; i < tabs.length; i++)
                           GButton(
-                            icon: tabs[i].$1,
-                            leading: tabs[i].$3 == null
+                            icon: tabs[i].materialIcon,
+                            leading: tabs[i].assetPath == null
                                 ? Icon(
-                                    tabs[i].$1,
+                                    tabs[i].materialIcon,
                                     size: 24,
                                     color: navigationShell.currentIndex == i
                                         ? theme.colorScheme.primary
                                         : theme.unselectedWidgetColor,
                                   )
                                 : SvgPicture.asset(
-                                    tabs[i].$3!,
+                                    tabs[i].assetPath!,
                                     width: 24,
                                     height: 24,
                                     colorFilter: ColorFilter.mode(
@@ -264,7 +248,7 @@ abstract final class AppRouter {
                                       BlendMode.srcIn,
                                     ),
                                   ),
-                            text: tabs[i].$2,
+                            text: tabs[i].label,
                           ),
                       ],
                     ),
@@ -274,66 +258,117 @@ abstract final class AppRouter {
             );
           },
           branches: [
-            StatefulShellBranch(
-              navigatorKey: _branchNavigatorKeys[0],
-              routes: [
-                GoRoute(
-                  path: home,
-                  builder: (context, state) => HomeTab(),
-                ),
-              ],
-            ),
-            StatefulShellBranch(
-              navigatorKey: _branchNavigatorKeys[1],
-              routes: [
-                GoRoute(
-                  path: match,
-                  builder: (context, state) => MatchProgrammePage(),
-                ),
-              ],
-            ),
-            StatefulShellBranch(
-              navigatorKey: _branchNavigatorKeys[2],
-              routes: [
-                GoRoute(
-                  path: statistics,
-                  builder: (context, state) => const StatisticsPage(),
-                ),
-              ],
-            ),
-            StatefulShellBranch(
-              navigatorKey: _branchNavigatorKeys[3],
-              routes: [
-                GoRoute(
-                  path: profile,
-                  builder: (context, state) => const ProfileTab(),
-                ),
-              ],
-            ),
-            StatefulShellBranch(
-              navigatorKey: _branchNavigatorKeys[4],
-              routes: [
-                GoRoute(
-                  path: fineBox,
-                  builder: (context, state) =>
-                      const TeamFinesPage(showBackButton: false),
-                ),
-              ],
-            ),
+            for (int i = 0; i < visibleMainTabs.length; i++)
+              StatefulShellBranch(
+                navigatorKey: branchNavigatorKeys[i],
+                routes: [
+                  GoRoute(
+                    path: visibleMainTabs[i].path,
+                    builder: (context, state) => visibleMainTabs[i].page,
+                  ),
+                ],
+              ),
           ],
         ),
       ],
     );
   }
 
-  static String _tabNameForIndex(int index) {
-    return switch (index) {
-      0 => 'home',
-      1 => 'matches',
-      2 => 'statistics',
-      3 => 'squad',
-      4 => 'fine_box',
-      _ => 'unknown',
+  static List<_MainTab> _visibleMainTabs(AppFeatureFlags featureFlags) {
+    return [
+      _MainTab.home,
+      _MainTab.matches,
+      if (featureFlags.showStatistics) _MainTab.statistics,
+      _MainTab.squad,
+      if (featureFlags.showFineBox) _MainTab.fineBox,
+    ];
+  }
+}
+
+enum _MainTab {
+  home,
+  matches,
+  statistics,
+  squad,
+  fineBox;
+
+  String get path {
+    return switch (this) {
+      _MainTab.home => AppRouter.home,
+      _MainTab.matches => AppRouter.match,
+      _MainTab.statistics => AppRouter.statistics,
+      _MainTab.squad => AppRouter.profile,
+      _MainTab.fineBox => AppRouter.fineBox,
+    };
+  }
+
+  Widget get page {
+    return switch (this) {
+      _MainTab.home => HomeTab(),
+      _MainTab.matches => MatchProgrammePage(),
+      _MainTab.statistics => const StatisticsPage(),
+      _MainTab.squad => const ProfileTab(),
+      _MainTab.fineBox => const TeamFinesPage(showBackButton: false),
+    };
+  }
+
+  IconData get materialIcon {
+    return switch (this) {
+      _MainTab.home => Icons.home,
+      _MainTab.matches => Icons.sports_soccer,
+      _MainTab.statistics => Icons.bar_chart,
+      _MainTab.squad => Icons.groups_outlined,
+      _MainTab.fineBox => CupertinoIcons.money_dollar_circle,
+    };
+  }
+
+  IconData get cupertinoIcon {
+    return switch (this) {
+      _MainTab.home => CupertinoIcons.house,
+      _MainTab.matches => CupertinoIcons.sportscourt,
+      _MainTab.statistics => CupertinoIcons.chart_bar,
+      _MainTab.squad => CupertinoIcons.group,
+      _MainTab.fineBox => CupertinoIcons.money_dollar_circle,
+    };
+  }
+
+  IconData get activeCupertinoIcon {
+    return switch (this) {
+      _MainTab.home => CupertinoIcons.house_fill,
+      _MainTab.matches => CupertinoIcons.sportscourt_fill,
+      _MainTab.statistics => CupertinoIcons.chart_bar_fill,
+      _MainTab.squad => CupertinoIcons.group_solid,
+      _MainTab.fineBox => CupertinoIcons.money_dollar_circle_fill,
+    };
+  }
+
+  String? get assetPath {
+    return switch (this) {
+      _MainTab.home => 'assets/logos/home-simple-door.svg',
+      _MainTab.matches => 'assets/logos/soccer-ball.svg',
+      _MainTab.statistics => 'assets/logos/graph-up.svg',
+      _MainTab.squad => null,
+      _MainTab.fineBox => 'assets/logos/piggy-bank.svg',
+    };
+  }
+
+  String get label {
+    return switch (this) {
+      _MainTab.home => 'Hjem',
+      _MainTab.matches => 'Kampe',
+      _MainTab.statistics => 'Statistik',
+      _MainTab.squad => 'Truppen',
+      _MainTab.fineBox => 'Bødekasse',
+    };
+  }
+
+  String get analyticsName {
+    return switch (this) {
+      _MainTab.home => 'home',
+      _MainTab.matches => 'matches',
+      _MainTab.statistics => 'statistics',
+      _MainTab.squad => 'squad',
+      _MainTab.fineBox => 'fine_box',
     };
   }
 }
