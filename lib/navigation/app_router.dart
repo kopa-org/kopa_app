@@ -52,7 +52,8 @@ abstract final class AppRouter {
       observers: AppAnalytics.routeObservers,
       redirect: (context, state) {
         final authState = authCubit.state;
-        final isLoggedIn = authState.status == AuthStatus.authenticated;
+        final isLoggedIn = authState.status == AuthStatus.authenticated ||
+            (authState.status == AuthStatus.loading && authState.user != null);
         final isLoggingIn = state.uri.path == login;
         final isRegistering = state.uri.path == register;
         final isInvite = state.uri.path == invite;
