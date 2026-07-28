@@ -332,6 +332,14 @@ class _MatchStatus {
       );
     }
 
+    if (!match.hasFinalScore) {
+      return _MatchStatus(
+        label: 'FÆRDIG',
+        backgroundColor: colors.lightGrass,
+        foregroundColor: colors.primary,
+      );
+    }
+
     final teamScore =
         ownSide.isAway ? match.awayTeamScore! : match.homeTeamScore!;
     final opponentScore =

@@ -4,6 +4,8 @@ import 'package:kopa/model/event_attendance_details.dart';
 import 'package:kopa/model/player_rating_summary.dart';
 
 class MatchDetails {
+  static const Duration postMatchDetailsDelay = Duration(hours: 1);
+
   final int id;
   final String type;
   final String? homeTeam;
@@ -104,6 +106,14 @@ class MatchDetails {
   }
 
   bool get hasMatchBeenPlayed {
+    return isPostMatchAt(DateTime.now());
+  }
+
+  bool isPostMatchAt(DateTime now) {
+    return !now.isBefore(date.add(postMatchDetailsDelay));
+  }
+
+  bool get hasFinalScore {
     return homeTeamScore != null && awayTeamScore != null;
   }
 

@@ -2,17 +2,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/button/button.dart';
-import 'package:kopa/component/card/kopa_card.dart';
 import 'package:kopa/component/card/player_positions_card.dart';
 import 'package:kopa/component/error_message.dart';
 import 'package:kopa/component/loading_indicator.dart';
 import 'package:kopa/helpers/date_helper.dart';
 import 'package:kopa/model/event_attendance_details.dart';
 import 'package:kopa/model/match_details.dart';
-import 'package:kopa/model/match_event_details.dart';
-import 'package:kopa/model/match_event_type.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/page/match/add_match_event_modal.dart';
+import 'package:kopa/page/match/post_match_details_page.dart';
 import 'package:kopa/repository/match_repository.dart';
 import 'package:kopa/repository/users_repository.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
@@ -25,7 +23,6 @@ import 'package:kopa/template/match_detail_template.dart';
 import 'package:kopa/component/card/match_hero_card.dart';
 import 'package:kopa/component/info_row/info_row.dart';
 import 'package:kopa/component/list_item/player_list_item.dart';
-import 'package:kopa/component/timeline/timeline_item.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class MatchDetailsPage extends StatefulWidget {
@@ -155,49 +152,55 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     final squad = data['squad'] as List<UserDetails>;
     final hasBeenPlayed = matchDetails.hasMatchBeenPlayed;
 
+    final heroCard = MatchHeroCard(
+      match: matchDetails,
+      heroTag: widget.heroTag,
+      animateCard: widget.heroTag != null,
+      onTap: _enableHeroCardActions &&
+              user.isTeamOwner &&
+              !matchDetails.hasFinalScore
+          ? () => setMatchScore(matchDetails.id)
+          : null,
+    );
+
+    if (hasBeenPlayed) {
+      return PostMatchDetailsPage(
+        match: matchDetails,
+        user: user,
+        heroCard: heroCard,
+        attendanceList: _buildAttendanceList(matchDetails, squad, user),
+        onRefresh: _refreshMatchAndSquad,
+        onAddEvent: () => addMatchEvent(user),
+        selectedSegment: _selectedSegment,
+        onSegmentChanged: _selectSegment,
+      );
+    }
+
     return MatchDetailTemplate(
       onRefresh: _refreshMatchAndSquad,
       selectedSegment: _selectedSegment,
       onSegmentChanged: _selectSegment,
-      heroCard: MatchHeroCard(
-        match: matchDetails,
-        heroTag: widget.heroTag,
-        animateCard: widget.heroTag != null,
-        onTap: _enableHeroCardActions &&
-                user.isTeamOwner &&
-                !matchDetails.hasMatchBeenPlayed
-            ? () => setMatchScore(matchDetails.id)
+      heroCard: heroCard,
+      overviewTitle: 'Praktisk information',
+      attendanceTitle: 'Tilmeldte spillere',
+      timelineTitle: 'Kampforløb',
+      attendanceSegmentLabel: 'Tilmeldte',
+      timelineSegmentLabel: 'Kampforløb',
+      timelineEmptyMessage: 'Ingen begivenheder registreret.',
+      overviewWidgets: const [],
+      infoRows: _buildPracticalInfoRows(matchDetails),
+      votingModule: null,
+      playerPositions: PlayerPositionsCard(
+        playerCount: _teamPlayerCount(matchDetails, user),
+        formation: matchDetails.formation,
+        players: _lineupPlayers(matchDetails),
+        onEditFormation: user.isTeamOwner
+            ? () => _showFormationPicker(matchDetails, user)
             : null,
       ),
-      overviewTitle: hasBeenPlayed ? 'Efter kampen' : 'Praktisk information',
-      attendanceTitle: hasBeenPlayed ? 'Tilmeldte' : 'Tilmeldte spillere',
-      timelineTitle: hasBeenPlayed ? 'Kampbegivenheder' : 'Kampforløb',
-      attendanceSegmentLabel: 'Tilmeldte',
-      timelineSegmentLabel: hasBeenPlayed ? 'Begivenheder' : 'Kampforløb',
-      showTimelineSegment: !hasBeenPlayed,
-      timelineEmptyMessage: hasBeenPlayed
-          ? 'Ingen kampbegivenheder registreret endnu.'
-          : 'Ingen begivenheder registreret.',
-      overviewWidgets: hasBeenPlayed
-          ? _buildPlayedMatchOverview(matchDetails, user)
-          : const [],
-      infoRows:
-          hasBeenPlayed ? const [] : _buildPracticalInfoRows(matchDetails),
-      votingModule: null,
-      playerPositions: hasBeenPlayed
-          ? null
-          : PlayerPositionsCard(
-              playerCount: _teamPlayerCount(matchDetails, user),
-              formation: matchDetails.formation,
-              players: _lineupPlayers(matchDetails),
-              onEditFormation: user.isTeamOwner
-                  ? () => _showFormationPicker(matchDetails, user)
-                  : null,
-            ),
       attendanceList: _buildAttendanceList(matchDetails, squad, user),
-      ratingsSection: hasBeenPlayed ? null : _buildRatingsSection(matchDetails),
-      timelineItems:
-          hasBeenPlayed ? const [] : _buildTimelineItems(matchDetails, user),
+      ratingsSection: _buildRatingsSection(matchDetails),
+      timelineItems: const [],
     );
   }
 
@@ -275,19 +278,6 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
             icon: CupertinoIcons.map,
           ),
         ),
-      ),
-    ];
-  }
-
-  List<Widget> _buildPlayedMatchOverview(
-    MatchDetails match,
-    UserDetails user,
-  ) {
-    return [
-      _MatchTimelineSection(
-        items: _buildTimelineItems(match, user, includeAddEventButton: false),
-        canAddEvent: user.isTeamOwner,
-        onAddEvent: () => addMatchEvent(user),
       ),
     ];
   }
@@ -719,91 +709,6 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     );
   }
 
-  List<Widget> _buildTimelineItems(
-    MatchDetails match,
-    UserDetails user, {
-    bool includeAddEventButton = true,
-  }) {
-    final List<MatchEventDetails> events =
-        List.from(match.matchEventDetailsList ?? []);
-    events.sort((a, b) => (b.minute ?? 0).compareTo(a.minute ?? 0));
-
-    if (events.isEmpty && !user.isTeamOwner) return [];
-
-    final List<Widget> items = [];
-
-    if (user.isTeamOwner && includeAddEventButton) {
-      items.add(
-        Center(
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 20),
-            child: Button(
-              buttonText: 'Tilføj begivenhed',
-              onPressed: () => addMatchEvent(user),
-              icon: CupertinoIcons.add,
-            ),
-          ),
-        ),
-      );
-    }
-
-    for (var i = 0; i < events.length; i++) {
-      final e = events[i];
-
-      String title = e.goalscorerUserName;
-      String timeLabel = '';
-      IconData icon = Icons.circle;
-      Color? iconColor;
-      String subtitle = '';
-
-      if (e.type == MatchEventType.goal) {
-        title = 'Mål: ${e.goalscorerUserName}';
-        timeLabel = e.minute != null ? '${e.minute}\'' : 'MÅL';
-        icon = Icons.sports_soccer;
-        subtitle = e.assistMakerUserName != null
-            ? 'Assisteret af ${e.assistMakerUserName}'
-            : 'Mål';
-      } else if (e.type == MatchEventType.yellowCard) {
-        title = 'Gult kort: ${e.goalscorerUserName}';
-        timeLabel = e.minute != null ? '${e.minute}\'' : 'KORT';
-        icon = Icons.square;
-        iconColor = Colors.yellow;
-        subtitle = 'Gult kort';
-      } else if (e.type == MatchEventType.redCard) {
-        title = 'Rødt kort: ${e.goalscorerUserName}';
-        timeLabel = e.minute != null ? '${e.minute}\'' : 'KORT';
-        icon = Icons.square;
-        iconColor = Colors.red;
-        subtitle = 'Rødt kort';
-      } else if (e.type == MatchEventType.substitution) {
-        title =
-            '${e.goalscorerUserName} (Ind) / ${e.assistMakerUserName ?? '?'} (Ud)';
-        timeLabel = e.minute != null ? '${e.minute}\'' : 'UDSK.';
-        icon = Icons.swap_horiz;
-        subtitle = 'Udskiftning';
-      } else if (e.type == MatchEventType.penaltyKick) {
-        title = 'Straffe: ${e.goalscorerUserName}';
-        timeLabel = e.minute != null ? '${e.minute}\'' : 'STRAFFE';
-        icon = Icons.sports_soccer;
-        iconColor = Colors.orange;
-        subtitle = 'Straffespark';
-      }
-
-      items.add(
-        TimelineItem(
-          title: title,
-          time: timeLabel,
-          icon: icon,
-          iconColor: iconColor,
-          isLast: i == events.length - 1,
-          subtitle: subtitle,
-        ),
-      );
-    }
-
-    return items;
-  }
-
   Future<void> setMatchScore(int matchDetailsId) async {
     final theme = Theme.of(context);
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
@@ -962,174 +867,6 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       'https://www.google.com/maps/search/?api=1&query=$query',
     );
     await launchUrl(uri, mode: LaunchMode.externalApplication);
-  }
-}
-
-class _MatchTimelineSection extends StatelessWidget {
-  final List<Widget> items;
-  final bool canAddEvent;
-  final VoidCallback onAddEvent;
-
-  const _MatchTimelineSection({
-    required this.items,
-    required this.canAddEvent,
-    required this.onAddEvent,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (items.isEmpty) {
-      return _MatchTimelineEmptyState(
-        canAddEvent: canAddEvent,
-        onAddEvent: onAddEvent,
-      );
-    }
-
-    final styles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Kampforløb',
-          style: styles.subtitle1.copyWith(fontWeight: FontWeight.w800),
-        ),
-        const SizedBox(height: 12),
-        KopaCard(
-          borderRadius: Spacing.borderRadiusLargeIncreased,
-          padding: const EdgeInsets.all(20),
-          child: Column(children: items),
-        ),
-        if (canAddEvent) ...[
-          const SizedBox(height: Spacing.lg),
-          _AddMatchEventOutlineButton(onPressed: onAddEvent),
-        ],
-      ],
-    );
-  }
-}
-
-class _MatchTimelineEmptyState extends StatelessWidget {
-  final bool canAddEvent;
-  final VoidCallback onAddEvent;
-
-  const _MatchTimelineEmptyState({
-    required this.canAddEvent,
-    required this.onAddEvent,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final styles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    return KopaCard(
-      borderRadius: Spacing.borderRadiusLargeIncreased,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
-      child: Column(
-        children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: colors.offWhite,
-              borderRadius: BorderRadius.circular(40),
-            ),
-            child: Icon(
-              CupertinoIcons.list_bullet_indent,
-              color: colors.primary,
-              size: 38,
-            ),
-          ),
-          const SizedBox(height: Spacing.lg),
-          Text(
-            'Ingen hændelser endnu',
-            style: styles.subtitle1.copyWith(fontWeight: FontWeight.w800),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: Spacing.sm),
-          Text(
-            'Tilføj hændelser som mål, kort og udskiftninger',
-            style: styles.body3.copyWith(color: colors.dirt),
-            textAlign: TextAlign.center,
-          ),
-          if (canAddEvent) ...[
-            const SizedBox(height: Spacing.lg),
-            _AddMatchEventButton(onPressed: onAddEvent),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _AddMatchEventButton extends StatelessWidget {
-  final VoidCallback onPressed;
-
-  const _AddMatchEventButton({required this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final styles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    return CupertinoButton(
-      padding: EdgeInsets.zero,
-      onPressed: onPressed,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: colors.primary,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Text(
-          '+ Tilføj hændelse',
-          style: styles.body1.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.w800,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ),
-    );
-  }
-}
-
-class _AddMatchEventOutlineButton extends StatelessWidget {
-  final VoidCallback onPressed;
-
-  const _AddMatchEventOutlineButton({required this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final styles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    return CupertinoButton(
-      padding: EdgeInsets.zero,
-      onPressed: onPressed,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          border: Border.all(color: colors.primary, width: 2),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Text(
-          '+ Tilføj hændelse',
-          style: styles.body1.copyWith(
-            color: colors.primary,
-            fontWeight: FontWeight.w800,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ),
-    );
   }
 }
 

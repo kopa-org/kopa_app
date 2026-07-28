@@ -26,7 +26,7 @@ class MatchHeroCard extends StatelessWidget {
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
-    final hasScore = match.hasMatchBeenPlayed;
+    final hasScore = match.hasFinalScore;
 
     final card = KopaCard(
       onTap: onTap,
