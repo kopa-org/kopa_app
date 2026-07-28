@@ -137,6 +137,14 @@ class _HomeTabViewState extends State<_HomeTabView> {
                 : upcomingMatches.first;
             final latestMatch =
                 playedMatches.isEmpty ? null : playedMatches.last;
+            void openCalendar() {
+              showHomeCalendarOverlay(
+                context: context,
+                events: state.matches,
+                onEventTap: (match) =>
+                    _openMatch(context, match, 'home_calendar'),
+              );
+            }
 
             return CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
@@ -172,6 +180,11 @@ class _HomeTabViewState extends State<_HomeTabView> {
                     ],
                   ),
                   actions: [
+                    _HomeHeaderActionButton(
+                      tooltip: 'Kalender',
+                      icon: Icons.calendar_today_outlined,
+                      onPressed: openCalendar,
+                    ),
                     Padding(
                       padding: const EdgeInsets.only(right: Spacing.md),
                       child: _HomeHeaderActionButton(
@@ -185,12 +198,6 @@ class _HomeTabViewState extends State<_HomeTabView> {
                 SliverToBoxAdapter(
                   child: _HeroSection(
                     nextMatch: nextMatch,
-                    onOpenCalendar: () => showHomeCalendarOverlay(
-                      context: context,
-                      events: state.matches,
-                      onEventTap: (match) =>
-                          _openMatch(context, match, 'home_calendar'),
-                    ),
                   ),
                 ),
                 SliverToBoxAdapter(
@@ -228,11 +235,9 @@ class _HomeTabViewState extends State<_HomeTabView> {
 
 class _HeroSection extends StatelessWidget {
   final MatchDetails? nextMatch;
-  final VoidCallback onOpenCalendar;
 
   const _HeroSection({
     required this.nextMatch,
-    required this.onOpenCalendar,
   });
 
   @override
@@ -270,12 +275,6 @@ class _HeroSection extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: _HeroCountdown(target: nextMatch?.date),
                 ),
-              ),
-              const SizedBox(width: Spacing.sm),
-              _HomeHeaderActionButton(
-                tooltip: 'Kalender',
-                icon: Icons.calendar_today_outlined,
-                onPressed: onOpenCalendar,
               ),
             ],
           ),

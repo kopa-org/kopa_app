@@ -32,6 +32,7 @@ class MatchDetailTemplate extends StatelessWidget {
   final String timelineSegmentLabel;
   final String attendanceEmptyMessage;
   final String timelineEmptyMessage;
+  final bool showTimelineSegment;
 
   const MatchDetailTemplate({
     super.key,
@@ -54,6 +55,7 @@ class MatchDetailTemplate extends StatelessWidget {
     this.timelineSegmentLabel = 'Kampforløb',
     this.attendanceEmptyMessage = 'Ingen tilmeldte spillere endnu.',
     this.timelineEmptyMessage = 'Ingen begivenheder registreret.',
+    this.showTimelineSegment = true,
   });
 
   @override
@@ -82,6 +84,13 @@ class MatchDetailTemplate extends StatelessWidget {
     final theme = Theme.of(context);
     final colors = theme.extension<AppColors>() ?? AppColors.light;
     final styles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    final entries = [
+      SegmentedButtonSlideEntry(label: overviewSegmentLabel),
+      SegmentedButtonSlideEntry(label: attendanceSegmentLabel),
+      if (showTimelineSegment)
+        SegmentedButtonSlideEntry(label: timelineSegmentLabel),
+    ];
 
     return Container(
       width: double.infinity,
@@ -121,22 +130,16 @@ class MatchDetailTemplate extends StatelessWidget {
             offset: const Offset(0, 3),
           ),
         ],
-        entries: [
-          SegmentedButtonSlideEntry(
-            label: overviewSegmentLabel,
-          ),
-          SegmentedButtonSlideEntry(
-            label: attendanceSegmentLabel,
-          ),
-          SegmentedButtonSlideEntry(
-            label: timelineSegmentLabel,
-          ),
-        ],
+        entries: entries,
       ),
     );
   }
 
   int _segmentIndex(MatchDetailSegment segment) {
+    if (!showTimelineSegment && segment == MatchDetailSegment.timeline) {
+      return 0;
+    }
+
     return switch (segment) {
       MatchDetailSegment.overview => 0,
       MatchDetailSegment.attendance => 1,
@@ -145,6 +148,12 @@ class MatchDetailTemplate extends StatelessWidget {
   }
 
   MatchDetailSegment _segmentFromIndex(int index) {
+    if (!showTimelineSegment) {
+      return index == 1
+          ? MatchDetailSegment.attendance
+          : MatchDetailSegment.overview;
+    }
+
     return switch (index) {
       1 => MatchDetailSegment.attendance,
       2 => MatchDetailSegment.timeline,
@@ -153,7 +162,12 @@ class MatchDetailTemplate extends StatelessWidget {
   }
 
   List<Widget> _buildSelectedSegment(BuildContext context) {
-    switch (selectedSegment) {
+    final effectiveSegment =
+        !showTimelineSegment && selectedSegment == MatchDetailSegment.timeline
+            ? MatchDetailSegment.overview
+            : selectedSegment;
+
+    switch (effectiveSegment) {
       case MatchDetailSegment.overview:
         return [
           ...overviewWidgets,

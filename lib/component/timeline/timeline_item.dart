@@ -30,21 +30,42 @@ class TimelineItem extends StatelessWidget {
 
     return IntrinsicHeight(
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+          SizedBox(
+            width: 40,
+            child: Text(
+              time,
+              textAlign: TextAlign.right,
+              style: appTextStyles.body3.copyWith(
+                color: appColors.dirt,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+          const SizedBox(width: Spacing.md),
+          SizedBox(
+            width: 24,
             child: Column(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(Spacing.xs),
+                  width: 24,
+                  height: 24,
                   decoration: BoxDecoration(
-                    color:
-                        (iconColor ?? appColors.primary).withValues(alpha: 0.1),
+                    color: appColors.white,
                     shape: BoxShape.circle,
+                    border: Border.all(color: appColors.grey3),
+                    boxShadow: [
+                      BoxShadow(
+                        color: appColors.black.withValues(alpha: 0.04),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
                   child: Icon(
                     icon,
-                    size: 16,
+                    size: 14,
                     color: iconColor ?? appColors.primary,
                   ),
                 ),
@@ -52,39 +73,36 @@ class TimelineItem extends StatelessWidget {
                   Expanded(
                     child: Container(
                       width: 2,
-                      color: appColors.divider,
+                      color: appColors.grey3.withValues(alpha: 0.5),
                     ),
                   ),
               ],
             ),
           ),
+          const SizedBox(width: Spacing.md),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.only(bottom: Spacing.lg),
+              padding: EdgeInsets.only(bottom: isLast ? 0 : 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Text(
-                        time,
-                        style: appTextStyles.bodyBold.copyWith(
-                          color: appColors.primary,
-                        ),
-                      ),
-                      const SizedBox(width: Spacing.sm),
-                      Expanded(
-                        child: Text(
-                          title,
-                          style: appTextStyles.bodyBold,
-                        ),
-                      ),
-                    ],
+                  Text(
+                    title,
+                    style: appTextStyles.body3.copyWith(
+                      color: appColors.dirt,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   if (subtitle != null)
                     Text(
                       subtitle!,
-                      style: appTextStyles.caption,
+                      style: appTextStyles.caption1.copyWith(
+                        color: appColors.dirt,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                 ],
               ),

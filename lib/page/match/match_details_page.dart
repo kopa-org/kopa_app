@@ -1,25 +1,17 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-import 'package:kopa/config/app_feature_flags.dart';
-import 'package:kopa/state/user_votes_state.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/button/button.dart';
 import 'package:kopa/component/card/kopa_card.dart';
 import 'package:kopa/component/card/player_positions_card.dart';
 import 'package:kopa/component/error_message.dart';
 import 'package:kopa/component/loading_indicator.dart';
-import 'package:kopa/cubits/match_polls_cubit.dart';
 import 'package:kopa/helpers/date_helper.dart';
+import 'package:kopa/model/event_attendance_details.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/match_event_details.dart';
 import 'package:kopa/model/match_event_type.dart';
-import 'package:kopa/model/match_poll_details.dart';
-import 'package:kopa/model/player_rating_summary.dart';
 import 'package:kopa/model/user_details.dart';
-import 'package:kopa/navigation/app_router.dart';
-import 'package:kopa/page/match_polls/create_match_poll_page.dart';
 import 'package:kopa/page/match/add_match_event_modal.dart';
 import 'package:kopa/repository/match_repository.dart';
 import 'package:kopa/repository/users_repository.dart';
@@ -32,7 +24,6 @@ import 'package:kopa/utils/crash_reporting.dart';
 import 'package:kopa/template/match_detail_template.dart';
 import 'package:kopa/component/card/match_hero_card.dart';
 import 'package:kopa/component/info_row/info_row.dart';
-import 'package:kopa/component/voting/voting_module.dart';
 import 'package:kopa/component/list_item/player_list_item.dart';
 import 'package:kopa/component/timeline/timeline_item.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -60,8 +51,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
   Object? _currentUserError;
   bool _showLoadedContent = false;
   bool _enableHeroCardActions = false;
-  bool _isManOfTheMatchVoted = false;
-  MatchPollDetails? matchPollDetails;
+  final Set<int> _savingAttendanceSelectionIds = {};
+  bool _isApprovingAllAttendances = false;
   int _homeGoals = 0;
   int _awayGoals = 0;
   MatchDetailSegment _selectedSegment = MatchDetailSegment.overview;
@@ -122,9 +113,6 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
   Future<Map<String, dynamic>> _fetchMatchAndSquad() async {
     final squad = await UsersRepository.getSquad();
     final matchDetails = await MatchRepository.getMatch(widget.matchId);
-    if (matchDetails.matchPollDetails != null) {
-      _setMatchPollDetails(matchDetails.matchPollDetails);
-    }
     return {
       'squad': squad,
       'matchDetails': matchDetails,
@@ -140,18 +128,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     });
   }
 
-  void _setMatchPollDetails(MatchPollDetails? matchPollDetailsToSet) {
-    _isManOfTheMatchVoted = true;
-    matchPollDetails = matchPollDetailsToSet;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final appColors = theme.extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        theme.extension<AppTextStyles>() ?? AppTextStyles.light;
-
     if (_loadError != null || _currentUserError != null) {
       return const ErrorMessage(
         message: 'Der skete en fejl. Prøv venligst igen senere.',
@@ -192,21 +170,20 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
             : null,
       ),
       overviewTitle: hasBeenPlayed ? 'Efter kampen' : 'Praktisk information',
-      attendanceTitle: hasBeenPlayed ? 'Kamptrup' : 'Tilmeldte spillere',
+      attendanceTitle: hasBeenPlayed ? 'Tilmeldte' : 'Tilmeldte spillere',
       timelineTitle: hasBeenPlayed ? 'Kampbegivenheder' : 'Kampforløb',
-      attendanceSegmentLabel: hasBeenPlayed ? 'Kamptrup' : 'Tilmeldte',
+      attendanceSegmentLabel: 'Tilmeldte',
       timelineSegmentLabel: hasBeenPlayed ? 'Begivenheder' : 'Kampforløb',
+      showTimelineSegment: !hasBeenPlayed,
       timelineEmptyMessage: hasBeenPlayed
           ? 'Ingen kampbegivenheder registreret endnu.'
           : 'Ingen begivenheder registreret.',
       overviewWidgets: hasBeenPlayed
-          ? _buildPostMatchOverview(matchDetails, user)
+          ? _buildPlayedMatchOverview(matchDetails, user)
           : const [],
       infoRows:
           hasBeenPlayed ? const [] : _buildPracticalInfoRows(matchDetails),
-      votingModule: hasBeenPlayed
-          ? _buildVotingModule(matchDetails, squad, appColors, appTextStyles)
-          : null,
+      votingModule: null,
       playerPositions: hasBeenPlayed
           ? null
           : PlayerPositionsCard(
@@ -217,9 +194,10 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
                   ? () => _showFormationPicker(matchDetails, user)
                   : null,
             ),
-      attendanceList: _buildAttendanceList(matchDetails, squad),
-      ratingsSection: _buildRatingsSection(matchDetails),
-      timelineItems: _buildTimelineItems(matchDetails, user),
+      attendanceList: _buildAttendanceList(matchDetails, squad, user),
+      ratingsSection: hasBeenPlayed ? null : _buildRatingsSection(matchDetails),
+      timelineItems:
+          hasBeenPlayed ? const [] : _buildTimelineItems(matchDetails, user),
     );
   }
 
@@ -301,180 +279,28 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     ];
   }
 
-  List<Widget> _buildPostMatchOverview(MatchDetails match, UserDetails user) {
-    final stats = _personalMatchStats(match, user);
-    final featureFlags = context.watch<AppFeatureFlags>();
-
-    return [
-      _PostMatchSummaryCard(
-        match: match,
-        eventCount: match.matchEventDetailsList?.length ?? 0,
-      ),
-      const SizedBox(height: Spacing.lg),
-      _PersonalMatchStatsCard(stats: stats),
-      if (featureFlags.showStatistics) ...[
-        const SizedBox(height: Spacing.lg),
-        Button(
-          buttonText: 'Se statistik breakdown',
-          onPressed: _openStatisticsBreakdown,
-          icon: CupertinoIcons.chart_bar_alt_fill,
-          width: double.infinity,
-        ),
-      ],
-    ];
-  }
-
-  _PersonalMatchStats _personalMatchStats(
-      MatchDetails match, UserDetails user) {
-    final events = match.matchEventDetailsList ?? [];
-    final goals = events
-        .where((event) =>
-            event.type == MatchEventType.goal &&
-            event.goalscorerUserId == user.id)
-        .length;
-    final assists = events
-        .where((event) =>
-            event.type == MatchEventType.goal &&
-            event.assistMakerUserId == user.id)
-        .length;
-    final yellowCards = events
-        .where((event) =>
-            event.type == MatchEventType.yellowCard &&
-            event.goalscorerUserId == user.id)
-        .length;
-    final redCards = events
-        .where((event) =>
-            event.type == MatchEventType.redCard &&
-            event.goalscorerUserId == user.id)
-        .length;
-    final rating = _currentUserRating(match, user);
-    final isPlayerOfTheMatch =
-        match.matchPollDetails?.playerOfTheMatchDetails.id == user.id;
-
-    return _PersonalMatchStats(
-      goals: goals,
-      assists: assists,
-      yellowCards: yellowCards,
-      redCards: redCards,
-      rating: rating?.averageRating,
-      ratingVotes: rating?.voteCount ?? 0,
-      isPlayerOfTheMatch: isPlayerOfTheMatch,
-    );
-  }
-
-  PlayerRatingSummary? _currentUserRating(
+  List<Widget> _buildPlayedMatchOverview(
     MatchDetails match,
     UserDetails user,
   ) {
-    for (final rating in match.playerRatingDetailsList ?? []) {
-      if (rating.userId == user.id) return rating;
-    }
-    return null;
-  }
-
-  void _openStatisticsBreakdown() {
-    AppAnalytics.logEvent('match_statistics_breakdown_opened');
-    context.go(AppRouter.statistics);
-  }
-
-  Widget? _buildVotingModule(MatchDetails match, List<UserDetails> squad,
-      AppColors colors, AppTextStyles styles) {
-    if (!_isManOfTheMatchVoted || matchPollDetails == null) {
-      return KopaCard(
-        onTap: () => _openCreateMatchPoll(match, squad),
-        padding: const EdgeInsets.all(Spacing.md),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: colors.lightGrass.withValues(alpha: 0.38),
-                borderRadius: BorderRadius.circular(Spacing.borderRadiusSmall),
-              ),
-              child: Icon(
-                CupertinoIcons.star_fill,
-                color: colors.primary,
-                size: 22,
-              ),
-            ),
-            const SizedBox(width: Spacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Stem på kampens spiller',
-                    style: styles.bodyBold,
-                  ),
-                  Text(
-                    'Fordel dine stemmer efter kampen',
-                    style: styles.caption,
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              CupertinoIcons.chevron_right,
-              color: colors.textSecondary,
-              size: 18,
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (matchPollDetails == null) return const SizedBox.shrink();
-
-    final poll = matchPollDetails!;
-    final totalVotes = poll.matchPollUserVotesDetails
-        .fold<int>(0, (sum, v) => sum + v.numberOfVotes);
-    final options = poll.matchPollUserVotesDetails.map((v) {
-      final player =
-          squad.firstWhere((s) => s.id == v.userId, orElse: () => squad.first);
-      return VotingOption(
-        id: v.userId,
-        label: player.name,
-        votes: v.numberOfVotes,
-        totalVotes: totalVotes,
-        isSelected: poll.playerOfTheMatchDetails.id == v.userId,
-      );
-    }).toList();
-
-    options.sort((a, b) => b.votes.compareTo(a.votes));
-
-    return VotingModule(
-      title: 'Kampens spiller',
-      options: options,
-      hasVoted: true,
-    );
-  }
-
-  Future<void> _openCreateMatchPoll(
-      MatchDetails match, List<UserDetails> squad) async {
-    final result = await Navigator.of(context).push(
-      createMatchPollPageRoute<MatchPollDetails?>(
-        child: BlocProvider(
-          create: (_) => MatchPollsCubit()
-            ..setData(
-              squad: squad,
-              matches: [match],
-            ),
-          child: ChangeNotifierProvider(
-            create: (context) => UserVotesState(),
-            child: const CreateMatchPollPage(),
-          ),
-        ),
+    return [
+      _MatchTimelineSection(
+        items: _buildTimelineItems(match, user, includeAddEventButton: false),
+        canAddEvent: user.isTeamOwner,
+        onAddEvent: () => addMatchEvent(user),
       ),
-    );
-
-    if (result != null) _setMatchPollDetails(result);
+    ];
   }
 
   List<Widget> _buildAttendanceList(
-      MatchDetails match, List<UserDetails> squad) {
+      MatchDetails match, List<UserDetails> squad, UserDetails user) {
     final attending =
         match.attendanceDetailsList?.where((a) => a.isAttending).toList() ?? [];
+
+    if (user.isTeamOwner && !match.hasMatchBeenPlayed) {
+      return _buildLeaderAttendanceApprovalList(match, attending);
+    }
+
     return attending
         .map((a) => PlayerListItem(
               name: a.userDetails.name,
@@ -485,6 +311,163 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
                       : a.userDetails.email,
             ))
         .toList();
+  }
+
+  List<Widget> _buildLeaderAttendanceApprovalList(
+    MatchDetails match,
+    List<EventAttendanceDetails> attending,
+  ) {
+    final pending = attending.where((a) => a.isSelected == null).toList();
+    final approved = attending.where((a) => a.isSelected == true).toList();
+    final widgets = <Widget>[];
+
+    widgets.add(
+      _AttendanceApprovalSection(
+        title: 'Afventer godkendelse (${pending.length})',
+        children: pending.isEmpty
+            ? const [_AttendanceApprovalEmpty()]
+            : pending
+                .map(
+                  (attendance) => _AttendanceApprovalRow(
+                    attendance: attendance,
+                    approved: false,
+                    isSaving:
+                        _savingAttendanceSelectionIds.contains(attendance.id),
+                    onApprove: () => _updateAttendanceSelection(
+                      match.id,
+                      attendance,
+                      true,
+                    ),
+                    onReject: () => _updateAttendanceSelection(
+                      match.id,
+                      attendance,
+                      false,
+                    ),
+                  ),
+                )
+                .toList(),
+      ),
+    );
+
+    if (approved.isNotEmpty) {
+      widgets.add(const SizedBox(height: Spacing.md));
+      widgets.add(
+        _AttendanceApprovalSection(
+          title: 'Godkendte (${approved.length})',
+          children: approved
+              .map(
+                (attendance) => _AttendanceApprovalRow(
+                  attendance: attendance,
+                  approved: true,
+                  isSaving:
+                      _savingAttendanceSelectionIds.contains(attendance.id),
+                  onApprove: () {},
+                  onReject: () => _updateAttendanceSelection(
+                    match.id,
+                    attendance,
+                    false,
+                  ),
+                ),
+              )
+              .toList(),
+        ),
+      );
+    }
+
+    if (pending.isNotEmpty) {
+      widgets.add(const SizedBox(height: Spacing.lg));
+      widgets.add(
+        _ApproveAllAttendancesButton(
+          isSaving: _isApprovingAllAttendances,
+          onPressed: () => _approveAllAttendances(match.id, pending),
+        ),
+      );
+    }
+
+    return widgets;
+  }
+
+  Future<void> _updateAttendanceSelection(
+    int matchId,
+    EventAttendanceDetails attendance,
+    bool isSelected,
+  ) async {
+    if (_savingAttendanceSelectionIds.contains(attendance.id)) return;
+
+    setState(() {
+      _savingAttendanceSelectionIds.add(attendance.id);
+    });
+
+    try {
+      await MatchRepository.updateAttendanceSelection(
+        matchId,
+        attendance.userDetails.id,
+        isSelected,
+      );
+      AppAnalytics.logEvent(
+        'match_attendance_selection_updated',
+        parameters: {'is_selected': isSelected},
+      );
+      await _refreshMatchAndSquad();
+    } catch (error, stack) {
+      CrashReporting.logWebError(error, stack);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Kunne ikke opdatere godkendelsen. Prøv igen.'),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _savingAttendanceSelectionIds.remove(attendance.id);
+        });
+      }
+    }
+  }
+
+  Future<void> _approveAllAttendances(
+    int matchId,
+    List<EventAttendanceDetails> pending,
+  ) async {
+    if (_isApprovingAllAttendances) return;
+
+    setState(() {
+      _isApprovingAllAttendances = true;
+      _savingAttendanceSelectionIds.addAll(pending.map((a) => a.id));
+    });
+
+    try {
+      for (final attendance in pending) {
+        await MatchRepository.updateAttendanceSelection(
+          matchId,
+          attendance.userDetails.id,
+          true,
+        );
+      }
+      AppAnalytics.logEvent(
+        'match_attendance_selection_all_approved',
+        parameters: {'count': pending.length},
+      );
+      await _refreshMatchAndSquad();
+    } catch (error, stack) {
+      CrashReporting.logWebError(error, stack);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Kunne ikke godkende alle. Prøv igen.'),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isApprovingAllAttendances = false;
+          _savingAttendanceSelectionIds.removeAll(pending.map((a) => a.id));
+        });
+      }
+    }
   }
 
   int _teamPlayerCount(MatchDetails match, UserDetails user) {
@@ -736,7 +719,11 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     );
   }
 
-  List<Widget> _buildTimelineItems(MatchDetails match, UserDetails user) {
+  List<Widget> _buildTimelineItems(
+    MatchDetails match,
+    UserDetails user, {
+    bool includeAddEventButton = true,
+  }) {
     final List<MatchEventDetails> events =
         List.from(match.matchEventDetailsList ?? []);
     events.sort((a, b) => (b.minute ?? 0).compareTo(a.minute ?? 0));
@@ -745,7 +732,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
 
     final List<Widget> items = [];
 
-    if (user.isTeamOwner) {
+    if (user.isTeamOwner && includeAddEventButton) {
       items.add(
         Center(
           child: Padding(
@@ -770,18 +757,20 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       String subtitle = '';
 
       if (e.type == MatchEventType.goal) {
-        if (e.assistMakerUserName != null) {
-          title += ' (Assist: ${e.assistMakerUserName})';
-        }
+        title = 'Mål: ${e.goalscorerUserName}';
         timeLabel = e.minute != null ? '${e.minute}\'' : 'MÅL';
         icon = Icons.sports_soccer;
-        subtitle = 'Mål';
+        subtitle = e.assistMakerUserName != null
+            ? 'Assisteret af ${e.assistMakerUserName}'
+            : 'Mål';
       } else if (e.type == MatchEventType.yellowCard) {
+        title = 'Gult kort: ${e.goalscorerUserName}';
         timeLabel = e.minute != null ? '${e.minute}\'' : 'KORT';
         icon = Icons.square;
         iconColor = Colors.yellow;
         subtitle = 'Gult kort';
       } else if (e.type == MatchEventType.redCard) {
+        title = 'Rødt kort: ${e.goalscorerUserName}';
         timeLabel = e.minute != null ? '${e.minute}\'' : 'KORT';
         icon = Icons.square;
         iconColor = Colors.red;
@@ -793,6 +782,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         icon = Icons.swap_horiz;
         subtitle = 'Udskiftning';
       } else if (e.type == MatchEventType.penaltyKick) {
+        title = 'Straffe: ${e.goalscorerUserName}';
         timeLabel = e.minute != null ? '${e.minute}\'' : 'STRAFFE';
         icon = Icons.sports_soccer;
         iconColor = Colors.orange;
@@ -975,110 +965,58 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
   }
 }
 
-class _PostMatchSummaryCard extends StatelessWidget {
-  final MatchDetails match;
-  final int eventCount;
+class _MatchTimelineSection extends StatelessWidget {
+  final List<Widget> items;
+  final bool canAddEvent;
+  final VoidCallback onAddEvent;
 
-  const _PostMatchSummaryCard({
-    required this.match,
-    required this.eventCount,
+  const _MatchTimelineSection({
+    required this.items,
+    required this.canAddEvent,
+    required this.onAddEvent,
   });
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    if (items.isEmpty) {
+      return _MatchTimelineEmptyState(
+        canAddEvent: canAddEvent,
+        onAddEvent: onAddEvent,
+      );
+    }
+
     final styles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final resultLabel = _resultLabel(match);
-    final eventLabel =
-        eventCount == 1 ? '1 begivenhed' : '$eventCount begivenheder';
-    final playerOfTheMatch =
-        match.matchPollDetails?.playerOfTheMatchDetails.name;
 
-    return KopaCard(
-      padding: const EdgeInsets.all(Spacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: colors.grass.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(
-                    Spacing.borderRadiusSmall,
-                  ),
-                ),
-                child: Icon(
-                  CupertinoIcons.checkmark_seal_fill,
-                  color: colors.grass,
-                  size: 22,
-                ),
-              ),
-              const SizedBox(width: Spacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Efter kampen', style: styles.bodyBold),
-                    Text(resultLabel, style: styles.caption),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: Spacing.md),
-          Wrap(
-            spacing: Spacing.sm,
-            runSpacing: Spacing.sm,
-            children: [
-              _PostMatchPill(
-                icon: CupertinoIcons.calendar,
-                label: DateHelper.getFormattedDate(match.date),
-              ),
-              _PostMatchPill(
-                icon: CupertinoIcons.list_bullet,
-                label: eventLabel,
-              ),
-              if (playerOfTheMatch != null)
-                _PostMatchPill(
-                  icon: CupertinoIcons.star_fill,
-                  label: playerOfTheMatch,
-                ),
-            ],
-          ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Kampforløb',
+          style: styles.subtitle1.copyWith(fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 12),
+        KopaCard(
+          borderRadius: Spacing.borderRadiusLargeIncreased,
+          padding: const EdgeInsets.all(20),
+          child: Column(children: items),
+        ),
+        if (canAddEvent) ...[
+          const SizedBox(height: Spacing.lg),
+          _AddMatchEventOutlineButton(onPressed: onAddEvent),
         ],
-      ),
+      ],
     );
-  }
-
-  String _resultLabel(MatchDetails match) {
-    final homeScore = match.homeTeamScore;
-    final awayScore = match.awayTeamScore;
-    if (homeScore == null || awayScore == null) return 'Resultat registreret';
-
-    final isHome = match.isHomeTeam == true;
-    final ownScore = isHome ? homeScore : awayScore;
-    final opponentScore = isHome ? awayScore : homeScore;
-    final result = ownScore > opponentScore
-        ? 'Sejr'
-        : ownScore == opponentScore
-            ? 'Uafgjort'
-            : 'Nederlag';
-
-    return '$result · $homeScore-$awayScore';
   }
 }
 
-class _PostMatchPill extends StatelessWidget {
-  final IconData icon;
-  final String label;
+class _MatchTimelineEmptyState extends StatelessWidget {
+  final bool canAddEvent;
+  final VoidCallback onAddEvent;
 
-  const _PostMatchPill({
-    required this.icon,
-    required this.label,
+  const _MatchTimelineEmptyState({
+    required this.canAddEvent,
+    required this.onAddEvent,
   });
 
   @override
@@ -1087,101 +1025,39 @@ class _PostMatchPill extends StatelessWidget {
     final styles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: Spacing.sm,
-        vertical: Spacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: colors.white.withValues(alpha: 0.72),
-        borderRadius: BorderRadius.circular(Spacing.borderRadiusFull),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+    return KopaCard(
+      borderRadius: Spacing.borderRadiusLargeIncreased,
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
+      child: Column(
         children: [
-          Icon(icon, size: 14, color: colors.grass),
-          const SizedBox(width: 5),
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: colors.offWhite,
+              borderRadius: BorderRadius.circular(40),
+            ),
+            child: Icon(
+              CupertinoIcons.list_bullet_indent,
+              color: colors.primary,
+              size: 38,
+            ),
+          ),
+          const SizedBox(height: Spacing.lg),
           Text(
-            label,
-            style: styles.caption.copyWith(
-              color: colors.dirt,
-              fontWeight: FontWeight.w700,
-            ),
+            'Ingen hændelser endnu',
+            style: styles.subtitle1.copyWith(fontWeight: FontWeight.w800),
+            textAlign: TextAlign.center,
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PersonalMatchStatsCard extends StatelessWidget {
-  final _PersonalMatchStats stats;
-
-  const _PersonalMatchStatsCard({required this.stats});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final styles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final ratingLabel = stats.rating == null
-        ? '-'
-        : '${stats.rating!.toStringAsFixed(1)} (${stats.ratingVotes})';
-
-    return KopaCard(
-      padding: const EdgeInsets.all(Spacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Din kamp', style: styles.bodyBold),
           const SizedBox(height: Spacing.sm),
-          GridView.count(
-            crossAxisCount: 2,
-            childAspectRatio: 2.65,
-            mainAxisSpacing: Spacing.sm,
-            crossAxisSpacing: Spacing.sm,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            children: [
-              _PersonalStatTile(
-                label: 'Mål',
-                value: '${stats.goals}',
-                icon: Icons.sports_soccer,
-              ),
-              _PersonalStatTile(
-                label: 'Assists',
-                value: '${stats.assists}',
-                icon: CupertinoIcons.arrowshape_turn_up_right_fill,
-              ),
-              _PersonalStatTile(
-                label: 'Kort',
-                value: '${stats.yellowCards + stats.redCards}',
-                icon: CupertinoIcons.square_fill,
-              ),
-              _PersonalStatTile(
-                label: 'Rating',
-                value: ratingLabel,
-                icon: CupertinoIcons.star_lefthalf_fill,
-              ),
-            ],
+          Text(
+            'Tilføj hændelser som mål, kort og udskiftninger',
+            style: styles.body3.copyWith(color: colors.dirt),
+            textAlign: TextAlign.center,
           ),
-          if (stats.isPlayerOfTheMatch) ...[
-            const SizedBox(height: Spacing.sm),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(Spacing.sm),
-              decoration: BoxDecoration(
-                color: colors.grass.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(Spacing.borderRadiusSmall),
-              ),
-              child: Text(
-                'Du blev kampens spiller',
-                style: styles.caption.copyWith(
-                  color: colors.grass,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
+          if (canAddEvent) ...[
+            const SizedBox(height: Spacing.lg),
+            _AddMatchEventButton(onPressed: onAddEvent),
           ],
         ],
       ),
@@ -1189,16 +1065,201 @@ class _PersonalMatchStatsCard extends StatelessWidget {
   }
 }
 
-class _PersonalStatTile extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
+class _AddMatchEventButton extends StatelessWidget {
+  final VoidCallback onPressed;
 
-  const _PersonalStatTile({
-    required this.label,
-    required this.value,
-    required this.icon,
+  const _AddMatchEventButton({required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final styles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return CupertinoButton(
+      padding: EdgeInsets.zero,
+      onPressed: onPressed,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: colors.primary,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          '+ Tilføj hændelse',
+          style: styles.body1.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w800,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+}
+
+class _AddMatchEventOutlineButton extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const _AddMatchEventOutlineButton({required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final styles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return CupertinoButton(
+      padding: EdgeInsets.zero,
+      onPressed: onPressed,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          border: Border.all(color: colors.primary, width: 2),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          '+ Tilføj hændelse',
+          style: styles.body1.copyWith(
+            color: colors.primary,
+            fontWeight: FontWeight.w800,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+}
+
+class _AttendanceApprovalSection extends StatelessWidget {
+  final String title;
+  final List<Widget> children;
+
+  const _AttendanceApprovalSection({
+    required this.title,
+    required this.children,
   });
+
+  @override
+  Widget build(BuildContext context) {
+    final styles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: styles.subtitle2),
+        const SizedBox(height: Spacing.sm),
+        ...children,
+      ],
+    );
+  }
+}
+
+class _AttendanceApprovalRow extends StatelessWidget {
+  final EventAttendanceDetails attendance;
+  final bool approved;
+  final bool isSaving;
+  final VoidCallback onApprove;
+  final VoidCallback onReject;
+
+  const _AttendanceApprovalRow({
+    required this.attendance,
+    required this.approved,
+    required this.isSaving,
+    required this.onApprove,
+    required this.onReject,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final styles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final user = attendance.userDetails;
+
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 150),
+      opacity: approved ? 0.82 : 1,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: Spacing.sm),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: colors.white,
+          borderRadius: BorderRadius.circular(Spacing.borderRadiusLarge),
+        ),
+        child: Row(
+          children: [
+            _AttendanceAvatar(name: user.name),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    user.name,
+                    style: styles.body3.copyWith(fontWeight: FontWeight.w700),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    _positionLabel(user.position),
+                    style: styles.caption1.copyWith(color: colors.dirt),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: Spacing.sm),
+            if (isSaving)
+              const SizedBox(
+                width: 32,
+                height: 32,
+                child: CupertinoActivityIndicator(),
+              )
+            else if (approved)
+              _ApprovedBadge(onReject: onReject)
+            else
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _AttendanceActionButton(
+                    icon: CupertinoIcons.xmark,
+                    color: colors.error,
+                    backgroundColor: const Color(0xFFFFEBEE),
+                    semanticLabel: 'Afvis ${user.name}',
+                    onPressed: onReject,
+                  ),
+                  const SizedBox(width: Spacing.sm),
+                  _AttendanceActionButton(
+                    icon: CupertinoIcons.checkmark_alt,
+                    color: colors.primary,
+                    backgroundColor: const Color(0xFFE8F5E9),
+                    semanticLabel: 'Godkend ${user.name}',
+                    onPressed: onApprove,
+                  ),
+                ],
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static String _positionLabel(String? position) {
+    final value = position?.trim();
+    if (value == null || value.isEmpty) return 'Spiller';
+    return value;
+  }
+}
+
+class _AttendanceAvatar extends StatelessWidget {
+  final String name;
+
+  const _AttendanceAvatar({required this.name});
 
   @override
   Widget build(BuildContext context) {
@@ -1207,58 +1268,187 @@ class _PersonalStatTile extends StatelessWidget {
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: Spacing.sm,
-        vertical: Spacing.xs,
-      ),
+      width: 38,
+      height: 38,
       decoration: BoxDecoration(
-        color: colors.white.withValues(alpha: 0.72),
-        borderRadius: BorderRadius.circular(Spacing.borderRadiusSmall),
+        color: colors.offWhite,
+        borderRadius: BorderRadius.circular(19),
       ),
-      child: Row(
-        children: [
-          Icon(icon, color: colors.grass, size: 18),
-          const SizedBox(width: Spacing.xs),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: styles.caption.copyWith(color: colors.textSecondary),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  value,
-                  style: styles.bodyBold,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
+      alignment: Alignment.center,
+      child: Text(
+        _initials(name),
+        style: styles.body3.copyWith(
+          color: colors.grass,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
+
+  String _initials(String name) {
+    final parts = name.trim().split(RegExp(r'\s+'));
+    if (parts.isEmpty || parts.first.isEmpty) return '?';
+    if (parts.length == 1) return parts.first.characters.first.toUpperCase();
+    return '${parts.first.characters.first}${parts.last.characters.first}'
+        .toUpperCase();
+  }
+}
+
+class _AttendanceActionButton extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final Color backgroundColor;
+  final String semanticLabel;
+  final VoidCallback onPressed;
+
+  const _AttendanceActionButton({
+    required this.icon,
+    required this.color,
+    required this.backgroundColor,
+    required this.semanticLabel,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: semanticLabel,
+      child: CupertinoButton(
+        padding: EdgeInsets.zero,
+        minimumSize: const Size(32, 32),
+        onPressed: onPressed,
+        child: Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(16),
           ),
-        ],
+          child: Icon(icon, size: 16, color: color),
+        ),
       ),
     );
   }
 }
 
-class _PersonalMatchStats {
-  final int goals;
-  final int assists;
-  final int yellowCards;
-  final int redCards;
-  final double? rating;
-  final int ratingVotes;
-  final bool isPlayerOfTheMatch;
+class _ApprovedBadge extends StatelessWidget {
+  final VoidCallback onReject;
 
-  const _PersonalMatchStats({
-    required this.goals,
-    required this.assists,
-    required this.yellowCards,
-    required this.redCards,
-    required this.rating,
-    required this.ratingVotes,
-    required this.isPlayerOfTheMatch,
+  const _ApprovedBadge({required this.onReject});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final styles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return CupertinoButton(
+      padding: EdgeInsets.zero,
+      minimumSize: const Size(28, 28),
+      onPressed: onReject,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+        decoration: BoxDecoration(
+          color: const Color(0xFFE8F5E9),
+          borderRadius: BorderRadius.circular(Spacing.borderRadiusSmall),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(CupertinoIcons.checkmark_alt, size: 10, color: colors.primary),
+            const SizedBox(width: 4),
+            Text(
+              'Godkendt',
+              style: styles.caption2.copyWith(
+                color: colors.primary,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AttendanceApprovalEmpty extends StatelessWidget {
+  const _AttendanceApprovalEmpty();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final styles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(Spacing.md),
+      decoration: BoxDecoration(
+        color: colors.white.withValues(alpha: 0.78),
+        borderRadius: BorderRadius.circular(Spacing.borderRadiusLarge),
+      ),
+      child: Text(
+        'Ingen spillere afventer godkendelse.',
+        style: styles.caption1.copyWith(color: colors.dirt),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+}
+
+class _ApproveAllAttendancesButton extends StatelessWidget {
+  final bool isSaving;
+  final VoidCallback onPressed;
+
+  const _ApproveAllAttendancesButton({
+    required this.isSaving,
+    required this.onPressed,
   });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final styles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return Semantics(
+      button: true,
+      enabled: !isSaving,
+      child: CupertinoButton(
+        padding: EdgeInsets.zero,
+        onPressed: isSaving ? null : onPressed,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          decoration: BoxDecoration(
+            color: colors.primary,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (isSaving)
+                const CupertinoActivityIndicator(color: Colors.white)
+              else ...[
+                const Icon(
+                  CupertinoIcons.checkmark_alt_circle,
+                  size: 18,
+                  color: Colors.white,
+                ),
+                const SizedBox(width: Spacing.sm),
+                Text(
+                  'Godkend alle',
+                  style: styles.body1.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

@@ -26,54 +26,61 @@ class MatchHeroCard extends StatelessWidget {
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final hasScore = match.hasMatchBeenPlayed;
 
     final card = KopaCard(
       onTap: onTap,
       padding: EdgeInsets.zero,
+      borderRadius: Spacing.borderRadiusLargeIncreased,
       child: Column(
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: Spacing.lg,
-              vertical: Spacing.lg,
+              horizontal: 20,
+              vertical: 20,
             ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(
+                SizedBox(
+                  width: 100,
                   child: TeamBadgeLabel(
                     teamName: match.homeTeam ?? 'Hjemme',
                     teamId: stableTeamSeed(match.homeTeam ?? 'Hjemme'),
                     heroTag: heroTag == null
                         ? null
                         : logoHeroTag(heroTag!, TeamSide.home),
-                    radius: 22,
-                    labelMaxLines: 2,
+                    radius: 23,
+                    labelMaxLines: 1,
                     labelStyle: appTextStyles.caption.copyWith(
                       color: appColors.dirt,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
-                  child: Text(
-                    'VS',
-                    style: appTextStyles.h5.copyWith(
-                      color: appColors.grass,
-                      fontWeight: FontWeight.w900,
+                if (hasScore)
+                  _FinalScorePill(match: match)
+                else
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+                    child: Text(
+                      'VS',
+                      style: appTextStyles.h5.copyWith(
+                        color: appColors.grass,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                   ),
-                ),
-                Expanded(
+                SizedBox(
+                  width: 100,
                   child: TeamBadgeLabel(
                     teamName: match.awayTeam ?? 'Ude',
                     teamId: stableTeamSeed(match.awayTeam ?? 'Ude'),
                     heroTag: heroTag == null
                         ? null
                         : logoHeroTag(heroTag!, TeamSide.away),
-                    radius: 22,
-                    labelMaxLines: 2,
+                    radius: 23,
+                    labelMaxLines: 1,
                     labelStyle: appTextStyles.caption.copyWith(
                       color: appColors.dirt,
                       fontWeight: FontWeight.w800,
@@ -106,6 +113,48 @@ class MatchHeroCard extends StatelessWidget {
 
   static String logoHeroTag(String cardHeroTag, TeamSide side) {
     return '$cardHeroTag-${side.name}-team-logo';
+  }
+}
+
+class _FinalScorePill extends StatelessWidget {
+  final MatchDetails match;
+
+  const _FinalScorePill({required this.match});
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          '${match.homeTeamScore} - ${match.awayTeamScore}',
+          style: appTextStyles.h3.copyWith(
+            color: appColors.dirt,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: appColors.lightGrass,
+            borderRadius: BorderRadius.circular(Spacing.borderRadiusFull),
+          ),
+          child: Text(
+            'Færdig',
+            style: appTextStyles.caption2.copyWith(
+              color: const Color(0xFF105230),
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 
