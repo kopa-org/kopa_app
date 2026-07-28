@@ -25,10 +25,12 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   void initState() {
     super.initState();
-    // Pre-fill email if it exists in onboarding state
     final onboardingState = context.read<OnboardingCubit>().state;
     if (onboardingState.email != null) {
       _emailController.text = onboardingState.email!;
+    }
+    if (onboardingState.name != null) {
+      _nameController.text = onboardingState.name!;
     }
   }
 
@@ -69,19 +71,20 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               );
             } else if (state.status == AuthStatus.authenticated) {
-              // If we have an invite token, join the team now
-              final onboardingCubit = context.read<OnboardingCubit>();
-              if (onboardingCubit.state.inviteToken != null) {
-                onboardingCubit.joinTeamWithToken();
-              }
+              context.go(AppRouter.onboarding);
             }
           },
         ),
         BlocListener<OnboardingCubit, OnboardingState>(
           listener: (context, state) async {
             if (state.status == OnboardingStatus.validated &&
-                state.email != null) {
-              _emailController.text = state.email!;
+                (state.email != null || state.name != null)) {
+              if (state.email != null) {
+                _emailController.text = state.email!;
+              }
+              if (state.name != null) {
+                _nameController.text = state.name!;
+              }
             } else if (state.status == OnboardingStatus.success) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(

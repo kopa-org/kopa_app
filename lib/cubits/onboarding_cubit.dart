@@ -15,6 +15,7 @@ class OnboardingState {
   final OnboardingStatus status;
   final String? inviteToken;
   final String? email;
+  final String? name;
   final int? teamId;
   final String? teamTitle;
   final String? errorMessage;
@@ -26,6 +27,7 @@ class OnboardingState {
     this.status = OnboardingStatus.initial,
     this.inviteToken,
     this.email,
+    this.name,
     this.teamId,
     this.teamTitle,
     this.errorMessage,
@@ -38,6 +40,7 @@ class OnboardingState {
     OnboardingStatus? status,
     Object? inviteToken = _unset,
     Object? email = _unset,
+    Object? name = _unset,
     Object? teamId = _unset,
     Object? teamTitle = _unset,
     Object? errorMessage = _unset,
@@ -50,6 +53,7 @@ class OnboardingState {
       inviteToken:
           inviteToken == _unset ? this.inviteToken : inviteToken as String?,
       email: email == _unset ? this.email : email as String?,
+      name: name == _unset ? this.name : name as String?,
       teamId: teamId == _unset ? this.teamId : teamId as int?,
       teamTitle: teamTitle == _unset ? this.teamTitle : teamTitle as String?,
       errorMessage:
@@ -70,18 +74,32 @@ class OnboardingCubit extends Cubit<OnboardingState> {
 
   OnboardingCubit(this._repository) : super(OnboardingState());
 
-  Future<void> handleDeepLink(String token) async {
+  Future<void> handleDeepLink(
+    String token, {
+    String? email,
+    String? name,
+    int? teamId,
+    String? teamTitle,
+  }) async {
     AppAnalytics.logEvent('onboarding_started');
-    emit(state.copyWith(status: OnboardingStatus.loading, inviteToken: token));
+    emit(state.copyWith(
+      status: OnboardingStatus.loading,
+      inviteToken: token,
+      email: email,
+      name: name,
+      teamId: teamId,
+      teamTitle: teamTitle,
+    ));
 
     final result = await _repository.validateToken(token);
 
     if (result['valid'] == true) {
       emit(state.copyWith(
         status: OnboardingStatus.validated,
-        email: result['email'],
-        teamId: result['team_id'],
-        teamTitle: result['team_title'],
+        email: result['email'] ?? email,
+        name: result['name'] ?? name,
+        teamId: result['team_id'] ?? teamId,
+        teamTitle: result['team_title'] ?? teamTitle,
       ));
     } else {
       emit(state.copyWith(

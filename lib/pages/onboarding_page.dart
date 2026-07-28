@@ -43,10 +43,28 @@ class _OnboardingPageState extends State<OnboardingPage> {
   Map<String, dynamic>? _pendingJoinTeam;
 
   @override
+  void initState() {
+    super.initState();
+    _applyInviteContext(context.read<OnboardingCubit>().state);
+  }
+
+  @override
   void dispose() {
     _teamNameController.dispose();
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _applyInviteContext(OnboardingState state) {
+    if (state.inviteToken == null || state.teamId == null) return;
+
+    _hasSelectedRole = true;
+    _mode = _OnboardingMode.join;
+    _joinStep = 0;
+    _pendingJoinTeam = {
+      'id': state.teamId,
+      'title': state.teamTitle ?? '',
+    };
   }
 
   Future<void> _openDbu() async {
@@ -134,9 +152,19 @@ class _OnboardingPageState extends State<OnboardingPage> {
   Future<void> _handlePrimaryAction() async {
     if (_mode == _OnboardingMode.join) {
       if (_joinStep == 0) {
+        final onboardingState = context.read<OnboardingCubit>().state;
+        final inviteTeamId = onboardingState.teamId;
+        final inviteTeamTitle = onboardingState.teamTitle ?? '';
         try {
           await _saveSelectedPosition();
         } catch (_) {
+          return;
+        }
+        if (inviteTeamId != null) {
+          await _requestJoin({
+            'id': inviteTeamId,
+            'title': inviteTeamTitle,
+          });
           return;
         }
         if (mounted) setState(() => _joinStep = 1);
@@ -224,6 +252,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
     return BlocConsumer<OnboardingCubit, OnboardingState>(
       listener: (context, state) {
+        if (state.inviteToken != null && state.teamId != null) {
+          setState(() => _applyInviteContext(state));
+        }
         if (state.status == OnboardingStatus.failure &&
             state.errorMessage != null) {
           ScaffoldMessenger.of(context).showSnackBar(

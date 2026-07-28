@@ -51,37 +51,10 @@ abstract final class AppRouter {
       refreshListenable: refreshListenable,
       observers: AppAnalytics.routeObservers,
       redirect: (context, state) {
-        final authState = authCubit.state;
-        final isLoggedIn = authState.status == AuthStatus.authenticated ||
-            (authState.status == AuthStatus.loading && authState.user != null);
-        final isLoggingIn = state.uri.path == login;
-        final isRegistering = state.uri.path == register;
-        final isInvite = state.uri.path == invite;
-        final isJoin = state.uri.path == join;
-        final isOnboarding = state.uri.path == onboarding;
-        final hasTeam = authState.user?.teamDetails != null;
-
-        if (!isLoggedIn &&
-            !isLoggingIn &&
-            !isRegistering &&
-            !isInvite &&
-            !isJoin) {
-          return login;
-        }
-        if (isLoggedIn && (isLoggingIn || isRegistering)) {
-          return home;
-        }
-        if (isLoggedIn &&
-            !hasTeam &&
-            !isOnboarding &&
-            !isInvite &&
-            !isJoin &&
-            state.uri.path != dbuWebview) {
-          return onboarding;
-        }
-        if (isLoggedIn && hasTeam && isOnboarding) return home;
-
-        return null;
+        return redirectPathFor(
+          path: state.uri.path,
+          authState: authCubit.state,
+        );
       },
       routes: [
         GoRoute(
@@ -89,7 +62,15 @@ abstract final class AppRouter {
           builder: (context, state) {
             final token = state.uri.queryParameters['token'];
             if (token != null) {
-              onboardingCubit.handleDeepLink(token);
+              onboardingCubit.handleDeepLink(
+                token,
+                email: state.uri.queryParameters['email'],
+                name: state.uri.queryParameters['name'],
+                teamId: int.tryParse(
+                  state.uri.queryParameters['team_id'] ?? '',
+                ),
+                teamTitle: state.uri.queryParameters['team_title'],
+              );
             }
             return const RegisterPage();
           },
@@ -99,7 +80,15 @@ abstract final class AppRouter {
           builder: (context, state) {
             final token = state.uri.queryParameters['team_token'];
             if (token != null) {
-              onboardingCubit.handleDeepLink(token);
+              onboardingCubit.handleDeepLink(
+                token,
+                email: state.uri.queryParameters['email'],
+                name: state.uri.queryParameters['name'],
+                teamId: int.tryParse(
+                  state.uri.queryParameters['team_id'] ?? '',
+                ),
+                teamTitle: state.uri.queryParameters['team_title'],
+              );
             }
             return const RegisterPage();
           },
@@ -273,6 +262,44 @@ abstract final class AppRouter {
         ),
       ],
     );
+  }
+
+  @visibleForTesting
+  static String? redirectPathFor({
+    required String path,
+    required AuthState authState,
+  }) {
+    final isLoggedIn = authState.status == AuthStatus.authenticated ||
+        (authState.status == AuthStatus.loading && authState.user != null);
+    final isLoggingIn = path == login;
+    final isRegistering = path == register;
+    final isInvite = path == invite;
+    final isJoin = path == join;
+    final isOnboarding = path == onboarding;
+    final hasTeam = authState.user?.teamDetails != null;
+
+    if (!isLoggedIn && !isLoggingIn && !isRegistering && !isInvite && !isJoin) {
+      return login;
+    }
+
+    if (isLoggedIn && !hasTeam) {
+      if (isLoggingIn ||
+          isRegistering ||
+          isInvite ||
+          isJoin ||
+          isOnboarding ||
+          path == dbuWebview) {
+        return null;
+      }
+
+      return login;
+    }
+
+    if (isLoggedIn && (isLoggingIn || isRegistering || isOnboarding)) {
+      return home;
+    }
+
+    return null;
   }
 
   static List<_MainTab> _visibleMainTabs(AppFeatureFlags featureFlags) {
