@@ -109,8 +109,8 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     }
   }
 
-  Future<void> joinTeamWithToken() async {
-    if (state.inviteToken == null) return;
+  Future<bool> joinTeamWithToken() async {
+    if (state.inviteToken == null) return false;
 
     emit(state.copyWith(status: OnboardingStatus.loading));
     final result = await _repository.joinTeam(state.inviteToken!);
@@ -118,11 +118,13 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     if (result['success'] == true) {
       AppAnalytics.logEvent('team_joined');
       emit(state.copyWith(status: OnboardingStatus.success, inviteToken: null));
+      return true;
     } else {
       emit(state.copyWith(
         status: OnboardingStatus.failure,
         errorMessage: result['error'],
       ));
+      return false;
     }
   }
 

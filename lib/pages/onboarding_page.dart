@@ -153,20 +153,26 @@ class _OnboardingPageState extends State<OnboardingPage> {
     if (_mode == _OnboardingMode.join) {
       if (_joinStep == 0) {
         final onboardingState = context.read<OnboardingCubit>().state;
-        final inviteTeamId = onboardingState.teamId;
-        final inviteTeamTitle = onboardingState.teamTitle ?? '';
+        final isInviteFlow = onboardingState.inviteToken != null;
+        final onboardingCubit = context.read<OnboardingCubit>();
+        final authCubit = context.read<AuthCubit>();
         try {
           await _saveSelectedPosition();
         } catch (_) {
           return;
         }
-        if (inviteTeamId != null) {
-          await _requestJoin({
-            'id': inviteTeamId,
-            'title': inviteTeamTitle,
-          });
+
+        if (isInviteFlow) {
+          final joined = await onboardingCubit.joinTeamWithToken();
+          if (!joined) return;
+
+          await authCubit.init();
+          if (!mounted) return;
+          onboardingCubit.clearOnboarding();
+          context.go(AppRouter.home);
           return;
         }
+
         if (mounted) setState(() => _joinStep = 1);
       }
       return;
