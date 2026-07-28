@@ -1445,8 +1445,13 @@ class _TeamSearchCard extends StatelessWidget {
     final title =
         team['title'] as String? ?? team['teamTitle'] as String? ?? '';
     final memberCount = team['member_count'] ?? team['memberCount'];
-    final subtitle =
-        memberCount == null ? 'Holdleder: Afventer' : '$memberCount medlemmer';
+    final leaderName =
+        team['leader_name'] as String? ?? team['leaderName'] as String? ?? '';
+    final subtitle = leaderName.trim().isNotEmpty
+        ? 'Holdleder: ${leaderName.trim()}'
+        : memberCount == null
+            ? 'Holdleder: Afventer'
+            : '$memberCount medlemmer';
     final series =
         team['series_name'] as String? ?? team['seriesName'] as String? ?? '';
 
