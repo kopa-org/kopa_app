@@ -26,7 +26,7 @@ class PlayerProfilePage extends StatelessWidget {
 
     return PageScaffold(
       title: player.name,
-      showTopBar: false,
+      showBackButton: true,
       backgroundColor: _ProfileColors.background,
       systemOverlayStyle: SystemUiOverlayStyle.dark.copyWith(
         statusBarColor: _ProfileColors.background,
@@ -51,8 +51,6 @@ class _PlayerProfileView extends StatelessWidget {
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(Spacing.md, 12, Spacing.md, 120),
       children: [
-        const _ProfileBackButton(),
-        const SizedBox(height: 12),
         _PlayerHero(profile: profile),
         const SizedBox(height: 20),
         _StatsRow(summary: profile.playerPlusSummary),
@@ -61,42 +59,6 @@ class _PlayerProfileView extends StatelessWidget {
         const SizedBox(height: 12),
         _MatchHistoryCard(matches: profile.matchHistory),
       ],
-    );
-  }
-}
-
-class _ProfileBackButton extends StatelessWidget {
-  const _ProfileBackButton();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final appColors = theme.extension<AppColors>() ?? AppColors.light;
-
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Material(
-        color: appColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: () => Navigator.of(context).pop(),
-          child: Container(
-            width: 44,
-            height: 44,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: _ProfileColors.border, width: 0.5),
-            ),
-            child: Icon(
-              CupertinoIcons.chevron_back,
-              size: 22,
-              color: appColors.dirt,
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
