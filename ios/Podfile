@@ -1,8 +1,20 @@
-# Uncomment this line to define a global platform for your project
-platform :ios, '12.0'
+# Firebase 12 and the current FlutterFire plugins require iOS 15 or later.
+platform :ios, '15.0'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
+
+def xcode_major_version
+  version_output = `xcodebuild -version 2>/dev/null`
+  version_output[/Xcode\s+(\d+)/, 1].to_i
+end
+
+# Do not downgrade Firebase on modern toolchains. Firebase 11+ requires Xcode
+# 16, so only keep the compatibility pin when this project is built with Xcode
+# 15 or older.
+if xcode_major_version.positive? && xcode_major_version < 16
+  $FirebaseSDKVersion = '10.29.0'
+end
 
 project 'Runner', {
   'Debug' => :debug,
@@ -23,6 +35,20 @@ def flutter_root
   raise "FLUTTER_ROOT not found in #{generated_xcode_build_settings_path}. Try deleting Generated.xcconfig, then run flutter pub get"
 end
 
+# CocoaPods 1.12 writes DT_TOOLCHAIN_DIR into generated support files. Xcode
+# 15 rejects that legacy variable, so normalize the generated xcconfigs after
+# CocoaPods has integrated them into the workspace.
+post_integrate do |_installer|
+  Dir.glob(File.join(__dir__, 'Pods', 'Target Support Files', '**', '*')).each do |file|
+    next unless File.file?(file)
+
+    contents = File.read(file)
+    next unless contents.include?('DT_TOOLCHAIN_DIR')
+
+    File.write(file, contents.gsub('DT_TOOLCHAIN_DIR', 'TOOLCHAIN_DIR'))
+  end
+end
+
 require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
 
 flutter_ios_podfile_setup
@@ -40,5 +66,19 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+
+    target.build_configurations.each do |config|
+      # FlutterFire 12 requires iOS 15. Keep every Pod target aligned with
+      # the application target to avoid Xcode simulator deployment warnings.
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+
+      # CocoaPods 1.12 emits this legacy Xcode 14 build setting. Xcode 15
+      # rejects it when Firebase evaluates its library search paths.
+      config.build_settings.each do |key, value|
+        next unless value.respond_to?(:gsub)
+
+        config.build_settings[key] = value.gsub('DT_TOOLCHAIN_DIR', 'TOOLCHAIN_DIR')
+      end
+    end
   end
 end
