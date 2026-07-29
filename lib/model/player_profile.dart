@@ -48,34 +48,75 @@ class PlayerMatchHistoryItem {
   final int eventId;
   final String homeTeam;
   final String awayTeam;
+  final String opponentName;
+  final int? homeTeamScore;
+  final int? awayTeamScore;
+  final int? teamScore;
+  final int? opponentScore;
+  final bool isHomeTeam;
+  final String? seasonName;
   final DateTime date;
   final bool participated;
   final double? rating;
   final bool scored;
   final bool assisted;
+  final int goalsCount;
+  final int assistsCount;
+  final int yellowCardsCount;
+  final int redCardsCount;
+  final bool playerOfTheMatch;
 
   PlayerMatchHistoryItem({
     required this.eventId,
     required this.homeTeam,
     required this.awayTeam,
+    required this.opponentName,
+    required this.homeTeamScore,
+    required this.awayTeamScore,
+    required this.teamScore,
+    required this.opponentScore,
+    required this.isHomeTeam,
+    required this.seasonName,
     required this.date,
     required this.participated,
     required this.rating,
     required this.scored,
     required this.assisted,
+    required this.goalsCount,
+    required this.assistsCount,
+    required this.yellowCardsCount,
+    required this.redCardsCount,
+    required this.playerOfTheMatch,
   });
 
   factory PlayerMatchHistoryItem.fromJson(Map<String, dynamic> json) {
     return PlayerMatchHistoryItem(
       eventId: json['event_id'],
-      homeTeam: json['home_team'] ?? 'Hjemmehold',
-      awayTeam: json['away_team'] ?? 'Udehold',
+      homeTeam: json['home_team'],
+      awayTeam: json['away_team'],
+      opponentName: json['opponent_name'],
+      homeTeamScore: json['home_team_score'],
+      awayTeamScore: json['away_team_score'],
+      teamScore: json['team_score'],
+      opponentScore: json['opponent_score'],
+      isHomeTeam: json['is_home_team'],
+      seasonName: json['season_name'],
       date: DateTime.parse(json['date']),
-      participated: json['participated'] ?? false,
+      participated: json['participated'],
       rating: (json['rating'] as num?)?.toDouble(),
-      scored: json['scored'] ?? false,
-      assisted: json['assisted'] ?? false,
+      scored: json['scored'],
+      assisted: json['assisted'],
+      goalsCount: json['goals_count'],
+      assistsCount: json['assists_count'],
+      yellowCardsCount: json['yellow_cards_count'],
+      redCardsCount: json['red_cards_count'],
+      playerOfTheMatch: json['player_of_the_match'],
     );
+  }
+
+  String? get scoreLabel {
+    if (teamScore == null || opponentScore == null) return null;
+    return '$teamScore - $opponentScore';
   }
 }
 

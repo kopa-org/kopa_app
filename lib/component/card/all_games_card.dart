@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:kopa/component/avatar/team_badge_label.dart';
 import 'package:kopa/helpers/date_helper.dart';
 import 'package:kopa/model/match_details.dart';
@@ -131,8 +130,8 @@ class _GameResultRow extends StatelessWidget {
                             const SizedBox(width: 6),
                             Expanded(
                               child: Text(
-                                DateFormat('EEE d. MMM', 'da_DK')
-                                    .format(match.date)
+                                DateHelper.getFormattedShortWeekdayDate(
+                                        match.date)
                                     .toUpperCase(),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,

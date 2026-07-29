@@ -99,32 +99,14 @@ class HomeCubit extends Cubit<HomeState> {
     final nextMatch = state.nextMatch;
     if (nextMatch != null && nextMatch.id == matchId) {
       emit(state.copyWith(
-        nextMatch: MatchDetails(
-          id: nextMatch.id,
-          type: nextMatch.type,
-          homeTeam: nextMatch.homeTeam,
-          awayTeam: nextMatch.awayTeam,
-          date: nextMatch.date,
-          meetingTime: nextMatch.meetingTime,
-          location: nextMatch.location,
-          createdAt: nextMatch.createdAt,
-          updatedAt: nextMatch.updatedAt,
-          notes: nextMatch.notes,
-          matchPollDetails: nextMatch.matchPollDetails,
-          homeTeamScore: nextMatch.homeTeamScore,
-          awayTeamScore: nextMatch.awayTeamScore,
-          isHomeTeam: nextMatch.isHomeTeam,
+        nextMatch: _nextMatchWith(
+          nextMatch,
           isCurrentUserRegistered: true,
           isCurrentUserSelected: nextMatch.isCurrentUserSelected,
           registeredCount: nextMatch.isCurrentUserRegistered
               ? nextMatch.registeredCount
               : nextMatch.registeredCount + 1,
           unavailableCount: nextMatch.unavailableCount,
-          latitude: nextMatch.latitude,
-          longitude: nextMatch.longitude,
-          attendanceDetailsList: nextMatch.attendanceDetailsList,
-          matchEventDetailsList: nextMatch.matchEventDetailsList,
-          playerRatingDetailsList: nextMatch.playerRatingDetailsList,
         ),
         isRegisteringForNextMatch: true,
       ));
@@ -142,5 +124,76 @@ class HomeCubit extends Cubit<HomeState> {
       ));
       await fetchDashboardData(teamId, showLoading: false);
     }
+  }
+
+  Future<void> declineMatch(int matchId, int teamId) async {
+    if (state.isRegisteringForNextMatch) return;
+
+    final nextMatch = state.nextMatch;
+    if (nextMatch != null && nextMatch.id == matchId) {
+      emit(state.copyWith(
+        nextMatch: _nextMatchWith(
+          nextMatch,
+          isCurrentUserRegistered: false,
+          isCurrentUserSelected: null,
+          registeredCount: nextMatch.isCurrentUserRegistered
+              ? nextMatch.registeredCount > 0
+                  ? nextMatch.registeredCount - 1
+                  : 0
+              : nextMatch.registeredCount,
+          unavailableCount: nextMatch.unavailableCount + 1,
+        ),
+        isRegisteringForNextMatch: true,
+      ));
+    } else {
+      emit(state.copyWith(isRegisteringForNextMatch: true));
+    }
+
+    try {
+      await MatchRepository.unregisterFromMatch(matchId);
+      await fetchDashboardData(teamId, showLoading: false);
+    } catch (e) {
+      emit(state.copyWith(
+        isRegisteringForNextMatch: false,
+        errorMessage: e.toString(),
+      ));
+      await fetchDashboardData(teamId, showLoading: false);
+    }
+  }
+
+  MatchDetails _nextMatchWith(
+    MatchDetails match, {
+    required bool isCurrentUserRegistered,
+    required bool? isCurrentUserSelected,
+    required int registeredCount,
+    required int unavailableCount,
+  }) {
+    return MatchDetails(
+      id: match.id,
+      type: match.type,
+      homeTeam: match.homeTeam,
+      awayTeam: match.awayTeam,
+      date: match.date,
+      meetingTime: match.meetingTime,
+      location: match.location,
+      createdAt: match.createdAt,
+      updatedAt: match.updatedAt,
+      notes: match.notes,
+      matchPollDetails: match.matchPollDetails,
+      homeTeamScore: match.homeTeamScore,
+      awayTeamScore: match.awayTeamScore,
+      isHomeTeam: match.isHomeTeam,
+      isCurrentUserRegistered: isCurrentUserRegistered,
+      isCurrentUserSelected: isCurrentUserSelected,
+      registeredCount: registeredCount,
+      unavailableCount: unavailableCount,
+      teamPlayerCount: match.teamPlayerCount,
+      formation: match.formation,
+      latitude: match.latitude,
+      longitude: match.longitude,
+      attendanceDetailsList: match.attendanceDetailsList,
+      matchEventDetailsList: match.matchEventDetailsList,
+      playerRatingDetailsList: match.playerRatingDetailsList,
+    );
   }
 }

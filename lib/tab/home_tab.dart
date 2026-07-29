@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:kopa/component/avatar/team_badge_label.dart';
 import 'package:kopa/component/card/match_hero_card.dart';
 import 'package:kopa/component/home/home_bento_card.dart';
@@ -19,6 +18,7 @@ import 'package:kopa/config/app_feature_flags.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/home_cubit.dart';
 import 'package:kopa/cubits/home_state.dart';
+import 'package:kopa/helpers/date_helper.dart';
 import 'package:kopa/model/dbu_standings.dart';
 import 'package:kopa/model/fine_box_details.dart';
 import 'package:kopa/model/match_details.dart';
@@ -1025,6 +1025,10 @@ class _MatchResponseCard extends StatelessWidget {
     final state = context.watch<HomeCubit>().state;
     final isRegistering = state.isRegisteringForNextMatch;
     final isRegistered = match.isCurrentUserRegistered;
+    final isUnavailable = match.attendanceDetailsList?.any((attendance) =>
+            attendance.userDetails.id == currentUser.id &&
+            !attendance.isAttending) ??
+        false;
 
     void register() {
       AppAnalytics.logEvent(
@@ -1033,6 +1037,15 @@ class _MatchResponseCard extends StatelessWidget {
       );
       final teamId = currentUser.teamDetails?.id ?? 0;
       context.read<HomeCubit>().registerForMatch(match.id, teamId);
+    }
+
+    void decline() {
+      AppAnalytics.logEvent(
+        'match_declined',
+        parameters: {'source': 'home_next_match'},
+      );
+      final teamId = currentUser.teamDetails?.id ?? 0;
+      context.read<HomeCubit>().declineMatch(match.id, teamId);
     }
 
     return Container(
@@ -1049,7 +1062,11 @@ class _MatchResponseCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  isRegistered ? 'Du er tilmeldt' : 'Kommer du?',
+                  isRegistered
+                      ? 'Du er tilmeldt'
+                      : isUnavailable
+                          ? 'Du har meldt afbud'
+                          : 'Kommer du?',
                   style: appTextStyles.body3.copyWith(
                     color: appColors.grass,
                     fontWeight: FontWeight.w600,
@@ -1098,6 +1115,29 @@ class _MatchResponseCard extends StatelessWidget {
                     ),
                   ),
                 )
+              else if (isUnavailable)
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Afbud registreret',
+                        style: appTextStyles.caption2.copyWith(
+                          color: appColors.dirt,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: Spacing.sm),
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: isRegistering ? null : register,
+                        child: Text(
+                          isRegistering ? 'Tilmeldes' : 'Tilmeld igen',
+                        ),
+                      ),
+                    ),
+                  ],
+                )
               else
                 Row(
                   children: [
@@ -1112,8 +1152,7 @@ class _MatchResponseCard extends StatelessWidget {
                     const SizedBox(width: Spacing.sm),
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: () =>
-                            _openMatch(context, match, 'home_decline'),
+                        onPressed: isRegistering ? null : decline,
                         child: const Text('Nej'),
                       ),
                     ),
@@ -1276,15 +1315,11 @@ List<MatchDetails> _playedMatches(HomeState state) {
 }
 
 String _matchDate(DateTime date) {
-  final localDate = date.toLocal();
-  final weekday = DateFormat('EEEE', 'da_DK').format(localDate);
-  final capitalizedWeekday =
-      '${weekday.substring(0, 1).toUpperCase()}${weekday.substring(1)}';
-  return '$capitalizedWeekday ${DateFormat('d. MMMM', 'da_DK').format(localDate)}';
+  return DateHelper.getFormattedMatchDate(date);
 }
 
 String _matchTime(DateTime date) {
-  return DateFormat('HH:mm').format(date.toLocal());
+  return DateHelper.getFormattedTime(date);
 }
 
 String _clockTime(DateTime date) {

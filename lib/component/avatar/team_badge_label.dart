@@ -30,6 +30,7 @@ class TeamBadgeLabel extends StatelessWidget {
   final String? heroTag;
   final bool isHighlighted;
   final bool showAvatar;
+  final bool showShadow;
   final TeamBadgeLabelLayout layout;
 
   const TeamBadgeLabel({
@@ -45,6 +46,7 @@ class TeamBadgeLabel extends StatelessWidget {
     this.heroTag,
     this.isHighlighted = false,
     this.showAvatar = true,
+    this.showShadow = true,
     this.layout = TeamBadgeLabelLayout.vertical,
   });
 
@@ -65,6 +67,7 @@ class TeamBadgeLabel extends StatelessWidget {
             tag: heroTag,
             child: _TeamBadgeShell(
               padding: badgePadding,
+              showShadow: showShadow,
               child: TeamAvatar(
                 teamName: teamName,
                 teamId: teamId,
@@ -110,10 +113,12 @@ class TeamBadgeLabel extends StatelessWidget {
 
 class _TeamBadgeShell extends StatelessWidget {
   final double padding;
+  final bool showShadow;
   final Widget child;
 
   const _TeamBadgeShell({
     required this.padding,
+    required this.showShadow,
     required this.child,
   });
 
@@ -127,18 +132,20 @@ class _TeamBadgeShell extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: appColors.white.withValues(alpha: 0.74),
-        boxShadow: [
-          BoxShadow(
-            color: appColors.dirt.withValues(alpha: 0.16),
-            blurRadius: 18,
-            spreadRadius: 2,
-          ),
-          BoxShadow(
-            color: appColors.dirt.withValues(alpha: 0.10),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: showShadow
+            ? [
+                BoxShadow(
+                  color: appColors.dirt.withValues(alpha: 0.16),
+                  blurRadius: 18,
+                  spreadRadius: 2,
+                ),
+                BoxShadow(
+                  color: appColors.dirt.withValues(alpha: 0.10),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : null,
       ),
       child: child,
     );

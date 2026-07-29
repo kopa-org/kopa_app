@@ -16,7 +16,7 @@ void main() {
       (tester) async {
     final upcomingMatch = _match(
       id: 1,
-      date: DateTime(2027, 8, 12, 19),
+      date: DateTime.utc(2027, 8, 12, 20),
       homeTeam: 'Kopa IF',
       awayTeam: 'Fremad',
       isCurrentUserRegistered: true,
@@ -62,6 +62,7 @@ void main() {
     expect(find.text('Kommende kampe'), findsNothing);
     expect(find.text('Tidligere kampe'), findsNothing);
     expect(find.text('Tilmeldt'), findsOneWidget);
+    expect(find.text('20:00'), findsOneWidget);
     expect(find.text('SEJR'), findsNWidgets(2));
     expect(find.byIcon(CupertinoIcons.chevron_right), findsNWidgets(3));
     expect(find.byType(Hero), findsNothing);

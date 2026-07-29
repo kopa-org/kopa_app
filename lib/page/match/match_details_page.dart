@@ -183,10 +183,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       heroCard: heroCard,
       overviewTitle: 'Praktisk information',
       attendanceTitle: 'Tilmeldte spillere',
-      timelineTitle: 'Kampforløb',
       attendanceSegmentLabel: 'Tilmeldte',
-      timelineSegmentLabel: 'Kampforløb',
-      timelineEmptyMessage: 'Ingen begivenheder registreret.',
+      showTimelineSegment: false,
       overviewWidgets: const [],
       infoRows: _buildPracticalInfoRows(matchDetails),
       votingModule: null,
@@ -200,7 +198,6 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       ),
       attendanceList: _buildAttendanceList(matchDetails, squad, user),
       ratingsSection: _buildRatingsSection(matchDetails),
-      timelineItems: const [],
     );
   }
 
@@ -223,6 +220,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         heroTag: widget.heroTag,
         animateCard: widget.heroTag != null,
       ),
+      showTimelineSegment: false,
     );
   }
 
