@@ -9,6 +9,9 @@
 .history
 .svn/
 .env
+.env.*
+!.env.example
+!.env.*.example
 
 # IntelliJ related
 *.iml
@@ -67,6 +70,24 @@ android/key.properties
 **/ios/Flutter/flutter_assets/
 **/ios/ServiceDefinitions.json
 **/ios/Runner/GeneratedPluginRegistrant.*
+
+# macOS/Xcode related
+**/macos/**/*.mode1v3
+**/macos/**/*.mode2v3
+**/macos/**/*.moved-aside
+**/macos/**/*.pbxuser
+**/macos/**/*.perspectivev3
+**/macos/**/*sync/
+**/macos/**/.sconsign.dblite
+**/macos/**/.tags*
+**/macos/**/.vagrant/
+**/macos/**/DerivedData/
+**/macos/**/Pods/
+**/macos/**/.symlinks/
+**/macos/**/xcuserdata
+**/macos/**/xcshareddata/swiftpm/
+**/macos/Flutter/ephemeral/
+**/macos/Flutter/GeneratedPluginRegistrant.swift
 
 # Exceptions to above rules.
 !**/ios/**/default.mode1v3
