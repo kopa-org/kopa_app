@@ -66,7 +66,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyAEGNYTgNI41c6yClVnfa30ZVRy01_eujE',
-    appId: '1:387318523179:ios:000ac6ac0c51cac6e0d16e',
+    appId: '1:387318523179:ios:0b32d91df9303531e0d16e',
     messagingSenderId: '387318523179',
     projectId: 'kopa-358fe',
     storageBucket: 'kopa-358fe.firebasestorage.app',
