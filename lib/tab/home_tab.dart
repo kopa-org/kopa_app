@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:kopa/component/avatar/team_badge_label.dart';
 import 'package:kopa/component/card/match_hero_card.dart';
 import 'package:kopa/component/home/home_bento_card.dart';
@@ -19,6 +18,7 @@ import 'package:kopa/config/app_feature_flags.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/home_cubit.dart';
 import 'package:kopa/cubits/home_state.dart';
+import 'package:kopa/helpers/date_helper.dart';
 import 'package:kopa/model/dbu_standings.dart';
 import 'package:kopa/model/fine_box_details.dart';
 import 'package:kopa/model/match_details.dart';
@@ -1315,15 +1315,11 @@ List<MatchDetails> _playedMatches(HomeState state) {
 }
 
 String _matchDate(DateTime date) {
-  final localDate = date.toLocal();
-  final weekday = DateFormat('EEEE', 'da_DK').format(localDate);
-  final capitalizedWeekday =
-      '${weekday.substring(0, 1).toUpperCase()}${weekday.substring(1)}';
-  return '$capitalizedWeekday ${DateFormat('d. MMMM', 'da_DK').format(localDate)}';
+  return DateHelper.getFormattedMatchDate(date);
 }
 
 String _matchTime(DateTime date) {
-  return DateFormat('HH:mm').format(date.toLocal());
+  return DateHelper.getFormattedTime(date);
 }
 
 String _clockTime(DateTime date) {
