@@ -1105,15 +1105,33 @@ class _MatchResponseCard extends StatelessWidget {
                   ),
                 ),
               if (isRegistered)
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'ingen opgaver',
-                    style: appTextStyles.caption2.copyWith(
-                      color: appColors.dirt,
-                      fontWeight: FontWeight.w800,
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'ingen opgaver',
+                        style: appTextStyles.caption2.copyWith(
+                          color: appColors.dirt,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: Spacing.sm),
+                    Expanded(
+                      child: TextButton(
+                        onPressed: isRegistering ? null : decline,
+                        style: TextButton.styleFrom(
+                          foregroundColor: appColors.grass,
+                          textStyle: appTextStyles.caption2.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        child: Text(
+                          isRegistering ? 'Melder afbud' : 'Meld afbud',
+                        ),
+                      ),
+                    ),
+                  ],
                 )
               else if (isUnavailable)
                 Row(
@@ -1129,8 +1147,14 @@ class _MatchResponseCard extends StatelessWidget {
                     ),
                     const SizedBox(width: Spacing.sm),
                     Expanded(
-                      child: FilledButton(
+                      child: TextButton(
                         onPressed: isRegistering ? null : register,
+                        style: TextButton.styleFrom(
+                          foregroundColor: appColors.grass,
+                          textStyle: appTextStyles.caption2.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
                         child: Text(
                           isRegistering ? 'Tilmeldes' : 'Tilmeld igen',
                         ),

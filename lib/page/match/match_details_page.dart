@@ -49,6 +49,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
   bool _showLoadedContent = false;
   bool _enableHeroCardActions = false;
   final Set<int> _savingAttendanceSelectionIds = {};
+  final Set<int> _editingAttendanceSelectionIds = {};
   bool _isApprovingAllAttendances = false;
   int _homeGoals = 0;
   int _awayGoals = 0;
@@ -306,7 +307,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     List<EventAttendanceDetails> attending,
   ) {
     final pending = attending.where((a) => a.isSelected == null).toList();
-    final approved = attending.where((a) => a.isSelected == true).toList();
+    final handled = attending.where((a) => a.isSelected != null).toList();
     final widgets = <Widget>[];
 
     widgets.add(
@@ -318,7 +319,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
                 .map(
                   (attendance) => _AttendanceApprovalRow(
                     attendance: attendance,
-                    approved: false,
+                    isEditing: true,
                     isSaving:
                         _savingAttendanceSelectionIds.contains(attendance.id),
                     onApprove: () => _updateAttendanceSelection(
@@ -337,24 +338,30 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       ),
     );
 
-    if (approved.isNotEmpty) {
+    if (handled.isNotEmpty) {
       widgets.add(const SizedBox(height: Spacing.md));
       widgets.add(
         _AttendanceApprovalSection(
-          title: 'Godkendte (${approved.length})',
-          children: approved
+          title: 'Behandlet (${handled.length})',
+          children: handled
               .map(
                 (attendance) => _AttendanceApprovalRow(
                   attendance: attendance,
-                  approved: true,
+                  isEditing:
+                      _editingAttendanceSelectionIds.contains(attendance.id),
                   isSaving:
                       _savingAttendanceSelectionIds.contains(attendance.id),
-                  onApprove: () {},
+                  onApprove: () => _updateAttendanceSelection(
+                    match.id,
+                    attendance,
+                    true,
+                  ),
                   onReject: () => _updateAttendanceSelection(
                     match.id,
                     attendance,
                     false,
                   ),
+                  onEdit: () => _editAttendanceSelection(attendance),
                 ),
               )
               .toList(),
@@ -373,6 +380,14 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     }
 
     return widgets;
+  }
+
+  void _editAttendanceSelection(EventAttendanceDetails attendance) {
+    if (_savingAttendanceSelectionIds.contains(attendance.id)) return;
+
+    setState(() {
+      _editingAttendanceSelectionIds.add(attendance.id);
+    });
   }
 
   Future<void> _updateAttendanceSelection(
@@ -397,6 +412,11 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         parameters: {'is_selected': isSelected},
       );
       await _refreshMatchAndSquad();
+      if (mounted) {
+        setState(() {
+          _editingAttendanceSelectionIds.remove(attendance.id);
+        });
+      }
     } catch (error, stack) {
       CrashReporting.logWebError(error, stack);
       if (mounted) {
@@ -895,17 +915,19 @@ class _AttendanceApprovalSection extends StatelessWidget {
 
 class _AttendanceApprovalRow extends StatelessWidget {
   final EventAttendanceDetails attendance;
-  final bool approved;
+  final bool isEditing;
   final bool isSaving;
   final VoidCallback onApprove;
   final VoidCallback onReject;
+  final VoidCallback? onEdit;
 
   const _AttendanceApprovalRow({
     required this.attendance,
-    required this.approved,
+    required this.isEditing,
     required this.isSaving,
     required this.onApprove,
     required this.onReject,
+    this.onEdit,
   });
 
   @override
@@ -917,7 +939,7 @@ class _AttendanceApprovalRow extends StatelessWidget {
 
     return AnimatedOpacity(
       duration: const Duration(milliseconds: 150),
-      opacity: approved ? 0.82 : 1,
+      opacity: attendance.isSelected != null && !isEditing ? 0.88 : 1,
       child: Container(
         margin: const EdgeInsets.only(bottom: Spacing.sm),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -955,28 +977,17 @@ class _AttendanceApprovalRow extends StatelessWidget {
                 height: 32,
                 child: CupertinoActivityIndicator(),
               )
-            else if (approved)
-              _ApprovedBadge(onReject: onReject)
+            else if (!isEditing && attendance.isSelected != null)
+              _AttendanceSelectionBadge(
+                isSelected: attendance.isSelected == true,
+                onEdit: onEdit,
+                userName: user.name,
+              )
             else
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _AttendanceActionButton(
-                    icon: CupertinoIcons.xmark,
-                    color: colors.error,
-                    backgroundColor: const Color(0xFFFFEBEE),
-                    semanticLabel: 'Afvis ${user.name}',
-                    onPressed: onReject,
-                  ),
-                  const SizedBox(width: Spacing.sm),
-                  _AttendanceActionButton(
-                    icon: CupertinoIcons.checkmark_alt,
-                    color: colors.primary,
-                    backgroundColor: const Color(0xFFE8F5E9),
-                    semanticLabel: 'Godkend ${user.name}',
-                    onPressed: onApprove,
-                  ),
-                ],
+              _AttendanceSelectionActions(
+                userName: user.name,
+                onApprove: onApprove,
+                onReject: onReject,
               ),
           ],
         ),
@@ -988,6 +999,44 @@ class _AttendanceApprovalRow extends StatelessWidget {
     final value = position?.trim();
     if (value == null || value.isEmpty) return 'Spiller';
     return value;
+  }
+}
+
+class _AttendanceSelectionActions extends StatelessWidget {
+  final String userName;
+  final VoidCallback onApprove;
+  final VoidCallback onReject;
+
+  const _AttendanceSelectionActions({
+    required this.userName,
+    required this.onApprove,
+    required this.onReject,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _AttendanceActionButton(
+          icon: CupertinoIcons.xmark,
+          color: colors.error,
+          backgroundColor: const Color(0xFFFFEBEE),
+          semanticLabel: 'Afvis $userName',
+          onPressed: onReject,
+        ),
+        const SizedBox(width: Spacing.sm),
+        _AttendanceActionButton(
+          icon: CupertinoIcons.checkmark_alt,
+          color: colors.primary,
+          backgroundColor: const Color(0xFFE8F5E9),
+          semanticLabel: 'Godkend $userName',
+          onPressed: onApprove,
+        ),
+      ],
+    );
   }
 }
 
@@ -1067,42 +1116,62 @@ class _AttendanceActionButton extends StatelessWidget {
   }
 }
 
-class _ApprovedBadge extends StatelessWidget {
-  final VoidCallback onReject;
+class _AttendanceSelectionBadge extends StatelessWidget {
+  final bool isSelected;
+  final VoidCallback? onEdit;
+  final String userName;
 
-  const _ApprovedBadge({required this.onReject});
+  const _AttendanceSelectionBadge({
+    required this.isSelected,
+    required this.onEdit,
+    required this.userName,
+  });
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final styles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final color = isSelected ? colors.primary : colors.error;
+    final backgroundColor =
+        isSelected ? const Color(0xFFE8F5E9) : const Color(0xFFFFEBEE);
+    final icon =
+        isSelected ? CupertinoIcons.checkmark_alt : CupertinoIcons.xmark;
+    final label = isSelected ? 'Godkendt' : 'Afvist';
 
-    return CupertinoButton(
-      padding: EdgeInsets.zero,
-      minimumSize: const Size(28, 28),
-      onPressed: onReject,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-        decoration: BoxDecoration(
-          color: const Color(0xFFE8F5E9),
-          borderRadius: BorderRadius.circular(Spacing.borderRadiusSmall),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(CupertinoIcons.checkmark_alt, size: 10, color: colors.primary),
-            const SizedBox(width: 4),
-            Text(
-              'Godkendt',
-              style: styles.caption2.copyWith(
-                color: colors.primary,
-                fontWeight: FontWeight.w800,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(Spacing.borderRadiusSmall),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 10, color: color),
+              const SizedBox(width: 4),
+              Text(
+                label,
+                style: styles.caption2.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
+        const SizedBox(width: Spacing.xs),
+        _AttendanceActionButton(
+          icon: CupertinoIcons.pencil,
+          color: colors.dirt,
+          backgroundColor: colors.white,
+          semanticLabel: 'Rediger valg for $userName',
+          onPressed: onEdit ?? () {},
+        ),
+      ],
     );
   }
 }
