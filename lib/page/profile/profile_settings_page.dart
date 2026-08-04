@@ -27,6 +27,8 @@ class ProfileSettingsPage extends StatefulWidget {
 
 class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
   bool _isLoading = false;
+  bool _isSharingKopa = false;
+  bool _isResendingInvites = false;
   DbuWebviewOperation? _activeDbuSync;
   String? _errorMessage;
   final _emailController = TextEditingController();
@@ -68,13 +70,8 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
             ),
             const SizedBox(height: 16),
             FullWidthButton(
-              buttonText: 'Del Kopa',
-              onPressed: () => SharePlus.instance.share(
-                ShareParams(
-                  text:
-                      'Kopa samler holdets kampe, statistik og bødekasse ét sted.',
-                ),
-              ),
+              buttonText: _isSharingKopa ? 'Henter link...' : 'Del Kopa',
+              onPressed: _isSharingKopa ? () {} : _shareKopa,
             ),
             const SizedBox(height: 24),
             Text('Holdværktøjer', style: appTextStyles.sectionHeader),
@@ -85,6 +82,13 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                     ? 'Synkroniserer stilling...'
                     : 'Synkroniser stilling fra DBU',
                 onPressed: _activeDbuSync == null ? _syncDbu : () {},
+              ),
+              const SizedBox(height: 16),
+              FullWidthButton(
+                buttonText: _isResendingInvites
+                    ? 'Sender invitationer...'
+                    : 'Send invitationer igen',
+                onPressed: _isResendingInvites ? () {} : _resendPendingInvites,
               ),
               const SizedBox(height: 16),
             ],
@@ -105,7 +109,9 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                 final teamId = currentUser.teamDetails?.id ?? 0;
                 await context.read<OnboardingCubit>().sendEmailInvites(
                   teamId,
-                  [_emailController.text.trim()],
+                  [
+                    {'email': _emailController.text.trim()}
+                  ],
                 );
                 if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -186,6 +192,103 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
       setState(() {
         _isLoading = false;
         _errorMessage = error.toString().replaceFirst('Exception: ', '');
+      });
+    }
+  }
+
+  Future<void> _shareKopa() async {
+    final currentUser = context.read<AuthCubit>().state.user;
+    final team = currentUser?.teamDetails;
+    if (team == null) {
+      setState(
+          () => _errorMessage = 'Du skal være på et hold for at dele Kopa.');
+      return;
+    }
+
+    setState(() {
+      _isSharingKopa = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final token =
+          await context.read<OnboardingCubit>().fetchTeamJoinToken(team.id);
+      if (!mounted) return;
+
+      if (token == null) {
+        setState(() {
+          _isSharingKopa = false;
+          _errorMessage = 'Kunne ikke hente invitationslink.';
+        });
+        return;
+      }
+
+      final inviteUri = Uri.https(
+        'app.kopa.dk',
+        '/join',
+        {
+          'team_token': token,
+          'team_id': team.id.toString(),
+          'team_title': team.title,
+        },
+      );
+
+      await SharePlus.instance.share(
+        ShareParams(
+          text: 'Join ${team.title} på Kopa: $inviteUri',
+        ),
+      );
+      if (!mounted) return;
+      setState(() => _isSharingKopa = false);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _isSharingKopa = false;
+        _errorMessage = 'Kunne ikke dele Kopa.';
+      });
+    }
+  }
+
+  Future<void> _resendPendingInvites() async {
+    final currentUser = context.read<AuthCubit>().state.user;
+    final teamId = currentUser?.teamDetails?.id;
+    if (currentUser?.isTeamOwner != true || teamId == null) {
+      return;
+    }
+
+    setState(() {
+      _isResendingInvites = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final result =
+          await context.read<OnboardingCubit>().resendPendingInvites(teamId);
+      if (!mounted) return;
+
+      if (result['error'] != null) {
+        setState(() {
+          _isResendingInvites = false;
+          _errorMessage = result['error'] as String;
+        });
+        return;
+      }
+
+      final sent = (result['sent'] as List<dynamic>? ?? []).length;
+      final failed = (result['failed'] as List<dynamic>? ?? []).length;
+      final message = failed == 0
+          ? 'Invitationer sendt igen ($sent).'
+          : 'Invitationer sendt: $sent. Fejlede: $failed.';
+
+      setState(() => _isResendingInvites = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _isResendingInvites = false;
+        _errorMessage = 'Kunne ikke sende invitationer igen.';
       });
     }
   }

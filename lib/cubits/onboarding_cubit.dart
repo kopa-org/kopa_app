@@ -128,11 +128,15 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     }
   }
 
-  Future<void> fetchTeamJoinToken(int teamId) async {
+  Future<String?> fetchTeamJoinToken(int teamId) async {
     final result = await _repository.getJoinToken(teamId);
     if (result.containsKey('token')) {
-      emit(state.copyWith(joinToken: result['token']));
+      final token = result['token'] as String;
+      emit(state.copyWith(joinToken: token, errorMessage: null));
+      return token;
     }
+    emit(state.copyWith(errorMessage: result['error']));
+    return null;
   }
 
   Future<void> rotateTeamJoinToken(int teamId) async {
@@ -143,13 +147,13 @@ class OnboardingCubit extends Cubit<OnboardingState> {
   }
 
   Future<Map<String, dynamic>> sendEmailInvites(
-      int teamId, List<String> emails) async {
+      int teamId, List<Map<String, String>> invites) async {
     emit(state.copyWith(status: OnboardingStatus.loading));
-    final result = await _repository.sendEmailInvites(teamId, emails);
+    final result = await _repository.sendEmailInvites(teamId, invites);
     if (result.containsKey('sent')) {
       AppAnalytics.logEvent(
         'email_invites_sent',
-        parameters: {'invite_count': emails.length},
+        parameters: {'invite_count': invites.length},
       );
       emit(state.copyWith(status: OnboardingStatus.validated)); // Reset status
       return result;
@@ -160,13 +164,28 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     }
   }
 
+  Future<Map<String, dynamic>> resendPendingInvites(int teamId) async {
+    emit(state.copyWith(status: OnboardingStatus.loading));
+    final result = await _repository.resendPendingInvites(teamId);
+    if (result.containsKey('sent')) {
+      emit(state.copyWith(status: OnboardingStatus.validated));
+      return result;
+    }
+
+    emit(state.copyWith(
+      status: OnboardingStatus.failure,
+      errorMessage: result['error'],
+    ));
+    return result;
+  }
+
   Future<bool> createTeam({
     required String title,
     String? dbuCalendarUrl,
     Map<String, dynamic>? dbuContext,
     List<Map<String, dynamic>> matches = const [],
     List<Map<String, dynamic>> standings = const [],
-    List<String> inviteEmails = const [],
+    List<Map<String, String>> inviteEmails = const [],
   }) async {
     emit(state.copyWith(status: OnboardingStatus.loading, errorMessage: null));
     final result = await _repository.createTeam(

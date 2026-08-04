@@ -96,8 +96,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
     final players = (_dbuData?['players'] as List<dynamic>? ?? [])
         .cast<Map<String, dynamic>>();
     final inviteEmails = _selectedPlayerIndexes
-        .map((index) => players[index]['contact'] as String? ?? '')
-        .where(_emailLike)
+        .map((index) => players[index])
+        .map((player) => {
+              'name': player['name'] as String? ?? '',
+              'email': player['contact'] as String? ?? '',
+            })
+        .where((invite) => _emailLike(invite['email'] ?? ''))
         .toList();
 
     final success = await context.read<OnboardingCubit>().createTeam(
