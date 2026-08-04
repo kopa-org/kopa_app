@@ -78,6 +78,11 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
             const SizedBox(height: 12),
             if (currentUser?.isTeamOwner == true) ...[
               FullWidthButton(
+                buttonText: 'Godkend nye spillere',
+                onPressed: () => context.push(AppRouter.teamJoinRequests),
+              ),
+              const SizedBox(height: 16),
+              FullWidthButton(
                 buttonText: _activeDbuSync == DbuWebviewOperation.standings
                     ? 'Synkroniserer stilling...'
                     : 'Synkroniser stilling fra DBU',

@@ -236,6 +236,72 @@ class OnboardingRepository {
     }
   }
 
+  Future<Map<String, dynamic>> listJoinRequests(int teamId) async {
+    final userToken = await SecureStorageService.getToken();
+    if (userToken == null) {
+      return {'success': false, 'error': 'Ikke logget ind'};
+    }
+
+    final url = Uri.parse('${ApiConfig.baseUrl}/teams/$teamId/join_requests');
+    try {
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $userToken'},
+      );
+      final body = response.body.isEmpty
+          ? <String, dynamic>{}
+          : json.decode(response.body);
+      if (response.statusCode == 200) {
+        return {'success': true, ...body};
+      }
+      return {
+        'success': false,
+        'error': body['error'] ?? 'Kunne ikke hente anmodninger'
+      };
+    } catch (e) {
+      return {'success': false, 'error': 'Netværksfejl'};
+    }
+  }
+
+  Future<Map<String, dynamic>> approveJoinRequest(int requestId) async {
+    return _respondToJoinRequest(requestId, 'approve');
+  }
+
+  Future<Map<String, dynamic>> rejectJoinRequest(int requestId) async {
+    return _respondToJoinRequest(requestId, 'reject');
+  }
+
+  Future<Map<String, dynamic>> _respondToJoinRequest(
+    int requestId,
+    String action,
+  ) async {
+    final userToken = await SecureStorageService.getToken();
+    if (userToken == null) {
+      return {'success': false, 'error': 'Ikke logget ind'};
+    }
+
+    final url =
+        Uri.parse('${ApiConfig.baseUrl}/team_join_requests/$requestId/$action');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Authorization': 'Bearer $userToken'},
+      );
+      final body = response.body.isEmpty
+          ? <String, dynamic>{}
+          : json.decode(response.body);
+      if (response.statusCode == 200) {
+        return {'success': true, ...body};
+      }
+      return {
+        'success': false,
+        'error': body['error'] ?? 'Kunne ikke behandle anmodning'
+      };
+    } catch (e) {
+      return {'success': false, 'error': 'Netværksfejl'};
+    }
+  }
+
   Future<Map<String, dynamic>> cancelJoinRequest(int requestId) async {
     final userToken = await SecureStorageService.getToken();
     if (userToken == null) {
