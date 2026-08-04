@@ -89,6 +89,10 @@ class _KopaBootstrapAppState extends State<KopaBootstrapApp> {
 
     // Initialize auth state
     await authCubit.init();
+    final user = authCubit.state.user;
+    if (user != null && user.teamDetails == null) {
+      await onboardingCubit.restorePendingJoinRequest();
+    }
 
     return _BootstrapResult(
       authRepository: authRepository,

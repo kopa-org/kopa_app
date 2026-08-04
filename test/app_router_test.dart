@@ -1,8 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kopa/cubits/auth_state.dart';
+import 'package:kopa/cubits/onboarding_cubit.dart';
 import 'package:kopa/model/team_details.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/navigation/app_router.dart';
+import 'package:kopa/pages/onboarding_page.dart';
+import 'package:kopa/pages/register_page.dart';
 
 void main() {
   group('AppRouter.redirectPathFor', () {
@@ -16,6 +19,23 @@ void main() {
       );
 
       expect(redirect, AppRouter.login);
+    });
+
+    test('restores teamless users with a pending join request to onboarding',
+        () {
+      final redirect = AppRouter.redirectPathFor(
+        path: AppRouter.home,
+        authState: AuthState(
+          status: AuthStatus.authenticated,
+          user: _user(),
+        ),
+        onboardingState: OnboardingState(
+          status: OnboardingStatus.waitingApproval,
+          pendingJoinRequestId: 12,
+        ),
+      );
+
+      expect(redirect, AppRouter.onboarding);
     });
 
     test('keeps explicit onboarding available for restored teamless users', () {
@@ -40,6 +60,32 @@ void main() {
       );
 
       expect(redirect, AppRouter.home);
+    });
+
+    test('keeps unauthenticated join links on the explicit join route', () {
+      final redirect = AppRouter.redirectPathFor(
+        path: AppRouter.join,
+        authState: const AuthState(),
+      );
+
+      expect(redirect, isNull);
+    });
+  });
+
+  group('AppRouter.inviteEntryPageFor', () {
+    test('starts unauthenticated join links at signup', () {
+      final page = AppRouter.inviteEntryPageFor(const AuthState());
+
+      expect(page, isA<RegisterPage>());
+    });
+
+    test('starts authenticated join links at onboarding', () {
+      final page = AppRouter.inviteEntryPageFor(AuthState(
+        status: AuthStatus.authenticated,
+        user: _user(),
+      ));
+
+      expect(page, isA<OnboardingPage>());
     });
   });
 }

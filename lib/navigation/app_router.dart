@@ -56,6 +56,7 @@ abstract final class AppRouter {
         return redirectPathFor(
           path: state.uri.path,
           authState: authCubit.state,
+          onboardingState: onboardingCubit.state,
         );
       },
       routes: [
@@ -74,7 +75,7 @@ abstract final class AppRouter {
                 teamTitle: state.uri.queryParameters['team_title'],
               );
             }
-            return const RegisterPage();
+            return inviteEntryPageFor(authCubit.state);
           },
         ),
         GoRoute(
@@ -92,7 +93,7 @@ abstract final class AppRouter {
                 teamTitle: state.uri.queryParameters['team_title'],
               );
             }
-            return const RegisterPage();
+            return inviteEntryPageFor(authCubit.state);
           },
         ),
         GoRoute(
@@ -274,6 +275,7 @@ abstract final class AppRouter {
   static String? redirectPathFor({
     required String path,
     required AuthState authState,
+    OnboardingState? onboardingState,
   }) {
     final isLoggedIn = authState.status == AuthStatus.authenticated ||
         (authState.status == AuthStatus.loading && authState.user != null);
@@ -283,12 +285,19 @@ abstract final class AppRouter {
     final isJoin = path == join;
     final isOnboarding = path == onboarding;
     final hasTeam = authState.user?.teamDetails != null;
+    final isWaitingForApproval =
+        onboardingState?.status == OnboardingStatus.waitingApproval ||
+            onboardingState?.pendingJoinRequestId != null;
 
     if (!isLoggedIn && !isLoggingIn && !isRegistering && !isInvite && !isJoin) {
       return login;
     }
 
     if (isLoggedIn && !hasTeam) {
+      if (isWaitingForApproval) {
+        return isOnboarding ? null : onboarding;
+      }
+
       if (isLoggingIn ||
           isRegistering ||
           isInvite ||
@@ -316,6 +325,14 @@ abstract final class AppRouter {
       _MainTab.squad,
       if (featureFlags.showFineBox) _MainTab.fineBox,
     ];
+  }
+
+  @visibleForTesting
+  static Widget inviteEntryPageFor(AuthState authState) {
+    final isLoggedIn = authState.status == AuthStatus.authenticated ||
+        (authState.status == AuthStatus.loading && authState.user != null);
+
+    return isLoggedIn ? const OnboardingPage() : const RegisterPage();
   }
 }
 

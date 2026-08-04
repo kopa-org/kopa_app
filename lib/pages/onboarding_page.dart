@@ -45,7 +45,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
   @override
   void initState() {
     super.initState();
-    _applyInviteContext(context.read<OnboardingCubit>().state);
+    final onboardingState = context.read<OnboardingCubit>().state;
+    _applyInviteContext(onboardingState);
+    if (onboardingState.status == OnboardingStatus.waitingApproval) {
+      _applyPendingJoinContext(onboardingState);
+    }
   }
 
   @override
@@ -61,6 +65,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
     _hasSelectedRole = true;
     _mode = _OnboardingMode.join;
     _joinStep = 0;
+    _applyPendingJoinContext(state);
+  }
+
+  void _applyPendingJoinContext(OnboardingState state) {
+    if (state.teamId == null) return;
+
     _pendingJoinTeam = {
       'id': state.teamId,
       'title': state.teamTitle ?? '',
@@ -264,6 +274,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
       listener: (context, state) {
         if (state.inviteToken != null && state.teamId != null) {
           setState(() => _applyInviteContext(state));
+        }
+        if (state.status == OnboardingStatus.waitingApproval &&
+            state.teamId != null) {
+          setState(() => _applyPendingJoinContext(state));
         }
         if (state.status == OnboardingStatus.failure &&
             state.errorMessage != null) {

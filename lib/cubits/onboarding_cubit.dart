@@ -258,6 +258,29 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     return false;
   }
 
+  Future<bool> restorePendingJoinRequest() async {
+    emit(state.copyWith(errorMessage: null));
+    final result = await _repository.getCurrentJoinRequest();
+    if (result['success'] != true) {
+      emit(state.copyWith(errorMessage: result['error']));
+      return false;
+    }
+
+    final request = result['join_request'] as Map<String, dynamic>?;
+    if (request == null || request['status'] != 'pending') {
+      emit(state.copyWith(pendingJoinRequestId: null));
+      return false;
+    }
+
+    emit(state.copyWith(
+      status: OnboardingStatus.waitingApproval,
+      pendingJoinRequestId: request['id'],
+      teamId: request['team_id'],
+      teamTitle: request['team_title'],
+    ));
+    return true;
+  }
+
   Future<void> cancelPendingJoinRequest() async {
     final requestId = state.pendingJoinRequestId;
     if (requestId == null) return;

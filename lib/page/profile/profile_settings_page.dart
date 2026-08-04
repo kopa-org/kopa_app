@@ -28,6 +28,7 @@ class ProfileSettingsPage extends StatefulWidget {
 class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
   bool _isLoading = false;
   bool _isSharingKopa = false;
+  bool _isSendingInvite = false;
   bool _isResendingInvites = false;
   DbuWebviewOperation? _activeDbuSync;
   String? _errorMessage;
@@ -96,35 +97,22 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                 onPressed: _isResendingInvites ? () {} : _resendPendingInvites,
               ),
               const SizedBox(height: 16),
-            ],
-            TextField(
-              controller: _emailController,
-              decoration: const InputDecoration(
-                labelText: 'Inviter spiller via email',
-                border: OutlineInputBorder(),
+              TextField(
+                controller: _emailController,
+                decoration: const InputDecoration(
+                  labelText: 'Inviter spiller via email',
+                  border: OutlineInputBorder(),
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            FullWidthButton(
-              buttonText: 'Send invitation',
-              onPressed: () async {
-                if (_emailController.text.isEmpty || currentUser == null) {
-                  return;
-                }
-                final teamId = currentUser.teamDetails?.id ?? 0;
-                await context.read<OnboardingCubit>().sendEmailInvites(
-                  teamId,
-                  [
-                    {'email': _emailController.text.trim()}
-                  ],
-                );
-                if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Invitation sendt.')),
-                );
-              },
-            ),
-            const SizedBox(height: 8),
+              const SizedBox(height: 8),
+              FullWidthButton(
+                buttonText: _isSendingInvite
+                    ? 'Sender invitation...'
+                    : 'Send invitation',
+                onPressed: _isSendingInvite ? () {} : _sendInvitation,
+              ),
+              const SizedBox(height: 8),
+            ],
             BlocBuilder<OnboardingCubit, OnboardingState>(
               builder: (context, state) {
                 if (state.status == OnboardingStatus.loading) {
@@ -229,7 +217,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
       }
 
       final inviteUri = Uri.https(
-        'app.kopa.dk',
+        'kopa.dk',
         '/join',
         {
           'team_token': token,
@@ -250,6 +238,67 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
       setState(() {
         _isSharingKopa = false;
         _errorMessage = 'Kunne ikke dele Kopa.';
+      });
+    }
+  }
+
+  Future<void> _sendInvitation() async {
+    final currentUser = context.read<AuthCubit>().state.user;
+    final teamId = currentUser?.teamDetails?.id;
+    final email = _emailController.text.trim();
+
+    if (currentUser?.isTeamOwner != true || teamId == null || email.isEmpty) {
+      return;
+    }
+
+    setState(() {
+      _isSendingInvite = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final result = await context.read<OnboardingCubit>().sendEmailInvites(
+        teamId,
+        [
+          {'email': email}
+        ],
+      );
+      if (!mounted) return;
+
+      final error = result['error'] as String?;
+      if (error != null) {
+        setState(() {
+          _isSendingInvite = false;
+          _errorMessage = error;
+        });
+        return;
+      }
+
+      final sent = (result['sent'] as List<dynamic>? ?? []).length;
+      final failed = (result['failed'] as List<dynamic>? ?? []).length;
+      final message = failed == 0 && sent > 0
+          ? 'Invitation sendt.'
+          : sent > 0
+              ? 'Invitationer sendt: $sent. Fejlede: $failed.'
+              : 'Kunne ikke sende invitation.';
+
+      setState(() {
+        _isSendingInvite = false;
+        if (failed == 0 && sent > 0) {
+          _emailController.clear();
+        } else {
+          _errorMessage = message;
+        }
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _isSendingInvite = false;
+        _errorMessage = 'Kunne ikke sende invitation.';
       });
     }
   }

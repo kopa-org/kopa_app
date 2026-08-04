@@ -236,6 +236,33 @@ class OnboardingRepository {
     }
   }
 
+  Future<Map<String, dynamic>> getCurrentJoinRequest() async {
+    final userToken = await SecureStorageService.getToken();
+    if (userToken == null) {
+      return {'success': false, 'error': 'Ikke logget ind'};
+    }
+
+    final url = Uri.parse('${ApiConfig.baseUrl}/team_join_requests/current');
+    try {
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $userToken'},
+      );
+      final body = response.body.isEmpty
+          ? <String, dynamic>{}
+          : json.decode(response.body);
+      if (response.statusCode == 200) {
+        return {'success': true, ...body};
+      }
+      return {
+        'success': false,
+        'error': body['error'] ?? 'Kunne ikke hente anmodning'
+      };
+    } catch (e) {
+      return {'success': false, 'error': 'Netværksfejl'};
+    }
+  }
+
   Future<Map<String, dynamic>> listJoinRequests(int teamId) async {
     final userToken = await SecureStorageService.getToken();
     if (userToken == null) {

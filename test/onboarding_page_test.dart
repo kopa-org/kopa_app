@@ -50,6 +50,88 @@ void main() {
     expect(find.text('Vælg din position'), findsOneWidget);
     expect(find.text('Er du holdleder?'), findsNothing);
   });
+
+  testWidgets('restored pending join request shows waiting screen',
+      (tester) async {
+    final onboardingCubit = _TestOnboardingCubit()
+      ..setPendingJoinRequest(
+        requestId: 12,
+        teamId: 1,
+        teamTitle: 'Kopa FC',
+      );
+
+    await tester.pumpWidget(
+      MultiBlocProvider(
+        providers: [
+          BlocProvider<AuthCubit>(
+            create: (_) => AuthCubit(authRepository: _FakeAuthRepository()),
+          ),
+          BlocProvider<OnboardingCubit>.value(value: onboardingCubit),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('da'),
+            Locale('en'),
+          ],
+          home: const OnboardingPage(),
+        ),
+      ),
+    );
+
+    expect(find.text('Venter på accept'), findsOneWidget);
+    expect(find.textContaining('Kopa FC'), findsWidgets);
+    expect(find.text('Er du holdleder?'), findsNothing);
+  });
+
+  testWidgets('async invite validation switches from role question to position',
+      (tester) async {
+    final onboardingCubit = _TestOnboardingCubit();
+
+    await tester.pumpWidget(
+      MultiBlocProvider(
+        providers: [
+          BlocProvider<AuthCubit>(
+            create: (_) => AuthCubit(authRepository: _FakeAuthRepository()),
+          ),
+          BlocProvider<OnboardingCubit>.value(value: onboardingCubit),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('da'),
+            Locale('en'),
+          ],
+          home: const OnboardingPage(),
+        ),
+      ),
+    );
+
+    expect(find.text('Er du holdleder?'), findsOneWidget);
+
+    onboardingCubit.setInviteContext(
+      email: 'player@example.com',
+      name: 'Player One',
+      teamId: 1,
+      teamTitle: 'Kopa FC',
+    );
+    await tester.pump();
+
+    expect(find.text('Vælg din position'), findsOneWidget);
+    expect(find.text('Er du holdleder?'), findsNothing);
+  });
 }
 
 class _TestOnboardingCubit extends OnboardingCubit {
@@ -66,6 +148,19 @@ class _TestOnboardingCubit extends OnboardingCubit {
       inviteToken: 'invite-token',
       email: email,
       name: name,
+      teamId: teamId,
+      teamTitle: teamTitle,
+    ));
+  }
+
+  void setPendingJoinRequest({
+    required int requestId,
+    required int teamId,
+    required String teamTitle,
+  }) {
+    emit(OnboardingState(
+      status: OnboardingStatus.waitingApproval,
+      pendingJoinRequestId: requestId,
       teamId: teamId,
       teamTitle: teamTitle,
     ));

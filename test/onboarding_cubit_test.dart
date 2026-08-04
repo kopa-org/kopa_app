@@ -31,13 +31,47 @@ void main() {
     expect(cubit.state.inviteToken, 'invite-token');
     expect(cubit.state.errorMessage, 'Nope');
   });
+
+  test('restorePendingJoinRequest resumes waiting approval state', () async {
+    final cubit = OnboardingCubit(_FakeOnboardingRepository(
+      joinResult: {'success': true},
+      currentJoinRequestResult: {
+        'success': true,
+        'join_request': {
+          'id': 42,
+          'status': 'pending',
+          'team_id': 7,
+          'team_title': 'Kopa FC',
+        },
+      },
+    ));
+
+    final restored = await cubit.restorePendingJoinRequest();
+
+    expect(restored, isTrue);
+    expect(cubit.state.status, OnboardingStatus.waitingApproval);
+    expect(cubit.state.pendingJoinRequestId, 42);
+    expect(cubit.state.teamId, 7);
+    expect(cubit.state.teamTitle, 'Kopa FC');
+  });
 }
 
 class _FakeOnboardingRepository extends OnboardingRepository {
   final Map<String, dynamic> joinResult;
+  final Map<String, dynamic> currentJoinRequestResult;
 
-  _FakeOnboardingRepository({required this.joinResult});
+  _FakeOnboardingRepository({
+    required this.joinResult,
+    this.currentJoinRequestResult = const {
+      'success': true,
+      'join_request': null,
+    },
+  });
 
   @override
   Future<Map<String, dynamic>> joinTeam(String token) async => joinResult;
+
+  @override
+  Future<Map<String, dynamic>> getCurrentJoinRequest() async =>
+      currentJoinRequestResult;
 }
