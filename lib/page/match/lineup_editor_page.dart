@@ -6,6 +6,7 @@ import 'package:kopa/model/event_attendance_details.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/repository/match_repository.dart';
+import 'package:kopa/services/secure_storage_service.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 import 'package:kopa/utils/crash_reporting.dart';
@@ -30,6 +31,7 @@ class _LineupEditorPageState extends State<LineupEditorPage> {
   late List<_LineupPlayer?> _starters;
   late List<_LineupPlayer> _bench;
   bool _saving = false;
+  bool _showDragHint = false;
   String? _draggingName;
 
   @override
@@ -41,6 +43,13 @@ class _LineupEditorPageState extends State<LineupEditorPage> {
       playerCount: widget.playerCount,
     );
     _syncInitialPlayers();
+    _loadDragHintPreference();
+  }
+
+  Future<void> _loadDragHintPreference() async {
+    final hasSeenHint = await SecureStorageService.hasSeenLineupDragHint();
+    if (!mounted || hasSeenHint) return;
+    setState(() => _showDragHint = true);
   }
 
   void _syncInitialPlayers() {
@@ -120,12 +129,11 @@ class _LineupEditorPageState extends State<LineupEditorPage> {
                     formationLabel: _formation.label,
                     starters: _starters,
                     draggingName: _draggingName,
+                    showDragHint: _showDragHint,
                     onDragStarted: (player) {
-                      setState(() => _draggingName = player.user.name);
+                      _handleDragStarted(player);
                     },
-                    onDragEnd: () {
-                      if (mounted) setState(() => _draggingName = null);
-                    },
+                    onDragEnd: _handleDragEnded,
                     onSlotAccept: _moveToSlot,
                     onSlotTap: _pickPlayerForSlot,
                     onEditFormation: _showFormationSheet,
@@ -136,11 +144,9 @@ class _LineupEditorPageState extends State<LineupEditorPage> {
                     styles: styles,
                     bench: _bench,
                     onDragStarted: (player) {
-                      setState(() => _draggingName = player.user.name);
+                      _handleDragStarted(player);
                     },
-                    onDragEnd: () {
-                      if (mounted) setState(() => _draggingName = null);
-                    },
+                    onDragEnd: _handleDragEnded,
                     onBenchAccept: _moveToBench,
                   ),
                 ],
@@ -150,6 +156,15 @@ class _LineupEditorPageState extends State<LineupEditorPage> {
         ),
       ),
     );
+  }
+
+  void _handleDragStarted(_LineupPlayer player) {
+    setState(() => _draggingName = player.user.name);
+  }
+
+  void _handleDragEnded() {
+    if (!mounted) return;
+    setState(() => _draggingName = null);
   }
 
   Future<void> _save() async {
@@ -173,6 +188,9 @@ class _LineupEditorPageState extends State<LineupEditorPage> {
         _formation.label,
         lineup,
       );
+      if (_showDragHint) {
+        await SecureStorageService.setLineupDragHintSeen();
+      }
       if (mounted) Navigator.of(context).pop(true);
     } catch (error, stack) {
       CrashReporting.logWebError(error, stack);
@@ -317,6 +335,8 @@ class _EditorHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isIOS = Theme.of(context).platform == TargetPlatform.iOS;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
       child: Row(
@@ -325,7 +345,10 @@ class _EditorHeader extends StatelessWidget {
             padding: EdgeInsets.zero,
             minimumSize: const Size(32, 32),
             onPressed: saving ? null : onClose,
-            child: Icon(CupertinoIcons.xmark_circle, color: colors.dirt),
+            child: Icon(
+              isIOS ? CupertinoIcons.back : Icons.arrow_back,
+              color: colors.dirt,
+            ),
           ),
           Expanded(
             child: Text(
@@ -363,6 +386,7 @@ class _LineupCard extends StatelessWidget {
   final String formationLabel;
   final List<_LineupPlayer?> starters;
   final String? draggingName;
+  final bool showDragHint;
   final ValueChanged<_LineupPlayer> onDragStarted;
   final VoidCallback onDragEnd;
   final void Function(_LineupDragData data, int slot) onSlotAccept;
@@ -376,6 +400,7 @@ class _LineupCard extends StatelessWidget {
     required this.formationLabel,
     required this.starters,
     required this.draggingName,
+    required this.showDragHint,
     required this.onDragStarted,
     required this.onDragEnd,
     required this.onSlotAccept,
@@ -400,6 +425,10 @@ class _LineupCard extends StatelessWidget {
       ),
       child: Column(
         children: [
+          if (showDragHint) ...[
+            _LineupDragHint(colors: colors, styles: styles),
+            const SizedBox(height: 10),
+          ],
           SizedBox(
             height: 340,
             child: FootballPitch(
@@ -690,40 +719,41 @@ class _PlayerBadge extends StatelessWidget {
   }
 }
 
-class _EmptySlotBadge extends StatelessWidget {
-  final String label;
-  final bool highlighted;
+class _LineupDragHint extends StatelessWidget {
+  final AppColors colors;
   final AppTextStyles styles;
 
-  const _EmptySlotBadge({
-    required this.label,
-    required this.highlighted,
+  const _LineupDragHint({
+    required this.colors,
     required this.styles,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 52,
-      height: 52,
-      alignment: Alignment.center,
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
       decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: Colors.white,
-          width: highlighted ? 2.4 : 1.6,
-          style: BorderStyle.solid,
-        ),
-        color: highlighted
-            ? Colors.white.withValues(alpha: 0.18)
-            : Colors.transparent,
+        color: colors.background,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: colors.primary.withValues(alpha: 0.16)),
       ),
-      child: Text(
-        label,
-        style: styles.caption3.copyWith(
-          color: Colors.white,
-          fontWeight: FontWeight.w800,
-        ),
+      child: Row(
+        children: [
+          Icon(Icons.touch_app, color: colors.primary, size: 18),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Hold på en spiller og træk for at bytte plads',
+              style: styles.caption1.copyWith(
+                color: colors.dirt,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          Icon(CupertinoIcons.arrow_right_arrow_left,
+              color: colors.primary, size: 16),
+        ],
       ),
     );
   }
@@ -801,6 +831,45 @@ class _BenchPlayerCard extends StatelessWidget {
       onDragEnd: (_) => onDragEnd(),
       onDraggableCanceled: (_, __) => onDragEnd(),
       child: card,
+    );
+  }
+}
+
+class _EmptySlotBadge extends StatelessWidget {
+  final String label;
+  final bool highlighted;
+  final AppTextStyles styles;
+
+  const _EmptySlotBadge({
+    required this.label,
+    required this.highlighted,
+    required this.styles,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 52,
+      height: 52,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: Colors.white,
+          width: highlighted ? 2.4 : 1.6,
+          style: BorderStyle.solid,
+        ),
+        color: highlighted
+            ? Colors.white.withValues(alpha: 0.18)
+            : Colors.transparent,
+      ),
+      child: Text(
+        label,
+        style: styles.caption3.copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
     );
   }
 }

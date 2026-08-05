@@ -6,6 +6,7 @@ class SecureStorageService {
   static final _storage = FlutterSecureStorage(
     iOptions: IOSOptions(accessibility: KeychainAccessibility.unlocked),
   );
+  static const _lineupDragHintSeenKey = 'lineupDragHintSeen';
 
   // ------------------------
   // Token methods
@@ -34,6 +35,19 @@ class SecureStorageService {
 
   static Future<void> deletePushToken() async {
     await _storage.delete(key: 'pushToken');
+  }
+
+  // ------------------------
+  // Local app preferences
+  // ------------------------
+
+  static Future<bool> hasSeenLineupDragHint() async {
+    final value = await _storage.read(key: _lineupDragHintSeenKey);
+    return value == 'true';
+  }
+
+  static Future<void> setLineupDragHintSeen() async {
+    await _storage.write(key: _lineupDragHintSeenKey, value: 'true');
   }
 
   // ------------------------
