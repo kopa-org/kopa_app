@@ -42,6 +42,7 @@ void main() {
           'status': 'pending',
           'team_id': 7,
           'team_title': 'Kopa FC',
+          'leader_name': 'Owner',
         },
       },
     ));
@@ -53,6 +54,7 @@ void main() {
     expect(cubit.state.pendingJoinRequestId, 42);
     expect(cubit.state.teamId, 7);
     expect(cubit.state.teamTitle, 'Kopa FC');
+    expect(cubit.state.teamLeaderName, 'Owner');
   });
 }
 

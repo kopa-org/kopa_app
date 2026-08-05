@@ -74,6 +74,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
     _pendingJoinTeam = {
       'id': state.teamId,
       'title': state.teamTitle ?? '',
+      if (state.teamLeaderName?.trim().isNotEmpty == true)
+        'leader_name': state.teamLeaderName,
     };
   }
 

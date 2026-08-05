@@ -58,6 +58,7 @@ void main() {
         requestId: 12,
         teamId: 1,
         teamTitle: 'Kopa FC',
+        teamLeaderName: 'Owner',
       );
 
     await tester.pumpWidget(
@@ -87,6 +88,9 @@ void main() {
 
     expect(find.text('Venter på accept'), findsOneWidget);
     expect(find.textContaining('Kopa FC'), findsWidgets);
+    expect(find.text('Holdleder: Owner'), findsOneWidget);
+    expect(find.text('Afventer'), findsOneWidget);
+    expect(find.text('Holdleder: Afventer'), findsNothing);
     expect(find.text('Er du holdleder?'), findsNothing);
   });
 
@@ -157,12 +161,14 @@ class _TestOnboardingCubit extends OnboardingCubit {
     required int requestId,
     required int teamId,
     required String teamTitle,
+    String? teamLeaderName,
   }) {
     emit(OnboardingState(
       status: OnboardingStatus.waitingApproval,
       pendingJoinRequestId: requestId,
       teamId: teamId,
       teamTitle: teamTitle,
+      teamLeaderName: teamLeaderName,
     ));
   }
 }

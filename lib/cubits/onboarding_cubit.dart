@@ -18,6 +18,7 @@ class OnboardingState {
   final String? name;
   final int? teamId;
   final String? teamTitle;
+  final String? teamLeaderName;
   final String? errorMessage;
   final String? joinToken; // Generic team join token for sharing
   final List<Map<String, dynamic>> searchResults;
@@ -30,6 +31,7 @@ class OnboardingState {
     this.name,
     this.teamId,
     this.teamTitle,
+    this.teamLeaderName,
     this.errorMessage,
     this.joinToken,
     this.searchResults = const [],
@@ -43,6 +45,7 @@ class OnboardingState {
     Object? name = _unset,
     Object? teamId = _unset,
     Object? teamTitle = _unset,
+    Object? teamLeaderName = _unset,
     Object? errorMessage = _unset,
     Object? joinToken = _unset,
     List<Map<String, dynamic>>? searchResults,
@@ -56,6 +59,9 @@ class OnboardingState {
       name: name == _unset ? this.name : name as String?,
       teamId: teamId == _unset ? this.teamId : teamId as int?,
       teamTitle: teamTitle == _unset ? this.teamTitle : teamTitle as String?,
+      teamLeaderName: teamLeaderName == _unset
+          ? this.teamLeaderName
+          : teamLeaderName as String?,
       errorMessage:
           errorMessage == _unset ? this.errorMessage : errorMessage as String?,
       joinToken: joinToken == _unset ? this.joinToken : joinToken as String?,
@@ -277,6 +283,7 @@ class OnboardingCubit extends Cubit<OnboardingState> {
       pendingJoinRequestId: request['id'],
       teamId: request['team_id'],
       teamTitle: request['team_title'],
+      teamLeaderName: request['leader_name'],
     ));
     return true;
   }
