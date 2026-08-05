@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:kopa/component/football_pitch.dart';
 import 'package:kopa/component/card/kopa_card.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/theme/app_colors.dart';
@@ -230,21 +231,25 @@ class _Pitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(Spacing.borderRadiusMedium),
-      child: CustomPaint(
-        painter: _PitchPainter(colors: colors),
-        child: Stack(
-          children: [
-            for (var i = 0; i < slots.length; i++)
-              _PositionedPlayer(
-                slot: slots[i],
-                player: i < players.length ? players[i] : null,
-                colors: colors,
-                styles: styles,
-              ),
-          ],
+    return FootballPitch(
+      borderRadius: BorderRadius.circular(24),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.08),
+          blurRadius: 16,
+          offset: const Offset(0, 8),
         ),
+      ],
+      child: Stack(
+        children: [
+          for (var i = 0; i < slots.length; i++)
+            _PositionedPlayer(
+              slot: slots[i],
+              player: i < players.length ? players[i] : null,
+              colors: colors,
+              styles: styles,
+            ),
+        ],
       ),
     );
   }
@@ -295,82 +300,6 @@ class _PositionedPlayer extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class _PitchPainter extends CustomPainter {
-  final AppColors colors;
-
-  const _PitchPainter({required this.colors});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final linePaint = Paint()
-      ..color = colors.lightGrass55
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2;
-
-    canvas.drawColor(colors.grass, BlendMode.src);
-
-    final borderRadius = Radius.circular(Spacing.borderRadiusMedium);
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(Offset.zero & size, borderRadius),
-      linePaint,
-    );
-
-    canvas.drawLine(
-      Offset(0, size.height * 0.5),
-      Offset(size.width, size.height * 0.5),
-      linePaint,
-    );
-    canvas.drawCircle(
-      Offset(size.width / 2, size.height * 0.5),
-      size.width * 0.11,
-      linePaint,
-    );
-
-    _drawPenaltyBox(canvas, size, linePaint, isTop: true);
-    _drawPenaltyBox(canvas, size, linePaint, isTop: false);
-  }
-
-  void _drawPenaltyBox(
-    Canvas canvas,
-    Size size,
-    Paint paint, {
-    required bool isTop,
-  }) {
-    final boxWidth = size.width * 0.42;
-    final boxHeight = size.height * 0.12;
-    final goalWidth = size.width * 0.2;
-    final goalHeight = size.height * 0.055;
-    final left = (size.width - boxWidth) / 2;
-    final goalLeft = (size.width - goalWidth) / 2;
-
-    final boxRect = isTop
-        ? Rect.fromLTWH(left, 0, boxWidth, boxHeight)
-        : Rect.fromLTWH(left, size.height - boxHeight, boxWidth, boxHeight);
-    final goalRect = isTop
-        ? Rect.fromLTWH(goalLeft, 0, goalWidth, goalHeight)
-        : Rect.fromLTWH(
-            goalLeft,
-            size.height - goalHeight,
-            goalWidth,
-            goalHeight,
-          );
-
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(boxRect, const Radius.circular(8)),
-      paint,
-    );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(goalRect, const Radius.circular(8)),
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _PitchPainter oldDelegate) {
-    return oldDelegate.colors != colors;
   }
 }
 

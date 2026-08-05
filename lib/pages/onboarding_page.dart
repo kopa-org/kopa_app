@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:kopa/component/football_pitch.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/onboarding_cubit.dart';
@@ -935,40 +936,16 @@ class _PitchPicker extends StatelessWidget {
           final width = constraints.maxWidth;
           final height = constraints.maxHeight;
 
-          return Container(
-            clipBehavior: Clip.antiAlias,
-            decoration: BoxDecoration(
-              color: const Color(0xFF106E35),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: colors.white, width: 1.5),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.08),
-                  blurRadius: 16,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
+          return FootballPitch(
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 16,
+                offset: const Offset(0, 8),
+              ),
+            ],
             child: Stack(
               children: [
-                for (var i = 0; i < 7; i++)
-                  Positioned(
-                    top: i * height / 7,
-                    left: 0,
-                    right: 0,
-                    height: height / 14,
-                    child: ColoredBox(
-                      color: const Color(0xFF167E44).withValues(alpha: 0.3),
-                    ),
-                  ),
-                Positioned.fill(
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: CustomPaint(
-                      painter: _PitchPainter(),
-                    ),
-                  ),
-                ),
                 for (final choice in choices)
                   Positioned(
                     left: choice.x * width - 17,
@@ -990,72 +967,6 @@ class _PitchPicker extends StatelessWidget {
       ),
     );
   }
-}
-
-class _PitchPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.38)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
-    final thinPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.28)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
-
-    canvas.drawRect(Offset.zero & size, paint);
-    canvas.drawLine(
-      Offset(0, size.height / 2),
-      Offset(size.width, size.height / 2),
-      paint,
-    );
-    canvas.drawCircle(
-      Offset(size.width / 2, size.height / 2),
-      size.width * 0.12,
-      paint,
-    );
-    canvas.drawCircle(
-      Offset(size.width / 2, size.height / 2),
-      3,
-      Paint()..color = Colors.white.withValues(alpha: 0.5),
-    );
-    canvas.drawRect(
-      Rect.fromCenter(
-        center: Offset(size.width / 2, size.height * 0.13),
-        width: size.width * 0.44,
-        height: size.height * 0.18,
-      ),
-      paint,
-    );
-    canvas.drawRect(
-      Rect.fromCenter(
-        center: Offset(size.width / 2, size.height * 0.04),
-        width: size.width * 0.22,
-        height: size.height * 0.07,
-      ),
-      thinPaint,
-    );
-    canvas.drawRect(
-      Rect.fromCenter(
-        center: Offset(size.width / 2, size.height * 0.87),
-        width: size.width * 0.44,
-        height: size.height * 0.18,
-      ),
-      paint,
-    );
-    canvas.drawRect(
-      Rect.fromCenter(
-        center: Offset(size.width / 2, size.height * 0.96),
-        width: size.width * 0.22,
-        height: size.height * 0.07,
-      ),
-      thinPaint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _PositionButton extends StatelessWidget {
