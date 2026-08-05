@@ -12,6 +12,7 @@ class PlayerPositionsCard extends StatelessWidget {
   final String formation;
   final List<UserDetails> players;
   final VoidCallback? onEditFormation;
+  final bool preservePlayerOrder;
 
   const PlayerPositionsCard({
     super.key,
@@ -19,6 +20,7 @@ class PlayerPositionsCard extends StatelessWidget {
     required this.formation,
     required this.players,
     this.onEditFormation,
+    this.preservePlayerOrder = false,
   });
 
   @override
@@ -30,7 +32,9 @@ class PlayerPositionsCard extends StatelessWidget {
       formation,
       playerCount: playerCount,
     );
-    final sortedPlayers = _sortPlayersForFormation(players, playerFormation);
+    final sortedPlayers = preservePlayerOrder
+        ? [...players]
+        : _sortPlayersForFormation(players, playerFormation);
     final starters = sortedPlayers.take(playerFormation.slots.length).toList();
     final bench = sortedPlayers.skip(playerFormation.slots.length).toList();
 
@@ -270,33 +274,111 @@ class _PositionedPlayer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const markerSize = 34.0;
-    final label = player == null ? slot.fallbackLabel : _initials(player!.name);
-
     return Positioned.fill(
       child: Align(
         alignment: Alignment(slot.x * 2 - 1, slot.y * 2 - 1),
         child: Tooltip(
           message: player?.name ?? slot.fallbackName,
-          child: Container(
-            width: markerSize,
-            height: markerSize,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: player == null ? colors.lightGrass95 : colors.lightGrass,
-              shape: BoxShape.circle,
-            ),
+          child: player == null
+              ? _EmptyPositionBadge(
+                  label: slot.fallbackLabel,
+                  styles: styles,
+                )
+              : _PlayerPositionBadge(
+                  name: player!.name,
+                  label: slot.fallbackLabel,
+                  colors: colors,
+                  styles: styles,
+                ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PlayerPositionBadge extends StatelessWidget {
+  final String name;
+  final String label;
+  final AppColors colors;
+  final AppTextStyles styles;
+
+  const _PlayerPositionBadge({
+    required this.name,
+    required this.label,
+    required this.colors,
+    required this.styles,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 52,
+      height: 52,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: colors.white,
+        shape: BoxShape.circle,
+        border: Border.all(color: colors.primary, width: 1.5),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Text(
-              label,
+              _firstName(name),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: styles.caption.copyWith(
-                color: colors.dirt,
-                fontWeight: FontWeight.w700,
+              textAlign: TextAlign.center,
+              style: styles.caption3.copyWith(
+                color: const Color(0xFF105230),
+                fontWeight: FontWeight.w900,
                 fontSize: 11,
               ),
             ),
           ),
+          Text(
+            label,
+            style: styles.label.copyWith(
+              color: colors.primary,
+              fontWeight: FontWeight.w800,
+              fontSize: 8,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EmptyPositionBadge extends StatelessWidget {
+  final String label;
+  final AppTextStyles styles;
+
+  const _EmptyPositionBadge({
+    required this.label,
+    required this.styles,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 34,
+      height: 34,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: 1.6),
+      ),
+      child: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: styles.caption.copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.w800,
+          fontSize: 11,
         ),
       ),
     );
@@ -434,4 +516,10 @@ String _initials(String name) {
       .map((part) => part.characters.first)
       .join()
       .toUpperCase();
+}
+
+String _firstName(String name) {
+  final trimmed = name.trim();
+  if (trimmed.isEmpty) return '?';
+  return trimmed.split(RegExp(r'\s+')).first;
 }

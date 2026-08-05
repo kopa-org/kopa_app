@@ -5,6 +5,7 @@ class EventAttendanceDetails {
   final UserDetails userDetails;
   final bool isAttending;
   final bool? isSelected;
+  final int? lineupSlot;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -13,6 +14,7 @@ class EventAttendanceDetails {
     required this.userDetails,
     required this.isAttending,
     this.isSelected,
+    this.lineupSlot,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -23,6 +25,7 @@ class EventAttendanceDetails {
       userDetails: UserDetails.fromJson(json['user_details']),
       isAttending: json['is_attending'],
       isSelected: json['is_selected'],
+      lineupSlot: json['lineup_slot'],
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
     );

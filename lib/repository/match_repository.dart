@@ -259,6 +259,39 @@ class MatchRepository {
     }
   }
 
+  static Future<void> updateMatchLineup(
+    int matchId,
+    String formation,
+    List<Map<String, dynamic>> lineup,
+  ) async {
+    final token = await _secureStorage.read(key: 'token');
+
+    if (token == null) {
+      throw Exception('No token found. User might not be logged in.');
+    }
+
+    final url = Uri.parse('${ApiConfig.baseUrl}/match/lineup');
+
+    final response = await http.patch(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({
+        'event_id': matchId,
+        'formation': formation,
+        'lineup': lineup,
+      }),
+    );
+
+    if (response.statusCode == 401) {
+      throw Exception('Unauthorized. Please log in again.');
+    } else if (response.statusCode != 200) {
+      throw Exception('Failed to update match lineup');
+    }
+  }
+
   static Future<void> updateAttendanceSelection(
     int matchId,
     int userId,

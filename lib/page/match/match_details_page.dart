@@ -10,6 +10,7 @@ import 'package:kopa/model/event_attendance_details.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/page/match/add_match_event_modal.dart';
+import 'package:kopa/page/match/lineup_editor_page.dart';
 import 'package:kopa/page/match/post_match_details_page.dart';
 import 'package:kopa/repository/match_repository.dart';
 import 'package:kopa/repository/users_repository.dart';
@@ -193,8 +194,9 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         playerCount: _teamPlayerCount(matchDetails, user),
         formation: matchDetails.formation,
         players: _lineupPlayers(matchDetails),
+        preservePlayerOrder: _hasSavedLineup(matchDetails),
         onEditFormation: user.isTeamOwner
-            ? () => _showFormationPicker(matchDetails, user)
+            ? () => _openLineupEditor(matchDetails, user)
             : null,
       ),
       attendanceList: _buildAttendanceList(matchDetails, squad, user),
@@ -491,10 +493,13 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     final selected = attendances
         .where((attendance) =>
             attendance.isAttending && attendance.isSelected == true)
-        .map((attendance) => attendance.userDetails)
-        .toList();
+        .toList()
+      ..sort(_compareLineupAttendance);
 
-    if (selected.isNotEmpty) return selected;
+    final selectedUsers =
+        selected.map((attendance) => attendance.userDetails).toList();
+
+    if (selectedUsers.isNotEmpty) return selectedUsers;
 
     return attendances
         .where((attendance) => attendance.isAttending)
@@ -502,196 +507,43 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         .toList();
   }
 
-  Future<void> _showFormationPicker(
-      MatchDetails match, UserDetails user) async {
-    final theme = Theme.of(context);
-    final appColors = theme.extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        theme.extension<AppTextStyles>() ?? AppTextStyles.light;
-    final formationCtl = TextEditingController(text: match.formation);
-    var selectedFormation = match.formation;
-    var isSaving = false;
+  bool _hasSavedLineup(MatchDetails match) {
+    return (match.attendanceDetailsList ?? []).any(
+      (attendance) =>
+          attendance.isAttending &&
+          attendance.isSelected == true &&
+          attendance.lineupSlot != null,
+    );
+  }
 
-    try {
-      await showCupertinoModalPopup(
-        context: context,
-        builder: (modalContext) => StatefulBuilder(
-          builder: (modalContext, setModalState) {
-            final suggestions =
-                _suggestedFormations(_teamPlayerCount(match, user));
-            final normalized = _normalizeFormation(formationCtl.text);
-            final canSave = _isValidFormation(normalized) && !isSaving;
+  int _compareLineupAttendance(
+    EventAttendanceDetails first,
+    EventAttendanceDetails second,
+  ) {
+    final firstSlot = first.lineupSlot;
+    final secondSlot = second.lineupSlot;
+    if (firstSlot != null && secondSlot != null) {
+      return firstSlot.compareTo(secondSlot);
+    }
+    if (firstSlot != null) return -1;
+    if (secondSlot != null) return 1;
+    return first.createdAt.compareTo(second.createdAt);
+  }
 
-            Future<void> save() async {
-              if (!canSave) return;
-              setModalState(() => isSaving = true);
-              try {
-                await MatchRepository.updateMatchFormation(
-                    match.id, normalized);
-                AppAnalytics.logEvent(
-                  'match_formation_updated',
-                  parameters: {'formation': normalized},
-                );
-                if (mounted) await _refreshMatchAndSquad();
-                if (modalContext.mounted) Navigator.of(modalContext).pop();
-              } catch (error, stack) {
-                CrashReporting.logWebError(error, stack);
-                if (modalContext.mounted) {
-                  setModalState(() => isSaving = false);
-                }
-              }
-            }
-
-            return Material(
-              child: Container(
-                color: appColors.surface,
-                child: AnimatedPadding(
-                  duration: const Duration(milliseconds: 200),
-                  padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(modalContext).viewInsets.bottom,
-                  ),
-                  child: SafeArea(
-                    top: false,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        CupertinoNavigationBar(
-                          backgroundColor: appColors.surface,
-                          middle: Text(
-                            'Vælg opstilling',
-                            style: appTextStyles.sectionHeader,
-                          ),
-                          leading: CupertinoButton(
-                            padding: EdgeInsets.zero,
-                            onPressed: () => Navigator.of(modalContext).pop(),
-                            child: Text(
-                              'Annullér',
-                              style: TextStyle(color: appColors.error),
-                            ),
-                          ),
-                          trailing: CupertinoButton(
-                            padding: EdgeInsets.zero,
-                            onPressed: canSave ? save : null,
-                            child: isSaving
-                                ? const CupertinoActivityIndicator()
-                                : Text(
-                                    'Gem',
-                                    style: TextStyle(
-                                      color: canSave
-                                          ? appColors.primary
-                                          : appColors.divider,
-                                    ),
-                                  ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(Spacing.lg),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Standard er 2-3-1, men du kan skrive enhver opstilling som f.eks. 3-2-1 eller 2-2-3.',
-                                style: appTextStyles.body,
-                              ),
-                              const SizedBox(height: Spacing.md),
-                              Wrap(
-                                spacing: Spacing.sm,
-                                runSpacing: Spacing.sm,
-                                children: suggestions.map((formation) {
-                                  final selected =
-                                      formation == selectedFormation;
-                                  return GestureDetector(
-                                    onTap: () {
-                                      setModalState(() {
-                                        selectedFormation = formation;
-                                        formationCtl.text = formation;
-                                      });
-                                    },
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: Spacing.md,
-                                        vertical: Spacing.sm,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: selected
-                                            ? appColors.lightGrass
-                                            : appColors.grey2,
-                                        borderRadius: BorderRadius.circular(
-                                          Spacing.borderRadiusFull,
-                                        ),
-                                      ),
-                                      child: Text(
-                                        formation,
-                                        style: appTextStyles.caption.copyWith(
-                                          color: selected
-                                              ? appColors.primary
-                                              : appColors.dirt,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
-                              const SizedBox(height: Spacing.md),
-                              CupertinoTextField(
-                                controller: formationCtl,
-                                placeholder: '2-3-1',
-                                keyboardType: TextInputType.text,
-                                padding: const EdgeInsets.all(Spacing.md),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(
-                                    Spacing.borderRadiusSmall,
-                                  ),
-                                ),
-                                onChanged: (value) {
-                                  setModalState(() {
-                                    selectedFormation =
-                                        _normalizeFormation(value);
-                                  });
-                                },
-                              ),
-                              const SizedBox(height: Spacing.xs),
-                              Text(
-                                'Brug bindestreger mellem kæderne. Målmanden er altid medregnet automatisk.',
-                                style: appTextStyles.caption,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
+  Future<void> _openLineupEditor(MatchDetails match, UserDetails user) async {
+    final changed = await Navigator.of(context).push<bool>(
+      CupertinoPageRoute(
+        builder: (context) => LineupEditorPage(
+          match: match,
+          playerCount: _teamPlayerCount(match, user),
         ),
-      );
-    } finally {
-      formationCtl.dispose();
+      ),
+    );
+
+    if (changed == true && mounted) {
+      AppAnalytics.logEvent('match_lineup_updated');
+      await _refreshMatchAndSquad();
     }
-  }
-
-  List<String> _suggestedFormations(int playerCount) {
-    if (playerCount == 11) {
-      return const ['4-3-3', '4-4-2', '3-5-2', '4-2-3-1'];
-    }
-
-    return const ['2-3-1', '3-2-1', '2-2-2', '1-3-2', '2-2-3'];
-  }
-
-  String _normalizeFormation(String value) {
-    return value.replaceAll(RegExp(r'\s+'), '');
-  }
-
-  bool _isValidFormation(String formation) {
-    if (!RegExp(r'^\d+(?:-\d+)*$').hasMatch(formation)) return false;
-    return formation
-        .split('-')
-        .map(int.tryParse)
-        .every((count) => count != null && count > 0 && count <= 5);
   }
 
   Widget? _buildRatingsSection(MatchDetails match) {
