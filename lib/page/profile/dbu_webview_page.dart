@@ -112,7 +112,7 @@ class _DbuWebviewPageState extends State<DbuWebviewPage> {
                 '$script',
               );
             } catch (e) {
-              debugPrint('Error extracting ical link: $e');
+              debugPrint('Error extracting DBU context: $e');
               if (mounted) {
                 setState(() => _isScraping = false);
               }

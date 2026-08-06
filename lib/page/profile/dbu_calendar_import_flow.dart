@@ -2,8 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:http/http.dart' as http;
-import 'package:icalendar_parser/icalendar_parser.dart';
 import 'package:kopa/navigation/app_router.dart';
 import 'package:kopa/repository/team_season_repository.dart';
 import 'package:kopa/repository/users_repository.dart';
@@ -33,18 +31,9 @@ class DbuCalendarImportFlow {
     }
 
     final resultData = _decodeResult(result);
-    final webcalLink = resultData['webcal']?.toString() ?? '';
-    if (webcalLink.isEmpty) {
+    if (resultData['dbuTeamId'] == null || resultData['dbuPoolId'] == null) {
       return null;
     }
-
-    final httpUrl = webcalLink.replaceFirst('webcal://', 'https://');
-    final response = await http.get(Uri.parse(httpUrl));
-    if (response.statusCode != 200) {
-      throw Exception('Kunne ikke hente DBU-kalenderen.');
-    }
-
-    ICalendar.fromString(response.body);
 
     if (mode == _CalendarImportMode.startNewSeason) {
       if (!context.mounted) {
@@ -66,13 +55,7 @@ class DbuCalendarImportFlow {
       }
     }
 
-    final scrapedMatches = resultData['matches'];
-    await UsersRepository.setCalendarUrl(
-      httpUrl,
-      calendarIcs: response.body,
-      calendarMatches: scrapedMatches is List<dynamic> ? scrapedMatches : null,
-      dbuContext: resultData,
-    );
+    await UsersRepository.syncDbuMatchProgram(resultData);
 
     return mode == _CalendarImportMode.startNewSeason
         ? 'Ny sæson er startet, og kampprogrammet er importeret.'
@@ -198,11 +181,9 @@ class DbuCalendarImportFlow {
       if (decoded is Map<String, dynamic>) {
         return decoded;
       }
-    } catch (_) {
-      // Older scraper results returned the webcal URL directly.
-    }
+    } catch (_) {}
 
-    return {'webcal': result, 'matches': []};
+    return {'matches': []};
   }
 
   static DateTime? _earliestMatchDate(Map<String, dynamic> resultData) {

@@ -119,10 +119,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
     final success = await context.read<OnboardingCubit>().createTeam(
           title: title,
-          dbuCalendarUrl: _dbuData?['webcal'] as String?,
           dbuContext: _dbuData,
-          matches: (_dbuData?['matches'] as List<dynamic>? ?? [])
-              .cast<Map<String, dynamic>>(),
           standings: (_dbuData?['standings'] as List<dynamic>? ?? [])
               .cast<Map<String, dynamic>>(),
           inviteEmails: inviteEmails,
@@ -1602,15 +1599,14 @@ class _MatchesStep extends StatelessWidget {
         _SummaryPill(
           colors: colors,
           textStyles: textStyles,
-          text:
-              '$selectedCount spillere • ${matches.length} kampe klar til oprettelse',
+          text: '$selectedCount spillere • ${matches.length} DBU-kampe fundet',
         ),
         const SizedBox(height: 12),
         if (shownMatches.isEmpty)
           _OnboardingCard(
             colors: colors,
             child: Text(
-              'Ingen DBU-kampe fundet. Holdet oprettes uden kampprogram.',
+              'Ingen DBU-kampe fundet her. Kopa synkroniserer det officielle kampprogram fra DBU efter oprettelse.',
               style: textStyles.body3.copyWith(color: colors.textSecondary),
             ),
           )

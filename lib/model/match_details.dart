@@ -66,7 +66,7 @@ class MatchDetails {
       type: json['type'] ?? 'MATCH',
       homeTeam: json['home_team'],
       awayTeam: json['away_team'],
-      date: DateTime.parse(json['date']),
+      date: _parseEventDate(json['date']),
       meetingTime: _parseMeetingTime(json['meeting_time']),
       location: json['location'],
       notes: json['notes'],
@@ -133,4 +133,8 @@ DateTime? _parseMeetingTime(dynamic v) {
   }
   // Ellers prøv ISO
   return DateTime.parse(s);
+}
+
+DateTime _parseEventDate(dynamic v) {
+  return DateTime.parse(v.toString()).toLocal();
 }

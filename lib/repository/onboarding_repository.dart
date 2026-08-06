@@ -133,9 +133,7 @@ class OnboardingRepository {
 
   Future<Map<String, dynamic>> createTeam({
     required String title,
-    String? dbuCalendarUrl,
     Map<String, dynamic>? dbuContext,
-    List<Map<String, dynamic>> matches = const [],
     List<Map<String, dynamic>> standings = const [],
     List<Map<String, String>> inviteEmails = const [],
   }) async {
@@ -154,9 +152,7 @@ class OnboardingRepository {
         },
         body: json.encode({
           'title': title,
-          if (dbuCalendarUrl != null) 'dbu_calendar_url': dbuCalendarUrl,
           if (dbuContext != null) ..._dbuContextPayload(dbuContext),
-          'matches': matches,
           'standings': standings,
           'invite_emails': inviteEmails,
         }),

@@ -187,18 +187,14 @@ class OnboardingCubit extends Cubit<OnboardingState> {
 
   Future<bool> createTeam({
     required String title,
-    String? dbuCalendarUrl,
     Map<String, dynamic>? dbuContext,
-    List<Map<String, dynamic>> matches = const [],
     List<Map<String, dynamic>> standings = const [],
     List<Map<String, String>> inviteEmails = const [],
   }) async {
     emit(state.copyWith(status: OnboardingStatus.loading, errorMessage: null));
     final result = await _repository.createTeam(
       title: title,
-      dbuCalendarUrl: dbuCalendarUrl,
       dbuContext: dbuContext,
-      matches: matches,
       standings: standings,
       inviteEmails: inviteEmails,
     );
@@ -207,8 +203,7 @@ class OnboardingCubit extends Cubit<OnboardingState> {
       AppAnalytics.logEvent(
         'team_created',
         parameters: {
-          'has_dbu_calendar': dbuCalendarUrl?.isNotEmpty == true ? 1 : 0,
-          'match_count': matches.length,
+          'has_dbu_context': dbuContext == null ? 0 : 1,
           'invite_count': inviteEmails.length,
         },
       );

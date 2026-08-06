@@ -7,8 +7,7 @@ void main() {
     await initializeDateFormatting('da_DK');
   });
 
-  test('formats imported DBU match timestamps without local offset conversion',
-      () {
+  test('formats DateTime clock values without implicit offset conversion', () {
     expect(
       DateHelper.getFormattedTime(DateTime.utc(2026, 8, 17, 20)),
       '20:00',

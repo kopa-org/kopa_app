@@ -16,7 +16,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/arc hive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.6+10
+version: 1.0.6+12
 environment:
   sdk: ^3.5.3
 
@@ -57,7 +57,6 @@ dependencies:
   firebase_messaging: ^16.0.4
   google_nav_bar: ^5.0.7
   webview_flutter: ^4.8.0
-  icalendar_parser: ^2.1.0
   share_plus: ^12.0.2
   flutter_local_notifications: ^19.4.2
   segmented_button_slide: ^2.0.0

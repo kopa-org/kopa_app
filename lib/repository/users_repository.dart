@@ -49,12 +49,8 @@ class UsersRepository {
     return json['id'];
   }
 
-  static Future<void> setCalendarUrl(
-    String calendarUrl, {
-    String? calendarIcs,
-    List<dynamic>? calendarMatches,
-    Map<String, dynamic>? dbuContext,
-  }) async {
+  static Future<void> syncDbuMatchProgram(
+      Map<String, dynamic> dbuContext) async {
     final token = await SecureStorageService.getToken();
     var url = Uri.parse('${ApiConfig.baseUrl}/team/calendar_url');
 
@@ -65,15 +61,12 @@ class UsersRepository {
         'Authorization': 'Bearer $token',
       },
       body: jsonEncode({
-        'calendar_url': calendarUrl,
-        if (calendarIcs != null) 'calendar_ics': calendarIcs,
-        if (calendarMatches != null) 'calendar_matches': calendarMatches,
-        if (dbuContext != null) ..._dbuContextPayload(dbuContext),
+        ..._dbuContextPayload(dbuContext),
       }),
     );
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to update calendar URL');
+      throw Exception('Failed to update DBU match program');
     }
   }
 
