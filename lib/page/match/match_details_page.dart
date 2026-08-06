@@ -158,9 +158,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       match: matchDetails,
       heroTag: widget.heroTag,
       animateCard: widget.heroTag != null,
-      onTap: _enableHeroCardActions &&
-              user.isTeamOwner &&
-              !matchDetails.hasFinalScore
+      onTap: _enableHeroCardActions && matchDetails.canSetFinalScore(user)
           ? () => setMatchScore(matchDetails.id)
           : null,
     );
@@ -285,28 +283,30 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
 
   List<Widget> _buildAttendanceList(
       MatchDetails match, List<UserDetails> squad, UserDetails user) {
-    final attending =
-        match.attendanceDetailsList?.where((a) => a.isAttending).toList() ?? [];
+    final attending = match.attendingAttendanceDetails;
+    final declined = match.declinedAttendanceDetails;
 
     if (user.isTeamOwner && !match.hasMatchBeenPlayed) {
-      return _buildLeaderAttendanceApprovalList(match, attending);
+      return _buildLeaderAttendanceApprovalList(match, attending, declined);
     }
 
-    return attending
-        .map((a) => PlayerListItem(
-              name: a.userDetails.name,
-              subtitle: a.isSelected == true
-                  ? 'Udtaget'
-                  : a.isSelected == false
-                      ? 'Ikke udtaget'
-                      : a.userDetails.email,
-            ))
-        .toList();
+    return [
+      ...attending.map((a) => PlayerListItem(
+            name: a.userDetails.name,
+            subtitle: a.isSelected == true
+                ? 'Udtaget'
+                : a.isSelected == false
+                    ? 'Ikke udtaget'
+                    : a.userDetails.email,
+          )),
+      ..._buildDeclinedAttendanceSection(declined),
+    ];
   }
 
   List<Widget> _buildLeaderAttendanceApprovalList(
     MatchDetails match,
     List<EventAttendanceDetails> attending,
+    List<EventAttendanceDetails> declined,
   ) {
     final pending = attending.where((a) => a.isSelected == null).toList();
     final handled = attending.where((a) => a.isSelected != null).toList();
@@ -381,7 +381,30 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       );
     }
 
+    widgets.addAll(_buildDeclinedAttendanceSection(declined));
+
     return widgets;
+  }
+
+  List<Widget> _buildDeclinedAttendanceSection(
+    List<EventAttendanceDetails> declined,
+  ) {
+    if (declined.isEmpty) return const [];
+
+    return [
+      const SizedBox(height: Spacing.lg),
+      _AttendanceApprovalSection(
+        title: 'Frameldte (${declined.length})',
+        children: declined
+            .map(
+              (attendance) => PlayerListItem(
+                name: attendance.userDetails.name,
+                subtitle: 'Frameldt',
+              ),
+            )
+            .toList(),
+      ),
+    ];
   }
 
   void _editAttendanceSelection(EventAttendanceDetails attendance) {

@@ -2,6 +2,7 @@ import 'package:kopa/model/match_event_details.dart';
 import 'package:kopa/model/match_poll_details.dart';
 import 'package:kopa/model/event_attendance_details.dart';
 import 'package:kopa/model/player_rating_summary.dart';
+import 'package:kopa/model/user_details.dart';
 
 class MatchDetails {
   static const Duration postMatchDetailsDelay = Duration(hours: 1);
@@ -115,6 +116,24 @@ class MatchDetails {
 
   bool get hasFinalScore {
     return homeTeamScore != null && awayTeamScore != null;
+  }
+
+  bool canSetFinalScore(UserDetails user, {DateTime? now}) {
+    return user.isTeamOwner &&
+        isPostMatchAt(now ?? DateTime.now()) &&
+        !hasFinalScore;
+  }
+
+  List<EventAttendanceDetails> get attendingAttendanceDetails {
+    return (attendanceDetailsList ?? [])
+        .where((attendance) => attendance.isAttending)
+        .toList();
+  }
+
+  List<EventAttendanceDetails> get declinedAttendanceDetails {
+    return (attendanceDetailsList ?? [])
+        .where((attendance) => !attendance.isAttending)
+        .toList();
   }
 
   Duration get countdown => date.difference(DateTime.now());

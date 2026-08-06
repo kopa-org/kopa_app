@@ -193,8 +193,6 @@ class MatchDetailTemplate extends StatelessWidget {
         ];
       case MatchDetailSegment.attendance:
         return [
-          SectionHeader(title: attendanceTitle),
-          const SizedBox(height: Spacing.md),
           if (attendanceList.isEmpty)
             _EmptySegmentMessage(message: attendanceEmptyMessage)
           else

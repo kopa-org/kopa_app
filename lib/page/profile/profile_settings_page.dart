@@ -12,6 +12,7 @@ import 'package:kopa/navigation/app_router.dart';
 import 'package:kopa/page/profile/dbu_calendar_import_flow.dart';
 import 'package:kopa/page/profile/dbu_webview_page.dart';
 import 'package:kopa/repository/team_dbu_repository.dart';
+import 'package:kopa/repository/users_repository.dart';
 import 'package:kopa/state/match_programme_refresh_notifier.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
@@ -30,9 +31,29 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
   bool _isSharingKopa = false;
   bool _isSendingInvite = false;
   bool _isResendingInvites = false;
+  bool _isSavingMeetingOffset = false;
+  int? _selectedMeetingOffsetMinutes;
   DbuWebviewOperation? _activeDbuSync;
   String? _errorMessage;
   final _emailController = TextEditingController();
+
+  static const List<int?> _meetingOffsetOptions = [
+    null,
+    15,
+    30,
+    45,
+    60,
+    90,
+    120,
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    final currentUser = context.read<AuthCubit>().state.user;
+    _selectedMeetingOffsetMinutes =
+        currentUser?.teamDetails?.defaultMeetingOffsetMinutes;
+  }
 
   @override
   void dispose() {
@@ -88,6 +109,37 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                     ? 'Synkroniserer stilling...'
                     : 'Synkroniser stilling fra DBU',
                 onPressed: _activeDbuSync == null ? _syncDbu : () {},
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<int?>(
+                initialValue: _meetingOffsetOptions
+                        .contains(_selectedMeetingOffsetMinutes)
+                    ? _selectedMeetingOffsetMinutes
+                    : null,
+                decoration: const InputDecoration(
+                  labelText: 'Standard mødetid',
+                  border: OutlineInputBorder(),
+                ),
+                items: _meetingOffsetOptions
+                    .map(
+                      (minutes) => DropdownMenuItem<int?>(
+                        value: minutes,
+                        child: Text(_meetingOffsetLabel(minutes)),
+                      ),
+                    )
+                    .toList(),
+                onChanged: _isSavingMeetingOffset
+                    ? null
+                    : (value) {
+                        setState(() => _selectedMeetingOffsetMinutes = value);
+                      },
+              ),
+              const SizedBox(height: 8),
+              FullWidthButton(
+                buttonText: _isSavingMeetingOffset
+                    ? 'Gemmer mødetid...'
+                    : 'Gem mødetid',
+                onPressed: _isSavingMeetingOffset ? () {} : _saveMeetingOffset,
               ),
               const SizedBox(height: 16),
               FullWidthButton(
@@ -240,6 +292,52 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
         _errorMessage = 'Kunne ikke dele Kopa.';
       });
     }
+  }
+
+  Future<void> _saveMeetingOffset() async {
+    final currentUser = context.read<AuthCubit>().state.user;
+    final teamId = currentUser?.teamDetails?.id;
+
+    if (currentUser?.isTeamOwner != true || teamId == null) {
+      setState(() => _errorMessage = 'Kun holdlederen kan ændre mødetid.');
+      return;
+    }
+
+    setState(() {
+      _isSavingMeetingOffset = true;
+      _errorMessage = null;
+    });
+
+    try {
+      await UsersRepository.updateTeamSettings(
+        teamId: teamId,
+        defaultMeetingOffsetMinutes: _selectedMeetingOffsetMinutes,
+      );
+      if (!mounted) return;
+
+      await context.read<AuthCubit>().init();
+      if (!mounted) return;
+
+      final label = _meetingOffsetLabel(_selectedMeetingOffsetMinutes);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Standard mødetid er sat til $label.')),
+      );
+      setState(() => _isSavingMeetingOffset = false);
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _isSavingMeetingOffset = false;
+        _errorMessage = error.toString().replaceFirst('Exception: ', '');
+      });
+    }
+  }
+
+  static String _meetingOffsetLabel(int? minutes) {
+    if (minutes == null || minutes == 0) {
+      return 'Ingen standard';
+    }
+
+    return '$minutes min før kampstart';
   }
 
   Future<void> _sendInvitation() async {

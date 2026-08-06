@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:kopa/helpers/api_config.dart';
 import 'package:kopa/model/add_user_to_team_command.dart';
 import 'package:kopa/model/player_profile.dart';
+import 'package:kopa/model/team_details.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/services/secure_storage_service.dart';
 import 'package:http/http.dart' as http;
@@ -68,6 +69,31 @@ class UsersRepository {
     if (response.statusCode != 200) {
       throw Exception('Failed to update DBU match program');
     }
+  }
+
+  static Future<TeamDetails> updateTeamSettings({
+    required int teamId,
+    required int? defaultMeetingOffsetMinutes,
+  }) async {
+    final token = await SecureStorageService.getToken();
+    final url = Uri.parse('${ApiConfig.baseUrl}/teams/$teamId/settings');
+
+    final response = await http.patch(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        'default_meeting_offset_minutes': defaultMeetingOffsetMinutes,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Kunne ikke gemme mødetid.');
+    }
+
+    return TeamDetails.fromJson(jsonDecode(response.body)['team']);
   }
 
   static Map<String, dynamic> _dbuContextPayload(Map<String, dynamic> context) {
