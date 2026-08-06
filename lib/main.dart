@@ -19,6 +19,7 @@ import 'package:kopa/repository/onboarding_repository.dart';
 import 'package:kopa/cubits/onboarding_cubit.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/theme/app_theme.dart';
+import 'package:kopa/services/deep_link_service.dart';
 import 'package:kopa/services/push_notifications_service.dart';
 import 'package:kopa/state/match_programme_refresh_notifier.dart';
 import 'package:kopa/utils/app_analytics.dart';
@@ -34,9 +35,13 @@ const _splashAnimationCacheHeight = 428;
 void main() async {
   await CrashReporting.runAppGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
+    final nativeInitialLink = await DeepLinkService.getInitialLink();
     final initialLocation = AppRouter.initialLocationFromPlatformRoute(
-      WidgetsBinding.instance.platformDispatcher.defaultRouteName,
-    );
+          nativeInitialLink ?? '',
+        ) ??
+        AppRouter.initialLocationFromPlatformRoute(
+          WidgetsBinding.instance.platformDispatcher.defaultRouteName,
+        );
     runApp(KopaBootstrapApp(initialLocation: initialLocation));
   });
 }
@@ -182,6 +187,7 @@ class _KopaAppState extends State<KopaApp> {
   late final MatchProgrammeRefreshNotifier _matchProgrammeRefreshNotifier;
   late final GoRouter _router;
   StreamSubscription<AuthState>? _authSubscription;
+  StreamSubscription<String>? _deepLinkSubscription;
 
   @override
   void initState() {
@@ -196,12 +202,17 @@ class _KopaAppState extends State<KopaApp> {
       initialLocation: widget.initialLocation,
     );
     _authSubscription = widget.authCubit.stream.listen(_handleAuthStateChanged);
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      _deepLinkSubscription =
+          DeepLinkService.linkStream.listen(_handleDeepLink);
+    }
     _handleAuthStateChanged(widget.authCubit.state);
   }
 
   @override
   void dispose() {
     _authSubscription?.cancel();
+    _deepLinkSubscription?.cancel();
     _refreshNotifier.dispose();
     _matchProgrammeRefreshNotifier.dispose();
     super.dispose();
@@ -213,6 +224,13 @@ class _KopaAppState extends State<KopaApp> {
     }
 
     await PushNotificationsService.instance.syncForUser(state.user);
+  }
+
+  void _handleDeepLink(String link) {
+    final location = AppRouter.initialLocationFromPlatformRoute(link);
+    if (location == null) return;
+
+    _router.go(location);
   }
 
   @override
