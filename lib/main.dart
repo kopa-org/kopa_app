@@ -34,12 +34,17 @@ const _splashAnimationCacheHeight = 428;
 void main() async {
   await CrashReporting.runAppGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
-    runApp(const KopaBootstrapApp());
+    final initialLocation = AppRouter.initialLocationFromPlatformRoute(
+      WidgetsBinding.instance.platformDispatcher.defaultRouteName,
+    );
+    runApp(KopaBootstrapApp(initialLocation: initialLocation));
   });
 }
 
 class KopaBootstrapApp extends StatefulWidget {
-  const KopaBootstrapApp({super.key});
+  const KopaBootstrapApp({super.key, this.initialLocation});
+
+  final String? initialLocation;
 
   @override
   State<KopaBootstrapApp> createState() => _KopaBootstrapAppState();
@@ -116,6 +121,7 @@ class _KopaBootstrapAppState extends State<KopaBootstrapApp> {
             featureFlags: result.featureFlags,
             authCubit: result.authCubit,
             onboardingCubit: result.onboardingCubit,
+            initialLocation: widget.initialLocation,
           );
 
           return defaultTargetPlatform == TargetPlatform.iOS
@@ -155,6 +161,7 @@ class KopaApp extends StatefulWidget {
   final AppFeatureFlags featureFlags;
   final AuthCubit authCubit;
   final OnboardingCubit onboardingCubit;
+  final String? initialLocation;
 
   const KopaApp({
     super.key,
@@ -163,6 +170,7 @@ class KopaApp extends StatefulWidget {
     required this.featureFlags,
     required this.authCubit,
     required this.onboardingCubit,
+    this.initialLocation,
   });
 
   @override
@@ -185,6 +193,7 @@ class _KopaAppState extends State<KopaApp> {
       onboardingCubit: widget.onboardingCubit,
       featureFlags: widget.featureFlags,
       refreshListenable: _refreshNotifier,
+      initialLocation: widget.initialLocation,
     );
     _authSubscription = widget.authCubit.stream.listen(_handleAuthStateChanged);
     _handleAuthStateChanged(widget.authCubit.state);

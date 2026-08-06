@@ -43,13 +43,15 @@ abstract final class AppRouter {
     required OnboardingCubit onboardingCubit,
     required AppFeatureFlags featureFlags,
     required Listenable refreshListenable,
+    String? initialLocation,
   }) {
     final visibleMainTabs = _visibleMainTabs(featureFlags);
     final branchNavigatorKeys = List.generate(
         visibleMainTabs.length, (_) => GlobalKey<NavigatorState>());
 
     return GoRouter(
-      initialLocation: home,
+      initialLocation: initialLocation ?? home,
+      overridePlatformDefaultLocation: initialLocation != null,
       refreshListenable: refreshListenable,
       observers: AppAnalytics.routeObservers,
       redirect: (context, state) {
@@ -269,6 +271,25 @@ abstract final class AppRouter {
         ),
       ],
     );
+  }
+
+  static String? initialLocationFromPlatformRoute(String route) {
+    final uri = Uri.tryParse(route);
+    if (uri == null) return null;
+
+    String? path;
+    if (uri.path == invite || uri.path == join) {
+      path = uri.path;
+    } else if (uri.path.isEmpty) {
+      if (uri.host == 'invite') {
+        path = invite;
+      } else if (uri.host == 'join') {
+        path = join;
+      }
+    }
+    if (path == null) return null;
+
+    return Uri(path: path, queryParameters: uri.queryParameters).toString();
   }
 
   @visibleForTesting

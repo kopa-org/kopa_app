@@ -8,6 +8,42 @@ import 'package:kopa/pages/onboarding_page.dart';
 import 'package:kopa/pages/register_page.dart';
 
 void main() {
+  group('AppRouter.initialLocationFromPlatformRoute', () {
+    test('normalizes cold-start shared team links from iOS universal links',
+        () {
+      final location = AppRouter.initialLocationFromPlatformRoute(
+        'https://kopa.dk/join?team_token=abc123&team_id=7&team_title=Kopa%20FC',
+      );
+
+      expect(
+        location,
+        '/join?team_token=abc123&team_id=7&team_title=Kopa+FC',
+      );
+    });
+
+    test('normalizes cold-start invite links from the custom iOS scheme', () {
+      final location = AppRouter.initialLocationFromPlatformRoute(
+        'kopa:///invite?token=invite-token&team_title=Kopa%20FC',
+      );
+
+      expect(location, '/invite?token=invite-token&team_title=Kopa+FC');
+    });
+
+    test('normalizes custom scheme links that put the route in the host', () {
+      final location = AppRouter.initialLocationFromPlatformRoute(
+        'kopa://join?team_token=abc123&team_title=Kopa%20FC',
+      );
+
+      expect(location, '/join?team_token=abc123&team_title=Kopa+FC');
+    });
+
+    test('ignores normal app launches', () {
+      final location = AppRouter.initialLocationFromPlatformRoute('/');
+
+      expect(location, isNull);
+    });
+  });
+
   group('AppRouter.redirectPathFor', () {
     test('starts restored teamless users on login instead of onboarding', () {
       final redirect = AppRouter.redirectPathFor(
