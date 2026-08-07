@@ -515,7 +515,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     final attendances = match.attendanceDetailsList ?? [];
     final selected = attendances
         .where((attendance) =>
-            attendance.isAttending && attendance.isSelected == true)
+            attendance.isAttending &&
+            (attendance.isSelected == true || attendance.lineupSlot != null))
         .toList()
       ..sort(_compareLineupAttendance);
 
@@ -532,10 +533,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
 
   bool _hasSavedLineup(MatchDetails match) {
     return (match.attendanceDetailsList ?? []).any(
-      (attendance) =>
-          attendance.isAttending &&
-          attendance.isSelected == true &&
-          attendance.lineupSlot != null,
+      (attendance) => attendance.isAttending && attendance.lineupSlot != null,
     );
   }
 
@@ -554,7 +552,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
   }
 
   Future<void> _openLineupEditor(MatchDetails match, UserDetails user) async {
-    final changed = await Navigator.of(context).push<bool>(
+    final updatedMatch = await Navigator.of(context).push<MatchDetails>(
       CupertinoPageRoute(
         builder: (context) => LineupEditorPage(
           match: match,
@@ -563,9 +561,15 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       ),
     );
 
-    if (changed == true && mounted) {
+    if (updatedMatch != null && mounted) {
       AppAnalytics.logEvent('match_lineup_updated');
-      await _refreshMatchAndSquad();
+      setState(() {
+        _matchAndSquadData = {
+          ...?_matchAndSquadData,
+          'matchDetails': updatedMatch,
+        };
+        _loadError = null;
+      });
     }
   }
 

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -22,7 +23,7 @@ class PushNotificationsService {
     importance: Importance.high,
   );
 
-  final FirebaseMessaging _messaging = FirebaseMessaging.instance;
+  FirebaseMessaging get _messaging => FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
   final PushNotificationsRepository _repository = PushNotificationsRepository();
@@ -31,6 +32,15 @@ class PushNotificationsService {
   StreamSubscription<RemoteMessage>? _foregroundMessageSubscription;
   StreamSubscription<RemoteMessage>? _messageOpenedAppSubscription;
   bool _initialized = false;
+  void Function(Map<String, dynamic> data)? _notificationTapHandler;
+  Map<String, dynamic>? _pendingNotificationTap;
+
+  void setNotificationTapHandler(void Function(Map<String, dynamic>) handler) {
+    _notificationTapHandler = handler;
+    final pendingData = _pendingNotificationTap;
+    _pendingNotificationTap = null;
+    if (pendingData != null) handler(pendingData);
+  }
 
   Future<void> initialize() async {
     if (_initialized || kIsWeb) {
@@ -55,9 +65,15 @@ class PushNotificationsService {
   }
 
   Future<void> syncForUser(UserDetails? user) async {
-    if (kIsWeb || user == null) {
-      return;
+    try {
+      await _syncForUser(user);
+    } catch (error, stackTrace) {
+      debugPrint('Push notification sync failed: $error\n$stackTrace');
     }
+  }
+
+  Future<void> _syncForUser(UserDetails? user) async {
+    if (kIsWeb || user == null) return;
 
     final settings = await _messaging.requestPermission(
       alert: true,
@@ -115,7 +131,16 @@ class PushNotificationsService {
         iOS: iosSettings,
       ),
       onDidReceiveNotificationResponse: (response) {
-        debugPrint('Notification tapped: ${response.payload}');
+        final payload = response.payload;
+        if (payload == null) return;
+
+        try {
+          _emitNotificationTap(
+            Map<String, dynamic>.from(jsonDecode(payload) as Map),
+          );
+        } catch (error) {
+          debugPrint('Could not parse notification payload: $error');
+        }
       },
     );
 
@@ -160,35 +185,43 @@ class PushNotificationsService {
         ),
         iOS: const DarwinNotificationDetails(),
       ),
-      payload: message.data.toString(),
+      payload: jsonEncode(message.data),
     );
   }
 
   void _handleMessageTap(RemoteMessage message) {
     debugPrint('Notification tap payload: ${message.data}');
+    _emitNotificationTap(message.data);
+  }
+
+  void _emitNotificationTap(Map<String, dynamic> data) {
+    final handler = _notificationTapHandler;
+    if (handler == null) {
+      _pendingNotificationTap = data;
+      return;
+    }
+
+    handler(data);
   }
 
   Future<void> _registerTokenIfPossible(String token) async {
-    final authToken = await SecureStorageService.getToken();
-    if (authToken == null) {
-      return;
+    try {
+      final authToken = await SecureStorageService.getToken();
+      if (authToken == null) return;
+
+      final previousToken = await SecureStorageService.getPushToken();
+      if (previousToken == token) return;
+
+      final platform = defaultTargetPlatform == TargetPlatform.iOS
+          ? 'ios'
+          : defaultTargetPlatform == TargetPlatform.android
+              ? 'android'
+              : 'web';
+
+      await _repository.registerToken(token: token, platform: platform);
+      await SecureStorageService.setPushToken(token);
+    } catch (error, stackTrace) {
+      debugPrint('Push token registration failed: $error\n$stackTrace');
     }
-
-    final previousToken = await SecureStorageService.getPushToken();
-    if (previousToken == token) {
-      return;
-    }
-
-    final platform = defaultTargetPlatform == TargetPlatform.iOS
-        ? 'ios'
-        : defaultTargetPlatform == TargetPlatform.android
-            ? 'android'
-            : 'web';
-
-    await _repository.registerToken(
-      token: token,
-      platform: platform,
-    );
-    await SecureStorageService.setPushToken(token);
   }
 }

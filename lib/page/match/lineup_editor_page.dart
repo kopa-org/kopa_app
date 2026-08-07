@@ -183,7 +183,7 @@ class _LineupEditorPageState extends State<LineupEditorPage> {
     }
 
     try {
-      await MatchRepository.updateMatchLineup(
+      final updatedMatch = await MatchRepository.updateMatchLineup(
         widget.match.id,
         _formation.label,
         lineup,
@@ -191,7 +191,7 @@ class _LineupEditorPageState extends State<LineupEditorPage> {
       if (_showDragHint) {
         await SecureStorageService.setLineupDragHintSeen();
       }
-      if (mounted) Navigator.of(context).pop(true);
+      if (mounted) Navigator.of(context).pop(updatedMatch);
     } catch (error, stack) {
       CrashReporting.logWebError(error, stack);
       if (!mounted) return;

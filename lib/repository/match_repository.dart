@@ -259,7 +259,7 @@ class MatchRepository {
     }
   }
 
-  static Future<void> updateMatchLineup(
+  static Future<MatchDetails> updateMatchLineup(
     int matchId,
     String formation,
     List<Map<String, dynamic>> lineup,
@@ -290,6 +290,13 @@ class MatchRepository {
     } else if (response.statusCode != 200) {
       throw Exception('Failed to update match lineup');
     }
+
+    final updatedMatch = jsonDecode(response.body)['match'];
+    if (updatedMatch is! Map<String, dynamic>) {
+      throw Exception('Updated match was not returned');
+    }
+
+    return MatchDetails.fromJson(updatedMatch);
   }
 
   static Future<void> updateAttendanceSelection(

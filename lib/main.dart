@@ -201,6 +201,9 @@ class _KopaAppState extends State<KopaApp> {
       refreshListenable: _refreshNotifier,
       initialLocation: widget.initialLocation,
     );
+    PushNotificationsService.instance.setNotificationTapHandler(
+      _handleNotificationTap,
+    );
     _authSubscription = widget.authCubit.stream.listen(_handleAuthStateChanged);
     if (defaultTargetPlatform == TargetPlatform.iOS) {
       _deepLinkSubscription =
@@ -231,6 +234,12 @@ class _KopaAppState extends State<KopaApp> {
     if (location == null) return;
 
     _router.go(location);
+  }
+
+  void _handleNotificationTap(Map<String, dynamic> data) {
+    if (data['type'] == 'team_join_request') {
+      _router.go(AppRouter.teamJoinRequests);
+    }
   }
 
   @override
