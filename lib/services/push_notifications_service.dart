@@ -32,6 +32,7 @@ class PushNotificationsService {
   StreamSubscription<RemoteMessage>? _foregroundMessageSubscription;
   StreamSubscription<RemoteMessage>? _messageOpenedAppSubscription;
   bool _initialized = false;
+  Future<void>? _syncInFlight;
   void Function(Map<String, dynamic> data)? _notificationTapHandler;
   Map<String, dynamic>? _pendingNotificationTap;
 
@@ -65,16 +66,29 @@ class PushNotificationsService {
   }
 
   Future<void> syncForUser(UserDetails? user) async {
-    try {
-      await _syncForUser(user);
-    } catch (error, stackTrace) {
+    if (kIsWeb || user == null) return;
+
+    final inFlight = _syncInFlight;
+    if (inFlight != null) {
+      await inFlight;
+      return;
+    }
+
+    final sync = _syncForUser(user).catchError((error, stackTrace) {
       debugPrint('Push notification sync failed: $error\n$stackTrace');
+    });
+    _syncInFlight = sync;
+
+    try {
+      await sync;
+    } finally {
+      if (identical(_syncInFlight, sync)) {
+        _syncInFlight = null;
+      }
     }
   }
 
   Future<void> _syncForUser(UserDetails? user) async {
-    if (kIsWeb || user == null) return;
-
     final settings = await _messaging.requestPermission(
       alert: true,
       announcement: false,

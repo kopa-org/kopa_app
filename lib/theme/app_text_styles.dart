@@ -75,6 +75,10 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
   static double _minusThreePercent(double fontSize) => -0.03 * fontSize;
 
   static AppTextStyles get light {
+    // Fonts are bundled with the app, so rendering must not depend on a
+    // runtime request to fonts.gstatic.com.
+    GoogleFonts.config.allowRuntimeFetching = false;
+
     final h2 = _rethink(
       fontSize: 40,
       fontWeight: FontWeight.w600,
