@@ -45,7 +45,7 @@ void main() {
   });
 
   group('AppRouter.redirectPathFor', () {
-    test('starts restored teamless users on login instead of onboarding', () {
+    test('starts restored teamless users on onboarding', () {
       final redirect = AppRouter.redirectPathFor(
         path: AppRouter.home,
         authState: AuthState(
@@ -54,7 +54,7 @@ void main() {
         ),
       );
 
-      expect(redirect, AppRouter.login);
+      expect(redirect, AppRouter.onboarding);
     });
 
     test('restores teamless users with a pending join request to onboarding',
@@ -68,6 +68,46 @@ void main() {
         onboardingState: OnboardingState(
           status: OnboardingStatus.waitingApproval,
           pendingJoinRequestId: 12,
+        ),
+      );
+
+      expect(redirect, AppRouter.onboarding);
+    });
+
+    test('uses backend waiting approval state when onboarding cubit is empty',
+        () {
+      final redirect = AppRouter.redirectPathFor(
+        path: AppRouter.login,
+        authState: AuthState(
+          status: AuthStatus.authenticated,
+          user: _user(
+            onboardingState: const UserOnboardingState(
+              status: 'waiting_approval',
+              joinRequest: UserPendingJoinRequest(
+                id: 12,
+                status: 'pending',
+                teamId: 7,
+                teamTitle: 'Kopa FC',
+              ),
+            ),
+          ),
+        ),
+        onboardingState: OnboardingState(),
+      );
+
+      expect(redirect, AppRouter.onboarding);
+    });
+
+    test('sends teamless users away from login to onboarding', () {
+      final redirect = AppRouter.redirectPathFor(
+        path: AppRouter.login,
+        authState: AuthState(
+          status: AuthStatus.authenticated,
+          user: _user(
+            onboardingState: const UserOnboardingState(
+              status: 'needs_onboarding',
+            ),
+          ),
         ),
       );
 
@@ -126,7 +166,10 @@ void main() {
   });
 }
 
-UserDetails _user({TeamDetails? teamDetails}) {
+UserDetails _user({
+  TeamDetails? teamDetails,
+  UserOnboardingState? onboardingState,
+}) {
   final now = DateTime(2026, 7, 28);
   return UserDetails(
     id: 1,
@@ -137,6 +180,7 @@ UserDetails _user({TeamDetails? teamDetails}) {
     createdAt: now,
     updatedAt: now,
     teamDetails: teamDetails,
+    onboardingState: onboardingState,
   );
 }
 

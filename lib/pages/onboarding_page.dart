@@ -51,6 +51,15 @@ class _OnboardingPageState extends State<OnboardingPage> {
     if (onboardingState.status == OnboardingStatus.waitingApproval) {
       _applyPendingJoinContext(onboardingState);
     }
+    final userOnboardingState =
+        context.read<AuthCubit>().state.user?.onboardingState;
+    if (userOnboardingState?.isWaitingApproval == true &&
+        onboardingState.status != OnboardingStatus.waitingApproval) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        context.read<OnboardingCubit>().restorePendingJoinRequest();
+      });
+    }
   }
 
   @override

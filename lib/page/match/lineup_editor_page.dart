@@ -115,7 +115,7 @@ class _LineupEditorPageState extends State<LineupEditorPage> {
               colors: colors,
               styles: styles,
               saving: _saving,
-              onClose: () => Navigator.of(context).pop(false),
+              onClose: () => Navigator.of(context).pop(),
               onSave: _save,
             ),
             Expanded(

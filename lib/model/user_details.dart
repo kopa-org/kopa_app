@@ -11,6 +11,7 @@ class UserDetails {
   final DateTime createdAt;
   final DateTime updatedAt;
   final TeamDetails? teamDetails;
+  final UserOnboardingState? onboardingState;
 
   UserDetails(
       {required this.id,
@@ -22,7 +23,8 @@ class UserDetails {
       this.position,
       required this.createdAt,
       required this.updatedAt,
-      required this.teamDetails});
+      required this.teamDetails,
+      this.onboardingState});
 
   factory UserDetails.fromJson(Map<String, dynamic> json) {
     return UserDetails(
@@ -40,6 +42,58 @@ class UserDetails {
       teamDetails: json['team_details'] == null
           ? null
           : TeamDetails.fromJson(json['team_details']),
+      onboardingState: json['onboarding_state'] == null
+          ? null
+          : UserOnboardingState.fromJson(json['onboarding_state']),
+    );
+  }
+}
+
+class UserOnboardingState {
+  final String status;
+  final UserPendingJoinRequest? joinRequest;
+
+  const UserOnboardingState({
+    required this.status,
+    this.joinRequest,
+  });
+
+  bool get isComplete => status == 'complete';
+  bool get needsOnboarding => status == 'needs_onboarding';
+  bool get isWaitingApproval => status == 'waiting_approval';
+
+  factory UserOnboardingState.fromJson(Map<String, dynamic> json) {
+    return UserOnboardingState(
+      status: json['status'] ?? 'needs_onboarding',
+      joinRequest: json['join_request'] == null
+          ? null
+          : UserPendingJoinRequest.fromJson(json['join_request']),
+    );
+  }
+}
+
+class UserPendingJoinRequest {
+  final int id;
+  final String status;
+  final int teamId;
+  final String? teamTitle;
+  final String? leaderName;
+
+  const UserPendingJoinRequest({
+    required this.id,
+    required this.status,
+    required this.teamId,
+    this.teamTitle,
+    this.leaderName,
+  });
+
+  factory UserPendingJoinRequest.fromJson(Map<String, dynamic> json) {
+    return UserPendingJoinRequest(
+      id: json['id'],
+      status: json['status'] ?? 'pending',
+      teamId: json['team_id'],
+      teamTitle: json['team_title'],
+      leaderName: json['leader_name'],
     );
   }
 }

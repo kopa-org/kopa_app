@@ -308,7 +308,8 @@ abstract final class AppRouter {
     final hasTeam = authState.user?.teamDetails != null;
     final isWaitingForApproval =
         onboardingState?.status == OnboardingStatus.waitingApproval ||
-            onboardingState?.pendingJoinRequestId != null;
+            onboardingState?.pendingJoinRequestId != null ||
+            authState.user?.onboardingState?.isWaitingApproval == true;
 
     if (!isLoggedIn && !isLoggingIn && !isRegistering && !isInvite && !isJoin) {
       return login;
@@ -319,16 +320,11 @@ abstract final class AppRouter {
         return isOnboarding ? null : onboarding;
       }
 
-      if (isLoggingIn ||
-          isRegistering ||
-          isInvite ||
-          isJoin ||
-          isOnboarding ||
-          path == dbuWebview) {
+      if (isInvite || isJoin || isOnboarding || path == dbuWebview) {
         return null;
       }
 
-      return login;
+      return onboarding;
     }
 
     if (isLoggedIn && (isLoggingIn || isRegistering || isOnboarding)) {

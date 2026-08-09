@@ -136,10 +136,69 @@ void main() {
     expect(find.text('Vælg din position'), findsOneWidget);
     expect(find.text('Er du holdleder?'), findsNothing);
   });
+
+  testWidgets('backend waiting approval state restores waiting screen',
+      (tester) async {
+    final onboardingCubit = _TestOnboardingCubit(
+      restoredPendingRequest: OnboardingState(
+        status: OnboardingStatus.waitingApproval,
+        pendingJoinRequestId: 12,
+        teamId: 1,
+        teamTitle: 'Kopa FC',
+        teamLeaderName: 'Owner',
+      ),
+    );
+    final authCubit = AuthCubit(authRepository: _FakeAuthRepository())
+      ..updateUser(_user(
+        onboardingState: const UserOnboardingState(
+          status: 'waiting_approval',
+          joinRequest: UserPendingJoinRequest(
+            id: 12,
+            status: 'pending',
+            teamId: 1,
+            teamTitle: 'Kopa FC',
+            leaderName: 'Owner',
+          ),
+        ),
+      ));
+
+    await tester.pumpWidget(
+      MultiBlocProvider(
+        providers: [
+          BlocProvider<AuthCubit>.value(value: authCubit),
+          BlocProvider<OnboardingCubit>.value(value: onboardingCubit),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('da'),
+            Locale('en'),
+          ],
+          home: const OnboardingPage(),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    expect(onboardingCubit.restoreCallCount, 1);
+    expect(find.text('Venter på accept'), findsOneWidget);
+    expect(find.text('Holdleder: Owner'), findsOneWidget);
+  });
 }
 
 class _TestOnboardingCubit extends OnboardingCubit {
-  _TestOnboardingCubit() : super(OnboardingRepository());
+  final OnboardingState? restoredPendingRequest;
+  int restoreCallCount = 0;
+
+  _TestOnboardingCubit({this.restoredPendingRequest})
+      : super(OnboardingRepository());
 
   void setInviteContext({
     required String email,
@@ -171,6 +230,15 @@ class _TestOnboardingCubit extends OnboardingCubit {
       teamLeaderName: teamLeaderName,
     ));
   }
+
+  @override
+  Future<bool> restorePendingJoinRequest() async {
+    restoreCallCount++;
+    final restored = restoredPendingRequest;
+    if (restored == null) return false;
+    emit(restored);
+    return true;
+  }
 }
 
 class _FakeAuthRepository implements AuthRepository {
@@ -191,4 +259,19 @@ class _FakeAuthRepository implements AuthRepository {
     required int roleId,
   }) async =>
       false;
+}
+
+UserDetails _user({UserOnboardingState? onboardingState}) {
+  final now = DateTime(2026, 7, 28);
+  return UserDetails(
+    id: 1,
+    name: 'Player',
+    email: 'player@example.com',
+    isTeamOwner: false,
+    roleId: 2,
+    createdAt: now,
+    updatedAt: now,
+    teamDetails: null,
+    onboardingState: onboardingState,
+  );
 }
