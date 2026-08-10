@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:kopa/component/card/all_games_card.dart';
+import 'package:kopa/model/event_attendance_details.dart';
 import 'package:kopa/model/match_details.dart';
+import 'package:kopa/model/user_details.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 
@@ -52,6 +54,7 @@ void main() {
             child: AllGamesCard(
               matches: [completedMatch, upcomingMatch, earliestMatch],
               ownTeamName: 'Profile team name',
+              currentUserId: 7,
               onMatchTap: (match) => tappedMatch = match,
             ),
           ),
@@ -92,6 +95,45 @@ void main() {
 
     expect(tappedMatch, same(upcomingMatch));
   });
+
+  testWidgets('shows declined badge for current user decline', (tester) async {
+    final declinedMatch = _match(
+      id: 4,
+      date: DateTime.utc(2027, 8, 13, 20),
+      homeTeam: 'Kopa IF',
+      awayTeam: 'Fremad',
+      attendanceDetailsList: [
+        _attendance(
+          id: 1,
+          userId: 7,
+          name: 'Current User',
+          isAttending: false,
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          extensions: <ThemeExtension<dynamic>>[
+            AppColors.light,
+            AppTextStyles.light,
+          ],
+        ),
+        home: Scaffold(
+          body: AllGamesCard(
+            matches: [declinedMatch],
+            currentUserId: 7,
+            onMatchTap: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Frameldt'), findsOneWidget);
+    expect(find.text('Tilmeldt'), findsNothing);
+    expect(find.byIcon(CupertinoIcons.xmark), findsOneWidget);
+  });
 }
 
 MatchDetails _match({
@@ -103,6 +145,7 @@ MatchDetails _match({
   int? awayScore,
   bool isHomeTeam = true,
   bool isCurrentUserRegistered = false,
+  List<EventAttendanceDetails> attendanceDetailsList = const [],
 }) {
   return MatchDetails(
     id: id,
@@ -116,5 +159,32 @@ MatchDetails _match({
     awayTeamScore: awayScore,
     isHomeTeam: isHomeTeam,
     isCurrentUserRegistered: isCurrentUserRegistered,
+    attendanceDetailsList: attendanceDetailsList,
+  );
+}
+
+EventAttendanceDetails _attendance({
+  required int id,
+  required int userId,
+  required String name,
+  required bool isAttending,
+}) {
+  final now = DateTime.utc(2026, 1, 1);
+
+  return EventAttendanceDetails(
+    id: id,
+    userDetails: UserDetails(
+      id: userId,
+      name: name,
+      email: 'user$userId@example.com',
+      isTeamOwner: false,
+      roleId: 3,
+      createdAt: now,
+      updatedAt: now,
+      teamDetails: null,
+    ),
+    isAttending: isAttending,
+    createdAt: now,
+    updatedAt: now,
   );
 }

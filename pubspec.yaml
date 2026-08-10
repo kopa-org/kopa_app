@@ -61,6 +61,8 @@ dependencies:
   flutter_local_notifications: ^19.4.2
   segmented_button_slide: ^2.0.0
   liquid_glass_widgets: 0.19.1
+  lottie: ^3.3.3
+  package_info_plus: ^9.0.1
 
 # Flutter 3.41.6 pins meta 1.17.0, while liquid_glass_widgets >=0.18.5
 # requires ^1.18.0. Remove this override after Flutter updates its SDK pin.
@@ -100,6 +102,7 @@ flutter:
     - assets/fonts/
     - assets/logos/
     - assets/illustrations/
+    - assets/lottie/
     - .env.local
     - .env.deploy
 

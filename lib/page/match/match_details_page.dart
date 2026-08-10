@@ -192,6 +192,9 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         playerCount: _teamPlayerCount(matchDetails, user),
         formation: matchDetails.formation,
         players: _lineupPlayers(matchDetails),
+        positionedPlayers: _hasSavedLineup(matchDetails)
+            ? _lineupPositionedPlayers(matchDetails, user)
+            : null,
         preservePlayerOrder: _hasSavedLineup(matchDetails),
         onEditFormation: user.isTeamOwner
             ? () => _openLineupEditor(matchDetails, user)
@@ -535,6 +538,31 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     return (match.attendanceDetailsList ?? []).any(
       (attendance) => attendance.isAttending && attendance.lineupSlot != null,
     );
+  }
+
+  List<UserDetails?> _lineupPositionedPlayers(
+    MatchDetails match,
+    UserDetails user,
+  ) {
+    final formation = PlayerFormation.fromString(
+      match.formation,
+      playerCount: _teamPlayerCount(match, user),
+    );
+    final positioned = List<UserDetails?>.filled(formation.slots.length, null);
+
+    for (final attendance in match.attendanceDetailsList ?? []) {
+      final slot = attendance.lineupSlot;
+      if (!attendance.isAttending ||
+          slot == null ||
+          slot < 0 ||
+          slot >= positioned.length) {
+        continue;
+      }
+
+      positioned[slot] = attendance.userDetails;
+    }
+
+    return positioned;
   }
 
   int _compareLineupAttendance(

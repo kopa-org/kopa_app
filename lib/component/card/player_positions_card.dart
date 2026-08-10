@@ -11,6 +11,7 @@ class PlayerPositionsCard extends StatelessWidget {
   final int playerCount;
   final String formation;
   final List<UserDetails> players;
+  final List<UserDetails?>? positionedPlayers;
   final VoidCallback? onEditFormation;
   final bool preservePlayerOrder;
 
@@ -19,6 +20,7 @@ class PlayerPositionsCard extends StatelessWidget {
     required this.playerCount,
     required this.formation,
     required this.players,
+    this.positionedPlayers,
     this.onEditFormation,
     this.preservePlayerOrder = false,
   });
@@ -32,11 +34,13 @@ class PlayerPositionsCard extends StatelessWidget {
       formation,
       playerCount: playerCount,
     );
-    final sortedPlayers = preservePlayerOrder
-        ? [...players]
-        : _sortPlayersForFormation(players, playerFormation);
-    final starters = sortedPlayers.take(playerFormation.slots.length).toList();
-    final bench = sortedPlayers.skip(playerFormation.slots.length).toList();
+    final starters = positionedPlayers == null
+        ? _startingPlayersForFormation(playerFormation)
+        : _normalizePositionedPlayers(
+            positionedPlayers!,
+            playerFormation.slots.length,
+          );
+    final bench = _benchPlayersFor(starters, playerFormation);
 
     return KopaCard(
       padding: const EdgeInsets.all(Spacing.md),
@@ -83,6 +87,43 @@ class PlayerPositionsCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  List<UserDetails?> _startingPlayersForFormation(PlayerFormation formation) {
+    final sortedPlayers = preservePlayerOrder
+        ? [...players]
+        : _sortPlayersForFormation(players, formation);
+
+    return sortedPlayers.take(formation.slots.length).toList();
+  }
+
+  List<UserDetails?> _normalizePositionedPlayers(
+    List<UserDetails?> positionedPlayers,
+    int slotCount,
+  ) {
+    return List<UserDetails?>.generate(
+      slotCount,
+      (slot) =>
+          slot < positionedPlayers.length ? positionedPlayers[slot] : null,
+    );
+  }
+
+  List<UserDetails> _benchPlayersFor(
+    List<UserDetails?> starters,
+    PlayerFormation formation,
+  ) {
+    if (positionedPlayers == null) {
+      final sortedPlayers = preservePlayerOrder
+          ? [...players]
+          : _sortPlayersForFormation(players, formation);
+
+      return sortedPlayers.skip(formation.slots.length).toList();
+    }
+
+    final starterIds =
+        starters.whereType<UserDetails>().map((player) => player.id).toSet();
+
+    return players.where((player) => !starterIds.contains(player.id)).toList();
   }
 
   List<UserDetails> _sortPlayersForFormation(
@@ -224,7 +265,7 @@ class _Pitch extends StatelessWidget {
   final AppColors colors;
   final AppTextStyles styles;
   final List<FormationSlot> slots;
-  final List<UserDetails> players;
+  final List<UserDetails?> players;
 
   const _Pitch({
     required this.colors,

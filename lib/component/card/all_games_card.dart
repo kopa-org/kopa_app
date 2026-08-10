@@ -12,12 +12,14 @@ class AllGamesCard extends StatelessWidget {
   final ValueChanged<MatchDetails> onMatchTap;
   final Map<int, GlobalKey>? matchItemKeys;
   final String? ownTeamName;
+  final int? currentUserId;
 
   const AllGamesCard({
     required this.matches,
     required this.onMatchTap,
     this.matchItemKeys,
     this.ownTeamName,
+    this.currentUserId,
     super.key,
   });
 
@@ -32,6 +34,7 @@ class AllGamesCard extends StatelessWidget {
       onMatchTap: onMatchTap,
       matchItemKeys: matchItemKeys,
       ownTeamName: resolvedOwnTeamName,
+      currentUserId: currentUserId,
     );
   }
 }
@@ -41,12 +44,14 @@ class _MatchList extends StatelessWidget {
   final ValueChanged<MatchDetails> onMatchTap;
   final Map<int, GlobalKey>? matchItemKeys;
   final String? ownTeamName;
+  final int? currentUserId;
 
   const _MatchList({
     required this.matches,
     required this.onMatchTap,
     this.matchItemKeys,
     this.ownTeamName,
+    this.currentUserId,
   });
 
   @override
@@ -58,6 +63,7 @@ class _MatchList extends StatelessWidget {
           match: entry.$2,
           onTap: () => onMatchTap(entry.$2),
           ownTeamName: ownTeamName,
+          currentUserId: currentUserId,
         );
         final itemKey = matchItemKeys?[entry.$2.id];
 
@@ -74,11 +80,13 @@ class _GameResultRow extends StatelessWidget {
   final MatchDetails match;
   final VoidCallback onTap;
   final String? ownTeamName;
+  final int? currentUserId;
 
   const _GameResultRow({
     required this.match,
     required this.onTap,
     required this.ownTeamName,
+    required this.currentUserId,
   });
 
   @override
@@ -89,6 +97,7 @@ class _GameResultRow extends StatelessWidget {
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
     final ownSide = _OwnTeamSide.from(match, ownTeamName);
     final status = _MatchStatus.from(match, appColors, ownSide);
+    final currentUserDeclined = _currentUserDeclined(match, currentUserId);
     final borderRadius = BorderRadius.circular(Spacing.borderRadiusSmall);
 
     return Semantics(
@@ -143,7 +152,10 @@ class _GameResultRow extends StatelessWidget {
                             ),
                             if (match.isCurrentUserRegistered) ...[
                               const SizedBox(width: 6),
-                              const _SignupBadge(),
+                              const _AttendanceBadge.registered(),
+                            ] else if (currentUserDeclined) ...[
+                              const SizedBox(width: 6),
+                              const _AttendanceBadge.declined(),
                             ],
                             const SizedBox(width: 6),
                             _StatusBadge(status: status),
@@ -187,10 +199,41 @@ class _GameResultRow extends StatelessWidget {
       ),
     );
   }
+
+  bool _currentUserDeclined(MatchDetails match, int? currentUserId) {
+    if (currentUserId == null) return false;
+
+    return (match.attendanceDetailsList ?? []).any(
+      (attendance) =>
+          attendance.userDetails.id == currentUserId && !attendance.isAttending,
+    );
+  }
 }
 
-class _SignupBadge extends StatelessWidget {
-  const _SignupBadge();
+class _AttendanceBadge extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final Color Function(AppColors colors) foregroundColor;
+  final Color Function(AppColors colors) backgroundColor;
+
+  const _AttendanceBadge.registered()
+      : label = 'Tilmeldt',
+        icon = CupertinoIcons.check_mark,
+        foregroundColor = _registeredForegroundColor,
+        backgroundColor = _registeredBackgroundColor;
+
+  const _AttendanceBadge.declined()
+      : label = 'Frameldt',
+        icon = CupertinoIcons.xmark,
+        foregroundColor = _declinedForegroundColor,
+        backgroundColor = _declinedBackgroundColor;
+
+  static Color _registeredForegroundColor(AppColors colors) => colors.grass;
+  static Color _registeredBackgroundColor(AppColors colors) =>
+      colors.lightGrass55;
+  static Color _declinedForegroundColor(AppColors colors) => colors.error;
+  static Color _declinedBackgroundColor(AppColors colors) =>
+      colors.error.withValues(alpha: 0.10);
 
   @override
   Widget build(BuildContext context) {
@@ -202,22 +245,22 @@ class _SignupBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
       decoration: BoxDecoration(
-        color: appColors.lightGrass55,
+        color: backgroundColor(appColors),
         borderRadius: BorderRadius.circular(Spacing.borderRadiusFull),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            CupertinoIcons.check_mark,
+            icon,
             size: 10,
-            color: appColors.grass,
+            color: foregroundColor(appColors),
           ),
           const SizedBox(width: 4),
           Text(
-            'Tilmeldt',
+            label,
             style: appTextStyles.buttonTiny.copyWith(
-              color: appColors.grass,
+              color: foregroundColor(appColors),
               fontWeight: FontWeight.w800,
             ),
           ),

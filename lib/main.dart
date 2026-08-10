@@ -9,8 +9,10 @@ import 'package:go_router/go_router.dart';
 import 'package:kopa/config/app_feature_flags.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/auth_state.dart';
+import 'package:kopa/cubits/feature_flags_cubit.dart';
 import 'package:kopa/navigation/app_router.dart';
 import 'package:kopa/navigation/router_refresh_notifier.dart';
+import 'package:kopa/page/update_required/update_required_gate.dart';
 import 'package:kopa/repositories/auth_repository.dart';
 import 'package:kopa/repository/feature_flags_repository.dart';
 import 'package:kopa/utils/crash_reporting.dart';
@@ -95,6 +97,10 @@ class _KopaBootstrapAppState extends State<KopaBootstrapApp> {
 
     final featureFlags = await featureFlagsRepository.getFeatureFlags();
     final authCubit = AuthCubit(authRepository: authRepository);
+    final featureFlagsCubit = FeatureFlagsCubit(
+      repository: featureFlagsRepository,
+      initialFeatureFlags: featureFlags,
+    );
     final onboardingCubit = OnboardingCubit(onboardingRepository);
 
     // Initialize auth state
@@ -109,6 +115,7 @@ class _KopaBootstrapAppState extends State<KopaBootstrapApp> {
       onboardingRepository: onboardingRepository,
       featureFlags: featureFlags,
       authCubit: authCubit,
+      featureFlagsCubit: featureFlagsCubit,
       onboardingCubit: onboardingCubit,
     );
   }
@@ -125,6 +132,7 @@ class _KopaBootstrapAppState extends State<KopaBootstrapApp> {
             onboardingRepository: result.onboardingRepository,
             featureFlags: result.featureFlags,
             authCubit: result.authCubit,
+            featureFlagsCubit: result.featureFlagsCubit,
             onboardingCubit: result.onboardingCubit,
             initialLocation: widget.initialLocation,
           );
@@ -150,6 +158,7 @@ class _BootstrapResult {
     required this.onboardingRepository,
     required this.featureFlags,
     required this.authCubit,
+    required this.featureFlagsCubit,
     required this.onboardingCubit,
   });
 
@@ -157,6 +166,7 @@ class _BootstrapResult {
   final OnboardingRepository onboardingRepository;
   final AppFeatureFlags featureFlags;
   final AuthCubit authCubit;
+  final FeatureFlagsCubit featureFlagsCubit;
   final OnboardingCubit onboardingCubit;
 }
 
@@ -165,18 +175,24 @@ class KopaApp extends StatefulWidget {
   final OnboardingRepository onboardingRepository;
   final AppFeatureFlags featureFlags;
   final AuthCubit authCubit;
+  final FeatureFlagsCubit featureFlagsCubit;
   final OnboardingCubit onboardingCubit;
   final String? initialLocation;
 
-  const KopaApp({
+  KopaApp({
     super.key,
     required this.authRepository,
     required this.onboardingRepository,
     required this.featureFlags,
     required this.authCubit,
+    FeatureFlagsCubit? featureFlagsCubit,
     required this.onboardingCubit,
     this.initialLocation,
-  });
+  }) : featureFlagsCubit = featureFlagsCubit ??
+            FeatureFlagsCubit(
+              repository: FeatureFlagsRepository(),
+              initialFeatureFlags: featureFlags,
+            );
 
   @override
   State<KopaApp> createState() => _KopaAppState();
@@ -201,6 +217,7 @@ class _KopaAppState extends State<KopaApp> {
       refreshListenable: _refreshNotifier,
       initialLocation: widget.initialLocation,
     );
+    widget.featureFlagsCubit.startWatching();
     PushNotificationsService.instance.setNotificationTapHandler(
       _handleNotificationTap,
     );
@@ -216,6 +233,7 @@ class _KopaAppState extends State<KopaApp> {
   void dispose() {
     _authSubscription?.cancel();
     _deepLinkSubscription?.cancel();
+    widget.featureFlagsCubit.close();
     _refreshNotifier.dispose();
     _matchProgrammeRefreshNotifier.dispose();
     super.dispose();
@@ -259,6 +277,7 @@ class _KopaAppState extends State<KopaApp> {
       child: MultiBlocProvider(
         providers: [
           BlocProvider.value(value: widget.authCubit),
+          BlocProvider.value(value: widget.featureFlagsCubit),
           BlocProvider.value(value: widget.onboardingCubit),
         ],
         child: MaterialApp.router(
@@ -275,6 +294,9 @@ class _KopaAppState extends State<KopaApp> {
             Locale('da'),
             Locale('en'),
           ],
+          builder: (context, child) => UpdateRequiredGate(
+            child: child ?? const SizedBox.shrink(),
+          ),
           routerConfig: _router,
         ),
       ),

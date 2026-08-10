@@ -168,6 +168,7 @@ class _MatchListState extends State<_MatchList> {
 
     final ownTeamName =
         context.read<AuthCubit>().state.user?.teamDetails?.title;
+    final currentUserId = context.read<AuthCubit>().state.user?.id;
 
     return ListView(
       key: _listViewKey,
@@ -177,6 +178,7 @@ class _MatchListState extends State<_MatchList> {
         AllGamesCard(
           matches: matches,
           ownTeamName: ownTeamName,
+          currentUserId: currentUserId,
           matchItemKeys: _matchKeys,
           onMatchTap: (match) => _openMatch(context, match),
         ),
