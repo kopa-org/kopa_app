@@ -63,6 +63,7 @@ class _SquadRosterView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final sortedSquad = sortSquadByPlayerRole(squad);
     final theme = Theme.of(context);
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
     final styles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
@@ -89,10 +90,71 @@ class _SquadRosterView extends StatelessWidget {
           style: styles.body3.copyWith(color: appColors.textSecondary),
         ),
         const SizedBox(height: 20),
-        _RosterCard(squad: squad),
+        _RosterCard(squad: sortedSquad),
       ],
     );
   }
+}
+
+@visibleForTesting
+List<UserDetails> sortSquadByPlayerRole(List<UserDetails> squad) {
+  final indexedSquad = squad.indexed.toList();
+  indexedSquad.sort((a, b) {
+    final roleComparison = _squadRoleSortIndex(a.$2.position)
+        .compareTo(_squadRoleSortIndex(b.$2.position));
+    if (roleComparison != 0) return roleComparison;
+
+    return a.$1.compareTo(b.$1);
+  });
+
+  return indexedSquad.map((entry) => entry.$2).toList();
+}
+
+int _squadRoleSortIndex(String? position) {
+  final value = position?.toLowerCase().trim() ?? '';
+  if (value.isEmpty) return 4;
+
+  if (value.contains('goalkeeper') ||
+      value.contains('keeper') ||
+      value.contains('målmand') ||
+      value.contains('maalmand') ||
+      value.contains('malmand')) {
+    return 0;
+  }
+
+  if (value.contains('centre_back') ||
+      value.contains('center_back') ||
+      value.contains('back_wingback') ||
+      value.contains('midterforsvar') ||
+      value.contains('stopper') ||
+      value.contains('forsvar') ||
+      value.contains('defender') ||
+      value.contains('defence') ||
+      value.contains('defense') ||
+      value.contains('back')) {
+    return 1;
+  }
+
+  if (value.contains('defensive_midfield') ||
+      value.contains('midfield') ||
+      value.contains('midtbane') ||
+      value.contains('midt') ||
+      value.contains('cm') ||
+      value.contains('dm') ||
+      value.contains('om')) {
+    return 2;
+  }
+
+  if (value.contains('wing') ||
+      value.contains('striker') ||
+      value.contains('angreb') ||
+      value.contains('angriber') ||
+      value.contains('attack') ||
+      value.contains('forward')) {
+    return 3;
+  }
+
+  return 4;
 }
 
 class _RosterCard extends StatelessWidget {

@@ -138,8 +138,7 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
                         ),
                       )
                     else
-                      SliverFillRemaining(
-                        hasScrollBody: false,
+                      SliverToBoxAdapter(
                         child: _buildPersonal(
                           fineBox,
                           user,
@@ -352,103 +351,101 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
       (sum, fine) => sum + fine.owedAmount,
     );
 
-    return Column(
-      children: [
-        Expanded(
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-            children: [
-              _KpiCard(
-                label: 'Udestående hos holdet',
-                amount: unpaidAmount.toDouble(),
-                amountColor: appColors.error,
-                icon: Icons.savings_outlined,
-                bottom: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Alt udestående skal afregnes herunder',
-                        style: appTextStyles.body3
-                            .copyWith(color: appColors.textSecondary),
-                      ),
-                    ),
-                    _SmallBadge(
-                      label: '${unpaidFines.length} ubetalte',
-                      backgroundColor: appColors.warning.withValues(alpha: .18),
-                      textColor: const Color(0xFFB77900),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  _PersonalStatTile(
-                      label: 'Bøder', value: '${allFines.length}'),
-                  const SizedBox(width: 8),
-                  _PersonalStatTile(
-                    label: 'Udestående',
-                    value: '$unpaidAmount kr',
-                    valueColor: appColors.error,
-                  ),
-                  const SizedBox(width: 8),
-                  _PersonalStatTile(label: 'Betalt', value: '$paidAmount kr'),
-                ],
-              ),
-              const SizedBox(height: 18),
-              _SectionTitleRow(
-                title: 'Ubetalte bøder',
-                actionLabel: unpaidFines.isEmpty
-                    ? null
-                    : _selectedPersonalFineIds.length == unpaidFines.length
-                        ? 'Fravælg alle (${unpaidFines.length})'
-                        : 'Vælg alle (${unpaidFines.length})',
-                onAction: unpaidFines.isEmpty
-                    ? null
-                    : () => _toggleAllPersonalFines(unpaidFines),
-              ),
-              const SizedBox(height: 10),
-              if (unpaidFines.isEmpty)
-                _EmptyPanel(text: 'Du har ingen ubetalte bøder.')
-              else
-                ...unpaidFines.map(
-                  (fine) => Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: _SelectableFineRow(
-                      fine: fine,
-                      selected: _selectedPersonalFineIds.contains(fine.id),
-                      onTap: () => _togglePersonalFine(fine.id),
-                    ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _KpiCard(
+            label: 'Udestående hos holdet',
+            amount: unpaidAmount.toDouble(),
+            amountColor: appColors.error,
+            icon: Icons.savings_outlined,
+            bottom: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Alt udestående skal afregnes herunder',
+                    style: appTextStyles.body3
+                        .copyWith(color: appColors.textSecondary),
                   ),
                 ),
-              if (allFines.any((fine) => fine.hasBeenPaid)) ...[
-                const SizedBox(height: 18),
-                _SectionTitleRow(title: 'Tidligere bøder'),
-                const SizedBox(height: 10),
-                ...allFines.where((fine) => fine.hasBeenPaid).take(5).map(
-                      (fine) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: _HistoryFineRow(fine: fine),
-                      ),
-                    ),
+                _SmallBadge(
+                  label: '${unpaidFines.length} ubetalte',
+                  backgroundColor: appColors.warning.withValues(alpha: .18),
+                  textColor: const Color(0xFFB77900),
+                ),
               ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              _PersonalStatTile(label: 'Bøder', value: '${allFines.length}'),
+              const SizedBox(width: 8),
+              _PersonalStatTile(
+                label: 'Udestående',
+                value: '$unpaidAmount kr',
+                valueColor: appColors.error,
+              ),
+              const SizedBox(width: 8),
+              _PersonalStatTile(label: 'Betalt', value: '$paidAmount kr'),
             ],
           ),
-        ),
-        if (unpaidFines.isNotEmpty)
-          _PaymentFooter(
-            selectedCount: selectedFines.length,
-            selectedAmount: selectedAmount,
-            userName: user.name,
-            onCashPaid: selectedFines.isEmpty
+          const SizedBox(height: 18),
+          _SectionTitleRow(
+            title: 'Ubetalte bøder',
+            actionLabel: unpaidFines.isEmpty
                 ? null
-                : () => _markSelectedPersonalFinesPaid(
-                      fineBox.id,
-                      selectedFines,
-                      selectedAmount,
-                    ),
+                : _selectedPersonalFineIds.length == unpaidFines.length
+                    ? 'Fravælg alle (${unpaidFines.length})'
+                    : 'Vælg alle (${unpaidFines.length})',
+            onAction: unpaidFines.isEmpty
+                ? null
+                : () => _toggleAllPersonalFines(unpaidFines),
           ),
-      ],
+          const SizedBox(height: 10),
+          if (unpaidFines.isEmpty)
+            _EmptyPanel(text: 'Du har ingen ubetalte bøder.')
+          else
+            ...unpaidFines.map(
+              (fine) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: _SelectableFineRow(
+                  fine: fine,
+                  selected: _selectedPersonalFineIds.contains(fine.id),
+                  onTap: () => _togglePersonalFine(fine.id),
+                ),
+              ),
+            ),
+          if (allFines.any((fine) => fine.hasBeenPaid)) ...[
+            const SizedBox(height: 18),
+            _SectionTitleRow(title: 'Tidligere bøder'),
+            const SizedBox(height: 10),
+            ...allFines.where((fine) => fine.hasBeenPaid).take(5).map(
+                  (fine) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: _HistoryFineRow(fine: fine),
+                  ),
+                ),
+          ],
+          if (unpaidFines.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            _PaymentFooter(
+              selectedCount: selectedFines.length,
+              selectedAmount: selectedAmount,
+              userName: user.name,
+              onCashPaid: selectedFines.isEmpty
+                  ? null
+                  : () => _markSelectedPersonalFinesPaid(
+                        fineBox.id,
+                        selectedFines,
+                        selectedAmount,
+                      ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 
