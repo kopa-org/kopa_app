@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:kopa/component/button/button.dart';
 import 'package:kopa/component/card/player_positions_card.dart';
 import 'package:kopa/component/error_message.dart';
 import 'package:kopa/component/loading_indicator.dart';
@@ -52,6 +51,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
   final Set<int> _savingAttendanceSelectionIds = {};
   final Set<int> _editingAttendanceSelectionIds = {};
   bool _isApprovingAllAttendances = false;
+  bool _isUpdatingRegistration = false;
   int _homeGoals = 0;
   int _awayGoals = 0;
   MatchDetailSegment _selectedSegment = MatchDetailSegment.overview;
@@ -181,9 +181,18 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       selectedSegment: _selectedSegment,
       onSegmentChanged: _selectSegment,
       heroCard: heroCard,
+      usePrematchLayout: true,
+      stickyActionBar: _PrematchRsvpBar(
+        match: matchDetails,
+        currentUser: user,
+        isSaving: _isUpdatingRegistration,
+        onAccept: () => _registerForMatch(matchDetails),
+        onDecline: () => _unregisterFromMatch(matchDetails),
+      ),
       overviewTitle: 'Praktisk information',
       attendanceTitle: 'Tilmeldte spillere',
-      attendanceSegmentLabel: 'Tilmeldte',
+      attendanceSegmentLabel:
+          'Tilmeldte (${matchDetails.attendanceDetailsList?.length ?? 0})',
       showTimelineSegment: false,
       overviewWidgets: const [],
       infoRows: _buildPracticalInfoRows(matchDetails),
@@ -199,6 +208,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         onEditFormation: user.isTeamOwner
             ? () => _openLineupEditor(matchDetails, user)
             : null,
+        showTitle: false,
       ),
       attendanceList: _buildAttendanceList(matchDetails, squad, user),
       ratingsSection: _buildRatingsSection(matchDetails),
@@ -224,6 +234,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         heroTag: widget.heroTag,
         animateCard: widget.heroTag != null,
       ),
+      usePrematchLayout: true,
       showTimelineSegment: false,
     );
   }
@@ -238,13 +249,20 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       InfoRow(
         icon: CupertinoIcons.time,
         title: 'Tidspunkt',
-        value:
-            '${DateHelper.getFormattedTime(matchDetails.date)} (Mødetid: ${DateHelper.getFormattedTime(matchDetails.meetingTime)})',
+        value: DateHelper.getFormattedTime(matchDetails.date),
+      ),
+      InfoRow(
+        icon: CupertinoIcons.alarm,
+        title: 'Mødetid',
+        value: DateHelper.getFormattedTime(matchDetails.meetingTime),
       ),
       InfoRow(
         icon: CupertinoIcons.location_solid,
         title: 'Lokation',
-        value: matchDetails.location,
+        trailing: _LocationMapsLink(
+          location: matchDetails.location,
+          onPressed: () => _openNavigation(matchDetails),
+        ),
       ),
       InfoRow(
         icon: CupertinoIcons.clock,
@@ -254,8 +272,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       InfoRow(
         icon: CupertinoIcons.person_2,
         title: 'Tilmeldinger',
-        value:
-            '${matchDetails.registeredCount} tilmeldte / ${matchDetails.unavailableCount} frameldte',
+        value: '${matchDetails.registeredCount} tilmeldte',
       ),
       InfoRow(
         icon: CupertinoIcons.checkmark_seal,
@@ -265,21 +282,14 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
             : matchDetails.isCurrentUserSelected == false
                 ? 'Ikke udtaget'
                 : 'Afventer',
+        valueColor: matchDetails.isCurrentUserSelected == true
+            ? const Color(0xFF00964E)
+            : const Color(0xFFF97316),
       ),
       InfoRow(
         icon: CupertinoIcons.pencil,
         title: 'Noter',
         value: matchDetails.notes ?? 'Ingen noter',
-      ),
-      Padding(
-        padding: const EdgeInsets.only(top: 8),
-        child: Center(
-          child: Button(
-            buttonText: 'Åbn navigation',
-            onPressed: () => _openNavigation(matchDetails),
-            icon: CupertinoIcons.map,
-          ),
-        ),
       ),
     ];
   }
@@ -601,6 +611,64 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     }
   }
 
+  Future<void> _registerForMatch(MatchDetails match) async {
+    if (_isUpdatingRegistration) return;
+
+    setState(() {
+      _isUpdatingRegistration = true;
+    });
+
+    try {
+      await MatchRepository.registerForMatch(match.id);
+      AppAnalytics.logEvent('match_registered');
+      await _refreshMatchAndSquad();
+    } catch (error, stack) {
+      CrashReporting.logWebError(error, stack);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Kunne ikke tilmelde dig kampen. Prøv igen.'),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isUpdatingRegistration = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _unregisterFromMatch(MatchDetails match) async {
+    if (_isUpdatingRegistration) return;
+
+    setState(() {
+      _isUpdatingRegistration = true;
+    });
+
+    try {
+      await MatchRepository.unregisterFromMatch(match.id);
+      AppAnalytics.logEvent('match_unregistered');
+      await _refreshMatchAndSquad();
+    } catch (error, stack) {
+      CrashReporting.logWebError(error, stack);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Kunne ikke melde afbud. Prøv igen.'),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isUpdatingRegistration = false;
+        });
+      }
+    }
+  }
+
   Widget? _buildRatingsSection(MatchDetails match) {
     final ratings = match.playerRatingDetailsList ?? [];
     if (ratings.isEmpty) return null;
@@ -783,7 +851,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       return 'I gang eller afsluttet';
     }
 
-    return '${countdown.inDays} dage ${countdown.inHours % 24} timer ${countdown.inMinutes % 60} min';
+    return '${countdown.inDays} dage ${countdown.inHours % 24} timer';
   }
 
   Future<void> _openNavigation(MatchDetails match) async {
@@ -792,6 +860,335 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       'https://www.google.com/maps/search/?api=1&query=$query',
     );
     await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+}
+
+class _LocationMapsLink extends StatelessWidget {
+  final String location;
+  final VoidCallback onPressed;
+
+  const _LocationMapsLink({
+    required this.location,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final styles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return CupertinoButton(
+      minimumSize: const Size(0, 28),
+      padding: EdgeInsets.zero,
+      onPressed: onPressed,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(
+            child: Text(
+              location,
+              style: styles.body3.copyWith(
+                color: colors.primary,
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                decoration: TextDecoration.underline,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.right,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Icon(
+            CupertinoIcons.location_north,
+            color: colors.primary,
+            size: 16,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PrematchRsvpBar extends StatelessWidget {
+  final MatchDetails match;
+  final UserDetails currentUser;
+  final bool isSaving;
+  final VoidCallback onAccept;
+  final VoidCallback onDecline;
+
+  const _PrematchRsvpBar({
+    required this.match,
+    required this.currentUser,
+    required this.isSaving,
+    required this.onAccept,
+    required this.onDecline,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final attendance = _currentUserAttendance;
+    final isDeclined = attendance?.isAttending == false;
+    final isAttending = match.isCurrentUserRegistered ||
+        (attendance != null && attendance.isAttending);
+
+    if (isAttending && !isDeclined) {
+      return _PrematchRsvpStatusBar(
+        message: 'Du er tilmeldt kampen!',
+        messageColor: const Color(0xFF00964E),
+        backgroundColor: const Color(0xFFE8F2ED),
+        icon: CupertinoIcons.checkmark_alt,
+        actionText: 'Kan ikke alligevel? Meld afbud',
+        actionColor: const Color(0xFF877B70),
+        isSaving: isSaving,
+        onAction: onDecline,
+      );
+    }
+
+    if (isDeclined) {
+      return _PrematchRsvpStatusBar(
+        message: 'Du har meldt afbud',
+        messageColor: const Color(0xFF524438),
+        backgroundColor: const Color(0xFFF1F4F2),
+        actionText: 'Alligevel klar? Tilmeld dig',
+        actionColor: const Color(0xFF00964E),
+        isSaving: isSaving,
+        onAction: onAccept,
+      );
+    }
+
+    return _PrematchRsvpChoiceBar(
+      isSaving: isSaving,
+      onAccept: onAccept,
+      onDecline: onDecline,
+    );
+  }
+
+  EventAttendanceDetails? get _currentUserAttendance {
+    for (final attendance in match.attendanceDetailsList ?? []) {
+      if (attendance.userDetails.id == currentUser.id) return attendance;
+    }
+    return null;
+  }
+}
+
+class _PrematchRsvpChoiceBar extends StatelessWidget {
+  final bool isSaving;
+  final VoidCallback onAccept;
+  final VoidCallback onDecline;
+
+  const _PrematchRsvpChoiceBar({
+    required this.isSaving,
+    required this.onAccept,
+    required this.onDecline,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
+
+    return _PrematchStickySurface(
+      child: Row(
+        children: [
+          Expanded(
+            child: _PrematchRsvpButton(
+              label: 'Nej, kan ikke',
+              foregroundColor: const Color(0xFF524438),
+              backgroundColor: Colors.transparent,
+              borderColor: const Color(0xFF524438),
+              isSaving: isSaving,
+              onPressed: onDecline,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: _PrematchRsvpButton(
+              label: 'Ja, jeg kommer',
+              icon: CupertinoIcons.checkmark_alt,
+              foregroundColor: Colors.white,
+              backgroundColor: colors.primary,
+              isSaving: isSaving,
+              onPressed: onAccept,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PrematchRsvpStatusBar extends StatelessWidget {
+  final String message;
+  final Color messageColor;
+  final Color backgroundColor;
+  final IconData? icon;
+  final String actionText;
+  final Color actionColor;
+  final bool isSaving;
+  final VoidCallback onAction;
+
+  const _PrematchRsvpStatusBar({
+    required this.message,
+    required this.messageColor,
+    required this.backgroundColor,
+    required this.actionText,
+    required this.actionColor,
+    required this.isSaving,
+    required this.onAction,
+    this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final styles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return _PrematchStickySurface(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, color: messageColor, size: 18),
+                  const SizedBox(width: 8),
+                ],
+                Flexible(
+                  child: Text(
+                    message,
+                    style: styles.body3.copyWith(
+                      color: messageColor,
+                      fontWeight: FontWeight.w800,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          CupertinoButton(
+            minimumSize: const Size(0, 30),
+            padding: const EdgeInsets.only(top: 8),
+            onPressed: isSaving ? null : onAction,
+            child: isSaving
+                ? const CupertinoActivityIndicator(radius: 8)
+                : Text(
+                    actionText,
+                    style: styles.caption2.copyWith(
+                      color: actionColor,
+                      decoration: TextDecoration.underline,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PrematchRsvpButton extends StatelessWidget {
+  final String label;
+  final IconData? icon;
+  final Color foregroundColor;
+  final Color backgroundColor;
+  final Color? borderColor;
+  final bool isSaving;
+  final VoidCallback onPressed;
+
+  const _PrematchRsvpButton({
+    required this.label,
+    required this.foregroundColor,
+    required this.backgroundColor,
+    required this.isSaving,
+    required this.onPressed,
+    this.icon,
+    this.borderColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final styles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return CupertinoButton(
+      padding: EdgeInsets.zero,
+      onPressed: isSaving ? null : onPressed,
+      child: Container(
+        height: 48,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          border: Border.all(color: borderColor ?? backgroundColor),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: isSaving
+            ? CupertinoActivityIndicator(color: foregroundColor)
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (icon != null) ...[
+                    Icon(icon, color: foregroundColor, size: 14),
+                    const SizedBox(width: 6),
+                  ],
+                  Flexible(
+                    child: Text(
+                      label,
+                      style: styles.body3.copyWith(
+                        color: foregroundColor,
+                        fontWeight: FontWeight.w800,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+}
+
+class _PrematchStickySurface extends StatelessWidget {
+  final Widget child;
+
+  const _PrematchStickySurface({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colors.white.withValues(alpha: 0.93),
+        border: const Border(
+          top: BorderSide(color: Color(0xFFE0E6E2)),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+          child: child,
+        ),
+      ),
+    );
   }
 }
 

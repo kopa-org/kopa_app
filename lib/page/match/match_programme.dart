@@ -269,7 +269,7 @@ class _MatchListState extends State<_MatchList> {
       'match_opened',
       parameters: {'source': 'match_programme'},
     );
-    await Navigator.of(context).push(
+    await Navigator.of(context, rootNavigator: true).push(
       MaterialPageRoute(
         builder: (context) => MatchDetailsPage(
           matchId: matchDetails.id,

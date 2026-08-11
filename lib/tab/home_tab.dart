@@ -1361,7 +1361,7 @@ TextStyle _displayStyle(BuildContext context) {
 
 void _openMatch(BuildContext context, MatchDetails match, String source) {
   AppAnalytics.logEvent('match_opened', parameters: {'source': source});
-  Navigator.of(context).push(
+  Navigator.of(context, rootNavigator: true).push(
     MaterialPageRoute(
       builder: (context) => MatchDetailsPage(
         matchId: match.id,

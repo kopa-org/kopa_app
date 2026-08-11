@@ -8,6 +8,8 @@ class InfoRow extends StatelessWidget {
   final String title;
   final String? value;
   final Widget? trailing;
+  final Color? valueColor;
+  final bool underlineValue;
 
   const InfoRow({
     super.key,
@@ -15,6 +17,8 @@ class InfoRow extends StatelessWidget {
     required this.title,
     this.value,
     this.trailing,
+    this.valueColor,
+    this.underlineValue = false,
   });
 
   @override
@@ -25,28 +29,53 @@ class InfoRow extends StatelessWidget {
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: Spacing.sm),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
           Icon(
             icon,
-            size: 24,
+            size: 20,
             color: appColors.primary,
           ),
-          const SizedBox(width: Spacing.md),
-          Expanded(
+          const SizedBox(width: 12),
+          SizedBox(
+            width: 112,
             child: Text(
               title,
-              style: appTextStyles.body,
+              style: appTextStyles.body3.copyWith(
+                color: const Color(0xFF524438),
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
+          const SizedBox(width: Spacing.sm),
           if (value != null)
-            Text(
-              value!,
-              style: appTextStyles.bodyBold,
+            Expanded(
+              child: Text(
+                value!,
+                style: appTextStyles.body3.copyWith(
+                  color: valueColor ?? appColors.dirt,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  decoration: underlineValue
+                      ? TextDecoration.underline
+                      : TextDecoration.none,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.right,
+              ),
             )
           else if (trailing != null)
-            trailing!,
+            Expanded(
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: trailing!,
+              ),
+            ),
         ],
       ),
     );

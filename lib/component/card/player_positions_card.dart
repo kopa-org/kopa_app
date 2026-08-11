@@ -14,6 +14,7 @@ class PlayerPositionsCard extends StatelessWidget {
   final List<UserDetails?>? positionedPlayers;
   final VoidCallback? onEditFormation;
   final bool preservePlayerOrder;
+  final bool showTitle;
 
   const PlayerPositionsCard({
     super.key,
@@ -23,6 +24,7 @@ class PlayerPositionsCard extends StatelessWidget {
     this.positionedPlayers,
     this.onEditFormation,
     this.preservePlayerOrder = false,
+    this.showTitle = true,
   });
 
   @override
@@ -47,12 +49,14 @@ class PlayerPositionsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            'Holdopstilling',
-            style: styles.h4,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: Spacing.xs),
+          if (showTitle) ...[
+            Text(
+              'Holdopstilling',
+              style: styles.h4,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: Spacing.xs),
+          ],
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

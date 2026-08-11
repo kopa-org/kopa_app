@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/component/section_header/section_header.dart';
@@ -33,6 +34,8 @@ class MatchDetailTemplate extends StatelessWidget {
   final String attendanceEmptyMessage;
   final String timelineEmptyMessage;
   final bool showTimelineSegment;
+  final bool usePrematchLayout;
+  final Widget? stickyActionBar;
 
   const MatchDetailTemplate({
     super.key,
@@ -56,26 +59,88 @@ class MatchDetailTemplate extends StatelessWidget {
     this.attendanceEmptyMessage = 'Ingen tilmeldte spillere endnu.',
     this.timelineEmptyMessage = 'Ingen begivenheder registreret.',
     this.showTimelineSegment = true,
+    this.usePrematchLayout = false,
+    this.stickyActionBar,
   });
 
   @override
   Widget build(BuildContext context) {
-    return PageScaffold(
-      title: 'Kampdetaljer',
-      showBackButton: true,
-      onRefresh: onRefresh,
-      body: SingleChildScrollView(
-        padding: Spacing.screenPadding,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    if (usePrematchLayout) {
+      return PageScaffold(
+        title: 'Kampdetaljer',
+        showTopBar: false,
+        onRefresh: onRefresh,
+        body: Stack(
+          fit: StackFit.expand,
           children: [
-            heroCard,
-            const SizedBox(height: Spacing.lg),
-            _buildSegmentedControl(context),
-            const SizedBox(height: Spacing.lg),
-            ..._buildSelectedSegment(context),
+            SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(
+                16,
+                84,
+                16,
+                stickyActionBar == null ? 32 : 220,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  heroCard,
+                  const SizedBox(height: 20),
+                  _buildSegmentedControl(context),
+                  const SizedBox(height: 20),
+                  ..._buildSelectedSegment(context),
+                ],
+              ),
+            ),
+            if (stickyActionBar != null)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: stickyActionBar!,
+              ),
+            const Positioned(
+              left: 0,
+              right: 0,
+              top: 0,
+              child: _MatchDetailsStickyHeader(),
+            ),
           ],
         ),
+      );
+    }
+
+    return PageScaffold(
+      title: 'Kampdetaljer',
+      showTopBar: false,
+      onRefresh: onRefresh,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(
+              16,
+              84,
+              16,
+              16,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                heroCard,
+                const SizedBox(height: Spacing.lg),
+                _buildSegmentedControl(context),
+                const SizedBox(height: Spacing.lg),
+                ..._buildSelectedSegment(context),
+              ],
+            ),
+          ),
+          const Positioned(
+            left: 0,
+            right: 0,
+            top: 0,
+            child: _MatchDetailsStickyHeader(),
+          ),
+        ],
       ),
     );
   }
@@ -94,29 +159,35 @@ class MatchDetailTemplate extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      decoration: BoxDecoration(
-        color: colors.white,
-        borderRadius: BorderRadius.circular(Spacing.borderRadiusSmall),
-      ),
+      padding:
+          usePrematchLayout ? const EdgeInsets.symmetric(horizontal: 4) : null,
+      decoration: usePrematchLayout
+          ? null
+          : BoxDecoration(
+              color: colors.white,
+              borderRadius: BorderRadius.circular(Spacing.borderRadiusSmall),
+            ),
       child: SegmentedButtonSlide(
         selectedEntry: _segmentIndex(selectedSegment),
         onChange: (index) => onSegmentChanged?.call(_segmentFromIndex(index)),
         animationDuration: const Duration(milliseconds: 220),
         curve: Curves.easeOutCubic,
-        height: 40,
-        padding: const EdgeInsets.all(4),
-        borderRadius: BorderRadius.circular(Spacing.borderRadiusSmall),
+        height: usePrematchLayout ? 38 : 40,
+        padding: usePrematchLayout ? EdgeInsets.zero : const EdgeInsets.all(4),
+        borderRadius: BorderRadius.circular(12),
         textOverflow: TextOverflow.ellipsis,
         colors: SegmentedButtonSlideColors(
-          barColor: colors.offWhite,
+          barColor: usePrematchLayout ? colors.offWhite : colors.offWhite,
           backgroundSelectedColor: colors.lightGrass,
         ),
         selectedTextStyle: styles.caption.copyWith(
-          color: colors.black,
+          color: usePrematchLayout ? const Color(0xFF105230) : colors.black,
+          fontSize: usePrematchLayout ? 13 : null,
           fontWeight: FontWeight.w700,
         ),
         unselectedTextStyle: styles.caption.copyWith(
-          color: colors.dirt,
+          color: usePrematchLayout ? const Color(0xFF524438) : colors.dirt,
+          fontSize: usePrematchLayout ? 13 : null,
           fontWeight: FontWeight.w600,
         ),
         hoverTextStyle: styles.caption.copyWith(
@@ -169,6 +240,23 @@ class MatchDetailTemplate extends StatelessWidget {
 
     switch (effectiveSegment) {
       case MatchDetailSegment.overview:
+        if (usePrematchLayout) {
+          return [
+            if (infoRows.isNotEmpty) ...[
+              const SizedBox(height: 18),
+              _PrematchSectionTitle(title: overviewTitle),
+              _PrematchInfoCard(children: infoRows),
+            ],
+            ...overviewWidgets,
+            if (playerPositions != null) ...[
+              const SizedBox(height: 26),
+              _PrematchSectionTitle(title: 'Holdopstilling'),
+              playerPositions!,
+              const SizedBox(height: 18),
+            ],
+          ];
+        }
+
         return [
           ...overviewWidgets,
           if (infoRows.isNotEmpty) ...[
@@ -208,6 +296,93 @@ class MatchDetailTemplate extends StatelessWidget {
             ...timelineItems,
         ];
     }
+  }
+}
+
+class _MatchDetailsStickyHeader extends StatelessWidget {
+  const _MatchDetailsStickyHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final styles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colors.background.withValues(alpha: 0.96),
+        boxShadow: [
+          BoxShadow(
+            color: colors.background.withValues(alpha: 0.85),
+            blurRadius: 10,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+        child: Row(
+          children: [
+            CupertinoButton(
+              minimumSize: const Size(32, 32),
+              padding: EdgeInsets.zero,
+              onPressed: () => Navigator.of(context).pop(),
+              child: Icon(
+                CupertinoIcons.back,
+                color: colors.dirt,
+                size: 30,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Text(
+              'Kampdetaljer',
+              style: styles.h5.copyWith(fontWeight: FontWeight.w800),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PrematchSectionTitle extends StatelessWidget {
+  final String title;
+
+  const _PrematchSectionTitle({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    final styles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Text(
+        title,
+        style: styles.h5.copyWith(fontWeight: FontWeight.w800),
+      ),
+    );
+  }
+}
+
+class _PrematchInfoCard extends StatelessWidget {
+  final List<Widget> children;
+
+  const _PrematchInfoCard({required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: colors.white,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(children: children),
+    );
   }
 }
 
