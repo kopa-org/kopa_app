@@ -45,6 +45,78 @@ void main() {
   });
 
   group('AppRouter.redirectPathFor', () {
+    test('starts unauthenticated normal launches on welcome', () {
+      final redirect = AppRouter.redirectPathFor(
+        path: AppRouter.home,
+        authState: const AuthState(status: AuthStatus.unauthenticated),
+      );
+
+      expect(redirect, AppRouter.welcome);
+    });
+
+    test('keeps explicit welcome available for unauthenticated users', () {
+      final redirect = AppRouter.redirectPathFor(
+        path: AppRouter.welcome,
+        authState: const AuthState(status: AuthStatus.unauthenticated),
+      );
+
+      expect(redirect, isNull);
+    });
+
+    test('keeps explicit login available for unauthenticated users', () {
+      final redirect = AppRouter.redirectPathFor(
+        path: AppRouter.login,
+        authState: const AuthState(status: AuthStatus.unauthenticated),
+      );
+
+      expect(redirect, isNull);
+    });
+
+    test('keeps explicit register available for unauthenticated users', () {
+      final redirect = AppRouter.redirectPathFor(
+        path: AppRouter.register,
+        authState: const AuthState(status: AuthStatus.unauthenticated),
+      );
+
+      expect(redirect, isNull);
+    });
+
+    test('starts returning logged-out users on login', () {
+      final redirect = AppRouter.redirectPathFor(
+        path: AppRouter.home,
+        authState: const AuthState(
+          status: AuthStatus.unauthenticated,
+          hasAuthenticatedBefore: true,
+        ),
+      );
+
+      expect(redirect, AppRouter.login);
+    });
+
+    test('sends returning logged-out users away from welcome', () {
+      final redirect = AppRouter.redirectPathFor(
+        path: AppRouter.welcome,
+        authState: const AuthState(
+          status: AuthStatus.unauthenticated,
+          hasAuthenticatedBefore: true,
+        ),
+      );
+
+      expect(redirect, AppRouter.login);
+    });
+
+    test('keeps register reachable for returning logged-out users', () {
+      final redirect = AppRouter.redirectPathFor(
+        path: AppRouter.register,
+        authState: const AuthState(
+          status: AuthStatus.unauthenticated,
+          hasAuthenticatedBefore: true,
+        ),
+      );
+
+      expect(redirect, isNull);
+    });
+
     test('starts restored teamless users on onboarding', () {
       final redirect = AppRouter.redirectPathFor(
         path: AppRouter.home,
@@ -138,9 +210,30 @@ void main() {
       expect(redirect, AppRouter.home);
     });
 
+    test('sends authenticated users with teams away from welcome', () {
+      final redirect = AppRouter.redirectPathFor(
+        path: AppRouter.welcome,
+        authState: AuthState(
+          status: AuthStatus.authenticated,
+          user: _user(teamDetails: _team()),
+        ),
+      );
+
+      expect(redirect, AppRouter.home);
+    });
+
     test('keeps unauthenticated join links on the explicit join route', () {
       final redirect = AppRouter.redirectPathFor(
         path: AppRouter.join,
+        authState: const AuthState(),
+      );
+
+      expect(redirect, isNull);
+    });
+
+    test('keeps unauthenticated invite links on the explicit invite route', () {
+      final redirect = AppRouter.redirectPathFor(
+        path: AppRouter.invite,
         authState: const AuthState(),
       );
 

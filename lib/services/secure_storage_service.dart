@@ -7,6 +7,7 @@ class SecureStorageService {
     iOptions: IOSOptions(accessibility: KeychainAccessibility.unlocked),
   );
   static const _lineupDragHintSeenKey = 'lineupDragHintSeen';
+  static const _hasAuthenticatedBeforeKey = 'hasAuthenticatedBefore';
 
   // ------------------------
   // Token methods
@@ -15,6 +16,7 @@ class SecureStorageService {
   static Future<void> setToken(String token) async {
     await _storage.delete(key: 'token');
     await _storage.write(key: 'token', value: token);
+    await setHasAuthenticatedBefore();
   }
 
   static Future<void> deleteToken() async {
@@ -50,6 +52,15 @@ class SecureStorageService {
     await _storage.write(key: _lineupDragHintSeenKey, value: 'true');
   }
 
+  static Future<bool> hasAuthenticatedBefore() async {
+    final value = await _storage.read(key: _hasAuthenticatedBeforeKey);
+    return value == 'true';
+  }
+
+  static Future<void> setHasAuthenticatedBefore() async {
+    await _storage.write(key: _hasAuthenticatedBeforeKey, value: 'true');
+  }
+
   // ------------------------
   // User info methods
   // ------------------------
@@ -78,7 +89,11 @@ class SecureStorageService {
   }
 
   static Future<void> clearUserData() async {
+    final hadAuthenticatedBefore = await hasAuthenticatedBefore();
     await _storage.deleteAll();
+    if (hadAuthenticatedBefore) {
+      await setHasAuthenticatedBefore();
+    }
     await deleteToken();
   }
 

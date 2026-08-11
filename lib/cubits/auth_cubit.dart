@@ -3,6 +3,7 @@ import 'package:kopa/model/user_details.dart';
 import 'package:kopa/repositories/auth_repository.dart';
 import 'package:kopa/utils/app_analytics.dart';
 import 'package:kopa/services/push_notifications_service.dart';
+import 'package:kopa/services/secure_storage_service.dart';
 import 'auth_state.dart';
 
 class AuthCubit extends Cubit<AuthState> {
@@ -13,12 +14,22 @@ class AuthCubit extends Cubit<AuthState> {
         super(const AuthState());
 
   Future<void> init() async {
-    emit(state.copyWith(status: AuthStatus.loading));
+    final hasAuthenticatedBefore =
+        await SecureStorageService.hasAuthenticatedBefore();
+    emit(state.copyWith(
+      status: AuthStatus.loading,
+      hasAuthenticatedBefore: hasAuthenticatedBefore,
+    ));
     try {
       final user = await _authRepository.getCurrentUser();
       if (user != null) {
+        await SecureStorageService.setHasAuthenticatedBefore();
         await AppAnalytics.setCurrentUser(user);
-        emit(state.copyWith(status: AuthStatus.authenticated, user: user));
+        emit(state.copyWith(
+          status: AuthStatus.authenticated,
+          user: user,
+          hasAuthenticatedBefore: true,
+        ));
       } else {
         await AppAnalytics.setCurrentUser(null);
         emit(state.copyWith(status: AuthStatus.unauthenticated));
@@ -34,9 +45,14 @@ class AuthCubit extends Cubit<AuthState> {
     final success = await _authRepository.login(email, password);
     if (success) {
       final user = await _authRepository.getCurrentUser();
+      await SecureStorageService.setHasAuthenticatedBefore();
       await AppAnalytics.logLogin(success: true);
       await AppAnalytics.setCurrentUser(user);
-      emit(state.copyWith(status: AuthStatus.authenticated, user: user));
+      emit(state.copyWith(
+        status: AuthStatus.authenticated,
+        user: user,
+        hasAuthenticatedBefore: true,
+      ));
     } else {
       await AppAnalytics.logLogin(success: false);
       emit(state.copyWith(
@@ -50,7 +66,11 @@ class AuthCubit extends Cubit<AuthState> {
     await PushNotificationsService.instance.unregisterCurrentToken();
     await _authRepository.logout();
     await AppAnalytics.setCurrentUser(null);
-    emit(state.copyWith(status: AuthStatus.unauthenticated, user: null));
+    emit(state.copyWith(
+      status: AuthStatus.unauthenticated,
+      user: null,
+      hasAuthenticatedBefore: true,
+    ));
   }
 
   void updateUser(UserDetails user) {

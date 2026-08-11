@@ -8,11 +8,13 @@ class AuthState {
   final AuthStatus status;
   final UserDetails? user;
   final String? errorMessage;
+  final bool hasAuthenticatedBefore;
 
   const AuthState({
     this.status = AuthStatus.initial,
     this.user,
     this.errorMessage,
+    this.hasAuthenticatedBefore = false,
   });
 
   bool get isAuthenticated => status == AuthStatus.authenticated;
@@ -21,11 +23,14 @@ class AuthState {
     AuthStatus? status,
     Object? user = _unset,
     String? errorMessage,
+    bool? hasAuthenticatedBefore,
   }) {
     return AuthState(
       status: status ?? this.status,
       user: user == _unset ? this.user : user as UserDetails?,
       errorMessage: errorMessage ?? this.errorMessage,
+      hasAuthenticatedBefore:
+          hasAuthenticatedBefore ?? this.hasAuthenticatedBefore,
     );
   }
 }

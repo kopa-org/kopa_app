@@ -14,6 +14,7 @@ import 'package:kopa/page/profile/dbu_webview_page.dart';
 import 'package:kopa/page/team/team_join_requests_page.dart';
 import 'package:kopa/page/team_fines/team_fines_page.dart';
 import 'package:kopa/page/statistics/statistics_page.dart';
+import 'package:kopa/pages/landing_page.dart';
 import 'package:kopa/pages/login_page.dart';
 import 'package:kopa/pages/onboarding_page.dart';
 import 'package:kopa/pages/register_page.dart';
@@ -25,6 +26,7 @@ import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 abstract final class AppRouter {
   static const login = '/login';
   static const register = '/register';
+  static const welcome = '/welcome';
   static const home = '/';
   static const match = '/match';
   static const statistics = '/statistics';
@@ -121,6 +123,10 @@ abstract final class AppRouter {
         GoRoute(
           path: '$playerPlus/in-form',
           builder: (context, state) => const InFormPage(),
+        ),
+        GoRoute(
+          path: welcome,
+          builder: (context, state) => const LandingPage(),
         ),
         GoRoute(
           path: login,
@@ -302,6 +308,7 @@ abstract final class AppRouter {
         (authState.status == AuthStatus.loading && authState.user != null);
     final isLoggingIn = path == login;
     final isRegistering = path == register;
+    final isWelcome = path == welcome;
     final isInvite = path == invite;
     final isJoin = path == join;
     final isOnboarding = path == onboarding;
@@ -311,8 +318,16 @@ abstract final class AppRouter {
             onboardingState?.pendingJoinRequestId != null ||
             authState.user?.onboardingState?.isWaitingApproval == true;
 
-    if (!isLoggedIn && !isLoggingIn && !isRegistering && !isInvite && !isJoin) {
-      return login;
+    if (!isLoggedIn) {
+      if (isInvite || isJoin || isLoggingIn || isRegistering) {
+        return null;
+      }
+
+      if (authState.hasAuthenticatedBefore) {
+        return login;
+      }
+
+      return isWelcome ? null : welcome;
     }
 
     if (isLoggedIn && !hasTeam) {
@@ -327,7 +342,8 @@ abstract final class AppRouter {
       return onboarding;
     }
 
-    if (isLoggedIn && (isLoggingIn || isRegistering || isOnboarding)) {
+    if (isLoggedIn &&
+        (isLoggingIn || isRegistering || isWelcome || isOnboarding)) {
       return home;
     }
 
