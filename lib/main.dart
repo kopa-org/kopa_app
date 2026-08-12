@@ -257,6 +257,16 @@ class _KopaAppState extends State<KopaApp> {
   void _handleNotificationTap(Map<String, dynamic> data) {
     if (data['type'] == 'team_join_request') {
       _router.go(AppRouter.teamJoinRequests);
+      return;
+    }
+
+    if (data['type'] == 'match_calendar_changed') {
+      final matchId = int.tryParse(
+        (data['match_id'] ?? data['event_id'] ?? '').toString(),
+      );
+      if (matchId == null) return;
+
+      _router.go(AppRouter.matchDetailsPath(matchId));
     }
   }
 

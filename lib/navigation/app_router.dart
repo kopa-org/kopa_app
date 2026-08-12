@@ -8,6 +8,7 @@ import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/auth_state.dart';
 import 'package:kopa/cubits/onboarding_cubit.dart';
 import 'package:kopa/page/in_form/in_form_page.dart';
+import 'package:kopa/page/match/match_details_page.dart';
 import 'package:kopa/page/match/match_programme.dart';
 import 'package:kopa/page/player_plus/player_plus_page.dart';
 import 'package:kopa/page/profile/dbu_webview_page.dart';
@@ -29,6 +30,7 @@ abstract final class AppRouter {
   static const welcome = '/welcome';
   static const home = '/';
   static const match = '/match';
+  static const matchDetails = '/match/details';
   static const statistics = '/statistics';
   static const playerPlus = '/player-plus';
   static const playerPlusInForm = '/player-plus/in-form';
@@ -39,6 +41,8 @@ abstract final class AppRouter {
   static const invite = '/invite';
   static const join = '/join';
   static const onboarding = '/onboarding';
+
+  static String matchDetailsPath(int matchId) => '$matchDetails/$matchId';
 
   static GoRouter create({
     required AuthCubit authCubit,
@@ -111,6 +115,20 @@ abstract final class AppRouter {
         GoRoute(
           path: teamJoinRequests,
           builder: (context, state) => const TeamJoinRequestsPage(),
+        ),
+        GoRoute(
+          path: '$matchDetails/:matchId',
+          builder: (context, state) {
+            final matchId = int.tryParse(
+              state.pathParameters['matchId'] ?? '',
+            );
+
+            if (matchId == null) {
+              return const MatchProgrammePage();
+            }
+
+            return MatchDetailsPage(matchId: matchId);
+          },
         ),
         GoRoute(
           path: onboarding,
