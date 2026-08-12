@@ -222,7 +222,7 @@ class _KopaAppState extends State<KopaApp> {
       _handleNotificationTap,
     );
     _authSubscription = widget.authCubit.stream.listen(_handleAuthStateChanged);
-    if (defaultTargetPlatform == TargetPlatform.iOS) {
+    if (_supportsNativeDeepLinks) {
       _deepLinkSubscription =
           DeepLinkService.linkStream.listen(_handleDeepLink);
     }
@@ -268,6 +268,12 @@ class _KopaAppState extends State<KopaApp> {
 
       _router.go(AppRouter.matchDetailsPath(matchId));
     }
+  }
+
+  bool get _supportsNativeDeepLinks {
+    return !kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.iOS ||
+            defaultTargetPlatform == TargetPlatform.android);
   }
 
   @override
