@@ -192,7 +192,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       overviewTitle: 'Praktisk information',
       attendanceTitle: 'Tilmeldte spillere',
       attendanceSegmentLabel:
-          'Tilmeldte (${matchDetails.attendanceDetailsList?.length ?? 0})',
+          'Tilmeldte (${matchDetails.attendingAttendanceDetails.length})',
       showTimelineSegment: false,
       overviewWidgets: const [],
       infoRows: _buildPracticalInfoRows(matchDetails),
@@ -298,9 +298,15 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       MatchDetails match, List<UserDetails> squad, UserDetails user) {
     final attending = match.attendingAttendanceDetails;
     final declined = match.declinedAttendanceDetails;
+    final noRsvp = _membersWithoutRsvp(match, squad);
 
     if (user.isTeamOwner && !match.hasMatchBeenPlayed) {
-      return _buildLeaderAttendanceApprovalList(match, attending, declined);
+      return _buildLeaderAttendanceApprovalList(
+        match,
+        attending,
+        declined,
+        noRsvp,
+      );
     }
 
     return [
@@ -312,6 +318,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
                     ? 'Ikke udtaget'
                     : a.userDetails.email,
           )),
+      ..._buildNoRsvpSection(noRsvp),
       ..._buildDeclinedAttendanceSection(declined),
     ];
   }
@@ -320,6 +327,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     MatchDetails match,
     List<EventAttendanceDetails> attending,
     List<EventAttendanceDetails> declined,
+    List<UserDetails> noRsvp,
   ) {
     final pending = attending.where((a) => a.isSelected == null).toList();
     final handled = attending.where((a) => a.isSelected != null).toList();
@@ -394,9 +402,43 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       );
     }
 
+    widgets.addAll(_buildNoRsvpSection(noRsvp));
     widgets.addAll(_buildDeclinedAttendanceSection(declined));
 
     return widgets;
+  }
+
+  List<UserDetails> _membersWithoutRsvp(
+    MatchDetails match,
+    List<UserDetails> squad,
+  ) {
+    final attendanceUserIds = (match.attendanceDetailsList ?? [])
+        .map((attendance) => attendance.userDetails.id)
+        .toSet();
+
+    return squad
+        .where((member) => !attendanceUserIds.contains(member.id))
+        .toList();
+  }
+
+  List<Widget> _buildNoRsvpSection(List<UserDetails> noRsvp) {
+    if (noRsvp.isEmpty) return const [];
+
+    return [
+      const SizedBox(height: Spacing.lg),
+      _AttendanceApprovalSection(
+        title: 'Mangler svar (${noRsvp.length})',
+        children: noRsvp
+            .map(
+              (member) => PlayerListItem(
+                name: member.name,
+                subtitle: member.email,
+                trailing: const Icon(CupertinoIcons.question_circle),
+              ),
+            )
+            .toList(),
+      ),
+    ];
   }
 
   List<Widget> _buildDeclinedAttendanceSection(
