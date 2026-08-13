@@ -47,7 +47,7 @@ class DbuCalendarImportFlow {
       final seasonStarted = await _startSeasonWithUnsettledWarning(
         context,
         teamId: teamId,
-        startsOn: _earliestMatchDate(resultData) ?? DateTime.now(),
+        startsOn: DateTime.now(),
         name: _seasonName(resultData),
       );
       if (!seasonStarted) {
@@ -183,25 +183,7 @@ class DbuCalendarImportFlow {
       }
     } catch (_) {}
 
-    return {'matches': []};
-  }
-
-  static DateTime? _earliestMatchDate(Map<String, dynamic> resultData) {
-    final matches = resultData['matches'];
-    if (matches is! List<dynamic>) {
-      return null;
-    }
-
-    final dates = matches
-        .whereType<Map<dynamic, dynamic>>()
-        .map((match) => match['dtstart']?.toString())
-        .whereType<String>()
-        .map(_parseDbuDate)
-        .whereType<DateTime>()
-        .toList()
-      ..sort();
-
-    return dates.isEmpty ? null : dates.first;
+    return {};
   }
 
   static String _seasonName(Map<String, dynamic> resultData) {
@@ -210,7 +192,7 @@ class DbuCalendarImportFlow {
       return season;
     }
 
-    final firstMatchDate = _earliestMatchDate(resultData) ?? DateTime.now();
+    final firstMatchDate = DateTime.now();
     return '${_seasonLabel(firstMatchDate.month)} ${firstMatchDate.year}';
   }
 
@@ -219,27 +201,5 @@ class DbuCalendarImportFlow {
     if (month >= 6 && month <= 8) return 'Sommer';
     if (month >= 9 && month <= 11) return 'Efterår';
     return 'Vinter';
-  }
-
-  static DateTime? _parseDbuDate(String value) {
-    final isoDate = DateTime.tryParse(value);
-    if (isoDate != null) {
-      return isoDate;
-    }
-
-    final match = RegExp(r'^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z?$')
-        .firstMatch(value);
-    if (match == null) {
-      return null;
-    }
-
-    return DateTime.utc(
-      int.parse(match.group(1)!),
-      int.parse(match.group(2)!),
-      int.parse(match.group(3)!),
-      int.parse(match.group(4)!),
-      int.parse(match.group(5)!),
-      int.parse(match.group(6)!),
-    );
   }
 }

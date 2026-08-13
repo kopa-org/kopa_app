@@ -711,8 +711,6 @@ class _CreateTeamView extends StatelessWidget {
   Widget build(BuildContext context) {
     final players = (dbuData?['players'] as List<dynamic>? ?? [])
         .cast<Map<String, dynamic>>();
-    final matches = (dbuData?['matches'] as List<dynamic>? ?? [])
-        .cast<Map<String, dynamic>>();
 
     return switch (step) {
       0 => Column(
@@ -738,7 +736,7 @@ class _CreateTeamView extends StatelessWidget {
               colors: colors,
               textStyles: textStyles,
               controller: teamNameController,
-              hintText: 'Skjold 7',
+              hintText: 'Dit holdnavn',
               onChanged: (_) => onTextChanged(),
             ),
           ],
@@ -772,9 +770,7 @@ class _CreateTeamView extends StatelessWidget {
       _ => _MatchesStep(
           colors: colors,
           textStyles: textStyles,
-          teamName: teamNameController.text.trim(),
           selectedCount: selectedPlayerIndexes.length,
-          matches: matches,
         ),
     };
   }
@@ -1586,49 +1582,32 @@ class _PlayersStepState extends State<_PlayersStep> {
 class _MatchesStep extends StatelessWidget {
   final AppColors colors;
   final AppTextStyles textStyles;
-  final String teamName;
   final int selectedCount;
-  final List<Map<String, dynamic>> matches;
 
   const _MatchesStep({
     required this.colors,
     required this.textStyles,
-    required this.teamName,
     required this.selectedCount,
-    required this.matches,
   });
 
   @override
   Widget build(BuildContext context) {
-    final shownMatches = matches.take(5).toList();
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _SummaryPill(
           colors: colors,
           textStyles: textStyles,
-          text: '$selectedCount spillere • ${matches.length} DBU-kampe fundet',
+          text: '$selectedCount spillere',
         ),
         const SizedBox(height: 12),
-        if (shownMatches.isEmpty)
-          _OnboardingCard(
-            colors: colors,
-            child: Text(
-              'Ingen DBU-kampe fundet her. Kopa synkroniserer det officielle kampprogram fra DBU efter oprettelse.',
-              style: textStyles.body3.copyWith(color: colors.textSecondary),
-            ),
-          )
-        else
-          for (final match in shownMatches) ...[
-            _MatchRow(
-              colors: colors,
-              textStyles: textStyles,
-              title: _matchTitle(match, teamName),
-              subtitle: _matchSubtitle(match),
-            ),
-            const SizedBox(height: 8),
-          ],
+        _OnboardingCard(
+          colors: colors,
+          child: Text(
+            'Kopa synkroniserer det officielle kampprogram fra DBU efter oprettelse.',
+            style: textStyles.body3.copyWith(color: colors.textSecondary),
+          ),
+        ),
       ],
     );
   }
@@ -1988,64 +1967,6 @@ class _PlayerRow extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           _CheckboxBox(colors: colors, selected: selected),
-        ],
-      ),
-    );
-  }
-}
-
-class _MatchRow extends StatelessWidget {
-  final AppColors colors;
-  final AppTextStyles textStyles;
-  final String title;
-  final String subtitle;
-
-  const _MatchRow({
-    required this.colors,
-    required this.textStyles,
-    required this.title,
-    required this.subtitle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return _OnboardingCard(
-      colors: colors,
-      padding: const EdgeInsets.all(14),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: colors.grey2,
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: Icon(Icons.sports_soccer, color: colors.primary, size: 18),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: textStyles.subtitle2.copyWith(
-                    color: colors.textPrimary,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style:
-                      textStyles.caption1.copyWith(color: colors.textSecondary),
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );
@@ -2660,22 +2581,4 @@ Color _teamAccentColor(String seed) {
   final index =
       seed.codeUnits.fold<int>(0, (sum, code) => sum + code) % colors.length;
   return colors[index];
-}
-
-String _matchTitle(Map<String, dynamic> match, String teamName) {
-  for (final key in ['summary', 'title', 'name']) {
-    final value = match[key] as String?;
-    if (value != null && value.trim().isNotEmpty) return value.trim();
-  }
-
-  return teamName.isEmpty ? 'Kamp' : '$teamName - modstander';
-}
-
-String _matchSubtitle(Map<String, dynamic> match) {
-  for (final key in ['dtstart', 'start', 'date']) {
-    final value = match[key] as String?;
-    if (value != null && value.trim().isNotEmpty) return value.trim();
-  }
-
-  return 'Tidspunkt afventer';
 }
