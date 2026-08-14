@@ -6,38 +6,6 @@ import 'package:kopa/model/dbu_standings.dart';
 import 'package:kopa/services/secure_storage_service.dart';
 
 abstract final class TeamDbuRepository {
-  static Future<DbuPublicClubTeamsResult> getPublicClubTeams({
-    required int clubId,
-    required String teamLabel,
-    required String leaderLabel,
-  }) async {
-    final token = await SecureStorageService.getToken();
-    if (token == null) {
-      throw Exception('Ikke logget ind.');
-    }
-
-    final uri = Uri.parse('${ApiConfig.baseUrl}/dbu/public/club_teams')
-        .replace(queryParameters: {
-      'club_id': clubId.toString(),
-      if (teamLabel.trim().isNotEmpty) 'team_label': teamLabel.trim(),
-      if (leaderLabel.trim().isNotEmpty) 'leader_label': leaderLabel.trim(),
-    });
-
-    final response = await http.get(
-      uri,
-      headers: {'Authorization': 'Bearer $token'},
-    );
-
-    final decoded = response.body.isEmpty
-        ? <String, dynamic>{}
-        : jsonDecode(response.body) as Map<String, dynamic>;
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      return DbuPublicClubTeamsResult.fromJson(decoded);
-    }
-
-    throw Exception(decoded['error'] ?? 'Kunne ikke hente DBU-hold.');
-  }
-
   static Future<DbuPublicClubTeamsResult> resolvePublicTeam({
     required String clubName,
     required String teamLabel,

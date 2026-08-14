@@ -12,7 +12,6 @@ import 'package:kopa/page/match/match_details_page.dart';
 import 'package:kopa/page/match/match_programme.dart';
 import 'package:kopa/page/player_plus/player_plus_page.dart';
 import 'package:kopa/page/profile/dbu_webview_page.dart';
-import 'package:kopa/page/profile/dbu_public_club_teams_test_page.dart';
 import 'package:kopa/page/team/team_join_requests_page.dart';
 import 'package:kopa/page/team_fines/team_fines_page.dart';
 import 'package:kopa/page/statistics/statistics_page.dart';
@@ -38,7 +37,6 @@ abstract final class AppRouter {
   static const profile = '/profile';
   static const fineBox = '/fine-box';
   static const dbuWebview = '/dbu-webview';
-  static const dbuPublicClubTeamsTest = '/dbu-public-club-teams-test';
   static const teamJoinRequests = '/team-join-requests';
   static const invite = '/invite';
   static const join = '/join';
@@ -113,10 +111,6 @@ abstract final class AppRouter {
                 ? state.extra! as DbuWebviewOperation
                 : DbuWebviewOperation.fullImport,
           ),
-        ),
-        GoRoute(
-          path: dbuPublicClubTeamsTest,
-          builder: (context, state) => const DbuPublicClubTeamsTestPage(),
         ),
         GoRoute(
           path: teamJoinRequests,

@@ -92,13 +92,6 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
             ),
             const SizedBox(height: 16),
             FullWidthButton(
-              buttonText: 'Test DBU holdopslag',
-              icon: Icons.search,
-              outlined: true,
-              onPressed: () => context.push(AppRouter.dbuPublicClubTeamsTest),
-            ),
-            const SizedBox(height: 16),
-            FullWidthButton(
               buttonText: _isSharingKopa ? 'Henter link...' : 'Del Kopa',
               onPressed: _isSharingKopa ? () {} : _shareKopa,
             ),

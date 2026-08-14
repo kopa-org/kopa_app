@@ -1,12 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
-import 'package:kopa/component/button/full_width_button.dart';
 import 'package:kopa/component/future_handler.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/model/user_details.dart';
-import 'package:kopa/navigation/app_router.dart';
 import 'package:kopa/page/profile/player_profile_page.dart';
 import 'package:kopa/repository/users_repository.dart';
 import 'package:kopa/theme/app_colors.dart';
@@ -91,13 +88,6 @@ class _SquadRosterView extends StatelessWidget {
         Text(
           '${squad.length} spillere i truppen',
           style: styles.body3.copyWith(color: appColors.textSecondary),
-        ),
-        const SizedBox(height: 20),
-        FullWidthButton(
-          buttonText: 'Test DBU holdopslag',
-          icon: Icons.search,
-          outlined: true,
-          onPressed: () => context.push(AppRouter.dbuPublicClubTeamsTest),
         ),
         const SizedBox(height: 20),
         _RosterCard(squad: sortedSquad),
