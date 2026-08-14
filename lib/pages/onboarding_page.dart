@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:kopa/component/football_pitch.dart';
 import 'package:go_router/go_router.dart';
@@ -9,9 +10,11 @@ import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/onboarding_cubit.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/navigation/app_router.dart';
+import 'package:kopa/repository/team_dbu_repository.dart';
 import 'package:kopa/repository/users_repository.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
+import 'package:share_plus/share_plus.dart';
 
 enum _OnboardingMode { create, join }
 
@@ -41,6 +44,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
   _TeamLogoPattern _teamLogoPattern = _TeamLogoPattern.solid;
   bool _savingPosition = false;
   Map<String, dynamic>? _pendingJoinTeam;
+  Uri? _createdTeamInviteUri;
+  String? _createdTeamTitle;
 
   @override
   void initState() {
@@ -93,9 +98,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
     if (result == null) return;
 
     final decoded = jsonDecode(result) as Map<String, dynamic>;
-    final suggestedTeamName = _suggestedTeamName(decoded);
+    final dbuData = await _resolvePublicDbuFallback(decoded);
+    if (!mounted) return;
+
+    final suggestedTeamName = _suggestedTeamName(dbuData);
     setState(() {
-      _dbuData = decoded;
+      _dbuData = dbuData;
       _teamNameController.text = suggestedTeamName.isNotEmpty
           ? suggestedTeamName
           : _teamNameController.text;
@@ -103,21 +111,281 @@ class _OnboardingPageState extends State<OnboardingPage> {
     });
   }
 
+  Future<Map<String, dynamic>> _resolvePublicDbuFallback(
+    Map<String, dynamic> data,
+  ) async {
+    if (data['publicFallback'] != true ||
+        (data['dbuTeamId'] != null && data['dbuPoolId'] != null)) {
+      return data;
+    }
+
+    final clubName = data['publicClubName']?.toString().trim() ?? '';
+    final teamLabel = data['publicTeamLabel']?.toString().trim() ?? '';
+    final leaderLabel = data['publicLeaderLabel']?.toString().trim() ?? '';
+    if (clubName.isEmpty || teamLabel.isEmpty) {
+      return data;
+    }
+
+    try {
+      final resolved = await TeamDbuRepository.resolvePublicTeam(
+        clubName: clubName,
+        teamLabel: teamLabel,
+        leaderLabel: leaderLabel,
+      );
+      _logPublicDbuMatches(
+        clubName: clubName,
+        teamLabel: teamLabel,
+        leaderLabel: leaderLabel,
+        teams: resolved.teams,
+      );
+      if (!mounted) {
+        return data;
+      }
+
+      final leaderMatches = resolved.teams
+          .where((team) => team.leaderMatchScore > 0)
+          .toList(growable: false);
+      final candidates = leaderMatches.isNotEmpty
+          ? leaderMatches
+          : resolved.teams
+              .where((team) => team.matchScore > 0)
+              .toList(growable: false);
+      if (candidates.isEmpty) {
+        return data;
+      }
+
+      await _showPublicDbuMatches(candidates);
+      if (!mounted) {
+        return data;
+      }
+
+      final selected = candidates.length == 1
+          ? candidates.first
+          : await _choosePublicDbuCandidate(candidates);
+      if (selected == null) {
+        return data;
+      }
+
+      return {
+        ...data,
+        'clubName': clubName,
+        'dbuTeamId': selected.dbuTeamId,
+        'dbuPoolId': selected.dbuPoolId,
+        'dbuTeamLabel': selected.seriesName,
+        'seriesName': selected.seriesName,
+        'poolLabel': selected.poolLabel,
+        'suggestedTeamName': data['suggestedTeamName'] ?? teamLabel,
+        'publicResolvedFromPlayerFallback': true,
+        'publicLeaderNames': selected.leaderNames,
+      };
+    } catch (error) {
+      debugPrint('DBU public fallback resolution failed: $error');
+      return data;
+    }
+  }
+
+  void _logPublicDbuMatches({
+    required String clubName,
+    required String teamLabel,
+    required String leaderLabel,
+    required List<DbuPublicClubTeam> teams,
+  }) {
+    debugPrint(
+      jsonEncode({
+        'operation': 'dbu_public_matches',
+        'clubName': clubName,
+        'teamLabel': teamLabel,
+        'leaderLabel': leaderLabel,
+        'count': teams.length,
+        'teams': teams
+            .map(
+              (team) => {
+                'dbuTeamId': team.dbuTeamId,
+                'dbuPoolId': team.dbuPoolId,
+                'seriesName': team.seriesName,
+                'poolLabel': team.poolLabel,
+                'matchScore': team.matchScore,
+                'leaderMatchScore': team.leaderMatchScore,
+                'combinedScore': team.combinedScore,
+                'leaderNames': team.leaderNames,
+                'url': team.url,
+              },
+            )
+            .toList(growable: false),
+      }),
+    );
+  }
+
+  Future<void> _showPublicDbuMatches(List<DbuPublicClubTeam> teams) {
+    return showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('DBU-kandidater fundet'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.separated(
+            shrinkWrap: true,
+            itemCount: teams.length,
+            separatorBuilder: (_, __) => const Divider(height: 1),
+            itemBuilder: (context, index) {
+              final team = teams[index];
+              return ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(team.seriesName),
+                subtitle: Text(
+                  [
+                    if (team.poolLabel.isNotEmpty) team.poolLabel,
+                    if (team.leaderNames.isNotEmpty)
+                      'Holdleder: ${team.leaderNames.join(', ')}',
+                    'Match score: ${team.matchScore}',
+                    'Leder score: ${team.leaderMatchScore}',
+                    'team ${team.dbuTeamId}',
+                    'pool ${team.dbuPoolId}',
+                  ].join('\n'),
+                ),
+              );
+            },
+          ),
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Fortsæt'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<DbuPublicClubTeam?> _choosePublicDbuCandidate(
+    List<DbuPublicClubTeam> candidates,
+  ) {
+    return showDialog<DbuPublicClubTeam>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Vælg DBU-hold'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.separated(
+            shrinkWrap: true,
+            itemCount: candidates.length,
+            separatorBuilder: (_, __) => const Divider(height: 1),
+            itemBuilder: (context, index) {
+              final candidate = candidates[index];
+              return ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(candidate.seriesName),
+                subtitle: Text(
+                  [
+                    if (candidate.poolLabel.isNotEmpty) candidate.poolLabel,
+                    if (candidate.leaderNames.isNotEmpty)
+                      'Holdleder: ${candidate.leaderNames.join(', ')}',
+                    'team ${candidate.dbuTeamId}',
+                    'pool ${candidate.dbuPoolId}',
+                  ].join('\n'),
+                ),
+                onTap: () => Navigator.of(dialogContext).pop(candidate),
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Annuller'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _createTeam() async {
     final title = _teamNameController.text.trim();
     if (title.isEmpty) return;
 
-    final success = await context.read<OnboardingCubit>().createTeam(
-          title: title,
-          dbuContext: _dbuData,
-          standings: (_dbuData?['standings'] as List<dynamic>? ?? [])
-              .cast<Map<String, dynamic>>(),
-        );
+    final onboardingCubit = context.read<OnboardingCubit>();
+    final success = await onboardingCubit.createTeam(
+      title: title,
+      dbuContext: _dbuData,
+      standings: (_dbuData?['standings'] as List<dynamic>? ?? [])
+          .cast<Map<String, dynamic>>(),
+    );
 
-    if (success && mounted) {
+    if (!success || !mounted) return;
+
+    final state = onboardingCubit.state;
+    final teamId = state.teamId;
+    final teamTitle = state.teamTitle ?? title;
+
+    if (teamId == null) {
       await context.read<AuthCubit>().init();
       if (mounted) context.go(AppRouter.home);
+      return;
     }
+
+    final token = await onboardingCubit.fetchTeamJoinToken(teamId);
+    if (!mounted) return;
+
+    if (token == null) {
+      final colors =
+          Theme.of(context).extension<AppColors>() ?? AppColors.light;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Kunne ikke hente invitationslink.'),
+          backgroundColor: colors.error,
+        ),
+      );
+      setState(() {
+        _createdTeamInviteUri = null;
+        _createdTeamTitle = teamTitle;
+        _createStep = 4;
+      });
+      return;
+    }
+
+    setState(() {
+      _createdTeamInviteUri = Uri.https(
+        'kopa.dk',
+        '/join',
+        {
+          'team_token': token,
+          'team_id': teamId.toString(),
+          'team_title': teamTitle,
+        },
+      );
+      _createdTeamTitle = teamTitle;
+      _createStep = 4;
+    });
+  }
+
+  Future<void> _finishOnboarding() async {
+    await context.read<AuthCubit>().init();
+    if (!mounted) return;
+    context.read<OnboardingCubit>().clearOnboarding();
+    context.go(AppRouter.home);
+  }
+
+  Future<void> _copyCreatedTeamInvite() async {
+    final inviteUri = _createdTeamInviteUri;
+    if (inviteUri == null) return;
+
+    await Clipboard.setData(ClipboardData(text: inviteUri.toString()));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Link kopieret')),
+    );
+  }
+
+  Future<void> _shareCreatedTeamInvite() async {
+    final inviteUri = _createdTeamInviteUri;
+    if (inviteUri == null) return;
+
+    final teamTitle = _createdTeamTitle ?? _teamNameController.text.trim();
+    await SharePlus.instance.share(
+      ShareParams(
+        text: 'Join $teamTitle på Kopa: $inviteUri',
+      ),
+    );
   }
 
   Future<void> _requestJoin(Map<String, dynamic> team) async {
@@ -205,6 +473,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
       await _createTeam();
       return;
     }
+
+    if (_createStep == 4) {
+      await _finishOnboarding();
+      return;
+    }
   }
 
   void _handleBack() {
@@ -217,6 +490,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
       return;
     }
 
+    if (_createStep == 4) {
+      _finishOnboarding();
+      return;
+    }
+
     if (_createStep > 0) {
       setState(() => _createStep -= 1);
     } else {
@@ -225,7 +503,15 @@ class _OnboardingPageState extends State<OnboardingPage> {
   }
 
   String _suggestedTeamName(Map<String, dynamic> dbuData) {
-    for (final key in ['suggestedTeamName', 'teamName', 'teamLabel']) {
+    for (final key in [
+      'clubName',
+      'publicClubName',
+      'suggestedTeamName',
+      'teamName',
+      'teamLabel',
+      'publicTeamLabel',
+      'dbuTeamLabel',
+    ]) {
       final value = dbuData[key] as String?;
       if (value != null && value.trim().isNotEmpty) {
         return value.trim();
@@ -308,7 +594,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 0 => l10n.onboardingTitle,
                 1 => 'Vælg din position',
                 2 => 'Design dit holdlogo',
-                _ => 'Klar til oprettelse',
+                3 => 'Klar til oprettelse',
+                _ => 'Inviter dit hold',
               };
         final subtitle = _mode == _OnboardingMode.join
             ? switch (_joinStep) {
@@ -321,13 +608,18 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   'Opret dit fodboldhold og saml spillere, kampe og statistikker ét sted.',
                 1 => 'Tryk på din position på banen',
                 2 => 'Vælg en baggrundsfarve og form til jeres holdlogo',
-                _ => 'Gennemgå holdet og opret det, når oplysningerne er klar.',
+                3 => 'Gennemgå holdet og opret det, når oplysningerne er klar.',
+                _ => 'Del linket med spillerne, så de kan finde holdet.',
               };
         final canAdvance = _mode == _OnboardingMode.create &&
-            _teamNameController.text.trim().isNotEmpty &&
+            (_createStep == 4 || _teamNameController.text.trim().isNotEmpty) &&
             !actionLoading;
-        final primaryLabel = _mode == _OnboardingMode.create && _createStep == 3
-            ? l10n.onboardingCreate
+        final primaryLabel = _mode == _OnboardingMode.create
+            ? switch (_createStep) {
+                3 => l10n.onboardingCreate,
+                4 => 'Fortsæt til Kopa',
+                _ => l10n.onboardingContinue,
+              }
             : l10n.onboardingContinue;
         final showBottomAction =
             _mode == _OnboardingMode.create || _joinStep == 0;
@@ -367,7 +659,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       colors: colors,
                       textStyles: textStyles,
                       step: step,
-                      totalSteps: 4,
+                      totalSteps: _mode == _OnboardingMode.create ? 5 : 4,
                       title: title,
                       subtitle: subtitle,
                     ),
@@ -400,6 +692,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                 setState(() => _teamLogoShape = value),
                             onLogoPatternChanged: (value) =>
                                 setState(() => _teamLogoPattern = value),
+                            inviteUri: _createdTeamInviteUri,
+                            teamTitle: _createdTeamTitle ??
+                                _teamNameController.text.trim(),
+                            onCopyInvite: _copyCreatedTeamInvite,
+                            onShareInvite: _shareCreatedTeamInvite,
                           )
                         : _joinStep == 0
                             ? _PositionStep(
@@ -620,6 +917,10 @@ class _CreateTeamView extends StatelessWidget {
   final ValueChanged<Color> onLogoColorChanged;
   final ValueChanged<_TeamLogoShape> onLogoShapeChanged;
   final ValueChanged<_TeamLogoPattern> onLogoPatternChanged;
+  final Uri? inviteUri;
+  final String teamTitle;
+  final VoidCallback onCopyInvite;
+  final VoidCallback onShareInvite;
 
   const _CreateTeamView({
     required this.l10n,
@@ -641,6 +942,10 @@ class _CreateTeamView extends StatelessWidget {
     required this.onLogoColorChanged,
     required this.onLogoShapeChanged,
     required this.onLogoPatternChanged,
+    required this.inviteUri,
+    required this.teamTitle,
+    required this.onCopyInvite,
+    required this.onShareInvite,
   });
 
   @override
@@ -693,9 +998,17 @@ class _CreateTeamView extends StatelessWidget {
           onShapeChanged: onLogoShapeChanged,
           onPatternChanged: onLogoPatternChanged,
         ),
-      _ => _MatchesStep(
+      3 => _MatchesStep(
           colors: colors,
           textStyles: textStyles,
+        ),
+      _ => _InviteTeamStep(
+          colors: colors,
+          textStyles: textStyles,
+          inviteUri: inviteUri,
+          teamTitle: teamTitle,
+          onCopyInvite: onCopyInvite,
+          onShareInvite: onShareInvite,
         ),
     };
   }
@@ -1446,6 +1759,111 @@ class _MatchesStep extends StatelessWidget {
           child: Text(
             'Kopa synkroniserer det officielle kampprogram fra DBU efter oprettelse.',
             style: textStyles.body3.copyWith(color: colors.textSecondary),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _InviteTeamStep extends StatelessWidget {
+  final AppColors colors;
+  final AppTextStyles textStyles;
+  final Uri? inviteUri;
+  final String teamTitle;
+  final VoidCallback onCopyInvite;
+  final VoidCallback onShareInvite;
+
+  const _InviteTeamStep({
+    required this.colors,
+    required this.textStyles,
+    required this.inviteUri,
+    required this.teamTitle,
+    required this.onCopyInvite,
+    required this.onShareInvite,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final inviteText = inviteUri?.toString();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _OnboardingCard(
+          colors: colors,
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                teamTitle,
+                style: textStyles.body1.copyWith(
+                  color: colors.textPrimary,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 14),
+              Container(
+                padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
+                decoration: BoxDecoration(
+                  color: colors.background,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: const Color(0xFFD1D6E0),
+                    width: 0.8,
+                  ),
+                ),
+                child: inviteText == null
+                    ? Text(
+                        'Invitationslinket kunne ikke hentes.',
+                        style: textStyles.body3.copyWith(
+                          color: colors.textSecondary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      )
+                    : Row(
+                        children: [
+                          Expanded(
+                            child: SelectableText(
+                              inviteText,
+                              style: textStyles.body3.copyWith(
+                                color: colors.textPrimary,
+                                fontWeight: FontWeight.w700,
+                                height: 1.35,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            onPressed: onCopyInvite,
+                            icon: const Icon(Icons.copy_rounded, size: 20),
+                            color: colors.primary,
+                            tooltip: 'Kopier link',
+                          ),
+                        ],
+                      ),
+              ),
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                onPressed: inviteUri == null ? null : onShareInvite,
+                icon: const Icon(Icons.ios_share_rounded, size: 19),
+                label: const Text('Del link'),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(47),
+                  backgroundColor: colors.primary,
+                  foregroundColor: colors.white,
+                  disabledBackgroundColor: colors.grey3,
+                  disabledForegroundColor: colors.white,
+                  textStyle: textStyles.body1.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ],

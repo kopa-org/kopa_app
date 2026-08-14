@@ -97,10 +97,12 @@ class UsersRepository {
   }
 
   static Map<String, dynamic> _dbuContextPayload(Map<String, dynamic> context) {
+    final clubName = context['clubName'] ?? context['publicClubName'];
+    final dbuTeamLabel = context['dbuTeamLabel'] ?? context['publicTeamLabel'];
+
     return {
-      if (context['clubName'] != null) 'club_name': context['clubName'],
-      if (context['dbuTeamLabel'] != null)
-        'dbu_team_label': context['dbuTeamLabel'],
+      if (clubName != null) 'club_name': clubName,
+      if (dbuTeamLabel != null) 'dbu_team_label': dbuTeamLabel,
       if (context['dbuTeamId'] != null) 'dbu_team_id': context['dbuTeamId'],
       if (context['dbuPoolId'] != null) 'dbu_pool_id': context['dbuPoolId'],
       if (context['season'] != null) 'season': context['season'],

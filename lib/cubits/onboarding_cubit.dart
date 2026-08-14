@@ -165,13 +165,28 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     );
 
     if (result['success'] == true) {
+      final team = result['team'] is Map<String, dynamic>
+          ? result['team'] as Map<String, dynamic>
+          : const <String, dynamic>{};
+      final teamId = _intFromJson(
+        team['id'] ?? result['id'] ?? result['team_id'],
+      );
+      final teamTitle = _stringFromJson(
+            team['title'] ?? result['title'] ?? result['team_title'],
+          ) ??
+          title;
+
       AppAnalytics.logEvent(
         'team_created',
         parameters: {
           'has_dbu_context': dbuContext == null ? 0 : 1,
         },
       );
-      emit(state.copyWith(status: OnboardingStatus.success));
+      emit(state.copyWith(
+        status: OnboardingStatus.success,
+        teamId: teamId,
+        teamTitle: teamTitle,
+      ));
       return true;
     }
 
@@ -180,6 +195,18 @@ class OnboardingCubit extends Cubit<OnboardingState> {
       errorMessage: result['error'] ?? 'Kunne ikke oprette holdet',
     ));
     return false;
+  }
+
+  int? _intFromJson(dynamic value) {
+    if (value is int) return value;
+    if (value is String) return int.tryParse(value);
+    return null;
+  }
+
+  String? _stringFromJson(dynamic value) {
+    if (value == null) return null;
+    final stringValue = value.toString().trim();
+    return stringValue.isEmpty ? null : stringValue;
   }
 
   Future<void> searchTeams(String query) async {

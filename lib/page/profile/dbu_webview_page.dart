@@ -79,6 +79,27 @@ class _DbuWebviewPageState extends State<DbuWebviewPage> {
             return;
           }
 
+          final scraperError = decoded['error']?.toString().trim();
+          if (widget.operation == DbuWebviewOperation.fullImport &&
+              scraperError != null &&
+              scraperError.isNotEmpty) {
+            AppAnalytics.logEvent('dbu_calendar_import_failure');
+            setState(() {
+              _isScraping = false;
+              _loadError = scraperError;
+            });
+            return;
+          }
+
+          if (widget.operation == DbuWebviewOperation.fullImport &&
+              !_hasFullImportResult(decoded)) {
+            debugPrint('DBU scraper returned without import context: $rawJson');
+            if (mounted) {
+              setState(() => _isScraping = false);
+            }
+            return;
+          }
+
           AppAnalytics.logEvent(
             widget.operation == DbuWebviewOperation.fullImport
                 ? 'dbu_calendar_import_success'
@@ -95,6 +116,13 @@ class _DbuWebviewPageState extends State<DbuWebviewPage> {
           onPageFinished: (String url) async {
             final script = _scraperScript;
             if (script == null) {
+              return;
+            }
+
+            if (!_shouldRunScraperOnUrl(url)) {
+              if (mounted) {
+                setState(() => _isScraping = false);
+              }
               return;
             }
 
@@ -115,6 +143,10 @@ class _DbuWebviewPageState extends State<DbuWebviewPage> {
                 setState(() => _isScraping = !requiresLogin);
               }
 
+              if (requiresLogin) {
+                return;
+              }
+
               final contextJson =
                   jsonEncode(_poolSyncContext).replaceAll('</', r'<\/');
               await controller.runJavaScript(
@@ -133,6 +165,31 @@ class _DbuWebviewPageState extends State<DbuWebviewPage> {
       );
 
     _loadScraperAndOpenDbu();
+  }
+
+  bool _shouldRunScraperOnUrl(String rawUrl) {
+    final url = Uri.tryParse(rawUrl);
+    if (url == null) {
+      return false;
+    }
+
+    final host = url.host.toLowerCase();
+    final path = url.path.toLowerCase();
+    if (widget.operation == DbuWebviewOperation.standings) {
+      return (host == 'mit.dbu.dk' && path.startsWith('/myteam/')) ||
+          (host == 'www.dbu.dk' && path.startsWith('/resultater/pulje/'));
+    }
+
+    return host == 'mit.dbu.dk' && path.startsWith('/myteam/');
+  }
+
+  bool _hasFullImportResult(Map<String, dynamic> data) {
+    final hasPublicFallback = data['publicFallback'] == true &&
+        data['publicClubName']?.toString().trim().isNotEmpty == true &&
+        data['publicTeamLabel']?.toString().trim().isNotEmpty == true;
+    final hasDbuIds = data['dbuTeamId'] != null && data['dbuPoolId'] != null;
+
+    return hasPublicFallback || hasDbuIds;
   }
 
   Future<void> _loadScraperAndOpenDbu() async {

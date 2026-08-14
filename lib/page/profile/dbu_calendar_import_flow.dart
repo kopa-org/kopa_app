@@ -202,7 +202,7 @@ class DbuCalendarImportFlow {
     final teamLabel = resultData['publicTeamLabel']?.toString().trim() ?? '';
     final leaderLabel =
         resultData['publicLeaderLabel']?.toString().trim() ?? '';
-    if (clubName.isEmpty || teamLabel.isEmpty || leaderLabel.isEmpty) {
+    if (clubName.isEmpty || teamLabel.isEmpty) {
       return {};
     }
 
