@@ -215,9 +215,14 @@ class DbuCalendarImportFlow {
       return {};
     }
 
-    final candidates = resolved.teams
+    final leaderMatches = resolved.teams
         .where((team) => team.leaderMatchScore > 0)
         .toList(growable: false);
+    final candidates = leaderMatches.isNotEmpty
+        ? leaderMatches
+        : resolved.teams
+            .where((team) => team.matchScore > 0)
+            .toList(growable: false);
     if (candidates.isEmpty) {
       return {};
     }
