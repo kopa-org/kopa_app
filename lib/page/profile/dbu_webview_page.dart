@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -64,6 +65,16 @@ class _DbuWebviewPageState extends State<DbuWebviewPage> {
               Uri.parse(
                 'https://www.dbu.dk/resultater/pulje/$poolId/stilling',
               ),
+            );
+            return;
+          }
+
+          if (decoded['operation'] == 'dbu_debug') {
+            debugPrint('DBU scraper debug: ${jsonEncode(decoded)}');
+            unawaited(
+              ScraperRepository.uploadDbuDebug(decoded).catchError((error) {
+                debugPrint('DBU scraper debug upload failed: $error');
+              }),
             );
             return;
           }

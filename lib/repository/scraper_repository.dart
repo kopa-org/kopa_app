@@ -44,4 +44,19 @@ class ScraperRepository {
 
     return manifest;
   }
+
+  static Future<void> uploadDbuDebug(Map<String, dynamic> payload) async {
+    final token = await SecureStorageService.getToken();
+    if (token == null) return;
+
+    final url = Uri.parse('${ApiConfig.baseUrl}/scraper/dbu/debug');
+    await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(payload),
+    );
+  }
 }
