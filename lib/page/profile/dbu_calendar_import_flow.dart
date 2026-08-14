@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kopa/navigation/app_router.dart';
+import 'package:kopa/repository/team_dbu_repository.dart';
 import 'package:kopa/repository/team_season_repository.dart';
 import 'package:kopa/repository/users_repository.dart';
 import 'package:kopa/utils/app_analytics.dart';
@@ -30,9 +31,12 @@ class DbuCalendarImportFlow {
       return null;
     }
 
-    final resultData = _decodeResult(result);
+    var resultData = _decodeResult(result);
     if (resultData['dbuTeamId'] == null || resultData['dbuPoolId'] == null) {
-      return null;
+      resultData = await _resolvePublicFallback(context, resultData);
+      if (!context.mounted || resultData.isEmpty) {
+        return null;
+      }
     }
 
     if (mode == _CalendarImportMode.startNewSeason) {
@@ -184,6 +188,100 @@ class DbuCalendarImportFlow {
     } catch (_) {}
 
     return {};
+  }
+
+  static Future<Map<String, dynamic>> _resolvePublicFallback(
+    BuildContext context,
+    Map<String, dynamic> resultData,
+  ) async {
+    if (resultData['publicFallback'] != true) {
+      return {};
+    }
+
+    final clubName = resultData['publicClubName']?.toString().trim() ?? '';
+    final teamLabel = resultData['publicTeamLabel']?.toString().trim() ?? '';
+    final leaderLabel =
+        resultData['publicLeaderLabel']?.toString().trim() ?? '';
+    if (clubName.isEmpty || teamLabel.isEmpty || leaderLabel.isEmpty) {
+      return {};
+    }
+
+    final resolved = await TeamDbuRepository.resolvePublicTeam(
+      clubName: clubName,
+      teamLabel: teamLabel,
+      leaderLabel: leaderLabel,
+    );
+    if (!context.mounted) {
+      return {};
+    }
+
+    final candidates = resolved.teams
+        .where((team) => team.leaderMatchScore > 0)
+        .toList(growable: false);
+    if (candidates.isEmpty) {
+      return {};
+    }
+
+    final selected = candidates.length == 1
+        ? candidates.first
+        : await _choosePublicCandidate(context, candidates);
+    if (selected == null) {
+      return {};
+    }
+
+    return {
+      ...resultData,
+      'dbuTeamId': selected.dbuTeamId,
+      'dbuPoolId': selected.dbuPoolId,
+      'dbuTeamLabel': selected.seriesName,
+      'seriesName': selected.seriesName,
+      'poolLabel': selected.poolLabel,
+      'publicResolvedFromPlayerFallback': true,
+      'publicLeaderNames': selected.leaderNames,
+    };
+  }
+
+  static Future<DbuPublicClubTeam?> _choosePublicCandidate(
+    BuildContext context,
+    List<DbuPublicClubTeam> candidates,
+  ) {
+    return showDialog<DbuPublicClubTeam>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Vælg DBU-hold'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.separated(
+            shrinkWrap: true,
+            itemCount: candidates.length,
+            separatorBuilder: (_, __) => const Divider(height: 1),
+            itemBuilder: (context, index) {
+              final candidate = candidates[index];
+              return ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(candidate.seriesName),
+                subtitle: Text(
+                  [
+                    if (candidate.poolLabel.isNotEmpty) candidate.poolLabel,
+                    if (candidate.leaderNames.isNotEmpty)
+                      'Holdleder: ${candidate.leaderNames.join(', ')}',
+                    'team ${candidate.dbuTeamId}',
+                    'pool ${candidate.dbuPoolId}',
+                  ].join('\n'),
+                ),
+                onTap: () => Navigator.of(dialogContext).pop(candidate),
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Annuller'),
+          ),
+        ],
+      ),
+    );
   }
 
   static String _seasonName(Map<String, dynamic> resultData) {

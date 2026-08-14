@@ -483,8 +483,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
                               ),
                   ),
                 ),
-                if (_mode == _OnboardingMode.create && _createStep != 3)
-                  const SliverFillRemaining(hasScrollBody: false),
               ],
             ),
           ),
