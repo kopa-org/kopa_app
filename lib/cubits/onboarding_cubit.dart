@@ -152,51 +152,16 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     }
   }
 
-  Future<Map<String, dynamic>> sendEmailInvites(
-      int teamId, List<Map<String, String>> invites) async {
-    emit(state.copyWith(status: OnboardingStatus.loading));
-    final result = await _repository.sendEmailInvites(teamId, invites);
-    if (result.containsKey('sent')) {
-      AppAnalytics.logEvent(
-        'email_invites_sent',
-        parameters: {'invite_count': invites.length},
-      );
-      emit(state.copyWith(status: OnboardingStatus.validated)); // Reset status
-      return result;
-    } else {
-      emit(state.copyWith(
-          status: OnboardingStatus.failure, errorMessage: result['error']));
-      return result;
-    }
-  }
-
-  Future<Map<String, dynamic>> resendPendingInvites(int teamId) async {
-    emit(state.copyWith(status: OnboardingStatus.loading));
-    final result = await _repository.resendPendingInvites(teamId);
-    if (result.containsKey('sent')) {
-      emit(state.copyWith(status: OnboardingStatus.validated));
-      return result;
-    }
-
-    emit(state.copyWith(
-      status: OnboardingStatus.failure,
-      errorMessage: result['error'],
-    ));
-    return result;
-  }
-
   Future<bool> createTeam({
     required String title,
     Map<String, dynamic>? dbuContext,
     List<Map<String, dynamic>> standings = const [],
-    List<Map<String, String>> inviteEmails = const [],
   }) async {
     emit(state.copyWith(status: OnboardingStatus.loading, errorMessage: null));
     final result = await _repository.createTeam(
       title: title,
       dbuContext: dbuContext,
       standings: standings,
-      inviteEmails: inviteEmails,
     );
 
     if (result['success'] == true) {
@@ -204,7 +169,6 @@ class OnboardingCubit extends Cubit<OnboardingState> {
         'team_created',
         parameters: {
           'has_dbu_context': dbuContext == null ? 0 : 1,
-          'invite_count': inviteEmails.length,
         },
       );
       emit(state.copyWith(status: OnboardingStatus.success));

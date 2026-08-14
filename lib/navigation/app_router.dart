@@ -38,7 +38,6 @@ abstract final class AppRouter {
   static const fineBox = '/fine-box';
   static const dbuWebview = '/dbu-webview';
   static const teamJoinRequests = '/team-join-requests';
-  static const invite = '/invite';
   static const join = '/join';
   static const onboarding = '/onboarding';
 
@@ -69,24 +68,6 @@ abstract final class AppRouter {
       },
       routes: [
         GoRoute(
-          path: invite,
-          builder: (context, state) {
-            final token = state.uri.queryParameters['token'];
-            if (token != null) {
-              onboardingCubit.handleDeepLink(
-                token,
-                email: state.uri.queryParameters['email'],
-                name: state.uri.queryParameters['name'],
-                teamId: int.tryParse(
-                  state.uri.queryParameters['team_id'] ?? '',
-                ),
-                teamTitle: state.uri.queryParameters['team_title'],
-              );
-            }
-            return inviteEntryPageFor(authCubit.state);
-          },
-        ),
-        GoRoute(
           path: join,
           builder: (context, state) {
             final token = state.uri.queryParameters['team_token'];
@@ -101,7 +82,7 @@ abstract final class AppRouter {
                 teamTitle: state.uri.queryParameters['team_title'],
               );
             }
-            return inviteEntryPageFor(authCubit.state);
+            return joinEntryPageFor(authCubit.state);
           },
         ),
         GoRoute(
@@ -302,12 +283,10 @@ abstract final class AppRouter {
     if (uri == null) return null;
 
     String? path;
-    if (uri.path == invite || uri.path == join) {
+    if (uri.path == join) {
       path = uri.path;
     } else if (uri.path.isEmpty) {
-      if (uri.host == 'invite') {
-        path = invite;
-      } else if (uri.host == 'join') {
+      if (uri.host == 'join') {
         path = join;
       }
     }
@@ -327,7 +306,6 @@ abstract final class AppRouter {
     final isLoggingIn = path == login;
     final isRegistering = path == register;
     final isWelcome = path == welcome;
-    final isInvite = path == invite;
     final isJoin = path == join;
     final isOnboarding = path == onboarding;
     final hasTeam = authState.user?.teamDetails != null;
@@ -337,7 +315,7 @@ abstract final class AppRouter {
             authState.user?.onboardingState?.isWaitingApproval == true;
 
     if (!isLoggedIn) {
-      if (isInvite || isJoin || isLoggingIn || isRegistering) {
+      if (isJoin || isLoggingIn || isRegistering) {
         return null;
       }
 
@@ -353,7 +331,7 @@ abstract final class AppRouter {
         return isOnboarding ? null : onboarding;
       }
 
-      if (isInvite || isJoin || isOnboarding || path == dbuWebview) {
+      if (isJoin || isOnboarding || path == dbuWebview) {
         return null;
       }
 
@@ -379,7 +357,7 @@ abstract final class AppRouter {
   }
 
   @visibleForTesting
-  static Widget inviteEntryPageFor(AuthState authState) {
+  static Widget joinEntryPageFor(AuthState authState) {
     final isLoggedIn = authState.status == AuthStatus.authenticated ||
         (authState.status == AuthStatus.loading && authState.user != null);
 

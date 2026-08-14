@@ -34,7 +34,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
   int _createStep = 0;
   int _joinStep = 0;
   Map<String, dynamic>? _dbuData;
-  Set<int> _selectedPlayerIndexes = {};
   _PositionChoice _selectedPosition = _positionChoices[6];
   bool _usesElevenAside = true;
   Color _teamLogoColor = const Color(0xFF1B8B4B);
@@ -94,19 +93,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
     if (result == null) return;
 
     final decoded = jsonDecode(result) as Map<String, dynamic>;
-    final players = decoded['players'] as List<dynamic>? ?? [];
     final suggestedTeamName = _suggestedTeamName(decoded);
     setState(() {
       _dbuData = decoded;
       _teamNameController.text = suggestedTeamName.isNotEmpty
           ? suggestedTeamName
           : _teamNameController.text;
-      _selectedPlayerIndexes = {
-        for (var i = 0; i < players.length; i++)
-          if (_emailLike(
-              (players[i] as Map<String, dynamic>)['contact'] as String? ?? ''))
-            i,
-      };
       _createStep = 0;
     });
   }
@@ -115,23 +107,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
     final title = _teamNameController.text.trim();
     if (title.isEmpty) return;
 
-    final players = (_dbuData?['players'] as List<dynamic>? ?? [])
-        .cast<Map<String, dynamic>>();
-    final inviteEmails = _selectedPlayerIndexes
-        .map((index) => players[index])
-        .map((player) => {
-              'name': player['name'] as String? ?? '',
-              'email': player['contact'] as String? ?? '',
-            })
-        .where((invite) => _emailLike(invite['email'] ?? ''))
-        .toList();
-
     final success = await context.read<OnboardingCubit>().createTeam(
           title: title,
           dbuContext: _dbuData,
           standings: (_dbuData?['standings'] as List<dynamic>? ?? [])
               .cast<Map<String, dynamic>>(),
-          inviteEmails: inviteEmails,
         );
 
     if (success && mounted) {
@@ -217,16 +197,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
     }
 
     if (_createStep == 2) {
-      setState(() => _createStep = _hasPlayers ? 3 : 4);
+      setState(() => _createStep = 3);
       return;
     }
 
     if (_createStep == 3) {
-      setState(() => _createStep = 4);
-      return;
-    }
-
-    if (_createStep == 4) {
       await _createTeam();
       return;
     }
@@ -243,22 +218,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
     }
 
     if (_createStep > 0) {
-      if (_createStep == 4 && !_hasPlayers) {
-        setState(() => _createStep = 2);
-      } else {
-        setState(() => _createStep -= 1);
-      }
+      setState(() => _createStep -= 1);
     } else {
       setState(() => _hasSelectedRole = false);
     }
-  }
-
-  bool get _hasPlayers {
-    return (_dbuData?['players'] as List<dynamic>? ?? []).isNotEmpty;
-  }
-
-  bool _emailLike(String value) {
-    return RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(value.trim());
   }
 
   String _suggestedTeamName(Map<String, dynamic> dbuData) {
@@ -345,7 +308,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 0 => l10n.onboardingTitle,
                 1 => 'Vælg din position',
                 2 => 'Design dit holdlogo',
-                3 => 'Tilføj spillere',
                 _ => 'Klar til oprettelse',
               };
         final subtitle = _mode == _OnboardingMode.join
@@ -359,14 +321,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   'Opret dit fodboldhold og saml spillere, kampe og statistikker ét sted.',
                 1 => 'Tryk på din position på banen',
                 2 => 'Vælg en baggrundsfarve og form til jeres holdlogo',
-                3 =>
-                  'Invitér spillere til holdet. De modtager en mail-invitation med det samme.',
                 _ => 'Gennemgå holdet og opret det, når oplysningerne er klar.',
               };
         final canAdvance = _mode == _OnboardingMode.create &&
             _teamNameController.text.trim().isNotEmpty &&
             !actionLoading;
-        final primaryLabel = _mode == _OnboardingMode.create && _createStep == 4
+        final primaryLabel = _mode == _OnboardingMode.create && _createStep == 3
             ? l10n.onboardingCreate
             : l10n.onboardingContinue;
         final showBottomAction =
@@ -380,7 +340,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   textStyles: textStyles,
                   label: primaryLabel,
                   loading: actionLoading,
-                  icon: _mode == _OnboardingMode.create && _createStep == 4
+                  icon: _mode == _OnboardingMode.create && _createStep == 3
                       ? Icons.check
                       : null,
                   onPressed: _mode == _OnboardingMode.create
@@ -407,7 +367,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       colors: colors,
                       textStyles: textStyles,
                       step: step,
-                      totalSteps: 5,
+                      totalSteps: 4,
                       title: title,
                       subtitle: subtitle,
                     ),
@@ -422,7 +382,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             step: _createStep,
                             teamNameController: _teamNameController,
                             dbuData: _dbuData,
-                            selectedPlayerIndexes: _selectedPlayerIndexes,
                             selectedPosition: _selectedPosition,
                             usesElevenAside: _usesElevenAside,
                             teamLogoColor: _teamLogoColor,
@@ -441,15 +400,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                 setState(() => _teamLogoShape = value),
                             onLogoPatternChanged: (value) =>
                                 setState(() => _teamLogoPattern = value),
-                            onPlayerChanged: (index, selected) {
-                              setState(() {
-                                if (selected) {
-                                  _selectedPlayerIndexes.add(index);
-                                } else {
-                                  _selectedPlayerIndexes.remove(index);
-                                }
-                              });
-                            },
                           )
                         : _joinStep == 0
                             ? _PositionStep(
@@ -657,7 +607,6 @@ class _CreateTeamView extends StatelessWidget {
   final int step;
   final TextEditingController teamNameController;
   final Map<String, dynamic>? dbuData;
-  final Set<int> selectedPlayerIndexes;
   final _PositionChoice selectedPosition;
   final bool usesElevenAside;
   final Color teamLogoColor;
@@ -671,7 +620,6 @@ class _CreateTeamView extends StatelessWidget {
   final ValueChanged<Color> onLogoColorChanged;
   final ValueChanged<_TeamLogoShape> onLogoShapeChanged;
   final ValueChanged<_TeamLogoPattern> onLogoPatternChanged;
-  final void Function(int index, bool selected) onPlayerChanged;
 
   const _CreateTeamView({
     required this.l10n,
@@ -680,7 +628,6 @@ class _CreateTeamView extends StatelessWidget {
     required this.step,
     required this.teamNameController,
     required this.dbuData,
-    required this.selectedPlayerIndexes,
     required this.selectedPosition,
     required this.usesElevenAside,
     required this.teamLogoColor,
@@ -694,14 +641,10 @@ class _CreateTeamView extends StatelessWidget {
     required this.onLogoColorChanged,
     required this.onLogoShapeChanged,
     required this.onLogoPatternChanged,
-    required this.onPlayerChanged,
   });
 
   @override
   Widget build(BuildContext context) {
-    final players = (dbuData?['players'] as List<dynamic>? ?? [])
-        .cast<Map<String, dynamic>>();
-
     return switch (step) {
       0 => Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -750,17 +693,9 @@ class _CreateTeamView extends StatelessWidget {
           onShapeChanged: onLogoShapeChanged,
           onPatternChanged: onLogoPatternChanged,
         ),
-      3 => _PlayersStep(
-          colors: colors,
-          textStyles: textStyles,
-          players: players,
-          selectedPlayerIndexes: selectedPlayerIndexes,
-          onPlayerChanged: onPlayerChanged,
-        ),
       _ => _MatchesStep(
           colors: colors,
           textStyles: textStyles,
-          selectedCount: selectedPlayerIndexes.length,
         ),
     };
   }
@@ -1492,92 +1427,13 @@ class _TeamSearchCard extends StatelessWidget {
   }
 }
 
-class _PlayersStep extends StatefulWidget {
-  final AppColors colors;
-  final AppTextStyles textStyles;
-  final List<Map<String, dynamic>> players;
-  final Set<int> selectedPlayerIndexes;
-  final void Function(int index, bool selected) onPlayerChanged;
-
-  const _PlayersStep({
-    required this.colors,
-    required this.textStyles,
-    required this.players,
-    required this.selectedPlayerIndexes,
-    required this.onPlayerChanged,
-  });
-
-  @override
-  State<_PlayersStep> createState() => _PlayersStepState();
-}
-
-class _PlayersStepState extends State<_PlayersStep> {
-  final _filterController = TextEditingController();
-
-  @override
-  void dispose() {
-    _filterController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final query = _filterController.text.trim().toLowerCase();
-    final visibleIndexes = [
-      for (var i = 0; i < widget.players.length; i++)
-        if (query.isEmpty ||
-            (widget.players[i]['name'] as String? ?? '')
-                .toLowerCase()
-                .contains(query) ||
-            (widget.players[i]['contact'] as String? ?? '')
-                .toLowerCase()
-                .contains(query))
-          i,
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _SearchInput(
-          colors: widget.colors,
-          textStyles: widget.textStyles,
-          controller: _filterController,
-          hintText: 'Søg efter navn eller e-mail...',
-          onChanged: (_) => setState(() {}),
-        ),
-        const SizedBox(height: 12),
-        for (final index in visibleIndexes) ...[
-          _PlayerRow(
-            colors: widget.colors,
-            textStyles: widget.textStyles,
-            name: widget.players[index]['name'] as String? ?? '',
-            contact: widget.players[index]['contact'] as String? ?? '',
-            selected: widget.selectedPlayerIndexes.contains(index),
-            onChanged: (selected) => widget.onPlayerChanged(index, selected),
-          ),
-          const SizedBox(height: 8),
-        ],
-        if (visibleIndexes.isEmpty)
-          Text(
-            'Ingen spillere fundet',
-            textAlign: TextAlign.center,
-            style: widget.textStyles.body3
-                .copyWith(color: widget.colors.textSecondary),
-          ),
-      ],
-    );
-  }
-}
-
 class _MatchesStep extends StatelessWidget {
   final AppColors colors;
   final AppTextStyles textStyles;
-  final int selectedCount;
 
   const _MatchesStep({
     required this.colors,
     required this.textStyles,
-    required this.selectedCount,
   });
 
   @override
@@ -1585,12 +1441,6 @@ class _MatchesStep extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SummaryPill(
-          colors: colors,
-          textStyles: textStyles,
-          text: '$selectedCount spillere',
-        ),
-        const SizedBox(height: 12),
         _OnboardingCard(
           colors: colors,
           child: Text(
@@ -1904,104 +1754,6 @@ class _FieldLabel extends StatelessWidget {
   }
 }
 
-class _PlayerRow extends StatelessWidget {
-  final AppColors colors;
-  final AppTextStyles textStyles;
-  final String name;
-  final String contact;
-  final bool selected;
-  final ValueChanged<bool> onChanged;
-
-  const _PlayerRow({
-    required this.colors,
-    required this.textStyles,
-    required this.name,
-    required this.contact,
-    required this.selected,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return _OnboardingCard(
-      colors: colors,
-      padding: const EdgeInsets.all(12),
-      onTap: () => onChanged(!selected),
-      child: Row(
-        children: [
-          _Avatar(colors: colors, initials: _initials(name)),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: textStyles.subtitle2.copyWith(
-                    color: colors.textPrimary,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  contact,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style:
-                      textStyles.caption1.copyWith(color: colors.textSecondary),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          _CheckboxBox(colors: colors, selected: selected),
-        ],
-      ),
-    );
-  }
-}
-
-class _SummaryPill extends StatelessWidget {
-  final AppColors colors;
-  final AppTextStyles textStyles;
-  final String text;
-
-  const _SummaryPill({
-    required this.colors,
-    required this.textStyles,
-    required this.text,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: colors.grey2,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.info_outline, color: colors.primary, size: 14),
-          const SizedBox(width: 6),
-          Flexible(
-            child: Text(
-              text,
-              style: textStyles.caption2.copyWith(
-                color: colors.primary,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _OnboardingCard extends StatelessWidget {
   final AppColors colors;
   final Widget child;
@@ -2073,33 +1825,6 @@ class _Avatar extends StatelessWidget {
           fontSize: 14,
         ),
       ),
-    );
-  }
-}
-
-class _CheckboxBox extends StatelessWidget {
-  final AppColors colors;
-  final bool selected;
-
-  const _CheckboxBox({required this.colors, required this.selected});
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 160),
-      width: 22,
-      height: 22,
-      decoration: BoxDecoration(
-        color: selected ? colors.primary : colors.white,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(
-          color: selected ? colors.primary : const Color(0xFFD1D6E0),
-          width: 1.5,
-        ),
-      ),
-      child: selected
-          ? Icon(Icons.check, size: 14, color: colors.white)
-          : const SizedBox.shrink(),
     );
   }
 }

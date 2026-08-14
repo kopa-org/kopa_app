@@ -166,16 +166,15 @@ class MainActivity: FlutterActivity() {
         val path = uri.path.orEmpty()
 
         if (uri.scheme == "https" && uri.host == "kopa.dk") {
-            return path == "/join" || path == "/invite"
+            return path == "/join"
         }
 
         if (uri.scheme == "kopa") {
             if (uri.host == "kopa.dk") {
-                return path == "/join" || path == "/invite"
+                return path == "/join"
             }
 
-            return uri.host == "join" || uri.host == "invite" ||
-                path == "/join" || path == "/invite"
+            return uri.host == "join" || path == "/join"
         }
 
         return false

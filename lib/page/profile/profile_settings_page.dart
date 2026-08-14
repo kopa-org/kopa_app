@@ -29,13 +29,10 @@ class ProfileSettingsPage extends StatefulWidget {
 class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
   bool _isLoading = false;
   bool _isSharingKopa = false;
-  bool _isSendingInvite = false;
-  bool _isResendingInvites = false;
   bool _isSavingMeetingOffset = false;
   int? _selectedMeetingOffsetMinutes;
   DbuWebviewOperation? _activeDbuSync;
   String? _errorMessage;
-  final _emailController = TextEditingController();
 
   static const List<int?> _meetingOffsetOptions = [
     null,
@@ -53,12 +50,6 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
     final currentUser = context.read<AuthCubit>().state.user;
     _selectedMeetingOffsetMinutes =
         currentUser?.teamDetails?.defaultMeetingOffsetMinutes;
-  }
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    super.dispose();
   }
 
   @override
@@ -141,29 +132,6 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                     : 'Gem mødetid',
                 onPressed: _isSavingMeetingOffset ? () {} : _saveMeetingOffset,
               ),
-              const SizedBox(height: 16),
-              FullWidthButton(
-                buttonText: _isResendingInvites
-                    ? 'Sender invitationer...'
-                    : 'Send invitationer igen',
-                onPressed: _isResendingInvites ? () {} : _resendPendingInvites,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Inviter spiller via email',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 8),
-              FullWidthButton(
-                buttonText: _isSendingInvite
-                    ? 'Sender invitation...'
-                    : 'Send invitation',
-                onPressed: _isSendingInvite ? () {} : _sendInvitation,
-              ),
-              const SizedBox(height: 8),
             ],
             BlocBuilder<OnboardingCubit, OnboardingState>(
               builder: (context, state) {
@@ -338,111 +306,6 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
     }
 
     return '$minutes min før kampstart';
-  }
-
-  Future<void> _sendInvitation() async {
-    final currentUser = context.read<AuthCubit>().state.user;
-    final teamId = currentUser?.teamDetails?.id;
-    final email = _emailController.text.trim();
-
-    if (currentUser?.isTeamOwner != true || teamId == null || email.isEmpty) {
-      return;
-    }
-
-    setState(() {
-      _isSendingInvite = true;
-      _errorMessage = null;
-    });
-
-    try {
-      final result = await context.read<OnboardingCubit>().sendEmailInvites(
-        teamId,
-        [
-          {'email': email}
-        ],
-      );
-      if (!mounted) return;
-
-      final error = result['error'] as String?;
-      if (error != null) {
-        setState(() {
-          _isSendingInvite = false;
-          _errorMessage = error;
-        });
-        return;
-      }
-
-      final sent = (result['sent'] as List<dynamic>? ?? []).length;
-      final failed = (result['failed'] as List<dynamic>? ?? []).length;
-      final message = failed == 0 && sent > 0
-          ? 'Invitation sendt.'
-          : sent > 0
-              ? 'Invitationer sendt: $sent. Fejlede: $failed.'
-              : 'Kunne ikke sende invitation.';
-
-      setState(() {
-        _isSendingInvite = false;
-        if (failed == 0 && sent > 0) {
-          _emailController.clear();
-        } else {
-          _errorMessage = message;
-        }
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
-      );
-    } catch (_) {
-      if (!mounted) return;
-      setState(() {
-        _isSendingInvite = false;
-        _errorMessage = 'Kunne ikke sende invitation.';
-      });
-    }
-  }
-
-  Future<void> _resendPendingInvites() async {
-    final currentUser = context.read<AuthCubit>().state.user;
-    final teamId = currentUser?.teamDetails?.id;
-    if (currentUser?.isTeamOwner != true || teamId == null) {
-      return;
-    }
-
-    setState(() {
-      _isResendingInvites = true;
-      _errorMessage = null;
-    });
-
-    try {
-      final result =
-          await context.read<OnboardingCubit>().resendPendingInvites(teamId);
-      if (!mounted) return;
-
-      if (result['error'] != null) {
-        setState(() {
-          _isResendingInvites = false;
-          _errorMessage = result['error'] as String;
-        });
-        return;
-      }
-
-      final sent = (result['sent'] as List<dynamic>? ?? []).length;
-      final failed = (result['failed'] as List<dynamic>? ?? []).length;
-      final message = failed == 0
-          ? 'Invitationer sendt igen ($sent).'
-          : 'Invitationer sendt: $sent. Fejlede: $failed.';
-
-      setState(() => _isResendingInvites = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
-      );
-    } catch (_) {
-      if (!mounted) return;
-      setState(() {
-        _isResendingInvites = false;
-        _errorMessage = 'Kunne ikke sende invitationer igen.';
-      });
-    }
   }
 
   Future<void> _syncDbu() async {

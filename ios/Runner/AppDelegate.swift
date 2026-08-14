@@ -88,15 +88,15 @@ import UIKit
     let path = url.path
 
     if url.scheme == "https", url.host == "kopa.dk" {
-      return path == "/join" || path == "/invite"
+      return path == "/join"
     }
 
     if url.scheme == "kopa" {
       if url.host == "kopa.dk" {
-        return path == "/join" || path == "/invite"
+        return path == "/join"
       }
 
-      return url.host == "join" || url.host == "invite" || path == "/join" || path == "/invite"
+      return url.host == "join" || path == "/join"
     }
 
     return false

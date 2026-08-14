@@ -89,53 +89,10 @@ class OnboardingRepository {
     }
   }
 
-  Future<Map<String, dynamic>> sendEmailInvites(
-      int teamId, List<Map<String, String>> invites) async {
-    final userToken = await SecureStorageService.getToken();
-    final url = Uri.parse('${ApiConfig.baseUrl}/team/invite/email');
-    try {
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $userToken',
-        },
-        body: json.encode({'team_id': teamId, 'emails': invites}),
-      );
-      if (response.statusCode == 200) {
-        return json.decode(response.body);
-      } else {
-        return {'error': 'Kunne ikke sende invitationer'};
-      }
-    } catch (e) {
-      return {'error': 'Netværksfejl'};
-    }
-  }
-
-  Future<Map<String, dynamic>> resendPendingInvites(int teamId) async {
-    final userToken = await SecureStorageService.getToken();
-    final url =
-        Uri.parse('${ApiConfig.baseUrl}/team/$teamId/invites/resend_pending');
-    try {
-      final response = await http.post(
-        url,
-        headers: {'Authorization': 'Bearer $userToken'},
-      );
-      if (response.statusCode == 200) {
-        return json.decode(response.body);
-      } else {
-        return {'error': 'Kunne ikke sende invitationer igen'};
-      }
-    } catch (e) {
-      return {'error': 'Netværksfejl'};
-    }
-  }
-
   Future<Map<String, dynamic>> createTeam({
     required String title,
     Map<String, dynamic>? dbuContext,
     List<Map<String, dynamic>> standings = const [],
-    List<Map<String, String>> inviteEmails = const [],
   }) async {
     final userToken = await SecureStorageService.getToken();
     if (userToken == null) {
@@ -154,7 +111,6 @@ class OnboardingRepository {
           'title': title,
           if (dbuContext != null) ..._dbuContextPayload(dbuContext),
           'standings': standings,
-          'invite_emails': inviteEmails,
         }),
       );
 

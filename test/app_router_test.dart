@@ -21,12 +21,13 @@ void main() {
       );
     });
 
-    test('normalizes cold-start invite links from the custom iOS scheme', () {
+    test('ignores removed personal invite links from the custom iOS scheme',
+        () {
       final location = AppRouter.initialLocationFromPlatformRoute(
         'kopa:///invite?token=invite-token&team_title=Kopa%20FC',
       );
 
-      expect(location, '/invite?token=invite-token&team_title=Kopa+FC');
+      expect(location, isNull);
     });
 
     test('normalizes custom scheme links that put the route in the host', () {
@@ -230,26 +231,17 @@ void main() {
 
       expect(redirect, isNull);
     });
-
-    test('keeps unauthenticated invite links on the explicit invite route', () {
-      final redirect = AppRouter.redirectPathFor(
-        path: AppRouter.invite,
-        authState: const AuthState(),
-      );
-
-      expect(redirect, isNull);
-    });
   });
 
-  group('AppRouter.inviteEntryPageFor', () {
+  group('AppRouter.joinEntryPageFor', () {
     test('starts unauthenticated join links at signup', () {
-      final page = AppRouter.inviteEntryPageFor(const AuthState());
+      final page = AppRouter.joinEntryPageFor(const AuthState());
 
       expect(page, isA<RegisterPage>());
     });
 
     test('starts authenticated join links at onboarding', () {
-      final page = AppRouter.inviteEntryPageFor(AuthState(
+      final page = AppRouter.joinEntryPageFor(AuthState(
         status: AuthStatus.authenticated,
         user: _user(),
       ));
