@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/foundation.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/repositories/auth_repository.dart';
 import 'package:kopa/utils/app_analytics.dart';
@@ -14,8 +15,7 @@ class AuthCubit extends Cubit<AuthState> {
         super(const AuthState());
 
   Future<void> init() async {
-    final hasAuthenticatedBefore =
-        await SecureStorageService.hasAuthenticatedBefore();
+    final hasAuthenticatedBefore = await _hasAuthenticatedBefore();
     emit(state.copyWith(
       status: AuthStatus.loading,
       hasAuthenticatedBefore: hasAuthenticatedBefore,
@@ -37,6 +37,18 @@ class AuthCubit extends Cubit<AuthState> {
     } catch (e) {
       emit(state.copyWith(
           status: AuthStatus.failure, errorMessage: e.toString()));
+    }
+  }
+
+  Future<bool> _hasAuthenticatedBefore() async {
+    try {
+      return await SecureStorageService.hasAuthenticatedBefore();
+    } catch (error, stack) {
+      debugPrint('Auth bootstrap storage read failed: $error');
+      if (kDebugMode) {
+        debugPrintStack(stackTrace: stack);
+      }
+      return false;
     }
   }
 

@@ -389,10 +389,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 )
               : null,
           body: SafeArea(
-            child: CustomScrollView(
-              slivers: [
-                SliverToBoxAdapter(
-                  child: Padding(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
                     padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
                     child: _KopaHeader(
                       colors: colors,
@@ -400,9 +401,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       onBack: _handleBack,
                     ),
                   ),
-                ),
-                SliverToBoxAdapter(
-                  child: Padding(
+                  Padding(
                     padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
                     child: _OnboardingTitle(
                       colors: colors,
@@ -413,15 +412,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       subtitle: subtitle,
                     ),
                   ),
-                ),
-                SliverPadding(
-                  padding: EdgeInsets.fromLTRB(
-                    20,
-                    20,
-                    20,
-                    28,
-                  ),
-                  sliver: SliverToBoxAdapter(
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
                     child: _mode == _OnboardingMode.create
                         ? _CreateTeamView(
                             l10n: l10n,
@@ -482,8 +474,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                 onRequestJoin: _requestJoin,
                               ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );

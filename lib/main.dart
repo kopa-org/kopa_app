@@ -73,7 +73,8 @@ class _KopaBootstrapAppState extends State<KopaBootstrapApp> {
       final result = await _bootstrap();
       await minimumSplash;
       return result;
-    } catch (_) {
+    } catch (error, stack) {
+      CrashReporting.logWebError(error, stack);
       await minimumSplash;
       rethrow;
     }
@@ -84,11 +85,23 @@ class _KopaBootstrapAppState extends State<KopaBootstrapApp> {
         ? _envFileFromDefine
         : (kReleaseMode ? '.env.deploy' : '.env.local');
     await dotenv.load(fileName: envFile);
-    await CrashReporting.initialize();
-    await AppAnalytics.initialize();
-    await PushNotificationsService.instance.initialize();
+    await _runOptionalBootstrapTask(
+      'crash_reporting',
+      CrashReporting.initialize,
+    );
+    await _runOptionalBootstrapTask(
+      'analytics',
+      AppAnalytics.initialize,
+    );
+    await _runOptionalBootstrapTask(
+      'push_notifications',
+      PushNotificationsService.instance.initialize,
+    );
     if (defaultTargetPlatform == TargetPlatform.iOS) {
-      await LiquidGlassWidgets.initialize();
+      await _runOptionalBootstrapTask(
+        'liquid_glass',
+        LiquidGlassWidgets.initialize,
+      );
     }
 
     final authRepository = ApiAuthRepository();
@@ -118,6 +131,21 @@ class _KopaBootstrapAppState extends State<KopaBootstrapApp> {
       featureFlagsCubit: featureFlagsCubit,
       onboardingCubit: onboardingCubit,
     );
+  }
+
+  Future<void> _runOptionalBootstrapTask(
+    String name,
+    Future<void> Function() task,
+  ) async {
+    try {
+      await task();
+    } catch (error, stack) {
+      debugPrint('Optional bootstrap task failed ($name): $error');
+      CrashReporting.logWebError(
+        StateError('Optional bootstrap task failed ($name): $error'),
+        stack,
+      );
+    }
   }
 
   @override
