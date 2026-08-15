@@ -13,6 +13,9 @@ class PlayerPositionsCard extends StatelessWidget {
   final List<UserDetails> players;
   final List<UserDetails?>? positionedPlayers;
   final VoidCallback? onEditFormation;
+  final VoidCallback? onToggleVisibility;
+  final bool isVisibleToPlayers;
+  final bool isUpdatingVisibility;
   final bool preservePlayerOrder;
   final bool showTitle;
 
@@ -23,6 +26,9 @@ class PlayerPositionsCard extends StatelessWidget {
     required this.players,
     this.positionedPlayers,
     this.onEditFormation,
+    this.onToggleVisibility,
+    this.isVisibleToPlayers = true,
+    this.isUpdatingVisibility = false,
     this.preservePlayerOrder = false,
     this.showTitle = true,
   });
@@ -46,48 +52,79 @@ class PlayerPositionsCard extends StatelessWidget {
 
     return KopaCard(
       padding: const EdgeInsets.all(Spacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Stack(
         children: [
-          if (showTitle) ...[
-            Text(
-              'Holdopstilling',
-              style: styles.h4,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: Spacing.xs),
-          ],
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              _FormationChip(formation: playerFormation.label),
-              if (onEditFormation != null) ...[
-                const SizedBox(width: Spacing.sm),
-                CupertinoButton(
-                  minimumSize: const Size(30, 30),
-                  padding: EdgeInsets.zero,
-                  onPressed: onEditFormation,
-                  child: Icon(
-                    CupertinoIcons.pencil_circle,
-                    color: colors.primary,
-                    size: 26,
-                  ),
+              if (showTitle) ...[
+                Text(
+                  'Holdopstilling',
+                  style: styles.h4,
+                  textAlign: TextAlign.center,
                 ),
+                const SizedBox(height: Spacing.xs),
               ],
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _FormationChip(formation: playerFormation.label),
+                  if (onEditFormation != null) ...[
+                    const SizedBox(width: Spacing.sm),
+                    CupertinoButton(
+                      minimumSize: const Size(30, 30),
+                      padding: EdgeInsets.zero,
+                      onPressed: onEditFormation,
+                      child: Icon(
+                        CupertinoIcons.pencil_circle,
+                        color: colors.primary,
+                        size: 26,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              const SizedBox(height: Spacing.sm),
+              _BenchLegend(bench: bench),
+              const SizedBox(height: Spacing.sm),
+              AspectRatio(
+                aspectRatio: 0.72,
+                child: _Pitch(
+                  colors: colors,
+                  styles: styles,
+                  slots: playerFormation.slots,
+                  players: starters,
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: Spacing.sm),
-          _BenchLegend(bench: bench),
-          const SizedBox(height: Spacing.sm),
-          AspectRatio(
-            aspectRatio: 0.72,
-            child: _Pitch(
-              colors: colors,
-              styles: styles,
-              slots: playerFormation.slots,
-              players: starters,
+          if (onToggleVisibility != null)
+            Positioned(
+              top: 0,
+              right: 0,
+              child: Semantics(
+                button: true,
+                toggled: isVisibleToPlayers,
+                label: isVisibleToPlayers
+                    ? 'Skjul holdopstilling for spillere'
+                    : 'Vis holdopstilling for spillere',
+                child: CupertinoButton(
+                  minimumSize: const Size(36, 36),
+                  padding: EdgeInsets.zero,
+                  onPressed: isUpdatingVisibility ? null : onToggleVisibility,
+                  child: isUpdatingVisibility
+                      ? CupertinoActivityIndicator(color: colors.primary)
+                      : Icon(
+                          isVisibleToPlayers
+                              ? CupertinoIcons.eye
+                              : CupertinoIcons.eye_slash,
+                          color:
+                              isVisibleToPlayers ? colors.primary : colors.dirt,
+                          size: 25,
+                        ),
+                ),
+              ),
             ),
-          ),
         ],
       ),
     );

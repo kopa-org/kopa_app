@@ -123,6 +123,32 @@ void main() {
     expect(match.attendingAttendanceDetails, [attending]);
     expect(match.declinedAttendanceDetails, [declined]);
   });
+
+  test('lineup visibility defaults to visible when missing', () {
+    final match = MatchDetails.fromJson(_matchJson());
+
+    expect(match.lineupVisible, isTrue);
+  });
+
+  test('lineup visibility parses from json', () {
+    final match = MatchDetails.fromJson(_matchJson(lineupVisible: false));
+
+    expect(match.lineupVisible, isFalse);
+  });
+}
+
+Map<String, dynamic> _matchJson({bool? lineupVisible}) {
+  return {
+    'id': 1,
+    'type': 'MATCH',
+    'home_team': 'Kopa IF',
+    'away_team': 'Fremad',
+    'date': '2026-07-28T19:00:00Z',
+    'location': 'Kopa Stadion',
+    'created_at': '2026-07-28T12:00:00Z',
+    'updated_at': '2026-07-28T12:00:00Z',
+    if (lineupVisible != null) 'lineup_visible': lineupVisible,
+  };
 }
 
 UserDetails _user({required bool isTeamOwner}) {

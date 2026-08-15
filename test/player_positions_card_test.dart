@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kopa/component/card/player_positions_card.dart';
@@ -34,6 +35,51 @@ void main() {
     final goalkeeperCenter = tester.getCenter(find.text('MM'));
 
     expect(nicklasCenter.dy, greaterThan(goalkeeperCenter.dy + 80));
+  });
+
+  testWidgets('visibility toggle swaps between eye states', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    var visible = true;
+
+    Future<void> pumpCard() async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (context, setState) {
+                return PlayerPositionsCard(
+                  playerCount: 7,
+                  formation: '2-3-1',
+                  players: [_user(id: 1, name: 'Nicklas Hansen')],
+                  isVisibleToPlayers: visible,
+                  onToggleVisibility: () {
+                    setState(() {
+                      visible = !visible;
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await pumpCard();
+
+    expect(find.byIcon(CupertinoIcons.eye), findsOneWidget);
+    expect(find.byIcon(CupertinoIcons.eye_slash), findsNothing);
+
+    await tester.tap(find.byIcon(CupertinoIcons.eye));
+    await tester.pump();
+
+    expect(find.byIcon(CupertinoIcons.eye), findsNothing);
+    expect(find.byIcon(CupertinoIcons.eye_slash), findsOneWidget);
   });
 }
 

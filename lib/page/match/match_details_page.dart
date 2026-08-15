@@ -52,6 +52,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
   final Set<int> _editingAttendanceSelectionIds = {};
   bool _isApprovingAllAttendances = false;
   bool _isUpdatingRegistration = false;
+  bool _isUpdatingLineupVisibility = false;
   int _homeGoals = 0;
   int _awayGoals = 0;
   MatchDetailSegment _selectedSegment = MatchDetailSegment.overview;
@@ -197,19 +198,26 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       overviewWidgets: const [],
       infoRows: _buildPracticalInfoRows(matchDetails),
       votingModule: null,
-      playerPositions: PlayerPositionsCard(
-        playerCount: _teamPlayerCount(matchDetails, user),
-        formation: matchDetails.formation,
-        players: _lineupPlayers(matchDetails),
-        positionedPlayers: _hasSavedLineup(matchDetails)
-            ? _lineupPositionedPlayers(matchDetails, user)
-            : null,
-        preservePlayerOrder: _hasSavedLineup(matchDetails),
-        onEditFormation: user.isTeamOwner
-            ? () => _openLineupEditor(matchDetails, user)
-            : null,
-        showTitle: false,
-      ),
+      playerPositions: user.isTeamOwner || matchDetails.lineupVisible
+          ? PlayerPositionsCard(
+              playerCount: _teamPlayerCount(matchDetails, user),
+              formation: matchDetails.formation,
+              players: _lineupPlayers(matchDetails),
+              positionedPlayers: _hasSavedLineup(matchDetails)
+                  ? _lineupPositionedPlayers(matchDetails, user)
+                  : null,
+              preservePlayerOrder: _hasSavedLineup(matchDetails),
+              onEditFormation: user.isTeamOwner
+                  ? () => _openLineupEditor(matchDetails, user)
+                  : null,
+              onToggleVisibility: user.isTeamOwner
+                  ? () => _toggleLineupVisibility(matchDetails)
+                  : null,
+              isVisibleToPlayers: matchDetails.lineupVisible,
+              isUpdatingVisibility: _isUpdatingLineupVisibility,
+              showTitle: false,
+            )
+          : null,
       attendanceList: _buildAttendanceList(matchDetails, squad, user),
       ratingsSection: _buildRatingsSection(matchDetails),
     );
@@ -335,7 +343,9 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
 
     widgets.add(
       _AttendanceApprovalSection(
+        key: const ValueKey('pending-attendance-approval'),
         title: 'Afventer godkendelse (${pending.length})',
+        collapsible: false,
         children: pending.isEmpty
             ? const [_AttendanceApprovalEmpty()]
             : pending
@@ -365,6 +375,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       widgets.add(const SizedBox(height: Spacing.md));
       widgets.add(
         _AttendanceApprovalSection(
+          key: const ValueKey('handled-attendance-approval'),
           title: 'Behandlet (${handled.length})',
           children: handled
               .map(
@@ -427,6 +438,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     return [
       const SizedBox(height: Spacing.lg),
       _AttendanceApprovalSection(
+        key: const ValueKey('no-rsvp-attendance'),
         title: 'Mangler svar (${noRsvp.length})',
         children: noRsvp
             .map(
@@ -449,6 +461,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     return [
       const SizedBox(height: Spacing.lg),
       _AttendanceApprovalSection(
+        key: const ValueKey('declined-attendance'),
         title: 'Frameldte (${declined.length})',
         children: declined
             .map(
@@ -650,6 +663,48 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         };
         _loadError = null;
       });
+    }
+  }
+
+  Future<void> _toggleLineupVisibility(MatchDetails match) async {
+    if (_isUpdatingLineupVisibility) return;
+
+    setState(() {
+      _isUpdatingLineupVisibility = true;
+    });
+
+    try {
+      final updatedMatch = await MatchRepository.updateMatchLineupVisibility(
+        match.id,
+        !match.lineupVisible,
+      );
+      AppAnalytics.logEvent(
+        'match_lineup_visibility_updated',
+        parameters: {'lineup_visible': updatedMatch.lineupVisible},
+      );
+      if (!mounted) return;
+      setState(() {
+        _matchAndSquadData = {
+          ...?_matchAndSquadData,
+          'matchDetails': updatedMatch,
+        };
+        _loadError = null;
+      });
+    } catch (error, stack) {
+      CrashReporting.logWebError(error, stack);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Kunne ikke ændre synligheden. Prøv igen.'),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isUpdatingLineupVisibility = false;
+        });
+      }
     }
   }
 
@@ -1234,26 +1289,99 @@ class _PrematchStickySurface extends StatelessWidget {
   }
 }
 
-class _AttendanceApprovalSection extends StatelessWidget {
+class _AttendanceApprovalSection extends StatefulWidget {
   final String title;
   final List<Widget> children;
+  final bool collapsible;
 
   const _AttendanceApprovalSection({
+    super.key,
     required this.title,
     required this.children,
+    this.collapsible = true,
   });
 
   @override
+  State<_AttendanceApprovalSection> createState() =>
+      _AttendanceApprovalSectionState();
+}
+
+class _AttendanceApprovalSectionState
+    extends State<_AttendanceApprovalSection> {
+  bool _isExpanded = false;
+
+  @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final styles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    if (!widget.collapsible) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(widget.title, style: styles.subtitle2),
+          const SizedBox(height: Spacing.sm),
+          ...widget.children,
+        ],
+      );
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: styles.subtitle2),
-        const SizedBox(height: Spacing.sm),
-        ...children,
+        Semantics(
+          button: true,
+          toggled: _isExpanded,
+          label: widget.title,
+          child: CupertinoButton(
+            minimumSize: const Size(0, 36),
+            padding: EdgeInsets.zero,
+            onPressed: () {
+              setState(() {
+                _isExpanded = !_isExpanded;
+              });
+            },
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    widget.title,
+                    style: styles.subtitle2.copyWith(color: colors.black),
+                  ),
+                ),
+                const SizedBox(width: Spacing.sm),
+                AnimatedRotation(
+                  turns: _isExpanded ? 0.5 : 0,
+                  duration: const Duration(milliseconds: 160),
+                  curve: Curves.easeOutCubic,
+                  child: Icon(
+                    CupertinoIcons.chevron_down,
+                    size: 18,
+                    color: colors.dirt,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 180),
+          switchInCurve: Curves.easeOutCubic,
+          switchOutCurve: Curves.easeInCubic,
+          child: _isExpanded
+              ? Column(
+                  key: const ValueKey('expanded-attendance-section'),
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: Spacing.sm),
+                    ...widget.children,
+                  ],
+                )
+              : const SizedBox.shrink(
+                  key: ValueKey('collapsed-attendance-section'),
+                ),
+        ),
       ],
     );
   }

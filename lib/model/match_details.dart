@@ -27,6 +27,7 @@ class MatchDetails {
   final int unavailableCount;
   final int teamPlayerCount;
   final String formation;
+  final bool lineupVisible;
   final double? latitude;
   final double? longitude;
   final List<EventAttendanceDetails>? attendanceDetailsList;
@@ -54,6 +55,7 @@ class MatchDetails {
     this.unavailableCount = 0,
     this.teamPlayerCount = 7,
     this.formation = '2-3-1',
+    this.lineupVisible = true,
     this.latitude,
     this.longitude,
     this.attendanceDetailsList = const [],
@@ -85,6 +87,7 @@ class MatchDetails {
       unavailableCount: json['unavailable_count'] ?? 0,
       teamPlayerCount: json['team_player_count'] ?? 7,
       formation: json['formation'] ?? '2-3-1',
+      lineupVisible: json['lineup_visible'] ?? true,
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
       attendanceDetailsList: json['attendance_details_list'] != null

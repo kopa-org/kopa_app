@@ -1065,10 +1065,10 @@ class _MatchResponseCard extends StatelessWidget {
                   isRegistered
                       ? 'Du er tilmeldt'
                       : isUnavailable
-                          ? 'Du har meldt afbud'
+                          ? 'Afbud registreret'
                           : 'Kommer du?',
                   style: appTextStyles.body3.copyWith(
-                    color: appColors.grass,
+                    color: appColors.dirt,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -1105,62 +1105,36 @@ class _MatchResponseCard extends StatelessWidget {
                   ),
                 ),
               if (isRegistered)
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'ingen opgaver',
-                        style: appTextStyles.caption2.copyWith(
-                          color: appColors.dirt,
-                          fontWeight: FontWeight.w800,
-                        ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: isRegistering ? null : decline,
+                    style: TextButton.styleFrom(
+                      foregroundColor: appColors.grass,
+                      textStyle: appTextStyles.caption2.copyWith(
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
-                    const SizedBox(width: Spacing.sm),
-                    Expanded(
-                      child: TextButton(
-                        onPressed: isRegistering ? null : decline,
-                        style: TextButton.styleFrom(
-                          foregroundColor: appColors.grass,
-                          textStyle: appTextStyles.caption2.copyWith(
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        child: Text(
-                          isRegistering ? 'Melder afbud' : 'Meld afbud',
-                        ),
-                      ),
+                    child: Text(
+                      isRegistering ? 'Melder afbud' : 'Meld afbud',
                     ),
-                  ],
+                  ),
                 )
               else if (isUnavailable)
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Afbud registreret',
-                        style: appTextStyles.caption2.copyWith(
-                          color: appColors.dirt,
-                          fontWeight: FontWeight.w800,
-                        ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: isRegistering ? null : register,
+                    style: TextButton.styleFrom(
+                      foregroundColor: appColors.grass,
+                      textStyle: appTextStyles.caption2.copyWith(
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
-                    const SizedBox(width: Spacing.sm),
-                    Expanded(
-                      child: TextButton(
-                        onPressed: isRegistering ? null : register,
-                        style: TextButton.styleFrom(
-                          foregroundColor: appColors.grass,
-                          textStyle: appTextStyles.caption2.copyWith(
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        child: Text(
-                          isRegistering ? 'Tilmeldes' : 'Tilmeld igen',
-                        ),
-                      ),
+                    child: Text(
+                      isRegistering ? 'Tilmeldes' : 'Tilmeld igen',
                     ),
-                  ],
+                  ),
                 )
               else
                 Row(
