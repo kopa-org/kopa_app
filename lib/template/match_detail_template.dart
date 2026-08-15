@@ -76,13 +76,14 @@ class MatchDetailTemplate extends StatelessWidget {
             SingleChildScrollView(
               padding: EdgeInsets.fromLTRB(
                 16,
-                84,
+                0,
                 16,
                 stickyActionBar == null ? 32 : 220,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const _MatchDetailsHeader(),
                   heroCard,
                   const SizedBox(height: 20),
                   _buildSegmentedControl(context),
@@ -98,12 +99,6 @@ class MatchDetailTemplate extends StatelessWidget {
                 bottom: 0,
                 child: stickyActionBar!,
               ),
-            const Positioned(
-              left: 0,
-              right: 0,
-              top: 0,
-              child: _MatchDetailsStickyHeader(),
-            ),
           ],
         ),
       );
@@ -119,13 +114,14 @@ class MatchDetailTemplate extends StatelessWidget {
           SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(
               16,
-              84,
+              0,
               16,
               16,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const _MatchDetailsHeader(),
                 heroCard,
                 const SizedBox(height: Spacing.lg),
                 _buildSegmentedControl(context),
@@ -133,12 +129,6 @@ class MatchDetailTemplate extends StatelessWidget {
                 ..._buildSelectedSegment(context),
               ],
             ),
-          ),
-          const Positioned(
-            left: 0,
-            right: 0,
-            top: 0,
-            child: _MatchDetailsStickyHeader(),
           ),
         ],
       ),
@@ -299,8 +289,8 @@ class MatchDetailTemplate extends StatelessWidget {
   }
 }
 
-class _MatchDetailsStickyHeader extends StatelessWidget {
-  const _MatchDetailsStickyHeader();
+class _MatchDetailsHeader extends StatelessWidget {
+  const _MatchDetailsHeader();
 
   @override
   Widget build(BuildContext context) {
@@ -308,38 +298,27 @@ class _MatchDetailsStickyHeader extends StatelessWidget {
     final styles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colors.background.withValues(alpha: 0.96),
-        boxShadow: [
-          BoxShadow(
-            color: colors.background.withValues(alpha: 0.85),
-            blurRadius: 10,
-            offset: const Offset(0, 8),
+    return Padding(
+      key: const ValueKey('match-details-scroll-header'),
+      padding: const EdgeInsets.fromLTRB(0, 12, 0, 20),
+      child: Row(
+        children: [
+          CupertinoButton(
+            minimumSize: const Size(32, 32),
+            padding: EdgeInsets.zero,
+            onPressed: () => Navigator.of(context).pop(),
+            child: Icon(
+              CupertinoIcons.back,
+              color: colors.dirt,
+              size: 30,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Text(
+            'Kampdetaljer',
+            style: styles.h5.copyWith(fontWeight: FontWeight.w800),
           ),
         ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-        child: Row(
-          children: [
-            CupertinoButton(
-              minimumSize: const Size(32, 32),
-              padding: EdgeInsets.zero,
-              onPressed: () => Navigator.of(context).pop(),
-              child: Icon(
-                CupertinoIcons.back,
-                color: colors.dirt,
-                size: 30,
-              ),
-            ),
-            const SizedBox(width: 14),
-            Text(
-              'Kampdetaljer',
-              style: styles.h5.copyWith(fontWeight: FontWeight.w800),
-            ),
-          ],
-        ),
       ),
     );
   }
