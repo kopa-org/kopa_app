@@ -83,29 +83,34 @@ class PageScaffold extends StatelessWidget {
                       trailing: _buildTrailing(appColors),
                     )
                 : null,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                SafeArea(
-                  top: useTopSafeArea,
-                  child: onRefresh != null
-                      ? CustomScrollView(
-                          slivers: [
-                            CupertinoSliverRefreshControl(
-                              onRefresh: onRefresh!,
-                            ),
-                            SliverFillRemaining(child: body),
-                          ],
-                        )
-                      : body,
-                ),
-                if (floatingActionButton != null)
-                  Positioned(
-                    right: 16,
-                    bottom: floatingActionButtonBottomInset,
-                    child: floatingActionButton!,
+            child: DefaultTextStyle(
+              style: appTextStyles.body.copyWith(
+                decoration: TextDecoration.none,
+              ),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  SafeArea(
+                    top: useTopSafeArea,
+                    child: onRefresh != null
+                        ? CustomScrollView(
+                            slivers: [
+                              CupertinoSliverRefreshControl(
+                                onRefresh: onRefresh!,
+                              ),
+                              SliverFillRemaining(child: body),
+                            ],
+                          )
+                        : body,
                   ),
-              ],
+                  if (floatingActionButton != null)
+                    Positioned(
+                      right: 16,
+                      bottom: floatingActionButtonBottomInset,
+                      child: floatingActionButton!,
+                    ),
+                ],
+              ),
             ),
           )
         : Scaffold(

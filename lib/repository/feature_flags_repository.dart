@@ -4,27 +4,33 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:kopa/config/app_feature_flags.dart';
 import 'package:kopa/helpers/api_config.dart';
+import 'package:kopa/services/secure_storage_service.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 typedef CurrentBuildNumberProvider = Future<int?> Function();
+typedef AuthTokenProvider = Future<String?> Function();
 
 class FeatureFlagsRepository {
   FeatureFlagsRepository({
     http.Client? httpClient,
     CurrentBuildNumberProvider? currentBuildNumberProvider,
+    AuthTokenProvider? authTokenProvider,
   })  : _httpClient = httpClient ?? http.Client(),
         _currentBuildNumberProvider =
-            currentBuildNumberProvider ?? _currentBuildNumberFromPackageInfo;
+            currentBuildNumberProvider ?? _currentBuildNumberFromPackageInfo,
+        _authTokenProvider = authTokenProvider ?? SecureStorageService.getToken;
 
   final http.Client _httpClient;
   final CurrentBuildNumberProvider _currentBuildNumberProvider;
+  final AuthTokenProvider _authTokenProvider;
   bool _closed = false;
 
   Future<AppFeatureFlags> getFeatureFlags() async {
     try {
       final currentBuildNumber = await _safeCurrentBuildNumber();
       final url = _featureFlagsUri('/features', currentBuildNumber);
-      final response = await _httpClient.get(url);
+      final response =
+          await _httpClient.get(url, headers: await _authHeaders());
       if (response.statusCode != 200) return const AppFeatureFlags();
 
       final body = jsonDecode(response.body);
@@ -63,9 +69,12 @@ class FeatureFlagsRepository {
 
     while (!_closed) {
       try {
-        final request = http.Request('GET', url)
-          ..headers['accept'] = 'text/event-stream'
-          ..headers['cache-control'] = 'no-cache';
+        final headers = {
+          'accept': 'text/event-stream',
+          'cache-control': 'no-cache',
+          ...await _authHeaders(),
+        };
+        final request = http.Request('GET', url)..headers.addAll(headers);
         final response = await _httpClient.send(request);
 
         if (response.statusCode != 200) {
@@ -121,6 +130,13 @@ class FeatureFlagsRepository {
       }
       return null;
     }
+  }
+
+  Future<Map<String, String>> _authHeaders() async {
+    final token = await _authTokenProvider();
+    if (token == null || token.isEmpty) return const {};
+
+    return {'Authorization': 'Bearer $token'};
   }
 
   Uri _featureFlagsUri(String path, int? currentBuildNumber) {

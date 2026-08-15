@@ -42,9 +42,11 @@ void main() {
 
     final repository = FeatureFlagsRepository(
       currentBuildNumberProvider: () async => 42,
+      authTokenProvider: () async => 'team-token',
       httpClient: MockClient((request) async {
         expect(request.url.path, '/api/features');
         expect(request.url.queryParameters['build_number'], '42');
+        expect(request.headers['Authorization'], 'Bearer team-token');
 
         return http.Response(
           jsonEncode({

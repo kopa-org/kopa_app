@@ -86,6 +86,12 @@ void main() {
     expect(find.byIcon(CupertinoIcons.back), findsNothing);
     expect(find.text('Indhold'), findsOneWidget);
     expect(find.byKey(const ValueKey('ios-fab')), findsOneWidget);
+    expect(
+      DefaultTextStyle.of(tester.element(find.text('Indhold')))
+          .style
+          .decoration,
+      TextDecoration.none,
+    );
 
     await tester.tap(find.byKey(const ValueKey('ios-tab-action')));
     await tester.pump();
