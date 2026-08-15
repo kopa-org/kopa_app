@@ -2,16 +2,28 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class UrlOpener {
-  static const _defaultMobilePayBoxUrl =
-      'https://qr.mobilepay.dk/box/74f833d8-ca7f-496c-8c2e-2302f9fbc58e/pay-in';
   static const _appStoreUrl = 'https://apps.apple.com/dk/app/624499138';
 
   static Future<bool> openMobilePay({
     int? amount,
     String? message,
+    String? mobilePayBoxId,
   }) async {
     final number = dotenv.maybeGet('MOBILEPAY_NUMBER')?.trim();
     final boxUrl = dotenv.maybeGet('MOBILEPAY_BOX_URL')?.trim();
+    final configuredBoxId = mobilePayBoxId?.trim();
+
+    if (configuredBoxId != null && configuredBoxId.isNotEmpty) {
+      final target = _mobilePayBoxUriFromId(
+        configuredBoxId,
+        amount: amount,
+        message: message,
+      );
+
+      if (await _launch(target)) {
+        return true;
+      }
+    }
 
     if (number != null && number.isNotEmpty) {
       final deeplink = Uri(
@@ -30,13 +42,11 @@ class UrlOpener {
       }
     }
 
-    final target = _mobilePayBoxUri(
-      boxUrl == null || boxUrl.isEmpty ? _defaultMobilePayBoxUrl : boxUrl,
-      amount: amount,
-      message: message,
-    );
+    final target = boxUrl != null && boxUrl.isNotEmpty
+        ? _mobilePayBoxUri(boxUrl, amount: amount, message: message)
+        : null;
 
-    if (await _launch(target)) {
+    if (target != null && await _launch(target)) {
       return true;
     }
 
@@ -52,12 +62,43 @@ class UrlOpener {
     return uri.replace(
       queryParameters: {
         ...uri.queryParameters,
-        if (amount != null && amount > 0) 'amount': amount.toString(),
+        if (amount != null && amount > 0)
+          'amount': _mobilePayBoxAmount(amount).toString(),
         if (message != null && message.trim().isNotEmpty)
           'message': message.trim(),
       },
     );
   }
+
+  static Uri _mobilePayBoxUriFromId(
+    String boxId, {
+    int? amount,
+    String? message,
+  }) {
+    return _mobilePayBoxUri(
+      'https://qr.mobilepay.dk/box/${Uri.encodeComponent(boxId)}/pay-in',
+      amount: amount,
+      message: message,
+    );
+  }
+
+  static Uri mobilePayBoxUriForTesting(
+    String rawUrl, {
+    int? amount,
+    String? message,
+  }) {
+    return _mobilePayBoxUri(rawUrl, amount: amount, message: message);
+  }
+
+  static Uri mobilePayBoxUriFromIdForTesting(
+    String boxId, {
+    int? amount,
+    String? message,
+  }) {
+    return _mobilePayBoxUriFromId(boxId, amount: amount, message: message);
+  }
+
+  static int _mobilePayBoxAmount(int amountInKroner) => amountInKroner * 100;
 
   static Future<bool> _launch(Uri uri) async {
     try {

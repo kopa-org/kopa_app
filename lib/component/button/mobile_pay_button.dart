@@ -5,12 +5,14 @@ import 'package:kopa/helpers/url_opener.dart';
 class MobilePayButton extends StatelessWidget {
   final int? amount;
   final String? message;
+  final String? mobilePayBoxId;
   final String? buttonText;
 
   const MobilePayButton({
     super.key,
     this.amount,
     this.message,
+    this.mobilePayBoxId,
     this.buttonText,
   });
 
@@ -22,7 +24,11 @@ class MobilePayButton extends StatelessWidget {
                 ? 'Betal $amount kr. med MobilePay'
                 : 'Gå til MobilePay Box'),
         onPressed: () {
-          UrlOpener.openMobilePay(amount: amount, message: message);
+          UrlOpener.openMobilePay(
+            amount: amount,
+            message: message,
+            mobilePayBoxId: mobilePayBoxId,
+          );
         },
         outlined: true);
   }

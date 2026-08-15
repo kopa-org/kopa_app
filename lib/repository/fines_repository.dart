@@ -48,6 +48,25 @@ class FinesRepository {
     return FineBoxDetails.fromJson(json);
   }
 
+  static Future<bool> updateMobilePayBoxId(
+    String mobilePayBoxId,
+  ) async {
+    final token = await _secureStorage.read(key: 'token');
+    var url = Uri.parse('${ApiConfig.baseUrl}/fine/fine_box');
+
+    var response = await http.patch(url, body: {
+      'mobilepay_box_id': mobilePayBoxId,
+    }, headers: {
+      'Authorization': 'Bearer $token',
+    });
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update MobilePay Box');
+    }
+
+    return true;
+  }
+
   static Future<List<int>> addFineForUsers(
       List<CreateUserFineCommand> createUserFineCommands) async {
     final token = await _secureStorage.read(key: 'token');

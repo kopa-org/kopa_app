@@ -213,6 +213,13 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
               ],
             ),
           ),
+          if (!fineBox.hasMobilePayBox) ...[
+            const SizedBox(height: 16),
+            _MobilePaySetupPanel(
+              isTeamOwner: user.isTeamOwner,
+              onSetup: _openMobilePaySetup,
+            ),
+          ],
           const SizedBox(height: 16),
           _PrimaryActionButton(
             icon: CupertinoIcons.plus_circle,
@@ -435,6 +442,9 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
               selectedCount: selectedFines.length,
               selectedAmount: selectedAmount,
               userName: user.name,
+              mobilePayBoxId: fineBox.mobilePayBoxId,
+              isTeamOwner: user.isTeamOwner,
+              onSetupMobilePay: _openMobilePaySetup,
               onCashPaid: selectedFines.isEmpty
                   ? null
                   : () => _markSelectedPersonalFinesPaid(
@@ -485,6 +495,18 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
 
     if (result == true) {
       _refreshFineTypes();
+    }
+  }
+
+  Future<void> _openMobilePaySetup() async {
+    final result = await showCupertinoModalBottomSheet(
+      expand: false,
+      context: context,
+      builder: (context) => const _MobilePaySetupModal(),
+    );
+
+    if (result == true) {
+      await _refreshFineBox();
     }
   }
 
@@ -1389,16 +1411,142 @@ class _FineTypeRow extends StatelessWidget {
   }
 }
 
+class _MobilePaySetupPanel extends StatelessWidget {
+  final bool isTeamOwner;
+  final VoidCallback? onSetup;
+  final bool framed;
+
+  const _MobilePaySetupPanel({
+    required this.isTeamOwner,
+    required this.onSetup,
+    this.framed = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    final content = Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            color: appColors.grey2,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(
+            CupertinoIcons.creditcard,
+            color: appColors.primary,
+            size: 22,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'MobilePay Box mangler',
+                style: appTextStyles.subtitle2.copyWith(
+                  color: appColors.textPrimary,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                isTeamOwner
+                    ? 'Tilføj holdets MobilePay Box nummer, så spillere kan betale direkte til bødekassen.'
+                    : 'Holdlederen skal tilføje holdets MobilePay Box, før MobilePay kan bruges her.',
+                style: appTextStyles.body3.copyWith(
+                  color: appColors.textSecondary,
+                ),
+              ),
+              if (isTeamOwner && onSetup != null) ...[
+                const SizedBox(height: 12),
+                _MiniActionButton(
+                  label: 'Tilføj Box',
+                  icon: CupertinoIcons.plus_circle,
+                  onPressed: onSetup!,
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+
+    return framed ? _SectionCard(child: content) : content;
+  }
+}
+
+class _MiniActionButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  const _MiniActionButton({
+    required this.label,
+    required this.icon,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return CupertinoButton(
+      minimumSize: const Size(0, 34),
+      padding: EdgeInsets.zero,
+      onPressed: onPressed,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: appColors.primary,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: appColors.surface, size: 16),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: appTextStyles.buttonSmall.copyWith(
+                color: appColors.surface,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _PaymentFooter extends StatelessWidget {
   final int selectedCount;
   final int selectedAmount;
   final String userName;
+  final String? mobilePayBoxId;
+  final bool isTeamOwner;
+  final VoidCallback? onSetupMobilePay;
   final VoidCallback? onCashPaid;
 
   const _PaymentFooter({
     required this.selectedCount,
     required this.selectedAmount,
     required this.userName,
+    required this.mobilePayBoxId,
+    required this.isTeamOwner,
+    required this.onSetupMobilePay,
     required this.onCashPaid,
   });
 
@@ -1455,11 +1603,19 @@ class _PaymentFooter extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            MobilePayButton(
-              amount: selectedAmount,
-              message: 'Bøder - $userName',
-              buttonText: 'Indbetal med MobilePay',
-            ),
+            if (mobilePayBoxId == null || mobilePayBoxId!.trim().isEmpty)
+              _MobilePaySetupPanel(
+                isTeamOwner: isTeamOwner,
+                onSetup: onSetupMobilePay,
+                framed: false,
+              )
+            else
+              MobilePayButton(
+                amount: selectedAmount,
+                message: 'Bøder - $userName',
+                mobilePayBoxId: mobilePayBoxId,
+                buttonText: 'Indbetal med MobilePay',
+              ),
             const SizedBox(height: 8),
             CupertinoButton(
               minimumSize: const Size(0, 24),
@@ -1475,6 +1631,141 @@ class _PaymentFooter extends StatelessWidget {
                   decoration: TextDecoration.underline,
                 ),
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MobilePaySetupModal extends StatefulWidget {
+  const _MobilePaySetupModal();
+
+  @override
+  State<_MobilePaySetupModal> createState() => _MobilePaySetupModalState();
+}
+
+class _MobilePaySetupModalState extends State<_MobilePaySetupModal> {
+  final TextEditingController _controller = TextEditingController();
+  bool _isSaving = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    final boxId = _normalizeMobilePayBoxId(_controller.text);
+
+    if (boxId.isEmpty) {
+      setState(() {
+        _error = 'Indtast MobilePay Box nummer eller link.';
+      });
+      return;
+    }
+
+    setState(() {
+      _isSaving = true;
+      _error = null;
+    });
+
+    try {
+      await FinesRepository.updateMobilePayBoxId(boxId);
+      if (mounted) {
+        Navigator.of(context).pop(true);
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+          _error = 'MobilePay Box kunne ikke gemmes.';
+        });
+      }
+    }
+  }
+
+  String _normalizeMobilePayBoxId(String value) {
+    final trimmed = value.trim();
+    final uri = Uri.tryParse(trimmed);
+
+    if (uri != null && uri.pathSegments.contains('box')) {
+      final boxIndex = uri.pathSegments.indexOf('box');
+      if (boxIndex >= 0 && boxIndex + 1 < uri.pathSegments.length) {
+        return uri.pathSegments[boxIndex + 1].trim();
+      }
+    }
+
+    return trimmed.replaceAll(RegExp(r'\s+'), '');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 20,
+          right: 20,
+          top: 18,
+          bottom: 20 + MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'MobilePay Box',
+              style: appTextStyles.h5.copyWith(
+                color: appColors.textPrimary,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Indsæt holdets MobilePay Box nummer eller det link, du får fra MobilePay.',
+              style: appTextStyles.body3.copyWith(
+                color: appColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 16),
+            CupertinoTextField(
+              controller: _controller,
+              enabled: !_isSaving,
+              autocorrect: false,
+              textCapitalization: TextCapitalization.characters,
+              placeholder: 'Fx 5289PN',
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+              decoration: BoxDecoration(
+                color: appColors.surface,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: appColors.divider),
+              ),
+            ),
+            if (_error != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                _error!,
+                style: appTextStyles.caption2.copyWith(
+                  color: appColors.error,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+            const SizedBox(height: 18),
+            _PrimaryActionButton(
+              icon: _isSaving
+                  ? CupertinoIcons.hourglass
+                  : CupertinoIcons.check_mark_circled,
+              label: _isSaving ? 'Gemmer' : 'Gem MobilePay Box',
+              onPressed: _isSaving ? () {} : _save,
             ),
           ],
         ),
