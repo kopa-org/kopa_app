@@ -19,6 +19,7 @@ class OnboardingState {
   final int? teamId;
   final String? teamTitle;
   final String? teamLeaderName;
+  final int? teamPlayerCount;
   final String? errorMessage;
   final String? joinToken; // Generic team join token for sharing
   final List<Map<String, dynamic>> searchResults;
@@ -32,6 +33,7 @@ class OnboardingState {
     this.teamId,
     this.teamTitle,
     this.teamLeaderName,
+    this.teamPlayerCount,
     this.errorMessage,
     this.joinToken,
     this.searchResults = const [],
@@ -46,6 +48,7 @@ class OnboardingState {
     Object? teamId = _unset,
     Object? teamTitle = _unset,
     Object? teamLeaderName = _unset,
+    Object? teamPlayerCount = _unset,
     Object? errorMessage = _unset,
     Object? joinToken = _unset,
     List<Map<String, dynamic>>? searchResults,
@@ -62,6 +65,9 @@ class OnboardingState {
       teamLeaderName: teamLeaderName == _unset
           ? this.teamLeaderName
           : teamLeaderName as String?,
+      teamPlayerCount: teamPlayerCount == _unset
+          ? this.teamPlayerCount
+          : teamPlayerCount as int?,
       errorMessage:
           errorMessage == _unset ? this.errorMessage : errorMessage as String?,
       joinToken: joinToken == _unset ? this.joinToken : joinToken as String?,
@@ -106,6 +112,7 @@ class OnboardingCubit extends Cubit<OnboardingState> {
         name: result['name'] ?? name,
         teamId: result['team_id'] ?? teamId,
         teamTitle: result['team_title'] ?? teamTitle,
+        teamPlayerCount: _playerCountFromJson(result['player_count']),
       ));
     } else {
       emit(state.copyWith(
@@ -154,12 +161,14 @@ class OnboardingCubit extends Cubit<OnboardingState> {
 
   Future<bool> createTeam({
     required String title,
+    required int playerCount,
     Map<String, dynamic>? dbuContext,
     List<Map<String, dynamic>> standings = const [],
   }) async {
     emit(state.copyWith(status: OnboardingStatus.loading, errorMessage: null));
     final result = await _repository.createTeam(
       title: title,
+      playerCount: playerCount,
       dbuContext: dbuContext,
       standings: standings,
     );
@@ -201,6 +210,11 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     if (value is int) return value;
     if (value is String) return int.tryParse(value);
     return null;
+  }
+
+  int? _playerCountFromJson(dynamic value) {
+    final playerCount = _intFromJson(value);
+    return playerCount == 7 || playerCount == 11 ? playerCount : null;
   }
 
   String? _stringFromJson(dynamic value) {
@@ -270,6 +284,7 @@ class OnboardingCubit extends Cubit<OnboardingState> {
       teamId: request['team_id'],
       teamTitle: request['team_title'],
       teamLeaderName: request['leader_name'],
+      teamPlayerCount: _playerCountFromJson(request['player_count']),
     ));
     return true;
   }

@@ -56,19 +56,43 @@ void main() {
     expect(cubit.state.teamTitle, 'Kopa FC');
     expect(cubit.state.teamLeaderName, 'Owner');
   });
+
+  test('handleDeepLink stores validated team player count', () async {
+    final cubit = OnboardingCubit(_FakeOnboardingRepository(
+      joinResult: {'success': true},
+      validateResult: {
+        'valid': true,
+        'team_id': 7,
+        'team_title': 'Kopa FC',
+        'player_count': 11,
+      },
+    ));
+
+    await cubit.handleDeepLink('invite-token');
+
+    expect(cubit.state.status, OnboardingStatus.validated);
+    expect(cubit.state.teamId, 7);
+    expect(cubit.state.teamPlayerCount, 11);
+  });
 }
 
 class _FakeOnboardingRepository extends OnboardingRepository {
   final Map<String, dynamic> joinResult;
   final Map<String, dynamic> currentJoinRequestResult;
+  final Map<String, dynamic> validateResult;
 
   _FakeOnboardingRepository({
     required this.joinResult,
+    this.validateResult = const {'valid': false},
     this.currentJoinRequestResult = const {
       'success': true,
       'join_request': null,
     },
   });
+
+  @override
+  Future<Map<String, dynamic>> validateToken(String token) async =>
+      validateResult;
 
   @override
   Future<Map<String, dynamic>> joinTeam(String token) async => joinResult;

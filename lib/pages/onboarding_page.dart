@@ -47,6 +47,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
   Uri? _createdTeamInviteUri;
   String? _createdTeamTitle;
 
+  bool get _isInviteJoinFlow {
+    final state = context.read<OnboardingCubit>().state;
+    return _mode == _OnboardingMode.join &&
+        state.inviteToken != null &&
+        state.teamId != null;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -79,6 +86,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     _hasSelectedRole = true;
     _mode = _OnboardingMode.join;
     _joinStep = 0;
+    _usesElevenAside = state.teamPlayerCount != 7;
     _applyPendingJoinContext(state);
   }
 
@@ -306,6 +314,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     final onboardingCubit = context.read<OnboardingCubit>();
     final success = await onboardingCubit.createTeam(
       title: title,
+      playerCount: _usesElevenAside ? 11 : 7,
       dbuContext: _dbuData,
       standings: (_dbuData?['standings'] as List<dynamic>? ?? [])
           .cast<Map<String, dynamic>>(),
@@ -425,6 +434,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
       if (_joinStep == 0) {
         final onboardingState = context.read<OnboardingCubit>().state;
         final isInviteFlow = onboardingState.inviteToken != null;
+        if (isInviteFlow) {
+          _usesElevenAside = onboardingState.teamPlayerCount != 7;
+        }
         final onboardingCubit = context.read<OnboardingCubit>();
         final authCubit = context.read<AuthCubit>();
         try {
@@ -583,6 +595,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
         final loading = state.status == OnboardingStatus.loading;
         final actionLoading = loading || _savingPosition;
+        final fixedJoinPlayerCount =
+            _isInviteJoinFlow ? (state.teamPlayerCount == 7 ? 7 : 11) : null;
         final step =
             _mode == _OnboardingMode.create ? _createStep : _joinStep + 1;
         final title = _mode == _OnboardingMode.join
@@ -703,7 +717,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                 colors: colors,
                                 textStyles: textStyles,
                                 selectedPosition: _selectedPosition,
-                                usesElevenAside: _usesElevenAside,
+                                usesElevenAside: fixedJoinPlayerCount == null
+                                    ? _usesElevenAside
+                                    : fixedJoinPlayerCount == 11,
+                                fixedPlayerCount: fixedJoinPlayerCount,
                                 onFormationChanged: (value) =>
                                     setState(() => _usesElevenAside = value),
                                 onPositionChanged: (value) =>
@@ -1015,6 +1032,7 @@ class _PositionStep extends StatelessWidget {
   final AppTextStyles textStyles;
   final _PositionChoice selectedPosition;
   final bool usesElevenAside;
+  final int? fixedPlayerCount;
   final ValueChanged<bool> onFormationChanged;
   final ValueChanged<_PositionChoice> onPositionChanged;
 
@@ -1023,6 +1041,7 @@ class _PositionStep extends StatelessWidget {
     required this.textStyles,
     required this.selectedPosition,
     required this.usesElevenAside,
+    this.fixedPlayerCount,
     required this.onFormationChanged,
     required this.onPositionChanged,
   });
@@ -1032,13 +1051,15 @@ class _PositionStep extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _SegmentedToggle(
-          colors: colors,
-          textStyles: textStyles,
-          usesElevenAside: usesElevenAside,
-          onChanged: onFormationChanged,
-        ),
-        const SizedBox(height: 18),
+        if (fixedPlayerCount == null) ...[
+          _SegmentedToggle(
+            colors: colors,
+            textStyles: textStyles,
+            usesElevenAside: usesElevenAside,
+            onChanged: onFormationChanged,
+          ),
+          const SizedBox(height: 18),
+        ],
         _PitchPicker(
           colors: colors,
           textStyles: textStyles,
@@ -1735,7 +1756,6 @@ class _TeamSearchCard extends StatelessWidget {
     );
   }
 }
-
 
 class _InviteTeamStep extends StatelessWidget {
   final AppColors colors;

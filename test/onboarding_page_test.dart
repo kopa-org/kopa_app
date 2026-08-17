@@ -49,6 +49,51 @@ void main() {
 
     expect(find.text('Vælg din position'), findsOneWidget);
     expect(find.text('Er du holdleder?'), findsNothing);
+    expect(find.text('7-mand'), findsNothing);
+    expect(find.text('11-mand'), findsNothing);
+  });
+
+  testWidgets('invite context uses leader-selected 7-player format',
+      (tester) async {
+    final onboardingCubit = _TestOnboardingCubit()
+      ..setInviteContext(
+        email: 'player@example.com',
+        name: 'Player One',
+        teamId: 1,
+        teamTitle: 'Kopa FC',
+        teamPlayerCount: 7,
+      );
+
+    await tester.pumpWidget(
+      MultiBlocProvider(
+        providers: [
+          BlocProvider<AuthCubit>(
+            create: (_) => AuthCubit(authRepository: _FakeAuthRepository()),
+          ),
+          BlocProvider<OnboardingCubit>.value(value: onboardingCubit),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('da'),
+            Locale('en'),
+          ],
+          home: const OnboardingPage(),
+        ),
+      ),
+    );
+
+    expect(find.text('Vælg din position'), findsOneWidget);
+    expect(find.text('7-mand'), findsNothing);
+    expect(find.text('11-mand'), findsNothing);
+    expect(find.text('Du valgte: Central midtbane (CM)'), findsOneWidget);
+    expect(find.text('Højre midtbane (HM)'), findsNothing);
   });
 
   testWidgets('restored pending join request shows waiting screen',
@@ -205,6 +250,7 @@ class _TestOnboardingCubit extends OnboardingCubit {
     required String name,
     required int teamId,
     required String teamTitle,
+    int? teamPlayerCount,
   }) {
     emit(OnboardingState(
       status: OnboardingStatus.validated,
@@ -213,6 +259,7 @@ class _TestOnboardingCubit extends OnboardingCubit {
       name: name,
       teamId: teamId,
       teamTitle: teamTitle,
+      teamPlayerCount: teamPlayerCount,
     ));
   }
 

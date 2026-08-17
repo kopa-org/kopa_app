@@ -91,6 +91,7 @@ class OnboardingRepository {
 
   Future<Map<String, dynamic>> createTeam({
     required String title,
+    required int playerCount,
     Map<String, dynamic>? dbuContext,
     List<Map<String, dynamic>> standings = const [],
   }) async {
@@ -109,6 +110,7 @@ class OnboardingRepository {
         },
         body: json.encode({
           'title': title,
+          'player_count': playerCount,
           if (dbuContext != null) ..._dbuContextPayload(dbuContext),
           'standings': standings,
         }),
