@@ -998,10 +998,6 @@ class _CreateTeamView extends StatelessWidget {
           onShapeChanged: onLogoShapeChanged,
           onPatternChanged: onLogoPatternChanged,
         ),
-      3 => _MatchesStep(
-          colors: colors,
-          textStyles: textStyles,
-        ),
       _ => _InviteTeamStep(
           colors: colors,
           textStyles: textStyles,
@@ -1740,31 +1736,6 @@ class _TeamSearchCard extends StatelessWidget {
   }
 }
 
-class _MatchesStep extends StatelessWidget {
-  final AppColors colors;
-  final AppTextStyles textStyles;
-
-  const _MatchesStep({
-    required this.colors,
-    required this.textStyles,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _OnboardingCard(
-          colors: colors,
-          child: Text(
-            'Kopa synkroniserer det officielle kampprogram fra DBU efter oprettelse.',
-            style: textStyles.body3.copyWith(color: colors.textSecondary),
-          ),
-        ),
-      ],
-    );
-  }
-}
 
 class _InviteTeamStep extends StatelessWidget {
   final AppColors colors;
