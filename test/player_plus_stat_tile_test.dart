@@ -49,4 +49,36 @@ void main() {
       ),
     );
   });
+
+  testWidgets('does not show buy prompt when locked tile is tapped',
+      (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          extensions: <ThemeExtension<dynamic>>[
+            AppColors.light,
+            AppTextStyles.light,
+          ],
+        ),
+        home: Scaffold(
+          body: PlayerPlusStatTile(
+            locked: true,
+            data: PlayerPlusStatTileData(
+              title: 'Mål',
+              value: '12',
+              rank: 2,
+              icon: Icons.sports_score,
+              accentColor: Colors.blue,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Mål'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Player+ påkrævet'), findsNothing);
+    expect(find.text('Køb Player+'), findsNothing);
+  });
 }

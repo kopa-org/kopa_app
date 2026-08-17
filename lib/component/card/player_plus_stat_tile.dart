@@ -4,10 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 
-class PlayerPlusAccess {
-  static final ValueNotifier<bool> temporaryUnlocked = ValueNotifier(false);
-}
-
 class PlayerPlusStatRankingRow {
   final int userId;
   final String userName;
@@ -61,7 +57,6 @@ class PlayerPlusStatTile extends StatelessWidget {
   final Color? backgroundColor;
   final int? currentUserId;
   final bool locked;
-  final Future<void> Function()? onBuyPlayerPlus;
 
   const PlayerPlusStatTile({
     super.key,
@@ -81,7 +76,6 @@ class PlayerPlusStatTile extends StatelessWidget {
     this.backgroundColor,
     this.currentUserId,
     this.locked = false,
-    this.onBuyPlayerPlus,
   });
 
   @override
@@ -198,55 +192,9 @@ class PlayerPlusStatTile extends StatelessWidget {
 
   void _handleTap(BuildContext context, PlayerPlusStatTileData displayData) {
     if (locked) {
-      _showPlayerPlusRequiredDialog(context);
       return;
     }
     _showLeaderboardSheet(context, displayData);
-  }
-
-  void _showPlayerPlusRequiredDialog(BuildContext context) {
-    final theme = Theme.of(context);
-    final appColors = theme.extension<AppColors>() ?? AppColors.light;
-    final styles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        title: Row(
-          children: [
-            Icon(Icons.workspace_premium, color: appColors.primary),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                'Player+ påkrævet',
-                style: styles.sectionHeader.copyWith(
-                  color: appColors.primary,
-                ),
-              ),
-            ),
-          ],
-        ),
-        content: Text(
-          'Ranglisten kan ikke vises, fordi spilleren ikke har Player+.',
-          style: styles.body.copyWith(color: appColors.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Luk'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              PlayerPlusAccess.temporaryUnlocked.value = true;
-              await onBuyPlayerPlus?.call();
-            },
-            child: const Text('Køb Player+'),
-          ),
-        ],
-      ),
-    );
   }
 
   void _showLeaderboardSheet(

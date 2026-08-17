@@ -23,7 +23,6 @@ class StatisticsPage extends StatefulWidget {
 class _StatisticsPageState extends State<StatisticsPage> {
   int? _loadedTeamId;
   Future<_StatisticsPageData>? _statisticsFuture;
-  bool _hasTemporaryPlayerPlus = false;
 
   @override
   Widget build(BuildContext context) {
@@ -45,10 +44,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
               onSuccess: (context, data) => _StatisticsView(
                 stats: data.stats,
                 currentUser: user,
-                hasPlayerPlus: data.hasPlayerPlus ||
-                    _hasTemporaryPlayerPlus ||
-                    PlayerPlusAccess.temporaryUnlocked.value,
-                onBuyPlayerPlus: _buyPlayerPlus,
+                hasPlayerPlus: true,
               ),
             ),
     );
@@ -61,13 +57,6 @@ class _StatisticsPageState extends State<StatisticsPage> {
       stats: stats,
       hasPlayerPlus: false,
     );
-  }
-
-  Future<void> _buyPlayerPlus() async {
-    PlayerPlusAccess.temporaryUnlocked.value = true;
-    setState(() {
-      _hasTemporaryPlayerPlus = true;
-    });
   }
 }
 
@@ -85,13 +74,11 @@ class _StatisticsView extends StatelessWidget {
   final StatisticsResponse stats;
   final UserDetails? currentUser;
   final bool hasPlayerPlus;
-  final Future<void> Function() onBuyPlayerPlus;
 
   const _StatisticsView({
     required this.stats,
     required this.currentUser,
     required this.hasPlayerPlus,
-    required this.onBuyPlayerPlus,
   });
 
   @override
@@ -111,7 +98,6 @@ class _StatisticsView extends StatelessWidget {
             stats: stats,
             currentUser: currentUser,
             hasPlayerPlus: hasPlayerPlus,
-            onBuyPlayerPlus: onBuyPlayerPlus,
           ),
         ),
         SliverToBoxAdapter(child: ClubStatsSection(club: stats.club)),
@@ -221,13 +207,11 @@ class _PlayerPlusStatsSection extends StatelessWidget {
   final StatisticsResponse stats;
   final UserDetails? currentUser;
   final bool hasPlayerPlus;
-  final Future<void> Function() onBuyPlayerPlus;
 
   const _PlayerPlusStatsSection({
     required this.stats,
     required this.currentUser,
     required this.hasPlayerPlus,
-    required this.onBuyPlayerPlus,
   });
 
   @override
@@ -275,7 +259,6 @@ class _PlayerPlusStatsSection extends StatelessWidget {
               currentUserId: currentUser?.id,
               locked: !hasPlayerPlus,
               obscureValue: !hasPlayerPlus && index >= tiles.length - 2,
-              onBuyPlayerPlus: onBuyPlayerPlus,
             ),
           ),
         ],
@@ -445,14 +428,12 @@ class _PlayerPlusStatTile extends StatelessWidget {
   final int? currentUserId;
   final bool locked;
   final bool obscureValue;
-  final Future<void> Function() onBuyPlayerPlus;
 
   const _PlayerPlusStatTile({
     required this.tile,
     required this.currentUserId,
     required this.locked,
     required this.obscureValue,
-    required this.onBuyPlayerPlus,
   });
 
   @override
@@ -482,9 +463,7 @@ class _PlayerPlusStatTile extends StatelessWidget {
       ),
       obscureValue: obscureValue,
       obscureRank: obscureRank,
-      onTap: () => locked
-          ? _showPlayerPlusRequiredDialog(context, onBuyPlayerPlus)
-          : _showLeaderboardSheet(context),
+      onTap: locked ? null : () => _showLeaderboardSheet(context),
     );
   }
 
@@ -497,53 +476,6 @@ class _PlayerPlusStatTile extends StatelessWidget {
         tile: tile,
         currentUserId: currentUserId,
         locked: locked,
-      ),
-    );
-  }
-
-  void _showPlayerPlusRequiredDialog(
-    BuildContext context,
-    Future<void> Function() onBuyPlayerPlus,
-  ) {
-    final theme = Theme.of(context);
-    final appColors = theme.extension<AppColors>() ?? AppColors.light;
-    final styles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        title: Row(
-          children: [
-            Icon(Icons.workspace_premium, color: appColors.primary),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                'Player+ påkrævet',
-                style: styles.sectionHeader.copyWith(
-                  color: appColors.primary,
-                ),
-              ),
-            ),
-          ],
-        ),
-        content: Text(
-          'Ranglisten kan ikke vises, fordi spilleren ikke har Player+.',
-          style: styles.body.copyWith(color: appColors.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Luk'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await onBuyPlayerPlus();
-            },
-            child: const Text('Køb Player+'),
-          ),
-        ],
       ),
     );
   }

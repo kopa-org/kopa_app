@@ -99,29 +99,25 @@ class HomeStatisticsStrip extends StatelessWidget {
       ),
     ];
 
-    return ValueListenableBuilder<bool>(
-      valueListenable: PlayerPlusAccess.temporaryUnlocked,
-      builder: (context, hasPlayerPlus, _) => SizedBox(
-        height: 150,
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
-          clipBehavior: Clip.none,
-          itemCount: tiles.length,
-          separatorBuilder: (context, index) =>
-              const SizedBox(width: Spacing.md),
-          itemBuilder: (context, index) => PlayerPlusStatTile(
-            data: tiles[index],
-            currentUserId: currentUser.id,
-            locked: !hasPlayerPlus,
-            width: 156,
-            padding: const EdgeInsets.all(12),
-            valueFontSize: 28,
-            titleFontSize: 14,
-            rankFontSize: 11,
-            obscureValue: hasPlayerPlus,
-            obscureRank: !hasPlayerPlus,
-            showShadow: true,
-          ),
+    return SizedBox(
+      height: 150,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        clipBehavior: Clip.none,
+        itemCount: tiles.length,
+        separatorBuilder: (context, index) => const SizedBox(width: Spacing.md),
+        itemBuilder: (context, index) => PlayerPlusStatTile(
+          data: tiles[index],
+          currentUserId: currentUser.id,
+          locked: false,
+          width: 156,
+          padding: const EdgeInsets.all(12),
+          valueFontSize: 28,
+          titleFontSize: 14,
+          rankFontSize: 11,
+          obscureValue: false,
+          obscureRank: false,
+          showShadow: true,
         ),
       ),
     );

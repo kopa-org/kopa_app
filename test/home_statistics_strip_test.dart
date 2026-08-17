@@ -32,6 +32,7 @@ void main() {
       _decorations(tester),
       _containsColor(appColors.lightGrass.withValues(alpha: 0.27)),
     );
+    expect(find.byType(ImageFiltered), findsNothing);
   });
 }
 
