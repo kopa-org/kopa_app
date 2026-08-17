@@ -232,7 +232,7 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _SectionTitleRow(
-                  title: 'Top syndere',
+                  title: 'Bøde podiet',
                   actionLabel: 'Personlig',
                   onAction: () {
                     setState(() {
@@ -654,8 +654,8 @@ class _SegmentTabs extends StatelessWidget {
               child: _SegmentChip(
                 label: switch (segment) {
                   TeamOwnerFinesSegments.overview => 'Overblik',
-                  TeamOwnerFinesSegments.fineTypes => 'Katalog',
-                  TeamOwnerFinesSegments.personal => 'Mine',
+                  TeamOwnerFinesSegments.fineTypes => 'Bødetype',
+                  TeamOwnerFinesSegments.personal => 'Bøder',
                 },
                 selected: isSelected,
                 onTap: () => onChanged(segment),

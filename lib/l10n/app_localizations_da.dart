@@ -39,7 +39,7 @@ class AppLocalizationsDa extends AppLocalizations {
   String get onboardingRequestJoin => 'Anmod om adgang';
 
   @override
-  String get onboardingWaitingTitle => 'Afventer godkendelse';
+  String get onboardingWaitingTitle => 'Til Rådighed';
 
   @override
   String get onboardingWaitingBody =>

@@ -344,7 +344,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     widgets.add(
       _AttendanceApprovalSection(
         key: const ValueKey('pending-attendance-approval'),
-        title: 'Afventer godkendelse (${pending.length})',
+        title: 'Til Rådighed (${pending.length})',
         collapsible: false,
         children: pending.isEmpty
             ? const [_AttendanceApprovalEmpty()]
@@ -376,7 +376,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       widgets.add(
         _AttendanceApprovalSection(
           key: const ValueKey('handled-attendance-approval'),
-          title: 'Behandlet (${handled.length})',
+          title: 'Udtaget (${handled.length})',
           children: handled
               .map(
                 (attendance) => _AttendanceApprovalRow(
