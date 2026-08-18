@@ -7,6 +7,7 @@ import 'package:kopa/component/button/mobile_pay_button.dart';
 import 'package:kopa/component/future_handler.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/model/fine_box_details.dart';
 import 'package:kopa/model/fine_details.dart';
 import 'package:kopa/model/fine_type_details.dart';
@@ -324,7 +325,10 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
                 ...fineTypes.map(
                   (fineType) => Padding(
                     padding: const EdgeInsets.only(bottom: 8),
-                    child: _FineTypeRow(fineType: fineType),
+                    child: _FineTypeRow(
+                      fineType: fineType,
+                      onDeleted: _refreshFineTypes,
+                    ),
                   ),
                 ),
             ],
@@ -1358,10 +1362,21 @@ class _DatePill extends StatelessWidget {
   }
 }
 
-class _FineTypeRow extends StatelessWidget {
+class _FineTypeRow extends StatefulWidget {
   final FineTypeDetails fineType;
+  final VoidCallback onDeleted;
 
-  const _FineTypeRow({required this.fineType});
+  const _FineTypeRow({
+    required this.fineType,
+    required this.onDeleted,
+  });
+
+  @override
+  State<_FineTypeRow> createState() => _FineTypeRowState();
+}
+
+class _FineTypeRowState extends State<_FineTypeRow> {
+  bool _isDeleting = false;
 
   @override
   Widget build(BuildContext context) {
@@ -1369,6 +1384,7 @@ class _FineTypeRow extends StatelessWidget {
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final localizations = AppLocalizations.of(context)!;
 
     return Container(
       padding: const EdgeInsets.all(14),
@@ -1390,7 +1406,7 @@ class _FineTypeRow extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              fineType.title,
+              widget.fineType.title,
               overflow: TextOverflow.ellipsis,
               style: appTextStyles.body3.copyWith(
                 color: appColors.textPrimary,
@@ -1399,11 +1415,102 @@ class _FineTypeRow extends StatelessWidget {
             ),
           ),
           Text(
-            '${fineType.defaultAmount} kr',
+            '${widget.fineType.defaultAmount} kr',
             style: appTextStyles.subtitle2.copyWith(
               color: appColors.error,
               fontWeight: FontWeight.w900,
             ),
+          ),
+          const SizedBox(width: 4),
+          Semantics(
+            button: true,
+            label: localizations.fineTypeDeleteIconLabel,
+            child: CupertinoButton(
+              minimumSize: const Size(36, 36),
+              padding: EdgeInsets.zero,
+              onPressed: _isDeleting ? null : _confirmDelete,
+              child: _isDeleting
+                  ? CupertinoActivityIndicator(color: appColors.error)
+                  : Icon(
+                      CupertinoIcons.clear_circled_solid,
+                      color: appColors.error,
+                      size: 22,
+                    ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _confirmDelete() async {
+    final localizations = AppLocalizations.of(context)!;
+
+    final shouldDelete = await showCupertinoDialog<bool>(
+          context: context,
+          builder: (dialogContext) => CupertinoAlertDialog(
+            title: Text(localizations.fineTypeDeleteTitle),
+            content: Text(
+                localizations.fineTypeDeleteMessage(widget.fineType.title)),
+            actions: [
+              CupertinoDialogAction(
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+                child: Text(localizations.commonCancel),
+              ),
+              CupertinoDialogAction(
+                isDestructiveAction: true,
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                child: Text(localizations.commonDelete),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+
+    if (!shouldDelete || !mounted) {
+      return;
+    }
+
+    setState(() {
+      _isDeleting = true;
+    });
+
+    try {
+      await FinesRepository.deleteFineType(widget.fineType.id);
+      AppAnalytics.logEvent('fine_type_deleted');
+
+      if (mounted) {
+        widget.onDeleted();
+      }
+    } on FineTypeInUseException {
+      if (mounted) {
+        await _showDeleteFailure(localizations.fineTypeDeleteInUseMessage);
+      }
+    } catch (_) {
+      if (mounted) {
+        await _showDeleteFailure(localizations.fineTypeDeleteFailureMessage);
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isDeleting = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _showDeleteFailure(String message) {
+    final localizations = AppLocalizations.of(context)!;
+
+    return showCupertinoDialog<void>(
+      context: context,
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(localizations.fineTypeDeleteFailureTitle),
+        content: Text(message),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(localizations.commonOk),
           ),
         ],
       ),

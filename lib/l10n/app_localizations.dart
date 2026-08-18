@@ -199,6 +199,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Something went wrong'**
   String get onboardingFailure;
+
+  /// No description provided for @commonCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get commonCancel;
+
+  /// No description provided for @commonDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get commonDelete;
+
+  /// No description provided for @commonOk.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get commonOk;
+
+  /// No description provided for @fineTypeDeleteIconLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete fine type'**
+  String get fineTypeDeleteIconLabel;
+
+  /// No description provided for @fineTypeDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete fine type?'**
+  String get fineTypeDeleteTitle;
+
+  /// No description provided for @fineTypeDeleteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {title} from the fine catalog?'**
+  String fineTypeDeleteMessage(String title);
+
+  /// No description provided for @fineTypeDeleteFailureTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete fine type'**
+  String get fineTypeDeleteFailureTitle;
+
+  /// No description provided for @fineTypeDeleteInUseMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This fine type is already used by existing fines.'**
+  String get fineTypeDeleteInUseMessage;
+
+  /// No description provided for @fineTypeDeleteFailureMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Try again.'**
+  String get fineTypeDeleteFailureMessage;
 }
 
 class _AppLocalizationsDelegate

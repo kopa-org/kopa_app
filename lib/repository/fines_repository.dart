@@ -129,4 +129,25 @@ class FinesRepository {
 
     return true;
   }
+
+  static Future<void> deleteFineType(int fineTypeId) async {
+    final token = await _secureStorage.read(key: 'token');
+    var url = Uri.parse('${ApiConfig.baseUrl}/fine/type/$fineTypeId');
+
+    var response = await http.delete(url, headers: {
+      'Authorization': 'Bearer $token',
+    });
+
+    if (response.statusCode == 200) {
+      return;
+    }
+
+    if (response.statusCode == 409) {
+      throw FineTypeInUseException();
+    }
+
+    throw Exception('Failed to delete fine type');
+  }
 }
+
+class FineTypeInUseException implements Exception {}

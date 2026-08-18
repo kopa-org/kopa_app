@@ -59,4 +59,34 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String get onboardingFailure => 'Noget gik galt';
+
+  @override
+  String get commonCancel => 'Annuller';
+
+  @override
+  String get commonDelete => 'Slet';
+
+  @override
+  String get commonOk => 'OK';
+
+  @override
+  String get fineTypeDeleteIconLabel => 'Slet bødetype';
+
+  @override
+  String get fineTypeDeleteTitle => 'Slet bødetype?';
+
+  @override
+  String fineTypeDeleteMessage(String title) {
+    return 'Slet $title fra bødekataloget?';
+  }
+
+  @override
+  String get fineTypeDeleteFailureTitle => 'Kunne ikke slette bødetype';
+
+  @override
+  String get fineTypeDeleteInUseMessage =>
+      'Denne bødetype bruges allerede af eksisterende bøder.';
+
+  @override
+  String get fineTypeDeleteFailureMessage => 'Noget gik galt. Prøv igen.';
 }

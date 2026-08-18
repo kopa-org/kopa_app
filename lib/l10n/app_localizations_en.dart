@@ -59,4 +59,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingFailure => 'Something went wrong';
+
+  @override
+  String get commonCancel => 'Cancel';
+
+  @override
+  String get commonDelete => 'Delete';
+
+  @override
+  String get commonOk => 'OK';
+
+  @override
+  String get fineTypeDeleteIconLabel => 'Delete fine type';
+
+  @override
+  String get fineTypeDeleteTitle => 'Delete fine type?';
+
+  @override
+  String fineTypeDeleteMessage(String title) {
+    return 'Delete $title from the fine catalog?';
+  }
+
+  @override
+  String get fineTypeDeleteFailureTitle => 'Could not delete fine type';
+
+  @override
+  String get fineTypeDeleteInUseMessage =>
+      'This fine type is already used by existing fines.';
+
+  @override
+  String get fineTypeDeleteFailureMessage => 'Something went wrong. Try again.';
 }

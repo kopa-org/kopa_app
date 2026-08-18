@@ -15,5 +15,21 @@
   "onboardingPlayers": "Players",
   "onboardingMatches": "Matches",
   "onboardingNoResults": "No teams found",
-  "onboardingFailure": "Something went wrong"
+  "onboardingFailure": "Something went wrong",
+  "commonCancel": "Cancel",
+  "commonDelete": "Delete",
+  "commonOk": "OK",
+  "fineTypeDeleteIconLabel": "Delete fine type",
+  "fineTypeDeleteTitle": "Delete fine type?",
+  "fineTypeDeleteMessage": "Delete {title} from the fine catalog?",
+  "@fineTypeDeleteMessage": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "fineTypeDeleteFailureTitle": "Could not delete fine type",
+  "fineTypeDeleteInUseMessage": "This fine type is already used by existing fines.",
+  "fineTypeDeleteFailureMessage": "Something went wrong. Try again."
 }

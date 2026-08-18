@@ -9,11 +9,27 @@
   "onboardingCreate": "Opret",
   "onboardingSearchHint": "Søg efter et hold",
   "onboardingRequestJoin": "Anmod om adgang",
-  "onboardingWaitingTitle": "Afventer godkendelse",
+  "onboardingWaitingTitle": "Til Rådighed",
   "onboardingWaitingBody": "Din anmodning er sendt til holdets administratorer.",
   "onboardingCancel": "Annuller",
   "onboardingPlayers": "Spillere",
   "onboardingMatches": "Kampe",
   "onboardingNoResults": "Ingen hold fundet",
-  "onboardingFailure": "Noget gik galt"
+  "onboardingFailure": "Noget gik galt",
+  "commonCancel": "Annuller",
+  "commonDelete": "Slet",
+  "commonOk": "OK",
+  "fineTypeDeleteIconLabel": "Slet bødetype",
+  "fineTypeDeleteTitle": "Slet bødetype?",
+  "fineTypeDeleteMessage": "Slet {title} fra bødekataloget?",
+  "@fineTypeDeleteMessage": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "fineTypeDeleteFailureTitle": "Kunne ikke slette bødetype",
+  "fineTypeDeleteInUseMessage": "Denne bødetype bruges allerede af eksisterende bøder.",
+  "fineTypeDeleteFailureMessage": "Noget gik galt. Prøv igen."
 }
