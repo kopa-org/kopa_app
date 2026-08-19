@@ -162,14 +162,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
         return data;
       }
 
-      await _showPublicDbuMatches(candidates);
-      if (!mounted) {
-        return data;
-      }
-
       final selected = candidates.length == 1
           ? candidates.first
-          : await _choosePublicDbuCandidate(candidates);
+          : await _choosePublicDbuCandidate(candidates, teamLabel: teamLabel);
       if (selected == null) {
         return data;
       }
@@ -224,50 +219,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
     );
   }
 
-  Future<void> _showPublicDbuMatches(List<DbuPublicClubTeam> teams) {
-    return showDialog<void>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('DBU-kandidater fundet'),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: ListView.separated(
-            shrinkWrap: true,
-            itemCount: teams.length,
-            separatorBuilder: (_, __) => const Divider(height: 1),
-            itemBuilder: (context, index) {
-              final team = teams[index];
-              return ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(team.seriesName),
-                subtitle: Text(
-                  [
-                    if (team.poolLabel.isNotEmpty) team.poolLabel,
-                    if (team.leaderNames.isNotEmpty)
-                      'Holdleder: ${team.leaderNames.join(', ')}',
-                    'Match score: ${team.matchScore}',
-                    'Leder score: ${team.leaderMatchScore}',
-                    'team ${team.dbuTeamId}',
-                    'pool ${team.dbuPoolId}',
-                  ].join('\n'),
-                ),
-              );
-            },
-          ),
-        ),
-        actions: [
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Fortsæt'),
-          ),
-        ],
-      ),
-    );
-  }
-
   Future<DbuPublicClubTeam?> _choosePublicDbuCandidate(
-    List<DbuPublicClubTeam> candidates,
-  ) {
+      List<DbuPublicClubTeam> candidates,
+      {required String teamLabel}) {
     return showDialog<DbuPublicClubTeam>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -282,14 +236,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
               final candidate = candidates[index];
               return ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: Text(candidate.seriesName),
+                title: Text(teamLabel),
                 subtitle: Text(
                   [
-                    if (candidate.poolLabel.isNotEmpty) candidate.poolLabel,
                     if (candidate.leaderNames.isNotEmpty)
                       'Holdleder: ${candidate.leaderNames.join(', ')}',
-                    'team ${candidate.dbuTeamId}',
-                    'pool ${candidate.dbuPoolId}',
+                    _seasonRowLabel(candidate),
                   ].join('\n'),
                 ),
                 onTap: () => Navigator.of(dialogContext).pop(candidate),
@@ -305,6 +257,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
         ],
       ),
     );
+  }
+
+  String _seasonRowLabel(DbuPublicClubTeam team) {
+    if (team.poolLabel.isEmpty) return team.seriesName;
+    return '${team.seriesName} · ${team.poolLabel}';
   }
 
   Future<void> _createTeam() async {

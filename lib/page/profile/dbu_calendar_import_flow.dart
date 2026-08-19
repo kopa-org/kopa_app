@@ -229,7 +229,11 @@ class DbuCalendarImportFlow {
 
     final selected = candidates.length == 1
         ? candidates.first
-        : await _choosePublicCandidate(context, candidates);
+        : await _choosePublicCandidate(
+            context,
+            candidates,
+            teamLabel: teamLabel,
+          );
     if (selected == null) {
       return {};
     }
@@ -247,9 +251,8 @@ class DbuCalendarImportFlow {
   }
 
   static Future<DbuPublicClubTeam?> _choosePublicCandidate(
-    BuildContext context,
-    List<DbuPublicClubTeam> candidates,
-  ) {
+      BuildContext context, List<DbuPublicClubTeam> candidates,
+      {required String teamLabel}) {
     return showDialog<DbuPublicClubTeam>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -264,14 +267,12 @@ class DbuCalendarImportFlow {
               final candidate = candidates[index];
               return ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: Text(candidate.seriesName),
+                title: Text(teamLabel),
                 subtitle: Text(
                   [
-                    if (candidate.poolLabel.isNotEmpty) candidate.poolLabel,
                     if (candidate.leaderNames.isNotEmpty)
                       'Holdleder: ${candidate.leaderNames.join(', ')}',
-                    'team ${candidate.dbuTeamId}',
-                    'pool ${candidate.dbuPoolId}',
+                    _seasonRowLabel(candidate),
                   ].join('\n'),
                 ),
                 onTap: () => Navigator.of(dialogContext).pop(candidate),
@@ -287,6 +288,11 @@ class DbuCalendarImportFlow {
         ],
       ),
     );
+  }
+
+  static String _seasonRowLabel(DbuPublicClubTeam team) {
+    if (team.poolLabel.isEmpty) return team.seriesName;
+    return '${team.seriesName} · ${team.poolLabel}';
   }
 
   static String _seasonName(Map<String, dynamic> resultData) {
