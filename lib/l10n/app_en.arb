@@ -33,5 +33,15 @@
   },
   "fineTypeDeleteFailureTitle": "Could not delete fine type",
   "fineTypeDeleteInUseMessage": "This fine type is already used by existing fines.",
-  "fineTypeDeleteFailureMessage": "Something went wrong. Try again."
+  "fineTypeDeleteFailureMessage": "Something went wrong. Try again.",
+  "teamLogoEditButton": "Change team logo",
+  "teamLogoEditTitle": "Change team logo",
+  "teamLogoDesignTitle": "Design your team logo",
+  "teamLogoDesignSubtitle": "Choose a background color and shape for your team logo",
+  "teamLogoBackgroundColor": "Background color",
+  "teamLogoShape": "Shape",
+  "teamLogoPattern": "Pattern",
+  "teamLogoSave": "Save logo",
+  "teamLogoSaving": "Saving logo...",
+  "teamLogoSaveFailure": "Could not save the team logo."
 }

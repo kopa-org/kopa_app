@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kopa/component/avatar/team_badge_label.dart';
 import 'package:kopa/model/dbu_standings.dart';
+import 'package:kopa/model/team_logo_design.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/page/standings/standings_page.dart';
 import 'package:kopa/theme/app_colors.dart';
@@ -98,12 +99,17 @@ class StandingsPreviewCard extends StatelessWidget {
                             currentUser,
                             standings,
                           ),
+                          logoDesign:
+                              _isCurrentTeam(row, currentUser, standings)
+                                  ? currentUser.teamDetails?.logoDesign
+                                  : null,
                         ),
                       if (showCurrentTeamBelow) ...[
                         _StandingPreviewGap(color: palette.outline),
                         _StandingPreviewRow(
                           row: currentTeamRow,
                           isCurrentTeam: true,
+                          logoDesign: currentUser.teamDetails?.logoDesign,
                         ),
                       ],
                     ],
@@ -199,10 +205,12 @@ class _PreviewTableHeader extends StatelessWidget {
 class _StandingPreviewRow extends StatelessWidget {
   final DbuStandingRow row;
   final bool isCurrentTeam;
+  final TeamLogoDesign? logoDesign;
 
   const _StandingPreviewRow({
     required this.row,
     required this.isCurrentTeam,
+    this.logoDesign,
   });
 
   @override
@@ -241,6 +249,7 @@ class _StandingPreviewRow extends StatelessWidget {
               teamName: row.teamName,
               teamId: row.dbuTeamId,
               colorSourceUrl: row.logoUrl,
+              logoDesign: logoDesign,
               radius: 10,
               labelStyle: appTextStyles.caption2.copyWith(
                 color: color,

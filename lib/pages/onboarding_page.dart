@@ -5,11 +5,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:kopa/component/football_pitch.dart';
+import 'package:kopa/component/team_logo_design_editor.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/onboarding_cubit.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/model/user_details.dart';
+import 'package:kopa/model/team_logo_design.dart';
 import 'package:kopa/navigation/app_router.dart';
 import 'package:kopa/repository/team_dbu_repository.dart';
 import 'package:kopa/repository/users_repository.dart';
@@ -18,10 +20,6 @@ import 'package:kopa/theme/app_text_styles.dart';
 import 'package:share_plus/share_plus.dart';
 
 enum _OnboardingMode { create, join }
-
-enum _TeamLogoShape { circle, square, shield, rounded }
-
-enum _TeamLogoPattern { solid, verticalSplit, horizontalSplit, gradient }
 
 class OnboardingPage extends StatefulWidget {
   final Future<UserDetails> Function(String position)? updatePosition;
@@ -42,9 +40,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   Map<String, dynamic>? _dbuData;
   _PositionChoice _selectedPosition = _positionChoices[6];
   bool _usesElevenAside = true;
-  Color _teamLogoColor = const Color(0xFF1B8B4B);
-  _TeamLogoShape _teamLogoShape = _TeamLogoShape.circle;
-  _TeamLogoPattern _teamLogoPattern = _TeamLogoPattern.solid;
+  TeamLogoDesign _teamLogoDesign = TeamLogoDesign.defaultDesign;
   bool _savingPosition = false;
   bool _creatingTeam = false;
   Map<String, dynamic>? _pendingJoinTeam;
@@ -286,6 +282,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
         final success = await onboardingCubit.createTeam(
           title: title,
           playerCount: _usesElevenAside ? 11 : 7,
+          logoDesign: _teamLogoDesign,
           dbuContext: _dbuData,
           standings: (_dbuData?['standings'] as List<dynamic>? ?? [])
               .cast<Map<String, dynamic>>(),
@@ -311,6 +308,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
         _createdTeamId = teamId;
         _createdTeamTitle = teamTitle;
+      } else {
+        final updated = await onboardingCubit.updateTeamLogo(
+          teamId: teamId,
+          logoDesign: _teamLogoDesign,
+        );
+        if (!updated || !mounted) return;
       }
 
       final createdTeamId = teamId;
@@ -595,7 +598,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
             : switch (_createStep) {
                 0 => l10n.onboardingTitle,
                 1 => 'Vælg din position',
-                2 => 'Design dit holdlogo',
+                2 => l10n.teamLogoDesignTitle,
                 3 => 'Inviter dit hold',
                 _ => 'Inviter dit hold',
               };
@@ -609,7 +612,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 0 =>
                   'Opret dit fodboldhold og saml spillere, kampe og statistikker ét sted.',
                 1 => 'Tryk på din position på banen',
-                2 => 'Vælg en baggrundsfarve og form til jeres holdlogo',
+                2 => l10n.teamLogoDesignSubtitle,
                 3 => 'Del linket med spillerne, så de kan finde holdet.',
                 _ => 'Del linket med spillerne, så de kan finde holdet.',
               };
@@ -675,9 +678,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             dbuData: _dbuData,
                             selectedPosition: _selectedPosition,
                             usesElevenAside: _usesElevenAside,
-                            teamLogoColor: _teamLogoColor,
-                            teamLogoShape: _teamLogoShape,
-                            teamLogoPattern: _teamLogoPattern,
+                            teamLogoDesign: _teamLogoDesign,
                             loading: loading,
                             onOpenDbu: _openDbu,
                             onTextChanged: () => setState(() {}),
@@ -685,12 +686,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                 setState(() => _usesElevenAside = value),
                             onPositionChanged: (value) =>
                                 setState(() => _selectedPosition = value),
-                            onLogoColorChanged: (value) =>
-                                setState(() => _teamLogoColor = value),
-                            onLogoShapeChanged: (value) =>
-                                setState(() => _teamLogoShape = value),
-                            onLogoPatternChanged: (value) =>
-                                setState(() => _teamLogoPattern = value),
+                            onLogoDesignChanged: (value) =>
+                                setState(() => _teamLogoDesign = value),
                             inviteUri: _createdTeamInviteUri,
                             teamTitle: _createdTeamTitle ??
                                 _teamNameController.text.trim(),
@@ -751,114 +748,127 @@ class _RoleQuestionView extends StatelessWidget {
     return Scaffold(
       backgroundColor: colors.white,
       body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
-              child: Row(
-                children: [
-                  SvgPicture.asset(
-                    'assets/logos/Logo.svg',
-                    height: 36,
-                    colorFilter:
-                        ColorFilter.mode(colors.primary, BlendMode.srcIn),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: IntrinsicHeight(
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
+                        child: Row(
+                          children: [
+                            SvgPicture.asset(
+                              'assets/logos/Logo.svg',
+                              height: 36,
+                              colorFilter: ColorFilter.mode(
+                                colors.primary,
+                                BlendMode.srcIn,
+                              ),
+                            ),
+                            const Spacer(),
+                            _HeaderStepDots(colors: colors),
+                          ],
+                        ),
+                      ),
+                      const Spacer(flex: 2),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Column(
+                          children: [
+                            Container(
+                              width: 180,
+                              height: 180,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: colors.background,
+                                borderRadius: BorderRadius.circular(90),
+                              ),
+                              child: SvgPicture.asset(
+                                'assets/illustrations/onboarding_leader_question.svg',
+                                width: 120,
+                                height: 120,
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                            const SizedBox(height: 32),
+                            Text(
+                              'Er du holdleder?',
+                              textAlign: TextAlign.center,
+                              style: textStyles.h4.copyWith(
+                                color: colors.textPrimary,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Hvis du er holdleder, kan du oprette og administrere dit hold, spillere samt kampe.',
+                              textAlign: TextAlign.center,
+                              style: textStyles.body3.copyWith(
+                                color: colors.textSecondary,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                                height: 1.5,
+                                letterSpacing: 0,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Spacer(flex: 3),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 20, 24, 44),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            FilledButton.icon(
+                              onPressed: onLeaderSelected,
+                              iconAlignment: IconAlignment.end,
+                              icon: const Icon(Icons.chevron_right, size: 20),
+                              label: const Text('Ja, jeg er holdleder'),
+                              style: FilledButton.styleFrom(
+                                minimumSize: const Size.fromHeight(51),
+                                backgroundColor: colors.primary,
+                                foregroundColor: colors.white,
+                                textStyle: textStyles.body1.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            OutlinedButton(
+                              onPressed: onPlayerSelected,
+                              style: OutlinedButton.styleFrom(
+                                minimumSize: const Size.fromHeight(51),
+                                foregroundColor: colors.textPrimary,
+                                side: const BorderSide(
+                                  color: Color(0xFFD1D6E0),
+                                  width: 1.5,
+                                ),
+                                textStyle: textStyles.body1.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                              child: const Text('Nej, jeg er spiller'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                  const Spacer(),
-                  _HeaderStepDots(colors: colors),
-                ],
+                ),
               ),
-            ),
-            const Spacer(flex: 2),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                children: [
-                  Container(
-                    width: 180,
-                    height: 180,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: colors.background,
-                      borderRadius: BorderRadius.circular(90),
-                    ),
-                    child: SvgPicture.asset(
-                      'assets/illustrations/onboarding_leader_question.svg',
-                      width: 120,
-                      height: 120,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  Text(
-                    'Er du holdleder?',
-                    textAlign: TextAlign.center,
-                    style: textStyles.h4.copyWith(
-                      color: colors.textPrimary,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Hvis du er holdleder, kan du oprette og administrere dit hold, spillere samt kampe.',
-                    textAlign: TextAlign.center,
-                    style: textStyles.body3.copyWith(
-                      color: colors.textSecondary,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                      height: 1.5,
-                      letterSpacing: 0,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Spacer(flex: 3),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 20, 24, 44),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  FilledButton.icon(
-                    onPressed: onLeaderSelected,
-                    iconAlignment: IconAlignment.end,
-                    icon: const Icon(Icons.chevron_right, size: 20),
-                    label: const Text('Ja, jeg er holdleder'),
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size.fromHeight(51),
-                      backgroundColor: colors.primary,
-                      foregroundColor: colors.white,
-                      textStyle: textStyles.body1.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  OutlinedButton(
-                    onPressed: onPlayerSelected,
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(51),
-                      foregroundColor: colors.textPrimary,
-                      side: const BorderSide(
-                        color: Color(0xFFD1D6E0),
-                        width: 1.5,
-                      ),
-                      textStyle: textStyles.body1.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    child: const Text('Nej, jeg er spiller'),
-                  ),
-                ],
-              ),
-            ),
-          ],
+            );
+          },
         ),
       ),
     );
@@ -908,17 +918,13 @@ class _CreateTeamView extends StatelessWidget {
   final Map<String, dynamic>? dbuData;
   final _PositionChoice selectedPosition;
   final bool usesElevenAside;
-  final Color teamLogoColor;
-  final _TeamLogoShape teamLogoShape;
-  final _TeamLogoPattern teamLogoPattern;
+  final TeamLogoDesign teamLogoDesign;
   final bool loading;
   final VoidCallback onOpenDbu;
   final VoidCallback onTextChanged;
   final ValueChanged<bool> onFormationChanged;
   final ValueChanged<_PositionChoice> onPositionChanged;
-  final ValueChanged<Color> onLogoColorChanged;
-  final ValueChanged<_TeamLogoShape> onLogoShapeChanged;
-  final ValueChanged<_TeamLogoPattern> onLogoPatternChanged;
+  final ValueChanged<TeamLogoDesign> onLogoDesignChanged;
   final Uri? inviteUri;
   final String teamTitle;
   final VoidCallback onCopyInvite;
@@ -933,17 +939,13 @@ class _CreateTeamView extends StatelessWidget {
     required this.dbuData,
     required this.selectedPosition,
     required this.usesElevenAside,
-    required this.teamLogoColor,
-    required this.teamLogoShape,
-    required this.teamLogoPattern,
+    required this.teamLogoDesign,
     required this.loading,
     required this.onOpenDbu,
     required this.onTextChanged,
     required this.onFormationChanged,
     required this.onPositionChanged,
-    required this.onLogoColorChanged,
-    required this.onLogoShapeChanged,
-    required this.onLogoPatternChanged,
+    required this.onLogoDesignChanged,
     required this.inviteUri,
     required this.teamTitle,
     required this.onCopyInvite,
@@ -989,16 +991,11 @@ class _CreateTeamView extends StatelessWidget {
           onFormationChanged: onFormationChanged,
           onPositionChanged: onPositionChanged,
         ),
-      2 => _TeamLogoStep(
-          colors: colors,
-          textStyles: textStyles,
+      2 => TeamLogoDesignEditor(
           teamName: teamNameController.text.trim(),
-          color: teamLogoColor,
-          shape: teamLogoShape,
-          pattern: teamLogoPattern,
-          onColorChanged: onLogoColorChanged,
-          onShapeChanged: onLogoShapeChanged,
-          onPatternChanged: onLogoPatternChanged,
+          design: teamLogoDesign,
+          keyPrefix: 'onboarding-logo',
+          onChanged: onLogoDesignChanged,
         ),
       _ => _InviteTeamStep(
           colors: colors,
@@ -1263,298 +1260,6 @@ class _PositionButton extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _TeamLogoStep extends StatelessWidget {
-  final AppColors colors;
-  final AppTextStyles textStyles;
-  final String teamName;
-  final Color color;
-  final _TeamLogoShape shape;
-  final _TeamLogoPattern pattern;
-  final ValueChanged<Color> onColorChanged;
-  final ValueChanged<_TeamLogoShape> onShapeChanged;
-  final ValueChanged<_TeamLogoPattern> onPatternChanged;
-
-  const _TeamLogoStep({
-    required this.colors,
-    required this.textStyles,
-    required this.teamName,
-    required this.color,
-    required this.shape,
-    required this.pattern,
-    required this.onColorChanged,
-    required this.onShapeChanged,
-    required this.onPatternChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final initials = _initials(teamName.isEmpty ? 'Skjold 7' : teamName);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Container(
-          height: 196,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: colors.white,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.02),
-                blurRadius: 8,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: _LogoPreview(
-            initials: initials,
-            color: color,
-            shape: shape,
-            pattern: pattern,
-            size: 150,
-            selected: true,
-          ),
-        ),
-        const SizedBox(height: 26),
-        _FieldLabel(
-          text: 'Baggrundsfarve',
-          colors: colors,
-          textStyles: textStyles,
-        ),
-        const SizedBox(height: 10),
-        _LogoColorPicker(
-          selected: color,
-          onChanged: onColorChanged,
-        ),
-        const SizedBox(height: 18),
-        _FieldLabel(text: 'Form', colors: colors, textStyles: textStyles),
-        const SizedBox(height: 10),
-        _LogoShapePicker(
-          colors: colors,
-          initials: initials,
-          color: color,
-          pattern: pattern,
-          selected: shape,
-          onChanged: onShapeChanged,
-        ),
-        const SizedBox(height: 18),
-        _FieldLabel(text: 'Mønster', colors: colors, textStyles: textStyles),
-        const SizedBox(height: 10),
-        _LogoPatternPicker(
-          colors: colors,
-          color: color,
-          selected: pattern,
-          onChanged: onPatternChanged,
-        ),
-      ],
-    );
-  }
-}
-
-class _LogoColorPicker extends StatelessWidget {
-  final Color selected;
-  final ValueChanged<Color> onChanged;
-
-  const _LogoColorPicker({
-    required this.selected,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        for (final color in _logoColors)
-          GestureDetector(
-            onTap: () => onChanged(color),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 160),
-              width: 34,
-              height: 34,
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: Colors.white,
-                  width: selected == color ? 3 : 0,
-                ),
-                boxShadow: selected == color
-                    ? [
-                        BoxShadow(
-                          color: color.withValues(alpha: 0.45),
-                          blurRadius: 6,
-                        ),
-                      ]
-                    : null,
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-class _LogoShapePicker extends StatelessWidget {
-  final AppColors colors;
-  final String initials;
-  final Color color;
-  final _TeamLogoPattern pattern;
-  final _TeamLogoShape selected;
-  final ValueChanged<_TeamLogoShape> onChanged;
-
-  const _LogoShapePicker({
-    required this.colors,
-    required this.initials,
-    required this.color,
-    required this.pattern,
-    required this.selected,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        for (final shape in _TeamLogoShape.values)
-          GestureDetector(
-            onTap: () => onChanged(shape),
-            child: _LogoPreview(
-              initials: initials,
-              color: selected == shape ? color : const Color(0xFFDCE5E2),
-              shape: shape,
-              pattern: selected == shape ? pattern : _TeamLogoPattern.solid,
-              size: 56,
-              selected: selected == shape,
-              textColor:
-                  selected == shape ? colors.white : colors.textSecondary,
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-class _LogoPatternPicker extends StatelessWidget {
-  final AppColors colors;
-  final Color color;
-  final _TeamLogoPattern selected;
-  final ValueChanged<_TeamLogoPattern> onChanged;
-
-  const _LogoPatternPicker({
-    required this.colors,
-    required this.color,
-    required this.selected,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        for (final pattern in _TeamLogoPattern.values)
-          GestureDetector(
-            onTap: () => onChanged(pattern),
-            child: Container(
-              width: 56,
-              height: 44,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: colors.white,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: selected == pattern
-                      ? colors.primary
-                      : const Color(0xFFD1D6E0),
-                  width: selected == pattern ? 2 : 1,
-                ),
-              ),
-              child: _PatternPreview(color: color, pattern: pattern),
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-class _LogoPreview extends StatelessWidget {
-  final String initials;
-  final Color color;
-  final _TeamLogoShape shape;
-  final _TeamLogoPattern pattern;
-  final double size;
-  final bool selected;
-  final Color? textColor;
-
-  const _LogoPreview({
-    required this.initials,
-    required this.color,
-    required this.shape,
-    required this.pattern,
-    required this.size,
-    required this.selected,
-    this.textColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      alignment: Alignment.center,
-      decoration: ShapeDecoration(
-        color: pattern == _TeamLogoPattern.solid ? color : null,
-        gradient: _logoGradient(color, pattern),
-        shape: _logoShape(shape, selected),
-        shadows: selected
-            ? [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: size >= 100 ? 8 : 4,
-                  offset: Offset(0, size >= 100 ? 4 : 2),
-                ),
-              ]
-            : null,
-      ),
-      child: Text(
-        initials,
-        style: TextStyle(
-          color: textColor ?? Colors.white,
-          fontWeight: FontWeight.w900,
-          fontSize: size >= 100 ? 48 : 16,
-          letterSpacing: 0,
-        ),
-      ),
-    );
-  }
-}
-
-class _PatternPreview extends StatelessWidget {
-  final Color color;
-  final _TeamLogoPattern pattern;
-
-  const _PatternPreview({
-    required this.color,
-    required this.pattern,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 28,
-      height: 18,
-      decoration: BoxDecoration(
-        color: color,
-        gradient: _logoGradient(color, pattern),
-        borderRadius: BorderRadius.circular(4),
       ),
     );
   }
@@ -2607,67 +2312,6 @@ const _sevenAsideChoices = <_PositionChoice>[
     y: 0.28,
   ),
 ];
-
-const _logoColors = <Color>[
-  Color(0xFF1B8B4B),
-  Color(0xFF15213D),
-  Color(0xFFD22B2B),
-  Color(0xFF1975F2),
-  Color(0xFFF05A00),
-  Color(0xFF6E22A8),
-  Color(0xFF008E7B),
-  Color(0xFF263238),
-];
-
-Gradient? _logoGradient(Color color, _TeamLogoPattern pattern) {
-  final secondary = Color.lerp(color, Colors.white, 0.78)!;
-  return switch (pattern) {
-    _TeamLogoPattern.solid => null,
-    _TeamLogoPattern.verticalSplit => LinearGradient(
-        begin: Alignment.centerLeft,
-        end: Alignment.centerRight,
-        colors: [color, color, secondary, secondary],
-        stops: const [0, 0.5, 0.5, 1],
-      ),
-    _TeamLogoPattern.horizontalSplit => LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [color, color, secondary, secondary],
-        stops: const [0, 0.5, 0.5, 1],
-      ),
-    _TeamLogoPattern.gradient => LinearGradient(
-        begin: Alignment.centerLeft,
-        end: Alignment.centerRight,
-        colors: [color, Colors.white],
-      ),
-  };
-}
-
-ShapeBorder _logoShape(_TeamLogoShape shape, bool selected) {
-  final side = selected
-      ? const BorderSide(color: Colors.white, width: 4)
-      : BorderSide.none;
-  return switch (shape) {
-    _TeamLogoShape.circle => CircleBorder(side: side),
-    _TeamLogoShape.square => RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: side,
-      ),
-    _TeamLogoShape.shield => RoundedRectangleBorder(
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(10),
-          topRight: Radius.circular(10),
-          bottomLeft: Radius.circular(28),
-          bottomRight: Radius.circular(28),
-        ),
-        side: side,
-      ),
-    _TeamLogoShape.rounded => RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: side,
-      ),
-  };
-}
 
 String _initials(String name) {
   final parts = name

@@ -94,7 +94,7 @@ class _HomeTabViewState extends State<_HomeTabView> {
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final currentUser = context.read<AuthCubit>().state.user;
+    final currentUser = context.watch<AuthCubit>().state.user;
 
     if (currentUser == null) {
       return const Center(child: Text('User not logged in'));
@@ -681,6 +681,8 @@ class _HeroTeamPanel extends StatelessWidget {
     final homeTeam =
         match?.homeTeam ?? currentUser.teamDetails?.title ?? 'Hold';
     final awayTeam = match?.awayTeam ?? 'Modstander';
+    final ownTeamName = currentUser.teamDetails?.title;
+    final ownTeamLogo = currentUser.teamDetails?.logoDesign;
     final title = titleOverride ??
         (match == null ? 'Ingen kamp' : _matchDate(match.date));
     final cardHeroTag = match == null || !enableLogoHeroes
@@ -757,6 +759,11 @@ class _HeroTeamPanel extends StatelessWidget {
                                   child: TeamBadgeLabel(
                                     teamName: homeTeam,
                                     teamId: stableTeamSeed(homeTeam),
+                                    logoDesign: ownTeamName != null &&
+                                            teamNamesMatch(
+                                                homeTeam, ownTeamName)
+                                        ? ownTeamLogo
+                                        : null,
                                     heroTag: cardHeroTag == null
                                         ? null
                                         : MatchHeroCard.logoHeroTag(
@@ -788,6 +795,11 @@ class _HeroTeamPanel extends StatelessWidget {
                                   child: TeamBadgeLabel(
                                     teamName: awayTeam,
                                     teamId: stableTeamSeed(awayTeam),
+                                    logoDesign: ownTeamName != null &&
+                                            teamNamesMatch(
+                                                awayTeam, ownTeamName)
+                                        ? ownTeamLogo
+                                        : null,
                                     heroTag: cardHeroTag == null
                                         ? null
                                         : MatchHeroCard.logoHeroTag(

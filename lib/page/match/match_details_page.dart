@@ -163,6 +163,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
 
     final heroCard = MatchHeroCard(
       match: matchDetails,
+      ownTeamName: user.teamDetails?.title,
+      ownTeamLogoDesign: user.teamDetails?.logoDesign,
       heroTag: widget.heroTag,
       animateCard: widget.heroTag != null,
       onTap: _enableHeroCardActions && matchDetails.canSetFinalScore(user)
@@ -252,6 +254,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       onSegmentChanged: _selectSegment,
       heroCard: MatchHeroCard(
         match: match,
+        ownTeamName: _currentUser?.teamDetails?.title,
+        ownTeamLogoDesign: _currentUser?.teamDetails?.logoDesign,
         heroTag: widget.heroTag,
         animateCard: widget.heroTag != null,
       ),

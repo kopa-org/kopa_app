@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kopa/component/avatar/team_badge_label.dart';
 import 'package:kopa/component/card/kopa_card.dart';
 import 'package:kopa/model/match_details.dart';
+import 'package:kopa/model/team_logo_design.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 import 'package:kopa/theme/spacing.dart';
@@ -12,6 +13,8 @@ class MatchHeroCard extends StatelessWidget {
   final Widget? topRightAction;
   final bool animateCard;
   final String? heroTag;
+  final String? ownTeamName;
+  final TeamLogoDesign? ownTeamLogoDesign;
 
   const MatchHeroCard({
     super.key,
@@ -20,6 +23,8 @@ class MatchHeroCard extends StatelessWidget {
     this.topRightAction,
     this.animateCard = true,
     this.heroTag,
+    this.ownTeamName,
+    this.ownTeamLogoDesign,
   });
 
   @override
@@ -49,6 +54,7 @@ class MatchHeroCard extends StatelessWidget {
                   child: TeamBadgeLabel(
                     teamName: match.homeTeam ?? 'Hjemme',
                     teamId: stableTeamSeed(match.homeTeam ?? 'Hjemme'),
+                    logoDesign: _logoForTeam(match.homeTeam ?? 'Hjemme'),
                     heroTag: heroTag == null
                         ? null
                         : logoHeroTag(heroTag!, TeamSide.home),
@@ -78,6 +84,7 @@ class MatchHeroCard extends StatelessWidget {
                   child: TeamBadgeLabel(
                     teamName: match.awayTeam ?? 'Ude',
                     teamId: stableTeamSeed(match.awayTeam ?? 'Ude'),
+                    logoDesign: _logoForTeam(match.awayTeam ?? 'Ude'),
                     heroTag: heroTag == null
                         ? null
                         : logoHeroTag(heroTag!, TeamSide.away),
@@ -123,6 +130,11 @@ class MatchHeroCard extends StatelessWidget {
         child: card,
       ),
     );
+  }
+
+  TeamLogoDesign? _logoForTeam(String teamName) {
+    if (ownTeamName == null || ownTeamLogoDesign == null) return null;
+    return teamNamesMatch(teamName, ownTeamName!) ? ownTeamLogoDesign : null;
   }
 
   static String defaultHeroTag(int matchId) => 'match-$matchId-hero-card';

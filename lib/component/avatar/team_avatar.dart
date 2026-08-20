@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:kopa/model/team_logo_design.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 
 class TeamAvatar extends StatelessWidget {
@@ -9,12 +10,14 @@ class TeamAvatar extends StatelessWidget {
   final String teamName;
   final int teamId;
   final String? colorSourceUrl;
+  final TeamLogoDesign? logoDesign;
   final double radius;
 
   const TeamAvatar({
     required this.teamName,
     required this.teamId,
     this.colorSourceUrl,
+    this.logoDesign,
     this.radius = 24,
     super.key,
   });
@@ -31,17 +34,23 @@ class TeamAvatar extends StatelessWidget {
       image: true,
       label: '$teamName holdmærke',
       child: FutureBuilder<ColorScheme?>(
-        future: normalizedUrl == null || normalizedUrl.isEmpty
-            ? null
-            : _colorSchemeCache.putIfAbsent(
-                normalizedUrl,
-                () => _extractColorScheme(normalizedUrl),
-              ),
+        future:
+            logoDesign != null || normalizedUrl == null || normalizedUrl.isEmpty
+                ? null
+                : _colorSchemeCache.putIfAbsent(
+                    normalizedUrl,
+                    () => _extractColorScheme(normalizedUrl),
+                  ),
         builder: (context, snapshot) {
           final colorScheme = snapshot.data;
-          final colors = colorScheme == null
-              ? fallbackColors
-              : (colorScheme.primary, colorScheme.tertiary);
+          final colors = logoDesign == null && colorScheme != null
+              ? (colorScheme.primary, colorScheme.tertiary)
+              : (
+                  logoDesign?.color ?? fallbackColors.$1,
+                  logoDesign == null
+                      ? fallbackColors.$2
+                      : Color.lerp(logoDesign!.color, Colors.white, 0.78)!
+                );
 
           return CustomPaint(
             size: Size.square(radius * 2),
@@ -49,6 +58,8 @@ class TeamAvatar extends StatelessWidget {
               primary: colors.$1,
               secondary: colors.$2,
               pattern: seed % 4,
+              shape: logoDesign?.shape ?? TeamLogoShape.circle,
+              logoPattern: logoDesign?.pattern,
             ),
             child: SizedBox.square(
               dimension: radius * 2,
@@ -85,15 +96,52 @@ class TeamAvatar extends StatelessWidget {
   }
 }
 
+class TeamLogoShapeBorder extends ShapeBorder {
+  final TeamLogoShape shape;
+
+  const TeamLogoShapeBorder(this.shape);
+
+  @override
+  EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
+
+  @override
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
+    return _logoPath(rect, shape);
+  }
+
+  @override
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
+    return _logoPath(rect, shape);
+  }
+
+  @override
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {}
+
+  @override
+  ShapeBorder scale(double t) => this;
+
+  @override
+  bool operator ==(Object other) {
+    return other is TeamLogoShapeBorder && other.shape == shape;
+  }
+
+  @override
+  int get hashCode => shape.hashCode;
+}
+
 class _TeamBadgePainter extends CustomPainter {
   final Color primary;
   final Color secondary;
   final int pattern;
+  final TeamLogoShape shape;
+  final TeamLogoPattern? logoPattern;
 
   const _TeamBadgePainter({
     required this.primary,
     required this.secondary,
     required this.pattern,
+    required this.shape,
+    required this.logoPattern,
   });
 
   @override
@@ -101,67 +149,96 @@ class _TeamBadgePainter extends CustomPainter {
     final bounds = Offset.zero & size;
     final center = bounds.center;
     final radius = size.shortestSide / 2;
+    final logoPath = TeamLogoShapeBorder(shape).getOuterPath(bounds);
 
     canvas.save();
-    canvas.clipPath(Path()..addOval(bounds));
-    canvas.drawColor(primary, BlendMode.src);
+    canvas.clipPath(logoPath);
 
     final secondaryPaint = Paint()..color = secondary;
     final stripePaint = Paint()
       ..color = Colors.white.withValues(alpha: 0.34)
       ..strokeWidth = math.max(2, size.width * 0.14);
 
-    switch (pattern) {
-      case 0:
-        canvas.drawRect(
-          Rect.fromLTWH(size.width / 2, 0, size.width / 2, size.height),
-          secondaryPaint,
-        );
-        canvas.drawLine(
-          Offset(size.width / 2, 0),
-          Offset(size.width / 2, size.height),
-          stripePaint,
-        );
-      case 1:
-        canvas.drawPath(
-          Path()
-            ..moveTo(0, size.height)
-            ..lineTo(size.width, 0)
-            ..lineTo(size.width, size.height)
-            ..close(),
-          secondaryPaint,
-        );
-        canvas.drawLine(
-          Offset(0, size.height),
-          Offset(size.width, 0),
-          stripePaint,
-        );
-      case 2:
-        canvas.drawRect(
-          Rect.fromLTWH(0, size.height / 2, size.width, size.height / 2),
-          secondaryPaint,
-        );
-        canvas.drawLine(
-          Offset(0, size.height / 2),
-          Offset(size.width, size.height / 2),
-          stripePaint,
-        );
-      case 3:
-        canvas.drawCircle(center, radius * 0.62, secondaryPaint);
-        canvas.drawCircle(
-          center,
-          radius * 0.69,
-          Paint()
-            ..color = Colors.white.withValues(alpha: 0.34)
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = math.max(2, size.width * 0.1),
-        );
+    if (logoPattern != null) {
+      final fillPaint = Paint();
+      switch (logoPattern!) {
+        case TeamLogoPattern.solid:
+          fillPaint.color = primary;
+        case TeamLogoPattern.verticalSplit:
+          fillPaint.shader = LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [primary, primary, secondary, secondary],
+            stops: const [0, 0.5, 0.5, 1],
+          ).createShader(bounds);
+        case TeamLogoPattern.horizontalSplit:
+          fillPaint.shader = LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [primary, primary, secondary, secondary],
+            stops: const [0, 0.5, 0.5, 1],
+          ).createShader(bounds);
+        case TeamLogoPattern.gradient:
+          fillPaint.shader = LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [primary, Colors.white],
+          ).createShader(bounds);
+      }
+      canvas.drawRect(bounds, fillPaint);
+    } else {
+      canvas.drawColor(primary, BlendMode.src);
+      switch (pattern) {
+        case 0:
+          canvas.drawRect(
+            Rect.fromLTWH(size.width / 2, 0, size.width / 2, size.height),
+            secondaryPaint,
+          );
+          canvas.drawLine(
+            Offset(size.width / 2, 0),
+            Offset(size.width / 2, size.height),
+            stripePaint,
+          );
+        case 1:
+          canvas.drawPath(
+            Path()
+              ..moveTo(0, size.height)
+              ..lineTo(size.width, 0)
+              ..lineTo(size.width, size.height)
+              ..close(),
+            secondaryPaint,
+          );
+          canvas.drawLine(
+            Offset(0, size.height),
+            Offset(size.width, 0),
+            stripePaint,
+          );
+        case 2:
+          canvas.drawRect(
+            Rect.fromLTWH(0, size.height / 2, size.width, size.height / 2),
+            secondaryPaint,
+          );
+          canvas.drawLine(
+            Offset(0, size.height / 2),
+            Offset(size.width, size.height / 2),
+            stripePaint,
+          );
+        case 3:
+          canvas.drawCircle(center, radius * 0.62, secondaryPaint);
+          canvas.drawCircle(
+            center,
+            radius * 0.69,
+            Paint()
+              ..color = Colors.white.withValues(alpha: 0.34)
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = math.max(2, size.width * 0.1),
+          );
+      }
     }
 
     canvas.restore();
-    canvas.drawCircle(
-      center,
-      radius - 0.75,
+    canvas.drawPath(
+      logoPath,
       Paint()
         ..color = Colors.white.withValues(alpha: 0.85)
         ..style = PaintingStyle.stroke
@@ -173,7 +250,32 @@ class _TeamBadgePainter extends CustomPainter {
   bool shouldRepaint(covariant _TeamBadgePainter oldDelegate) =>
       oldDelegate.primary != primary ||
       oldDelegate.secondary != secondary ||
-      oldDelegate.pattern != pattern;
+      oldDelegate.pattern != pattern ||
+      oldDelegate.shape != shape ||
+      oldDelegate.logoPattern != logoPattern;
+}
+
+Path _logoPath(Rect bounds, TeamLogoShape shape) {
+  final size = bounds.shortestSide;
+  final radius = Radius.circular(size * 0.14);
+
+  return switch (shape) {
+    TeamLogoShape.circle => Path()..addOval(bounds),
+    TeamLogoShape.square => Path()
+      ..addRRect(RRect.fromRectAndRadius(bounds, radius)),
+    TeamLogoShape.shield => Path()
+      ..addRRect(
+        RRect.fromRectAndCorners(
+          bounds,
+          topLeft: radius,
+          topRight: radius,
+          bottomLeft: Radius.circular(size * 0.28),
+          bottomRight: Radius.circular(size * 0.28),
+        ),
+      ),
+    TeamLogoShape.rounded => Path()
+      ..addRRect(RRect.fromRectAndRadius(bounds, Radius.circular(size * 0.22))),
+  };
 }
 
 const _badgePalettes = <(Color, Color)>[

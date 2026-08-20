@@ -1,4 +1,7 @@
+import 'package:kopa/model/team_logo_design.dart';
+
 class TeamDetails {
+  final TeamLogoDesign logoDesign;
   final int id;
   final String title;
   final int playerCount;
@@ -10,6 +13,7 @@ class TeamDetails {
     required this.id,
     required this.title,
     this.playerCount = 7,
+    this.logoDesign = TeamLogoDesign.defaultDesign,
     this.defaultMeetingOffsetMinutes,
     required this.createdAt,
     required this.updatedAt,
@@ -20,6 +24,7 @@ class TeamDetails {
       id: json['id'],
       title: json['title'],
       playerCount: json['player_count'] ?? 7,
+      logoDesign: TeamLogoDesign.fromJson(json),
       defaultMeetingOffsetMinutes: json['default_meeting_offset_minutes'],
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),

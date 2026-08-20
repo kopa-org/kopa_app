@@ -96,4 +96,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fineTypeDeleteFailureMessage => 'Something went wrong. Try again.';
+
+  @override
+  String get teamLogoEditButton => 'Change team logo';
+
+  @override
+  String get teamLogoEditTitle => 'Change team logo';
+
+  @override
+  String get teamLogoDesignTitle => 'Design your team logo';
+
+  @override
+  String get teamLogoDesignSubtitle =>
+      'Choose a background color and shape for your team logo';
+
+  @override
+  String get teamLogoBackgroundColor => 'Background color';
+
+  @override
+  String get teamLogoShape => 'Shape';
+
+  @override
+  String get teamLogoPattern => 'Pattern';
+
+  @override
+  String get teamLogoSave => 'Save logo';
+
+  @override
+  String get teamLogoSaving => 'Saving logo...';
+
+  @override
+  String get teamLogoSaveFailure => 'Could not save the team logo.';
 }

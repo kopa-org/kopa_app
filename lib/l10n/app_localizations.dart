@@ -265,6 +265,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Something went wrong. Try again.'**
   String get fineTypeDeleteFailureMessage;
+
+  /// No description provided for @teamLogoEditButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Change team logo'**
+  String get teamLogoEditButton;
+
+  /// No description provided for @teamLogoEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change team logo'**
+  String get teamLogoEditTitle;
+
+  /// No description provided for @teamLogoDesignTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Design your team logo'**
+  String get teamLogoDesignTitle;
+
+  /// No description provided for @teamLogoDesignSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a background color and shape for your team logo'**
+  String get teamLogoDesignSubtitle;
+
+  /// No description provided for @teamLogoBackgroundColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Background color'**
+  String get teamLogoBackgroundColor;
+
+  /// No description provided for @teamLogoShape.
+  ///
+  /// In en, this message translates to:
+  /// **'Shape'**
+  String get teamLogoShape;
+
+  /// No description provided for @teamLogoPattern.
+  ///
+  /// In en, this message translates to:
+  /// **'Pattern'**
+  String get teamLogoPattern;
+
+  /// No description provided for @teamLogoSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save logo'**
+  String get teamLogoSave;
+
+  /// No description provided for @teamLogoSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving logo...'**
+  String get teamLogoSaving;
+
+  /// No description provided for @teamLogoSaveFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the team logo.'**
+  String get teamLogoSaveFailure;
 }
 
 class _AppLocalizationsDelegate

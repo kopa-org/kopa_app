@@ -1,4 +1,5 @@
 import 'package:kopa/model/team_details.dart';
+import 'package:kopa/model/team_logo_design.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -82,9 +83,24 @@ class SecureStorageService {
         key: 'teamPlayerCount',
         value: user.teamDetails!.playerCount.toString(),
       );
+      await _storage.write(
+        key: 'teamLogoColor',
+        value: TeamLogoDesign.colorToHex(user.teamDetails!.logoDesign.color),
+      );
+      await _storage.write(
+        key: 'teamLogoShape',
+        value: user.teamDetails!.logoDesign.shape.name,
+      );
+      await _storage.write(
+        key: 'teamLogoPattern',
+        value: user.teamDetails!.logoDesign.pattern.name,
+      );
     } else {
       await _storage.delete(key: 'teamName');
       await _storage.delete(key: 'teamPlayerCount');
+      await _storage.delete(key: 'teamLogoColor');
+      await _storage.delete(key: 'teamLogoShape');
+      await _storage.delete(key: 'teamLogoPattern');
     }
   }
 
@@ -110,6 +126,9 @@ class SecureStorageService {
     final updatedAtStr = await _storage.read(key: 'updatedAt');
     final teamName = await _storage.read(key: 'teamName');
     final teamPlayerCount = await _storage.read(key: 'teamPlayerCount');
+    final teamLogoColor = await _storage.read(key: 'teamLogoColor');
+    final teamLogoShape = await _storage.read(key: 'teamLogoShape');
+    final teamLogoPattern = await _storage.read(key: 'teamLogoPattern');
 
     if ([
       idStr,
@@ -140,6 +159,11 @@ class SecureStorageService {
                 id: 1,
                 title: teamName,
                 playerCount: int.tryParse(teamPlayerCount ?? '') ?? 7,
+                logoDesign: TeamLogoDesign.fromJson({
+                  'logo_color': teamLogoColor,
+                  'logo_shape': teamLogoShape,
+                  'logo_pattern': teamLogoPattern,
+                }),
                 createdAt: DateTime.now(),
                 updatedAt: DateTime.now(),
               ),

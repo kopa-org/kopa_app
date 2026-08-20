@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kopa/component/avatar/team_avatar.dart';
+import 'package:kopa/model/team_logo_design.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 import 'package:kopa/theme/spacing.dart';
@@ -16,12 +17,17 @@ int stableTeamSeed(String name) {
   return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
 }
 
+bool teamNamesMatch(String first, String second) {
+  return first.trim().toLowerCase() == second.trim().toLowerCase();
+}
+
 enum TeamBadgeLabelLayout { vertical, horizontal }
 
 class TeamBadgeLabel extends StatelessWidget {
   final String teamName;
   final int teamId;
   final String? colorSourceUrl;
+  final TeamLogoDesign? logoDesign;
   final double radius;
   final double badgePadding;
   final double? width;
@@ -38,6 +44,7 @@ class TeamBadgeLabel extends StatelessWidget {
     required this.teamName,
     required this.teamId,
     this.colorSourceUrl,
+    this.logoDesign,
     this.radius = 22,
     this.badgePadding = 5,
     this.width,
@@ -61,6 +68,7 @@ class TeamBadgeLabel extends StatelessWidget {
           color: isHighlighted ? appColors.primary : appColors.dirt,
           fontWeight: isHighlighted ? FontWeight.w800 : FontWeight.w600,
         );
+    final logoShape = logoDesign?.shape ?? TeamLogoShape.circle;
 
     final badge = showAvatar
         ? _TeamBadgeHero(
@@ -68,10 +76,12 @@ class TeamBadgeLabel extends StatelessWidget {
             child: _TeamBadgeShell(
               padding: badgePadding,
               showShadow: showShadow,
+              shape: logoShape,
               child: TeamAvatar(
                 teamName: teamName,
                 teamId: teamId,
                 colorSourceUrl: colorSourceUrl,
+                logoDesign: logoDesign,
                 radius: radius,
               ),
             ),
@@ -114,11 +124,13 @@ class TeamBadgeLabel extends StatelessWidget {
 class _TeamBadgeShell extends StatelessWidget {
   final double padding;
   final bool showShadow;
+  final TeamLogoShape shape;
   final Widget child;
 
   const _TeamBadgeShell({
     required this.padding,
     required this.showShadow,
+    required this.shape,
     required this.child,
   });
 
@@ -129,10 +141,11 @@ class _TeamBadgeShell extends StatelessWidget {
 
     return Container(
       padding: EdgeInsets.all(padding),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
+      clipBehavior: Clip.antiAlias,
+      decoration: ShapeDecoration(
+        shape: TeamLogoShapeBorder(shape),
         color: appColors.white.withValues(alpha: 0.74),
-        boxShadow: showShadow
+        shadows: showShadow
             ? [
                 BoxShadow(
                   color: appColors.dirt.withValues(alpha: 0.16),

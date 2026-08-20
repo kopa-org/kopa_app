@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kopa/component/avatar/team_badge_label.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/model/dbu_standings.dart';
+import 'package:kopa/model/team_logo_design.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
@@ -122,10 +123,10 @@ class _StandingsTable extends StatelessWidget {
             child: Column(
               children: [
                 _StandingsHeader(compact: compact),
-                         Divider(
-                    height: 1,
-                    color: appColors.dirt,
-                  ),
+                Divider(
+                  height: 1,
+                  color: appColors.dirt,
+                ),
                 for (final row in rows) ...[
                   _StandingsRow(
                     row: row,
@@ -135,8 +136,10 @@ class _StandingsTable extends StatelessWidget {
                       currentUser,
                       standings,
                     ),
+                    logoDesign: _isCurrentTeam(row, currentUser, standings)
+                        ? currentUser.teamDetails?.logoDesign
+                        : null,
                   ),
-         
                   if (row.boundaryAfter != null)
                     _StandingsBoundary(
                       style: row.boundaryAfter!,
@@ -213,11 +216,13 @@ class _StandingsRow extends StatelessWidget {
   final DbuStandingRow row;
   final bool compact;
   final bool isCurrentTeam;
+  final TeamLogoDesign? logoDesign;
 
   const _StandingsRow({
     required this.row,
     required this.compact,
     required this.isCurrentTeam,
+    this.logoDesign,
   });
 
   @override
@@ -256,6 +261,7 @@ class _StandingsRow extends StatelessWidget {
               teamName: row.teamName,
               teamId: row.dbuTeamId,
               colorSourceUrl: row.logoUrl,
+              logoDesign: logoDesign,
               radius: 11,
               showAvatar: !compact,
               badgePadding: 5,

@@ -56,6 +56,8 @@ class _HomeLatestResultCardState extends State<HomeLatestResultCard> {
         events.where((event) => event.type == MatchEventType.redCard).length;
     final cardHeroTag =
         match == null ? null : widget.matchHeroTag(match, 'home_latest');
+    final ownTeamName = widget.currentUser.teamDetails?.title;
+    final ownTeamLogo = widget.currentUser.teamDetails?.logoDesign;
 
     return HomeBentoCard(
       padding: const EdgeInsets.all(Spacing.lg),
@@ -86,6 +88,13 @@ class _HomeLatestResultCardState extends State<HomeLatestResultCard> {
                 TeamBadgeLabel(
                   teamName: match?.homeTeam ?? 'Hjemme',
                   teamId: stableTeamSeed(match?.homeTeam ?? 'Hjemme'),
+                  logoDesign: ownTeamName != null &&
+                          teamNamesMatch(
+                            match?.homeTeam ?? 'Hjemme',
+                            ownTeamName,
+                          )
+                      ? ownTeamLogo
+                      : null,
                   heroTag: cardHeroTag == null
                       ? null
                       : MatchHeroCard.logoHeroTag(
@@ -109,6 +118,13 @@ class _HomeLatestResultCardState extends State<HomeLatestResultCard> {
                 TeamBadgeLabel(
                   teamName: match?.awayTeam ?? 'Ude',
                   teamId: stableTeamSeed(match?.awayTeam ?? 'Ude'),
+                  logoDesign: ownTeamName != null &&
+                          teamNamesMatch(
+                            match?.awayTeam ?? 'Ude',
+                            ownTeamName,
+                          )
+                      ? ownTeamLogo
+                      : null,
                   heroTag: cardHeroTag == null
                       ? null
                       : MatchHeroCard.logoHeroTag(

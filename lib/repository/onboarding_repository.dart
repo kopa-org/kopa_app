@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:kopa/helpers/api_config.dart';
+import 'package:kopa/model/team_logo_design.dart';
 import 'package:kopa/services/secure_storage_service.dart';
 import 'package:kopa/services/api_client.dart';
 
@@ -91,9 +92,36 @@ class OnboardingRepository {
     }
   }
 
+  Future<Map<String, dynamic>> updateTeamLogo({
+    required int teamId,
+    required TeamLogoDesign logoDesign,
+  }) async {
+    final url = Uri.parse('${ApiConfig.baseUrl}/teams/$teamId/settings');
+    try {
+      final response = await _apiClient.patchJson(
+        url,
+        body: logoDesign.toJson(),
+      );
+      final body = response.body.isEmpty
+          ? <String, dynamic>{}
+          : json.decode(response.body);
+      if (response.statusCode == 200) {
+        return {'success': true, ...body};
+      }
+      return {
+        'success': false,
+        'error': body['error'] ?? 'Netværksfejl',
+      };
+    } catch (e) {
+      if (kDebugMode) print('Update team logo error: $e');
+      return {'success': false, 'error': 'Netværksfejl'};
+    }
+  }
+
   Future<Map<String, dynamic>> createTeam({
     required String title,
     required int playerCount,
+    TeamLogoDesign? logoDesign,
     Map<String, dynamic>? dbuContext,
     List<Map<String, dynamic>> standings = const [],
   }) async {
@@ -113,6 +141,7 @@ class OnboardingRepository {
         body: json.encode({
           'title': title,
           'player_count': playerCount,
+          if (logoDesign != null) ...logoDesign.toJson(),
           if (dbuContext != null) ..._dbuContextPayload(dbuContext),
           'standings': standings,
         }),

@@ -33,5 +33,15 @@
   },
   "fineTypeDeleteFailureTitle": "Kunne ikke slette bødetype",
   "fineTypeDeleteInUseMessage": "Denne bødetype bruges allerede af eksisterende bøder.",
-  "fineTypeDeleteFailureMessage": "Noget gik galt. Prøv igen."
+  "fineTypeDeleteFailureMessage": "Noget gik galt. Prøv igen.",
+  "teamLogoEditButton": "Ændre hold logo",
+  "teamLogoEditTitle": "Ændre hold logo",
+  "teamLogoDesignTitle": "Design dit holdlogo",
+  "teamLogoDesignSubtitle": "Vælg en baggrundsfarve og form til jeres holdlogo",
+  "teamLogoBackgroundColor": "Baggrundsfarve",
+  "teamLogoShape": "Form",
+  "teamLogoPattern": "Mønster",
+  "teamLogoSave": "Gem logo",
+  "teamLogoSaving": "Gemmer logo...",
+  "teamLogoSaveFailure": "Kunne ikke gemme holdlogoet."
 }

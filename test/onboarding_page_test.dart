@@ -7,6 +7,7 @@ import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/onboarding_cubit.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/model/user_details.dart';
+import 'package:kopa/model/team_logo_design.dart';
 import 'package:kopa/navigation/app_router.dart';
 import 'package:kopa/navigation/router_refresh_notifier.dart';
 import 'package:kopa/pages/onboarding_page.dart';
@@ -16,6 +17,46 @@ import 'package:kopa/repository/onboarding_repository.dart';
 import 'package:kopa/theme/app_theme.dart';
 
 void main() {
+  testWidgets('role question scrolls on a compact viewport', (tester) async {
+    tester.view.physicalSize = const Size(360, 416);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final onboardingCubit = _TestOnboardingCubit();
+
+    await tester.pumpWidget(
+      MultiBlocProvider(
+        providers: [
+          BlocProvider<AuthCubit>(
+            create: (_) => AuthCubit(authRepository: _FakeAuthRepository()),
+          ),
+          BlocProvider<OnboardingCubit>.value(value: onboardingCubit),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          locale: const Locale('da'),
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('da'),
+            Locale('en'),
+          ],
+          home: const OnboardingPage(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Er du holdleder?'), findsOneWidget);
+    expect(find.text('Nej, jeg er spiller'), findsOneWidget);
+  });
+
   testWidgets('invite context skips role question and starts position step',
       (tester) async {
     final onboardingCubit = _TestOnboardingCubit()
@@ -112,10 +153,32 @@ void main() {
     expect(find.text('Klar til oprettelse'), findsNothing);
     expect(find.text('Invitationslinket kunne ikke hentes.'), findsNothing);
 
+    await tester.tap(
+      find.byKey(const ValueKey('onboarding-logo-color-#D22B2B')),
+    );
+    final shapeFinder =
+        find.byKey(const ValueKey('onboarding-logo-shape-shield'));
+    await tester.ensureVisible(shapeFinder);
+    await tester.tap(
+      shapeFinder,
+    );
+    final patternFinder =
+        find.byKey(const ValueKey('onboarding-logo-pattern-horizontalSplit'));
+    await tester.ensureVisible(patternFinder);
+    await tester.tap(
+      patternFinder,
+    );
+
     await tester.tap(find.text('Fortsæt'));
     await tester.pumpAndSettle();
 
     expect(onboardingCubit.createTeamCallCount, 1);
+    expect(onboardingCubit.createdLogoDesign?.color, const Color(0xFFD22B2B));
+    expect(onboardingCubit.createdLogoDesign?.shape, TeamLogoShape.shield);
+    expect(
+      onboardingCubit.createdLogoDesign?.pattern,
+      TeamLogoPattern.horizontalSplit,
+    );
     expect(onboardingCubit.fetchTeamJoinTokenCallCount, 1);
     expect(find.text('Inviter dit hold'), findsOneWidget);
     expect(find.text('Fortsæt til Kopa'), findsOneWidget);
@@ -132,6 +195,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(onboardingCubit.fetchTeamJoinTokenCallCount, 2);
+    expect(onboardingCubit.updateTeamLogoCallCount, 1);
     expect(find.text('Inviter dit hold'), findsOneWidget);
     expect(find.text('Fortsæt til Kopa'), findsOneWidget);
     expect(find.textContaining('kopa.dk/join'), findsOneWidget);
@@ -441,6 +505,8 @@ class _TestOnboardingCubit extends OnboardingCubit {
 class _CreateTestOnboardingCubit extends OnboardingCubit {
   int createTeamCallCount = 0;
   int fetchTeamJoinTokenCallCount = 0;
+  int updateTeamLogoCallCount = 0;
+  TeamLogoDesign? createdLogoDesign;
 
   _CreateTestOnboardingCubit() : super(OnboardingRepository());
 
@@ -448,10 +514,12 @@ class _CreateTestOnboardingCubit extends OnboardingCubit {
   Future<bool> createTeam({
     required String title,
     required int playerCount,
+    TeamLogoDesign? logoDesign,
     Map<String, dynamic>? dbuContext,
     List<Map<String, dynamic>> standings = const [],
   }) async {
     createTeamCallCount++;
+    createdLogoDesign = logoDesign;
     emit(state.copyWith(
       status: OnboardingStatus.success,
       teamId: 42,
@@ -465,6 +533,15 @@ class _CreateTestOnboardingCubit extends OnboardingCubit {
     fetchTeamJoinTokenCallCount++;
     emit(state.copyWith(joinToken: 'join-token', errorMessage: null));
     return 'join-token';
+  }
+
+  @override
+  Future<bool> updateTeamLogo({
+    required int teamId,
+    required TeamLogoDesign logoDesign,
+  }) async {
+    updateTeamLogoCallCount++;
+    return true;
   }
 }
 

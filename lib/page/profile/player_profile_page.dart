@@ -5,6 +5,7 @@ import 'package:kopa/component/avatar/team_badge_label.dart';
 import 'package:kopa/component/future_handler.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/model/player_profile.dart';
+import 'package:kopa/model/team_logo_design.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/repository/users_repository.dart';
 import 'package:kopa/theme/app_colors.dart';
@@ -47,6 +48,8 @@ class _PlayerProfileView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ownTeamLogoDesign = profile.player.teamDetails?.logoDesign;
+
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(Spacing.md, 12, Spacing.md, 120),
@@ -57,7 +60,10 @@ class _PlayerProfileView extends StatelessWidget {
         const SizedBox(height: 22),
         const _MatchHistoryHeader(),
         const SizedBox(height: 12),
-        _MatchHistoryCard(matches: profile.matchHistory),
+        _MatchHistoryCard(
+          matches: profile.matchHistory,
+          ownTeamLogoDesign: ownTeamLogoDesign,
+        ),
       ],
     );
   }
@@ -306,8 +312,12 @@ class _MatchHistoryHeader extends StatelessWidget {
 
 class _MatchHistoryCard extends StatelessWidget {
   final List<PlayerMatchHistoryItem> matches;
+  final TeamLogoDesign? ownTeamLogoDesign;
 
-  const _MatchHistoryCard({required this.matches});
+  const _MatchHistoryCard({
+    required this.matches,
+    this.ownTeamLogoDesign,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -337,6 +347,7 @@ class _MatchHistoryCard extends StatelessWidget {
               _MatchHistoryRow(
                 match: group.matches[index],
                 showDivider: index < group.matches.length - 1,
+                ownTeamLogoDesign: ownTeamLogoDesign,
               ),
           ],
         ],
@@ -441,10 +452,12 @@ class _SeasonDivider extends StatelessWidget {
 class _MatchHistoryRow extends StatelessWidget {
   final PlayerMatchHistoryItem match;
   final bool showDivider;
+  final TeamLogoDesign? ownTeamLogoDesign;
 
   const _MatchHistoryRow({
     required this.match,
     required this.showDivider,
+    this.ownTeamLogoDesign,
   });
 
   @override
@@ -473,7 +486,10 @@ class _MatchHistoryRow extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          _HistoryTeams(match: match),
+          _HistoryTeams(
+            match: match,
+            ownTeamLogoDesign: ownTeamLogoDesign,
+          ),
         ],
       ),
     );
@@ -482,8 +498,12 @@ class _MatchHistoryRow extends StatelessWidget {
 
 class _HistoryTeams extends StatelessWidget {
   final PlayerMatchHistoryItem match;
+  final TeamLogoDesign? ownTeamLogoDesign;
 
-  const _HistoryTeams({required this.match});
+  const _HistoryTeams({
+    required this.match,
+    this.ownTeamLogoDesign,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -494,12 +514,14 @@ class _HistoryTeams extends StatelessWidget {
           name: match.homeTeam,
           score: match.homeTeamScore,
           isOwnTeam: match.isHomeTeam,
+          ownTeamLogoDesign: ownTeamLogoDesign,
         ),
         const SizedBox(height: 8),
         _HistoryTeamScoreLine(
           name: match.awayTeam,
           score: match.awayTeamScore,
           isOwnTeam: !match.isHomeTeam,
+          ownTeamLogoDesign: ownTeamLogoDesign,
         ),
       ],
     );
@@ -510,11 +532,13 @@ class _HistoryTeamScoreLine extends StatelessWidget {
   final String name;
   final int? score;
   final bool isOwnTeam;
+  final TeamLogoDesign? ownTeamLogoDesign;
 
   const _HistoryTeamScoreLine({
     required this.name,
     required this.score,
     required this.isOwnTeam,
+    this.ownTeamLogoDesign,
   });
 
   @override
@@ -525,6 +549,7 @@ class _HistoryTeamScoreLine extends StatelessWidget {
           child: _HistoryTeamLine(
             name: name,
             isOwnTeam: isOwnTeam,
+            ownTeamLogoDesign: ownTeamLogoDesign,
           ),
         ),
         const SizedBox(width: 12),
@@ -540,10 +565,12 @@ class _HistoryTeamScoreLine extends StatelessWidget {
 class _HistoryTeamLine extends StatelessWidget {
   final String name;
   final bool isOwnTeam;
+  final TeamLogoDesign? ownTeamLogoDesign;
 
   const _HistoryTeamLine({
     required this.name,
     required this.isOwnTeam,
+    this.ownTeamLogoDesign,
   });
 
   @override
@@ -555,6 +582,7 @@ class _HistoryTeamLine extends StatelessWidget {
     return TeamBadgeLabel(
       teamName: name,
       teamId: stableTeamSeed(name),
+      logoDesign: isOwnTeam ? ownTeamLogoDesign : null,
       radius: 8,
       badgePadding: 2,
       isHighlighted: isOwnTeam,

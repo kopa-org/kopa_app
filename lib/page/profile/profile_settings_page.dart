@@ -8,9 +8,11 @@ import 'package:kopa/component/loading_indicator.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/onboarding_cubit.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/navigation/app_router.dart';
 import 'package:kopa/page/profile/dbu_calendar_import_flow.dart';
 import 'package:kopa/page/profile/dbu_webview_page.dart';
+import 'package:kopa/page/profile/team_logo_design_page.dart';
 import 'package:kopa/repository/team_dbu_repository.dart';
 import 'package:kopa/repository/users_repository.dart';
 import 'package:kopa/state/match_programme_refresh_notifier.dart';
@@ -59,6 +61,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
     final appTextStyles =
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
     final currentUser = context.read<AuthCubit>().state.user;
+    final l10n = AppLocalizations.of(context)!;
 
     return PageScaffold(
       title: 'Settings',
@@ -90,6 +93,12 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
             Text('Holdværktøjer', style: appTextStyles.sectionHeader),
             const SizedBox(height: 12),
             if (currentUser?.isTeamOwner == true) ...[
+              FullWidthButton(
+                buttonText: l10n.teamLogoEditButton,
+                icon: Icons.palette_outlined,
+                onPressed: _openTeamLogoEditor,
+              ),
+              const SizedBox(height: 16),
               FullWidthButton(
                 buttonText: 'Godkend nye spillere',
                 onPressed: () => context.push(AppRouter.teamJoinRequests),
@@ -298,6 +307,22 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
         _errorMessage = error.toString().replaceFirst('Exception: ', '');
       });
     }
+  }
+
+  Future<void> _openTeamLogoEditor() async {
+    final currentUser = context.read<AuthCubit>().state.user;
+    final team = currentUser?.teamDetails;
+    if (currentUser?.isTeamOwner != true || team == null) return;
+
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => TeamLogoDesignPage(
+          teamId: team.id,
+          teamName: team.title,
+          initialDesign: team.logoDesign,
+        ),
+      ),
+    );
   }
 
   static String _meetingOffsetLabel(int? minutes) {

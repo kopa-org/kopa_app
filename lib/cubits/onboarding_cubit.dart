@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kopa/model/team_logo_design.dart';
 import 'package:kopa/repository/onboarding_repository.dart';
 import 'package:kopa/utils/app_analytics.dart';
 
@@ -169,6 +170,26 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     return null;
   }
 
+  Future<bool> updateTeamLogo({
+    required int teamId,
+    required TeamLogoDesign logoDesign,
+  }) async {
+    final result = await _repository.updateTeamLogo(
+      teamId: teamId,
+      logoDesign: logoDesign,
+    );
+    if (result['success'] == true) {
+      emit(state.copyWith(status: OnboardingStatus.success));
+      return true;
+    }
+
+    emit(state.copyWith(
+      status: OnboardingStatus.failure,
+      errorMessage: result['error'] ?? 'Netværksfejl',
+    ));
+    return false;
+  }
+
   Future<void> rotateTeamJoinToken(int teamId) async {
     final result = await _repository.rotateJoinToken(teamId);
     if (result.containsKey('token')) {
@@ -179,6 +200,7 @@ class OnboardingCubit extends Cubit<OnboardingState> {
   Future<bool> createTeam({
     required String title,
     required int playerCount,
+    TeamLogoDesign? logoDesign,
     Map<String, dynamic>? dbuContext,
     List<Map<String, dynamic>> standings = const [],
   }) async {
@@ -186,6 +208,7 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     final result = await _repository.createTeam(
       title: title,
       playerCount: playerCount,
+      logoDesign: logoDesign,
       dbuContext: dbuContext,
       standings: standings,
     );

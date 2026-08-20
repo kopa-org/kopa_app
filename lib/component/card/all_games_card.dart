@@ -4,6 +4,7 @@ import 'package:kopa/component/avatar/team_badge_label.dart';
 import 'package:kopa/component/chip/match_result_badge.dart';
 import 'package:kopa/helpers/date_helper.dart';
 import 'package:kopa/model/match_details.dart';
+import 'package:kopa/model/team_logo_design.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 import 'package:kopa/theme/spacing.dart';
@@ -13,6 +14,7 @@ class AllGamesCard extends StatelessWidget {
   final ValueChanged<MatchDetails> onMatchTap;
   final Map<int, GlobalKey>? matchItemKeys;
   final String? ownTeamName;
+  final TeamLogoDesign? ownTeamLogoDesign;
   final int? currentUserId;
 
   const AllGamesCard({
@@ -20,6 +22,7 @@ class AllGamesCard extends StatelessWidget {
     required this.onMatchTap,
     this.matchItemKeys,
     this.ownTeamName,
+    this.ownTeamLogoDesign,
     this.currentUserId,
     super.key,
   });
@@ -35,6 +38,7 @@ class AllGamesCard extends StatelessWidget {
       onMatchTap: onMatchTap,
       matchItemKeys: matchItemKeys,
       ownTeamName: resolvedOwnTeamName,
+      ownTeamLogoDesign: ownTeamLogoDesign,
       currentUserId: currentUserId,
     );
   }
@@ -45,6 +49,7 @@ class _MatchList extends StatelessWidget {
   final ValueChanged<MatchDetails> onMatchTap;
   final Map<int, GlobalKey>? matchItemKeys;
   final String? ownTeamName;
+  final TeamLogoDesign? ownTeamLogoDesign;
   final int? currentUserId;
 
   const _MatchList({
@@ -52,6 +57,7 @@ class _MatchList extends StatelessWidget {
     required this.onMatchTap,
     this.matchItemKeys,
     this.ownTeamName,
+    this.ownTeamLogoDesign,
     this.currentUserId,
   });
 
@@ -64,6 +70,7 @@ class _MatchList extends StatelessWidget {
           match: entry.$2,
           onTap: () => onMatchTap(entry.$2),
           ownTeamName: ownTeamName,
+          ownTeamLogoDesign: ownTeamLogoDesign,
           currentUserId: currentUserId,
         );
         final itemKey = matchItemKeys?[entry.$2.id];
@@ -81,12 +88,14 @@ class _GameResultRow extends StatelessWidget {
   final MatchDetails match;
   final VoidCallback onTap;
   final String? ownTeamName;
+  final TeamLogoDesign? ownTeamLogoDesign;
   final int? currentUserId;
 
   const _GameResultRow({
     required this.match,
     required this.onTap,
     required this.ownTeamName,
+    required this.ownTeamLogoDesign,
     required this.currentUserId,
   });
 
@@ -167,12 +176,14 @@ class _GameResultRow extends StatelessWidget {
                           name: match.homeTeam ?? 'Hjemme',
                           score: match.homeTeamScore,
                           isOwnTeam: ownSide.isHome,
+                          ownTeamLogoDesign: ownTeamLogoDesign,
                         ),
                         const SizedBox(height: Spacing.sm),
                         _GameTeamLine(
                           name: match.awayTeam ?? 'Ude',
                           score: match.awayTeamScore,
                           isOwnTeam: ownSide.isAway,
+                          ownTeamLogoDesign: ownTeamLogoDesign,
                         ),
                       ],
                     ),
@@ -303,11 +314,13 @@ class _GameTeamLine extends StatelessWidget {
   final String name;
   final int? score;
   final bool isOwnTeam;
+  final TeamLogoDesign? ownTeamLogoDesign;
 
   const _GameTeamLine({
     required this.name,
     required this.score,
     required this.isOwnTeam,
+    this.ownTeamLogoDesign,
   });
 
   @override
@@ -323,6 +336,7 @@ class _GameTeamLine extends StatelessWidget {
           child: TeamBadgeLabel(
             teamName: name,
             teamId: stableTeamSeed(name),
+            logoDesign: isOwnTeam ? ownTeamLogoDesign : null,
             radius: 10,
             badgePadding: 2,
             isHighlighted: isOwnTeam,

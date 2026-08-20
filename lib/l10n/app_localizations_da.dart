@@ -96,4 +96,35 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String get fineTypeDeleteFailureMessage => 'Noget gik galt. Prøv igen.';
+
+  @override
+  String get teamLogoEditButton => 'Ændre hold logo';
+
+  @override
+  String get teamLogoEditTitle => 'Ændre hold logo';
+
+  @override
+  String get teamLogoDesignTitle => 'Design dit holdlogo';
+
+  @override
+  String get teamLogoDesignSubtitle =>
+      'Vælg en baggrundsfarve og form til jeres holdlogo';
+
+  @override
+  String get teamLogoBackgroundColor => 'Baggrundsfarve';
+
+  @override
+  String get teamLogoShape => 'Form';
+
+  @override
+  String get teamLogoPattern => 'Mønster';
+
+  @override
+  String get teamLogoSave => 'Gem logo';
+
+  @override
+  String get teamLogoSaving => 'Gemmer logo...';
+
+  @override
+  String get teamLogoSaveFailure => 'Kunne ikke gemme holdlogoet.';
 }
