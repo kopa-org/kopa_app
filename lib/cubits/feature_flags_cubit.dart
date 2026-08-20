@@ -10,6 +10,7 @@ class FeatureFlagsState {
   const FeatureFlagsState({required this.featureFlags});
 
   bool get updateRequired => featureFlags.updateRequired;
+  bool get maintenanceMode => featureFlags.maintenanceMode;
 }
 
 class FeatureFlagsCubit extends Cubit<FeatureFlagsState> {

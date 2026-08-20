@@ -64,6 +64,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonCancel => 'Cancel';
 
   @override
+  String get maintenanceMessage =>
+      'Kopa is under maintenance and will be back soon.';
+
+  @override
   String get commonDelete => 'Delete';
 
   @override

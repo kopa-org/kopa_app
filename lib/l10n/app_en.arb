@@ -17,6 +17,7 @@
   "onboardingNoResults": "No teams found",
   "onboardingFailure": "Something went wrong",
   "commonCancel": "Cancel",
+  "maintenanceMessage": "Kopa is under maintenance and will be back soon.",
   "commonDelete": "Delete",
   "commonOk": "OK",
   "fineTypeDeleteIconLabel": "Delete fine type",

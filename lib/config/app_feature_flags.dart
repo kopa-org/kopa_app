@@ -1,6 +1,7 @@
 class AppFeatureFlags {
   final bool showStatistics;
   final bool showFineBox;
+  final bool maintenanceMode;
   final bool updateRequired;
   final int minimumRequiredBuildNumber;
   final int? currentBuildNumber;
@@ -8,6 +9,7 @@ class AppFeatureFlags {
   const AppFeatureFlags({
     this.showStatistics = false,
     this.showFineBox = false,
+    this.maintenanceMode = false,
     this.updateRequired = false,
     this.minimumRequiredBuildNumber = 0,
     this.currentBuildNumber,
@@ -27,6 +29,7 @@ class AppFeatureFlags {
     return AppFeatureFlags(
       showStatistics: json['statistics'] == true,
       showFineBox: json['fine_box'] == true,
+      maintenanceMode: json['maintenance'] == true,
       updateRequired: serverRequiresUpdate || buildRequiresUpdate,
       minimumRequiredBuildNumber: minimumRequiredBuildNumber,
       currentBuildNumber: currentBuildNumber,
@@ -36,6 +39,7 @@ class AppFeatureFlags {
   AppFeatureFlags copyWith({
     bool? showStatistics,
     bool? showFineBox,
+    bool? maintenanceMode,
     bool? updateRequired,
     int? minimumRequiredBuildNumber,
     int? currentBuildNumber,
@@ -43,6 +47,7 @@ class AppFeatureFlags {
     return AppFeatureFlags(
       showStatistics: showStatistics ?? this.showStatistics,
       showFineBox: showFineBox ?? this.showFineBox,
+      maintenanceMode: maintenanceMode ?? this.maintenanceMode,
       updateRequired: updateRequired ?? this.updateRequired,
       minimumRequiredBuildNumber:
           minimumRequiredBuildNumber ?? this.minimumRequiredBuildNumber,

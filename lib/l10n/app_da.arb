@@ -17,6 +17,7 @@
   "onboardingNoResults": "Ingen hold fundet",
   "onboardingFailure": "Noget gik galt",
   "commonCancel": "Annuller",
+  "maintenanceMessage": "Kopa er under vedligeholdelse og vil snart være klar igen.",
   "commonDelete": "Slet",
   "commonOk": "OK",
   "fineTypeDeleteIconLabel": "Slet bødetype",

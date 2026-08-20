@@ -206,6 +206,12 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get commonCancel;
 
+  /// No description provided for @maintenanceMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Kopa is under maintenance and will be back soon.'**
+  String get maintenanceMessage;
+
   /// No description provided for @commonDelete.
   ///
   /// In en, this message translates to:

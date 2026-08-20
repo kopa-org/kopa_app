@@ -13,6 +13,7 @@ import 'package:kopa/cubits/feature_flags_cubit.dart';
 import 'package:kopa/navigation/app_router.dart';
 import 'package:kopa/navigation/router_refresh_notifier.dart';
 import 'package:kopa/page/update_required/update_required_gate.dart';
+import 'package:kopa/page/maintenance/maintenance_gate.dart';
 import 'package:kopa/repositories/auth_repository.dart';
 import 'package:kopa/repository/feature_flags_repository.dart';
 import 'package:kopa/utils/crash_reporting.dart';
@@ -338,8 +339,10 @@ class _KopaAppState extends State<KopaApp> {
             Locale('da'),
             Locale('en'),
           ],
-          builder: (context, child) => UpdateRequiredGate(
-            child: child ?? const SizedBox.shrink(),
+          builder: (context, child) => MaintenanceGate(
+            child: UpdateRequiredGate(
+              child: child ?? const SizedBox.shrink(),
+            ),
           ),
           routerConfig: _router,
         ),

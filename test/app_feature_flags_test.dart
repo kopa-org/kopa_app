@@ -13,6 +13,7 @@ void main() {
       {
         'statistics': true,
         'fine_box': false,
+        'maintenance': true,
         'update_required': false,
         'minimum_required_build_number': 17,
       },
@@ -20,6 +21,7 @@ void main() {
     );
 
     expect(featureFlags.showStatistics, isTrue);
+    expect(featureFlags.maintenanceMode, isTrue);
     expect(featureFlags.updateRequired, isTrue);
     expect(featureFlags.minimumRequiredBuildNumber, 17);
     expect(featureFlags.currentBuildNumber, 16);
@@ -53,6 +55,7 @@ void main() {
             'features': {
               'statistics': false,
               'fine_box': false,
+              'maintenance': false,
               'update_required': false,
               'minimum_required_build_number': 42,
             },
