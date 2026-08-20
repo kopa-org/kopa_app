@@ -1331,9 +1331,13 @@ TextStyle _displayStyle(BuildContext context) {
   );
 }
 
-void _openMatch(BuildContext context, MatchDetails match, String source) {
+Future<void> _openMatch(
+  BuildContext context,
+  MatchDetails match,
+  String source,
+) async {
   AppAnalytics.logEvent('match_opened', parameters: {'source': source});
-  Navigator.of(context, rootNavigator: true).push(
+  await Navigator.of(context, rootNavigator: true).push(
     MaterialPageRoute(
       builder: (context) => MatchDetailsPage(
         matchId: match.id,
@@ -1342,6 +1346,17 @@ void _openMatch(BuildContext context, MatchDetails match, String source) {
       ),
     ),
   );
+
+  if (!context.mounted) return;
+
+  final teamId = context.read<AuthCubit>().state.user?.teamDetails?.id;
+  if (teamId == null) return;
+
+  await context.read<HomeCubit>().fetchDashboardData(
+        teamId,
+        showLoading: false,
+        forceRefresh: true,
+      );
 }
 
 String _matchHeroTag(MatchDetails match, String source) {
