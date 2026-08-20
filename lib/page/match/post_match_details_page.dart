@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:kopa/component/button/button.dart';
 import 'package:kopa/component/card/kopa_card.dart';
+import 'package:kopa/component/match/player_of_match_summary_card.dart';
 import 'package:kopa/component/timeline/timeline_item.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/match_event_details.dart';
@@ -18,6 +20,8 @@ class PostMatchDetailsPage extends StatelessWidget {
   final List<Widget> attendanceList;
   final Future<void> Function()? onRefresh;
   final VoidCallback onAddEvent;
+  final VoidCallback onSetMatchScore;
+  final VoidCallback onCreateMatchPoll;
   final MatchDetailSegment selectedSegment;
   final ValueChanged<MatchDetailSegment> onSegmentChanged;
 
@@ -28,6 +32,8 @@ class PostMatchDetailsPage extends StatelessWidget {
     required this.heroCard,
     required this.attendanceList,
     required this.onAddEvent,
+    required this.onSetMatchScore,
+    required this.onCreateMatchPoll,
     required this.selectedSegment,
     required this.onSegmentChanged,
     this.onRefresh,
@@ -48,6 +54,16 @@ class PostMatchDetailsPage extends StatelessWidget {
       showTimelineSegment: false,
       timelineEmptyMessage: 'Ingen kampbegivenheder registreret endnu.',
       overviewWidgets: [
+        if (user.isTeamOwner && !match.hasFinalScore) ...[
+          _RegisterMatchResultSection(onPressed: onSetMatchScore),
+          const SizedBox(height: Spacing.lg),
+        ],
+        PlayerOfMatchSummaryCard(
+          playerName: match.matchPollDetails?.playerOfTheMatchDetails.name,
+          voteCount: match.matchPollDetails?.playerOfTheMatchVotes,
+          onPressed: match.matchPollDetails == null ? onCreateMatchPoll : null,
+        ),
+        const SizedBox(height: Spacing.lg),
         _MatchTimelineSection(
           items: _buildTimelineItems(match),
           canAddEvent: user.isTeamOwner,
@@ -83,6 +99,54 @@ class PostMatchDetailsPage extends StatelessWidget {
         subtitle: item.subtitle,
       );
     }).toList();
+  }
+}
+
+class _RegisterMatchResultSection extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const _RegisterMatchResultSection({required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final styles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return KopaCard(
+      borderRadius: Spacing.borderRadiusLargeIncreased,
+      padding: const EdgeInsets.all(Spacing.md),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: colors.lightGrass.withValues(alpha: 0.38),
+              borderRadius: BorderRadius.circular(Spacing.borderRadiusSmall),
+            ),
+            child: Icon(
+              CupertinoIcons.sportscourt,
+              color: colors.primary,
+              size: 21,
+            ),
+          ),
+          const SizedBox(width: Spacing.md),
+          Expanded(
+            child: Text(
+              'Registrer kampens resultat',
+              style: styles.subtitle2.copyWith(fontWeight: FontWeight.w900),
+            ),
+          ),
+          const SizedBox(width: Spacing.sm),
+          Button(
+            buttonText: 'Indtast',
+            icon: CupertinoIcons.pencil,
+            onPressed: onPressed,
+          ),
+        ],
+      ),
+    );
   }
 }
 

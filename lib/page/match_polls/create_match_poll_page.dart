@@ -70,151 +70,111 @@ class _CreateMatchPollPageState extends State<CreateMatchPollPage> {
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     final hasMatches = state.matches.isNotEmpty;
-    final matchNames = state.matches.map((x) => x.matchName).toList();
-    final safeIdx = _safeIndex(matchNames.length);
+    final safeIdx = _safeIndex(state.matches.length);
 
     return PageScaffold(
       title: 'Tilføj afstemning',
       showBackButton: true,
-      body: SingleChildScrollView(
-        padding: Spacing.screenPadding,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            KopaCard(
-              padding: const EdgeInsets.symmetric(
-                horizontal: Spacing.md,
-                vertical: Spacing.sm,
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: appColors.lightSky.withValues(alpha: 0.45),
-                      borderRadius:
-                          BorderRadius.circular(Spacing.borderRadiusSmall),
-                    ),
-                    child: Icon(
-                      CupertinoIcons.sportscourt,
-                      color: appColors.sky,
-                      size: 22,
-                    ),
-                  ),
-                  const SizedBox(width: Spacing.md),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Kamp',
-                          style: appTextStyles.caption,
-                        ),
-                        Text(
-                          hasMatches
-                              ? matchNames[safeIdx]
-                              : 'Ingen kampe tilgængelige',
-                          style: appTextStyles.bodyBold,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (hasMatches)
-                    CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      minimumSize: const Size(36, 36),
-                      onPressed: () {
-                        _showDialog(
-                          CupertinoPicker(
-                            magnification: 1.22,
-                            squeeze: 1.2,
-                            useMagnifier: true,
-                            itemExtent: 32.0,
-                            scrollController: FixedExtentScrollController(
-                              initialItem: safeIdx,
-                            ),
-                            onSelectedItemChanged: (int i) {
-                              setState(() => selectedMatchIndex = i);
-                            },
-                            children: List<Widget>.generate(matchNames.length,
-                                (int i) {
-                              return Center(child: Text(matchNames[i]));
-                            }),
-                          ),
-                        );
-                      },
-                      child: Icon(
-                        CupertinoIcons.chevron_down,
-                        color: appColors.primary,
-                        size: 20,
-                      ),
-                    ),
-                ],
-              ),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(
+              Spacing.md,
+              Spacing.md,
+              Spacing.md,
+              112,
             ),
-            const SizedBox(height: Spacing.lg),
-            KopaCard(
-              padding: const EdgeInsets.all(Spacing.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                KopaCard(
+                  padding: const EdgeInsets.all(Spacing.md),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: appColors.lightGrass.withValues(alpha: 0.38),
-                          borderRadius:
-                              BorderRadius.circular(Spacing.borderRadiusSmall),
-                        ),
-                        child: Icon(
-                          CupertinoIcons.star_fill,
-                          color: appColors.primary,
-                          size: 20,
-                        ),
+                      Row(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color:
+                                  appColors.lightGrass.withValues(alpha: 0.38),
+                              borderRadius: BorderRadius.circular(
+                                Spacing.borderRadiusSmall,
+                              ),
+                            ),
+                            child: Icon(
+                              CupertinoIcons.star_fill,
+                              color: appColors.primary,
+                              size: 20,
+                            ),
+                          ),
+                          const SizedBox(width: Spacing.md),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Stem på kampens spiller',
+                                  style: appTextStyles.sectionHeader,
+                                ),
+                                Text(
+                                  'Fordel stemmer med + og -',
+                                  style: appTextStyles.caption,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: Spacing.md),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Stem på kampens spiller',
-                              style: appTextStyles.sectionHeader,
-                            ),
-                            Text(
-                              'Fordel stemmer med + og -',
-                              style: appTextStyles.caption,
-                            ),
-                          ],
+                      const SizedBox(height: Spacing.md),
+                      ...getMatchPollRowItems(state).map(
+                        (item) => Padding(
+                          padding: const EdgeInsets.only(bottom: Spacing.sm),
+                          child: item,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: Spacing.md),
-                  ...getMatchPollRowItems(state).map(
-                    (item) => Padding(
-                      padding: const EdgeInsets.only(bottom: Spacing.sm),
-                      child: item,
-                    ),
+                ),
+              ],
+            ),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: appColors.background,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.08),
+                    blurRadius: 18,
+                    offset: const Offset(0, -6),
                   ),
                 ],
               ),
+              child: SafeArea(
+                top: false,
+                minimum: const EdgeInsets.fromLTRB(
+                  Spacing.md,
+                  Spacing.sm,
+                  Spacing.md,
+                  Spacing.md,
+                ),
+                child: Button(
+                  buttonText:
+                      state.isSubmitting ? 'Opretter...' : 'Opret afstemning',
+                  width: double.infinity,
+                  enabled: !state.isSubmitting && hasMatches,
+                  onPressed: () => _submitPoll(safeIdx, userVotes),
+                ),
+              ),
             ),
-            const SizedBox(height: Spacing.lg),
-            Button(
-              buttonText:
-                  state.isSubmitting ? 'Opretter...' : 'Opret afstemning',
-              width: double.infinity,
-              enabled: !state.isSubmitting && hasMatches,
-              onPressed: () => _submitPoll(safeIdx, userVotes),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -240,37 +200,6 @@ class _CreateMatchPollPageState extends State<CreateMatchPollPage> {
         matchPollsCubit.clearFormError();
       }
     }
-  }
-
-  void _showDialog(Widget child) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
-        actions: <Widget>[
-          Container(
-            height: 250,
-            // The Bottom margin is provided to align the popup above the system navigation bar.
-            margin: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-            ),
-            // Provide a background color for the popup.
-            color: CupertinoColors.systemBackground.resolveFrom(context),
-            // Use a SafeArea widget to avoid system overlaps.
-            child: SafeArea(
-              top: false,
-              child: child,
-            ),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          isDefaultAction: true,
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: const Text('Luk'),
-        ),
-      ),
-    );
   }
 
   Future<void> _showError(String message) {

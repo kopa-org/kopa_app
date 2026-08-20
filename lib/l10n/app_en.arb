@@ -16,6 +16,7 @@
   "onboardingMatches": "Matches",
   "onboardingNoResults": "No teams found",
   "onboardingFailure": "Something went wrong",
+  "matchEventChooseEvent": "Choose event",
   "commonCancel": "Cancel",
   "maintenanceMessage": "Kopa is under maintenance and will be back soon.",
   "commonDelete": "Delete",

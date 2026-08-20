@@ -61,6 +61,9 @@ class AppLocalizationsDa extends AppLocalizations {
   String get onboardingFailure => 'Noget gik galt';
 
   @override
+  String get matchEventChooseEvent => 'Vælg begivenhed';
+
+  @override
   String get commonCancel => 'Annuller';
 
   @override

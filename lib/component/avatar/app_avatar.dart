@@ -7,6 +7,7 @@ class AppAvatar extends StatelessWidget {
   final String? initials;
   final double radius;
   final BoxFit imageFit;
+  final Color? backgroundColor;
 
   const AppAvatar({
     super.key,
@@ -14,6 +15,7 @@ class AppAvatar extends StatelessWidget {
     this.initials,
     this.radius = 24.0,
     this.imageFit = BoxFit.cover,
+    this.backgroundColor,
   });
 
   @override
@@ -34,7 +36,7 @@ class AppAvatar extends StatelessWidget {
 
     return CircleAvatar(
       radius: radius,
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor ?? Colors.white,
       child: normalizedImageUrl == null || normalizedImageUrl.isEmpty
           ? fallback
           : ClipOval(

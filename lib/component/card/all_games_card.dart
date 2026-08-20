@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/avatar/team_badge_label.dart';
+import 'package:kopa/component/chip/match_result_badge.dart';
 import 'package:kopa/helpers/date_helper.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/theme/app_colors.dart';
@@ -181,14 +182,10 @@ class _GameResultRow extends StatelessWidget {
                     width: 36,
                     height: 36,
                     alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: appColors.lightGrass55,
-                      shape: BoxShape.circle,
-                    ),
                     child: Icon(
                       CupertinoIcons.chevron_right,
                       size: 17,
-                      color: appColors.grass,
+                      color: appColors.dirt,
                     ),
                   ),
                 ],
@@ -277,19 +274,24 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final result = status.result;
+    if (result != null) {
+      return MatchResultBadge(result: result);
+    }
+
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
       decoration: BoxDecoration(
-        color: status.backgroundColor,
+        color: status.backgroundColor!,
         borderRadius: BorderRadius.circular(Spacing.borderRadiusFull),
       ),
       child: Text(
-        status.label,
+        status.label!,
         style: appTextStyles.buttonTiny.copyWith(
-          color: status.foregroundColor,
+          color: status.foregroundColor!,
           fontWeight: FontWeight.w800,
         ),
       ),
@@ -351,14 +353,16 @@ class _GameTeamLine extends StatelessWidget {
 }
 
 class _MatchStatus {
-  final String label;
-  final Color backgroundColor;
-  final Color foregroundColor;
+  final String? label;
+  final Color? backgroundColor;
+  final Color? foregroundColor;
+  final MatchResultStatus? result;
 
   const _MatchStatus({
-    required this.label,
-    required this.backgroundColor,
-    required this.foregroundColor,
+    this.label,
+    this.backgroundColor,
+    this.foregroundColor,
+    this.result,
   });
 
   factory _MatchStatus.from(
@@ -388,18 +392,14 @@ class _MatchStatus {
         ownSide.isAway ? match.homeTeamScore! : match.awayTeamScore!;
 
     if (teamScore == opponentScore) {
-      return _MatchStatus(
-        label: 'UAFGJORT',
-        backgroundColor: colors.sunset,
-        foregroundColor: colors.offWhite,
-      );
+      return const _MatchStatus(result: MatchResultStatus.draw);
     }
 
-    final isWin = teamScore > opponentScore;
     return _MatchStatus(
-      label: isWin ? 'SEJR' : 'TABT',
-      backgroundColor: isWin ? colors.success : colors.error,
-      foregroundColor: isWin ? colors.dirt : colors.offWhite,
+      result: MatchResultStatus.fromScores(
+        teamScore: teamScore,
+        opponentScore: opponentScore,
+      ),
     );
   }
 }

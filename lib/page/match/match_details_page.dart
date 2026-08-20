@@ -4,16 +4,20 @@ import 'package:flutter/material.dart';
 import 'package:kopa/component/card/player_positions_card.dart';
 import 'package:kopa/component/error_message.dart';
 import 'package:kopa/component/loading_indicator.dart';
+import 'package:kopa/cubits/match_polls_cubit.dart';
 import 'package:kopa/helpers/date_helper.dart';
 import 'package:kopa/model/event_attendance_details.dart';
 import 'package:kopa/model/match_details.dart';
+import 'package:kopa/model/match_poll_details.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/page/match/add_match_event_modal.dart';
 import 'package:kopa/page/match/lineup_editor_page.dart';
 import 'package:kopa/page/match/post_match_details_page.dart';
+import 'package:kopa/page/match_polls/create_match_poll_page.dart';
 import 'package:kopa/repository/match_repository.dart';
 import 'package:kopa/repository/users_repository.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
+import 'package:kopa/state/user_votes_state.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 import 'package:kopa/theme/spacing.dart';
@@ -23,6 +27,7 @@ import 'package:kopa/template/match_detail_template.dart';
 import 'package:kopa/component/card/match_hero_card.dart';
 import 'package:kopa/component/info_row/info_row.dart';
 import 'package:kopa/component/list_item/player_list_item.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class MatchDetailsPage extends StatefulWidget {
@@ -154,13 +159,19 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     final matchDetails = data['matchDetails'] as MatchDetails;
     final squad = data['squad'] as List<UserDetails>;
     final hasBeenPlayed = matchDetails.hasMatchBeenPlayed;
+    final canManageResult = user.isTeamOwner && hasBeenPlayed;
 
     final heroCard = MatchHeroCard(
       match: matchDetails,
       heroTag: widget.heroTag,
       animateCard: widget.heroTag != null,
       onTap: _enableHeroCardActions && matchDetails.canSetFinalScore(user)
-          ? () => setMatchScore(matchDetails.id)
+          ? () => setMatchScore(matchDetails)
+          : null,
+      topRightAction: canManageResult && matchDetails.hasFinalScore
+          ? _EditMatchScoreButton(
+              onPressed: () => setMatchScore(matchDetails),
+            )
           : null,
     );
 
@@ -172,6 +183,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         attendanceList: _buildAttendanceList(matchDetails, squad, user),
         onRefresh: _refreshMatchAndSquad,
         onAddEvent: () => addMatchEvent(user),
+        onSetMatchScore: () => setMatchScore(matchDetails),
+        onCreateMatchPoll: () => _openCreateMatchPoll(matchDetails, squad),
         selectedSegment: _selectedSegment,
         onSegmentChanged: _selectSegment,
       );
@@ -245,6 +258,35 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       usePrematchLayout: true,
       showTimelineSegment: false,
     );
+  }
+
+  Future<void> _openCreateMatchPoll(
+    MatchDetails match,
+    List<UserDetails> squad,
+  ) async {
+    final result = await Navigator.of(context).push<MatchPollDetails>(
+      createMatchPollPageRoute<MatchPollDetails>(
+        child: BlocProvider(
+          create: (_) => MatchPollsCubit()
+            ..setData(
+              squad: squad,
+              matches: [match],
+              matchPolls: [
+                if (match.matchPollDetails != null) match.matchPollDetails!,
+              ],
+            ),
+          child: ChangeNotifierProvider(
+            create: (_) => UserVotesState(),
+            child: const CreateMatchPollPage(),
+          ),
+        ),
+      ),
+    );
+
+    if (result != null) {
+      AppAnalytics.logEvent('match_details_motm_created');
+      await _refreshMatchAndSquad();
+    }
   }
 
   List<Widget> _buildPracticalInfoRows(MatchDetails matchDetails) {
@@ -799,14 +841,18 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     );
   }
 
-  Future<void> setMatchScore(int matchDetailsId) async {
+  Future<void> setMatchScore(MatchDetails match) async {
     final theme = Theme.of(context);
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
-    final homeCtl = TextEditingController(text: _homeGoals.toString());
-    final awayCtl = TextEditingController(text: _awayGoals.toString());
+    final homeCtl = TextEditingController(
+      text: (match.homeTeamScore ?? _homeGoals).toString(),
+    );
+    final awayCtl = TextEditingController(
+      text: (match.awayTeamScore ?? _awayGoals).toString(),
+    );
     final homeNode = FocusNode();
     final awayNode = FocusNode();
     bool isSaving = false;
@@ -824,7 +870,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
             try {
               final h = int.parse(homeCtl.text);
               final a = int.parse(awayCtl.text);
-              await MatchRepository.updateMatchScore(matchDetailsId, h, a);
+              await MatchRepository.updateMatchScore(match.id, h, a);
               AppAnalytics.logEvent('match_score_updated');
               if (mounted) {
                 setState(() {
@@ -1549,6 +1595,47 @@ class _AttendanceAvatar extends StatelessWidget {
     if (parts.length == 1) return parts.first.characters.first.toUpperCase();
     return '${parts.first.characters.first}${parts.last.characters.first}'
         .toUpperCase();
+  }
+}
+
+class _EditMatchScoreButton extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const _EditMatchScoreButton({required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
+
+    return Semantics(
+      button: true,
+      label: 'Rediger kampens resultat',
+      child: CupertinoButton(
+        padding: EdgeInsets.zero,
+        minimumSize: const Size(36, 36),
+        onPressed: onPressed,
+        child: Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: colors.white,
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: [
+              BoxShadow(
+                color: colors.black.withValues(alpha: 0.12),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Icon(
+            CupertinoIcons.pencil,
+            size: 18,
+            color: colors.dirt,
+          ),
+        ),
+      ),
+    );
   }
 }
 

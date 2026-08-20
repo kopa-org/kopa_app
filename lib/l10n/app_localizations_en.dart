@@ -61,6 +61,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingFailure => 'Something went wrong';
 
   @override
+  String get matchEventChooseEvent => 'Choose event';
+
+  @override
   String get commonCancel => 'Cancel';
 
   @override

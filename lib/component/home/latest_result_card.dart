@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:kopa/component/avatar/team_badge_label.dart';
 import 'package:kopa/component/card/match_hero_card.dart';
+import 'package:kopa/component/chip/match_result_badge.dart';
 import 'package:kopa/component/home/home_bento_card.dart';
+import 'package:kopa/component/match/player_of_match_summary_card.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/match_event_details.dart';
 import 'package:kopa/model/match_event_type.dart';
@@ -41,8 +43,9 @@ class _HomeLatestResultCardState extends State<HomeLatestResultCard> {
     final score = match == null
         ? '--'
         : '${match.homeTeamScore ?? 0} - ${match.awayTeamScore ?? 0}';
-    final resultLabel = _resultLabel(match, widget.currentUser);
+    final result = _resultStatus(match, widget.currentUser);
     final motm = match?.matchPollDetails?.playerOfTheMatchDetails.name;
+    final motmVotes = match?.matchPollDetails?.playerOfTheMatchVotes;
     final events = [...?match?.matchEventDetailsList]
       ..sort((a, b) => (b.minute ?? 0).compareTo(a.minute ?? 0));
     final goalCount =
@@ -73,24 +76,7 @@ class _HomeLatestResultCardState extends State<HomeLatestResultCard> {
                     ),
                   ),
                 ),
-                if (resultLabel != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: Spacing.sm,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: appColors.lightGrass,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Text(
-                      resultLabel,
-                      style: appTextStyles.label.copyWith(
-                        color: appColors.primary,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ),
+                if (result != null) MatchResultBadge(result: result),
               ],
             ),
             const SizedBox(height: Spacing.lg),
@@ -116,7 +102,7 @@ class _HomeLatestResultCardState extends State<HomeLatestResultCard> {
                 Text(
                   score,
                   style: appTextStyles.h2.copyWith(
-                    color: appColors.grass,
+                    color: appColors.dirt,
                     fontSize: 42,
                   ),
                 ),
@@ -139,7 +125,10 @@ class _HomeLatestResultCardState extends State<HomeLatestResultCard> {
               ],
             ),
             const SizedBox(height: Spacing.lg),
-            _LatestResultPlayerOfMatch(playerName: motm),
+            PlayerOfMatchSummaryCard(
+              playerName: motm,
+              voteCount: motmVotes,
+            ),
             if (match != null) ...[
               const SizedBox(height: Spacing.lg),
               Align(
@@ -248,86 +237,6 @@ class _HomeLatestResultCardState extends State<HomeLatestResultCard> {
   }
 }
 
-class _LatestResultPlayerOfMatch extends StatelessWidget {
-  final String? playerName;
-
-  const _LatestResultPlayerOfMatch({required this.playerName});
-
-  @override
-  Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final winnerName = playerName?.trim();
-    final hasWinner = winnerName != null && winnerName.isNotEmpty;
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        horizontal: Spacing.md,
-        vertical: 12,
-      ),
-      decoration: BoxDecoration(
-        color: hasWinner
-            ? appColors.lightGrass.withValues(alpha: 0.62)
-            : appColors.offWhite,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: hasWinner
-              ? appColors.grass.withValues(alpha: 0.24)
-              : appColors.grey3.withValues(alpha: 0.36),
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: hasWinner ? appColors.sunset : appColors.grey3,
-            ),
-            child: Icon(
-              Icons.emoji_events_rounded,
-              size: 21,
-              color: appColors.white,
-            ),
-          ),
-          const SizedBox(width: Spacing.sm),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Kampens spiller',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: appTextStyles.label.copyWith(
-                    color: hasWinner ? appColors.grass : appColors.grey5,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  hasWinner ? winnerName : 'Ikke valgt endnu',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: appTextStyles.subtitle2.copyWith(
-                    color: hasWinner ? appColors.dirt : appColors.grey5,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _LatestResultEventSummary extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -367,7 +276,7 @@ class _LatestResultEventSummary extends StatelessWidget {
               Text(
                 '$count',
                 style: appTextStyles.subtitle2.copyWith(
-                  color: appColors.grass,
+                  color: appColors.dirt,
                   fontWeight: FontWeight.w900,
                 ),
               ),
@@ -450,7 +359,7 @@ class _LatestResultHistoryRow extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: appTextStyles.caption2.copyWith(
-                color: appColors.grass,
+                color: appColors.dirt,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -481,7 +390,10 @@ String _latestResultEventLabel(MatchEventDetails event) {
   return event.goalscorerUserName;
 }
 
-String? _resultLabel(MatchDetails? match, UserDetails currentUser) {
+MatchResultStatus? _resultStatus(
+  MatchDetails? match,
+  UserDetails currentUser,
+) {
   if (match == null ||
       match.homeTeamScore == null ||
       match.awayTeamScore == null) {
@@ -493,7 +405,8 @@ String? _resultLabel(MatchDetails? match, UserDetails currentUser) {
   final currentScore = isHome ? match.homeTeamScore! : match.awayTeamScore!;
   final opponentScore = isHome ? match.awayTeamScore! : match.homeTeamScore!;
 
-  if (currentScore > opponentScore) return 'SEJR';
-  if (currentScore == opponentScore) return 'UAFGJORT';
-  return 'TABT';
+  return MatchResultStatus.fromScores(
+    teamScore: currentScore,
+    opponentScore: opponentScore,
+  );
 }

@@ -66,7 +66,7 @@ void main() {
     expect(find.text('Tidligere kampe'), findsNothing);
     expect(find.text('Tilmeldt'), findsOneWidget);
     expect(find.text('20:00'), findsOneWidget);
-    expect(find.text('SEJR'), findsNWidgets(2));
+    expect(find.text('Sejr'), findsNWidgets(2));
     expect(find.byIcon(CupertinoIcons.chevron_right), findsNWidgets(3));
     expect(find.byType(Hero), findsNothing);
     expect(

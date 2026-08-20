@@ -200,6 +200,12 @@ abstract class AppLocalizations {
   /// **'Something went wrong'**
   String get onboardingFailure;
 
+  /// No description provided for @matchEventChooseEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose event'**
+  String get matchEventChooseEvent;
+
   /// No description provided for @commonCancel.
   ///
   /// In en, this message translates to:

@@ -8,6 +8,7 @@ class PlayerListItem extends StatelessWidget {
   final String? subtitle;
   final String? imageUrl;
   final String? initials;
+  final Color? avatarBackgroundColor;
   final Widget? trailing;
   final VoidCallback? onTap;
   final String? heroTag;
@@ -18,6 +19,7 @@ class PlayerListItem extends StatelessWidget {
     this.subtitle,
     this.imageUrl,
     this.initials,
+    this.avatarBackgroundColor,
     this.trailing,
     this.onTap,
     this.heroTag,
@@ -42,6 +44,7 @@ class PlayerListItem extends StatelessWidget {
               imageUrl: imageUrl,
               initials: initials ?? _getInitials(name),
               radius: 20,
+              backgroundColor: avatarBackgroundColor,
             ),
             const SizedBox(width: Spacing.md),
             Expanded(

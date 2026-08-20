@@ -16,6 +16,7 @@
   "onboardingMatches": "Kampe",
   "onboardingNoResults": "Ingen hold fundet",
   "onboardingFailure": "Noget gik galt",
+  "matchEventChooseEvent": "Vælg begivenhed",
   "commonCancel": "Annuller",
   "maintenanceMessage": "Kopa er under vedligeholdelse og vil snart være klar igen.",
   "commonDelete": "Slet",

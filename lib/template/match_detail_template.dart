@@ -149,25 +149,19 @@ class MatchDetailTemplate extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding:
-          usePrematchLayout ? const EdgeInsets.symmetric(horizontal: 4) : null,
-      decoration: usePrematchLayout
-          ? null
-          : BoxDecoration(
-              color: colors.white,
-              borderRadius: BorderRadius.circular(Spacing.borderRadiusSmall),
-            ),
+      padding: const EdgeInsets.all(4),
+      decoration: const BoxDecoration(color: Colors.transparent),
       child: SegmentedButtonSlide(
         selectedEntry: _segmentIndex(selectedSegment),
         onChange: (index) => onSegmentChanged?.call(_segmentFromIndex(index)),
         animationDuration: const Duration(milliseconds: 220),
         curve: Curves.easeOutCubic,
         height: usePrematchLayout ? 38 : 40,
-        padding: usePrematchLayout ? EdgeInsets.zero : const EdgeInsets.all(4),
+        padding: EdgeInsets.zero,
         borderRadius: BorderRadius.circular(12),
         textOverflow: TextOverflow.ellipsis,
         colors: SegmentedButtonSlideColors(
-          barColor: usePrematchLayout ? colors.offWhite : colors.offWhite,
+          barColor: colors.white,
           backgroundSelectedColor: colors.lightGrass,
         ),
         selectedTextStyle: styles.caption.copyWith(

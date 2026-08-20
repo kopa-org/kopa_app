@@ -9,6 +9,7 @@ import 'package:kopa/theme/spacing.dart';
 class MatchHeroCard extends StatelessWidget {
   final MatchDetails match;
   final VoidCallback? onTap;
+  final Widget? topRightAction;
   final bool animateCard;
   final String? heroTag;
 
@@ -16,6 +17,7 @@ class MatchHeroCard extends StatelessWidget {
     super.key,
     required this.match,
     this.onTap,
+    this.topRightAction,
     this.animateCard = true,
     this.heroTag,
   });
@@ -28,7 +30,7 @@ class MatchHeroCard extends StatelessWidget {
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
     final hasScore = match.hasFinalScore;
 
-    final card = KopaCard(
+    final cardContent = KopaCard(
       onTap: onTap,
       padding: EdgeInsets.zero,
       borderRadius: Spacing.borderRadiusLargeIncreased,
@@ -94,6 +96,20 @@ class MatchHeroCard extends StatelessWidget {
       ),
     );
 
+    final card = topRightAction == null
+        ? cardContent
+        : Stack(
+            clipBehavior: Clip.none,
+            children: [
+              cardContent,
+              Positioned(
+                top: -8,
+                right: -8,
+                child: topRightAction!,
+              ),
+            ],
+          );
+
     if (!animateCard || heroTag != null) return card;
 
     return Hero(
@@ -136,21 +152,6 @@ class _FinalScorePill extends StatelessWidget {
           style: appTextStyles.h3.copyWith(
             color: appColors.dirt,
             fontWeight: FontWeight.w900,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: appColors.lightGrass,
-            borderRadius: BorderRadius.circular(Spacing.borderRadiusFull),
-          ),
-          child: Text(
-            'Færdig',
-            style: appTextStyles.caption2.copyWith(
-              color: const Color(0xFF105230),
-              fontWeight: FontWeight.w800,
-            ),
           ),
         ),
       ],

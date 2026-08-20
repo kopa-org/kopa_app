@@ -9,6 +9,7 @@ import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 import 'package:kopa/component/list_item/player_list_item.dart';
 import 'package:kopa/component/avatar/app_avatar.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/utils/app_analytics.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
@@ -166,6 +167,8 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
 
   void _syncAndConfirm({required bool thenSave}) {
     final List<(GlobalKey, Widget)> itemsToFly = [];
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
 
@@ -192,8 +195,10 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
         _headerPrimaryKey,
         Center(
             child: AppAvatar(
-                initials: _getInitials(getUserName(_draft.primaryId)),
-                radius: 15))
+          initials: _getInitials(getUserName(_draft.primaryId)),
+          radius: 15,
+          backgroundColor: appColors.surface,
+        ))
       ));
     }
     if (_draft.secondaryId != null) {
@@ -201,8 +206,10 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
         _headerSecondaryKey,
         Center(
             child: AppAvatar(
-                initials: _getInitials(getUserName(_draft.secondaryId)),
-                radius: 15))
+          initials: _getInitials(getUserName(_draft.secondaryId)),
+          radius: 15,
+          backgroundColor: appColors.surface,
+        ))
       ));
     }
 
@@ -439,14 +446,13 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return Scaffold(
-      backgroundColor: appColors.surface,
+      backgroundColor: appColors.offWhite,
       body: SafeArea(
         child: Column(
           children: [
             CupertinoNavigationBar(
-              backgroundColor: appColors.surface,
-              middle:
-                  Text('Tilføj begivenhed', style: appTextStyles.sectionHeader),
+              backgroundColor: appColors.offWhite,
+              middle: Text(_flowTitle(), style: appTextStyles.sectionHeader),
               leading: CupertinoButton(
                 padding: EdgeInsets.zero,
                 child: Icon(
@@ -471,8 +477,8 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
                 children: [
                   _buildTypeStep(appTextStyles, appColors),
                   _buildTimeStep(appTextStyles, appColors),
-                  _buildPrimaryPlayerStep(appTextStyles, appColors),
-                  _buildSecondaryPlayerStep(appTextStyles, appColors),
+                  _buildPrimaryPlayerStep(appColors),
+                  _buildSecondaryPlayerStep(appColors),
                 ],
               ),
             ),
@@ -490,12 +496,27 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
     );
   }
 
+  String _flowTitle() {
+    switch (_currentStep) {
+      case 0:
+        return AppLocalizations.of(context)!.matchEventChooseEvent;
+      case 1:
+        return 'Vælg minut';
+      case 2:
+        return getPrimaryLabel(_draft.type);
+      case 3:
+        return getSecondaryLabel(_draft.type) ?? 'Spiller';
+      default:
+        return AppLocalizations.of(context)!.matchEventChooseEvent;
+    }
+  }
+
   Widget _buildHeader(AppTextStyles appTextStyles, AppColors appColors) {
     return Container(
       height: 60,
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(color: appColors.surface),
+      decoration: BoxDecoration(color: appColors.offWhite),
       child: Row(
         children: [
           _buildHeaderChip(
@@ -535,9 +556,7 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
         key: key,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: value != null
-              ? appColors.primary.withValues(alpha: 0.1)
-              : Colors.transparent,
+          color: value != null ? appColors.surface : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Text(value ?? '-',
@@ -559,14 +578,16 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
         width: 34,
         height: 34,
         decoration: BoxDecoration(
-          color: initials != null
-              ? appColors.primary.withValues(alpha: 0.1)
-              : Colors.transparent,
+          color: initials != null ? appColors.surface : Colors.transparent,
           shape: BoxShape.circle,
         ),
         alignment: Alignment.center,
         child: initials != null
-            ? AppAvatar(initials: initials, radius: 17)
+            ? AppAvatar(
+                initials: initials,
+                radius: 17,
+                backgroundColor: appColors.surface,
+              )
             : Text('-',
                 style: appTextStyles.bodyBold.copyWith(
                     color: appColors.textSecondary.withValues(alpha: 0.5))),
@@ -611,8 +632,16 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
           child: Container(
             key: type.$4,
             decoration: BoxDecoration(
-                color: appColors.surface,
-                borderRadius: BorderRadius.circular(16)),
+              color: appColors.surface,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: appColors.black.withValues(alpha: 0.04),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
             child:
                 Column(mainAxisAlignment: MainAxisAlignment.center, children: [
               Text(type.$3, style: const TextStyle(fontSize: 32)),
@@ -629,8 +658,6 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
     return Column(
       children: [
         const SizedBox(height: 24),
-        Text('Vælg minut', style: appTextStyles.sectionHeader),
-        const SizedBox(height: 8),
         Expanded(
           child: CupertinoPicker(
             scrollController: _minuteScrollController,
@@ -686,14 +713,10 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
     );
   }
 
-  Widget _buildPrimaryPlayerStep(
-      AppTextStyles appTextStyles, AppColors appColors) {
-    final label = getPrimaryLabel(_draft.type);
+  Widget _buildPrimaryPlayerStep(AppColors appColors) {
     return Column(
       children: [
         const SizedBox(height: 24),
-        Text(label, style: appTextStyles.sectionHeader),
-        const SizedBox(height: 8),
         Expanded(
           child: ListView.builder(
             itemCount: widget.squad.length,
@@ -701,16 +724,21 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
               final user = widget.squad[index];
               final itemKey = GlobalKey();
               final initials = _getInitials(user.name);
-              return PlayerListItem(
-                key: itemKey,
-                name: user.name,
+              return _buildPlayerOption(
+                itemKey: itemKey,
+                user: user,
+                appColors: appColors,
                 onTap: () {
                   // Capture specific avatar position relative to the whole item
                   _animateSelection(
                     sourceKey: itemKey,
                     targetKey: _headerPrimaryKey,
                     customSourceSize: const Size(40, 40),
-                    child: AppAvatar(initials: initials, radius: 20),
+                    child: AppAvatar(
+                      initials: initials,
+                      radius: 20,
+                      backgroundColor: appColors.offWhite,
+                    ),
                     onComplete: () {
                       setState(() => _draft.primaryId = user.id);
                       if (getSecondaryLabel(_draft.type) != null) {
@@ -727,10 +755,10 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
     );
   }
 
-  Widget _buildSecondaryPlayerStep(
-      AppTextStyles appTextStyles, AppColors appColors) {
-    final label = getSecondaryLabel(_draft.type);
-    if (label == null) return const SizedBox.shrink();
+  Widget _buildSecondaryPlayerStep(AppColors appColors) {
+    if (getSecondaryLabel(_draft.type) == null) {
+      return const SizedBox.shrink();
+    }
 
     final filteredSquad = _draft.type == MatchEventType.substitution
         ? widget.squad.where((u) => u.id != _draft.primaryId).toList()
@@ -739,8 +767,6 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
     return Column(
       children: [
         const SizedBox(height: 24),
-        Text(label, style: appTextStyles.sectionHeader),
-        const SizedBox(height: 8),
         Expanded(
           child: ListView.builder(
             itemCount: filteredSquad.length,
@@ -748,15 +774,20 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
               final user = filteredSquad[index];
               final itemKey = GlobalKey();
               final initials = _getInitials(user.name);
-              return PlayerListItem(
-                key: itemKey,
-                name: user.name,
+              return _buildPlayerOption(
+                itemKey: itemKey,
+                user: user,
+                appColors: appColors,
                 onTap: () {
                   _animateSelection(
                     sourceKey: itemKey,
                     targetKey: _headerSecondaryKey,
                     customSourceSize: const Size(40, 40),
-                    child: AppAvatar(initials: initials, radius: 20),
+                    child: AppAvatar(
+                      initials: initials,
+                      radius: 20,
+                      backgroundColor: appColors.offWhite,
+                    ),
                     onComplete: () {
                       setState(() => _draft.secondaryId = user.id);
                     },
@@ -767,6 +798,28 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildPlayerOption({
+    required GlobalKey itemKey,
+    required UserDetails user,
+    required AppColors appColors,
+    required VoidCallback onTap,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: Material(
+        color: appColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        clipBehavior: Clip.antiAlias,
+        child: PlayerListItem(
+          key: itemKey,
+          name: user.name,
+          avatarBackgroundColor: appColors.offWhite,
+          onTap: onTap,
+        ),
+      ),
     );
   }
 
