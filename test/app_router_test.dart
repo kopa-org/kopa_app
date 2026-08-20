@@ -223,6 +223,35 @@ void main() {
       expect(redirect, AppRouter.home);
     });
 
+    test('keeps active team creation on onboarding after team assignment', () {
+      final redirect = AppRouter.redirectPathFor(
+        path: AppRouter.onboarding,
+        authState: AuthState(
+          status: AuthStatus.authenticated,
+          user: _user(teamDetails: _team()),
+        ),
+        onboardingState: OnboardingState(
+          status: OnboardingStatus.success,
+          teamId: 1,
+          teamTitle: 'Kopa FC',
+        ),
+      );
+
+      expect(redirect, isNull);
+    });
+
+    test('sends completed team members away from inactive onboarding', () {
+      final redirect = AppRouter.redirectPathFor(
+        path: AppRouter.onboarding,
+        authState: AuthState(
+          status: AuthStatus.authenticated,
+          user: _user(teamDetails: _team()),
+        ),
+      );
+
+      expect(redirect, AppRouter.home);
+    });
+
     test('keeps unauthenticated join links on the explicit join route', () {
       final redirect = AppRouter.redirectPathFor(
         path: AppRouter.join,

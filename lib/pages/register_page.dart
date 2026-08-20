@@ -71,7 +71,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               );
             } else if (state.status == AuthStatus.authenticated) {
-              context.go(AppRouter.onboarding);
+              context.push(AppRouter.onboarding);
             }
           },
         ),

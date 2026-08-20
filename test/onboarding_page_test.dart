@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/onboarding_cubit.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/model/user_details.dart';
+import 'package:kopa/navigation/app_router.dart';
+import 'package:kopa/navigation/router_refresh_notifier.dart';
 import 'package:kopa/pages/onboarding_page.dart';
+import 'package:kopa/pages/register_page.dart';
 import 'package:kopa/repositories/auth_repository.dart';
 import 'package:kopa/repository/onboarding_repository.dart';
 import 'package:kopa/theme/app_theme.dart';
@@ -32,6 +36,7 @@ void main() {
         ],
         child: MaterialApp(
           theme: AppTheme.lightTheme,
+          locale: const Locale('da'),
           localizationsDelegates: const [
             AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
@@ -51,6 +56,151 @@ void main() {
     expect(find.text('Er du holdleder?'), findsNothing);
     expect(find.text('7-mand'), findsNothing);
     expect(find.text('11-mand'), findsNothing);
+  });
+
+  testWidgets('creates the team and link before showing the final step',
+      (tester) async {
+    final onboardingCubit = _CreateTestOnboardingCubit();
+
+    await tester.pumpWidget(
+      MultiBlocProvider(
+        providers: [
+          BlocProvider<AuthCubit>(
+            create: (_) => AuthCubit(authRepository: _FakeAuthRepository()),
+          ),
+          BlocProvider<OnboardingCubit>.value(value: onboardingCubit),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          locale: const Locale('da'),
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('da'),
+            Locale('en'),
+          ],
+          home: OnboardingPage(
+            updatePosition: (_) async => _user(),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Ja, jeg er holdleder'));
+    await tester.pump();
+
+    final backRect = tester.getRect(
+      find.byKey(const ValueKey('onboarding-back-button')),
+    );
+    final logoRect = tester.getRect(
+      find.byKey(const ValueKey('onboarding-header-logo')),
+    );
+    expect(backRect.center.dx, lessThan(logoRect.center.dx));
+
+    await tester.enterText(find.byType(TextField), 'Kopa FC');
+    await tester.pump();
+    await tester.tap(find.text('Fortsæt'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Fortsæt'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Design dit holdlogo'), findsOneWidget);
+    expect(find.text('Klar til oprettelse'), findsNothing);
+    expect(find.text('Invitationslinket kunne ikke hentes.'), findsNothing);
+
+    await tester.tap(find.text('Fortsæt'));
+    await tester.pumpAndSettle();
+
+    expect(onboardingCubit.createTeamCallCount, 1);
+    expect(onboardingCubit.fetchTeamJoinTokenCallCount, 1);
+    expect(find.text('Inviter dit hold'), findsOneWidget);
+    expect(find.text('Fortsæt til Kopa'), findsOneWidget);
+    expect(find.textContaining('kopa.dk/join'), findsOneWidget);
+    expect(find.text('Invitationslinket kunne ikke hentes.'), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('onboarding-back-button')));
+    await tester.pump();
+
+    expect(find.text('Design dit holdlogo'), findsOneWidget);
+    expect(find.text('Inviter dit hold'), findsNothing);
+
+    await tester.tap(find.text('Fortsæt'));
+    await tester.pumpAndSettle();
+
+    expect(onboardingCubit.fetchTeamJoinTokenCallCount, 2);
+    expect(find.text('Inviter dit hold'), findsOneWidget);
+    expect(find.text('Fortsæt til Kopa'), findsOneWidget);
+    expect(find.textContaining('kopa.dk/join'), findsOneWidget);
+  });
+
+  testWidgets('first onboarding back returns to the signup route',
+      (tester) async {
+    final authCubit = AuthCubit(authRepository: _FakeAuthRepository());
+    final onboardingCubit = _TestOnboardingCubit();
+    final refreshNotifier = RouterRefreshNotifier(authCubit.stream);
+    addTearDown(refreshNotifier.dispose);
+
+    final router = GoRouter(
+      initialLocation: AppRouter.register,
+      refreshListenable: refreshNotifier,
+      redirect: (context, state) => AppRouter.redirectPathFor(
+        path: state.uri.path,
+        authState: authCubit.state,
+        onboardingState: onboardingCubit.state,
+      ),
+      routes: [
+        GoRoute(
+          path: AppRouter.register,
+          builder: (context, state) => const RegisterPage(),
+        ),
+        GoRoute(
+          path: AppRouter.onboarding,
+          builder: (context, state) => const OnboardingPage(),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      MultiBlocProvider(
+        providers: [
+          BlocProvider<AuthCubit>.value(value: authCubit),
+          BlocProvider<OnboardingCubit>.value(value: onboardingCubit),
+        ],
+        child: MaterialApp.router(
+          theme: AppTheme.lightTheme,
+          locale: const Locale('da'),
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('da'),
+            Locale('en'),
+          ],
+          routerConfig: router,
+        ),
+      ),
+    );
+
+    expect(find.byType(RegisterPage), findsOneWidget);
+
+    authCubit.updateUser(_user());
+    await tester.pumpAndSettle();
+
+    expect(find.byType(OnboardingPage), findsOneWidget);
+    await tester.tap(find.text('Ja, jeg er holdleder'));
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('onboarding-back-button')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(RegisterPage), findsOneWidget);
+    expect(find.byType(OnboardingPage), findsNothing);
   });
 
   testWidgets('invite context uses leader-selected 7-player format',
@@ -285,6 +435,36 @@ class _TestOnboardingCubit extends OnboardingCubit {
     if (restored == null) return false;
     emit(restored);
     return true;
+  }
+}
+
+class _CreateTestOnboardingCubit extends OnboardingCubit {
+  int createTeamCallCount = 0;
+  int fetchTeamJoinTokenCallCount = 0;
+
+  _CreateTestOnboardingCubit() : super(OnboardingRepository());
+
+  @override
+  Future<bool> createTeam({
+    required String title,
+    required int playerCount,
+    Map<String, dynamic>? dbuContext,
+    List<Map<String, dynamic>> standings = const [],
+  }) async {
+    createTeamCallCount++;
+    emit(state.copyWith(
+      status: OnboardingStatus.success,
+      teamId: 42,
+      teamTitle: title,
+    ));
+    return true;
+  }
+
+  @override
+  Future<String?> fetchTeamJoinToken(int teamId) async {
+    fetchTeamJoinTokenCallCount++;
+    emit(state.copyWith(joinToken: 'join-token', errorMessage: null));
+    return 'join-token';
   }
 }
 

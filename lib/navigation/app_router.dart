@@ -309,6 +309,8 @@ abstract final class AppRouter {
     final isJoin = path == join;
     final isOnboarding = path == onboarding;
     final hasTeam = authState.user?.teamDetails != null;
+    final hasActiveOnboardingTeam =
+        isOnboarding && onboardingState?.teamId != null;
     final isWaitingForApproval =
         onboardingState?.status == OnboardingStatus.waitingApproval ||
             onboardingState?.pendingJoinRequestId != null ||
@@ -331,7 +333,10 @@ abstract final class AppRouter {
         return isOnboarding ? null : onboarding;
       }
 
-      if (isJoin || isOnboarding || path == dbuWebview) {
+      // Keep the signup route available while a newly registered user is
+      // standing on the onboarding stack. RegisterPage pushes onboarding so
+      // its back button can return here.
+      if (isJoin || isOnboarding || isRegistering || path == dbuWebview) {
         return null;
       }
 
@@ -339,7 +344,10 @@ abstract final class AppRouter {
     }
 
     if (isLoggedIn &&
-        (isLoggingIn || isRegistering || isWelcome || isOnboarding)) {
+        (isLoggingIn ||
+            isRegistering ||
+            isWelcome ||
+            (isOnboarding && !hasActiveOnboardingTeam))) {
       return home;
     }
 

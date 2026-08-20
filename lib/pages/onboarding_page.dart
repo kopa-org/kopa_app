@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/onboarding_cubit.dart';
 import 'package:kopa/l10n/app_localizations.dart';
+import 'package:kopa/model/user_details.dart';
 import 'package:kopa/navigation/app_router.dart';
 import 'package:kopa/repository/team_dbu_repository.dart';
 import 'package:kopa/repository/users_repository.dart';
@@ -23,7 +24,9 @@ enum _TeamLogoShape { circle, square, shield, rounded }
 enum _TeamLogoPattern { solid, verticalSplit, horizontalSplit, gradient }
 
 class OnboardingPage extends StatefulWidget {
-  const OnboardingPage({super.key});
+  final Future<UserDetails> Function(String position)? updatePosition;
+
+  const OnboardingPage({super.key, this.updatePosition});
 
   @override
   State<OnboardingPage> createState() => _OnboardingPageState();
@@ -43,7 +46,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
   _TeamLogoShape _teamLogoShape = _TeamLogoShape.circle;
   _TeamLogoPattern _teamLogoPattern = _TeamLogoPattern.solid;
   bool _savingPosition = false;
+  bool _creatingTeam = false;
   Map<String, dynamic>? _pendingJoinTeam;
+  int? _createdTeamId;
   Uri? _createdTeamInviteUri;
   String? _createdTeamTitle;
 
@@ -265,63 +270,84 @@ class _OnboardingPageState extends State<OnboardingPage> {
   }
 
   Future<void> _createTeam() async {
+    if (_creatingTeam) return;
+
     final title = _teamNameController.text.trim();
     if (title.isEmpty) return;
 
     final onboardingCubit = context.read<OnboardingCubit>();
-    final success = await onboardingCubit.createTeam(
-      title: title,
-      playerCount: _usesElevenAside ? 11 : 7,
-      dbuContext: _dbuData,
-      standings: (_dbuData?['standings'] as List<dynamic>? ?? [])
-          .cast<Map<String, dynamic>>(),
-    );
+    setState(() => _creatingTeam = true);
 
-    if (!success || !mounted) return;
+    try {
+      var teamId = _createdTeamId;
+      var teamTitle = _createdTeamTitle ?? title;
 
-    final state = onboardingCubit.state;
-    final teamId = state.teamId;
-    final teamTitle = state.teamTitle ?? title;
+      if (teamId == null) {
+        final success = await onboardingCubit.createTeam(
+          title: title,
+          playerCount: _usesElevenAside ? 11 : 7,
+          dbuContext: _dbuData,
+          standings: (_dbuData?['standings'] as List<dynamic>? ?? [])
+              .cast<Map<String, dynamic>>(),
+        );
 
-    if (teamId == null) {
-      await context.read<AuthCubit>().init();
-      if (mounted) context.go(AppRouter.home);
-      return;
-    }
+        if (!success || !mounted) return;
 
-    final token = await onboardingCubit.fetchTeamJoinToken(teamId);
-    if (!mounted) return;
+        final state = onboardingCubit.state;
+        teamId = state.teamId;
+        teamTitle = state.teamTitle ?? title;
 
-    if (token == null) {
-      final colors =
-          Theme.of(context).extension<AppColors>() ?? AppColors.light;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Kunne ikke hente invitationslink.'),
-          backgroundColor: colors.error,
-        ),
-      );
-      setState(() {
-        _createdTeamInviteUri = null;
+        if (teamId == null) {
+          final colors =
+              Theme.of(context).extension<AppColors>() ?? AppColors.light;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.onboardingFailure),
+              backgroundColor: colors.error,
+            ),
+          );
+          return;
+        }
+
+        _createdTeamId = teamId;
         _createdTeamTitle = teamTitle;
-        _createStep = 4;
-      });
-      return;
-    }
+      }
 
-    setState(() {
-      _createdTeamInviteUri = Uri.https(
-        'kopa.dk',
-        '/join',
-        {
-          'team_token': token,
-          'team_id': teamId.toString(),
-          'team_title': teamTitle,
-        },
-      );
-      _createdTeamTitle = teamTitle;
-      _createStep = 4;
-    });
+      final createdTeamId = teamId;
+
+      // Keep the create step visible while both the team and its link are
+      // being prepared. The invite step is only shown after this completes.
+      final token = await onboardingCubit.fetchTeamJoinToken(createdTeamId);
+      if (!mounted) return;
+
+      if (token == null) {
+        final colors =
+            Theme.of(context).extension<AppColors>() ?? AppColors.light;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Kunne ikke hente invitationslink.'),
+            backgroundColor: colors.error,
+          ),
+        );
+        return;
+      }
+
+      setState(() {
+        _createdTeamInviteUri = Uri.https(
+          'kopa.dk',
+          '/join',
+          {
+            'team_token': token,
+            'team_id': createdTeamId.toString(),
+            'team_title': teamTitle,
+          },
+        );
+        _createdTeamTitle = teamTitle;
+        _createStep = 3;
+      });
+    } finally {
+      if (mounted) setState(() => _creatingTeam = false);
+    }
   }
 
   Future<void> _finishOnboarding() async {
@@ -367,8 +393,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
   Future<void> _saveSelectedPosition() async {
     setState(() => _savingPosition = true);
     try {
-      final user =
-          await UsersRepository.updatePosition(_selectedPosition.value);
+      final updatePosition =
+          widget.updatePosition ?? UsersRepository.updatePosition;
+      final user = await updatePosition(_selectedPosition.value);
       if (mounted) context.read<AuthCubit>().updateUser(user);
     } catch (_) {
       if (!mounted) return;
@@ -434,16 +461,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
     }
 
     if (_createStep == 2) {
-      setState(() => _createStep = 3);
-      return;
-    }
-
-    if (_createStep == 3) {
       await _createTeam();
       return;
     }
 
-    if (_createStep == 4) {
+    if (_createStep == 3) {
       await _finishOnboarding();
       return;
     }
@@ -454,21 +476,30 @@ class _OnboardingPageState extends State<OnboardingPage> {
       if (_joinStep > 0) {
         setState(() => _joinStep -= 1);
       } else {
-        setState(() => _hasSelectedRole = false);
+        _leaveOnboarding();
       }
       return;
     }
 
-    if (_createStep == 4) {
-      _finishOnboarding();
+    if (_createStep == 3) {
+      setState(() => _createStep = 2);
       return;
     }
 
     if (_createStep > 0) {
       setState(() => _createStep -= 1);
     } else {
-      setState(() => _hasSelectedRole = false);
+      _leaveOnboarding();
     }
+  }
+
+  void _leaveOnboarding() {
+    if (context.canPop()) {
+      context.pop();
+      return;
+    }
+
+    context.go(AppRouter.register);
   }
 
   String _suggestedTeamName(Map<String, dynamic> dbuData) {
@@ -551,7 +582,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
         }
 
         final loading = state.status == OnboardingStatus.loading;
-        final actionLoading = loading || _savingPosition;
+        final actionLoading = loading || _savingPosition || _creatingTeam;
         final fixedJoinPlayerCount =
             _isInviteJoinFlow ? (state.teamPlayerCount == 7 ? 7 : 11) : null;
         final step =
@@ -565,7 +596,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 0 => l10n.onboardingTitle,
                 1 => 'Vælg din position',
                 2 => 'Design dit holdlogo',
-                3 => 'Klar til oprettelse',
+                3 => 'Inviter dit hold',
                 _ => 'Inviter dit hold',
               };
         final subtitle = _mode == _OnboardingMode.join
@@ -579,16 +610,15 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   'Opret dit fodboldhold og saml spillere, kampe og statistikker ét sted.',
                 1 => 'Tryk på din position på banen',
                 2 => 'Vælg en baggrundsfarve og form til jeres holdlogo',
-                3 => 'Gennemgå holdet og opret det, når oplysningerne er klar.',
+                3 => 'Del linket med spillerne, så de kan finde holdet.',
                 _ => 'Del linket med spillerne, så de kan finde holdet.',
               };
         final canAdvance = _mode == _OnboardingMode.create &&
-            (_createStep == 4 || _teamNameController.text.trim().isNotEmpty) &&
+            (_createStep == 3 || _teamNameController.text.trim().isNotEmpty) &&
             !actionLoading;
         final primaryLabel = _mode == _OnboardingMode.create
             ? switch (_createStep) {
-                3 => l10n.onboardingCreate,
-                4 => 'Fortsæt til Kopa',
+                3 => 'Fortsæt til Kopa',
                 _ => l10n.onboardingContinue,
               }
             : l10n.onboardingContinue;
@@ -603,9 +633,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   textStyles: textStyles,
                   label: primaryLabel,
                   loading: actionLoading,
-                  icon: _mode == _OnboardingMode.create && _createStep == 3
-                      ? Icons.check
-                      : null,
+                  icon: null,
                   onPressed: _mode == _OnboardingMode.create
                       ? (canAdvance ? _handlePrimaryAction : null)
                       : (actionLoading ? null : _handlePrimaryAction),
@@ -621,7 +649,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     child: _KopaHeader(
                       colors: colors,
                       showBack: true,
-                      onBack: _handleBack,
+                      onBack: _creatingTeam ? null : _handleBack,
                     ),
                   ),
                   Padding(
@@ -630,7 +658,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       colors: colors,
                       textStyles: textStyles,
                       step: step,
-                      totalSteps: _mode == _OnboardingMode.create ? 5 : 4,
+                      totalSteps: 4,
                       title: title,
                       subtitle: subtitle,
                     ),
@@ -1834,19 +1862,21 @@ class _KopaHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        SvgPicture.asset(
-          'assets/logos/Logo.svg',
-          height: 36,
-          colorFilter: ColorFilter.mode(colors.primary, BlendMode.srcIn),
-        ),
-        const Spacer(),
         if (showBack)
           IconButton(
+            key: const ValueKey('onboarding-back-button'),
             onPressed: onBack,
             icon: const Icon(Icons.arrow_back),
             color: colors.textPrimary,
             tooltip: 'Tilbage',
           ),
+        SvgPicture.asset(
+          'assets/logos/Logo.svg',
+          key: const ValueKey('onboarding-header-logo'),
+          height: 36,
+          colorFilter: ColorFilter.mode(colors.primary, BlendMode.srcIn),
+        ),
+        const Spacer(),
       ],
     );
   }
