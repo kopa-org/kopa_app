@@ -30,7 +30,7 @@ import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 import 'package:provider/provider.dart';
 
 const _envFileFromDefine = String.fromEnvironment('ENV_FILE');
-const _minimumSplashDuration = Duration(seconds: 2);
+const _minimumSplashDuration = Duration(milliseconds: 1500);
 const _splashBackgroundColor = Color(0xFFE8F2ED);
 const _splashAnimationCacheWidth = 690;
 const _splashAnimationCacheHeight = 428;
@@ -86,39 +86,50 @@ class _KopaBootstrapAppState extends State<KopaBootstrapApp> {
         ? _envFileFromDefine
         : (kReleaseMode ? '.env.deploy' : '.env.local');
     await dotenv.load(fileName: envFile);
+
+    if (!kIsWeb) {
+      await SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]);
+    }
+
     await _runOptionalBootstrapTask(
       'crash_reporting',
       CrashReporting.initialize,
     );
-    await _runOptionalBootstrapTask(
-      'analytics',
-      AppAnalytics.initialize,
-    );
-    await _runOptionalBootstrapTask(
-      'push_notifications',
-      PushNotificationsService.instance.initialize,
-    );
+
+    final optionalBootstrapTasks = <Future<void>>[
+      _runOptionalBootstrapTask('analytics', AppAnalytics.initialize),
+      _runOptionalBootstrapTask(
+        'push_notifications',
+        PushNotificationsService.instance.initialize,
+      ),
+    ];
     if (defaultTargetPlatform == TargetPlatform.iOS) {
-      await _runOptionalBootstrapTask(
+      optionalBootstrapTasks.add(_runOptionalBootstrapTask(
         'liquid_glass',
         LiquidGlassWidgets.initialize,
-      );
+      ));
     }
+    await Future.wait(optionalBootstrapTasks);
 
     final authRepository = ApiAuthRepository();
     final featureFlagsRepository = FeatureFlagsRepository();
     final onboardingRepository = OnboardingRepository();
 
-    final featureFlags = await featureFlagsRepository.getFeatureFlags();
     final authCubit = AuthCubit(authRepository: authRepository);
+    final featureFlagsFuture = featureFlagsRepository.getFeatureFlags();
+    final authInitFuture = authCubit.init();
+
+    final featureFlags = await featureFlagsFuture;
     final featureFlagsCubit = FeatureFlagsCubit(
       repository: featureFlagsRepository,
       initialFeatureFlags: featureFlags,
     );
     final onboardingCubit = OnboardingCubit(onboardingRepository);
 
-    // Initialize auth state
-    await authCubit.init();
+    await authInitFuture;
     final user = authCubit.state.user;
     if (user != null && user.teamDetails == null) {
       await onboardingCubit.restorePendingJoinRequest();
@@ -307,11 +318,6 @@ class _KopaAppState extends State<KopaApp> {
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
-
     return MultiProvider(
       providers: [
         RepositoryProvider.value(value: widget.authRepository),

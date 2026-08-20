@@ -1,8 +1,9 @@
+import 'package:equatable/equatable.dart';
 import 'package:kopa/model/match_details.dart';
 
 enum MatchProgrammeStatus { initial, loading, loaded, creating, failure }
 
-class MatchProgrammeState {
+class MatchProgrammeState extends Equatable {
   final MatchProgrammeStatus status;
   final List<MatchDetails> matches;
   final String? errorMessage;
@@ -30,4 +31,7 @@ class MatchProgrammeState {
       errorMessage: errorMessage,
     );
   }
+
+  @override
+  List<Object?> get props => [status, matches, errorMessage];
 }

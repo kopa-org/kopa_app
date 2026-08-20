@@ -5,6 +5,7 @@ import 'package:kopa/repositories/auth_repository.dart';
 import 'package:kopa/utils/app_analytics.dart';
 import 'package:kopa/services/push_notifications_service.dart';
 import 'package:kopa/services/secure_storage_service.dart';
+import 'package:kopa/repository/match_repository.dart';
 import 'auth_state.dart';
 
 class AuthCubit extends Cubit<AuthState> {
@@ -56,6 +57,7 @@ class AuthCubit extends Cubit<AuthState> {
     emit(state.copyWith(status: AuthStatus.loading));
     final success = await _authRepository.login(email, password);
     if (success) {
+      MatchRepository.invalidateMatchSummaries();
       final user = await _authRepository.getCurrentUser();
       await SecureStorageService.setHasAuthenticatedBefore();
       await AppAnalytics.logLogin(success: true);
@@ -77,6 +79,7 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> logout() async {
     await PushNotificationsService.instance.unregisterCurrentToken();
     await _authRepository.logout();
+    MatchRepository.invalidateMatchSummaries();
     await AppAnalytics.setCurrentUser(null);
     emit(state.copyWith(
       status: AuthStatus.unauthenticated,

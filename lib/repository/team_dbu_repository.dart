@@ -1,21 +1,17 @@
 import 'dart:convert';
 
-import 'package:http/http.dart' as http;
 import 'package:kopa/helpers/api_config.dart';
 import 'package:kopa/model/dbu_standings.dart';
-import 'package:kopa/services/secure_storage_service.dart';
+import 'package:kopa/services/api_client.dart';
 
 abstract final class TeamDbuRepository {
+  static final _apiClient = ApiClient.shared;
+
   static Future<DbuPublicClubTeamsResult> resolvePublicTeam({
     required String clubName,
     required String teamLabel,
     required String leaderLabel,
   }) async {
-    final token = await SecureStorageService.getToken();
-    if (token == null) {
-      throw Exception('Ikke logget ind.');
-    }
-
     final uri = Uri.parse('${ApiConfig.baseUrl}/dbu/public/resolve_team')
         .replace(queryParameters: {
       'club_name': clubName.trim(),
@@ -23,10 +19,7 @@ abstract final class TeamDbuRepository {
       'leader_label': leaderLabel.trim(),
     });
 
-    final response = await http.get(
-      uri,
-      headers: {'Authorization': 'Bearer $token'},
-    );
+    final response = await _apiClient.get(uri);
 
     final decoded = response.body.isEmpty
         ? <String, dynamic>{}
@@ -39,14 +32,8 @@ abstract final class TeamDbuRepository {
   }
 
   static Future<DbuStandings?> getStandings(int teamId) async {
-    final token = await SecureStorageService.getToken();
-    if (token == null) {
-      throw Exception('Ikke logget ind.');
-    }
-
-    final response = await http.get(
+    final response = await _apiClient.get(
       Uri.parse('${ApiConfig.baseUrl}/teams/$teamId/dbu/standings'),
-      headers: {'Authorization': 'Bearer $token'},
     );
 
     final decoded = response.body.isEmpty
@@ -100,18 +87,9 @@ abstract final class TeamDbuRepository {
     String path,
     Map<String, dynamic> body,
   ) async {
-    final token = await SecureStorageService.getToken();
-    if (token == null) {
-      throw Exception('Ikke logget ind.');
-    }
-
-    final response = await http.post(
+    final response = await _apiClient.postJson(
       Uri.parse('${ApiConfig.baseUrl}$path'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode(body),
+      body: body,
     );
 
     final decoded = response.body.isEmpty

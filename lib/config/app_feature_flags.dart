@@ -1,4 +1,6 @@
-class AppFeatureFlags {
+import 'package:equatable/equatable.dart';
+
+class AppFeatureFlags extends Equatable {
   final bool showStatistics;
   final bool showFineBox;
   final bool maintenanceMode;
@@ -54,6 +56,16 @@ class AppFeatureFlags {
       currentBuildNumber: currentBuildNumber ?? this.currentBuildNumber,
     );
   }
+
+  @override
+  List<Object?> get props => [
+        showStatistics,
+        showFineBox,
+        maintenanceMode,
+        updateRequired,
+        minimumRequiredBuildNumber,
+        currentBuildNumber,
+      ];
 
   static int? _intFromJson(Object? value) {
     if (value is int) return value;

@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/match_poll_details.dart';
 import 'package:kopa/model/user_details.dart';
@@ -6,7 +7,7 @@ enum MatchPollsStatus { initial, loading, loaded, submitting, failure }
 
 const Object _unset = Object();
 
-class MatchPollRow {
+class MatchPollRow extends Equatable {
   final MatchPollDetails matchPoll;
   final UserDetails user;
 
@@ -14,9 +15,12 @@ class MatchPollRow {
     required this.matchPoll,
     required this.user,
   });
+
+  @override
+  List<Object?> get props => [matchPoll, user];
 }
 
-class MatchPollsState {
+class MatchPollsState extends Equatable {
   final MatchPollsStatus status;
   final List<UserDetails> squad;
   final List<MatchDetails> matches;
@@ -62,4 +66,15 @@ class MatchPollsState {
           : formErrorMessage as String?,
     );
   }
+
+  @override
+  List<Object?> get props => [
+        status,
+        squad,
+        matches,
+        matchPolls,
+        rows,
+        errorMessage,
+        formErrorMessage,
+      ];
 }

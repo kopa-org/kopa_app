@@ -5,6 +5,7 @@ import 'package:kopa/helpers/api_config.dart';
 import 'package:kopa/services/secure_storage_service.dart';
 
 class PushNotificationsRepository {
+  static const _requestTimeout = Duration(seconds: 20);
   PushNotificationsRepository({http.Client? httpClient})
       : _httpClient = httpClient ?? http.Client();
 
@@ -20,17 +21,19 @@ class PushNotificationsRepository {
     }
 
     final url = Uri.parse('${ApiConfig.baseUrl}/push_tokens');
-    final response = await _httpClient.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $authToken',
-      },
-      body: jsonEncode({
-        'token': token,
-        'platform': platform,
-      }),
-    );
+    final response = await _httpClient
+        .post(
+          url,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $authToken',
+          },
+          body: jsonEncode({
+            'token': token,
+            'platform': platform,
+          }),
+        )
+        .timeout(_requestTimeout);
 
     if (response.statusCode != 201) {
       throw Exception('Failed to register push token.');
@@ -44,14 +47,16 @@ class PushNotificationsRepository {
     }
 
     final url = Uri.parse('${ApiConfig.baseUrl}/push_tokens');
-    final response = await _httpClient.delete(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $authToken',
-      },
-      body: jsonEncode({'token': token}),
-    );
+    final response = await _httpClient
+        .delete(
+          url,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $authToken',
+          },
+          body: jsonEncode({'token': token}),
+        )
+        .timeout(_requestTimeout);
 
     if (response.statusCode != 200 && response.statusCode != 404) {
       throw Exception('Failed to unregister push token.');

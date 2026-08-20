@@ -1,27 +1,14 @@
 import 'dart:convert';
 import 'package:kopa/helpers/api_config.dart';
 import 'package:kopa/model/statistics.dart';
-import 'package:http/http.dart' as http;
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:kopa/services/api_client.dart';
 
 class StatisticsRepository {
-  static final _secureStorage = FlutterSecureStorage();
+  static final _apiClient = ApiClient.shared;
 
   static Future<StatisticsResponse> getStatistics(int teamId) async {
-    final token = await _secureStorage.read(key: 'token');
-
-    if (token == null) {
-      throw Exception('No token found. User might not be logged in.');
-    }
-
     final url = Uri.parse('${ApiConfig.baseUrl}/statistics/$teamId');
-    final response = await http.get(
-      url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
+    final response = await _apiClient.get(url);
 
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body)['statistics'];

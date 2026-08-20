@@ -135,9 +135,21 @@ void main() {
 
     expect(match.lineupVisible, isFalse);
   });
+
+  test('summary attendance status parses independently from registration', () {
+    final match = MatchDetails.fromJson(
+      _matchJson(isCurrentUserAttending: false),
+    );
+
+    expect(match.isCurrentUserRegistered, isFalse);
+    expect(match.isCurrentUserAttending, isFalse);
+  });
 }
 
-Map<String, dynamic> _matchJson({bool? lineupVisible}) {
+Map<String, dynamic> _matchJson({
+  bool? lineupVisible,
+  bool? isCurrentUserAttending,
+}) {
   return {
     'id': 1,
     'type': 'MATCH',
@@ -148,6 +160,8 @@ Map<String, dynamic> _matchJson({bool? lineupVisible}) {
     'created_at': '2026-07-28T12:00:00Z',
     'updated_at': '2026-07-28T12:00:00Z',
     if (lineupVisible != null) 'lineup_visible': lineupVisible,
+    if (isCurrentUserAttending != null)
+      'is_current_user_attending': isCurrentUserAttending,
   };
 }
 

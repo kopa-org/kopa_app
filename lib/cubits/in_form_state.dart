@@ -1,8 +1,9 @@
+import 'package:equatable/equatable.dart';
 import 'package:kopa/model/in_form.dart';
 
 enum InFormStatus { initial, loading, loaded, empty, failure }
 
-class InFormState {
+class InFormState extends Equatable {
   final InFormStatus status;
   final int? teamId;
   final InFormPeriod period;
@@ -37,4 +38,14 @@ class InFormState {
       errorMessage: errorMessage,
     );
   }
+
+  @override
+  List<Object?> get props => [
+        status,
+        teamId,
+        period,
+        position,
+        leaderboard,
+        errorMessage,
+      ];
 }

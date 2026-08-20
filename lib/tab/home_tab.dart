@@ -84,6 +84,7 @@ class _HomeTabViewState extends State<_HomeTabView> {
     context.read<HomeCubit>().fetchDashboardData(
           teamId,
           showLoading: false,
+          forceRefresh: true,
         );
   }
 
@@ -135,8 +136,8 @@ class _HomeTabViewState extends State<_HomeTabView> {
             final nextMatch = upcomingMatches.isEmpty
                 ? state.nextMatch
                 : upcomingMatches.first;
-            final latestMatch =
-                playedMatches.isEmpty ? null : playedMatches.last;
+            final latestMatch = state.lastMatch ??
+                (playedMatches.isEmpty ? null : playedMatches.last);
             void openCalendar() {
               showHomeCalendarOverlay(
                 context: context,
@@ -1025,10 +1026,7 @@ class _MatchResponseCard extends StatelessWidget {
     final state = context.watch<HomeCubit>().state;
     final isRegistering = state.isRegisteringForNextMatch;
     final isRegistered = match.isCurrentUserRegistered;
-    final isUnavailable = match.attendanceDetailsList?.any((attendance) =>
-            attendance.userDetails.id == currentUser.id &&
-            !attendance.isAttending) ??
-        false;
+    final isUnavailable = match.isCurrentUserAttending == false;
 
     void register() {
       AppAnalytics.logEvent(

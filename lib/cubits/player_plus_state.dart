@@ -1,8 +1,9 @@
+import 'package:equatable/equatable.dart';
 import 'package:kopa/model/player_plus.dart';
 
 enum PlayerPlusStatus { initial, loading, loaded, empty, error, noTeam }
 
-class PlayerPlusState {
+class PlayerPlusState extends Equatable {
   final PlayerPlusStatus status;
   final int? teamId;
   final int? currentUserId;
@@ -48,4 +49,17 @@ class PlayerPlusState {
       errorMessage: errorMessage,
     );
   }
+
+  @override
+  List<Object?> get props => [
+        status,
+        teamId,
+        currentUserId,
+        teamTitle,
+        overview,
+        leaderboard,
+        selectedCategory,
+        selectedScope,
+        errorMessage,
+      ];
 }

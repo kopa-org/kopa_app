@@ -3,20 +3,15 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:kopa/helpers/api_config.dart';
 import 'package:kopa/model/season_details.dart';
-import 'package:kopa/services/secure_storage_service.dart';
+import 'package:kopa/services/api_client.dart';
 
 class TeamSeasonRepository {
+  static final _apiClient = ApiClient.shared;
+
   static Future<List<SeasonDetails>> getSeasons(int teamId) async {
-    final token = await SecureStorageService.getToken();
     final url = Uri.parse('${ApiConfig.baseUrl}/teams/$teamId/seasons');
 
-    final response = await http.get(
-      url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
+    final response = await _apiClient.get(url);
 
     if (response.statusCode != 200) {
       throw Exception(
@@ -34,20 +29,15 @@ class TeamSeasonRepository {
     String? name,
     bool allowUnsettledMatches = false,
   }) async {
-    final token = await SecureStorageService.getToken();
     final url = Uri.parse('${ApiConfig.baseUrl}/teams/$teamId/seasons');
 
-    final response = await http.post(
+    final response = await _apiClient.postJson(
       url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
+      body: {
         'starts_on': _dateOnly(startsOn),
         if (name != null && name.trim().isNotEmpty) 'name': name.trim(),
         if (allowUnsettledMatches) 'allow_unsettled_matches': true,
-      }),
+      },
     );
 
     if (response.statusCode != 201) {

@@ -1,10 +1,11 @@
+import 'package:equatable/equatable.dart';
 import 'package:kopa/model/user_details.dart';
 
 enum AuthStatus { initial, loading, authenticated, unauthenticated, failure }
 
 const Object _unset = Object();
 
-class AuthState {
+class AuthState extends Equatable {
   final AuthStatus status;
   final UserDetails? user;
   final String? errorMessage;
@@ -33,4 +34,12 @@ class AuthState {
           hasAuthenticatedBefore ?? this.hasAuthenticatedBefore,
     );
   }
+
+  @override
+  List<Object?> get props => [
+        status,
+        user,
+        errorMessage,
+        hasAuthenticatedBefore,
+      ];
 }

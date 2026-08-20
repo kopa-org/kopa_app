@@ -38,7 +38,7 @@ class MatchPollsCubit extends Cubit<MatchPollsState> {
     try {
       final results = await Future.wait([
         UsersRepository.getSquad(),
-        MatchRepository.getMatches(),
+        MatchRepository.getMatchSummaries(),
         MatchPollsRepository.getMatchPolls(),
       ]);
 

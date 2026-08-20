@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopa/repository/onboarding_repository.dart';
 import 'package:kopa/utils/app_analytics.dart';
@@ -11,7 +12,7 @@ enum OnboardingStatus {
   waitingApproval
 }
 
-class OnboardingState {
+class OnboardingState extends Equatable {
   final OnboardingStatus status;
   final String? inviteToken;
   final String? email;
@@ -77,6 +78,22 @@ class OnboardingState {
           : pendingJoinRequestId as int?,
     );
   }
+
+  @override
+  List<Object?> get props => [
+        status,
+        inviteToken,
+        email,
+        name,
+        teamId,
+        teamTitle,
+        teamLeaderName,
+        teamPlayerCount,
+        errorMessage,
+        joinToken,
+        searchResults,
+        pendingJoinRequestId,
+      ];
 }
 
 const Object _unset = Object();

@@ -5,17 +5,15 @@ import 'package:kopa/model/add_user_to_team_command.dart';
 import 'package:kopa/model/player_profile.dart';
 import 'package:kopa/model/team_details.dart';
 import 'package:kopa/model/user_details.dart';
-import 'package:kopa/services/secure_storage_service.dart';
-import 'package:http/http.dart' as http;
+import 'package:kopa/services/api_client.dart';
 
 class UsersRepository {
-  static Future<List<UserDetails>> getSquad() async {
-    final token = await SecureStorageService.getToken();
-    var url = Uri.parse('${ApiConfig.baseUrl}/user/all');
+  static final _apiClient = ApiClient.shared;
 
-    var response = await http.get(url, headers: {
-      'Authorization': 'Bearer $token',
-    });
+  static Future<List<UserDetails>> getSquad() async {
+    final url = Uri.parse('${ApiConfig.baseUrl}/user/all');
+
+    final response = await _apiClient.get(url);
 
     if (response.statusCode != 200) {
       throw Exception('Failed to fetch squad');
@@ -28,18 +26,15 @@ class UsersRepository {
   }
 
   static Future<int> createPlayer(String name, String email) async {
-    final token = await SecureStorageService.getToken();
-    var url = Uri.parse('${ApiConfig.baseUrl}/user');
+    final url = Uri.parse('${ApiConfig.baseUrl}/user');
 
     AddUserToTeamCommand addUserToTeamCommand =
         AddUserToTeamCommand(name, email, false);
 
-    var response = await http.post(url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: addUserToTeamCommand.toJson());
+    final response = await _apiClient.postJson(
+      url,
+      body: addUserToTeamCommand.toJson(),
+    );
 
     if (response.statusCode != 200) {
       throw Exception('Failed to add user');
@@ -52,18 +47,13 @@ class UsersRepository {
 
   static Future<void> syncDbuMatchProgram(
       Map<String, dynamic> dbuContext) async {
-    final token = await SecureStorageService.getToken();
-    var url = Uri.parse('${ApiConfig.baseUrl}/team/calendar_url');
+    final url = Uri.parse('${ApiConfig.baseUrl}/team/calendar_url');
 
-    var response = await http.post(
+    final response = await _apiClient.postJson(
       url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode({
+      body: {
         ..._dbuContextPayload(dbuContext),
-      }),
+      },
     );
 
     if (response.statusCode != 200) {
@@ -75,18 +65,13 @@ class UsersRepository {
     required int teamId,
     required int? defaultMeetingOffsetMinutes,
   }) async {
-    final token = await SecureStorageService.getToken();
     final url = Uri.parse('${ApiConfig.baseUrl}/teams/$teamId/settings');
 
-    final response = await http.patch(
+    final response = await _apiClient.patchJson(
       url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode({
+      body: {
         'default_meeting_offset_minutes': defaultMeetingOffsetMinutes,
-      }),
+      },
     );
 
     if (response.statusCode != 200) {
@@ -112,13 +97,9 @@ class UsersRepository {
   }
 
   static Future<PlayerProfile> getPlayerProfile(int playerId) async {
-    final token = await SecureStorageService.getToken();
     final url = Uri.parse('${ApiConfig.baseUrl}/user/$playerId/profile');
 
-    final response = await http.get(url, headers: {
-      'Authorization': 'Bearer $token',
-      'Content-Type': 'application/json',
-    });
+    final response = await _apiClient.get(url);
 
     if (response.statusCode != 200) {
       throw Exception('Failed to fetch player profile');
@@ -129,16 +110,11 @@ class UsersRepository {
   }
 
   static Future<UserDetails> updatePosition(String position) async {
-    final token = await SecureStorageService.getToken();
     final url = Uri.parse('${ApiConfig.baseUrl}/user/profile');
 
-    final response = await http.patch(
+    final response = await _apiClient.patchJson(
       url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({'position': position}),
+      body: {'position': position},
     );
 
     if (response.statusCode != 200) {

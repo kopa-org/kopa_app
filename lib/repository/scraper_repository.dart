@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:http/http.dart' as http;
 import 'package:kopa/helpers/api_config.dart';
+import 'package:kopa/services/api_client.dart';
 import 'package:kopa/services/secure_storage_service.dart';
 
 class ScraperManifest {
@@ -25,13 +25,12 @@ class ScraperManifest {
 }
 
 class ScraperRepository {
+  static final _apiClient = ApiClient.shared;
+
   static Future<ScraperManifest> getDbuScraper() async {
-    final token = await SecureStorageService.getToken();
     final url = Uri.parse('${ApiConfig.baseUrl}/scraper/dbu');
 
-    final response = await http.get(url, headers: {
-      'Authorization': 'Bearer $token',
-    });
+    final response = await _apiClient.get(url);
 
     if (response.statusCode != 200) {
       throw Exception('Failed to fetch DBU scraper');
@@ -46,17 +45,12 @@ class ScraperRepository {
   }
 
   static Future<void> uploadDbuDebug(Map<String, dynamic> payload) async {
-    final token = await SecureStorageService.getToken();
-    if (token == null) return;
+    if (await SecureStorageService.getToken() == null) return;
 
     final url = Uri.parse('${ApiConfig.baseUrl}/scraper/dbu/debug');
-    await http.post(
+    await _apiClient.postJson(
       url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode(payload),
+      body: payload,
     );
   }
 }

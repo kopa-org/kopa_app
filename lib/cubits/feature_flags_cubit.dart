@@ -1,16 +1,20 @@
 import 'dart:async';
 
+import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopa/config/app_feature_flags.dart';
 import 'package:kopa/repository/feature_flags_repository.dart';
 
-class FeatureFlagsState {
+class FeatureFlagsState extends Equatable {
   final AppFeatureFlags featureFlags;
 
   const FeatureFlagsState({required this.featureFlags});
 
   bool get updateRequired => featureFlags.updateRequired;
   bool get maintenanceMode => featureFlags.maintenanceMode;
+
+  @override
+  List<Object?> get props => [featureFlags];
 }
 
 class FeatureFlagsCubit extends Cubit<FeatureFlagsState> {

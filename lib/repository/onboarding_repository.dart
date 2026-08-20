@@ -1,14 +1,16 @@
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:kopa/helpers/api_config.dart';
 import 'package:kopa/services/secure_storage_service.dart';
+import 'package:kopa/services/api_client.dart';
 
 class OnboardingRepository {
+  final _apiClient = ApiClient.shared;
+
   Future<Map<String, dynamic>> validateToken(String token) async {
     final url = Uri.parse('${ApiConfig.baseUrl}/onboarding/validate/$token');
     try {
-      final response = await http.get(url);
+      final response = await _apiClient.get(url, authenticated: false);
       if (response.statusCode == 200) {
         return json.decode(response.body);
       } else {
@@ -28,7 +30,7 @@ class OnboardingRepository {
 
     final url = Uri.parse('${ApiConfig.baseUrl}/team/join');
     try {
-      final response = await http.post(
+      final response = await _apiClient.post(
         url,
         headers: {
           'Content-Type': 'application/json',
@@ -56,7 +58,7 @@ class OnboardingRepository {
     final userToken = await SecureStorageService.getToken();
     final url = Uri.parse('${ApiConfig.baseUrl}/team/$teamId/join_token');
     try {
-      final response = await http.get(
+      final response = await _apiClient.get(
         url,
         headers: {'Authorization': 'Bearer $userToken'},
       );
@@ -75,7 +77,7 @@ class OnboardingRepository {
     final url =
         Uri.parse('${ApiConfig.baseUrl}/team/$teamId/join_token/rotate');
     try {
-      final response = await http.post(
+      final response = await _apiClient.post(
         url,
         headers: {'Authorization': 'Bearer $userToken'},
       );
@@ -102,7 +104,7 @@ class OnboardingRepository {
 
     final url = Uri.parse('${ApiConfig.baseUrl}/teams');
     try {
-      final response = await http.post(
+      final response = await _apiClient.post(
         url,
         headers: {
           'Content-Type': 'application/json',
@@ -152,7 +154,7 @@ class OnboardingRepository {
     final url = Uri.parse('${ApiConfig.baseUrl}/teams/search')
         .replace(queryParameters: {'q': query});
     try {
-      final response = await http.get(
+      final response = await _apiClient.get(
         url,
         headers: {'Authorization': 'Bearer $userToken'},
       );
@@ -173,7 +175,7 @@ class OnboardingRepository {
 
     final url = Uri.parse('${ApiConfig.baseUrl}/teams/$teamId/join_requests');
     try {
-      final response = await http.post(
+      final response = await _apiClient.post(
         url,
         headers: {'Authorization': 'Bearer $userToken'},
       );
@@ -200,7 +202,7 @@ class OnboardingRepository {
 
     final url = Uri.parse('${ApiConfig.baseUrl}/team_join_requests/current');
     try {
-      final response = await http.get(
+      final response = await _apiClient.get(
         url,
         headers: {'Authorization': 'Bearer $userToken'},
       );
@@ -227,7 +229,7 @@ class OnboardingRepository {
 
     final url = Uri.parse('${ApiConfig.baseUrl}/teams/$teamId/join_requests');
     try {
-      final response = await http.get(
+      final response = await _apiClient.get(
         url,
         headers: {'Authorization': 'Bearer $userToken'},
       );
@@ -266,7 +268,7 @@ class OnboardingRepository {
     final url =
         Uri.parse('${ApiConfig.baseUrl}/team_join_requests/$requestId/$action');
     try {
-      final response = await http.post(
+      final response = await _apiClient.post(
         url,
         headers: {'Authorization': 'Bearer $userToken'},
       );
@@ -293,7 +295,7 @@ class OnboardingRepository {
 
     final url = Uri.parse('${ApiConfig.baseUrl}/team_join_requests/$requestId');
     try {
-      final response = await http.delete(
+      final response = await _apiClient.delete(
         url,
         headers: {'Authorization': 'Bearer $userToken'},
       );

@@ -6,7 +6,10 @@ import 'package:kopa/utils/app_analytics.dart';
 class MatchProgrammeCubit extends Cubit<MatchProgrammeState> {
   MatchProgrammeCubit() : super(const MatchProgrammeState());
 
-  Future<void> loadMatches({bool showLoading = true}) async {
+  Future<void> loadMatches({
+    bool showLoading = true,
+    bool forceRefresh = false,
+  }) async {
     if (showLoading || state.status == MatchProgrammeStatus.initial) {
       emit(state.copyWith(
         status: MatchProgrammeStatus.loading,
@@ -15,7 +18,9 @@ class MatchProgrammeCubit extends Cubit<MatchProgrammeState> {
     }
 
     try {
-      final matches = await MatchRepository.getMatches();
+      final matches = await MatchRepository.getMatchSummaries(
+        forceRefresh: forceRefresh,
+      );
       emit(state.copyWith(
         status: MatchProgrammeStatus.loaded,
         matches: matches,
@@ -52,7 +57,8 @@ class MatchProgrammeCubit extends Cubit<MatchProgrammeState> {
         notes: notes,
       );
       AppAnalytics.logEvent('match_created');
-      await loadMatches();
+      MatchRepository.invalidateMatchSummaries();
+      await loadMatches(forceRefresh: true);
       return true;
     } catch (e) {
       emit(state.copyWith(

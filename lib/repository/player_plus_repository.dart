@@ -1,12 +1,12 @@
 import 'dart:convert';
 
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:kopa/helpers/api_config.dart';
 import 'package:kopa/model/player_plus.dart';
+import 'package:kopa/services/api_client.dart';
 
 class PlayerPlusRepository {
-  static final _secureStorage = FlutterSecureStorage();
+  static final _apiClient = ApiClient.shared;
 
   static Future<PlayerPlusEntitlement> getEntitlement({int? teamId}) async {
     final json = await _get(
@@ -61,14 +61,10 @@ class PlayerPlusRepository {
     String path, {
     Map<String, String>? query,
   }) async {
-    final token = await _token();
     final url =
         Uri.parse('${ApiConfig.baseUrl}$path').replace(queryParameters: query);
 
-    final response = await http.get(
-      url,
-      headers: _headers(token),
-    );
+    final response = await _apiClient.get(url);
 
     return _decodeResponse(response);
   }
@@ -77,31 +73,14 @@ class PlayerPlusRepository {
     String path,
     Map<String, dynamic> body,
   ) async {
-    final token = await _token();
     final url = Uri.parse('${ApiConfig.baseUrl}$path');
 
-    final response = await http.post(
+    final response = await _apiClient.postJson(
       url,
-      headers: _headers(token),
-      body: jsonEncode(body),
+      body: body,
     );
 
     return _decodeResponse(response);
-  }
-
-  static Future<String> _token() async {
-    final token = await _secureStorage.read(key: 'token');
-    if (token == null) {
-      throw Exception('No token found. User might not be logged in.');
-    }
-    return token;
-  }
-
-  static Map<String, String> _headers(String token) {
-    return {
-      'Authorization': 'Bearer $token',
-      'Content-Type': 'application/json',
-    };
   }
 
   static Map<String, dynamic> _decodeResponse(http.Response response) {

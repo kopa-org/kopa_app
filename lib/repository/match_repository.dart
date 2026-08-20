@@ -4,31 +4,17 @@ import 'package:kopa/model/create_match_comand.dart';
 import 'package:kopa/model/create_match_event_command.dart';
 import 'package:kopa/model/register_for_unregister_from_match_command.dart';
 import 'package:kopa/model/match_details.dart';
-
-import 'package:http/http.dart' as http;
-
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:kopa/model/update_match_score_command.dart';
+import 'package:kopa/services/api_client.dart';
 
 class MatchRepository {
-  static final _secureStorage = FlutterSecureStorage();
+  static final _apiClient = ApiClient.shared;
+  static Future<List<MatchDetails>>? _summaryRequest;
+  static List<MatchDetails>? _summaryCache;
 
   static Future<List<MatchDetails>> getMatches() async {
-    // Get token
-    final token = await _secureStorage.read(key: 'token');
-
-    if (token == null) {
-      throw Exception('No token found. User might not be logged in.');
-    }
-
     final url = Uri.parse('${ApiConfig.baseUrl}/match');
-    final response = await http.get(
-      url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
+    final response = await _apiClient.get(url);
 
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body)['matches'];
@@ -42,6 +28,51 @@ class MatchRepository {
     }
   }
 
+  static Future<List<MatchDetails>> getMatchSummaries({
+    bool forceRefresh = false,
+  }) {
+    final inFlight = _summaryRequest;
+    if (inFlight != null) return inFlight;
+
+    final cached = _summaryCache;
+    if (!forceRefresh && cached != null) {
+      return Future.value(cached);
+    }
+
+    final request = _fetchMatchSummaries();
+    _summaryRequest = request;
+
+    return request.then((matches) {
+      _summaryCache = List.unmodifiable(matches);
+      return _summaryCache!;
+    }).whenComplete(() {
+      _summaryRequest = null;
+    });
+  }
+
+  static void invalidateMatchSummaries() {
+    _summaryCache = null;
+  }
+
+  static Future<List<MatchDetails>> _fetchMatchSummaries() async {
+    final url = Uri.parse('${ApiConfig.baseUrl}/match/summaries');
+    final response = await _apiClient.get(url);
+
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body)['matches'] as List<dynamic>;
+      return json
+          .map((content) => MatchDetails.fromJson(content))
+          .toList(growable: false);
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized. Please log in again.');
+    } else {
+      // Keep the app usable while the client and API are on different
+      // releases. The summary endpoint is an optimization; the existing
+      // match endpoint remains the compatible source of truth.
+      return getMatches();
+    }
+  }
+
   static Future<int> createMatch(
     String firstTeam,
     String secondTeam,
@@ -50,24 +81,14 @@ class MatchRepository {
     DateTime? meetingTime, {
     String? notes,
   }) async {
-    final token = await _secureStorage.read(key: 'token');
-
-    if (token == null) {
-      throw Exception('No token found. User might not be logged in.');
-    }
-
     final url = Uri.parse('${ApiConfig.baseUrl}/match');
 
     final createMatchCommand = CreateMatchCommand(
         firstTeam, secondTeam, location, meetingTime, date, notes);
 
-    final response = await http.post(
+    final response = await _apiClient.postJson(
       url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: json.encode(createMatchCommand.toJson()),
+      body: createMatchCommand.toJson(),
     );
 
     if (response.statusCode == 401) {
@@ -77,29 +98,17 @@ class MatchRepository {
     }
 
     final decodedJson = jsonDecode(response.body);
+    invalidateMatchSummaries();
 
     return decodedJson['id'] ?? decodedJson['match']['id'];
   }
 
   static Future<void> deleteMatch(int id) async {
-    // Get token
-    final token = await _secureStorage.read(key: 'token');
-
-    if (token == null) {
-      throw Exception('No token found. User might not be logged in.');
-    }
-
     final url = Uri.parse('${ApiConfig.baseUrl}/match/$id');
-
-    final response = await http.delete(
-      url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
+    final response = await _apiClient.delete(url);
 
     if (response.statusCode == 200) {
+      invalidateMatchSummaries();
       return;
     } else if (response.statusCode == 401) {
       throw Exception('Unauthorized. Please log in again.');
@@ -109,21 +118,8 @@ class MatchRepository {
   }
 
   static Future<MatchDetails> getMatch(int id) async {
-    // Get token
-    final token = await _secureStorage.read(key: 'token');
-
-    if (token == null) {
-      throw Exception('No token found. User might not be logged in.');
-    }
-
     final url = Uri.parse('${ApiConfig.baseUrl}/match/$id');
-    final response = await http.get(
-      url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
+    final response = await _apiClient.get(url);
 
     if (response.statusCode == 200) {
       var json = jsonDecode(response.body)['match'];
@@ -137,25 +133,15 @@ class MatchRepository {
   }
 
   static Future<void> registerForMatch(int matchId) async {
-    final token = await _secureStorage.read(key: 'token');
-
-    if (token == null) {
-      throw Exception('No token found. User might not be logged in.');
-    }
-
     final url = Uri.parse('${ApiConfig.baseUrl}/match/register');
 
     final command = RegisterForUnregisterFromEventCommand(
       eventId: matchId.toString(),
     );
 
-    final response = await http.post(
+    final response = await _apiClient.postJson(
       url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: json.encode(command.toJson()),
+      body: command.toJson(),
     );
 
     if (response.statusCode == 401) {
@@ -164,29 +150,20 @@ class MatchRepository {
       throw Exception('Failed to register for match');
     }
 
+    invalidateMatchSummaries();
     return;
   }
 
   static Future<void> unregisterFromMatch(int matchId) async {
-    final token = await _secureStorage.read(key: 'token');
-
-    if (token == null) {
-      throw Exception('No token found. User might not be logged in.');
-    }
-
     final url = Uri.parse('${ApiConfig.baseUrl}/match/unregister');
 
     final command = RegisterForUnregisterFromEventCommand(
       eventId: matchId.toString(),
     );
 
-    final response = await http.post(
+    final response = await _apiClient.postJson(
       url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: json.encode(command.toJson()),
+      body: command.toJson(),
     );
 
     if (response.statusCode == 401) {
@@ -195,17 +172,12 @@ class MatchRepository {
       throw Exception('Failed to unregister from match');
     }
 
+    invalidateMatchSummaries();
     return;
   }
 
   static Future<void> updateMatchScore(
       int matchId, int homeTeamScore, int awayTeamScore) async {
-    final token = await _secureStorage.read(key: 'token');
-
-    if (token == null) {
-      throw Exception('No token found. User might not be logged in.');
-    }
-
     final url = Uri.parse('${ApiConfig.baseUrl}/match/score');
 
     final command = UpdateMatchScoreCommand(
@@ -214,13 +186,9 @@ class MatchRepository {
       awayTeamScore: awayTeamScore,
     );
 
-    final response = await http.patch(
+    final response = await _apiClient.patchJson(
       url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: json.encode(command.toJson()),
+      body: command.toJson(),
     );
 
     if (response.statusCode == 401) {
@@ -228,28 +196,20 @@ class MatchRepository {
     } else if (response.statusCode != 200) {
       throw Exception('Failed to upodate match score');
     }
+
+    invalidateMatchSummaries();
   }
 
   static Future<void> updateMatchFormation(
       int matchId, String formation) async {
-    final token = await _secureStorage.read(key: 'token');
-
-    if (token == null) {
-      throw Exception('No token found. User might not be logged in.');
-    }
-
     final url = Uri.parse('${ApiConfig.baseUrl}/match/formation');
 
-    final response = await http.patch(
+    final response = await _apiClient.patchJson(
       url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: json.encode({
+      body: {
         'event_id': matchId,
         'formation': formation,
-      }),
+      },
     );
 
     if (response.statusCode == 401) {
@@ -257,6 +217,8 @@ class MatchRepository {
     } else if (response.statusCode != 200) {
       throw Exception('Failed to update match formation');
     }
+
+    invalidateMatchSummaries();
   }
 
   static Future<MatchDetails> updateMatchLineup(
@@ -264,25 +226,15 @@ class MatchRepository {
     String formation,
     List<Map<String, dynamic>> lineup,
   ) async {
-    final token = await _secureStorage.read(key: 'token');
-
-    if (token == null) {
-      throw Exception('No token found. User might not be logged in.');
-    }
-
     final url = Uri.parse('${ApiConfig.baseUrl}/match/lineup');
 
-    final response = await http.patch(
+    final response = await _apiClient.patchJson(
       url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: json.encode({
+      body: {
         'event_id': matchId,
         'formation': formation,
         'lineup': lineup,
-      }),
+      },
     );
 
     if (response.statusCode == 401) {
@@ -296,6 +248,7 @@ class MatchRepository {
       throw Exception('Updated match was not returned');
     }
 
+    invalidateMatchSummaries();
     return MatchDetails.fromJson(updatedMatch);
   }
 
@@ -303,24 +256,14 @@ class MatchRepository {
     int matchId,
     bool visible,
   ) async {
-    final token = await _secureStorage.read(key: 'token');
-
-    if (token == null) {
-      throw Exception('No token found. User might not be logged in.');
-    }
-
     final url = Uri.parse('${ApiConfig.baseUrl}/match/lineup_visibility');
 
-    final response = await http.patch(
+    final response = await _apiClient.patchJson(
       url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: json.encode({
+      body: {
         'event_id': matchId,
         'lineup_visible': visible,
-      }),
+      },
     );
 
     if (response.statusCode == 401) {
@@ -334,6 +277,7 @@ class MatchRepository {
       throw Exception('Updated match was not returned');
     }
 
+    invalidateMatchSummaries();
     return MatchDetails.fromJson(updatedMatch);
   }
 
@@ -342,25 +286,15 @@ class MatchRepository {
     int userId,
     bool isSelected,
   ) async {
-    final token = await _secureStorage.read(key: 'token');
-
-    if (token == null) {
-      throw Exception('No token found. User might not be logged in.');
-    }
-
     final url = Uri.parse('${ApiConfig.baseUrl}/match/attendance_selection');
 
-    final response = await http.patch(
+    final response = await _apiClient.patchJson(
       url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: json.encode({
+      body: {
         'event_id': matchId,
         'user_id': userId,
         'is_selected': isSelected,
-      }),
+      },
     );
 
     if (response.statusCode == 401) {
@@ -368,28 +302,17 @@ class MatchRepository {
     } else if (response.statusCode != 200) {
       throw Exception('Failed to update attendance selection');
     }
+
+    invalidateMatchSummaries();
   }
 
   static Future<List<int>> createMatchEvents(
       List<CreateMatchEventCommand> createMatchEventCommands) async {
-    final token = await _secureStorage.read(key: 'token');
-
-    if (token == null) {
-      throw Exception('No token found. User might not be logged in.');
-    }
-
     final url = Uri.parse('${ApiConfig.baseUrl}/match/event');
 
-    var jsonEncoded =
-        jsonEncode(createMatchEventCommands.map((e) => e.toJson()).toList());
-
-    var response = await http.post(
+    final response = await _apiClient.postJson(
       url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncoded,
+      body: createMatchEventCommands.map((e) => e.toJson()).toList(),
     );
 
     if (response.statusCode != 200) {
@@ -402,21 +325,9 @@ class MatchRepository {
   }
 
   static Future<bool> deleteMatchEvent(int matchEventId) async {
-    final token = await _secureStorage.read(key: 'token');
-
-    if (token == null) {
-      throw Exception('No token found. User might not be logged in.');
-    }
-
     final url = Uri.parse('${ApiConfig.baseUrl}/match/event/$matchEventId');
 
-    final response = await http.delete(
-      url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
+    final response = await _apiClient.delete(url);
 
     if (response.statusCode == 200) {
       return true;

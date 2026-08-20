@@ -22,6 +22,7 @@ class MatchDetails {
   final int? awayTeamScore;
   final bool? isHomeTeam;
   final bool isCurrentUserRegistered;
+  final bool? isCurrentUserAttending;
   final bool? isCurrentUserSelected;
   final int registeredCount;
   final int unavailableCount;
@@ -50,6 +51,7 @@ class MatchDetails {
     this.awayTeamScore,
     this.isHomeTeam,
     this.isCurrentUserRegistered = false,
+    this.isCurrentUserAttending,
     this.isCurrentUserSelected,
     this.registeredCount = 0,
     this.unavailableCount = 0,
@@ -82,6 +84,7 @@ class MatchDetails {
       awayTeamScore: json['away_team_score'],
       isHomeTeam: json['is_home_team'],
       isCurrentUserRegistered: json['is_current_user_registered'] ?? false,
+      isCurrentUserAttending: json['is_current_user_attending'],
       isCurrentUserSelected: json['is_current_user_selected'],
       registeredCount: json['registered_count'] ?? 0,
       unavailableCount: json['unavailable_count'] ?? 0,

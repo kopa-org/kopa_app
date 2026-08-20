@@ -17,6 +17,7 @@ abstract interface class AuthRepository {
 }
 
 class ApiAuthRepository implements AuthRepository {
+  static const _requestTimeout = Duration(seconds: 20);
   final http.Client _httpClient;
 
   ApiAuthRepository({http.Client? httpClient})
@@ -32,7 +33,7 @@ class ApiAuthRepository implements AuthRepository {
       final response = await _httpClient.get(
         url,
         headers: {'Authorization': 'Bearer $token'},
-      );
+      ).timeout(_requestTimeout);
 
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
@@ -50,11 +51,13 @@ class ApiAuthRepository implements AuthRepository {
   Future<bool> login(String email, String password) async {
     final url = Uri.parse('${ApiConfig.baseUrl}/authentication/login');
     try {
-      final response = await _httpClient.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({'email': email, 'password': password}),
-      );
+      final response = await _httpClient
+          .post(
+            url,
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode({'email': email, 'password': password}),
+          )
+          .timeout(_requestTimeout);
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -82,16 +85,18 @@ class ApiAuthRepository implements AuthRepository {
   }) async {
     final url = Uri.parse('${ApiConfig.baseUrl}/authentication/register');
     try {
-      final response = await _httpClient.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'name': name,
-          'email': email,
-          'password': password,
-          'role_id': roleId,
-        }),
-      );
+      final response = await _httpClient
+          .post(
+            url,
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode({
+              'name': name,
+              'email': email,
+              'password': password,
+              'role_id': roleId,
+            }),
+          )
+          .timeout(_requestTimeout);
 
       return response.statusCode == 201;
     } catch (e) {

@@ -113,7 +113,10 @@ class _MatchProgrammeRefreshListenerState
   }
 
   void _refreshMatchesAfterImport() {
-    context.read<MatchProgrammeCubit>().loadMatches(showLoading: false);
+    context.read<MatchProgrammeCubit>().loadMatches(
+          showLoading: false,
+          forceRefresh: true,
+        );
   }
 
   @override
@@ -279,7 +282,10 @@ class _MatchListState extends State<_MatchList> {
     );
     await Future<void>.delayed(const Duration(milliseconds: 350));
     if (context.mounted) {
-      context.read<MatchProgrammeCubit>().loadMatches(showLoading: false);
+      context.read<MatchProgrammeCubit>().loadMatches(
+            showLoading: false,
+            forceRefresh: true,
+          );
     }
   }
 }

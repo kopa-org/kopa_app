@@ -11,6 +11,7 @@ typedef CurrentBuildNumberProvider = Future<int?> Function();
 typedef AuthTokenProvider = Future<String?> Function();
 
 class FeatureFlagsRepository {
+  static const _requestTimeout = Duration(seconds: 20);
   FeatureFlagsRepository({
     http.Client? httpClient,
     CurrentBuildNumberProvider? currentBuildNumberProvider,
@@ -29,8 +30,9 @@ class FeatureFlagsRepository {
     try {
       final currentBuildNumber = await _safeCurrentBuildNumber();
       final url = _featureFlagsUri('/features', currentBuildNumber);
-      final response =
-          await _httpClient.get(url, headers: await _authHeaders());
+      final response = await _httpClient
+          .get(url, headers: await _authHeaders())
+          .timeout(_requestTimeout);
       if (response.statusCode != 200) return const AppFeatureFlags();
 
       final body = jsonDecode(response.body);
@@ -75,7 +77,9 @@ class FeatureFlagsRepository {
           ...await _authHeaders(),
         };
         final request = http.Request('GET', url)..headers.addAll(headers);
-        final response = await _httpClient.send(request);
+        final response = await _httpClient.send(request).timeout(
+              _requestTimeout,
+            );
 
         if (response.statusCode != 200) {
           await Future<void>.delayed(reconnectDelay);

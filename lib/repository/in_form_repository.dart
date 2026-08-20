@@ -1,11 +1,12 @@
 import 'dart:convert';
 
-import 'package:http/http.dart' as http;
 import 'package:kopa/helpers/api_config.dart';
 import 'package:kopa/model/in_form.dart';
-import 'package:kopa/services/secure_storage_service.dart';
+import 'package:kopa/services/api_client.dart';
 
 class InFormRepository {
+  static final _apiClient = ApiClient.shared;
+
   static Future<InFormLeaderboard> getLeaderboard({
     required int teamId,
     required InFormPeriod period,
@@ -35,15 +36,10 @@ class InFormRepository {
     String path,
     Map<String, String> query,
   ) async {
-    final token = await SecureStorageService.getToken();
     final uri =
         Uri.parse('${ApiConfig.baseUrl}$path').replace(queryParameters: query);
-    final headers = {
-      'Authorization': 'Bearer $token',
-      'Content-Type': 'application/json',
-    };
 
-    final response = await http.get(uri, headers: headers);
+    final response = await _apiClient.get(uri);
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw Exception('In-form request failed (${response.statusCode})');

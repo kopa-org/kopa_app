@@ -12,13 +12,19 @@ import 'package:kopa/repository/team_dbu_repository.dart';
 class HomeCubit extends Cubit<HomeState> {
   HomeCubit() : super(const HomeState());
 
-  Future<void> fetchDashboardData(int teamId, {bool showLoading = true}) async {
+  Future<void> fetchDashboardData(
+    int teamId, {
+    bool showLoading = true,
+    bool forceRefresh = false,
+  }) async {
     if (showLoading || state.status == HomeStatus.initial) {
       emit(state.copyWith(status: HomeStatus.loading));
     }
     try {
       final results = await Future.wait([
-        MatchRepository.getMatches(),
+        MatchRepository.getMatchSummaries(
+          forceRefresh: forceRefresh || showLoading,
+        ),
         _safeFetchStats(teamId),
         _safeFetchFineBox(),
         _safeFetchDbuStandings(teamId),
@@ -47,6 +53,14 @@ class HomeCubit extends Cubit<HomeState> {
       playedMatches.sort((a, b) => b.date.compareTo(a.date));
       if (playedMatches.isNotEmpty) {
         lastMatch = playedMatches.first;
+      }
+
+      if (lastMatch != null) {
+        try {
+          lastMatch = await MatchRepository.getMatch(lastMatch.id);
+        } catch (_) {
+          // The summary remains usable when the optional result details fail.
+        }
       }
 
       emit(state.copyWith(
@@ -116,6 +130,7 @@ class HomeCubit extends Cubit<HomeState> {
 
     try {
       await MatchRepository.registerForMatch(matchId);
+      MatchRepository.invalidateMatchSummaries();
       await fetchDashboardData(teamId, showLoading: false);
     } catch (e) {
       emit(state.copyWith(
@@ -151,6 +166,7 @@ class HomeCubit extends Cubit<HomeState> {
 
     try {
       await MatchRepository.unregisterFromMatch(matchId);
+      MatchRepository.invalidateMatchSummaries();
       await fetchDashboardData(teamId, showLoading: false);
     } catch (e) {
       emit(state.copyWith(
@@ -184,6 +200,7 @@ class HomeCubit extends Cubit<HomeState> {
       awayTeamScore: match.awayTeamScore,
       isHomeTeam: match.isHomeTeam,
       isCurrentUserRegistered: isCurrentUserRegistered,
+      isCurrentUserAttending: isCurrentUserRegistered,
       isCurrentUserSelected: isCurrentUserSelected,
       registeredCount: registeredCount,
       unavailableCount: unavailableCount,
