@@ -295,19 +295,30 @@ class _KopaAppState extends State<KopaApp> {
   }
 
   void _handleNotificationTap(Map<String, dynamic> data) {
-    if (data['type'] == 'team_join_request') {
-      _router.go(AppRouter.teamJoinRequests);
-      return;
-    }
+    String? targetLocation;
 
-    if (data['type'] == 'match_calendar_changed') {
+    if (data['type'] == 'team_join_request') {
+      targetLocation = AppRouter.teamJoinRequests;
+    } else if (data['type'] == 'match_calendar_changed') {
       final matchId = int.tryParse(
         (data['match_id'] ?? data['event_id'] ?? '').toString(),
       );
       if (matchId == null) return;
 
-      _router.go(AppRouter.matchDetailsPath(matchId));
+      targetLocation = AppRouter.matchDetailsPath(matchId);
     }
+
+    if (targetLocation == null) return;
+    _pushNotificationRoute(targetLocation);
+  }
+
+  void _pushNotificationRoute(String location) {
+    // Initial notification taps can be delivered during initState, before
+    // GoRouter has parsed the initial shell route used as the push base.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      unawaited(_router.push<void>(location));
+    });
   }
 
   bool get _supportsNativeDeepLinks {
