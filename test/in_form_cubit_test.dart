@@ -5,7 +5,7 @@ import 'package:kopa/model/in_form.dart';
 
 void main() {
   group('InFormCubit', () {
-    test('loads the rolling three month leaderboard by default', () async {
+    test('loads the current season leaderboard by default', () async {
       final cubit = InFormCubit(
         loader: ({
           required int teamId,
@@ -13,7 +13,7 @@ void main() {
           String? position,
         }) async {
           expect(teamId, 12);
-          expect(period, InFormPeriod.rollingThreeMonths);
+          expect(period, InFormPeriod.currentSeason);
           expect(position, isNull);
           return _leaderboard(period, position);
         },
@@ -44,7 +44,6 @@ void main() {
       await cubit.selectPosition('striker');
 
       expect(requests, [
-        'rolling_3_months:all',
         'current_season:all',
         'current_season:striker',
       ]);

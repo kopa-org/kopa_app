@@ -27,7 +27,6 @@ import 'package:kopa/model/user_details.dart';
 import 'package:kopa/navigation/app_router.dart';
 import 'package:kopa/page/match/match_details_page.dart';
 import 'package:kopa/page/profile/profile_settings_page.dart';
-import 'package:kopa/page/team_fines/team_fines_page.dart';
 import 'package:kopa/state/match_programme_refresh_notifier.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
@@ -1377,9 +1376,7 @@ String _matchHeroTag(MatchDetails match, String source) {
 
 void _openFineBox(BuildContext context) {
   AppAnalytics.logEvent('fine_box_opened');
-  Navigator.of(context).push(MaterialWithModalsPageRoute(
-    builder: (context) => const TeamFinesPage(),
-  ));
+  context.go(AppRouter.fineBox);
 }
 
 void _openProfileSettings(BuildContext context) {

@@ -227,16 +227,11 @@ class _PlayerPlusStatsSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Player+',
-            style: styles.pageTitle.copyWith(color: appColors.primary),
+            'Dine Stats',
+            style: styles.sectionHeader.copyWith(color: appColors.dirt),
           ),
           const SizedBox(height: 6),
-          Text(
-            hasPlayerPlus
-                ? 'Dine tal og placeringer på holdets ranglister.'
-                : 'Få Player+ for at låse alle placeringer op.',
-            style: styles.body.copyWith(color: appColors.textSecondary),
-          ),
+
           if (!hasPlayerPlus) ...[
             const SizedBox(height: 12),
             _PlayerPlusLockedCallout(
@@ -268,17 +263,6 @@ class _PlayerPlusStatsSection extends StatelessWidget {
 
   List<_PlayerPlusTileData> _buildTiles(AppColors appColors) {
     return [
-      _leaderboardTile(
-        title: 'Pointsnit',
-        value: _currentLeaderboardValue(
-          stats.leaderboards.bestPointsAverage,
-          decimal: true,
-        ),
-        rows: stats.leaderboards.bestPointsAverage,
-        icon: Icons.trending_up,
-        accentColor: appColors.grass,
-        decimal: true,
-      ),
       _leaderboardTile(
         title: 'Mål',
         value: stats.player.goalsScored.toString(),
@@ -317,16 +301,13 @@ class _PlayerPlusStatsSection extends StatelessWidget {
     required List<LeaderboardRow> rows,
     required IconData icon,
     required Color accentColor,
-    bool decimal = false,
   }) {
     final rankingRows = rows
         .map(
           (row) => _StatRankingRow(
             userId: row.userId,
             userName: row.userName,
-            value: decimal
-                ? row.value.toDouble().toStringAsFixed(1)
-                : '${row.value}',
+            value: '${row.value}',
           ),
         )
         .toList();
@@ -363,10 +344,7 @@ class _PlayerPlusStatsSection extends StatelessWidget {
     );
   }
 
-  String _currentLeaderboardValue(
-    List<LeaderboardRow> rows, {
-    bool decimal = false,
-  }) {
+  String _currentLeaderboardValue(List<LeaderboardRow> rows) {
     final currentRow = rows.cast<dynamic>().where((row) {
       if (currentUser != null && row.userId == currentUser!.id) {
         return true;
@@ -378,9 +356,7 @@ class _PlayerPlusStatsSection extends StatelessWidget {
       return '-';
     }
 
-    return decimal
-        ? currentRow.value.toDouble().toStringAsFixed(1)
-        : '${currentRow.value}';
+    return '${currentRow.value}';
   }
 
   _StatRankingRow? _findCurrentRow(List<_StatRankingRow> rows) {
@@ -438,6 +414,8 @@ class _PlayerPlusStatTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final currentIndex =
         tile.rows.indexWhere((row) => row.userId == currentUserId);
     final rank = currentIndex == -1 ? null : currentIndex + 1;
@@ -460,6 +438,7 @@ class _PlayerPlusStatTile extends StatelessWidget {
             .toList(),
         icon: tile.icon,
         accentColor: tile.accentColor,
+        backgroundColor: appColors.white,
       ),
       obscureValue: obscureValue,
       obscureRank: obscureRank,

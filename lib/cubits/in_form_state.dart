@@ -14,7 +14,7 @@ class InFormState extends Equatable {
   const InFormState({
     this.status = InFormStatus.initial,
     this.teamId,
-    this.period = InFormPeriod.rollingThreeMonths,
+    this.period = InFormPeriod.currentSeason,
     this.position,
     this.leaderboard,
     this.errorMessage,

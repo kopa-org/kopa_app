@@ -41,45 +41,66 @@ class FormCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: lastFiveMatchesForm.map((result) {
-              Color bgColor;
-              String label;
-              if (result == 1) {
-                bgColor = appColors.success;
-                label = 'V';
-              } else if (result == 0) {
-                bgColor = appColors.warning;
-                label = 'U';
-              } else {
-                bgColor = appColors.error;
-                label = 'T';
-              }
-              return Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: bgColor,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: bgColor.withValues(alpha: 0.4),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  label,
-                  style: appTextStyles.bodyBold.copyWith(
-                    color: Colors.white,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              for (var index = 0; index < lastFiveMatchesForm.length; index++)
+                Padding(
+                  padding: EdgeInsets.only(
+                    right: index == lastFiveMatchesForm.length - 1 ? 0 : 12,
+                  ),
+                  child: _FormResult(
+                    result: lastFiveMatchesForm[index],
+                    colors: appColors,
+                    textStyles: appTextStyles,
                   ),
                 ),
-              );
-            }).toList(),
+            ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _FormResult extends StatelessWidget {
+  final int result;
+  final AppColors colors;
+  final AppTextStyles textStyles;
+
+  const _FormResult({
+    required this.result,
+    required this.colors,
+    required this.textStyles,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final (bgColor, label) = switch (result) {
+      1 => (colors.success, 'V'),
+      0 => (colors.warning, 'U'),
+      _ => (colors.error, 'T'),
+    };
+
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        color: bgColor,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: bgColor.withValues(alpha: 0.4),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        label,
+        style: textStyles.bodyBold.copyWith(
+          color: Colors.white,
+        ),
       ),
     );
   }

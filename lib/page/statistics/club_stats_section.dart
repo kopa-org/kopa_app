@@ -30,7 +30,7 @@ class ClubStatsSection extends StatelessWidget {
           child: Text(
             'Holdets Stats',
             style: appTextStyles.sectionHeader.copyWith(
-              color: appColors.primary,
+              color: appColors.dirt,
             ),
           ),
         ),
