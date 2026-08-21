@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kopa/config/app_feature_flags.dart';
 import 'package:kopa/cubits/auth_state.dart';
 import 'package:kopa/cubits/onboarding_cubit.dart';
 import 'package:kopa/model/team_details.dart';
@@ -8,6 +9,15 @@ import 'package:kopa/pages/onboarding_page.dart';
 import 'package:kopa/pages/register_page.dart';
 
 void main() {
+  test('places Bødekasse before Truppen in the main tab order', () {
+    expect(
+      AppRouter.visibleMainTabLabels(
+        const AppFeatureFlags(showStatistics: true, showFineBox: true),
+      ),
+      ['Hjem', 'Kampe', 'Statistik', 'Bødekasse', 'Truppen'],
+    );
+  });
+
   group('AppRouter.initialLocationFromPlatformRoute', () {
     test('normalizes cold-start shared team links from iOS universal links',
         () {

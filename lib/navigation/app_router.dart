@@ -359,8 +359,8 @@ abstract final class AppRouter {
       _MainTab.home,
       _MainTab.matches,
       if (featureFlags.showStatistics) _MainTab.statistics,
-      _MainTab.squad,
       if (featureFlags.showFineBox) _MainTab.fineBox,
+      _MainTab.squad,
     ];
   }
 
@@ -370,6 +370,13 @@ abstract final class AppRouter {
         (authState.status == AuthStatus.loading && authState.user != null);
 
     return isLoggedIn ? const OnboardingPage() : const RegisterPage();
+  }
+
+  @visibleForTesting
+  static List<String> visibleMainTabLabels(AppFeatureFlags featureFlags) {
+    return _visibleMainTabs(featureFlags)
+        .map((tab) => tab.label)
+        .toList(growable: false);
   }
 }
 
