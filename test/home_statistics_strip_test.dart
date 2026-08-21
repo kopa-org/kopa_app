@@ -27,10 +27,11 @@ void main() {
       ),
     );
 
-    expect(find.text('Pointsnit'), findsOneWidget);
+    expect(find.text('Pointsnit'), findsNothing);
+    expect(find.text('Mål'), findsOneWidget);
     expect(
       _decorations(tester),
-      _containsColor(appColors.lightGrass.withValues(alpha: 0.27)),
+      _containsColor(appColors.lightSky.withValues(alpha: 0.27)),
     );
     expect(find.byType(ImageFiltered), findsNothing);
   });

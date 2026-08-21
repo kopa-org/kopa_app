@@ -85,7 +85,7 @@ class InFormLeaderboard {
 
   factory InFormLeaderboard.fromJson(Map<String, dynamic> json) {
     return InFormLeaderboard(
-      period: json['period'] ?? 'rolling_3_months',
+      period: json['period'] ?? 'current_season',
       position: json['position'],
       rows: (json['rows'] as List<dynamic>? ?? [])
           .map((row) =>
@@ -140,7 +140,7 @@ class InFormPlayerBreakdown {
   factory InFormPlayerBreakdown.fromJson(Map<String, dynamic> json) {
     return InFormPlayerBreakdown(
       userId: json['user_id'] ?? 0,
-      period: json['period'] ?? 'rolling_3_months',
+      period: json['period'] ?? 'current_season',
       total: (json['total'] as num? ?? 0).toDouble(),
       entries: (json['entries'] as List<dynamic>? ?? [])
           .map((entry) =>

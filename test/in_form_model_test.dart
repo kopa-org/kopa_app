@@ -2,6 +2,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kopa/model/in_form.dart';
 
 void main() {
+  test('defaults missing periods to the current season', () {
+    final leaderboard = InFormLeaderboard.fromJson({});
+    final breakdown = InFormPlayerBreakdown.fromJson({});
+
+    expect(leaderboard.period, 'current_season');
+    expect(breakdown.period, 'current_season');
+  });
+
   test('parses leaderboard decimals and rank movement', () {
     final leaderboard = InFormLeaderboard.fromJson({
       'period': 'rolling_3_months',

@@ -228,10 +228,13 @@ class _PlayerPlusStatsSection extends StatelessWidget {
         children: [
           Text(
             'Dine Stats',
-            style: styles.sectionHeader.copyWith(color: appColors.dirt),
+            style: styles.pageTitle.copyWith(color: appColors.dirt),
           ),
           const SizedBox(height: 6),
-
+          Text(
+            'For denne season.',
+            style: styles.body.copyWith(color: appColors.textSecondary),
+          ),
           if (!hasPlayerPlus) ...[
             const SizedBox(height: 12),
             _PlayerPlusLockedCallout(

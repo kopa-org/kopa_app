@@ -38,21 +38,6 @@ class HomeStatisticsStrip extends StatelessWidget {
 
     final tiles = [
       PlayerPlusStatTileData(
-        title: 'Pointsnit',
-        backgroundColor: appColors.lightGrass.withValues(alpha: 0.27),
-        value: _currentLeaderboardValue(
-          stats.leaderboards.bestPointsAverage,
-          decimal: true,
-        ),
-        rank: _rankFor(stats.leaderboards.bestPointsAverage),
-        rows: _leaderboardRows(
-          stats.leaderboards.bestPointsAverage,
-          decimal: true,
-        ),
-        icon: Icons.trending_up,
-        accentColor: appColors.grass,
-      ),
-      PlayerPlusStatTileData(
         title: 'Mål',
         backgroundColor: appColors.lightSky.withValues(alpha: 0.27),
         value: stats.player.goalsScored.toString(),
