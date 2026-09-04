@@ -73,6 +73,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get matchTimelineFullTime => 'Full time';
 
   @override
+  String get matchRegisterResult => 'Register match result';
+
+  @override
+  String get matchEnterResult => 'Enter';
+
+  @override
+  String get matchScoreDialogTitle => 'Enter result';
+
+  @override
   String get commonCancel => 'Cancel';
 
   @override

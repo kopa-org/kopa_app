@@ -9,6 +9,7 @@ class PlayerListItem extends StatelessWidget {
   final String? imageUrl;
   final String? initials;
   final Color? avatarBackgroundColor;
+  final Color? subtitleColor;
   final Widget? trailing;
   final VoidCallback? onTap;
   final String? heroTag;
@@ -20,6 +21,7 @@ class PlayerListItem extends StatelessWidget {
     this.imageUrl,
     this.initials,
     this.avatarBackgroundColor,
+    this.subtitleColor,
     this.trailing,
     this.onTap,
     this.heroTag,
@@ -67,7 +69,8 @@ class PlayerListItem extends StatelessWidget {
                   if (subtitle != null)
                     Text(
                       subtitle!,
-                      style: appTextStyles.caption,
+                      style:
+                          appTextStyles.caption.copyWith(color: subtitleColor),
                     ),
                 ],
               ),

@@ -37,7 +37,7 @@ void main() {
     expect(match.hasFinalScore, isFalse);
   });
 
-  test('score entry is only available to owners after post-match timing', () {
+  test('score entry is available to owners at any time', () {
     final kickoff = DateTime(2026, 7, 28, 19);
     final owner = _user(isTeamOwner: true);
     final player = _user(isTeamOwner: false);
@@ -54,22 +54,12 @@ void main() {
     expect(
       match.canSetFinalScore(
         owner,
-        now: kickoff.add(const Duration(minutes: 59)),
-      ),
-      isFalse,
-    );
-    expect(
-      match.canSetFinalScore(
-        owner,
-        now: kickoff.add(const Duration(hours: 1)),
+        now: kickoff.subtract(const Duration(days: 1)),
       ),
       isTrue,
     );
     expect(
-      match.canSetFinalScore(
-        player,
-        now: kickoff.add(const Duration(hours: 1)),
-      ),
+      match.canSetFinalScore(player),
       isFalse,
     );
   });
@@ -89,10 +79,7 @@ void main() {
     );
 
     expect(
-      match.canSetFinalScore(
-        _user(isTeamOwner: true),
-        now: kickoff.add(const Duration(hours: 1)),
-      ),
+      match.canSetFinalScore(_user(isTeamOwner: true)),
       isFalse,
     );
   });

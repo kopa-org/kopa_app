@@ -1077,7 +1077,7 @@ class _MatchResponseCard extends StatelessWidget {
                           ? 'Afbud registreret'
                           : 'Kommer du?',
                   style: appTextStyles.body3.copyWith(
-                    color: appColors.dirt,
+                    color: isUnavailable ? appColors.error : appColors.dirt,
                     fontWeight: FontWeight.w600,
                   ),
                 ),

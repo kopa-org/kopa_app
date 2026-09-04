@@ -210,6 +210,7 @@ class _GameResultRow extends StatelessWidget {
 
   bool _currentUserDeclined(MatchDetails match, int? currentUserId) {
     if (currentUserId == null) return false;
+    if (match.isCurrentUserAttending == false) return true;
 
     return (match.attendanceDetailsList ?? []).any(
       (attendance) =>

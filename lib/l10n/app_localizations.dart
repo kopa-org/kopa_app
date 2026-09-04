@@ -224,6 +224,24 @@ abstract class AppLocalizations {
   /// **'Full time'**
   String get matchTimelineFullTime;
 
+  /// No description provided for @matchRegisterResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Register match result'**
+  String get matchRegisterResult;
+
+  /// No description provided for @matchEnterResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter'**
+  String get matchEnterResult;
+
+  /// No description provided for @matchScoreDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter result'**
+  String get matchScoreDialogTitle;
+
   /// No description provided for @commonCancel.
   ///
   /// In en, this message translates to:

@@ -45,6 +45,9 @@ void main() {
       ),
     );
 
+    expect(find.text('Registrer kampens resultat'), findsOneWidget);
+    expect(find.text('Indtast'), findsOneWidget);
+
     final labels = [
       'Kampstart',
       'Mål: Tidlig målscorer',

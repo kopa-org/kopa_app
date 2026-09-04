@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:kopa/component/button/button.dart';
 import 'package:kopa/component/card/kopa_card.dart';
 import 'package:kopa/component/match/player_of_match_summary_card.dart';
+import 'package:kopa/component/match/match_result_action_card.dart';
 import 'package:kopa/component/timeline/timeline_item.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/model/match_details.dart';
@@ -58,7 +58,7 @@ class PostMatchDetailsPage extends StatelessWidget {
       timelineEmptyMessage: 'Ingen kampbegivenheder registreret endnu.',
       overviewWidgets: [
         if (user.isTeamOwner && !match.hasFinalScore) ...[
-          _RegisterMatchResultSection(onPressed: onSetMatchScore),
+          MatchResultActionCard(onPressed: onSetMatchScore),
           const SizedBox(height: Spacing.lg),
         ],
         PlayerOfMatchSummaryCard(
@@ -173,54 +173,6 @@ class _MatchTimelineEntry {
       time: item.timeLabel,
       icon: item.icon,
       iconColor: item.iconColor,
-    );
-  }
-}
-
-class _RegisterMatchResultSection extends StatelessWidget {
-  final VoidCallback onPressed;
-
-  const _RegisterMatchResultSection({required this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final styles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    return KopaCard(
-      borderRadius: Spacing.borderRadiusLargeIncreased,
-      padding: const EdgeInsets.all(Spacing.md),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: colors.lightGrass.withValues(alpha: 0.38),
-              borderRadius: BorderRadius.circular(Spacing.borderRadiusSmall),
-            ),
-            child: Icon(
-              CupertinoIcons.sportscourt,
-              color: colors.primary,
-              size: 21,
-            ),
-          ),
-          const SizedBox(width: Spacing.md),
-          Expanded(
-            child: Text(
-              'Registrer kampens resultat',
-              style: styles.subtitle2.copyWith(fontWeight: FontWeight.w900),
-            ),
-          ),
-          const SizedBox(width: Spacing.sm),
-          Button(
-            buttonText: 'Indtast',
-            icon: CupertinoIcons.pencil,
-            onPressed: onPressed,
-          ),
-        ],
-      ),
     );
   }
 }

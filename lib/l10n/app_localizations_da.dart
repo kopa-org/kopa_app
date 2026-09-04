@@ -73,6 +73,15 @@ class AppLocalizationsDa extends AppLocalizations {
   String get matchTimelineFullTime => 'Kamp slut';
 
   @override
+  String get matchRegisterResult => 'Registrer kampens resultat';
+
+  @override
+  String get matchEnterResult => 'Indtast';
+
+  @override
+  String get matchScoreDialogTitle => 'Indtast resultat';
+
+  @override
   String get commonCancel => 'Annuller';
 
   @override

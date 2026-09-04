@@ -27,8 +27,10 @@ import 'package:kopa/template/match_detail_template.dart';
 import 'package:kopa/component/card/match_hero_card.dart';
 import 'package:kopa/component/info_row/info_row.dart';
 import 'package:kopa/component/list_item/player_list_item.dart';
+import 'package:kopa/component/match/match_result_action_card.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 
 class MatchDetailsPage extends StatefulWidget {
   final int matchId;
@@ -159,7 +161,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     final matchDetails = data['matchDetails'] as MatchDetails;
     final squad = data['squad'] as List<UserDetails>;
     final hasBeenPlayed = matchDetails.hasMatchBeenPlayed;
-    final canManageResult = user.isTeamOwner && hasBeenPlayed;
+    final canManageResult = user.isTeamOwner;
 
     final heroCard = MatchHeroCard(
       match: matchDetails,
@@ -210,7 +212,14 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       attendanceSegmentLabel:
           'Tilmeldte (${matchDetails.attendingAttendanceDetails.length})',
       showTimelineSegment: false,
-      overviewWidgets: const [],
+      overviewWidgets: [
+        if (user.isTeamOwner && !matchDetails.hasFinalScore) ...[
+          MatchResultActionCard(
+            onPressed: () => setMatchScore(matchDetails),
+          ),
+          const SizedBox(height: Spacing.lg),
+        ],
+      ],
       infoRows: _buildPracticalInfoRows(matchDetails),
       votingModule: null,
       playerPositions: user.isTeamOwner || matchDetails.lineupVisible
@@ -504,6 +513,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
   ) {
     if (declined.isEmpty) return const [];
 
+    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
+
     return [
       const SizedBox(height: Spacing.lg),
       _AttendanceApprovalSection(
@@ -514,6 +525,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
               (attendance) => PlayerListItem(
                 name: attendance.userDetails.name,
                 subtitle: 'Frameldt',
+                subtitleColor: colors.error,
               ),
             )
             .toList(),
@@ -847,6 +859,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
 
   Future<void> setMatchScore(MatchDetails match) async {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
@@ -904,11 +917,11 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
                   children: [
                     CupertinoNavigationBar(
                       backgroundColor: appColors.surface,
-                      middle: Text('Indtast resultat',
+                      middle: Text(l10n.matchScoreDialogTitle,
                           style: appTextStyles.sectionHeader),
                       leading: CupertinoButton(
                           padding: EdgeInsets.zero,
-                          child: Text('Annullér',
+                          child: Text(l10n.commonCancel,
                               style: TextStyle(color: appColors.error)),
                           onPressed: () => Navigator.of(modalContext).pop()),
                       trailing: CupertinoButton(
@@ -916,7 +929,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
                         onPressed: canSave && !isSaving ? onOk : null,
                         child: isSaving
                             ? const CupertinoActivityIndicator()
-                            : Text('OK',
+                            : Text(l10n.commonOk,
                                 style: TextStyle(
                                     color: canSave
                                         ? appColors.primary
@@ -1075,6 +1088,7 @@ class _PrematchRsvpBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final attendance = _currentUserAttendance;
     final isDeclined = attendance?.isAttending == false;
     final isAttending = match.isCurrentUserRegistered ||
@@ -1096,8 +1110,8 @@ class _PrematchRsvpBar extends StatelessWidget {
     if (isDeclined) {
       return _PrematchRsvpStatusBar(
         message: 'Du har meldt afbud',
-        messageColor: const Color(0xFF524438),
-        backgroundColor: const Color(0xFFF1F4F2),
+        messageColor: colors.error,
+        backgroundColor: colors.error.withValues(alpha: 0.10),
         actionText: 'Alligevel klar? Tilmeld dig',
         actionColor: const Color(0xFF00964E),
         isSaving: isSaving,

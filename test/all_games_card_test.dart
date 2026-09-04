@@ -5,7 +5,6 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:kopa/component/card/all_games_card.dart';
 import 'package:kopa/model/event_attendance_details.dart';
 import 'package:kopa/model/match_details.dart';
-import 'package:kopa/model/user_details.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 
@@ -102,14 +101,7 @@ void main() {
       date: DateTime.utc(2027, 8, 13, 20),
       homeTeam: 'Kopa IF',
       awayTeam: 'Fremad',
-      attendanceDetailsList: [
-        _attendance(
-          id: 1,
-          userId: 7,
-          name: 'Current User',
-          isAttending: false,
-        ),
-      ],
+      isCurrentUserAttending: false,
     );
 
     await tester.pumpWidget(
@@ -133,6 +125,10 @@ void main() {
     expect(find.text('Frameldt'), findsOneWidget);
     expect(find.text('Tilmeldt'), findsNothing);
     expect(find.byIcon(CupertinoIcons.xmark), findsOneWidget);
+    expect(
+      tester.widget<Text>(find.text('Frameldt')).style?.color,
+      AppColors.light.error,
+    );
   });
 }
 
@@ -145,6 +141,7 @@ MatchDetails _match({
   int? awayScore,
   bool isHomeTeam = true,
   bool isCurrentUserRegistered = false,
+  bool? isCurrentUserAttending,
   List<EventAttendanceDetails> attendanceDetailsList = const [],
 }) {
   return MatchDetails(
@@ -159,32 +156,7 @@ MatchDetails _match({
     awayTeamScore: awayScore,
     isHomeTeam: isHomeTeam,
     isCurrentUserRegistered: isCurrentUserRegistered,
+    isCurrentUserAttending: isCurrentUserAttending,
     attendanceDetailsList: attendanceDetailsList,
-  );
-}
-
-EventAttendanceDetails _attendance({
-  required int id,
-  required int userId,
-  required String name,
-  required bool isAttending,
-}) {
-  final now = DateTime.utc(2026, 1, 1);
-
-  return EventAttendanceDetails(
-    id: id,
-    userDetails: UserDetails(
-      id: userId,
-      name: name,
-      email: 'user$userId@example.com',
-      isTeamOwner: false,
-      roleId: 3,
-      createdAt: now,
-      updatedAt: now,
-      teamDetails: null,
-    ),
-    isAttending: isAttending,
-    createdAt: now,
-    updatedAt: now,
   );
 }

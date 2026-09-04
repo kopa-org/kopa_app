@@ -125,9 +125,9 @@ class MatchDetails {
   }
 
   bool canSetFinalScore(UserDetails user, {DateTime? now}) {
-    return user.isTeamOwner &&
-        isPostMatchAt(now ?? DateTime.now()) &&
-        !hasFinalScore;
+    // Keep the optional clock for callers that provide deterministic timing;
+    // result entry is intentionally not gated by it.
+    return user.isTeamOwner && !hasFinalScore;
   }
 
   List<EventAttendanceDetails> get attendingAttendanceDetails {
