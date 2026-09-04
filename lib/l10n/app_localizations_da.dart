@@ -64,6 +64,15 @@ class AppLocalizationsDa extends AppLocalizations {
   String get matchEventChooseEvent => 'Vælg begivenhed';
 
   @override
+  String get matchTimelineKickoff => 'Kampstart';
+
+  @override
+  String get matchTimelineHalftime => 'Pause';
+
+  @override
+  String get matchTimelineFullTime => 'Kamp slut';
+
+  @override
   String get commonCancel => 'Annuller';
 
   @override

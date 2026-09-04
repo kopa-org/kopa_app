@@ -64,6 +64,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get matchEventChooseEvent => 'Choose event';
 
   @override
+  String get matchTimelineKickoff => 'Kick-off';
+
+  @override
+  String get matchTimelineHalftime => 'Half-time';
+
+  @override
+  String get matchTimelineFullTime => 'Full time';
+
+  @override
   String get commonCancel => 'Cancel';
 
   @override

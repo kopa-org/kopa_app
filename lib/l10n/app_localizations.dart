@@ -206,6 +206,24 @@ abstract class AppLocalizations {
   /// **'Choose event'**
   String get matchEventChooseEvent;
 
+  /// No description provided for @matchTimelineKickoff.
+  ///
+  /// In en, this message translates to:
+  /// **'Kick-off'**
+  String get matchTimelineKickoff;
+
+  /// No description provided for @matchTimelineHalftime.
+  ///
+  /// In en, this message translates to:
+  /// **'Half-time'**
+  String get matchTimelineHalftime;
+
+  /// No description provided for @matchTimelineFullTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Full time'**
+  String get matchTimelineFullTime;
+
   /// No description provided for @commonCancel.
   ///
   /// In en, this message translates to:

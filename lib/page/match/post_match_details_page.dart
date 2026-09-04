@@ -4,6 +4,7 @@ import 'package:kopa/component/button/button.dart';
 import 'package:kopa/component/card/kopa_card.dart';
 import 'package:kopa/component/match/player_of_match_summary_card.dart';
 import 'package:kopa/component/timeline/timeline_item.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/match_event_details.dart';
 import 'package:kopa/model/match_event_type.dart';
@@ -41,6 +42,8 @@ class PostMatchDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return MatchDetailTemplate(
       onRefresh: onRefresh,
       selectedSegment: selectedSegment,
@@ -65,7 +68,7 @@ class PostMatchDetailsPage extends StatelessWidget {
         ),
         const SizedBox(height: Spacing.lg),
         _MatchTimelineSection(
-          items: _buildTimelineItems(match),
+          items: _buildTimelineItems(match, l10n),
           canAddEvent: user.isTeamOwner,
           onAddEvent: onAddEvent,
         ),
@@ -79,26 +82,98 @@ class PostMatchDetailsPage extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildTimelineItems(MatchDetails match) {
-    final events = List<MatchEventDetails>.from(
-      match.matchEventDetailsList ?? const [],
-    )..sort((a, b) => (a.minute ?? 0).compareTo(b.minute ?? 0));
+  List<Widget> _buildTimelineItems(
+    MatchDetails match,
+    AppLocalizations l10n,
+  ) {
+    final entries = <_MatchTimelineEntry>[
+      _MatchTimelineEntry.phase(
+        minute: 0,
+        sortOrder: -1,
+        title: l10n.matchTimelineKickoff,
+        icon: Icons.play_arrow,
+      ),
+      ...(match.matchEventDetailsList ?? const [])
+          .map(_MatchTimelineEntry.event),
+      _MatchTimelineEntry.phase(
+        minute: 45,
+        sortOrder: 1,
+        title: l10n.matchTimelineHalftime,
+        icon: Icons.pause,
+      ),
+      _MatchTimelineEntry.phase(
+        minute: 90,
+        sortOrder: 1,
+        title: l10n.matchTimelineFullTime,
+        icon: Icons.flag,
+      ),
+    ]..sort((a, b) {
+        final minuteComparison = a.minute.compareTo(b.minute);
+        if (minuteComparison != 0) return minuteComparison;
+        return a.sortOrder.compareTo(b.sortOrder);
+      });
 
-    if (events.isEmpty) return [];
-
-    return events.indexed.map((entry) {
-      final event = entry.$2;
-      final item = _TimelineEventItem.from(event);
+    return entries.indexed.map((entry) {
+      final item = entry.$2;
 
       return TimelineItem(
         title: item.title,
-        time: item.timeLabel,
+        time: item.time,
         icon: item.icon,
         iconColor: item.iconColor,
-        isLast: entry.$1 == events.length - 1,
+        isLast: entry.$1 == entries.length - 1,
         subtitle: item.subtitle,
       );
     }).toList();
+  }
+}
+
+class _MatchTimelineEntry {
+  final int minute;
+  final int sortOrder;
+  final String title;
+  final String? subtitle;
+  final String time;
+  final IconData icon;
+  final Color? iconColor;
+
+  const _MatchTimelineEntry({
+    required this.minute,
+    required this.sortOrder,
+    required this.title,
+    required this.time,
+    required this.icon,
+    this.subtitle,
+    this.iconColor,
+  });
+
+  factory _MatchTimelineEntry.phase({
+    required int minute,
+    required int sortOrder,
+    required String title,
+    required IconData icon,
+  }) {
+    return _MatchTimelineEntry(
+      minute: minute,
+      sortOrder: sortOrder,
+      title: title,
+      time: '$minute\'',
+      icon: icon,
+    );
+  }
+
+  factory _MatchTimelineEntry.event(MatchEventDetails event) {
+    final item = _TimelineEventItem.from(event);
+
+    return _MatchTimelineEntry(
+      minute: event.minute ?? 0,
+      sortOrder: 0,
+      title: item.title,
+      subtitle: item.subtitle,
+      time: item.timeLabel,
+      icon: item.icon,
+      iconColor: item.iconColor,
+    );
   }
 }
 
