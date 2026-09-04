@@ -35,7 +35,7 @@ class UpdateRequiredPage extends StatelessWidget {
   const UpdateRequiredPage({super.key});
 
   static final Uri _androidUpdateUri =
-      Uri.parse('https://play.google.com/apps/testing/dk.kopa.app');
+      Uri.parse('https://play.google.com/store/apps/details?id=dk.kopa.app');
   static final Uri _iosUpdateUri =
       Uri.parse('https://testflight.apple.com/join/cXrT8De7');
   static final Uri _fallbackUpdateUri = Uri.parse('https://kopa.dk');
