@@ -160,10 +160,10 @@ class _InFormCallout extends StatelessWidget {
 
     return Material(
       color: colors.lightGrass,
-      borderRadius: BorderRadius.circular(22),
+      borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(18),
           child: Row(
@@ -246,11 +246,12 @@ class _PlayerPlusStatsSection extends StatelessWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: tiles.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               mainAxisSpacing: 12,
               crossAxisSpacing: 12,
-              childAspectRatio: 1.04,
+              mainAxisExtent:
+                  175 + (MediaQuery.textScalerOf(context).scale(100) - 100),
             ),
             itemBuilder: (context, index) => _PlayerPlusStatTile(
               tile: tiles[index],
@@ -271,21 +272,21 @@ class _PlayerPlusStatsSection extends StatelessWidget {
         value: stats.player.goalsScored.toString(),
         rows: stats.leaderboards.topScorers,
         icon: Icons.sports_score,
-        accentColor: appColors.sky,
+        accentColor: appColors.dirt,
       ),
       _leaderboardTile(
         title: 'Assists',
         value: stats.player.assists.toString(),
         rows: stats.leaderboards.assists,
         icon: Icons.handshake,
-        accentColor: appColors.success,
+        accentColor: appColors.dirt,
       ),
       _leaderboardTile(
         title: 'Kampe',
         value: stats.player.matchesPlayed.toString(),
         rows: stats.leaderboards.matchesPlayed,
         icon: Icons.sports_soccer,
-        accentColor: appColors.sunset,
+        accentColor: appColors.dirt,
       ),
       _leaderboardTile(
         title: 'Stemmer',
@@ -343,7 +344,7 @@ class _PlayerPlusStatsSection extends StatelessWidget {
       value: currentRow?.value ?? '-',
       rows: rows,
       icon: Icons.local_fire_department,
-      accentColor: appColors.error,
+      accentColor: appColors.dirt,
     );
   }
 

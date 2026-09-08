@@ -65,4 +65,41 @@ class MatchPollsRepository {
 
     return json['id'];
   }
+
+  static Future<MatchPollDetails> updateMatchPoll(
+      int matchPollId, List<UserVote> userVotes) async {
+    final url = Uri.parse('${ApiConfig.baseUrl}/match/matchpoll/$matchPollId');
+
+    final response = await _apiClient.patchJson(
+      url,
+      body: {
+        'create_match_poll_user_vote_commands': jsonEncode(
+          userVotes
+              .map(
+                (userVote) => {
+                  'user_id': userVote.userId.toString(),
+                  'user_votes': userVote.votes.toString(),
+                },
+              )
+              .toList(),
+        ),
+      },
+    );
+
+    if (response.statusCode == 401) {
+      throw Exception('Unauthorized. Please log in again.');
+    }
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update match poll');
+    }
+
+    final decoded = jsonDecode(response.body);
+    final poll = decoded['poll'];
+    if (poll is! Map) {
+      throw Exception('Updated match poll was not returned');
+    }
+
+    return MatchPollDetails.fromJson(Map<String, dynamic>.from(poll));
+  }
 }

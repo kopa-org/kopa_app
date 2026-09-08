@@ -28,22 +28,19 @@ class SectionHeader extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            title,
-            style: appTextStyles.sectionHeader,
-          ),
+          Expanded(child: Text(title, style: appTextStyles.sectionHeader)),
           if (actionText != null && onActionPressed != null)
             TextButton(
               onPressed: onActionPressed,
               style: TextButton.styleFrom(
                 padding: EdgeInsets.zero,
-                minimumSize: const Size(50, 30),
+                minimumSize: const Size(48, 48),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
               child: Text(
                 actionText!,
                 style: appTextStyles.bodyBold.copyWith(
-                  color: appColors.primary,
+                  color: appColors.successForeground,
                 ),
               ),
             ),

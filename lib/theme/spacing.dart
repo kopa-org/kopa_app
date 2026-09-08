@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class Spacing {
   static const double xs = 4;
   static const double sm = 8;
+  static const double itemGap = 12;
   static const double md = 16;
   static const double lg = 24;
   static const double xl = 32;
@@ -24,7 +25,7 @@ class Spacing {
     vertical: 12,
   );
 
-  static const double borderRadius = 12;
+  static const double borderRadius = 16;
   static const double borderRadiusExtraSmall = 4;
   static const double borderRadiusSmall = 8;
   static const double borderRadiusMedium = 12;

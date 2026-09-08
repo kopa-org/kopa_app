@@ -1775,12 +1775,12 @@ class _TextInput extends StatelessWidget {
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: colors.primary, width: 1.5),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: colors.primary, width: 1.5),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: colors.primary, width: 2),
         ),
       ),
     );
@@ -1821,7 +1821,7 @@ class _SearchInput extends StatelessWidget {
             const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFD1D6E0)),
+          borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -1881,14 +1881,6 @@ class _OnboardingCard extends StatelessWidget {
           padding: padding,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFD1D6E0), width: 0.5),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
-                blurRadius: 8,
-                offset: const Offset(0, 8),
-              ),
-            ],
           ),
           child: child,
         ),
@@ -1962,7 +1954,7 @@ class _BottomActionBar extends StatelessWidget {
                         dimension: 18,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: colors.white,
+                          color: colors.dirt,
                         ),
                       )
                     : Icon(icon, size: 18),
@@ -1980,17 +1972,14 @@ class _BottomActionBar extends StatelessWidget {
 
   ButtonStyle get _buttonStyle {
     return FilledButton.styleFrom(
-      minimumSize: const Size.fromHeight(47),
-      backgroundColor: colors.primary,
-      foregroundColor: colors.white,
-      disabledBackgroundColor: colors.grey3,
-      disabledForegroundColor: colors.white,
-      textStyle: textStyles.body1.copyWith(
-        fontWeight: FontWeight.w800,
-        color: colors.white,
-      ),
+      minimumSize: const Size.fromHeight(48),
+      backgroundColor: colors.lightGrass,
+      foregroundColor: colors.dirt,
+      disabledBackgroundColor: colors.offWhite,
+      disabledForegroundColor: colors.textSecondary,
+      textStyle: textStyles.button,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
       ),
     );
   }

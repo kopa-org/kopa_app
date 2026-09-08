@@ -7,6 +7,8 @@ import 'package:kopa/component/match_poll_row_item.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/cubits/match_polls_cubit.dart';
 import 'package:kopa/cubits/match_polls_state.dart';
+import 'package:kopa/l10n/app_localizations.dart';
+import 'package:kopa/model/match_poll_details.dart';
 import 'package:kopa/model/user_vote.dart';
 import 'package:kopa/state/user_votes_state.dart';
 import 'package:kopa/theme/app_colors.dart';
@@ -41,7 +43,14 @@ PageRoute<T> createMatchPollPageRoute<T>({required Widget child}) {
 }
 
 class CreateMatchPollPage extends StatefulWidget {
-  const CreateMatchPollPage({super.key});
+  final MatchPollDetails? initialPoll;
+
+  const CreateMatchPollPage({
+    super.key,
+    this.initialPoll,
+  });
+
+  bool get isEditing => initialPoll != null;
 
   @override
   State<CreateMatchPollPage> createState() => _CreateMatchPollPageState();
@@ -64,6 +73,7 @@ class _CreateMatchPollPageState extends State<CreateMatchPollPage> {
   Widget build(BuildContext context) {
     var userVotes = context.watch<UserVotesState>().userVotes;
     final state = context.watch<MatchPollsCubit>().state;
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
@@ -73,7 +83,9 @@ class _CreateMatchPollPageState extends State<CreateMatchPollPage> {
     final safeIdx = _safeIndex(state.matches.length);
 
     return PageScaffold(
-      title: 'Tilføj afstemning',
+      title: widget.isEditing
+          ? l10n.matchPollEditTitle
+          : l10n.matchPollCreateTitle,
       showBackButton: true,
       body: Stack(
         children: [
@@ -116,11 +128,11 @@ class _CreateMatchPollPageState extends State<CreateMatchPollPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Stem på kampens spiller',
+                                  l10n.matchPollTitle,
                                   style: appTextStyles.sectionHeader,
                                 ),
                                 Text(
-                                  'Fordel stemmer med + og -',
+                                  l10n.matchPollInstruction,
                                   style: appTextStyles.caption,
                                 ),
                               ],
@@ -165,8 +177,13 @@ class _CreateMatchPollPageState extends State<CreateMatchPollPage> {
                   Spacing.md,
                 ),
                 child: Button(
-                  buttonText:
-                      state.isSubmitting ? 'Opretter...' : 'Opret afstemning',
+                  buttonText: state.isSubmitting
+                      ? (widget.isEditing
+                          ? l10n.matchPollSaving
+                          : l10n.matchPollCreating)
+                      : (widget.isEditing
+                          ? l10n.matchPollSaveAction
+                          : l10n.matchPollCreateAction),
                   width: double.infinity,
                   enabled: !state.isSubmitting && hasMatches,
                   onPressed: () => _submitPoll(safeIdx, userVotes),
@@ -183,17 +200,22 @@ class _CreateMatchPollPageState extends State<CreateMatchPollPage> {
     final matchPollsCubit = context.read<MatchPollsCubit>();
     final userVotesState = context.read<UserVotesState>();
     final navigator = Navigator.of(context);
-    final createdMatchPollDetails = await matchPollsCubit.createMatchPoll(
-      selectedMatchIndex: safeIdx,
-      userVotes: userVotes,
-    );
+    final updatedOrCreatedPoll = widget.initialPoll == null
+        ? await matchPollsCubit.createMatchPoll(
+            selectedMatchIndex: safeIdx,
+            userVotes: userVotes,
+          )
+        : await matchPollsCubit.updateMatchPoll(
+            matchPollId: widget.initialPoll!.id,
+            userVotes: userVotes,
+          );
 
     if (!mounted) return;
 
     final errorMessage = matchPollsCubit.state.formErrorMessage;
-    if (createdMatchPollDetails != null) {
+    if (updatedOrCreatedPoll != null) {
       userVotesState.removeAllUserVotes();
-      navigator.pop(createdMatchPollDetails);
+      navigator.pop(updatedOrCreatedPoll);
     } else if (errorMessage != null) {
       await _showError(errorMessage);
       if (mounted) {
@@ -203,14 +225,16 @@ class _CreateMatchPollPageState extends State<CreateMatchPollPage> {
   }
 
   Future<void> _showError(String message) {
+    final l10n = AppLocalizations.of(context)!;
+
     return showCupertinoDialog(
       context: context,
       builder: (BuildContext modalContext) => CupertinoAlertDialog(
-        title: const Text('Fejl'),
+        title: Text(l10n.matchPollErrorTitle),
         content: Text(message),
         actions: [
           CupertinoDialogAction(
-            child: const Text('OK'),
+            child: Text(l10n.commonOk),
             onPressed: () => Navigator.of(modalContext).pop(),
           ),
         ],
@@ -222,8 +246,12 @@ class _CreateMatchPollPageState extends State<CreateMatchPollPage> {
     List<MatchPollRowItem> matchPollRowItems = [];
 
     for (var user in state.squad) {
-      var matchPollItem =
-          MatchPollRowItem(userId: user.id, userName: user.name);
+      var matchPollItem = MatchPollRowItem(
+        userId: user.id,
+        userName: user.name,
+        isUserPlayerOfTheMatch:
+            widget.initialPoll?.playerOfTheMatchDetails.id == user.id,
+      );
 
       matchPollRowItems.add(matchPollItem);
     }

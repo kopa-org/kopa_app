@@ -433,7 +433,7 @@ class _HeroCountdownPart extends StatelessWidget {
           suffix,
           style: style.copyWith(
             fontSize: 11,
-            fontWeight: FontWeight.w900,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ],
@@ -743,7 +743,7 @@ class _HeroTeamPanel extends StatelessWidget {
                             title,
                             style: appTextStyles.caption.copyWith(
                               color: appColors.dirt,
-                              fontWeight: FontWeight.w900,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ),
@@ -980,7 +980,7 @@ class _MatchInfoListRow extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: appTextStyles.body4.copyWith(
                   color: _MatchInfoList._actionColor,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             )
@@ -1203,7 +1203,7 @@ class _MatchSignupSummary extends StatelessWidget {
             '$count',
             style: appTextStyles.subtitle2.copyWith(
               color: appColors.dirt,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(width: 3),
@@ -1338,7 +1338,7 @@ TextStyle _displayStyle(BuildContext context) {
   final appTextStyles =
       Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
   return appTextStyles.h2.copyWith(
-    fontWeight: FontWeight.w900,
+    fontWeight: FontWeight.w700,
   );
 }
 

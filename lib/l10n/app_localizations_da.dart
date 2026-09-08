@@ -9,6 +9,24 @@ class AppLocalizationsDa extends AppLocalizations {
   AppLocalizationsDa([String locale = 'da']) : super(locale);
 
   @override
+  String get matchScoreHome => 'Hjemme';
+
+  @override
+  String get matchScoreAway => 'Ude';
+
+  @override
+  String get matchScoreHelp => 'Indtast slutresultatet for hvert hold.';
+
+  @override
+  String get matchScoreSave => 'Gem resultat';
+
+  @override
+  String get matchScoreSaveFailed => 'Resultatet kunne ikke gemmes. Prøv igen.';
+
+  @override
+  String get commonGoTo => 'Gå til';
+
+  @override
   String get onboardingTitle => 'Kom i gang med Kopa';
 
   @override
@@ -145,4 +163,59 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String get teamLogoSaveFailure => 'Kunne ikke gemme holdlogoet.';
+
+  @override
+  String get matchPollTitle => 'Kampens spiller';
+
+  @override
+  String get matchPollInstruction => 'Fordel stemmer med + og -';
+
+  @override
+  String matchPollTotalVotes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'I alt: $count stemmer',
+      one: 'I alt: 1 stemme',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String matchPollVoteCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count stemmer',
+      one: '1 stemme',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get matchPollEdit => 'Rediger afstemning';
+
+  @override
+  String get matchPollCreateTitle => 'Tilføj afstemning';
+
+  @override
+  String get matchPollEditTitle => 'Rediger afstemning';
+
+  @override
+  String get matchPollCreateAction => 'Opret afstemning';
+
+  @override
+  String get matchPollSaveAction => 'Gem ændringer';
+
+  @override
+  String get matchPollCreating => 'Opretter...';
+
+  @override
+  String get matchPollSaving => 'Gemmer...';
+
+  @override
+  String get matchPollUnknownPlayer => 'Ukendt spiller';
+
+  @override
+  String get matchPollErrorTitle => 'Fejl';
 }

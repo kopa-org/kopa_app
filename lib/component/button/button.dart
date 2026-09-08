@@ -1,15 +1,18 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
+
+enum ButtonVariant { primary, secondary, tertiary, destructive }
 
 class Button extends StatelessWidget {
   final String buttonText;
   final VoidCallback onPressed;
   final bool outlined;
   final bool enabled;
+  final bool loading;
   final IconData? icon;
   final double? width;
+  final ButtonVariant variant;
 
   const Button({
     super.key,
@@ -17,65 +20,63 @@ class Button extends StatelessWidget {
     required this.onPressed,
     this.outlined = false,
     this.enabled = true,
+    this.loading = false,
     this.icon,
     this.width,
+    this.variant = ButtonVariant.primary,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final appColors = theme.extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final colors = theme.extension<AppColors>() ?? AppColors.light;
+    final styles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final role = outlined ? ButtonVariant.secondary : variant;
+    final foreground = role == ButtonVariant.destructive
+        ? colors.errorForeground
+        : colors.dirt;
+    final background = switch (role) {
+      ButtonVariant.primary => colors.lightGrass,
+      ButtonVariant.secondary => colors.surface,
+      ButtonVariant.tertiary => Colors.transparent,
+      ButtonVariant.destructive => colors.errorSurface,
+    };
 
-    final Color bgColor = outlined
-        ? appColors.surface
-        : (enabled ? appColors.primary : appColors.divider);
-
-    final Color textColor = outlined
-        ? (enabled ? appColors.primary : appColors.textSecondary)
-        : (enabled ? Colors.white : appColors.textSecondary);
-
-    return Semantics(
-      button: true,
-      enabled: enabled,
-      child: CupertinoButton(
-        padding: EdgeInsets.zero,
-        onPressed: enabled ? onPressed : null,
-        child: AnimatedOpacity(
-          duration: const Duration(milliseconds: 150),
-          opacity: enabled ? 1.0 : 0.5,
-          child: Container(
-            width: width,
-            decoration: BoxDecoration(
-              color: bgColor,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding:
-                const EdgeInsets.symmetric(vertical: 15.0, horizontal: 30.0),
-            child: Row(
-              mainAxisSize: width == double.infinity
-                  ? MainAxisSize.max
-                  : MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (icon != null) ...[
-                  Icon(
-                    icon,
-                    color: textColor,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 5),
-                ],
-                Text(
-                  buttonText,
-                  style: appTextStyles.button.copyWith(
-                    color: textColor,
-                  ),
-                ),
-              ],
-            ),
-          ),
+    return SizedBox(
+      width: width,
+      child: FilledButton(
+        onPressed: enabled && !loading ? onPressed : null,
+        style: FilledButton.styleFrom(
+          backgroundColor: background,
+          foregroundColor: foreground,
+          disabledBackgroundColor: colors.offWhite,
+          disabledForegroundColor: colors.textSecondary,
+          minimumSize: const Size(48, 48),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          textStyle: styles.button,
+          elevation: 0,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        child: Row(
+          mainAxisSize:
+              width == double.infinity ? MainAxisSize.max : MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (loading) ...[
+              SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                    strokeWidth: 2, color: foreground),
+              ),
+              const SizedBox(width: 8),
+            ] else if (icon != null) ...[
+              Icon(icon, size: 20),
+              const SizedBox(width: 8),
+            ],
+            Flexible(child: Text(buttonText, textAlign: TextAlign.center)),
+          ],
         ),
       ),
     );

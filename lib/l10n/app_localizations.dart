@@ -98,6 +98,42 @@ abstract class AppLocalizations {
     Locale('en')
   ];
 
+  /// No description provided for @matchScoreHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get matchScoreHome;
+
+  /// No description provided for @matchScoreAway.
+  ///
+  /// In en, this message translates to:
+  /// **'Away'**
+  String get matchScoreAway;
+
+  /// No description provided for @matchScoreHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the final score for each team.'**
+  String get matchScoreHelp;
+
+  /// No description provided for @matchScoreSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save result'**
+  String get matchScoreSave;
+
+  /// No description provided for @matchScoreSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the result. Please try again.'**
+  String get matchScoreSaveFailed;
+
+  /// No description provided for @commonGoTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to'**
+  String get commonGoTo;
+
   /// No description provided for @onboardingTitle.
   ///
   /// In en, this message translates to:
@@ -361,6 +397,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not save the team logo.'**
   String get teamLogoSaveFailure;
+
+  /// No description provided for @matchPollTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Player of the match'**
+  String get matchPollTitle;
+
+  /// No description provided for @matchPollInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Distribute votes with + and -'**
+  String get matchPollInstruction;
+
+  /// No description provided for @matchPollTotalVotes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1 {Total: 1 vote} other {Total: {count} votes}}'**
+  String matchPollTotalVotes(int count);
+
+  /// No description provided for @matchPollVoteCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1 {1 vote} other {{count} votes}}'**
+  String matchPollVoteCount(int count);
+
+  /// No description provided for @matchPollEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit poll'**
+  String get matchPollEdit;
+
+  /// No description provided for @matchPollCreateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add poll'**
+  String get matchPollCreateTitle;
+
+  /// No description provided for @matchPollEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit poll'**
+  String get matchPollEditTitle;
+
+  /// No description provided for @matchPollCreateAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create poll'**
+  String get matchPollCreateAction;
+
+  /// No description provided for @matchPollSaveAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get matchPollSaveAction;
+
+  /// No description provided for @matchPollCreating.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating...'**
+  String get matchPollCreating;
+
+  /// No description provided for @matchPollSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving...'**
+  String get matchPollSaving;
+
+  /// No description provided for @matchPollUnknownPlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown player'**
+  String get matchPollUnknownPlayer;
+
+  /// No description provided for @matchPollErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get matchPollErrorTitle;
 }
 
 class _AppLocalizationsDelegate

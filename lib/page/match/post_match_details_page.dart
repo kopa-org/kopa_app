@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/card/kopa_card.dart';
+import 'package:kopa/component/match/match_poll_details_card.dart';
 import 'package:kopa/component/match/player_of_match_summary_card.dart';
 import 'package:kopa/component/match/match_result_action_card.dart';
 import 'package:kopa/component/timeline/timeline_item.dart';
@@ -19,10 +20,12 @@ class PostMatchDetailsPage extends StatelessWidget {
   final UserDetails user;
   final Widget heroCard;
   final List<Widget> attendanceList;
+  final List<UserDetails> squad;
   final Future<void> Function()? onRefresh;
   final VoidCallback onAddEvent;
   final VoidCallback onSetMatchScore;
   final VoidCallback onCreateMatchPoll;
+  final VoidCallback? onEditMatchPoll;
   final MatchDetailSegment selectedSegment;
   final ValueChanged<MatchDetailSegment> onSegmentChanged;
 
@@ -32,9 +35,11 @@ class PostMatchDetailsPage extends StatelessWidget {
     required this.user,
     required this.heroCard,
     required this.attendanceList,
+    this.squad = const [],
     required this.onAddEvent,
     required this.onSetMatchScore,
     required this.onCreateMatchPoll,
+    this.onEditMatchPoll,
     required this.selectedSegment,
     required this.onSegmentChanged,
     this.onRefresh,
@@ -61,11 +66,17 @@ class PostMatchDetailsPage extends StatelessWidget {
           MatchResultActionCard(onPressed: onSetMatchScore),
           const SizedBox(height: Spacing.lg),
         ],
-        PlayerOfMatchSummaryCard(
-          playerName: match.matchPollDetails?.playerOfTheMatchDetails.name,
-          voteCount: match.matchPollDetails?.playerOfTheMatchVotes,
-          onPressed: match.matchPollDetails == null ? onCreateMatchPoll : null,
-        ),
+        if (match.matchPollDetails == null)
+          PlayerOfMatchSummaryCard(
+            playerName: null,
+            onPressed: user.isTeamOwner ? onCreateMatchPoll : null,
+          )
+        else
+          MatchPollDetailsCard(
+            poll: match.matchPollDetails!,
+            squad: squad,
+            onEdit: user.isTeamOwner ? onEditMatchPoll : null,
+          ),
         const SizedBox(height: Spacing.lg),
         _MatchTimelineSection(
           items: _buildTimelineItems(match, l10n),

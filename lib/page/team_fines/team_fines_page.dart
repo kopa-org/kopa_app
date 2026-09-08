@@ -620,7 +620,7 @@ class _FineHeader extends StatelessWidget {
                   title,
                   style: appTextStyles.h5.copyWith(
                     color: appColors.textPrimary,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
@@ -699,7 +699,7 @@ class _SegmentChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           color: selected ? appColors.grey2 : appColors.surface,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: selected ? appColors.success : appColors.surface,
           ),
@@ -761,7 +761,7 @@ class _KpiCard extends StatelessWidget {
                       _formatAmount(amount),
                       style: appTextStyles.h3.copyWith(
                         color: amountColor,
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ],
@@ -815,7 +815,7 @@ class _InlineAmount extends StatelessWidget {
             text: '${amount.toStringAsFixed(0)} kr',
             style: TextStyle(
               color: amountColor ?? appColors.textPrimary,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],
@@ -849,7 +849,7 @@ class _PrimaryActionButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         decoration: BoxDecoration(
           color: appColors.success,
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -860,7 +860,7 @@ class _PrimaryActionButton extends StatelessWidget {
               label,
               style: appTextStyles.subtitle2.copyWith(
                 color: appColors.surface,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],
@@ -909,7 +909,7 @@ class _SecondaryActionButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           color: appColors.surface,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -951,7 +951,7 @@ class _SectionCard extends StatelessWidget {
 
   const _SectionCard({
     required this.child,
-    this.padding = const EdgeInsets.all(20),
+    this.padding = const EdgeInsets.all(16),
   });
 
   @override
@@ -963,14 +963,7 @@ class _SectionCard extends StatelessWidget {
       padding: padding,
       decoration: BoxDecoration(
         color: appColors.surface,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: appColors.black.withValues(alpha: .03),
-            blurRadius: 8,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(16),
       ),
       child: child,
     );
@@ -1002,7 +995,7 @@ class _SectionTitleRow extends StatelessWidget {
             title,
             style: appTextStyles.subtitle2.copyWith(
               color: appColors.textPrimary,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ),
@@ -1015,7 +1008,7 @@ class _SectionTitleRow extends StatelessWidget {
               actionLabel!,
               style: appTextStyles.caption2.copyWith(
                 color: appColors.primary,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),
@@ -1051,14 +1044,14 @@ class _OffenderCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: appTextStyles.caption2.copyWith(
               color: appColors.textPrimary,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
             ),
           ),
           Text(
             '${summary.unpaidAmount} kr',
             style: appTextStyles.caption2.copyWith(
               color: appColors.error,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],
@@ -1098,7 +1091,7 @@ class _RecentFineRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: appTextStyles.body3.copyWith(
                     color: appColors.textPrimary,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 Text(
@@ -1114,7 +1107,7 @@ class _RecentFineRow extends StatelessWidget {
             '${row.fine.owedAmount} kr',
             style: appTextStyles.subtitle2.copyWith(
               color: appColors.error,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],
@@ -1155,7 +1148,7 @@ class _PersonalStatTile extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: appTextStyles.caption3.copyWith(
                 color: appColors.textSecondary,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(height: 4),
@@ -1164,7 +1157,7 @@ class _PersonalStatTile extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: appTextStyles.subtitle1.copyWith(
                 color: valueColor ?? appColors.textPrimary,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],
@@ -1218,7 +1211,7 @@ class _SelectableFineRow extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: appTextStyles.body3.copyWith(
                       color: appColors.textPrimary,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                   Text(
@@ -1234,7 +1227,7 @@ class _SelectableFineRow extends StatelessWidget {
               '${fine.owedAmount} kr',
               style: appTextStyles.subtitle2.copyWith(
                 color: selected ? appColors.primary : appColors.error,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],
@@ -1303,14 +1296,14 @@ class _HistoryFineRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: appTextStyles.body3.copyWith(
                     color: appColors.textPrimary,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 Text(
                   '${fine.owedAmount} kr',
                   style: appTextStyles.body3.copyWith(
                     color: appColors.error,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
@@ -1347,7 +1340,7 @@ class _DatePill extends StatelessWidget {
             date.day.toString().padLeft(2, '0'),
             style: appTextStyles.caption2.copyWith(
               color: appColors.textSecondary,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
             ),
           ),
           Text(
@@ -1399,7 +1392,7 @@ class _FineTypeRowState extends State<_FineTypeRow> {
             height: 36,
             decoration: BoxDecoration(
               color: appColors.grey2,
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(16),
             ),
             child: Icon(CupertinoIcons.tag, color: appColors.primary, size: 18),
           ),
@@ -1410,7 +1403,7 @@ class _FineTypeRowState extends State<_FineTypeRow> {
               overflow: TextOverflow.ellipsis,
               style: appTextStyles.body3.copyWith(
                 color: appColors.textPrimary,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),
@@ -1418,7 +1411,7 @@ class _FineTypeRowState extends State<_FineTypeRow> {
             '${widget.fineType.defaultAmount} kr',
             style: appTextStyles.subtitle2.copyWith(
               color: appColors.error,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(width: 4),
@@ -1561,7 +1554,7 @@ class _MobilePaySetupPanel extends StatelessWidget {
                 'MobilePay Box mangler',
                 style: appTextStyles.subtitle2.copyWith(
                   color: appColors.textPrimary,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: 4),
@@ -1628,7 +1621,7 @@ class _MiniActionButton extends StatelessWidget {
               label,
               style: appTextStyles.buttonSmall.copyWith(
                 color: appColors.surface,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],
@@ -1704,7 +1697,7 @@ class _PaymentFooter extends StatelessWidget {
                   '$selectedAmount kr',
                   style: appTextStyles.subtitle1.copyWith(
                     color: appColors.primary,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
@@ -1734,7 +1727,7 @@ class _PaymentFooter extends StatelessWidget {
                   color: onCashPaid == null
                       ? appColors.textSecondary.withValues(alpha: .45)
                       : appColors.textSecondary,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w700,
                   decoration: TextDecoration.underline,
                 ),
               ),
@@ -1832,7 +1825,7 @@ class _MobilePaySetupModalState extends State<_MobilePaySetupModal> {
               'MobilePay Box',
               style: appTextStyles.h5.copyWith(
                 color: appColors.textPrimary,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(height: 6),
@@ -1907,7 +1900,7 @@ class _SmallBadge extends StatelessWidget {
         label,
         style: appTextStyles.caption3.copyWith(
           color: textColor,
-          fontWeight: FontWeight.w900,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );
@@ -1939,7 +1932,7 @@ class _Avatar extends StatelessWidget {
         initials,
         style: appTextStyles.caption2.copyWith(
           color: appColors.success,
-          fontWeight: FontWeight.w900,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );

@@ -10,8 +10,10 @@ import 'package:kopa/model/event_attendance_details.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/match_poll_details.dart';
 import 'package:kopa/model/user_details.dart';
+import 'package:kopa/model/user_vote.dart';
 import 'package:kopa/page/match/add_match_event_modal.dart';
 import 'package:kopa/page/match/lineup_editor_page.dart';
+import 'package:kopa/page/match/match_score_sheet.dart';
 import 'package:kopa/page/match/post_match_details_page.dart';
 import 'package:kopa/page/match_polls/create_match_poll_page.dart';
 import 'package:kopa/repository/match_repository.dart';
@@ -30,7 +32,6 @@ import 'package:kopa/component/list_item/player_list_item.dart';
 import 'package:kopa/component/match/match_result_action_card.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:kopa/l10n/app_localizations.dart';
 
 class MatchDetailsPage extends StatefulWidget {
   final int matchId;
@@ -185,10 +186,12 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         user: user,
         heroCard: heroCard,
         attendanceList: _buildAttendanceList(matchDetails, squad, user),
+        squad: squad,
         onRefresh: _refreshMatchAndSquad,
         onAddEvent: () => addMatchEvent(user),
         onSetMatchScore: () => setMatchScore(matchDetails),
         onCreateMatchPoll: () => _openCreateMatchPoll(matchDetails, squad),
+        onEditMatchPoll: () => _openEditMatchPoll(matchDetails, squad),
         selectedSegment: _selectedSegment,
         onSegmentChanged: _selectSegment,
       );
@@ -214,6 +217,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       showTimelineSegment: false,
       overviewWidgets: [
         if (user.isTeamOwner && !matchDetails.hasFinalScore) ...[
+          SizedBox(height: Spacing.lg),
           MatchResultActionCard(
             onPressed: () => setMatchScore(matchDetails),
           ),
@@ -302,7 +306,48 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     }
   }
 
+  Future<void> _openEditMatchPoll(
+    MatchDetails match,
+    List<UserDetails> squad,
+  ) async {
+    final poll = match.matchPollDetails;
+    if (poll == null) return;
+
+    final initialVotes = poll.matchPollUserVotesDetails
+        .where((vote) => vote.numberOfVotes > 0)
+        .map(
+          (vote) => UserVote(
+            userId: vote.userId,
+            votes: vote.numberOfVotes,
+          ),
+        )
+        .toList();
+
+    final result = await Navigator.of(context).push<MatchPollDetails>(
+      createMatchPollPageRoute<MatchPollDetails>(
+        child: BlocProvider(
+          create: (_) => MatchPollsCubit()
+            ..setData(
+              squad: squad,
+              matches: [match],
+              matchPolls: [poll],
+            ),
+          child: ChangeNotifierProvider(
+            create: (_) => UserVotesState(initialVotes: initialVotes),
+            child: CreateMatchPollPage(initialPoll: poll),
+          ),
+        ),
+      ),
+    );
+
+    if (result != null) {
+      AppAnalytics.logEvent('match_details_motm_updated');
+      await _refreshMatchAndSquad();
+    }
+  }
+
   List<Widget> _buildPracticalInfoRows(MatchDetails matchDetails) {
+    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
     return [
       InfoRow(
         icon: CupertinoIcons.calendar,
@@ -346,8 +391,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
                 ? 'Ikke udtaget'
                 : 'Afventer',
         valueColor: matchDetails.isCurrentUserSelected == true
-            ? const Color(0xFF00964E)
-            : const Color(0xFFF97316),
+            ? colors.successForeground
+            : colors.warningForeground,
       ),
       InfoRow(
         icon: CupertinoIcons.pencil,
@@ -858,128 +903,22 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
   }
 
   Future<void> setMatchScore(MatchDetails match) async {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    final appColors = theme.extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        theme.extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    final homeCtl = TextEditingController(
-      text: (match.homeTeamScore ?? _homeGoals).toString(),
-    );
-    final awayCtl = TextEditingController(
-      text: (match.awayTeamScore ?? _awayGoals).toString(),
-    );
-    final homeNode = FocusNode();
-    final awayNode = FocusNode();
-    bool isSaving = false;
-
-    await showCupertinoModalPopup(
+    final score = await showMatchScoreSheet(
       context: context,
-      builder: (modalContext) => StatefulBuilder(
-        builder: (modalContext, setModalState) {
-          bool valid(String v) => v.isNotEmpty && int.tryParse(v) != null;
-          final canSave = valid(homeCtl.text) && valid(awayCtl.text);
-
-          Future<void> onOk() async {
-            if (!canSave || isSaving) return;
-            setModalState(() => isSaving = true);
-            try {
-              final h = int.parse(homeCtl.text);
-              final a = int.parse(awayCtl.text);
-              await MatchRepository.updateMatchScore(match.id, h, a);
-              AppAnalytics.logEvent('match_score_updated');
-              if (mounted) {
-                setState(() {
-                  _homeGoals = h;
-                  _awayGoals = a;
-                });
-                _refreshMatchAndSquad();
-                if (modalContext.mounted) {
-                  Navigator.of(modalContext).pop();
-                }
-              }
-            } catch (e) {
-              setModalState(() => isSaving = false);
-            }
-          }
-
-          return Container(
-            color: appColors.surface,
-            child: AnimatedPadding(
-              duration: const Duration(milliseconds: 200),
-              padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(modalContext).viewInsets.bottom),
-              child: SafeArea(
-                top: false,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    CupertinoNavigationBar(
-                      backgroundColor: appColors.surface,
-                      middle: Text(l10n.matchScoreDialogTitle,
-                          style: appTextStyles.sectionHeader),
-                      leading: CupertinoButton(
-                          padding: EdgeInsets.zero,
-                          child: Text(l10n.commonCancel,
-                              style: TextStyle(color: appColors.error)),
-                          onPressed: () => Navigator.of(modalContext).pop()),
-                      trailing: CupertinoButton(
-                        padding: EdgeInsets.zero,
-                        onPressed: canSave && !isSaving ? onOk : null,
-                        child: isSaving
-                            ? const CupertinoActivityIndicator()
-                            : Text(l10n.commonOk,
-                                style: TextStyle(
-                                    color: canSave
-                                        ? appColors.primary
-                                        : appColors.divider)),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 32),
-                      child: Row(
-                        children: [
-                          Expanded(
-                              child: _buildScoreField(
-                                  homeCtl, homeNode, awayNode, appColors)),
-                          Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16),
-                              child: Text('—', style: appTextStyles.pageTitle)),
-                          Expanded(
-                              child: _buildScoreField(
-                                  awayCtl, awayNode, null, appColors,
-                                  onSubmitted: onOk)),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
-      ),
+      homeTeam: match.homeTeam,
+      awayTeam: match.awayTeam,
+      homeScore: match.homeTeamScore ?? _homeGoals,
+      awayScore: match.awayTeamScore ?? _awayGoals,
+      onSave: (home, away) =>
+          MatchRepository.updateMatchScore(match.id, home, away),
     );
-  }
-
-  Widget _buildScoreField(TextEditingController ctl, FocusNode node,
-      FocusNode? next, AppColors appColors,
-      {VoidCallback? onSubmitted}) {
-    return CupertinoTextField(
-      controller: ctl,
-      focusNode: node,
-      autofocus: next != null,
-      textAlign: TextAlign.center,
-      keyboardType: TextInputType.number,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-      onSubmitted: (_) =>
-          next != null ? next.requestFocus() : onSubmitted?.call(),
-    );
+    if (score == null || !mounted) return;
+    AppAnalytics.logEvent('match_score_updated');
+    setState(() {
+      _homeGoals = score.$1;
+      _awayGoals = score.$2;
+    });
+    await _refreshMatchAndSquad();
   }
 
   Future<void> addMatchEvent(UserDetails currentUserData) async {
@@ -1097,11 +1036,11 @@ class _PrematchRsvpBar extends StatelessWidget {
     if (isAttending && !isDeclined) {
       return _PrematchRsvpStatusBar(
         message: 'Du er tilmeldt kampen!',
-        messageColor: const Color(0xFF00964E),
-        backgroundColor: const Color(0xFFE8F2ED),
+        messageColor: colors.successForeground,
+        backgroundColor: colors.successSurface,
         icon: CupertinoIcons.checkmark_alt,
         actionText: 'Kan ikke alligevel? Meld afbud',
-        actionColor: const Color(0xFF877B70),
+        actionColor: colors.textSecondary,
         isSaving: isSaving,
         onAction: onDecline,
       );
@@ -1110,10 +1049,10 @@ class _PrematchRsvpBar extends StatelessWidget {
     if (isDeclined) {
       return _PrematchRsvpStatusBar(
         message: 'Du har meldt afbud',
-        messageColor: colors.error,
-        backgroundColor: colors.error.withValues(alpha: 0.10),
+        messageColor: colors.errorForeground,
+        backgroundColor: colors.errorSurface,
         actionText: 'Alligevel klar? Tilmeld dig',
-        actionColor: const Color(0xFF00964E),
+        actionColor: colors.successForeground,
         isSaving: isSaving,
         onAction: onAccept,
       );
@@ -1155,9 +1094,8 @@ class _PrematchRsvpChoiceBar extends StatelessWidget {
           Expanded(
             child: _PrematchRsvpButton(
               label: 'Nej, kan ikke',
-              foregroundColor: const Color(0xFF524438),
-              backgroundColor: Colors.transparent,
-              borderColor: const Color(0xFF524438),
+              foregroundColor: colors.dirt,
+              backgroundColor: colors.offWhite,
               isSaving: isSaving,
               onPressed: onDecline,
             ),
@@ -1167,8 +1105,8 @@ class _PrematchRsvpChoiceBar extends StatelessWidget {
             child: _PrematchRsvpButton(
               label: 'Ja, jeg kommer',
               icon: CupertinoIcons.checkmark_alt,
-              foregroundColor: Colors.white,
-              backgroundColor: colors.primary,
+              foregroundColor: colors.dirt,
+              backgroundColor: colors.lightGrass,
               isSaving: isSaving,
               onPressed: onAccept,
             ),
@@ -1262,7 +1200,6 @@ class _PrematchRsvpButton extends StatelessWidget {
   final IconData? icon;
   final Color foregroundColor;
   final Color backgroundColor;
-  final Color? borderColor;
   final bool isSaving;
   final VoidCallback onPressed;
 
@@ -1273,7 +1210,6 @@ class _PrematchRsvpButton extends StatelessWidget {
     required this.isSaving,
     required this.onPressed,
     this.icon,
-    this.borderColor,
   });
 
   @override
@@ -1285,11 +1221,11 @@ class _PrematchRsvpButton extends StatelessWidget {
       padding: EdgeInsets.zero,
       onPressed: isSaving ? null : onPressed,
       child: Container(
-        height: 48,
+        constraints: const BoxConstraints(minHeight: 48),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: backgroundColor,
-          border: Border.all(color: borderColor ?? backgroundColor),
           borderRadius: BorderRadius.circular(12),
         ),
         child: isSaving
@@ -1308,8 +1244,7 @@ class _PrematchRsvpButton extends StatelessWidget {
                         color: foregroundColor,
                         fontWeight: FontWeight.w800,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 ],
@@ -1561,7 +1496,7 @@ class _AttendanceSelectionActions extends StatelessWidget {
         _AttendanceActionButton(
           icon: CupertinoIcons.xmark,
           color: colors.error,
-          backgroundColor: const Color(0xFFFFEBEE),
+          backgroundColor: colors.errorSurface,
           semanticLabel: 'Afvis $userName',
           onPressed: onReject,
         ),
@@ -1569,7 +1504,7 @@ class _AttendanceSelectionActions extends StatelessWidget {
         _AttendanceActionButton(
           icon: CupertinoIcons.checkmark_alt,
           color: colors.primary,
-          backgroundColor: const Color(0xFFE8F5E9),
+          backgroundColor: colors.successSurface,
           semanticLabel: 'Godkend $userName',
           onPressed: onApprove,
         ),
@@ -1711,9 +1646,10 @@ class _AttendanceSelectionBadge extends StatelessWidget {
     final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final styles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final color = isSelected ? colors.primary : colors.error;
+    final color =
+        isSelected ? colors.successForeground : colors.errorForeground;
     final backgroundColor =
-        isSelected ? const Color(0xFFE8F5E9) : const Color(0xFFFFEBEE);
+        isSelected ? colors.successSurface : colors.errorSurface;
     final icon =
         isSelected ? CupertinoIcons.checkmark_alt : CupertinoIcons.xmark;
     final label = isSelected ? 'Godkendt' : 'Afvist';

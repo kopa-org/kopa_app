@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:kopa/component/card/kopa_card.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 import 'package:kopa/theme/spacing.dart';
@@ -19,25 +21,7 @@ class HomeBentoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-
-    return Container(
-      clipBehavior: clip ? Clip.antiAlias : Clip.none,
-      padding: padding,
-      decoration: BoxDecoration(
-        color: color ?? appColors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: appColors.black.withValues(alpha: 0.06),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: child,
-    );
+    return KopaCard(padding: padding, color: color, clip: clip, child: child);
   }
 }
 
@@ -62,9 +46,9 @@ class HomeBentoSectionTitle extends StatelessWidget {
     final titleWidget = Text(
       title,
       textAlign: TextAlign.left,
-      style: appTextStyles.h5.copyWith(
+      style: appTextStyles.sectionHeader.copyWith(
         color: appColors.dirt,
-        fontWeight: FontWeight.w900,
+        fontWeight: FontWeight.w700,
       ),
     );
 
@@ -83,17 +67,17 @@ class HomeBentoSectionTitle extends StatelessWidget {
           onPressed: onAction,
           style: TextButton.styleFrom(
             foregroundColor: appColors.dirt,
-            minimumSize: const Size(0, 34),
+            minimumSize: const Size(48, 48),
             padding: const EdgeInsets.symmetric(horizontal: 8),
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
           iconAlignment: IconAlignment.end,
           icon: const Icon(Icons.arrow_forward, size: 16),
           label: Text(
-            actionLabel ?? 'Gå til',
-            style: appTextStyles.buttonTiny.copyWith(
+            actionLabel ?? AppLocalizations.of(context)!.commonGoTo,
+            style: appTextStyles.body4.copyWith(
               color: appColors.dirt,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ),

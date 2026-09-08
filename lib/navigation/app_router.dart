@@ -197,11 +197,11 @@ abstract final class AppRouter {
               body: navigationShell,
               bottomNavigationBar: Container(
                 decoration: BoxDecoration(
-                  color: theme.scaffoldBackgroundColor,
+                  color: theme.colorScheme.surface,
                   boxShadow: [
                     BoxShadow(
-                      blurRadius: 20,
-                      color: Colors.black.withValues(alpha: .1),
+                      blurRadius: 12,
+                      color: Colors.black.withValues(alpha: .04),
                     )
                   ],
                 ),
@@ -217,15 +217,14 @@ abstract final class AppRouter {
                       hoverColor:
                           theme.colorScheme.primary.withValues(alpha: 0.1),
                       gap: 8,
-                      activeColor: theme.colorScheme.primary,
+                      activeColor: theme.colorScheme.onPrimaryContainer,
                       iconSize: 24,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
                         vertical: 12,
                       ),
                       duration: const Duration(milliseconds: 400),
-                      tabBackgroundColor:
-                          theme.colorScheme.primary.withValues(alpha: 0.1),
+                      tabBackgroundColor: theme.colorScheme.primaryContainer,
                       color: theme.unselectedWidgetColor,
                       selectedIndex: navigationShell.currentIndex,
                       onTabChange: selectTab,
@@ -238,7 +237,7 @@ abstract final class AppRouter {
                                     tabs[i].materialIcon,
                                     size: 24,
                                     color: navigationShell.currentIndex == i
-                                        ? theme.colorScheme.primary
+                                        ? theme.colorScheme.onPrimaryContainer
                                         : theme.unselectedWidgetColor,
                                   )
                                 : SvgPicture.asset(
@@ -247,7 +246,7 @@ abstract final class AppRouter {
                                     height: 24,
                                     colorFilter: ColorFilter.mode(
                                       navigationShell.currentIndex == i
-                                          ? theme.colorScheme.primary
+                                          ? theme.colorScheme.onPrimaryContainer
                                           : theme.unselectedWidgetColor,
                                       BlendMode.srcIn,
                                     ),

@@ -74,7 +74,7 @@ class _HomeLatestResultCardState extends State<HomeLatestResultCard> {
                     'SENESTE RESULTAT',
                     style: appTextStyles.label.copyWith(
                       color: appColors.grey5,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
@@ -153,7 +153,7 @@ class _HomeLatestResultCardState extends State<HomeLatestResultCard> {
                   'Kamphistorik',
                   style: appTextStyles.label.copyWith(
                     color: appColors.grey5,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
@@ -293,7 +293,7 @@ class _LatestResultEventSummary extends StatelessWidget {
                 '$count',
                 style: appTextStyles.subtitle2.copyWith(
                   color: appColors.dirt,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ],

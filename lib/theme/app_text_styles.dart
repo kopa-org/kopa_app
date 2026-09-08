@@ -53,8 +53,7 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
   });
 
   static const Color _dirt = Color(0xFF2D1000);
-  static const Color _grey5 = Color(0xFF6D7B77);
-  static const Color _white = Color(0xFFFDFDFD);
+  static const Color _grey5 = Color(0xFF454B45);
 
   static TextStyle _rethink({
     required double fontSize,
@@ -122,19 +121,19 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
     final body1 = _rethink(
       fontSize: 16,
       fontWeight: FontWeight.w400,
-      height: 1.2,
+      height: 1.4,
       color: _dirt,
     );
     final body3 = _rethink(
       fontSize: 14,
       fontWeight: FontWeight.w400,
-      height: 1.2,
+      height: 1.4,
       color: _dirt,
     );
     final body4 = _rethink(
       fontSize: 14,
       fontWeight: FontWeight.w500,
-      height: 1.2,
+      height: 1.4,
       color: _dirt,
     );
     final caption1 = _rethink(
@@ -150,19 +149,19 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
       color: _grey5,
     );
     final caption3 = _rethink(
-      fontSize: 10,
+      fontSize: 12,
       fontWeight: FontWeight.w500,
       height: 1.1,
       color: _grey5,
     );
     final label = _rethink(
-      fontSize: 8,
+      fontSize: 12,
       fontWeight: FontWeight.w500,
       height: 1.1,
       color: _grey5,
     );
     final buttonGiant = _rethink(
-      fontSize: 18,
+      fontSize: 16,
       fontWeight: FontWeight.w500,
       height: 1.1,
       color: _dirt,
@@ -174,7 +173,7 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
       color: _dirt,
     );
     final buttonTiny = _rethink(
-      fontSize: 10,
+      fontSize: 12,
       fontWeight: FontWeight.w600,
       height: 1.1,
       color: _dirt,
@@ -182,11 +181,15 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
 
     return AppTextStyles(
       pageTitle: h4,
-      sectionHeader: h5,
+      sectionHeader: h5.copyWith(
+        fontSize: 20,
+        fontWeight: FontWeight.w700,
+        letterSpacing: _minusThreePercent(20),
+      ),
       bodyBold: subtitle2,
       body: body1,
       caption: caption1,
-      button: buttonGiant.copyWith(color: _white),
+      button: buttonGiant,
       h2: h2,
       h3: h3,
       h4: h4,

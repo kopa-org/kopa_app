@@ -1,4 +1,5 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:kopa/component/button/button.dart';
 
 class ButtonSmall extends StatelessWidget {
   final String buttonText;
@@ -15,44 +16,10 @@ class ButtonSmall extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return CupertinoButton(
-      padding: EdgeInsets.zero,
-      onPressed: onPressed,
-      child: Container(
-        decoration: BoxDecoration(
-          color:
-              outlined ? CupertinoColors.white : CupertinoColors.systemIndigo,
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (icon != null)
-              Padding(
-                padding: const EdgeInsets.only(right: 5.0),
-                child: Icon(
-                  icon,
-                  color: outlined
-                      ? CupertinoColors.systemIndigo
-                      : CupertinoColors.white,
-                  size: 22,
-                ),
-              ),
-            Text(
-              buttonText,
-              style: TextStyle(
-                color: outlined
-                    ? CupertinoColors.systemIndigo
-                    : CupertinoColors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Button(
+        buttonText: buttonText,
+        onPressed: onPressed,
+        outlined: outlined,
+        icon: icon,
+      );
 }

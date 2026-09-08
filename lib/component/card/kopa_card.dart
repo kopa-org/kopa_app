@@ -7,6 +7,8 @@ class KopaCard extends StatelessWidget {
   final EdgeInsetsGeometry? margin;
   final VoidCallback? onTap;
   final double borderRadius;
+  final Color? color;
+  final bool clip;
 
   const KopaCard({
     super.key,
@@ -14,39 +16,30 @@ class KopaCard extends StatelessWidget {
     this.padding,
     this.margin,
     this.onTap,
-    this.borderRadius = 12,
+    this.borderRadius = 16,
+    this.color,
+    this.clip = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final appColors = theme.extension<AppColors>() ?? AppColors.light;
-
-    final content = Container(
-      margin: margin,
-      padding: padding ?? const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: appColors.white,
-        borderRadius: BorderRadius.circular(borderRadius),
-        boxShadow: [
-          BoxShadow(
-            color: appColors.black.withValues(alpha: 0.05),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
+    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final radius = BorderRadius.circular(borderRadius);
+    return Padding(
+      padding: margin ?? EdgeInsets.zero,
+      child: Material(
+        color: color ?? colors.surface,
+        borderRadius: radius,
+        clipBehavior: clip || onTap != null ? Clip.antiAlias : Clip.none,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: radius,
+          child: Padding(
+            padding: padding ?? const EdgeInsets.all(16),
+            child: child,
           ),
-        ],
+        ),
       ),
-      child: child,
     );
-
-    if (onTap != null) {
-      return InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(borderRadius),
-        child: content,
-      );
-    }
-
-    return content;
   }
 }

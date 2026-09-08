@@ -58,7 +58,7 @@ class HomeFineBoxCard extends StatelessWidget {
                         'BØDEKASSEN',
                         style: appTextStyles.label.copyWith(
                           color: palette.onSurfaceMuted,
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                       const SizedBox(height: Spacing.sm),
@@ -98,7 +98,7 @@ class HomeFineBoxCard extends StatelessWidget {
                       : '${personalAmounts.$1.toStringAsFixed(0)},-',
                   style: appTextStyles.caption2.copyWith(
                     color: palette.onSurface,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
@@ -153,6 +153,6 @@ TextStyle _displayStyle(BuildContext context) {
   final appTextStyles =
       Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
   return appTextStyles.h2.copyWith(
-    fontWeight: FontWeight.w900,
+    fontWeight: FontWeight.w700,
   );
 }

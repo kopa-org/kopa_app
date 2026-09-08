@@ -248,33 +248,11 @@ class _AttendanceBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final appColors =
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
-      decoration: BoxDecoration(
-        color: backgroundColor(appColors),
-        borderRadius: BorderRadius.circular(Spacing.borderRadiusFull),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            size: 10,
-            color: foregroundColor(appColors),
-          ),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: appTextStyles.buttonTiny.copyWith(
-              color: foregroundColor(appColors),
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
-      ),
+    return MatchOverviewChip(
+      label: label,
+      icon: icon,
+      foregroundColor: foregroundColor(appColors),
+      backgroundColor: backgroundColor(appColors),
     );
   }
 }
@@ -291,22 +269,10 @@ class _StatusBadge extends StatelessWidget {
       return MatchResultBadge(result: result);
     }
 
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
-      decoration: BoxDecoration(
-        color: status.backgroundColor!,
-        borderRadius: BorderRadius.circular(Spacing.borderRadiusFull),
-      ),
-      child: Text(
-        status.label!,
-        style: appTextStyles.buttonTiny.copyWith(
-          color: status.foregroundColor!,
-          fontWeight: FontWeight.w800,
-        ),
-      ),
+    return MatchOverviewChip(
+      label: status.label!,
+      foregroundColor: status.foregroundColor!,
+      backgroundColor: status.backgroundColor!,
     );
   }
 }
@@ -395,7 +361,7 @@ class _MatchStatus {
 
     if (!match.hasFinalScore) {
       return _MatchStatus(
-        label: 'FÆRDIG',
+        label: 'Færdig',
         backgroundColor: colors.lightGrass,
         foregroundColor: colors.primary,
       );

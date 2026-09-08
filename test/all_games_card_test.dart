@@ -130,6 +130,71 @@ void main() {
       AppColors.light.error,
     );
   });
+
+  testWidgets('uses shared title-case typography for match status chips',
+      (tester) async {
+    final finishedMatch = _match(
+      id: 5,
+      date: DateTime(2026, 5, 1, 19),
+      homeTeam: 'Kopa IF',
+      awayTeam: 'Fremad',
+      isCurrentUserRegistered: true,
+    );
+    final lossMatch = _match(
+      id: 6,
+      date: DateTime(2026, 5, 2, 19),
+      homeTeam: 'Kopa IF',
+      awayTeam: 'Fremad',
+      homeScore: 0,
+      awayScore: 1,
+      isCurrentUserAttending: false,
+    );
+    final drawMatch = _match(
+      id: 7,
+      date: DateTime(2026, 5, 3, 19),
+      homeTeam: 'Kopa IF',
+      awayTeam: 'Fremad',
+      homeScore: 1,
+      awayScore: 1,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          extensions: <ThemeExtension<dynamic>>[
+            AppColors.light,
+            AppTextStyles.light,
+          ],
+        ),
+        home: Scaffold(
+          body: AllGamesCard(
+            matches: [finishedMatch, lossMatch, drawMatch],
+            currentUserId: 7,
+            onMatchTap: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Færdig'), findsOneWidget);
+    expect(find.text('Tabt'), findsOneWidget);
+    expect(find.text('Uafgjort'), findsOneWidget);
+    expect(find.text('Tilmeldt'), findsOneWidget);
+    expect(find.text('Frameldt'), findsOneWidget);
+    expect(find.text('FÆRDIG'), findsNothing);
+    expect(find.text('TABT'), findsNothing);
+    expect(find.text('UAFGJORT'), findsNothing);
+
+    final registeredStyle = tester.widget<Text>(find.text('Tilmeldt')).style!;
+    for (final label in ['Færdig', 'Tabt', 'Uafgjort', 'Frameldt']) {
+      final style = tester.widget<Text>(find.text(label)).style!;
+      expect(style.fontFamily, registeredStyle.fontFamily);
+      expect(style.fontSize, registeredStyle.fontSize);
+      expect(style.fontWeight, registeredStyle.fontWeight);
+      expect(style.height, registeredStyle.height);
+      expect(style.letterSpacing, registeredStyle.letterSpacing);
+    }
+  });
 }
 
 MatchDetails _match({

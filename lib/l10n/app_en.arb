@@ -1,4 +1,10 @@
 {
+  "matchScoreHome": "Home",
+  "matchScoreAway": "Away",
+  "matchScoreHelp": "Enter the final score for each team.",
+  "matchScoreSave": "Save result",
+  "matchScoreSaveFailed": "Could not save the result. Please try again.",
+  "commonGoTo": "Go to",
   "onboardingTitle": "Join Kopa",
   "onboardingCreateTeam": "Create team",
   "onboardingJoinTeam": "Join team",
@@ -49,5 +55,32 @@
   "teamLogoPattern": "Pattern",
   "teamLogoSave": "Save logo",
   "teamLogoSaving": "Saving logo...",
-  "teamLogoSaveFailure": "Could not save the team logo."
+  "teamLogoSaveFailure": "Could not save the team logo.",
+  "matchPollTitle": "Player of the match",
+  "matchPollInstruction": "Distribute votes with + and -",
+  "matchPollTotalVotes": "{count, plural, =1 {Total: 1 vote} other {Total: {count} votes}}",
+  "@matchPollTotalVotes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "matchPollVoteCount": "{count, plural, =1 {1 vote} other {{count} votes}}",
+  "@matchPollVoteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "matchPollEdit": "Edit poll",
+  "matchPollCreateTitle": "Add poll",
+  "matchPollEditTitle": "Edit poll",
+  "matchPollCreateAction": "Create poll",
+  "matchPollSaveAction": "Save changes",
+  "matchPollCreating": "Creating...",
+  "matchPollSaving": "Saving...",
+  "matchPollUnknownPlayer": "Unknown player",
+  "matchPollErrorTitle": "Error"
 }

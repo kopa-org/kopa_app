@@ -9,6 +9,25 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get matchScoreHome => 'Home';
+
+  @override
+  String get matchScoreAway => 'Away';
+
+  @override
+  String get matchScoreHelp => 'Enter the final score for each team.';
+
+  @override
+  String get matchScoreSave => 'Save result';
+
+  @override
+  String get matchScoreSaveFailed =>
+      'Could not save the result. Please try again.';
+
+  @override
+  String get commonGoTo => 'Go to';
+
+  @override
   String get onboardingTitle => 'Join Kopa';
 
   @override
@@ -145,4 +164,59 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get teamLogoSaveFailure => 'Could not save the team logo.';
+
+  @override
+  String get matchPollTitle => 'Player of the match';
+
+  @override
+  String get matchPollInstruction => 'Distribute votes with + and -';
+
+  @override
+  String matchPollTotalVotes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Total: $count votes',
+      one: 'Total: 1 vote',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String matchPollVoteCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count votes',
+      one: '1 vote',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get matchPollEdit => 'Edit poll';
+
+  @override
+  String get matchPollCreateTitle => 'Add poll';
+
+  @override
+  String get matchPollEditTitle => 'Edit poll';
+
+  @override
+  String get matchPollCreateAction => 'Create poll';
+
+  @override
+  String get matchPollSaveAction => 'Save changes';
+
+  @override
+  String get matchPollCreating => 'Creating...';
+
+  @override
+  String get matchPollSaving => 'Saving...';
+
+  @override
+  String get matchPollUnknownPlayer => 'Unknown player';
+
+  @override
+  String get matchPollErrorTitle => 'Error';
 }

@@ -101,6 +101,60 @@ class MatchPollsCubit extends Cubit<MatchPollsState> {
     }
   }
 
+  Future<MatchPollDetails?> updateMatchPoll({
+    required int matchPollId,
+    required List<UserVote> userVotes,
+  }) async {
+    if (userVotes.isEmpty) {
+      emit(state.copyWith(
+        formErrorMessage: 'Afgiv mindst én stemme for at gemme afstemningen.',
+      ));
+      return null;
+    }
+
+    emit(state.copyWith(
+      status: MatchPollsStatus.submitting,
+      formErrorMessage: null,
+    ));
+
+    try {
+      final updatedMatchPoll = await MatchPollsRepository.updateMatchPoll(
+        matchPollId,
+        userVotes,
+      );
+
+      final updatedPolls = state.matchPolls
+          .map(
+            (poll) => poll.id == updatedMatchPoll.id ? updatedMatchPoll : poll,
+          )
+          .toList();
+
+      if (!updatedPolls.any((poll) => poll.id == updatedMatchPoll.id)) {
+        updatedPolls.add(updatedMatchPoll);
+      }
+
+      emit(state.copyWith(
+        status: MatchPollsStatus.loaded,
+        matchPolls: updatedPolls,
+        rows: _buildRows(state.squad, updatedPolls),
+        formErrorMessage: null,
+      ));
+
+      AppAnalytics.logEvent(
+        'match_poll_updated',
+        parameters: {'vote_count': userVotes.length},
+      );
+
+      return updatedMatchPoll;
+    } catch (e) {
+      emit(state.copyWith(
+        status: MatchPollsStatus.loaded,
+        formErrorMessage: 'Kunne ikke gemme afstemningen.',
+      ));
+      return null;
+    }
+  }
+
   void clearFormError() {
     emit(state.copyWith(formErrorMessage: null));
   }

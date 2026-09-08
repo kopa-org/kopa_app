@@ -22,28 +22,30 @@ class StatusChip extends StatelessWidget {
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     Color backgroundColor;
-    Color textColor = appColors.black;
+    Color textColor = appColors.dirt;
 
     switch (status) {
       case ChipStatus.success:
-        backgroundColor = appColors.success;
-        textColor = Colors.white;
+        backgroundColor = appColors.successSurface;
+        textColor = appColors.successForeground;
       case ChipStatus.warning:
-        backgroundColor = appColors.warning;
+        backgroundColor = appColors.warningSurface;
+        textColor = appColors.warningForeground;
       case ChipStatus.error:
-        backgroundColor = appColors.error;
-        textColor = Colors.white;
+        backgroundColor = appColors.errorSurface;
+        textColor = appColors.errorForeground;
       case ChipStatus.info:
-        backgroundColor = appColors.lightSky;
+        backgroundColor = appColors.infoSurface;
+        textColor = appColors.infoForeground;
       case ChipStatus.normal:
-        backgroundColor = appColors.divider;
+        backgroundColor = appColors.offWhite;
     }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(1000),
       ),
       child: Text(
         label,

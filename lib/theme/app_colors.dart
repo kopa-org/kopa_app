@@ -79,7 +79,7 @@ class AppColors extends ThemeExtension<AppColors> {
     primary: Color(0xFF00943C), // Græs / Grass
     divider: Color(0xFFB7B7B7), // Grey 3
     textPrimary: Color(0xFF2D1000), // Jord
-    textSecondary: Color(0xFF6D7B77), // Grey 5
+    textSecondary: Color(0xFF454B45), // Readable on white and off-white
     lightGrass: Color(0xFF9FFDCC),
     offWhite: Color(0xFFE8F2ED),
     white: Color(0xFFFDFDFD),
@@ -107,6 +107,16 @@ class AppColors extends ThemeExtension<AppColors> {
     warning: Color(0xFFFF9F1A), // Figma has no warning token; use Solnedgang
     error: Color(0xFFED2415),
   );
+
+  // Semantic pairs keep small labels readable without changing brand swatches.
+  Color get successForeground => const Color(0xFF006B35);
+  Color get successSurface => lightGrass55;
+  Color get warningForeground => dirt;
+  Color get warningSurface => const Color(0xFFFFE9CA);
+  Color get errorForeground => const Color(0xFFB51B10);
+  Color get errorSurface => const Color(0xFFFFEDEA);
+  Color get infoForeground => const Color(0xFF1257B5);
+  Color get infoSurface => lightSky55;
 
   @override
   AppColors copyWith({

@@ -171,15 +171,7 @@ class _RosterCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: appColors.surface,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: _SquadColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: appColors.primary.withValues(alpha: 0.03),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         children: [
@@ -225,12 +217,12 @@ class _RosterRow extends StatelessWidget {
           decoration: BoxDecoration(
             border: showDivider
                 ? Border(
-                    bottom: BorderSide(color: _SquadColors.border),
+                    bottom: BorderSide(color: appColors.offWhite),
                   )
                 : null,
           ),
           padding: const EdgeInsets.symmetric(
-            horizontal: 20,
+            horizontal: 16,
             vertical: Spacing.md,
           ),
           child: Row(
@@ -321,8 +313,4 @@ class _RosterAvatar extends StatelessWidget {
     final initials = parts.take(2).map((p) => p[0].toUpperCase()).join();
     return initials.isEmpty ? '?' : initials;
   }
-}
-
-abstract final class _SquadColors {
-  static const border = Color(0xFFDCE5E2);
 }

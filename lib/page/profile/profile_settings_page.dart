@@ -68,7 +68,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
       showBackButton: true,
       backgroundColor: appColors.background,
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
+        padding: const EdgeInsets.fromLTRB(16, 24, 16, 32),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -81,12 +81,16 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                 ),
               ),
             FullWidthButton(
+              outlined: true,
               buttonText: 'Importér kampprogram',
+              loading: _isLoading,
               onPressed: _isLoading ? () {} : _importCalendar,
             ),
             const SizedBox(height: 16),
             FullWidthButton(
               buttonText: _isSharingKopa ? 'Henter link...' : 'Del Kopa',
+              outlined: true,
+              loading: _isSharingKopa,
               onPressed: _isSharingKopa ? () {} : _shareKopa,
             ),
             const SizedBox(height: 24),
@@ -95,12 +99,14 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
             if (currentUser?.isTeamOwner == true) ...[
               FullWidthButton(
                 buttonText: l10n.teamLogoEditButton,
+                outlined: true,
                 icon: Icons.palette_outlined,
                 onPressed: _openTeamLogoEditor,
               ),
               const SizedBox(height: 16),
               FullWidthButton(
                 buttonText: 'Godkend nye spillere',
+                outlined: true,
                 onPressed: () => context.push(AppRouter.teamJoinRequests),
               ),
               const SizedBox(height: 16),
@@ -108,6 +114,8 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                 buttonText: _activeDbuSync == DbuWebviewOperation.standings
                     ? 'Synkroniserer stilling...'
                     : 'Synkroniser stilling fra DBU',
+                outlined: true,
+                loading: _activeDbuSync != null,
                 onPressed: _activeDbuSync == null ? _syncDbu : () {},
               ),
               const SizedBox(height: 16),
@@ -139,6 +147,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                 buttonText: _isSavingMeetingOffset
                     ? 'Gemmer mødetid...'
                     : 'Gem mødetid',
+                loading: _isSavingMeetingOffset,
                 onPressed: _isSavingMeetingOffset ? () {} : _saveMeetingOffset,
               ),
             ],
@@ -162,6 +171,8 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
             const SizedBox(height: 24),
             FullWidthButton(
               buttonText: _isLoading ? 'Logger ud...' : 'Log ud',
+              outlined: true,
+              loading: _isLoading,
               onPressed: _isLoading
                   ? () {}
                   : () async {

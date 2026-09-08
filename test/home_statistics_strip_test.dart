@@ -7,7 +7,7 @@ import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 
 void main() {
-  testWidgets('uses per-tile stat background colors', (tester) async {
+  testWidgets('uses neutral stat surfaces', (tester) async {
     final appColors = AppColors.light;
 
     await tester.pumpWidget(
@@ -31,7 +31,7 @@ void main() {
     expect(find.text('Mål'), findsOneWidget);
     expect(
       _decorations(tester),
-      _containsColor(appColors.lightSky.withValues(alpha: 0.27)),
+      _containsColor(appColors.surface),
     );
     expect(find.byType(ImageFiltered), findsNothing);
   });

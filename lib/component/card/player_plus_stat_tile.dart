@@ -66,7 +66,7 @@ class PlayerPlusStatTile extends StatelessWidget {
     this.obscureRank = false,
     this.width,
     this.padding = const EdgeInsets.all(14),
-    this.borderRadius = 8,
+    this.borderRadius = 16,
     this.iconSize = 20,
     this.valueFontSize = 34,
     this.titleFontSize,

@@ -1,4 +1,10 @@
 {
+  "matchScoreHome": "Hjemme",
+  "matchScoreAway": "Ude",
+  "matchScoreHelp": "Indtast slutresultatet for hvert hold.",
+  "matchScoreSave": "Gem resultat",
+  "matchScoreSaveFailed": "Resultatet kunne ikke gemmes. Prøv igen.",
+  "commonGoTo": "Gå til",
   "onboardingTitle": "Kom i gang med Kopa",
   "onboardingCreateTeam": "Opret hold",
   "onboardingJoinTeam": "Find hold",
@@ -49,5 +55,32 @@
   "teamLogoPattern": "Mønster",
   "teamLogoSave": "Gem logo",
   "teamLogoSaving": "Gemmer logo...",
-  "teamLogoSaveFailure": "Kunne ikke gemme holdlogoet."
+  "teamLogoSaveFailure": "Kunne ikke gemme holdlogoet.",
+  "matchPollTitle": "Kampens spiller",
+  "matchPollInstruction": "Fordel stemmer med + og -",
+  "matchPollTotalVotes": "{count, plural, =1 {I alt: 1 stemme} other {I alt: {count} stemmer}}",
+  "@matchPollTotalVotes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "matchPollVoteCount": "{count, plural, =1 {1 stemme} other {{count} stemmer}}",
+  "@matchPollVoteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "matchPollEdit": "Rediger afstemning",
+  "matchPollCreateTitle": "Tilføj afstemning",
+  "matchPollEditTitle": "Rediger afstemning",
+  "matchPollCreateAction": "Opret afstemning",
+  "matchPollSaveAction": "Gem ændringer",
+  "matchPollCreating": "Opretter...",
+  "matchPollSaving": "Gemmer...",
+  "matchPollUnknownPlayer": "Ukendt spiller",
+  "matchPollErrorTitle": "Fejl"
 }

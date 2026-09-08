@@ -6,7 +6,13 @@ import 'package:kopa/model/user_vote.dart';
 class UserVotesState extends ChangeNotifier {
   final List<UserVote> _userVotes = [];
 
-  UserVotesState();
+  UserVotesState({Iterable<UserVote> initialVotes = const []}) {
+    _userVotes.addAll(
+      initialVotes.map(
+        (vote) => UserVote(userId: vote.userId, votes: vote.votes),
+      ),
+    );
+  }
 
   UnmodifiableListView<UserVote> get userVotes =>
       UnmodifiableListView(_userVotes);
