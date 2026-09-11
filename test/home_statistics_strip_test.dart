@@ -7,7 +7,8 @@ import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 
 void main() {
-  testWidgets('uses neutral stat surfaces', (tester) async {
+  testWidgets('uses neutral stat surfaces and metric icon colors',
+      (tester) async {
     final appColors = AppColors.light;
 
     await tester.pumpWidget(
@@ -29,6 +30,26 @@ void main() {
 
     expect(find.text('Pointsnit'), findsNothing);
     expect(find.text('Mål'), findsOneWidget);
+    expect(
+      tester.widget<Icon>(find.byIcon(Icons.sports_score)).color,
+      appColors.sky,
+    );
+    expect(
+      tester.widget<Icon>(find.byIcon(Icons.handshake)).color,
+      appColors.success,
+    );
+    expect(
+      tester.widget<Icon>(find.byIcon(Icons.sports_soccer)).color,
+      appColors.sunset,
+    );
+    expect(
+      tester.widget<Icon>(find.byIcon(Icons.how_to_vote)).color,
+      appColors.dirt,
+    );
+    expect(
+      tester.widget<Icon>(find.byIcon(Icons.local_fire_department)).color,
+      appColors.error,
+    );
     expect(
       _decorations(tester),
       _containsColor(appColors.surface),

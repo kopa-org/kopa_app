@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kopa/component/match/match_poll_details_card.dart';
 import 'package:kopa/component/match_poll_row_item.dart';
+import 'package:kopa/component/match/player_of_match_summary_card.dart';
 import 'package:kopa/cubits/match_polls_cubit.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/model/match_details.dart';
@@ -16,37 +17,52 @@ import 'package:kopa/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 
 void main() {
-  testWidgets('shows every squad player and exposes the edit action',
+  testWidgets('shows only the winner and exposes the edit action',
       (tester) async {
     final now = DateTime(2026, 1, 1);
-    final squad = [
-      _user(1, 'Alice', now),
-      _user(2, 'Bob', now),
-      _user(3, 'Charlie', now),
-    ];
     var editCount = 0;
 
     await tester.pumpWidget(
       _app(
         MatchPollDetailsCard(
           poll: _poll(now),
-          squad: squad,
           onEdit: () => editCount++,
         ),
       ),
     );
 
     expect(find.text('Alice'), findsOneWidget);
-    expect(find.text('Bob'), findsOneWidget);
-    expect(find.text('Charlie'), findsOneWidget);
-    expect(find.text('I alt: 4 stemmer'), findsOneWidget);
+    expect(find.text('Bob'), findsNothing);
+    expect(find.text('Charlie'), findsNothing);
+    expect(find.text('I alt: 3 stemmer'), findsOneWidget);
     expect(find.text('3 stemmer'), findsOneWidget);
-    expect(find.text('1 stemme'), findsOneWidget);
-    expect(find.text('0 stemmer'), findsOneWidget);
+    expect(find.text('1 stemme'), findsNothing);
+    expect(find.text('0 stemmer'), findsNothing);
     expect(find.byTooltip('Rediger afstemning'), findsOneWidget);
 
     await tester.tap(find.byTooltip('Rediger afstemning'));
     expect(editCount, 1);
+  });
+
+  testWidgets('empty MOTM state invites the owner to create a poll',
+      (tester) async {
+    var createCount = 0;
+
+    await tester.pumpWidget(
+      _app(
+        PlayerOfMatchSummaryCard(
+          playerName: null,
+          onPressed: () => createCount++,
+        ),
+      ),
+    );
+
+    expect(find.text('Ikke valgt endnu'), findsOneWidget);
+    expect(find.text('Opret afstemning'), findsOneWidget);
+    expect(find.byType(InkWell), findsOneWidget);
+
+    await tester.tap(find.byType(InkWell));
+    expect(createCount, 1);
   });
 
   testWidgets('edit form starts with the persisted votes', (tester) async {

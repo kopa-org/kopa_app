@@ -25,24 +25,45 @@ enum MatchResultStatus {
       };
 }
 
+enum MatchOverviewChipStatus { success, warning, error, info, neutral }
+
 class MatchOverviewChip extends StatelessWidget {
   final String label;
-  final Color foregroundColor;
-  final Color backgroundColor;
+  final MatchOverviewChipStatus status;
   final IconData? icon;
 
   const MatchOverviewChip({
     super.key,
     required this.label,
-    required this.foregroundColor,
-    required this.backgroundColor,
+    this.status = MatchOverviewChipStatus.neutral,
     this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final (foregroundColor, backgroundColor) = switch (status) {
+      MatchOverviewChipStatus.success => (
+          appColors.successForeground,
+          appColors.successSurface,
+        ),
+      MatchOverviewChipStatus.warning => (
+          appColors.warningForeground,
+          appColors.warningSurface,
+        ),
+      MatchOverviewChipStatus.error => (
+          appColors.errorForeground,
+          appColors.errorSurface,
+        ),
+      MatchOverviewChipStatus.info => (
+          appColors.infoForeground,
+          appColors.infoSurface,
+        ),
+      MatchOverviewChipStatus.neutral => (appColors.dirt, appColors.offWhite),
+    };
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
@@ -81,24 +102,15 @@ class MatchResultBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final (foreground, background) = switch (result) {
-      MatchResultStatus.win => (
-          appColors.successForeground,
-          appColors.successSurface
-        ),
-      MatchResultStatus.draw => (appColors.dirt, appColors.offWhite),
-      MatchResultStatus.loss => (
-          appColors.errorForeground,
-          appColors.errorSurface
-        ),
+    final status = switch (result) {
+      MatchResultStatus.win => MatchOverviewChipStatus.success,
+      MatchResultStatus.draw => MatchOverviewChipStatus.neutral,
+      MatchResultStatus.loss => MatchOverviewChipStatus.error,
     };
 
     return MatchOverviewChip(
       label: result.label,
-      foregroundColor: foreground,
-      backgroundColor: background,
+      status: status,
     );
   }
 }

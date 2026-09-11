@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flip_counter_plus/flip_counter_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -196,11 +197,6 @@ class _HomeTabViewState extends State<_HomeTabView> {
                   ],
                 ),
                 SliverToBoxAdapter(
-                  child: _HeroSection(
-                    nextMatch: nextMatch,
-                  ),
-                ),
-                SliverToBoxAdapter(
                   child: _HeroMatchCarousel(
                     matches: upcomingMatches,
                     fallbackMatch: nextMatch,
@@ -260,7 +256,7 @@ class _HeroSection extends StatelessWidget {
         children: [
           const SizedBox(height: Spacing.sm),
           Text(
-            nextMatch == null ? 'Ingen kommende kamp' : 'Næste kamp om',
+            nextMatch == null ? 'Ingen kommende kamp' : 'Spilles om:',
             style: appTextStyles.caption2.copyWith(
               color: appColors.dirt,
               fontWeight: FontWeight.w800,
@@ -273,7 +269,10 @@ class _HeroSection extends StatelessWidget {
               Expanded(
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: _HeroCountdown(target: nextMatch?.date),
+                  child: _HeroCountdown(
+                    target: nextMatch?.date,
+                    selectionKey: nextMatch?.id,
+                  ),
                 ),
               ),
             ],
@@ -319,8 +318,12 @@ class _HomeHeaderActionButton extends StatelessWidget {
 
 class _HeroCountdown extends StatefulWidget {
   final DateTime? target;
+  final Object? selectionKey;
 
-  const _HeroCountdown({required this.target});
+  const _HeroCountdown({
+    required this.target,
+    required this.selectionKey,
+  });
 
   @override
   State<_HeroCountdown> createState() => _HeroCountdownState();
@@ -340,7 +343,8 @@ class _HeroCountdownState extends State<_HeroCountdown> {
   @override
   void didUpdateWidget(covariant _HeroCountdown oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.target != widget.target) {
+    if (oldWidget.target != widget.target ||
+        oldWidget.selectionKey != widget.selectionKey) {
       _remaining = _calculateRemaining();
     }
   }
@@ -424,9 +428,14 @@ class _HeroCountdownPart extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.baseline,
       textBaseline: TextBaseline.alphabetic,
       children: [
-        Text(
-          value.toString().padLeft(2, '0'),
-          style: style,
+        AnimatedFlipCounter(
+          value: value,
+          wholeDigits: 2,
+          duration: const Duration(milliseconds: 420),
+          curve: Curves.easeOutCubic,
+          transitionType: CounterTransitionType.flip,
+          textStyle: style,
+          useTabularFigures: true,
         ),
         const SizedBox(width: 2),
         Text(
@@ -499,6 +508,9 @@ class _HeroMatchCarouselState extends State<_HeroMatchCarousel> {
       color: Colors.transparent,
       child: Column(
         children: [
+          _HeroSection(
+            nextMatch: pages[_currentIndex],
+          ),
           AnimatedSize(
             duration: const Duration(milliseconds: 260),
             curve: Curves.easeOutCubic,
@@ -850,7 +862,7 @@ class _HeroTeamPanel extends StatelessWidget {
                       height: 1,
                     ),
                     const SizedBox(height: Spacing.sm),
-                    _MatchResponseCard(
+                    HomeMatchResponseCard(
                       match: match,
                       currentUser: currentUser,
                       reserveRegistrationActions: reserveRegistrationActions,
@@ -1017,12 +1029,12 @@ class _MatchInfoDivider extends StatelessWidget {
   }
 }
 
-class _MatchResponseCard extends StatelessWidget {
+class HomeMatchResponseCard extends StatelessWidget {
   final MatchDetails match;
   final UserDetails currentUser;
   final bool reserveRegistrationActions;
 
-  const _MatchResponseCard({
+  const HomeMatchResponseCard({
     required this.match,
     required this.currentUser,
     this.reserveRegistrationActions = false,
@@ -1097,16 +1109,19 @@ class _MatchResponseCard extends StatelessWidget {
                     child: Row(
                       children: [
                         Expanded(
-                          child: FilledButton(
+                          child: _KopaChoiceButton(
+                            label: 'Nej',
+                            icon: Icons.close,
+                            outlined: true,
                             onPressed: () {},
-                            child: const Text('Ja, jeg kommer'),
                           ),
                         ),
                         const SizedBox(width: Spacing.sm),
                         Expanded(
-                          child: OutlinedButton(
+                          child: _KopaChoiceButton(
+                            label: 'Ja, jeg kommer',
+                            icon: Icons.how_to_reg,
                             onPressed: () {},
-                            child: const Text('Nej'),
                           ),
                         ),
                       ],
@@ -1149,18 +1164,21 @@ class _MatchResponseCard extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: FilledButton(
-                        onPressed: isRegistering ? null : register,
-                        child: Text(
-                          isRegistering ? 'Tilmeldes' : 'Ja, jeg kommer',
-                        ),
+                      child: _KopaChoiceButton(
+                        key: const ValueKey('match_response_decline'),
+                        label: 'Nej',
+                        icon: Icons.close,
+                        outlined: true,
+                        onPressed: isRegistering ? null : decline,
                       ),
                     ),
                     const SizedBox(width: Spacing.sm),
                     Expanded(
-                      child: OutlinedButton(
-                        onPressed: isRegistering ? null : decline,
-                        child: const Text('Nej'),
+                      child: _KopaChoiceButton(
+                        key: const ValueKey('match_response_accept'),
+                        label: isRegistering ? 'Tilmeldes' : 'Ja, jeg kommer',
+                        icon: Icons.how_to_reg,
+                        onPressed: isRegistering ? null : register,
                       ),
                     ),
                   ],
@@ -1168,6 +1186,73 @@ class _MatchResponseCard extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _KopaChoiceButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final VoidCallback? onPressed;
+  final bool outlined;
+
+  const _KopaChoiceButton({
+    super.key,
+    required this.label,
+    required this.icon,
+    required this.onPressed,
+    this.outlined = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final enabled = onPressed != null;
+    final backgroundColor = outlined ? appColors.white : appColors.primary;
+    final foregroundColor = outlined ? appColors.primary : appColors.white;
+
+    return Opacity(
+      opacity: enabled ? 1 : 0.55,
+      child: Material(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(Spacing.borderRadiusFull),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onPressed,
+          child: Container(
+            height: 42,
+            padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(Spacing.borderRadiusFull),
+              border: Border.all(
+                color: appColors.primary,
+                width: outlined ? 1.5 : 0,
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, color: foregroundColor, size: 18),
+                const SizedBox(width: Spacing.sm),
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: appTextStyles.buttonSmall.copyWith(
+                      color: foregroundColor,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:kopa/component/card/all_games_card.dart';
+import 'package:kopa/component/chip/match_result_badge.dart';
 import 'package:kopa/model/event_attendance_details.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/theme/app_colors.dart';
@@ -127,7 +128,7 @@ void main() {
     expect(find.byIcon(CupertinoIcons.xmark), findsOneWidget);
     expect(
       tester.widget<Text>(find.text('Frameldt')).style?.color,
-      AppColors.light.error,
+      AppColors.light.errorForeground,
     );
   });
 
@@ -157,6 +158,14 @@ void main() {
       homeScore: 1,
       awayScore: 1,
     );
+    final winMatch = _match(
+      id: 8,
+      date: DateTime(2026, 5, 4, 19),
+      homeTeam: 'Kopa IF',
+      awayTeam: 'Fremad',
+      homeScore: 2,
+      awayScore: 1,
+    );
 
     await tester.pumpWidget(
       MaterialApp(
@@ -168,7 +177,7 @@ void main() {
         ),
         home: Scaffold(
           body: AllGamesCard(
-            matches: [finishedMatch, lossMatch, drawMatch],
+            matches: [finishedMatch, lossMatch, drawMatch, winMatch],
             currentUserId: 7,
             onMatchTap: (_) {},
           ),
@@ -184,6 +193,7 @@ void main() {
     expect(find.text('FÆRDIG'), findsNothing);
     expect(find.text('TABT'), findsNothing);
     expect(find.text('UAFGJORT'), findsNothing);
+    expect(find.text('Sejr'), findsOneWidget);
 
     final registeredStyle = tester.widget<Text>(find.text('Tilmeldt')).style!;
     for (final label in ['Færdig', 'Tabt', 'Uafgjort', 'Frameldt']) {
@@ -194,7 +204,56 @@ void main() {
       expect(style.height, registeredStyle.height);
       expect(style.letterSpacing, registeredStyle.letterSpacing);
     }
+
+    final registeredChip = _chipFor(tester, 'Tilmeldt');
+    final finishedChip = _chipFor(tester, 'Færdig');
+    final winChip = _chipFor(tester, 'Sejr');
+    final declinedChip = _chipFor(tester, 'Frameldt');
+    final lossChip = _chipFor(tester, 'Tabt');
+
+    expect(finishedChip.status, registeredChip.status);
+    expect(winChip.status, registeredChip.status);
+    expect(lossChip.status, declinedChip.status);
+
+    final registeredDecoration = _chipDecoration(tester, 'Tilmeldt');
+    for (final label in ['Færdig', 'Sejr']) {
+      expect(
+        _chipDecoration(tester, label).color,
+        registeredDecoration.color,
+      );
+      expect(
+        tester.widget<Text>(find.text(label)).style?.color,
+        registeredStyle.color,
+      );
+    }
+    final declinedDecoration = _chipDecoration(tester, 'Frameldt');
+    expect(_chipDecoration(tester, 'Tabt').color, declinedDecoration.color);
+    expect(
+      tester.widget<Text>(find.text('Tabt')).style?.color,
+      tester.widget<Text>(find.text('Frameldt')).style?.color,
+    );
   });
+}
+
+MatchOverviewChip _chipFor(WidgetTester tester, String label) {
+  return tester.widget<MatchOverviewChip>(
+    find.byWidgetPredicate(
+      (widget) => widget is MatchOverviewChip && widget.label == label,
+    ),
+  );
+}
+
+BoxDecoration _chipDecoration(WidgetTester tester, String label) {
+  return tester
+      .widget<Container>(
+        find
+            .ancestor(
+              of: find.text(label),
+              matching: find.byType(Container),
+            )
+            .first,
+      )
+      .decoration! as BoxDecoration;
 }
 
 MatchDetails _match({

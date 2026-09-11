@@ -44,7 +44,7 @@ class HomeStatisticsStrip extends StatelessWidget {
         rank: _rankFor(stats.leaderboards.topScorers),
         rows: _leaderboardRows(stats.leaderboards.topScorers),
         icon: Icons.sports_score,
-        accentColor: appColors.dirt,
+        accentColor: appColors.sky,
       ),
       PlayerPlusStatTileData(
         title: 'Assists',
@@ -53,7 +53,7 @@ class HomeStatisticsStrip extends StatelessWidget {
         rank: _rankFor(stats.leaderboards.assists),
         rows: _leaderboardRows(stats.leaderboards.assists),
         icon: Icons.handshake,
-        accentColor: appColors.dirt,
+        accentColor: appColors.success,
       ),
       PlayerPlusStatTileData(
         title: 'Kampe',
@@ -62,7 +62,7 @@ class HomeStatisticsStrip extends StatelessWidget {
         rank: _rankFor(stats.leaderboards.matchesPlayed),
         rows: _leaderboardRows(stats.leaderboards.matchesPlayed),
         icon: Icons.sports_soccer,
-        accentColor: appColors.dirt,
+        accentColor: appColors.sunset,
       ),
       PlayerPlusStatTileData(
         title: 'Stemmer',
@@ -80,7 +80,7 @@ class HomeStatisticsStrip extends StatelessWidget {
         rank: _rankForInForm(),
         rows: _inFormRows(),
         icon: Icons.local_fire_department,
-        accentColor: appColors.dirt,
+        accentColor: appColors.error,
       ),
     ];
 

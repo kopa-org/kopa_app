@@ -18,6 +18,8 @@ void main() {
     WidgetTester tester, {
     required Future<void> Function(int, int) onSave,
     ValueChanged<(int, int)?>? onClosed,
+    int? homeScore = 2,
+    int? awayScore = 1,
     double scale = 1,
   }) async {
     await tester.pumpWidget(MaterialApp(
@@ -38,8 +40,8 @@ void main() {
                           context: context,
                           homeTeam: 'Kopa FC',
                           awayTeam: 'Frederiksberg Boldklub og Idrætsforening',
-                          homeScore: 2,
-                          awayScore: 1,
+                          homeScore: homeScore,
+                          awayScore: awayScore,
                           onSave: onSave);
                       onClosed?.call(result);
                     },
@@ -67,6 +69,17 @@ void main() {
     await tester.tap(find.byTooltip('Annuller'));
     await tester.pumpAndSettle();
     expect(find.byType(MatchScoreSheet), findsNothing);
+  });
+
+  testWidgets('starts a new result with empty numeric fields', (tester) async {
+    await open(tester,
+        homeScore: null, awayScore: null, onSave: (home, away) async {});
+
+    for (final key in const ['home-score', 'away-score']) {
+      final field = tester.widget<TextField>(find.byKey(ValueKey(key)));
+      expect(field.controller!.text, isEmpty);
+      expect(field.keyboardType, TextInputType.number);
+    }
   });
 
   testWidgets(

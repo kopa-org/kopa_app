@@ -9,8 +9,8 @@ Future<(int, int)?> showMatchScoreSheet({
   required BuildContext context,
   required String? homeTeam,
   required String? awayTeam,
-  required int homeScore,
-  required int awayScore,
+  int? homeScore,
+  int? awayScore,
   required Future<void> Function(int home, int away) onSave,
 }) {
   FocusManager.instance.primaryFocus?.unfocus();
@@ -34,16 +34,16 @@ Future<(int, int)?> showMatchScoreSheet({
 class MatchScoreSheet extends StatefulWidget {
   final String? homeTeam;
   final String? awayTeam;
-  final int homeScore;
-  final int awayScore;
+  final int? homeScore;
+  final int? awayScore;
   final Future<void> Function(int home, int away) onSave;
 
   const MatchScoreSheet({
     super.key,
     required this.homeTeam,
     required this.awayTeam,
-    required this.homeScore,
-    required this.awayScore,
+    this.homeScore,
+    this.awayScore,
     required this.onSave,
   });
 
@@ -52,8 +52,10 @@ class MatchScoreSheet extends StatefulWidget {
 }
 
 class _MatchScoreSheetState extends State<MatchScoreSheet> {
-  late final _home = TextEditingController(text: widget.homeScore.toString());
-  late final _away = TextEditingController(text: widget.awayScore.toString());
+  late final _home =
+      TextEditingController(text: widget.homeScore?.toString() ?? '');
+  late final _away =
+      TextEditingController(text: widget.awayScore?.toString() ?? '');
   final _awayFocus = FocusNode();
   bool _saving = false;
   bool _failed = false;

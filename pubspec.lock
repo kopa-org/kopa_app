@@ -249,6 +249,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.1"
+  flip_counter_plus:
+    dependency: "direct main"
+    description:
+      name: flip_counter_plus
+      sha256: "4e3d4d9cc853d0463ab110278aa6ddee617345f5fc9baa3ae9e10120f285a06c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   flutter:
     dependency: "direct main"
     description: flutter

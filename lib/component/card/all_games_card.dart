@@ -106,7 +106,7 @@ class _GameResultRow extends StatelessWidget {
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
     final ownSide = _OwnTeamSide.from(match, ownTeamName);
-    final status = _MatchStatus.from(match, appColors, ownSide);
+    final status = _MatchStatus.from(match, ownSide);
     final currentUserDeclined = _currentUserDeclined(match, currentUserId);
     final borderRadius = BorderRadius.circular(Spacing.borderRadiusSmall);
 
@@ -222,37 +222,24 @@ class _GameResultRow extends StatelessWidget {
 class _AttendanceBadge extends StatelessWidget {
   final String label;
   final IconData icon;
-  final Color Function(AppColors colors) foregroundColor;
-  final Color Function(AppColors colors) backgroundColor;
+  final MatchOverviewChipStatus status;
 
   const _AttendanceBadge.registered()
       : label = 'Tilmeldt',
         icon = CupertinoIcons.check_mark,
-        foregroundColor = _registeredForegroundColor,
-        backgroundColor = _registeredBackgroundColor;
+        status = MatchOverviewChipStatus.success;
 
   const _AttendanceBadge.declined()
       : label = 'Frameldt',
         icon = CupertinoIcons.xmark,
-        foregroundColor = _declinedForegroundColor,
-        backgroundColor = _declinedBackgroundColor;
-
-  static Color _registeredForegroundColor(AppColors colors) => colors.grass;
-  static Color _registeredBackgroundColor(AppColors colors) =>
-      colors.lightGrass55;
-  static Color _declinedForegroundColor(AppColors colors) => colors.error;
-  static Color _declinedBackgroundColor(AppColors colors) =>
-      colors.error.withValues(alpha: 0.10);
+        status = MatchOverviewChipStatus.error;
 
   @override
   Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
     return MatchOverviewChip(
       label: label,
       icon: icon,
-      foregroundColor: foregroundColor(appColors),
-      backgroundColor: backgroundColor(appColors),
+      status: status,
     );
   }
 }
@@ -271,8 +258,7 @@ class _StatusBadge extends StatelessWidget {
 
     return MatchOverviewChip(
       label: status.label!,
-      foregroundColor: status.foregroundColor!,
-      backgroundColor: status.backgroundColor!,
+      status: status.chipStatus!,
     );
   }
 }
@@ -335,35 +321,30 @@ class _GameTeamLine extends StatelessWidget {
 
 class _MatchStatus {
   final String? label;
-  final Color? backgroundColor;
-  final Color? foregroundColor;
+  final MatchOverviewChipStatus? chipStatus;
   final MatchResultStatus? result;
 
   const _MatchStatus({
     this.label,
-    this.backgroundColor,
-    this.foregroundColor,
+    this.chipStatus,
     this.result,
   });
 
   factory _MatchStatus.from(
     MatchDetails match,
-    AppColors colors,
     _OwnTeamSide ownSide,
   ) {
     if (!match.hasMatchBeenPlayed) {
       return _MatchStatus(
         label: DateHelper.getFormattedTime(match.date),
-        backgroundColor: colors.lightSky55,
-        foregroundColor: colors.sky,
+        chipStatus: MatchOverviewChipStatus.info,
       );
     }
 
     if (!match.hasFinalScore) {
       return _MatchStatus(
         label: 'Færdig',
-        backgroundColor: colors.lightGrass,
-        foregroundColor: colors.primary,
+        chipStatus: MatchOverviewChipStatus.success,
       );
     }
 

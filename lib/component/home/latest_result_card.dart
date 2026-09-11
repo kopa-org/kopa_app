@@ -5,14 +5,13 @@ import 'package:kopa/component/chip/match_result_badge.dart';
 import 'package:kopa/component/home/home_bento_card.dart';
 import 'package:kopa/component/match/player_of_match_summary_card.dart';
 import 'package:kopa/model/match_details.dart';
-import 'package:kopa/model/match_event_details.dart';
 import 'package:kopa/model/match_event_type.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 import 'package:kopa/theme/spacing.dart';
 
-class HomeLatestResultCard extends StatefulWidget {
+class HomeLatestResultCard extends StatelessWidget {
   final MatchDetails? match;
   final UserDetails currentUser;
   final void Function(MatchDetails match) onOpenMatch;
@@ -27,27 +26,19 @@ class HomeLatestResultCard extends StatefulWidget {
   });
 
   @override
-  State<HomeLatestResultCard> createState() => _HomeLatestResultCardState();
-}
-
-class _HomeLatestResultCardState extends State<HomeLatestResultCard> {
-  bool _showAllEvents = false;
-
-  @override
   Widget build(BuildContext context) {
     final appColors =
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final match = widget.match;
+    final match = this.match;
     final score = match == null
         ? '--'
         : '${match.homeTeamScore ?? 0} - ${match.awayTeamScore ?? 0}';
-    final result = _resultStatus(match, widget.currentUser);
+    final result = _resultStatus(match, currentUser);
     final motm = match?.matchPollDetails?.playerOfTheMatchDetails.name;
     final motmVotes = match?.matchPollDetails?.playerOfTheMatchVotes;
-    final events = [...?match?.matchEventDetailsList]
-      ..sort((a, b) => (b.minute ?? 0).compareTo(a.minute ?? 0));
+    final events = match?.matchEventDetailsList ?? const [];
     final goalCount =
         events.where((event) => event.type == MatchEventType.goal).length;
     final yellowCardCount =
@@ -55,29 +46,21 @@ class _HomeLatestResultCardState extends State<HomeLatestResultCard> {
     final redCardCount =
         events.where((event) => event.type == MatchEventType.redCard).length;
     final cardHeroTag =
-        match == null ? null : widget.matchHeroTag(match, 'home_latest');
-    final ownTeamName = widget.currentUser.teamDetails?.title;
-    final ownTeamLogo = widget.currentUser.teamDetails?.logoDesign;
+        match == null ? null : matchHeroTag(match, 'home_latest');
+    final ownTeamName = currentUser.teamDetails?.title;
+    final ownTeamLogo = currentUser.teamDetails?.logoDesign;
 
     return HomeBentoCard(
-      padding: const EdgeInsets.all(Spacing.lg),
+      padding: const EdgeInsets.fromLTRB(Spacing.lg, 0, Spacing.lg, Spacing.md),
       color: appColors.white,
       child: InkWell(
-        onTap: match == null ? null : () => widget.onOpenMatch(match),
+        onTap: match == null ? null : () => onOpenMatch(match),
         borderRadius: BorderRadius.circular(16),
         child: Column(
           children: [
             Row(
               children: [
-                Expanded(
-                  child: Text(
-                    'SENESTE RESULTAT',
-                    style: appTextStyles.label.copyWith(
-                      color: appColors.grey5,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
+
                 if (result != null) MatchResultBadge(result: result),
               ],
             ),
@@ -168,7 +151,7 @@ class _HomeLatestResultCardState extends State<HomeLatestResultCard> {
                     ),
                   ),
                 )
-              else ...[
+              else
                 Row(
                   children: [
                     Expanded(
@@ -199,52 +182,6 @@ class _HomeLatestResultCardState extends State<HomeLatestResultCard> {
                     ),
                   ],
                 ),
-                const SizedBox(height: Spacing.xs),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton.icon(
-                    onPressed: () =>
-                        setState(() => _showAllEvents = !_showAllEvents),
-                    iconAlignment: IconAlignment.end,
-                    icon: AnimatedRotation(
-                      turns: _showAllEvents ? 0.5 : 0,
-                      duration: const Duration(milliseconds: 160),
-                      child: const Icon(Icons.keyboard_arrow_down, size: 20),
-                    ),
-                    label: Text(
-                      _showAllEvents
-                          ? 'Skjul hændelser'
-                          : 'Vis alle hændelser (${events.length})',
-                    ),
-                    style: TextButton.styleFrom(
-                      foregroundColor: appColors.dirt,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: Spacing.xs,
-                        vertical: Spacing.xs,
-                      ),
-                      textStyle: appTextStyles.caption2.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                ),
-                AnimatedSize(
-                  duration: const Duration(milliseconds: 220),
-                  curve: Curves.easeOut,
-                  alignment: Alignment.topCenter,
-                  child: _showAllEvents
-                      ? Padding(
-                          padding: const EdgeInsets.only(top: Spacing.xs),
-                          child: Column(
-                            children: [
-                              for (final event in events)
-                                _LatestResultHistoryRow(event: event),
-                            ],
-                          ),
-                        )
-                      : const SizedBox.shrink(),
-                ),
-              ],
             ],
           ],
         ),
@@ -312,98 +249,6 @@ class _LatestResultEventSummary extends StatelessWidget {
       ),
     );
   }
-}
-
-class _LatestResultHistoryRow extends StatelessWidget {
-  final MatchEventDetails event;
-
-  const _LatestResultHistoryRow({required this.event});
-
-  @override
-  Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    final (icon, color, label) = switch (event.type) {
-      MatchEventType.goal => (
-          Icons.sports_soccer,
-          appColors.primary,
-          'Mål',
-        ),
-      MatchEventType.yellowCard => (
-          Icons.crop_portrait,
-          appColors.warning,
-          'Gult kort',
-        ),
-      MatchEventType.redCard => (
-          Icons.crop_portrait,
-          appColors.error,
-          'Rødt kort',
-        ),
-      MatchEventType.substitution => (
-          Icons.swap_horiz,
-          appColors.sky,
-          'Udskiftning',
-        ),
-      MatchEventType.penaltyKick => (
-          Icons.sports_soccer,
-          appColors.sunset,
-          'Straffespark',
-        ),
-    };
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: Spacing.xs),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 34,
-            child: Text(
-              event.minute == null ? '-' : '${event.minute}′',
-              style: appTextStyles.caption2.copyWith(
-                color: appColors.grey5,
-              ),
-            ),
-          ),
-          Icon(icon, size: 16, color: color),
-          const SizedBox(width: Spacing.sm),
-          Expanded(
-            child: Text(
-              _latestResultEventLabel(event),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: appTextStyles.caption2.copyWith(
-                color: appColors.dirt,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          const SizedBox(width: Spacing.sm),
-          Text(
-            label,
-            style: appTextStyles.caption3.copyWith(
-              color: appColors.grey5,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-String _latestResultEventLabel(MatchEventDetails event) {
-  if (event.type == MatchEventType.goal && event.assistMakerUserName != null) {
-    return '${event.goalscorerUserName} (Assist: ${event.assistMakerUserName})';
-  }
-
-  if (event.type == MatchEventType.substitution) {
-    return '${event.goalscorerUserName} ind / ${event.assistMakerUserName ?? '?'} ud';
-  }
-
-  return event.goalscorerUserName;
 }
 
 MatchResultStatus? _resultStatus(

@@ -3,20 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:kopa/component/card/kopa_card.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/model/match_poll_details.dart';
-import 'package:kopa/model/user_details.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 import 'package:kopa/theme/spacing.dart';
 
 class MatchPollDetailsCard extends StatelessWidget {
   final MatchPollDetails poll;
-  final List<UserDetails> squad;
   final VoidCallback? onEdit;
 
   const MatchPollDetailsCard({
     super.key,
     required this.poll,
-    this.squad = const [],
     this.onEdit,
   });
 
@@ -26,8 +23,7 @@ class MatchPollDetailsCard extends StatelessWidget {
     final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final styles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final rows = _buildRows(l10n);
-    final totalVotes = rows.fold<int>(0, (total, row) => total + row.votes);
+    final winner = poll.playerOfTheMatchDetails;
 
     return KopaCard(
       padding: const EdgeInsets.all(Spacing.md),
@@ -62,7 +58,7 @@ class MatchPollDetailsCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      l10n.matchPollTotalVotes(totalVotes),
+                      l10n.matchPollTotalVotes(poll.playerOfTheMatchVotes),
                       style: styles.caption,
                     ),
                   ],
@@ -78,59 +74,21 @@ class MatchPollDetailsCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: Spacing.md),
-          ...rows.map(
-            (row) => Padding(
-              key: ValueKey('match-poll-vote-${row.userId}'),
-              padding: const EdgeInsets.only(bottom: Spacing.sm),
-              child: _MatchPollVoteRow(
-                row: row,
-                winnerId: poll.playerOfTheMatchDetails.id,
+          Padding(
+            key: const ValueKey('match-poll-winner'),
+            padding: const EdgeInsets.only(bottom: Spacing.sm),
+            child: _MatchPollVoteRow(
+              row: _MatchPollRowData(
+                userId: winner.id,
+                userName: winner.name,
+                votes: poll.playerOfTheMatchVotes,
               ),
+              winnerId: winner.id,
             ),
           ),
         ],
       ),
     );
-  }
-
-  List<_MatchPollRowData> _buildRows(AppLocalizations l10n) {
-    final voteCounts = <int, int>{};
-    for (final vote in poll.matchPollUserVotesDetails) {
-      voteCounts[vote.userId] = vote.numberOfVotes;
-    }
-
-    final namesById = <int, String>{};
-    for (final player in squad) {
-      namesById[player.id] = player.name;
-    }
-
-    final winner = poll.playerOfTheMatchDetails;
-    namesById.putIfAbsent(winner.id, () => winner.name);
-    if (voteCounts.isEmpty && poll.playerOfTheMatchVotes > 0) {
-      voteCounts[winner.id] = poll.playerOfTheMatchVotes;
-    }
-
-    for (final vote in poll.matchPollUserVotesDetails) {
-      namesById.putIfAbsent(vote.userId, () => l10n.matchPollUnknownPlayer);
-    }
-
-    final rows = namesById.entries
-        .map(
-          (entry) => _MatchPollRowData(
-            userId: entry.key,
-            userName: entry.value,
-            votes: voteCounts[entry.key] ?? 0,
-          ),
-        )
-        .toList();
-
-    rows.sort((a, b) {
-      final voteComparison = b.votes.compareTo(a.votes);
-      if (voteComparison != 0) return voteComparison;
-      return a.userName.toLowerCase().compareTo(b.userName.toLowerCase());
-    });
-
-    return rows;
   }
 }
 

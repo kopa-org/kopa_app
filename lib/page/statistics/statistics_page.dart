@@ -272,21 +272,21 @@ class _PlayerPlusStatsSection extends StatelessWidget {
         value: stats.player.goalsScored.toString(),
         rows: stats.leaderboards.topScorers,
         icon: Icons.sports_score,
-        accentColor: appColors.dirt,
+        accentColor: appColors.sky,
       ),
       _leaderboardTile(
         title: 'Assists',
         value: stats.player.assists.toString(),
         rows: stats.leaderboards.assists,
         icon: Icons.handshake,
-        accentColor: appColors.dirt,
+        accentColor: appColors.success,
       ),
       _leaderboardTile(
         title: 'Kampe',
         value: stats.player.matchesPlayed.toString(),
         rows: stats.leaderboards.matchesPlayed,
         icon: Icons.sports_soccer,
-        accentColor: appColors.dirt,
+        accentColor: appColors.sunset,
       ),
       _leaderboardTile(
         title: 'Stemmer',
@@ -344,7 +344,7 @@ class _PlayerPlusStatsSection extends StatelessWidget {
       value: currentRow?.value ?? '-',
       rows: rows,
       icon: Icons.local_fire_department,
-      accentColor: appColors.dirt,
+      accentColor: appColors.error,
     );
   }
 

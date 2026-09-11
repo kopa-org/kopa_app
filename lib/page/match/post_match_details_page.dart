@@ -20,7 +20,6 @@ class PostMatchDetailsPage extends StatelessWidget {
   final UserDetails user;
   final Widget heroCard;
   final List<Widget> attendanceList;
-  final List<UserDetails> squad;
   final Future<void> Function()? onRefresh;
   final VoidCallback onAddEvent;
   final VoidCallback onSetMatchScore;
@@ -35,7 +34,6 @@ class PostMatchDetailsPage extends StatelessWidget {
     required this.user,
     required this.heroCard,
     required this.attendanceList,
-    this.squad = const [],
     required this.onAddEvent,
     required this.onSetMatchScore,
     required this.onCreateMatchPoll,
@@ -74,7 +72,6 @@ class PostMatchDetailsPage extends StatelessWidget {
         else
           MatchPollDetailsCard(
             poll: match.matchPollDetails!,
-            squad: squad,
             onEdit: user.isTeamOwner ? onEditMatchPoll : null,
           ),
         const SizedBox(height: Spacing.lg),

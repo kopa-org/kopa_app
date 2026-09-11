@@ -61,8 +61,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
   bool _isApprovingAllAttendances = false;
   bool _isUpdatingRegistration = false;
   bool _isUpdatingLineupVisibility = false;
-  int _homeGoals = 0;
-  int _awayGoals = 0;
+  int? _homeGoals;
+  int? _awayGoals;
   MatchDetailSegment _selectedSegment = MatchDetailSegment.overview;
 
   @override
@@ -186,7 +186,6 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         user: user,
         heroCard: heroCard,
         attendanceList: _buildAttendanceList(matchDetails, squad, user),
-        squad: squad,
         onRefresh: _refreshMatchAndSquad,
         onAddEvent: () => addMatchEvent(user),
         onSetMatchScore: () => setMatchScore(matchDetails),
