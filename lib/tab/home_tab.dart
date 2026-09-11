@@ -269,9 +269,12 @@ class _HeroSection extends StatelessWidget {
               Expanded(
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: _HeroCountdown(
-                    target: nextMatch?.date,
-                    selectionKey: nextMatch?.id,
+                  child: SizedBox(
+                    height: 38,
+                    child: _HeroCountdown(
+                      target: nextMatch?.date,
+                      selectionKey: nextMatch?.id,
+                    ),
                   ),
                 ),
               ),
@@ -423,29 +426,38 @@ class _HeroCountdownPart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.baseline,
-      textBaseline: TextBaseline.alphabetic,
-      children: [
-        AnimatedFlipCounter(
-          value: value,
-          wholeDigits: 2,
-          duration: const Duration(milliseconds: 420),
-          curve: Curves.easeOutCubic,
-          transitionType: CounterTransitionType.flip,
-          textStyle: style,
-          useTabularFigures: true,
-        ),
-        const SizedBox(width: 2),
-        Text(
-          suffix,
-          style: style.copyWith(
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
+
+    return SizedBox(
+      height: 36,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          ClipRect(
+            child: AnimatedFlipCounter(
+              value: value,
+              wholeDigits: 2,
+              duration: const Duration(milliseconds: 300),
+              transitionType: CounterTransitionType.roll,
+              increasingColor: appColors.primary,
+              decreasingColor: appColors.error,
+              colorFadeDuration: const Duration(milliseconds: 500),
+              textStyle: style,
+              useTabularFigures: true,
+            ),
           ),
-        ),
-      ],
+          const SizedBox(width: 2),
+          Text(
+            suffix,
+            style: style.copyWith(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
