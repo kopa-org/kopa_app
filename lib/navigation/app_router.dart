@@ -25,6 +25,7 @@ import 'package:kopa/utils/app_analytics.dart';
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 const double _androidNavigationSurfaceOpacity = 0.82;
+const double _androidNavigationBarRadius = 28;
 
 abstract final class AppRouter {
   static const login = '/login';
@@ -347,45 +348,50 @@ class _TransparentAndroidNavigationBar extends StatelessWidget {
       top: false,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-        child: GNav(
-          backgroundColor: theme.colorScheme.surface.withValues(
-            alpha: _androidNavigationSurfaceOpacity,
-          ),
-          rippleColor: theme.colorScheme.primary.withValues(alpha: 0.1),
-          hoverColor: theme.colorScheme.primary.withValues(alpha: 0.1),
-          gap: 8,
-          activeColor: selectedColor,
-          iconSize: 24,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-          duration: const Duration(milliseconds: 400),
-          tabBackgroundColor: theme.colorScheme.primaryContainer,
-          color: unselectedColor,
-          selectedIndex: selectedIndex,
-          onTabChange: onTabSelected,
-          tabs: [
-            for (var i = 0; i < tabs.length; i++)
-              GButton(
-                icon: tabs[i].materialIcon,
-                leading: tabs[i].assetPath == null
-                    ? Icon(
-                        tabs[i].materialIcon,
-                        size: 24,
-                        color: selectedIndex == i
-                            ? selectedColor
-                            : unselectedColor,
-                      )
-                    : SvgPicture.asset(
-                        tabs[i].assetPath!,
-                        width: 24,
-                        height: 24,
-                        colorFilter: ColorFilter.mode(
-                          selectedIndex == i ? selectedColor : unselectedColor,
-                          BlendMode.srcIn,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(_androidNavigationBarRadius),
+          child: GNav(
+            backgroundColor: theme.colorScheme.surface.withValues(
+              alpha: _androidNavigationSurfaceOpacity,
+            ),
+            rippleColor: theme.colorScheme.primary.withValues(alpha: 0.1),
+            hoverColor: theme.colorScheme.primary.withValues(alpha: 0.1),
+            gap: 8,
+            activeColor: selectedColor,
+            iconSize: 24,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            duration: const Duration(milliseconds: 400),
+            tabBackgroundColor: theme.colorScheme.primaryContainer,
+            color: unselectedColor,
+            selectedIndex: selectedIndex,
+            onTabChange: onTabSelected,
+            tabs: [
+              for (var i = 0; i < tabs.length; i++)
+                GButton(
+                  icon: tabs[i].materialIcon,
+                  leading: tabs[i].assetPath == null
+                      ? Icon(
+                          tabs[i].materialIcon,
+                          size: 24,
+                          color: selectedIndex == i
+                              ? selectedColor
+                              : unselectedColor,
+                        )
+                      : SvgPicture.asset(
+                          tabs[i].assetPath!,
+                          width: 24,
+                          height: 24,
+                          colorFilter: ColorFilter.mode(
+                            selectedIndex == i
+                                ? selectedColor
+                                : unselectedColor,
+                            BlendMode.srcIn,
+                          ),
                         ),
-                      ),
-                text: tabs[i].label,
-              ),
-          ],
+                  text: tabs[i].label,
+                ),
+            ],
+          ),
         ),
       ),
     );
