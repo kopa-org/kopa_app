@@ -9,6 +9,27 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get homeAttendanceGoing => 'You\'re going';
+
+  @override
+  String get homeAttendanceDeclined => 'Not going';
+
+  @override
+  String get homeAttendanceQuestion => 'Are you coming?';
+
+  @override
+  String get homeAttendanceYes => 'Yes, I\'m coming';
+
+  @override
+  String get homeAttendanceNo => 'No';
+
+  @override
+  String get homeAttendanceSaving => 'Saving…';
+
+  @override
+  String get homeAttendanceChange => 'Change your response';
+
+  @override
   String get matchScoreHome => 'Home';
 
   @override

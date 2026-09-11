@@ -67,14 +67,15 @@ class _SquadRosterView extends StatelessWidget {
     final theme = Theme.of(context);
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
     final styles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final bottomContentPadding = mainTabBottomContentPadding(context);
 
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(
+      padding: EdgeInsets.fromLTRB(
         Spacing.md,
         Spacing.md,
         Spacing.md,
-        120,
+        Spacing.md + bottomContentPadding,
       ),
       children: [
         Text(

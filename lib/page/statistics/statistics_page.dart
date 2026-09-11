@@ -142,6 +142,9 @@ class _StatisticsView extends StatelessWidget {
             ),
           ),
         ),
+        SliverToBoxAdapter(
+          child: SizedBox(height: mainTabBottomContentPadding(context)),
+        ),
       ],
     );
   }

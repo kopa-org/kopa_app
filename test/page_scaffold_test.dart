@@ -125,4 +125,36 @@ void main() {
     expect(find.text('Statistik'), findsNothing);
     expect(find.text('Indhold'), findsOneWidget);
   });
+
+  testWidgets('tab scaffold keeps the measured bar inset available to content',
+      (tester) async {
+    double? bottomInset;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          platform: TargetPlatform.android,
+          extensions: <ThemeExtension<dynamic>>[
+            AppColors.light,
+            AppTextStyles.light,
+          ],
+        ),
+        home: Scaffold(
+          extendBody: true,
+          body: PageScaffold.tab(
+            title: 'Hjem',
+            body: Builder(
+              builder: (context) {
+                bottomInset = mainTabBottomContentPadding(context);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+          bottomNavigationBar: const SizedBox(height: 100),
+        ),
+      ),
+    );
+
+    expect(bottomInset, 100);
+  });
 }

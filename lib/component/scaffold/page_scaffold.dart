@@ -5,6 +5,14 @@ import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+/// Returns the bottom obstruction reported by the root main-tab scaffold.
+///
+/// The root scaffold updates this media-query padding to the measured height
+/// of its transparent navigation bar while the tab body remains edge-to-edge.
+double mainTabBottomContentPadding(BuildContext context) {
+  return MediaQuery.paddingOf(context).bottom;
+}
+
 class PageScaffold extends StatelessWidget {
   final String title;
   final Widget? titleWidget;
@@ -19,6 +27,7 @@ class PageScaffold extends StatelessWidget {
   final bool showTopBar;
   final bool showTitle;
   final bool useTopSafeArea;
+  final bool useBottomSafeArea;
   final ObstructingPreferredSizeWidget? navigationBar;
   final SystemUiOverlayStyle? systemOverlayStyle;
 
@@ -38,6 +47,7 @@ class PageScaffold extends StatelessWidget {
     this.showTopBar = true,
     this.showTitle = true,
     this.useTopSafeArea = true,
+    this.useBottomSafeArea = true,
     this.systemOverlayStyle,
   });
 
@@ -55,6 +65,7 @@ class PageScaffold extends StatelessWidget {
     this.systemOverlayStyle,
     this.useTopSafeArea = true,
     this.showTopBar = true,
+    this.useBottomSafeArea = false,
   })  : showBackButton = false,
         showTitle = false,
         navigationBar = null;
@@ -92,6 +103,7 @@ class PageScaffold extends StatelessWidget {
                 children: [
                   SafeArea(
                     top: useTopSafeArea,
+                    bottom: useBottomSafeArea,
                     child: onRefresh != null
                         ? CustomScrollView(
                             slivers: [
@@ -130,7 +142,11 @@ class PageScaffold extends StatelessWidget {
                     actions: trailing ?? [],
                   )
                 : null,
-            body: SafeArea(top: useTopSafeArea, child: body),
+            body: SafeArea(
+              top: useTopSafeArea,
+              bottom: useBottomSafeArea,
+              child: body,
+            ),
             floatingActionButton: floatingActionButton,
           );
 

@@ -178,7 +178,10 @@ class _MatchListState extends State<_MatchList> {
     return ListView(
       key: _listViewKey,
       controller: _scrollController,
-      padding: Spacing.screenPadding,
+      padding: Spacing.screenPadding.copyWith(
+        bottom:
+            Spacing.screenPadding.bottom + mainTabBottomContentPadding(context),
+      ),
       children: [
         AllGamesCard(
           matches: matches,

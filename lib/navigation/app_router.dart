@@ -24,6 +24,8 @@ import 'package:kopa/tab/profile_tab.dart';
 import 'package:kopa/utils/app_analytics.dart';
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
+const double _androidNavigationSurfaceOpacity = 0.82;
+
 abstract final class AppRouter {
   static const login = '/login';
   static const register = '/register';
@@ -194,69 +196,13 @@ abstract final class AppRouter {
             }
 
             return Scaffold(
+              extendBody: true,
               body: navigationShell,
-              bottomNavigationBar: Container(
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surface,
-                  boxShadow: [
-                    BoxShadow(
-                      blurRadius: 12,
-                      color: Colors.black.withValues(alpha: .04),
-                    )
-                  ],
-                ),
-                child: SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8.0,
-                      vertical: 8,
-                    ),
-                    child: GNav(
-                      rippleColor:
-                          theme.colorScheme.primary.withValues(alpha: 0.1),
-                      hoverColor:
-                          theme.colorScheme.primary.withValues(alpha: 0.1),
-                      gap: 8,
-                      activeColor: theme.colorScheme.onPrimaryContainer,
-                      iconSize: 24,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 12,
-                      ),
-                      duration: const Duration(milliseconds: 400),
-                      tabBackgroundColor: theme.colorScheme.primaryContainer,
-                      color: theme.unselectedWidgetColor,
-                      selectedIndex: navigationShell.currentIndex,
-                      onTabChange: selectTab,
-                      tabs: [
-                        for (int i = 0; i < tabs.length; i++)
-                          GButton(
-                            icon: tabs[i].materialIcon,
-                            leading: tabs[i].assetPath == null
-                                ? Icon(
-                                    tabs[i].materialIcon,
-                                    size: 24,
-                                    color: navigationShell.currentIndex == i
-                                        ? theme.colorScheme.onPrimaryContainer
-                                        : theme.unselectedWidgetColor,
-                                  )
-                                : SvgPicture.asset(
-                                    tabs[i].assetPath!,
-                                    width: 24,
-                                    height: 24,
-                                    colorFilter: ColorFilter.mode(
-                                      navigationShell.currentIndex == i
-                                          ? theme.colorScheme.onPrimaryContainer
-                                          : theme.unselectedWidgetColor,
-                                      BlendMode.srcIn,
-                                    ),
-                                  ),
-                            text: tabs[i].label,
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
+              bottomNavigationBar: _TransparentAndroidNavigationBar(
+                tabs: tabs,
+                selectedIndex: navigationShell.currentIndex,
+                onTabSelected: selectTab,
+                theme: theme,
               ),
             );
           },
@@ -376,6 +322,73 @@ abstract final class AppRouter {
     return _visibleMainTabs(featureFlags)
         .map((tab) => tab.label)
         .toList(growable: false);
+  }
+}
+
+class _TransparentAndroidNavigationBar extends StatelessWidget {
+  final List<_MainTab> tabs;
+  final int selectedIndex;
+  final ValueChanged<int> onTabSelected;
+  final ThemeData theme;
+
+  const _TransparentAndroidNavigationBar({
+    required this.tabs,
+    required this.selectedIndex,
+    required this.onTabSelected,
+    required this.theme,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final selectedColor = theme.colorScheme.onPrimaryContainer;
+    final unselectedColor = theme.unselectedWidgetColor;
+
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        child: GNav(
+          backgroundColor: theme.colorScheme.surface.withValues(
+            alpha: _androidNavigationSurfaceOpacity,
+          ),
+          rippleColor: theme.colorScheme.primary.withValues(alpha: 0.1),
+          hoverColor: theme.colorScheme.primary.withValues(alpha: 0.1),
+          gap: 8,
+          activeColor: selectedColor,
+          iconSize: 24,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          duration: const Duration(milliseconds: 400),
+          tabBackgroundColor: theme.colorScheme.primaryContainer,
+          color: unselectedColor,
+          selectedIndex: selectedIndex,
+          onTabChange: onTabSelected,
+          tabs: [
+            for (var i = 0; i < tabs.length; i++)
+              GButton(
+                icon: tabs[i].materialIcon,
+                leading: tabs[i].assetPath == null
+                    ? Icon(
+                        tabs[i].materialIcon,
+                        size: 24,
+                        color: selectedIndex == i
+                            ? selectedColor
+                            : unselectedColor,
+                      )
+                    : SvgPicture.asset(
+                        tabs[i].assetPath!,
+                        width: 24,
+                        height: 24,
+                        colorFilter: ColorFilter.mode(
+                          selectedIndex == i ? selectedColor : unselectedColor,
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                text: tabs[i].label,
+              ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

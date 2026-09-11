@@ -98,6 +98,48 @@ abstract class AppLocalizations {
     Locale('en')
   ];
 
+  /// No description provided for @homeAttendanceGoing.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re going'**
+  String get homeAttendanceGoing;
+
+  /// No description provided for @homeAttendanceDeclined.
+  ///
+  /// In en, this message translates to:
+  /// **'Not going'**
+  String get homeAttendanceDeclined;
+
+  /// No description provided for @homeAttendanceQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you coming?'**
+  String get homeAttendanceQuestion;
+
+  /// No description provided for @homeAttendanceYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, I\'m coming'**
+  String get homeAttendanceYes;
+
+  /// No description provided for @homeAttendanceNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get homeAttendanceNo;
+
+  /// No description provided for @homeAttendanceSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get homeAttendanceSaving;
+
+  /// No description provided for @homeAttendanceChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change your response'**
+  String get homeAttendanceChange;
+
   /// No description provided for @matchScoreHome.
   ///
   /// In en, this message translates to:

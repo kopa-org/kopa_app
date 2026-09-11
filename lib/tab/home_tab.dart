@@ -20,6 +20,7 @@ import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/home_cubit.dart';
 import 'package:kopa/cubits/home_state.dart';
 import 'package:kopa/helpers/date_helper.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/model/dbu_standings.dart';
 import 'package:kopa/model/fine_box_details.dart';
 import 'package:kopa/model/match_details.dart';
@@ -218,6 +219,11 @@ class _HomeTabViewState extends State<_HomeTabView> {
                       statistics: state.statistics,
                       fineBox: state.fineBox,
                     ),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: mainTabBottomContentPadding(context),
                   ),
                 ),
               ],
@@ -552,7 +558,6 @@ class _HeroMatchCarouselState extends State<_HeroMatchCarousel> {
                                 pages[index],
                                 isFirst: index == 0,
                               ),
-                              reserveRegistrationActions: true,
                               enableLogoHeroes: false,
                             ),
                           ),
@@ -585,7 +590,6 @@ class _HeroMatchCarouselState extends State<_HeroMatchCarousel> {
                               pages[index],
                               isFirst: index == 0,
                             ),
-                            reserveRegistrationActions: true,
                             logoHeroSource: 'home_hero',
                           ),
                           builder: (context, child) {
@@ -681,7 +685,6 @@ class _HeroTeamPanel extends StatelessWidget {
   final MatchDetails? match;
   final UserDetails currentUser;
   final String? titleOverride;
-  final bool reserveRegistrationActions;
   final bool enableLogoHeroes;
   final String? logoHeroSource;
 
@@ -689,7 +692,6 @@ class _HeroTeamPanel extends StatelessWidget {
     required this.match,
     required this.currentUser,
     this.titleOverride,
-    this.reserveRegistrationActions = false,
     this.enableLogoHeroes = true,
     this.logoHeroSource,
   });
@@ -877,7 +879,6 @@ class _HeroTeamPanel extends StatelessWidget {
                     HomeMatchResponseCard(
                       match: match,
                       currentUser: currentUser,
-                      reserveRegistrationActions: reserveRegistrationActions,
                     ),
                     if (pinDetailsToBottom) const Spacer()
                   ],
@@ -1044,12 +1045,10 @@ class _MatchInfoDivider extends StatelessWidget {
 class HomeMatchResponseCard extends StatelessWidget {
   final MatchDetails match;
   final UserDetails currentUser;
-  final bool reserveRegistrationActions;
 
   const HomeMatchResponseCard({
     required this.match,
     required this.currentUser,
-    this.reserveRegistrationActions = false,
   });
 
   @override
@@ -1081,123 +1080,266 @@ class HomeMatchResponseCard extends StatelessWidget {
       context.read<HomeCubit>().declineMatch(match.id, teamId);
     }
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(Spacing.md),
-      decoration: BoxDecoration(
-        color: appColors.white,
-        borderRadius: BorderRadius.circular(Spacing.borderRadiusLarge),
-      ),
+    final l10n = AppLocalizations.of(context)!;
+    final answered = isRegistered || isUnavailable;
+    final statusColor = isUnavailable ? appColors.error : appColors.grass;
+
+    Future<void> changeResponse() async {
+      if (isRegistering) return;
+      final response = await showModalBottomSheet<bool>(
+        context: context,
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        useSafeArea: true,
+        builder: (_) => _AttendanceResponseSheet(
+          currentResponse: isRegistered,
+          colors: appColors,
+          styles: appTextStyles,
+          l10n: l10n,
+        ),
+      );
+
+      if (!context.mounted || response == null || response == isRegistered) {
+        return;
+      }
+      response ? register() : decline();
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+          horizontal: Spacing.md, vertical: Spacing.sm),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
               Expanded(
-                child: Text(
-                  isRegistered
-                      ? 'Du er tilmeldt'
-                      : isUnavailable
-                          ? 'Afbud registreret'
-                          : 'Kommer du?',
-                  style: appTextStyles.body3.copyWith(
-                    color: isUnavailable ? appColors.error : appColors.dirt,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                child: answered
+                    ? Align(
+                        alignment: Alignment.centerLeft,
+                        child: Semantics(
+                          button: true,
+                          label: l10n.homeAttendanceChange,
+                          child: Material(
+                            color: statusColor.withValues(alpha: 0.10),
+                            borderRadius: BorderRadius.circular(
+                              Spacing.borderRadiusFull,
+                            ),
+                            child: InkWell(
+                              key: const ValueKey('match_response_status'),
+                              onTap: isRegistering ? null : changeResponse,
+                              borderRadius: BorderRadius.circular(
+                                Spacing.borderRadiusFull,
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 10,
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      isRegistered ? Icons.check : Icons.close,
+                                      size: 18,
+                                      color: statusColor,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Flexible(
+                                      child: Text(
+                                        isRegistering
+                                            ? l10n.homeAttendanceSaving
+                                            : isRegistered
+                                                ? l10n.homeAttendanceGoing
+                                                : l10n.homeAttendanceDeclined,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: appTextStyles.body3.copyWith(
+                                          color: statusColor,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Icon(
+                                      Icons.keyboard_arrow_down,
+                                      size: 20,
+                                      color: statusColor,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                    : Text(l10n.homeAttendanceQuestion,
+                        style: appTextStyles.body3.copyWith(
+                            color: appColors.dirt,
+                            fontWeight: FontWeight.w600)),
               ),
-              _MatchSignupSummary(
-                count: match.registeredCount,
-              ),
+              const SizedBox(width: Spacing.sm),
+              _MatchSignupSummary(count: match.registeredCount),
             ],
           ),
-          const SizedBox(height: Spacing.sm),
-          Stack(
-            children: [
-              if (reserveRegistrationActions)
-                Opacity(
-                  opacity: 0,
-                  child: IgnorePointer(
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: _KopaChoiceButton(
-                            label: 'Nej',
-                            icon: Icons.close,
-                            outlined: true,
-                            onPressed: () {},
-                          ),
-                        ),
-                        const SizedBox(width: Spacing.sm),
-                        Expanded(
-                          child: _KopaChoiceButton(
-                            label: 'Ja, jeg kommer',
-                            icon: Icons.how_to_reg,
-                            onPressed: () {},
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              if (isRegistered)
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
+          if (!answered) ...[
+            const SizedBox(height: Spacing.sm),
+            Row(
+              children: [
+                Expanded(
+                  child: _KopaChoiceButton(
+                    key: const ValueKey('match_response_decline'),
+                    label: l10n.homeAttendanceNo,
+                    icon: Icons.close,
+                    outlined: true,
                     onPressed: isRegistering ? null : decline,
-                    style: TextButton.styleFrom(
-                      foregroundColor: appColors.grass,
-                      textStyle: appTextStyles.caption2.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    child: Text(
-                      isRegistering ? 'Melder afbud' : 'Meld afbud',
-                    ),
                   ),
-                )
-              else if (isUnavailable)
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: isRegistering ? null : register,
-                    style: TextButton.styleFrom(
-                      foregroundColor: appColors.grass,
-                      textStyle: appTextStyles.caption2.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    child: Text(
-                      isRegistering ? 'Tilmeldes' : 'Tilmeld igen',
-                    ),
-                  ),
-                )
-              else
-                Row(
-                  children: [
-                    Expanded(
-                      child: _KopaChoiceButton(
-                        key: const ValueKey('match_response_decline'),
-                        label: 'Nej',
-                        icon: Icons.close,
-                        outlined: true,
-                        onPressed: isRegistering ? null : decline,
-                      ),
-                    ),
-                    const SizedBox(width: Spacing.sm),
-                    Expanded(
-                      child: _KopaChoiceButton(
-                        key: const ValueKey('match_response_accept'),
-                        label: isRegistering ? 'Tilmeldes' : 'Ja, jeg kommer',
-                        icon: Icons.how_to_reg,
-                        onPressed: isRegistering ? null : register,
-                      ),
-                    ),
-                  ],
                 ),
+                const SizedBox(width: Spacing.sm),
+                Expanded(
+                  child: _KopaChoiceButton(
+                    key: const ValueKey('match_response_accept'),
+                    label: isRegistering
+                        ? l10n.homeAttendanceSaving
+                        : l10n.homeAttendanceYes,
+                    icon: Icons.how_to_reg,
+                    onPressed: isRegistering ? null : register,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _AttendanceResponseSheet extends StatelessWidget {
+  final bool currentResponse;
+  final AppColors colors;
+  final AppTextStyles styles;
+  final AppLocalizations l10n;
+
+  const _AttendanceResponseSheet({
+    required this.currentResponse,
+    required this.colors,
+    required this.styles,
+    required this.l10n,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: colors.surface,
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      clipBehavior: Clip.antiAlias,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            Spacing.md,
+            12,
+            Spacing.md,
+            Spacing.md,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: colors.grey4,
+                    borderRadius: BorderRadius.circular(
+                      Spacing.borderRadiusFull,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: Spacing.md),
+              Text(l10n.homeAttendanceChange, style: styles.sectionHeader),
+              const SizedBox(height: Spacing.sm),
+              _AttendanceResponseOption(
+                key: const ValueKey('attendance_response_yes'),
+                label: l10n.homeAttendanceYes,
+                icon: Icons.how_to_reg,
+                color: colors.grass,
+                selected: currentResponse,
+                onTap: () => Navigator.of(context).pop(true),
+              ),
+              const SizedBox(height: Spacing.sm),
+              _AttendanceResponseOption(
+                key: const ValueKey('attendance_response_no'),
+                label: l10n.homeAttendanceNo,
+                icon: Icons.close,
+                color: colors.error,
+                selected: !currentResponse,
+                onTap: () => Navigator.of(context).pop(false),
+              ),
             ],
           ),
-        ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AttendanceResponseOption extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final Color color;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _AttendanceResponseOption({
+    super.key,
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final styles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      child: Material(
+        color: selected ? color.withValues(alpha: 0.10) : colors.offWhite,
+        borderRadius: BorderRadius.circular(Spacing.borderRadiusMedium),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(Spacing.borderRadiusMedium),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: Spacing.md,
+              vertical: 14,
+            ),
+            child: Row(
+              children: [
+                Icon(icon, color: color, size: 22),
+                const SizedBox(width: Spacing.sm),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: styles.bodyBold.copyWith(color: colors.dirt),
+                  ),
+                ),
+                if (selected) Icon(Icons.check, color: color, size: 22),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -1,4 +1,11 @@
 {
+  "homeAttendanceGoing": "Du er tilmeldt",
+  "homeAttendanceDeclined": "Afbud registreret",
+  "homeAttendanceQuestion": "Kommer du?",
+  "homeAttendanceYes": "Ja, jeg kommer",
+  "homeAttendanceNo": "Nej",
+  "homeAttendanceSaving": "Gemmer…",
+  "homeAttendanceChange": "Ændr dit svar",
   "matchScoreHome": "Hjemme",
   "matchScoreAway": "Ude",
   "matchScoreHelp": "Indtast slutresultatet for hvert hold.",

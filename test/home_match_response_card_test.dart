@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kopa/cubits/home_cubit.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/tab/home_tab.dart';
@@ -16,6 +17,8 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         theme: ThemeData(
           extensions: <ThemeExtension<dynamic>>[
             AppColors.light,
@@ -58,12 +61,82 @@ void main() {
     );
     expect(acceptMaterial.color, AppColors.light.primary);
   });
+
+  for (final going in [true, false]) {
+    testWidgets('answered status opens choices and changes response: $going',
+        (tester) async {
+      final cubit = _ResponseCubit();
+      addTearDown(cubit.close);
+      Future<void> render(bool? response) => tester.pumpWidget(MaterialApp(
+            locale: const Locale('da'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: BlocProvider<HomeCubit>.value(
+              value: cubit,
+              child: Scaffold(
+                body: Align(
+                  alignment: Alignment.topCenter,
+                  child: SizedBox(
+                    width: 320,
+                    child: HomeMatchResponseCard(
+                      match: _match(response),
+                      currentUser: _user(),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ));
+      await render(null);
+      await tester.pumpAndSettle();
+      final unansweredHeight =
+          tester.getSize(find.byType(HomeMatchResponseCard)).height;
+      await render(going);
+      await tester.pumpAndSettle();
+      expect(tester.getSize(find.byType(HomeMatchResponseCard)).height,
+          lessThan(unansweredHeight));
+      expect(find.text(going ? 'Du er tilmeldt' : 'Afbud registreret'),
+          findsOneWidget);
+      expect(find.byIcon(Icons.keyboard_arrow_down), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('match_response_status')));
+      await tester.pumpAndSettle();
+      expect(find.byType(BottomSheet), findsOneWidget);
+      expect(find.text('Ja, jeg kommer'), findsOneWidget);
+      expect(find.text('Nej'), findsOneWidget);
+      await tester.tap(find.byKey(ValueKey(
+        going ? 'attendance_response_no' : 'attendance_response_yes',
+      )));
+      await tester.pumpAndSettle();
+      expect(cubit.response, !going);
+      expect(cubit.matchId, 1);
+      expect(tester.takeException(), isNull);
+    });
+  }
 }
 
-MatchDetails _match() {
+class _ResponseCubit extends HomeCubit {
+  bool? response;
+  int? matchId;
+
+  @override
+  Future<void> registerForMatch(int matchId, int teamId) async {
+    response = true;
+    this.matchId = matchId;
+  }
+
+  @override
+  Future<void> declineMatch(int matchId, int teamId) async {
+    response = false;
+    this.matchId = matchId;
+  }
+}
+
+MatchDetails _match([bool? response]) {
   final date = DateTime(2026, 10, 1, 19);
   return MatchDetails(
     id: 1,
+    isCurrentUserRegistered: response == true,
+    isCurrentUserAttending: response,
     homeTeam: 'Kopa IF',
     awayTeam: 'Fremad',
     date: date,

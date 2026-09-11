@@ -1,4 +1,11 @@
 {
+  "homeAttendanceGoing": "You're going",
+  "homeAttendanceDeclined": "Not going",
+  "homeAttendanceQuestion": "Are you coming?",
+  "homeAttendanceYes": "Yes, I'm coming",
+  "homeAttendanceNo": "No",
+  "homeAttendanceSaving": "Saving…",
+  "homeAttendanceChange": "Change your response",
   "matchScoreHome": "Home",
   "matchScoreAway": "Away",
   "matchScoreHelp": "Enter the final score for each team.",

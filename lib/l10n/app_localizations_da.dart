@@ -9,6 +9,27 @@ class AppLocalizationsDa extends AppLocalizations {
   AppLocalizationsDa([String locale = 'da']) : super(locale);
 
   @override
+  String get homeAttendanceGoing => 'Du er tilmeldt';
+
+  @override
+  String get homeAttendanceDeclined => 'Afbud registreret';
+
+  @override
+  String get homeAttendanceQuestion => 'Kommer du?';
+
+  @override
+  String get homeAttendanceYes => 'Ja, jeg kommer';
+
+  @override
+  String get homeAttendanceNo => 'Nej';
+
+  @override
+  String get homeAttendanceSaving => 'Gemmer…';
+
+  @override
+  String get homeAttendanceChange => 'Ændr dit svar';
+
+  @override
   String get matchScoreHome => 'Hjemme';
 
   @override

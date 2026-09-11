@@ -83,6 +83,7 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
       showBackButton: widget.showBackButton,
       showTopBar: false,
       backgroundColor: appColors.background,
+      useBottomSafeArea: widget.showBackButton,
       body: FutureHandler<UserDetails>(
         future: currentUserData,
         onSuccess: (context, user) {
@@ -147,6 +148,11 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
                           appTextStyles,
                         ),
                       ),
+                    SliverToBoxAdapter(
+                      child: SizedBox(
+                        height: mainTabBottomContentPadding(context),
+                      ),
+                    ),
                   ],
                 ),
               );
