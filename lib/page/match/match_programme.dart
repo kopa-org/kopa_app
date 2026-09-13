@@ -60,7 +60,7 @@ class _MatchProgrammePageState extends State<MatchProgrammePage> {
               tooltip: 'Opret kamp',
               backgroundColor: colors.white,
               onPressed: () => _showCreateMatch(context),
-              child: Icon(Icons.add, color: colors.lightGrass),
+              child: Icon(Icons.add, color: colors.primary, size: 32),
             );
           },
         ),

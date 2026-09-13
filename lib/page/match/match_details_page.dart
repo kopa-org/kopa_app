@@ -1085,16 +1085,15 @@ class _PrematchRsvpChoiceBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
-
     return _PrematchStickySurface(
       child: Row(
         children: [
           Expanded(
             child: _PrematchRsvpButton(
               label: 'Nej, kan ikke',
-              foregroundColor: colors.dirt,
-              backgroundColor: colors.offWhite,
+              foregroundColor: const Color(0xFF524438),
+              backgroundColor: Colors.transparent,
+              borderColor: const Color(0xFF524438),
               isSaving: isSaving,
               onPressed: onDecline,
             ),
@@ -1103,9 +1102,9 @@ class _PrematchRsvpChoiceBar extends StatelessWidget {
           Expanded(
             child: _PrematchRsvpButton(
               label: 'Ja, jeg kommer',
-              icon: CupertinoIcons.checkmark_alt,
-              foregroundColor: colors.dirt,
-              backgroundColor: colors.lightGrass,
+              icon: CupertinoIcons.checkmark,
+              foregroundColor: Colors.white,
+              backgroundColor: const Color(0xFF00964E),
               isSaving: isSaving,
               onPressed: onAccept,
             ),
@@ -1199,6 +1198,7 @@ class _PrematchRsvpButton extends StatelessWidget {
   final IconData? icon;
   final Color foregroundColor;
   final Color backgroundColor;
+  final Color? borderColor;
   final bool isSaving;
   final VoidCallback onPressed;
 
@@ -1206,6 +1206,7 @@ class _PrematchRsvpButton extends StatelessWidget {
     required this.label,
     required this.foregroundColor,
     required this.backgroundColor,
+    this.borderColor,
     required this.isSaving,
     required this.onPressed,
     this.icon,
@@ -1218,13 +1219,15 @@ class _PrematchRsvpButton extends StatelessWidget {
 
     return CupertinoButton(
       padding: EdgeInsets.zero,
+      minimumSize: const Size(0, 42),
       onPressed: isSaving ? null : onPressed,
       child: Container(
-        constraints: const BoxConstraints(minHeight: 48),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        height: 42,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: backgroundColor,
+          border: borderColor == null ? null : Border.all(color: borderColor!),
           borderRadius: BorderRadius.circular(12),
         ),
         child: isSaving
@@ -1241,7 +1244,11 @@ class _PrematchRsvpButton extends StatelessWidget {
                       label,
                       style: styles.body3.copyWith(
                         color: foregroundColor,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: borderColor == null
+                            ? FontWeight.w700
+                            : FontWeight.w600,
+                        fontSize: 14,
+                        height: 18 / 14,
                       ),
                       textAlign: TextAlign.center,
                     ),

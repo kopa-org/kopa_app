@@ -79,6 +79,9 @@ class _MatchList extends StatelessWidget {
         if (entry.$1 != matches.length - 1) {
           yield const SizedBox(height: Spacing.sm);
         }
+        if (entry.$1 == matches.length - 1) {
+          yield const SizedBox(height: Spacing.lg*3);
+        }
       }).toList(),
     );
   }

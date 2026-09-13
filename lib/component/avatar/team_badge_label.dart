@@ -145,20 +145,7 @@ class _TeamBadgeShell extends StatelessWidget {
       decoration: ShapeDecoration(
         shape: TeamLogoShapeBorder(shape),
         color: appColors.white.withValues(alpha: 0.74),
-        shadows: showShadow
-            ? [
-                BoxShadow(
-                  color: appColors.dirt.withValues(alpha: 0.16),
-                  blurRadius: 18,
-                  spreadRadius: 2,
-                ),
-                BoxShadow(
-                  color: appColors.dirt.withValues(alpha: 0.10),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ]
-            : null,
+
       ),
       child: child,
     );

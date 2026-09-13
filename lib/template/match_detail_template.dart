@@ -5,7 +5,6 @@ import 'package:kopa/component/section_header/section_header.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 import 'package:kopa/theme/spacing.dart';
-import 'package:segmented_button_slide/segmented_button_slide.dart';
 
 enum MatchDetailSegment {
   overview,
@@ -136,84 +135,49 @@ class MatchDetailTemplate extends StatelessWidget {
   }
 
   Widget _buildSegmentedControl(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = theme.extension<AppColors>() ?? AppColors.light;
-    final styles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final styles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
 
-    final entries = [
-      SegmentedButtonSlideEntry(label: overviewSegmentLabel),
-      SegmentedButtonSlideEntry(label: attendanceSegmentLabel),
+    final segments = <({MatchDetailSegment segment, String label})>[
+      (segment: MatchDetailSegment.overview, label: overviewSegmentLabel),
+      (segment: MatchDetailSegment.attendance, label: attendanceSegmentLabel),
       if (showTimelineSegment)
-        SegmentedButtonSlideEntry(label: timelineSegmentLabel),
+        (segment: MatchDetailSegment.timeline, label: timelineSegmentLabel),
     ];
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(4),
-      decoration: const BoxDecoration(color: Colors.transparent),
-      child: SegmentedButtonSlide(
-        selectedEntry: _segmentIndex(selectedSegment),
-        onChange: (index) => onSegmentChanged?.call(_segmentFromIndex(index)),
-        animationDuration: const Duration(milliseconds: 220),
-        curve: Curves.easeOutCubic,
-        height: usePrematchLayout ? 38 : 40,
-        padding: EdgeInsets.zero,
-        borderRadius: BorderRadius.circular(12),
-        textOverflow: TextOverflow.ellipsis,
-        colors: SegmentedButtonSlideColors(
-          barColor: colors.white,
-          backgroundSelectedColor: colors.lightGrass,
-        ),
-        selectedTextStyle: styles.caption.copyWith(
-          color: usePrematchLayout ? const Color(0xFF105230) : colors.black,
-          fontSize: usePrematchLayout ? 13 : null,
-          fontWeight: FontWeight.w700,
-        ),
-        unselectedTextStyle: styles.caption.copyWith(
-          color: usePrematchLayout ? const Color(0xFF524438) : colors.dirt,
-          fontSize: usePrematchLayout ? 13 : null,
-          fontWeight: FontWeight.w600,
-        ),
-        hoverTextStyle: styles.caption.copyWith(
-          color: colors.grass,
-          fontWeight: FontWeight.w600,
-        ),
-        slideShadow: [
-          BoxShadow(
-            color: colors.lightGrass.withValues(alpha: 0.45),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Row(
+        children: [
+          for (var index = 0; index < segments.length; index++) ...[
+            if (index > 0) const SizedBox(width: 8),
+            Expanded(
+              child: _MatchDetailSegmentButton(
+                key: ValueKey(
+                  'match-details-segment-${segments[index].segment.name}',
+                ),
+                segment: segments[index].segment,
+                label: segments[index].label,
+                selected: _effectiveSelectedSegment == segments[index].segment,
+                textStyle: styles.body3,
+                onPressed: () => onSegmentChanged?.call(
+                  segments[index].segment,
+                ),
+              ),
+            ),
+          ],
         ],
-        entries: entries,
       ),
     );
   }
 
-  int _segmentIndex(MatchDetailSegment segment) {
-    if (!showTimelineSegment && segment == MatchDetailSegment.timeline) {
-      return 0;
+  MatchDetailSegment get _effectiveSelectedSegment {
+    if (!showTimelineSegment &&
+        selectedSegment == MatchDetailSegment.timeline) {
+      return MatchDetailSegment.overview;
     }
 
-    return switch (segment) {
-      MatchDetailSegment.overview => 0,
-      MatchDetailSegment.attendance => 1,
-      MatchDetailSegment.timeline => 2,
-    };
-  }
-
-  MatchDetailSegment _segmentFromIndex(int index) {
-    if (!showTimelineSegment) {
-      return index == 1
-          ? MatchDetailSegment.attendance
-          : MatchDetailSegment.overview;
-    }
-
-    return switch (index) {
-      1 => MatchDetailSegment.attendance,
-      2 => MatchDetailSegment.timeline,
-      _ => MatchDetailSegment.overview,
-    };
+    return selectedSegment;
   }
 
   List<Widget> _buildSelectedSegment(BuildContext context) {
@@ -280,6 +244,79 @@ class MatchDetailTemplate extends StatelessWidget {
             ...timelineItems,
         ];
     }
+  }
+}
+
+class _MatchDetailSegmentButton extends StatelessWidget {
+  final MatchDetailSegment segment;
+  final String label;
+  final bool selected;
+  final TextStyle textStyle;
+  final VoidCallback onPressed;
+
+  const _MatchDetailSegmentButton({
+    super.key,
+    required this.segment,
+    required this.label,
+    required this.selected,
+    required this.textStyle,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const selectedColor = Color(0xFF105230);
+    const unselectedColor = Color(0xFF524438);
+
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          child: SizedBox(
+            height: 30,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: textStyle.copyWith(
+                        color: selected
+                            ? selectedColor
+                            : unselectedColor.withValues(alpha: 0.5),
+                        fontSize: 14,
+                        fontWeight:
+                            selected ? FontWeight.w700 : FontWeight.w600,
+                        height: 18 / 14,
+                      ),
+                    ),
+                  ),
+                  AnimatedContainer(
+                    key: ValueKey(
+                      'match-details-segment-${segment.name}-indicator',
+                    ),
+                    duration: const Duration(milliseconds: 220),
+                    height: 2,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: selected ? selectedColor : Colors.transparent,
+                      borderRadius: BorderRadius.circular(1),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 

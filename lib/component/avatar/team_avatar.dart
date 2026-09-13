@@ -70,9 +70,6 @@ class TeamAvatar extends StatelessWidget {
                     color: Colors.white,
                     fontSize: radius * 0.72,
                     fontWeight: FontWeight.w700,
-                    shadows: const [
-                      Shadow(color: Color(0x66000000), blurRadius: 2),
-                    ],
                   ),
                 ),
               ),
