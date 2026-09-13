@@ -30,6 +30,37 @@ class AppLocalizationsDa extends AppLocalizations {
   String get homeAttendanceChange => 'Ændr dit svar';
 
   @override
+  String get matchDetailsDecisionTitle => 'Beslutning';
+
+  @override
+  String get matchDetailsDecisionPending =>
+      'Du er tilmeldt, men din udtagelse afventer stadig.';
+
+  @override
+  String get matchDetailsRsvpDecline => 'Nej, kan ikke';
+
+  @override
+  String get matchDetailsRsvpAccept => 'Ja, jeg kommer';
+
+  @override
+  String get matchDetailsRsvpRegistered => 'Tilmeldt';
+
+  @override
+  String get matchDetailsRsvpDeclineAction => 'Meld afbud';
+
+  @override
+  String get matchDetailsRsvpDeclined => 'Ikke tilmeldt';
+
+  @override
+  String get matchDetailsNavHome => 'Hjem';
+
+  @override
+  String get matchDetailsNavMatches => 'Kampe';
+
+  @override
+  String get matchDetailsNavSquad => 'Truppen';
+
+  @override
   String get matchScoreHome => 'Hjemme';
 
   @override
@@ -142,6 +173,16 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String get commonOk => 'OK';
+
+  @override
+  String get lineupVisibilityRevealMessage =>
+      'Holdet får besked og kan se holdopstillingen.';
+
+  @override
+  String get lineupVisibilityRevealConfirm => 'OK, forstået';
+
+  @override
+  String get lineupVisibilityRevealCancel => 'Afbryd';
 
   @override
   String get fineTypeDeleteIconLabel => 'Slet bødetype';

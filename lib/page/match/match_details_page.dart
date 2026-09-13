@@ -1,7 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:kopa/component/card/player_positions_card.dart';
+import 'package:kopa/component/dialog/lineup_visibility_confirmation_dialog.dart';
 import 'package:kopa/component/error_message.dart';
 import 'package:kopa/component/loading_indicator.dart';
 import 'package:kopa/cubits/match_polls_cubit.dart';
@@ -11,6 +14,7 @@ import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/match_poll_details.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/model/user_vote.dart';
+import 'package:kopa/navigation/app_router.dart';
 import 'package:kopa/page/match/add_match_event_modal.dart';
 import 'package:kopa/page/match/lineup_editor_page.dart';
 import 'package:kopa/page/match/match_score_sheet.dart';
@@ -19,6 +23,7 @@ import 'package:kopa/page/match_polls/create_match_poll_page.dart';
 import 'package:kopa/repository/match_repository.dart';
 import 'package:kopa/repository/users_repository.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/state/user_votes_state.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
@@ -32,6 +37,35 @@ import 'package:kopa/component/list_item/player_list_item.dart';
 import 'package:kopa/component/match/match_result_action_card.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+enum _MatchRsvpState {
+  pending,
+  attending,
+  declined,
+}
+
+_MatchRsvpState _matchRsvpStateFor(MatchDetails match, int userId) {
+  EventAttendanceDetails? currentUserAttendance;
+  for (final attendance in match.attendanceDetailsList ?? []) {
+    if (attendance.userDetails.id == userId) {
+      currentUserAttendance = attendance;
+      break;
+    }
+  }
+
+  if (match.isCurrentUserAttending == false ||
+      currentUserAttendance?.isAttending == false) {
+    return _MatchRsvpState.declined;
+  }
+
+  if (match.isCurrentUserAttending == true ||
+      match.isCurrentUserRegistered ||
+      currentUserAttendance?.isAttending == true) {
+    return _MatchRsvpState.attending;
+  }
+
+  return _MatchRsvpState.pending;
+}
 
 class MatchDetailsPage extends StatefulWidget {
   final int matchId;
@@ -163,6 +197,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     final squad = data['squad'] as List<UserDetails>;
     final hasBeenPlayed = matchDetails.hasMatchBeenPlayed;
     final canManageResult = user.isTeamOwner;
+    final rsvpState = _matchRsvpStateFor(matchDetails, user.id);
 
     final heroCard = MatchHeroCard(
       match: matchDetails,
@@ -193,6 +228,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         onEditMatchPoll: () => _openEditMatchPoll(matchDetails, squad),
         selectedSegment: _selectedSegment,
         onSegmentChanged: _selectSegment,
+        bottomNavigationBar: _buildMatchDetailsBottomNavigationBar(context),
       );
     }
 
@@ -202,13 +238,27 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       onSegmentChanged: _selectSegment,
       heroCard: heroCard,
       usePrematchLayout: true,
-      stickyActionBar: _PrematchRsvpBar(
-        match: matchDetails,
-        currentUser: user,
-        isSaving: _isUpdatingRegistration,
-        onAccept: () => _registerForMatch(matchDetails),
-        onDecline: () => _unregisterFromMatch(matchDetails),
-      ),
+      inlineResponseStatus: switch (rsvpState) {
+        _MatchRsvpState.attending => _PrematchRsvpInlineStatus(
+            isSaving: _isUpdatingRegistration,
+            onDecline: () => _unregisterFromMatch(matchDetails),
+          ),
+        _MatchRsvpState.declined => _PrematchRsvpDeclinedInlineStatus(
+            isSaving: _isUpdatingRegistration,
+            onAccept: () => _registerForMatch(matchDetails),
+          ),
+        _MatchRsvpState.pending => null,
+      },
+      stickyActionBar: rsvpState == _MatchRsvpState.pending
+          ? _PrematchRsvpBar(
+              match: matchDetails,
+              currentUser: user,
+              isSaving: _isUpdatingRegistration,
+              onAccept: () => _registerForMatch(matchDetails),
+              onDecline: () => _unregisterFromMatch(matchDetails),
+            )
+          : null,
+      bottomNavigationBar: _buildMatchDetailsBottomNavigationBar(context),
       overviewTitle: 'Praktisk information',
       attendanceTitle: 'Tilmeldte spillere',
       attendanceSegmentLabel:
@@ -273,7 +323,27 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       ),
       usePrematchLayout: true,
       showTimelineSegment: false,
+      bottomNavigationBar: _buildMatchDetailsBottomNavigationBar(context),
     );
+  }
+
+  Widget _buildMatchDetailsBottomNavigationBar(BuildContext context) {
+    return _MatchDetailsBottomNavigationBar(
+      onHomePressed: () => _navigateToMainTab(context, AppRouter.home),
+      onMatchesPressed: () => _navigateToMainTab(context, AppRouter.match),
+      onSquadPressed: () => _navigateToMainTab(context, AppRouter.profile),
+    );
+  }
+
+  void _navigateToMainTab(BuildContext context, String location) {
+    final router = GoRouter.of(context);
+    final wasOpenedFromAnotherPage = widget.initialMatch != null;
+
+    router.go(location);
+    if (wasOpenedFromAnotherPage &&
+        Navigator.of(context, rootNavigator: true).canPop()) {
+      Navigator.of(context, rootNavigator: true).pop();
+    }
   }
 
   Future<void> _openCreateMatchPoll(
@@ -771,6 +841,15 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
   Future<void> _toggleLineupVisibility(MatchDetails match) async {
     if (_isUpdatingLineupVisibility) return;
 
+    if (!match.lineupVisible) {
+      final shouldReveal = await showCupertinoDialog<bool>(
+            context: context,
+            builder: (_) => const LineupVisibilityConfirmationDialog(),
+          ) ??
+          false;
+      if (!shouldReveal || !mounted) return;
+    }
+
     setState(() {
       _isUpdatingLineupVisibility = true;
     });
@@ -1026,58 +1105,29 @@ class _PrematchRsvpBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final attendance = _currentUserAttendance;
-    final isDeclined = attendance?.isAttending == false;
-    final isAttending = match.isCurrentUserRegistered ||
-        (attendance != null && attendance.isAttending);
-
-    if (isAttending && !isDeclined) {
-      return _PrematchRsvpStatusBar(
-        message: 'Du er tilmeldt kampen!',
-        messageColor: colors.successForeground,
-        backgroundColor: colors.successSurface,
-        icon: CupertinoIcons.checkmark_alt,
-        actionText: 'Kan ikke alligevel? Meld afbud',
-        actionColor: colors.textSecondary,
-        isSaving: isSaving,
-        onAction: onDecline,
-      );
+    switch (_matchRsvpStateFor(match, currentUser.id)) {
+      case _MatchRsvpState.pending:
+        return _PrematchRsvpDecisionBar(
+          isSaving: isSaving,
+          onAccept: onAccept,
+          onDecline: onDecline,
+        );
+      case _MatchRsvpState.attending:
+        // Attending users get the compact response status below the tabs.
+        return const SizedBox.shrink();
+      case _MatchRsvpState.declined:
+        // Declined users get the same inline treatment as attending users.
+        return const SizedBox.shrink();
     }
-
-    if (isDeclined) {
-      return _PrematchRsvpStatusBar(
-        message: 'Du har meldt afbud',
-        messageColor: colors.errorForeground,
-        backgroundColor: colors.errorSurface,
-        actionText: 'Alligevel klar? Tilmeld dig',
-        actionColor: colors.successForeground,
-        isSaving: isSaving,
-        onAction: onAccept,
-      );
-    }
-
-    return _PrematchRsvpChoiceBar(
-      isSaving: isSaving,
-      onAccept: onAccept,
-      onDecline: onDecline,
-    );
-  }
-
-  EventAttendanceDetails? get _currentUserAttendance {
-    for (final attendance in match.attendanceDetailsList ?? []) {
-      if (attendance.userDetails.id == currentUser.id) return attendance;
-    }
-    return null;
   }
 }
 
-class _PrematchRsvpChoiceBar extends StatelessWidget {
+class _PrematchRsvpDecisionBar extends StatelessWidget {
   final bool isSaving;
   final VoidCallback onAccept;
   final VoidCallback onDecline;
 
-  const _PrematchRsvpChoiceBar({
+  const _PrematchRsvpDecisionBar({
     required this.isSaving,
     required this.onAccept,
     required this.onDecline,
@@ -1085,29 +1135,45 @@ class _PrematchRsvpChoiceBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final styles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
     return _PrematchStickySurface(
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: _PrematchRsvpButton(
-              label: 'Nej, kan ikke',
-              foregroundColor: const Color(0xFF524438),
-              backgroundColor: Colors.transparent,
-              borderColor: const Color(0xFF524438),
-              isSaving: isSaving,
-              onPressed: onDecline,
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.matchDetailsDecisionTitle,
+                style: styles.body1.copyWith(
+                  color: const Color(0xFF2A1808),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  height: 20 / 16,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                l10n.matchDetailsDecisionPending,
+                style: styles.body3.copyWith(
+                  color: const Color(0xFF524438),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  height: 18 / 13,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: _PrematchRsvpButton(
-              label: 'Ja, jeg kommer',
-              icon: CupertinoIcons.checkmark,
-              foregroundColor: Colors.white,
-              backgroundColor: const Color(0xFF00964E),
-              isSaving: isSaving,
-              onPressed: onAccept,
-            ),
+          const SizedBox(height: 12),
+          _PrematchRsvpChoiceBar(
+            declineLabel: l10n.matchDetailsRsvpDecline,
+            acceptLabel: l10n.matchDetailsRsvpAccept,
+            isSaving: isSaving,
+            onAccept: onAccept,
+            onDecline: onDecline,
           ),
         ],
       ),
@@ -1115,75 +1181,193 @@ class _PrematchRsvpChoiceBar extends StatelessWidget {
   }
 }
 
-class _PrematchRsvpStatusBar extends StatelessWidget {
-  final String message;
-  final Color messageColor;
-  final Color backgroundColor;
-  final IconData? icon;
-  final String actionText;
-  final Color actionColor;
+class _PrematchRsvpChoiceBar extends StatelessWidget {
+  final String declineLabel;
+  final String acceptLabel;
   final bool isSaving;
-  final VoidCallback onAction;
+  final VoidCallback onAccept;
+  final VoidCallback onDecline;
 
-  const _PrematchRsvpStatusBar({
-    required this.message,
-    required this.messageColor,
-    required this.backgroundColor,
-    required this.actionText,
-    required this.actionColor,
+  const _PrematchRsvpChoiceBar({
+    required this.declineLabel,
+    required this.acceptLabel,
     required this.isSaving,
-    required this.onAction,
-    this.icon,
+    required this.onAccept,
+    required this.onDecline,
   });
 
   @override
   Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: _PrematchRsvpButton(
+            label: declineLabel,
+            foregroundColor: const Color(0xFF524438),
+            backgroundColor: Colors.transparent,
+            borderColor: const Color(0xFF524438),
+            isSaving: isSaving,
+            onPressed: onDecline,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _PrematchRsvpButton(
+            label: acceptLabel,
+            icon: CupertinoIcons.checkmark,
+            foregroundColor: Colors.white,
+            backgroundColor: const Color(0xFF00964E),
+            isSaving: isSaving,
+            onPressed: onAccept,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PrematchRsvpInlineStatus extends StatelessWidget {
+  final bool isSaving;
+  final VoidCallback onDecline;
+
+  const _PrematchRsvpInlineStatus({
+    required this.isSaving,
+    required this.onDecline,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final styles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
 
-    return _PrematchStickySurface(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE8F2ED),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
         children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (icon != null) ...[
-                  Icon(icon, color: messageColor, size: 18),
-                  const SizedBox(width: 8),
-                ],
-                Flexible(
-                  child: Text(
-                    message,
-                    style: styles.body3.copyWith(
-                      color: messageColor,
-                      fontWeight: FontWeight.w800,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ],
+          const Icon(
+            CupertinoIcons.checkmark_circle_fill,
+            color: Color(0xFF00964E),
+            size: 18,
+          ),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              l10n.matchDetailsRsvpRegistered,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: styles.body3.copyWith(
+                color: const Color(0xFF00964E),
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                height: 18 / 14,
+              ),
             ),
           ),
+          const SizedBox(width: 8),
+          const Icon(
+            CupertinoIcons.arrow_left,
+            color: Color(0xFF877B70),
+            size: 16,
+          ),
+          const SizedBox(width: 8),
           CupertinoButton(
-            minimumSize: const Size(0, 30),
-            padding: const EdgeInsets.only(top: 8),
-            onPressed: isSaving ? null : onAction,
+            key: const ValueKey('match-details-rsvp-decline-action'),
+            minimumSize: const Size(0, 18),
+            padding: EdgeInsets.zero,
+            onPressed: isSaving ? null : onDecline,
             child: isSaving
                 ? const CupertinoActivityIndicator(radius: 8)
                 : Text(
-                    actionText,
-                    style: styles.caption2.copyWith(
-                      color: actionColor,
+                    l10n.matchDetailsRsvpDeclineAction,
+                    style: styles.body3.copyWith(
+                      color: const Color(0xFF877B70),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      height: 18 / 14,
                       decoration: TextDecoration.underline,
-                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PrematchRsvpDeclinedInlineStatus extends StatelessWidget {
+  final bool isSaving;
+  final VoidCallback onAccept;
+
+  const _PrematchRsvpDeclinedInlineStatus({
+    required this.isSaving,
+    required this.onAccept,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final styles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        // Keep the declined state in the same inline flow as the accepted
+        // state; only its status treatment changes.
+        color: colors.background,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            CupertinoIcons.xmark_circle_fill,
+            color: colors.error,
+            size: 18,
+          ),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              l10n.matchDetailsRsvpDeclined,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: styles.body3.copyWith(
+                color: colors.error,
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                height: 18 / 14,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          const Icon(
+            CupertinoIcons.arrow_left,
+            color: Color(0xFF877B70),
+            size: 16,
+          ),
+          const SizedBox(width: 8),
+          CupertinoButton(
+            key: const ValueKey('match-details-rsvp-accept-action'),
+            minimumSize: const Size(0, 18),
+            padding: EdgeInsets.zero,
+            onPressed: isSaving ? null : onAccept,
+            child: isSaving
+                ? const CupertinoActivityIndicator(radius: 8)
+                : Text(
+                    l10n.matchDetailsRsvpAccept,
+                    style: styles.body3.copyWith(
+                      color: const Color(0xFF877B70),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      height: 18 / 14,
+                      decoration: TextDecoration.underline,
                     ),
                   ),
           ),
@@ -1267,27 +1451,174 @@ class _PrematchStickySurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
-
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: colors.white.withValues(alpha: 0.93),
+        color: Colors.white,
         border: const Border(
           top: BorderSide(color: Color(0xFFE0E6E2)),
         ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 16,
+            blurRadius: 8,
             offset: const Offset(0, -4),
           ),
         ],
       ),
-      child: SafeArea(
-        top: false,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: child,
+      ),
+    );
+  }
+}
+
+class _MatchDetailsBottomNavigationBar extends StatelessWidget {
+  final VoidCallback onHomePressed;
+  final VoidCallback onMatchesPressed;
+  final VoidCallback onSquadPressed;
+
+  const _MatchDetailsBottomNavigationBar({
+    required this.onHomePressed,
+    required this.onMatchesPressed,
+    required this.onSquadPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return SizedBox(
+      height: 72,
+      child: DecoratedBox(
+        decoration: const BoxDecoration(
+          color: Color(0xFFF9FBF9),
+          border: Border(
+            top: BorderSide(color: Color(0xFFE0E6E2)),
+          ),
+        ),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-          child: child,
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 24),
+          child: Material(
+            color: Colors.transparent,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                _MatchDetailsNavItem(
+                  key: const ValueKey('match-details-bottom-nav-home'),
+                  selected: true,
+                  label: l10n.matchDetailsNavHome,
+                  onPressed: onHomePressed,
+                ),
+                _MatchDetailsNavIconButton(
+                  key: const ValueKey('match-details-bottom-nav-matches'),
+                  icon: CupertinoIcons.xmark_circle,
+                  onPressed: onMatchesPressed,
+                  semanticLabel: l10n.matchDetailsNavMatches,
+                ),
+                _MatchDetailsNavIconButton(
+                  key: const ValueKey('match-details-bottom-nav-squad'),
+                  icon: CupertinoIcons.person_2,
+                  onPressed: onSquadPressed,
+                  semanticLabel: l10n.matchDetailsNavSquad,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MatchDetailsNavItem extends StatelessWidget {
+  final bool selected;
+  final String label;
+  final VoidCallback onPressed;
+
+  const _MatchDetailsNavItem({
+    super.key,
+    required this.selected,
+    required this.label,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final styles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: onPressed,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: selected ? const Color(0xFFD5ECE5) : Colors.transparent,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SvgPicture.asset(
+                'assets/logos/home-simple-door.svg',
+                width: 20,
+                height: 20,
+                colorFilter: const ColorFilter.mode(
+                  Color(0xFF00964E),
+                  BlendMode.srcIn,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: styles.body3.copyWith(
+                  color: const Color(0xFF00964E),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  height: 18 / 14,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MatchDetailsNavIconButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onPressed;
+  final String semanticLabel;
+
+  const _MatchDetailsNavIconButton({
+    super.key,
+    required this.icon,
+    required this.onPressed,
+    required this.semanticLabel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: semanticLabel,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: onPressed,
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Icon(
+            icon,
+            color: const Color(0xFF877B70),
+            size: 22,
+          ),
         ),
       ),
     );

@@ -140,6 +140,66 @@ abstract class AppLocalizations {
   /// **'Change your response'**
   String get homeAttendanceChange;
 
+  /// No description provided for @matchDetailsDecisionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Decision'**
+  String get matchDetailsDecisionTitle;
+
+  /// No description provided for @matchDetailsDecisionPending.
+  ///
+  /// In en, this message translates to:
+  /// **'You are signed up, but your selection is still pending.'**
+  String get matchDetailsDecisionPending;
+
+  /// No description provided for @matchDetailsRsvpDecline.
+  ///
+  /// In en, this message translates to:
+  /// **'No, I can\'t'**
+  String get matchDetailsRsvpDecline;
+
+  /// No description provided for @matchDetailsRsvpAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, I\'m coming'**
+  String get matchDetailsRsvpAccept;
+
+  /// No description provided for @matchDetailsRsvpRegistered.
+  ///
+  /// In en, this message translates to:
+  /// **'Registered'**
+  String get matchDetailsRsvpRegistered;
+
+  /// No description provided for @matchDetailsRsvpDeclineAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel attendance'**
+  String get matchDetailsRsvpDeclineAction;
+
+  /// No description provided for @matchDetailsRsvpDeclined.
+  ///
+  /// In en, this message translates to:
+  /// **'Not registered'**
+  String get matchDetailsRsvpDeclined;
+
+  /// No description provided for @matchDetailsNavHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get matchDetailsNavHome;
+
+  /// No description provided for @matchDetailsNavMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'Matches'**
+  String get matchDetailsNavMatches;
+
+  /// No description provided for @matchDetailsNavSquad.
+  ///
+  /// In en, this message translates to:
+  /// **'Squad'**
+  String get matchDetailsNavSquad;
+
   /// No description provided for @matchScoreHome.
   ///
   /// In en, this message translates to:
@@ -361,6 +421,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'OK'**
   String get commonOk;
+
+  /// No description provided for @lineupVisibilityRevealMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The team will be notified and able to see the lineup.'**
+  String get lineupVisibilityRevealMessage;
+
+  /// No description provided for @lineupVisibilityRevealConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'OK, understood'**
+  String get lineupVisibilityRevealConfirm;
+
+  /// No description provided for @lineupVisibilityRevealCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get lineupVisibilityRevealCancel;
 
   /// No description provided for @fineTypeDeleteIconLabel.
   ///

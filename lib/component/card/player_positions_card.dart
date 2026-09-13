@@ -27,7 +27,7 @@ class PlayerPositionsCard extends StatelessWidget {
     this.positionedPlayers,
     this.onEditFormation,
     this.onToggleVisibility,
-    this.isVisibleToPlayers = true,
+    this.isVisibleToPlayers = false,
     this.isUpdatingVisibility = false,
     this.preservePlayerOrder = false,
     this.showTitle = true,

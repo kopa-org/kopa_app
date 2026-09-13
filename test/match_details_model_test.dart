@@ -136,10 +136,10 @@ void main() {
     expect(match.declinedAttendanceDetails, [declined]);
   });
 
-  test('lineup visibility defaults to visible when missing', () {
+  test('lineup visibility defaults to hidden when missing', () {
     final match = MatchDetails.fromJson(_matchJson());
 
-    expect(match.lineupVisible, isTrue);
+    expect(match.lineupVisible, isFalse);
   });
 
   test('lineup visibility parses from json', () {

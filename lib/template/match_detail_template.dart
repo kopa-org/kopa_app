@@ -34,7 +34,9 @@ class MatchDetailTemplate extends StatelessWidget {
   final String timelineEmptyMessage;
   final bool showTimelineSegment;
   final bool usePrematchLayout;
+  final Widget? inlineResponseStatus;
   final Widget? stickyActionBar;
+  final Widget? bottomNavigationBar;
 
   const MatchDetailTemplate({
     super.key,
@@ -59,78 +61,64 @@ class MatchDetailTemplate extends StatelessWidget {
     this.timelineEmptyMessage = 'Ingen begivenheder registreret.',
     this.showTimelineSegment = true,
     this.usePrematchLayout = false,
+    this.inlineResponseStatus,
     this.stickyActionBar,
+    this.bottomNavigationBar,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (usePrematchLayout) {
-      return PageScaffold(
-        title: 'Kampdetaljer',
-        showTopBar: false,
-        onRefresh: onRefresh,
-        body: Stack(
-          fit: StackFit.expand,
-          children: [
-            SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(
-                16,
-                0,
-                16,
-                stickyActionBar == null ? 32 : 220,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const _MatchDetailsHeader(),
-                  heroCard,
-                  const SizedBox(height: 20),
-                  _buildSegmentedControl(context),
-                  const SizedBox(height: 20),
-                  ..._buildSelectedSegment(context),
-                ],
-              ),
-            ),
-            if (stickyActionBar != null)
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: stickyActionBar!,
-              ),
-          ],
-        ),
-      );
-    }
-
     return PageScaffold(
       title: 'Kampdetaljer',
       showTopBar: false,
       onRefresh: onRefresh,
-      body: Stack(
-        fit: StackFit.expand,
+      useBottomSafeArea: bottomNavigationBar == null,
+      body: Column(
         children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(
-              16,
-              0,
-              16,
-              16,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const _MatchDetailsHeader(),
-                heroCard,
-                const SizedBox(height: Spacing.lg),
-                _buildSegmentedControl(context),
-                const SizedBox(height: Spacing.lg),
-                ..._buildSelectedSegment(context),
-              ],
-            ),
-          ),
+          Expanded(child: _buildScrollableContent(context)),
+          if (bottomNavigationBar != null) bottomNavigationBar!,
         ],
       ),
+    );
+  }
+
+  Widget _buildScrollableContent(BuildContext context) {
+    final segmentSpacing = usePrematchLayout ? 20.0 : Spacing.lg;
+    final bottomPadding = usePrematchLayout
+        ? stickyActionBar == null
+            ? 32.0
+            : 144.0
+        : 32.0;
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(16, 0, 16, bottomPadding),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const _MatchDetailsHeader(),
+              heroCard,
+              SizedBox(height: segmentSpacing),
+              _buildSegmentedControl(context),
+              SizedBox(height: segmentSpacing),
+              if (inlineResponseStatus != null) ...[
+                inlineResponseStatus!,
+                const SizedBox(height: 16),
+              ],
+              ..._buildSelectedSegment(context),
+            ],
+          ),
+        ),
+        if (stickyActionBar != null)
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: stickyActionBar!,
+          ),
+      ],
     );
   }
 
@@ -191,7 +179,6 @@ class MatchDetailTemplate extends StatelessWidget {
         if (usePrematchLayout) {
           return [
             if (infoRows.isNotEmpty) ...[
-              const SizedBox(height: 18),
               _PrematchSectionTitle(title: overviewTitle),
               _PrematchInfoCard(children: infoRows),
             ],

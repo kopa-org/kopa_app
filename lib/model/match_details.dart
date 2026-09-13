@@ -57,7 +57,7 @@ class MatchDetails {
     this.unavailableCount = 0,
     this.teamPlayerCount = 7,
     this.formation = '2-3-1',
-    this.lineupVisible = true,
+    this.lineupVisible = false,
     this.latitude,
     this.longitude,
     this.attendanceDetailsList = const [],
@@ -90,7 +90,7 @@ class MatchDetails {
       unavailableCount: json['unavailable_count'] ?? 0,
       teamPlayerCount: json['team_player_count'] ?? 7,
       formation: json['formation'] ?? '2-3-1',
-      lineupVisible: json['lineup_visible'] ?? true,
+      lineupVisible: json['lineup_visible'] ?? false,
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
       attendanceDetailsList: json['attendance_details_list'] != null

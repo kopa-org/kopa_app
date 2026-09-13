@@ -27,6 +27,7 @@ class PostMatchDetailsPage extends StatelessWidget {
   final VoidCallback? onEditMatchPoll;
   final MatchDetailSegment selectedSegment;
   final ValueChanged<MatchDetailSegment> onSegmentChanged;
+  final Widget? bottomNavigationBar;
 
   const PostMatchDetailsPage({
     super.key,
@@ -41,6 +42,7 @@ class PostMatchDetailsPage extends StatelessWidget {
     required this.selectedSegment,
     required this.onSegmentChanged,
     this.onRefresh,
+    this.bottomNavigationBar,
   });
 
   @override
@@ -87,6 +89,7 @@ class PostMatchDetailsPage extends StatelessWidget {
       attendanceList: attendanceList,
       ratingsSection: null,
       timelineItems: const [],
+      bottomNavigationBar: bottomNavigationBar,
     );
   }
 

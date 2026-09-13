@@ -98,4 +98,54 @@ void main() {
 
     expect(selected, MatchDetailSegment.attendance);
   });
+
+  testWidgets('prematch response status sits above content and nav',
+      (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MatchDetailTemplate(
+          heroCard: const SizedBox(height: 1),
+          usePrematchLayout: true,
+          inlineResponseStatus: Container(
+            key: const ValueKey('inline-response-status'),
+            height: 38,
+          ),
+          infoRows: const [SizedBox(height: 20)],
+          bottomNavigationBar: const SizedBox(
+            key: ValueKey('match-details-bottom-navigation'),
+            height: 72,
+          ),
+        ),
+      ),
+    );
+
+    final responseStatus = find.byKey(const ValueKey('inline-response-status'));
+    final practicalTitle = find.text('Praktisk information');
+    final navigation =
+        find.byKey(const ValueKey('match-details-bottom-navigation'));
+
+    expect(
+      tester.getTopLeft(responseStatus).dy,
+      lessThan(tester.getTopLeft(practicalTitle).dy),
+    );
+    expect(tester.getSize(navigation).height, 72);
+  });
+
+  testWidgets('match details layout supports the iOS refresh scaffold',
+      (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: MatchDetailTemplate(
+          heroCard: const SizedBox(height: 1),
+          onRefresh: () async {},
+          usePrematchLayout: true,
+          stickyActionBar: const SizedBox(height: 126),
+          bottomNavigationBar: const SizedBox(height: 72),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
 }

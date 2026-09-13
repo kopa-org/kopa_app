@@ -6,6 +6,30 @@ import 'package:kopa/model/user_details.dart';
 import 'package:kopa/theme/app_theme.dart';
 
 void main() {
+  testWidgets('visibility control defaults to hidden', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        home: Scaffold(
+          body: PlayerPositionsCard(
+            playerCount: 7,
+            formation: '2-3-1',
+            players: [_user(id: 1, name: 'Nicklas Hansen')],
+            onToggleVisibility: () {},
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byIcon(CupertinoIcons.eye), findsNothing);
+    expect(find.byIcon(CupertinoIcons.eye_slash), findsOneWidget);
+  });
+
   testWidgets('saved sparse lineup slots stay in their persisted positions',
       (tester) async {
     tester.view.physicalSize = const Size(390, 844);
@@ -43,7 +67,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    var visible = true;
+    var visible = false;
 
     Future<void> pumpCard() async {
       await tester.pumpWidget(
@@ -72,14 +96,14 @@ void main() {
 
     await pumpCard();
 
-    expect(find.byIcon(CupertinoIcons.eye), findsOneWidget);
-    expect(find.byIcon(CupertinoIcons.eye_slash), findsNothing);
-
-    await tester.tap(find.byIcon(CupertinoIcons.eye));
-    await tester.pump();
-
     expect(find.byIcon(CupertinoIcons.eye), findsNothing);
     expect(find.byIcon(CupertinoIcons.eye_slash), findsOneWidget);
+
+    await tester.tap(find.byIcon(CupertinoIcons.eye_slash));
+    await tester.pump();
+
+    expect(find.byIcon(CupertinoIcons.eye), findsOneWidget);
+    expect(find.byIcon(CupertinoIcons.eye_slash), findsNothing);
   });
 }
 

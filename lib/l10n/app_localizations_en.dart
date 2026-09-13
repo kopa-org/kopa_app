@@ -30,6 +30,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeAttendanceChange => 'Change your response';
 
   @override
+  String get matchDetailsDecisionTitle => 'Decision';
+
+  @override
+  String get matchDetailsDecisionPending =>
+      'You are signed up, but your selection is still pending.';
+
+  @override
+  String get matchDetailsRsvpDecline => 'No, I can\'t';
+
+  @override
+  String get matchDetailsRsvpAccept => 'Yes, I\'m coming';
+
+  @override
+  String get matchDetailsRsvpRegistered => 'Registered';
+
+  @override
+  String get matchDetailsRsvpDeclineAction => 'Cancel attendance';
+
+  @override
+  String get matchDetailsRsvpDeclined => 'Not registered';
+
+  @override
+  String get matchDetailsNavHome => 'Home';
+
+  @override
+  String get matchDetailsNavMatches => 'Matches';
+
+  @override
+  String get matchDetailsNavSquad => 'Squad';
+
+  @override
   String get matchScoreHome => 'Home';
 
   @override
@@ -143,6 +174,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commonOk => 'OK';
+
+  @override
+  String get lineupVisibilityRevealMessage =>
+      'The team will be notified and able to see the lineup.';
+
+  @override
+  String get lineupVisibilityRevealConfirm => 'OK, understood';
+
+  @override
+  String get lineupVisibilityRevealCancel => 'Cancel';
 
   @override
   String get fineTypeDeleteIconLabel => 'Delete fine type';

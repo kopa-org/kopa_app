@@ -299,7 +299,8 @@ class _KopaAppState extends State<KopaApp> {
 
     if (data['type'] == 'team_join_request') {
       targetLocation = AppRouter.teamJoinRequests;
-    } else if (data['type'] == 'match_calendar_changed') {
+    } else if (data['type'] == 'match_calendar_changed' ||
+        data['type'] == 'match_lineup_revealed') {
       final matchId = int.tryParse(
         (data['match_id'] ?? data['event_id'] ?? '').toString(),
       );
