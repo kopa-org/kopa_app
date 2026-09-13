@@ -46,6 +46,22 @@ abstract final class AppRouter {
 
   static String matchDetailsPath(int matchId) => '$matchDetails/$matchId';
 
+  static Widget mainNavigationBar({
+    required AppFeatureFlags featureFlags,
+    required int selectedIndex,
+    required ValueChanged<int> onTabSelected,
+  }) {
+    return _MainTabNavigationBar(
+      tabs: _visibleMainTabs(featureFlags),
+      selectedIndex: selectedIndex,
+      onTabSelected: onTabSelected,
+    );
+  }
+
+  static String mainTabPathAt(AppFeatureFlags featureFlags, int index) {
+    return _visibleMainTabs(featureFlags)[index].path;
+  }
+
   static GoRouter create({
     required AuthCubit authCubit,
     required OnboardingCubit onboardingCubit,
@@ -150,7 +166,6 @@ abstract final class AppRouter {
           ),
         StatefulShellRoute.indexedStack(
           builder: (context, state, navigationShell) {
-            final theme = Theme.of(context);
             final tabs = visibleMainTabs;
             void selectTab(int index) {
               final isCurrentTab = index == navigationShell.currentIndex;
@@ -171,39 +186,13 @@ abstract final class AppRouter {
               );
             }
 
-            if (theme.platform == TargetPlatform.iOS) {
-              return Scaffold(
-                extendBody: true,
-                body: navigationShell,
-                bottomNavigationBar: GlassTabBar.bottom(
-                  selectedIndex: navigationShell.currentIndex,
-                  onTabSelected: selectTab,
-                  selectedIconColor: theme.colorScheme.primary,
-                  selectedLabelColor: theme.colorScheme.primary,
-                  unselectedIconColor: theme.unselectedWidgetColor,
-                  unselectedLabelColor: theme.unselectedWidgetColor,
-                  indicatorColor:
-                      theme.colorScheme.primary.withValues(alpha: 0.12),
-                  tabs: [
-                    for (final tab in tabs)
-                      GlassTab(
-                        icon: Icon(tab.cupertinoIcon),
-                        activeIcon: Icon(tab.activeCupertinoIcon),
-                        label: tab.label,
-                      ),
-                  ],
-                ),
-              );
-            }
-
             return Scaffold(
               extendBody: true,
               body: navigationShell,
-              bottomNavigationBar: _TransparentAndroidNavigationBar(
-                tabs: tabs,
+              bottomNavigationBar: AppRouter.mainNavigationBar(
+                featureFlags: featureFlags,
                 selectedIndex: navigationShell.currentIndex,
                 onTabSelected: selectTab,
-                theme: theme,
               ),
             );
           },
@@ -323,6 +312,50 @@ abstract final class AppRouter {
     return _visibleMainTabs(featureFlags)
         .map((tab) => tab.label)
         .toList(growable: false);
+  }
+}
+
+class _MainTabNavigationBar extends StatelessWidget {
+  final List<_MainTab> tabs;
+  final int selectedIndex;
+  final ValueChanged<int> onTabSelected;
+
+  const _MainTabNavigationBar({
+    required this.tabs,
+    required this.selectedIndex,
+    required this.onTabSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    if (theme.platform == TargetPlatform.iOS) {
+      return GlassTabBar.bottom(
+        selectedIndex: selectedIndex,
+        onTabSelected: onTabSelected,
+        selectedIconColor: theme.colorScheme.primary,
+        selectedLabelColor: theme.colorScheme.primary,
+        unselectedIconColor: theme.unselectedWidgetColor,
+        unselectedLabelColor: theme.unselectedWidgetColor,
+        indicatorColor: theme.colorScheme.primary.withValues(alpha: 0.12),
+        tabs: [
+          for (final tab in tabs)
+            GlassTab(
+              icon: Icon(tab.cupertinoIcon),
+              activeIcon: Icon(tab.activeCupertinoIcon),
+              label: tab.label,
+            ),
+        ],
+      );
+    }
+
+    return _TransparentAndroidNavigationBar(
+      tabs: tabs,
+      selectedIndex: selectedIndex,
+      onTabSelected: onTabSelected,
+      theme: theme,
+    );
   }
 }
 

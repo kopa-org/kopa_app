@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kopa/component/card/player_positions_card.dart';
 import 'package:kopa/component/dialog/lineup_visibility_confirmation_dialog.dart';
@@ -35,6 +34,7 @@ import 'package:kopa/component/card/match_hero_card.dart';
 import 'package:kopa/component/info_row/info_row.dart';
 import 'package:kopa/component/list_item/player_list_item.dart';
 import 'package:kopa/component/match/match_result_action_card.dart';
+import 'package:kopa/config/app_feature_flags.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -280,10 +280,11 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
               playerCount: _teamPlayerCount(matchDetails, user),
               formation: matchDetails.formation,
               players: _lineupPlayers(matchDetails),
-              positionedPlayers: _hasSavedLineup(matchDetails)
-                  ? _lineupPositionedPlayers(matchDetails, user)
-                  : null,
-              preservePlayerOrder: _hasSavedLineup(matchDetails),
+              // An attendee without a saved slot starts on the bench. Passing
+              // the empty slot list also prevents the card's formation-based
+              // fallback from turning new registrations into starters.
+              positionedPlayers: _lineupPositionedPlayers(matchDetails, user),
+              preservePlayerOrder: true,
               onEditFormation: user.isTeamOwner
                   ? () => _openLineupEditor(matchDetails, user)
                   : null,
@@ -328,10 +329,15 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
   }
 
   Widget _buildMatchDetailsBottomNavigationBar(BuildContext context) {
-    return _MatchDetailsBottomNavigationBar(
-      onHomePressed: () => _navigateToMainTab(context, AppRouter.home),
-      onMatchesPressed: () => _navigateToMainTab(context, AppRouter.match),
-      onSquadPressed: () => _navigateToMainTab(context, AppRouter.profile),
+    final featureFlags = context.read<AppFeatureFlags>();
+
+    return AppRouter.mainNavigationBar(
+      featureFlags: featureFlags,
+      selectedIndex: 1,
+      onTabSelected: (index) => _navigateToMainTab(
+        context,
+        AppRouter.mainTabPathAt(featureFlags, index),
+      ),
     );
   }
 
@@ -769,12 +775,6 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         .where((attendance) => attendance.isAttending)
         .map((attendance) => attendance.userDetails)
         .toList();
-  }
-
-  bool _hasSavedLineup(MatchDetails match) {
-    return (match.attendanceDetailsList ?? []).any(
-      (attendance) => attendance.isAttending && attendance.lineupSlot != null,
-    );
   }
 
   List<UserDetails?> _lineupPositionedPlayers(
@@ -1468,158 +1468,6 @@ class _PrematchStickySurface extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: child,
-      ),
-    );
-  }
-}
-
-class _MatchDetailsBottomNavigationBar extends StatelessWidget {
-  final VoidCallback onHomePressed;
-  final VoidCallback onMatchesPressed;
-  final VoidCallback onSquadPressed;
-
-  const _MatchDetailsBottomNavigationBar({
-    required this.onHomePressed,
-    required this.onMatchesPressed,
-    required this.onSquadPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
-    return SizedBox(
-      height: 72,
-      child: DecoratedBox(
-        decoration: const BoxDecoration(
-          color: Color(0xFFF9FBF9),
-          border: Border(
-            top: BorderSide(color: Color(0xFFE0E6E2)),
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 24),
-          child: Material(
-            color: Colors.transparent,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                _MatchDetailsNavItem(
-                  key: const ValueKey('match-details-bottom-nav-home'),
-                  selected: true,
-                  label: l10n.matchDetailsNavHome,
-                  onPressed: onHomePressed,
-                ),
-                _MatchDetailsNavIconButton(
-                  key: const ValueKey('match-details-bottom-nav-matches'),
-                  icon: CupertinoIcons.xmark_circle,
-                  onPressed: onMatchesPressed,
-                  semanticLabel: l10n.matchDetailsNavMatches,
-                ),
-                _MatchDetailsNavIconButton(
-                  key: const ValueKey('match-details-bottom-nav-squad'),
-                  icon: CupertinoIcons.person_2,
-                  onPressed: onSquadPressed,
-                  semanticLabel: l10n.matchDetailsNavSquad,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _MatchDetailsNavItem extends StatelessWidget {
-  final bool selected;
-  final String label;
-  final VoidCallback onPressed;
-
-  const _MatchDetailsNavItem({
-    super.key,
-    required this.selected,
-    required this.label,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final styles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    return Semantics(
-      button: true,
-      selected: selected,
-      label: label,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onTap: onPressed,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: selected ? const Color(0xFFD5ECE5) : Colors.transparent,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SvgPicture.asset(
-                'assets/logos/home-simple-door.svg',
-                width: 20,
-                height: 20,
-                colorFilter: const ColorFilter.mode(
-                  Color(0xFF00964E),
-                  BlendMode.srcIn,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: styles.body3.copyWith(
-                  color: const Color(0xFF00964E),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  height: 18 / 14,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _MatchDetailsNavIconButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onPressed;
-  final String semanticLabel;
-
-  const _MatchDetailsNavIconButton({
-    super.key,
-    required this.icon,
-    required this.onPressed,
-    required this.semanticLabel,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: semanticLabel,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onTap: onPressed,
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Icon(
-            icon,
-            color: const Color(0xFF877B70),
-            size: 22,
-          ),
-        ),
       ),
     );
   }

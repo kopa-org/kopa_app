@@ -182,24 +182,6 @@ abstract class AppLocalizations {
   /// **'Not registered'**
   String get matchDetailsRsvpDeclined;
 
-  /// No description provided for @matchDetailsNavHome.
-  ///
-  /// In en, this message translates to:
-  /// **'Home'**
-  String get matchDetailsNavHome;
-
-  /// No description provided for @matchDetailsNavMatches.
-  ///
-  /// In en, this message translates to:
-  /// **'Matches'**
-  String get matchDetailsNavMatches;
-
-  /// No description provided for @matchDetailsNavSquad.
-  ///
-  /// In en, this message translates to:
-  /// **'Squad'**
-  String get matchDetailsNavSquad;
-
   /// No description provided for @matchScoreHome.
   ///
   /// In en, this message translates to:

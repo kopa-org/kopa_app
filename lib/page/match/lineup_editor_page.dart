@@ -57,14 +57,12 @@ class _LineupEditorPageState extends State<LineupEditorPage> {
         .where((attendance) => attendance.isAttending)
         .map(_LineupPlayer.fromAttendance)
         .toList();
-    final anySelected = attending.any((player) => player.selected);
-    final players = anySelected
-        ? attending
-        : attending.map((player) => player.copyWith(selected: true)).toList();
 
     _starters = List<_LineupPlayer?>.filled(_formation.slots.length, null);
 
-    for (final player in players) {
+    // Only persisted slots are starters. New attendees stay on the bench
+    // until the team leader places them manually.
+    for (final player in attending) {
       final slot = player.attendance.lineupSlot;
       if (slot != null && slot >= 0 && slot < _starters.length) {
         _starters[slot] = player.copyWith(selected: true);
@@ -75,29 +73,14 @@ class _LineupEditorPageState extends State<LineupEditorPage> {
         .whereType<_LineupPlayer>()
         .map((player) => player.user.id)
         .toSet();
-    final selectedPool = players.where((player) => player.selected).toList();
-    var nextPoolIndex = 0;
 
-    for (var slot = 0; slot < _starters.length; slot++) {
-      if (_starters[slot] != null) continue;
-
-      while (nextPoolIndex < selectedPool.length &&
-          placedIds.contains(selectedPool[nextPoolIndex].user.id)) {
-        nextPoolIndex++;
-      }
-
-      if (nextPoolIndex >= selectedPool.length) break;
-      final player = selectedPool[nextPoolIndex].copyWith(selected: true);
-      _starters[slot] = player;
-      placedIds.add(player.user.id);
-    }
-
-    _bench =
-        players.where((player) => !placedIds.contains(player.user.id)).toList()
-          ..sort((a, b) {
-            if (a.selected != b.selected) return a.selected ? -1 : 1;
-            return a.user.name.compareTo(b.user.name);
-          });
+    _bench = attending
+        .where((player) => !placedIds.contains(player.user.id))
+        .toList()
+      ..sort((a, b) {
+        if (a.selected != b.selected) return a.selected ? -1 : 1;
+        return a.user.name.compareTo(b.user.name);
+      });
   }
 
   @override

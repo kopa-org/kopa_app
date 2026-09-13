@@ -52,15 +52,6 @@ class AppLocalizationsDa extends AppLocalizations {
   String get matchDetailsRsvpDeclined => 'Ikke tilmeldt';
 
   @override
-  String get matchDetailsNavHome => 'Hjem';
-
-  @override
-  String get matchDetailsNavMatches => 'Kampe';
-
-  @override
-  String get matchDetailsNavSquad => 'Truppen';
-
-  @override
   String get matchScoreHome => 'Hjemme';
 
   @override
