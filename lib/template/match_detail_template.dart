@@ -37,6 +37,7 @@ class MatchDetailTemplate extends StatelessWidget {
   final Widget? inlineResponseStatus;
   final Widget? stickyActionBar;
   final Widget? bottomNavigationBar;
+  final bool useParentBottomNavigationBar;
 
   const MatchDetailTemplate({
     super.key,
@@ -64,6 +65,7 @@ class MatchDetailTemplate extends StatelessWidget {
     this.inlineResponseStatus,
     this.stickyActionBar,
     this.bottomNavigationBar,
+    this.useParentBottomNavigationBar = false,
   });
 
   @override
@@ -72,7 +74,8 @@ class MatchDetailTemplate extends StatelessWidget {
       title: 'Kampdetaljer',
       showTopBar: false,
       onRefresh: onRefresh,
-      useBottomSafeArea: bottomNavigationBar == null,
+      useBottomSafeArea:
+          bottomNavigationBar == null && !useParentBottomNavigationBar,
       body: Column(
         children: [
           Expanded(child: _buildScrollableContent(context)),
@@ -84,11 +87,15 @@ class MatchDetailTemplate extends StatelessWidget {
 
   Widget _buildScrollableContent(BuildContext context) {
     final segmentSpacing = usePrematchLayout ? 20.0 : Spacing.lg;
-    final bottomPadding = usePrematchLayout
-        ? stickyActionBar == null
-            ? 32.0
-            : 144.0
-        : 32.0;
+    final contentBottomPadding = useParentBottomNavigationBar
+        ? mainTabBottomContentPadding(context)
+        : 0.0;
+    final bottomPadding = (usePrematchLayout
+            ? stickyActionBar == null
+                ? 32.0
+                : 144.0
+            : 32.0) +
+        contentBottomPadding;
 
     return Stack(
       fit: StackFit.expand,

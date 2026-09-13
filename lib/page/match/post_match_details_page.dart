@@ -28,6 +28,7 @@ class PostMatchDetailsPage extends StatelessWidget {
   final MatchDetailSegment selectedSegment;
   final ValueChanged<MatchDetailSegment> onSegmentChanged;
   final Widget? bottomNavigationBar;
+  final bool useParentBottomNavigationBar;
 
   const PostMatchDetailsPage({
     super.key,
@@ -43,6 +44,7 @@ class PostMatchDetailsPage extends StatelessWidget {
     required this.onSegmentChanged,
     this.onRefresh,
     this.bottomNavigationBar,
+    this.useParentBottomNavigationBar = false,
   });
 
   @override
@@ -90,6 +92,7 @@ class PostMatchDetailsPage extends StatelessWidget {
       ratingsSection: null,
       timelineItems: const [],
       bottomNavigationBar: bottomNavigationBar,
+      useParentBottomNavigationBar: useParentBottomNavigationBar,
     );
   }
 

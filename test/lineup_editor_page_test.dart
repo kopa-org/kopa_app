@@ -89,6 +89,52 @@ void main() {
       greaterThan(tester.getRect(benchHeader).top),
     );
   });
+
+  testWidgets('dragging a starter to the bench removes them from the field',
+      (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    FlutterSecureStorage.setMockInitialValues({'lineupDragHintSeen': 'true'});
+    final now = DateTime(2026, 8, 9, 12);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        home: LineupEditorPage(
+          match: _match(
+            attendanceDetailsList: [
+              _attendance(
+                id: 1,
+                user: _user(id: 1, name: 'Alice Jensen', now: now),
+                now: now,
+                lineupSlot: 0,
+              ),
+            ],
+          ),
+          playerCount: 7,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final player = find.text('Alice');
+    final emptyBench = find.text('Ingen spillere på bænken');
+    final gesture = await tester.startGesture(tester.getRect(player).center);
+    await tester.pump(const Duration(milliseconds: 600));
+    await gesture.moveTo(tester.getRect(emptyBench).center);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    final benchHeader = find.text('Bænken (1 spillere)');
+    expect(benchHeader, findsOneWidget);
+    expect(
+      tester.getRect(player).top,
+      greaterThan(tester.getRect(benchHeader).top),
+    );
+  });
 }
 
 MatchDetails _match({List<EventAttendanceDetails>? attendanceDetailsList}) {
@@ -109,12 +155,14 @@ EventAttendanceDetails _attendance({
   required int id,
   required UserDetails user,
   required DateTime now,
+  int? lineupSlot,
 }) {
   return EventAttendanceDetails(
     id: id,
     userDetails: user,
     isAttending: true,
     isSelected: true,
+    lineupSlot: lineupSlot,
     createdAt: now,
     updatedAt: now,
   );

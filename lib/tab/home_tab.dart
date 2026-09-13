@@ -1631,12 +1631,13 @@ Future<void> _openMatch(
   String source,
 ) async {
   AppAnalytics.logEvent('match_opened', parameters: {'source': source});
-  await Navigator.of(context, rootNavigator: true).push(
+  await Navigator.of(context).push(
     MaterialPageRoute(
       builder: (context) => MatchDetailsPage(
         matchId: match.id,
         initialMatch: match,
         heroTag: _matchHeroTag(match, source),
+        showBottomNavigationBar: false,
       ),
     ),
   );

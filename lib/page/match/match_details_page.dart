@@ -71,12 +71,14 @@ class MatchDetailsPage extends StatefulWidget {
   final int matchId;
   final MatchDetails? initialMatch;
   final String? heroTag;
+  final bool showBottomNavigationBar;
 
   const MatchDetailsPage({
     super.key,
     required this.matchId,
     this.initialMatch,
     this.heroTag,
+    this.showBottomNavigationBar = true,
   });
 
   @override
@@ -198,6 +200,9 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     final hasBeenPlayed = matchDetails.hasMatchBeenPlayed;
     final canManageResult = user.isTeamOwner;
     final rsvpState = _matchRsvpStateFor(matchDetails, user.id);
+    final bottomNavigationBar = widget.showBottomNavigationBar
+        ? _buildMatchDetailsBottomNavigationBar(context)
+        : null;
 
     final heroCard = MatchHeroCard(
       match: matchDetails,
@@ -228,7 +233,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         onEditMatchPoll: () => _openEditMatchPoll(matchDetails, squad),
         selectedSegment: _selectedSegment,
         onSegmentChanged: _selectSegment,
-        bottomNavigationBar: _buildMatchDetailsBottomNavigationBar(context),
+        bottomNavigationBar: bottomNavigationBar,
+        useParentBottomNavigationBar: !widget.showBottomNavigationBar,
       );
     }
 
@@ -258,7 +264,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
               onDecline: () => _unregisterFromMatch(matchDetails),
             )
           : null,
-      bottomNavigationBar: _buildMatchDetailsBottomNavigationBar(context),
+      bottomNavigationBar: bottomNavigationBar,
+      useParentBottomNavigationBar: !widget.showBottomNavigationBar,
       overviewTitle: 'Praktisk information',
       attendanceTitle: 'Tilmeldte spillere',
       attendanceSegmentLabel:
@@ -324,7 +331,10 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       ),
       usePrematchLayout: true,
       showTimelineSegment: false,
-      bottomNavigationBar: _buildMatchDetailsBottomNavigationBar(context),
+      bottomNavigationBar: widget.showBottomNavigationBar
+          ? _buildMatchDetailsBottomNavigationBar(context)
+          : null,
+      useParentBottomNavigationBar: !widget.showBottomNavigationBar,
     );
   }
 

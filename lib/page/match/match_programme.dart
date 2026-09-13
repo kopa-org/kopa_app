@@ -42,8 +42,7 @@ class _MatchProgrammePageState extends State<MatchProgrammePage> {
 
   @override
   Widget build(BuildContext context) {
-    final colors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
     return BlocProvider(
       create: (_) => MatchProgrammeCubit()..loadMatches(),
       child: PageScaffold.tab(
@@ -277,11 +276,12 @@ class _MatchListState extends State<_MatchList> {
       'match_opened',
       parameters: {'source': 'match_programme'},
     );
-    await Navigator.of(context, rootNavigator: true).push(
+    await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => MatchDetailsPage(
           matchId: matchDetails.id,
           initialMatch: matchDetails,
+          showBottomNavigationBar: false,
         ),
       ),
     );

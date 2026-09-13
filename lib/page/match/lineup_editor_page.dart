@@ -556,48 +556,59 @@ class _BenchSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DragTarget<_LineupDragData>(
+      key: const ValueKey('lineup-bench-drop-target'),
+      onWillAcceptWithDetails: (_) => true,
       onAcceptWithDetails: (details) => onBenchAccept(details.data),
       builder: (context, candidateData, rejectedData) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Bænken (${bench.where((player) => player.selected).length} spillere)',
-              style: styles.subtitle2.copyWith(fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: 10),
-            if (bench.isEmpty)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border:
-                      Border.all(color: colors.divider.withValues(alpha: 0.4)),
-                ),
-                child: Text('Ingen spillere på bænken', style: styles.body3),
-              )
-            else
-              SizedBox(
-                height: 98,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: bench.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 12),
-                  itemBuilder: (context, index) {
-                    final player = bench[index];
-                    return _BenchPlayerCard(
-                      player: player,
-                      colors: colors,
-                      styles: styles,
-                      onDragStarted: onDragStarted,
-                      onDragEnd: onDragEnd,
-                    );
-                  },
-                ),
+        final isDropTarget = candidateData.isNotEmpty;
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            color: isDropTarget
+                ? colors.lightGrass55.withValues(alpha: 0.55)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Bænken (${bench.where((player) => player.selected).length} spillere)',
+                style: styles.subtitle2.copyWith(fontWeight: FontWeight.w800),
               ),
-          ],
+              const SizedBox(height: 10),
+              if (bench.isEmpty)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                        color: colors.divider.withValues(alpha: 0.4)),
+                  ),
+                  child: Text('Ingen spillere på bænken', style: styles.body3),
+                )
+              else
+                SizedBox(
+                  height: 98,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: bench.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 12),
+                    itemBuilder: (context, index) {
+                      final player = bench[index];
+                      return _BenchPlayerCard(
+                        player: player,
+                        colors: colors,
+                        styles: styles,
+                        onDragStarted: onDragStarted,
+                        onDragEnd: onDragEnd,
+                      );
+                    },
+                  ),
+                ),
+            ],
+          ),
         );
       },
     );
