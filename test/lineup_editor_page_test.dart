@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/model/event_attendance_details.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/user_details.dart';
@@ -134,6 +135,87 @@ void main() {
       tester.getRect(player).top,
       greaterThan(tester.getRect(benchHeader).top),
     );
+  });
+
+  testWidgets('warns before leaving after an unsaved lineup edit',
+      (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    FlutterSecureStorage.setMockInitialValues({'lineupDragHintSeen': 'true'});
+    final now = DateTime(2026, 8, 9, 12);
+    MatchDetails? routeResult;
+    var routeCompleted = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        locale: const Locale('da'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Builder(
+          builder: (context) {
+            return TextButton(
+              onPressed: () async {
+                routeResult = await Navigator.of(context).push<MatchDetails>(
+                  CupertinoPageRoute(
+                    builder: (_) => LineupEditorPage(
+                      match: _match(
+                        attendanceDetailsList: [
+                          _attendance(
+                            id: 1,
+                            user: _user(
+                              id: 1,
+                              name: 'Alice Jensen',
+                              now: now,
+                            ),
+                            now: now,
+                            lineupSlot: 0,
+                          ),
+                        ],
+                      ),
+                      playerCount: 7,
+                    ),
+                  ),
+                );
+                routeCompleted = true;
+              },
+              child: const Text('Open editor'),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open editor'));
+    await tester.pumpAndSettle();
+
+    final player = find.text('Alice');
+    final emptyBench = find.text('Ingen spillere på bænken');
+    final gesture = await tester.startGesture(tester.getRect(player).center);
+    await tester.pump(const Duration(milliseconds: 600));
+    await gesture.moveTo(tester.getRect(emptyBench).center);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Du har ikke gemt holdopstillingen'), findsOneWidget);
+    expect(find.byKey(const ValueKey('lineup-unsaved-save')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('lineup-unsaved-discard')),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const ValueKey('lineup-unsaved-discard')));
+    await tester.pumpAndSettle();
+
+    expect(routeCompleted, isTrue);
+    expect(routeResult, isNull);
+    expect(tester.takeException(), isNull);
   });
 }
 

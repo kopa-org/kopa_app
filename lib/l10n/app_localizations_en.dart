@@ -89,6 +89,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingDbu => 'DBU';
 
   @override
+  String get onboardingDbuRecommendation =>
+      'It is recommended to sync with DBU for the best app experience';
+
+  @override
   String get onboardingContinue => 'Continue';
 
   @override
@@ -175,6 +179,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get lineupVisibilityRevealCancel => 'Cancel';
+
+  @override
+  String get lineupUnsavedChangesTitle => 'You forgot to save the lineup';
+
+  @override
+  String get lineupUnsavedChangesMessage =>
+      'Would you like to save your changes before leaving?';
+
+  @override
+  String get lineupUnsavedChangesSave => 'Save';
+
+  @override
+  String get lineupUnsavedChangesDiscard => 'Don\'t save';
 
   @override
   String get fineTypeDeleteIconLabel => 'Delete fine type';

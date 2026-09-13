@@ -195,6 +195,65 @@ void main() {
     expect(elevenMandDecoration.boxShadow, isNull);
   });
 
+  testWidgets('recommends DBU once before advancing from manual team name',
+      (tester) async {
+    final onboardingCubit = _TestOnboardingCubit();
+
+    await tester.pumpWidget(
+      MultiBlocProvider(
+        providers: [
+          BlocProvider<AuthCubit>(
+            create: (_) => AuthCubit(authRepository: _FakeAuthRepository()),
+          ),
+          BlocProvider<OnboardingCubit>.value(value: onboardingCubit),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          locale: const Locale('da'),
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('da'),
+            Locale('en'),
+          ],
+          home: const OnboardingPage(),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Ja, jeg er holdleder'));
+    await tester.pump();
+    await tester.enterText(find.byType(TextField), 'Kopa FC');
+    await tester.pump();
+
+    await tester.tap(find.text('Fortsæt'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+        'Det anbefles at synkronisere med DBU, for den bedste app oplevelse',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Vælg din position'), findsNothing);
+
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    expect(
+        find.text(
+            'Det anbefles at synkronisere med DBU, for den bedste app oplevelse'),
+        findsNothing);
+
+    await tester.tap(find.text('Fortsæt'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Vælg din position'), findsOneWidget);
+  });
+
   testWidgets('creates the team and link before showing the final step',
       (tester) async {
     final onboardingCubit = _CreateTestOnboardingCubit();
@@ -241,6 +300,8 @@ void main() {
     await tester.enterText(find.byType(TextField), 'Kopa FC');
     await tester.pump();
     await tester.tap(find.text('Fortsæt'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Fortsæt'));
     await tester.pumpAndSettle();

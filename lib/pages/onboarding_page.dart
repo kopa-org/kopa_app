@@ -43,6 +43,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   TeamLogoDesign _teamLogoDesign = TeamLogoDesign.defaultDesign;
   bool _savingPosition = false;
   bool _creatingTeam = false;
+  bool _hasDismissedDbuRecommendation = false;
   Map<String, dynamic>? _pendingJoinTeam;
   int? _createdTeamId;
   Uri? _createdTeamInviteUri;
@@ -416,6 +417,23 @@ class _OnboardingPageState extends State<OnboardingPage> {
     }
   }
 
+  Future<void> _showDbuRecommendation() async {
+    final l10n = AppLocalizations.of(context)!;
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        content: Text(l10n.onboardingDbuRecommendation),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(l10n.commonOk),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _handlePrimaryAction() async {
     if (_mode == _OnboardingMode.join) {
       if (_joinStep == 0) {
@@ -449,6 +467,14 @@ class _OnboardingPageState extends State<OnboardingPage> {
     }
 
     if (_createStep == 0) {
+      if (_dbuData == null &&
+          _teamNameController.text.trim().isNotEmpty &&
+          !_hasDismissedDbuRecommendation) {
+        _hasDismissedDbuRecommendation = true;
+        await _showDbuRecommendation();
+        return;
+      }
+
       setState(() => _createStep = 1);
       return;
     }

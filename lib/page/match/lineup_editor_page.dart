@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/football_pitch.dart';
 import 'package:kopa/component/card/player_positions_card.dart';
+import 'package:kopa/component/dialog/lineup_unsaved_changes_dialog.dart';
 import 'package:kopa/model/event_attendance_details.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/user_details.dart';
@@ -31,6 +34,7 @@ class _LineupEditorPageState extends State<LineupEditorPage> {
   late List<_LineupPlayer?> _starters;
   late List<_LineupPlayer> _bench;
   bool _saving = false;
+  bool _hasUnsavedChanges = false;
   bool _showDragHint = false;
   String? _draggingName;
 
@@ -89,53 +93,59 @@ class _LineupEditorPageState extends State<LineupEditorPage> {
     final styles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
 
-    return Scaffold(
-      backgroundColor: colors.background,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _EditorHeader(
-              colors: colors,
-              styles: styles,
-              saving: _saving,
-              onClose: () => Navigator.of(context).pop(),
-              onSave: _save,
-            ),
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
-                children: [
-                  _LineupCard(
-                    colors: colors,
-                    styles: styles,
-                    formation: _formation,
-                    formationLabel: _formation.label,
-                    starters: _starters,
-                    draggingName: _draggingName,
-                    showDragHint: _showDragHint,
-                    onDragStarted: (player) {
-                      _handleDragStarted(player);
-                    },
-                    onDragEnd: _handleDragEnded,
-                    onSlotAccept: _moveToSlot,
-                    onSlotTap: _pickPlayerForSlot,
-                    onEditFormation: _showFormationSheet,
-                  ),
-                  const SizedBox(height: 16),
-                  _BenchSection(
-                    colors: colors,
-                    styles: styles,
-                    bench: _bench,
-                    onDragStarted: (player) {
-                      _handleDragStarted(player);
-                    },
-                    onDragEnd: _handleDragEnded,
-                    onBenchAccept: _moveToBench,
-                  ),
-                ],
+    return PopScope<MatchDetails>(
+      canPop: !_saving && !_hasUnsavedChanges,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) unawaited(_attemptClose());
+      },
+      child: Scaffold(
+        backgroundColor: colors.background,
+        body: SafeArea(
+          child: Column(
+            children: [
+              _EditorHeader(
+                colors: colors,
+                styles: styles,
+                saving: _saving,
+                onClose: _attemptClose,
+                onSave: _save,
               ),
-            ),
-          ],
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
+                  children: [
+                    _LineupCard(
+                      colors: colors,
+                      styles: styles,
+                      formation: _formation,
+                      formationLabel: _formation.label,
+                      starters: _starters,
+                      draggingName: _draggingName,
+                      showDragHint: _showDragHint,
+                      onDragStarted: (player) {
+                        _handleDragStarted(player);
+                      },
+                      onDragEnd: _handleDragEnded,
+                      onSlotAccept: _moveToSlot,
+                      onSlotTap: _pickPlayerForSlot,
+                      onEditFormation: _showFormationSheet,
+                    ),
+                    const SizedBox(height: 16),
+                    _BenchSection(
+                      colors: colors,
+                      styles: styles,
+                      bench: _bench,
+                      onDragStarted: (player) {
+                        _handleDragStarted(player);
+                      },
+                      onDragEnd: _handleDragEnded,
+                      onBenchAccept: _moveToBench,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -148,6 +158,30 @@ class _LineupEditorPageState extends State<LineupEditorPage> {
   void _handleDragEnded() {
     if (!mounted) return;
     setState(() => _draggingName = null);
+  }
+
+  Future<void> _attemptClose() async {
+    if (_saving) return;
+    if (!_hasUnsavedChanges) {
+      if (mounted) Navigator.of(context).pop();
+      return;
+    }
+
+    final action = await showCupertinoDialog<LineupUnsavedChangesAction>(
+      context: context,
+      builder: (_) => const LineupUnsavedChangesDialog(),
+    );
+    if (!mounted || action == null) return;
+
+    switch (action) {
+      case LineupUnsavedChangesAction.save:
+        await _save();
+      case LineupUnsavedChangesAction.discard:
+        setState(() => _hasUnsavedChanges = false);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) Navigator.of(context).pop();
+        });
+    }
   }
 
   Future<void> _save() async {
@@ -174,7 +208,15 @@ class _LineupEditorPageState extends State<LineupEditorPage> {
       if (_showDragHint) {
         await SecureStorageService.setLineupDragHintSeen();
       }
-      if (mounted) Navigator.of(context).pop(updatedMatch);
+      if (mounted) {
+        setState(() {
+          _hasUnsavedChanges = false;
+          _saving = false;
+        });
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) Navigator.of(context).pop(updatedMatch);
+        });
+      }
     } catch (error, stack) {
       CrashReporting.logWebError(error, stack);
       if (!mounted) return;
@@ -192,6 +234,7 @@ class _LineupEditorPageState extends State<LineupEditorPage> {
       final dragged = _takeDraggedPlayer(data)?.copyWith(selected: true);
       if (dragged == null) return;
 
+      _hasUnsavedChanges = true;
       final displaced = _starters[targetSlot];
       _starters[targetSlot] = dragged;
       if (displaced != null && displaced.user.id != dragged.user.id) {
@@ -206,6 +249,7 @@ class _LineupEditorPageState extends State<LineupEditorPage> {
     setState(() {
       final dragged = _takeDraggedPlayer(data)?.copyWith(selected: true);
       if (dragged == null) return;
+      _hasUnsavedChanges = true;
       _bench.add(dragged);
       _sortBench();
       _draggingName = null;
@@ -267,6 +311,7 @@ class _LineupEditorPageState extends State<LineupEditorPage> {
     if (selected == null || selected == _formation.label) return;
 
     setState(() {
+      _hasUnsavedChanges = true;
       final existing = [
         ..._starters.whereType<_LineupPlayer>(),
         ..._bench,

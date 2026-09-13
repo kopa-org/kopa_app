@@ -254,6 +254,12 @@ abstract class AppLocalizations {
   /// **'DBU'**
   String get onboardingDbu;
 
+  /// No description provided for @onboardingDbuRecommendation.
+  ///
+  /// In en, this message translates to:
+  /// **'It is recommended to sync with DBU for the best app experience'**
+  String get onboardingDbuRecommendation;
+
   /// No description provided for @onboardingContinue.
   ///
   /// In en, this message translates to:
@@ -421,6 +427,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancel'**
   String get lineupVisibilityRevealCancel;
+
+  /// No description provided for @lineupUnsavedChangesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You forgot to save the lineup'**
+  String get lineupUnsavedChangesTitle;
+
+  /// No description provided for @lineupUnsavedChangesMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Would you like to save your changes before leaving?'**
+  String get lineupUnsavedChangesMessage;
+
+  /// No description provided for @lineupUnsavedChangesSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get lineupUnsavedChangesSave;
+
+  /// No description provided for @lineupUnsavedChangesDiscard.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t save'**
+  String get lineupUnsavedChangesDiscard;
 
   /// No description provided for @fineTypeDeleteIconLabel.
   ///

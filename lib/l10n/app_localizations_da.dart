@@ -88,6 +88,10 @@ class AppLocalizationsDa extends AppLocalizations {
   String get onboardingDbu => 'DBU';
 
   @override
+  String get onboardingDbuRecommendation =>
+      'Det anbefles at synkronisere med DBU, for den bedste app oplevelse';
+
+  @override
   String get onboardingContinue => 'Fortsæt';
 
   @override
@@ -174,6 +178,19 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String get lineupVisibilityRevealCancel => 'Afbryd';
+
+  @override
+  String get lineupUnsavedChangesTitle => 'Du har ikke gemt holdopstillingen';
+
+  @override
+  String get lineupUnsavedChangesMessage =>
+      'Vil du gemme dine ændringer, før du forlader siden?';
+
+  @override
+  String get lineupUnsavedChangesSave => 'Gem';
+
+  @override
+  String get lineupUnsavedChangesDiscard => 'Gem ikke';
 
   @override
   String get fineTypeDeleteIconLabel => 'Slet bødetype';
