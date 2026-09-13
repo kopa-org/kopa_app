@@ -13,6 +13,7 @@ import 'package:kopa/component/home/home_calendar_overlay.dart';
 import 'package:kopa/component/home/home_fine_box_card.dart';
 import 'package:kopa/component/home/home_statistics_strip.dart';
 import 'package:kopa/component/home/latest_result_card.dart';
+import 'package:kopa/component/match/match_result_reminder.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/component/standings/standings_preview_card.dart';
 import 'package:kopa/config/app_feature_flags.dart';
@@ -28,7 +29,9 @@ import 'package:kopa/model/statistics.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/navigation/app_router.dart';
 import 'package:kopa/page/match/match_details_page.dart';
+import 'package:kopa/page/match/match_score_sheet.dart';
 import 'package:kopa/page/profile/profile_settings_page.dart';
+import 'package:kopa/repository/match_repository.dart';
 import 'package:kopa/state/match_programme_refresh_notifier.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
@@ -710,6 +713,7 @@ class _HeroTeamPanel extends StatelessWidget {
     final ownTeamLogo = currentUser.teamDetails?.logoDesign;
     final title = titleOverride ??
         (match == null ? 'Ingen kamp' : _matchDate(match.date));
+    final heroRadius = BorderRadius.circular(HomeBentoCard.cardRadius);
     final cardHeroTag = match == null || !enableLogoHeroes
         ? null
         : _matchHeroTag(match, logoHeroSource ?? 'home_hero');
@@ -724,10 +728,10 @@ class _HeroTeamPanel extends StatelessWidget {
 
         return Material(
           type: MaterialType.transparency,
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: heroRadius,
           child: InkWell(
             onTap: openDetails,
-            borderRadius: BorderRadius.circular(28),
+            borderRadius: heroRadius,
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(
@@ -738,7 +742,7 @@ class _HeroTeamPanel extends StatelessWidget {
               ),
               decoration: BoxDecoration(
                 color: appColors.white,
-                borderRadius: BorderRadius.circular(28),
+                borderRadius: heroRadius,
                 boxShadow: [
                   BoxShadow(
                     color: appColors.black.withValues(alpha: 0.06),
@@ -759,19 +763,28 @@ class _HeroTeamPanel extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: appColors.lightGrass,
-                      borderRadius: BorderRadius.circular(28),
+                      borderRadius: heroRadius,
                     ),
                     child: Column(
                       children: [
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            title,
-                            style: appTextStyles.caption.copyWith(
-                              color: appColors.dirt,
-                              fontWeight: FontWeight.w700,
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                title,
+                                style: appTextStyles.caption.copyWith(
+                                  color: appColors.dirt,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
                             ),
-                          ),
+                            if (match != null && currentUser.isTeamOwner)
+                              MatchResultReminderButton(
+                                match: match,
+                                onPressed: () =>
+                                    _openMatchResultReminder(context, match),
+                              ),
+                          ],
                         ),
                         const SizedBox(height: 10),
                         Padding(
@@ -1550,14 +1563,45 @@ List<MatchDetails> _upcomingMatches(HomeState state) {
 }
 
 List<MatchDetails> _playedMatches(HomeState state) {
-  final now = DateTime.now();
-  final today = DateTime(now.year, now.month, now.day);
-  return state.matches
-      .where(
-        (match) => match.hasMatchBeenPlayed && match.date.isBefore(today),
-      )
-      .toList()
+  return state.matches.where((match) => match.hasMatchBeenPlayed).toList()
     ..sort((a, b) => a.date.compareTo(b.date));
+}
+
+Future<void> _openMatchResultReminder(
+  BuildContext context,
+  MatchDetails match,
+) async {
+  await showMatchResultReminderDialog(
+    context,
+    onEnterResult: () => _enterHomeMatchResult(context, match),
+  );
+}
+
+Future<void> _enterHomeMatchResult(
+  BuildContext context,
+  MatchDetails match,
+) async {
+  final score = await showMatchScoreSheet(
+    context: context,
+    homeTeam: match.homeTeam,
+    awayTeam: match.awayTeam,
+    homeScore: match.homeTeamScore,
+    awayScore: match.awayTeamScore,
+    onSave: (home, away) =>
+        MatchRepository.updateMatchScore(match.id, home, away),
+  );
+
+  if (score == null || !context.mounted) return;
+
+  AppAnalytics.logEvent('match_score_updated');
+  final teamId = context.read<AuthCubit>().state.user?.teamDetails?.id;
+  if (teamId == null) return;
+
+  await context.read<HomeCubit>().fetchDashboardData(
+        teamId,
+        showLoading: false,
+        forceRefresh: true,
+      );
 }
 
 String _matchDate(DateTime date) {

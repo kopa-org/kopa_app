@@ -40,9 +40,10 @@ class _MatchProgrammePageState extends State<MatchProgrammePage> {
     }
   }
 
-  final appColors = AppColors.light;
   @override
   Widget build(BuildContext context) {
+    final colors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
     return BlocProvider(
       create: (_) => MatchProgrammeCubit()..loadMatches(),
       child: PageScaffold.tab(
@@ -57,11 +58,9 @@ class _MatchProgrammePageState extends State<MatchProgrammePage> {
             return FloatingActionButton(
               heroTag: 'create-match-fab',
               tooltip: 'Opret kamp',
-              backgroundColor:
-                  Theme.of(context).extension<AppColors>()?.lightGrass ??
-                      Colors.green,
+              backgroundColor: colors.white,
               onPressed: () => _showCreateMatch(context),
-              child: Icon(Icons.add, color: appColors.dirt),
+              child: Icon(Icons.add, color: colors.lightGrass),
             );
           },
         ),

@@ -30,6 +30,7 @@ class PageScaffold extends StatelessWidget {
   final bool useBottomSafeArea;
   final ObstructingPreferredSizeWidget? navigationBar;
   final SystemUiOverlayStyle? systemOverlayStyle;
+  final bool _isTabScaffold;
 
   const PageScaffold({
     super.key,
@@ -49,7 +50,7 @@ class PageScaffold extends StatelessWidget {
     this.useTopSafeArea = true,
     this.useBottomSafeArea = true,
     this.systemOverlayStyle,
-  });
+  }) : _isTabScaffold = false;
 
   const PageScaffold.tab({
     super.key,
@@ -68,7 +69,8 @@ class PageScaffold extends StatelessWidget {
     this.useBottomSafeArea = false,
   })  : showBackButton = false,
         showTitle = false,
-        navigationBar = null;
+        navigationBar = null,
+        _isTabScaffold = true;
 
   @override
   Widget build(BuildContext context) {
@@ -80,6 +82,17 @@ class PageScaffold extends StatelessWidget {
     final isIOS = theme.platform == TargetPlatform.iOS;
     final bgColor = backgroundColor ?? appColors.background;
     final shouldShowTopBar = showTopBar && _hasTopBarContent;
+    // The root tab scaffold uses extendBody, so its Android nav bar overlays
+    // nested tab scaffolds. Lift their FAB by the reported bar height.
+    final androidFloatingActionButton =
+        !_isTabScaffold || isIOS || floatingActionButton == null
+            ? floatingActionButton
+            : Padding(
+                padding: EdgeInsets.only(
+                  bottom: mainTabBottomContentPadding(context),
+                ),
+                child: floatingActionButton,
+              );
 
     final page = isIOS
         ? CupertinoPageScaffold(
@@ -147,7 +160,7 @@ class PageScaffold extends StatelessWidget {
               bottom: useBottomSafeArea,
               child: body,
             ),
-            floatingActionButton: floatingActionButton,
+            floatingActionButton: androidFloatingActionButton,
           );
 
     final systemOverlayStyle = this.systemOverlayStyle;

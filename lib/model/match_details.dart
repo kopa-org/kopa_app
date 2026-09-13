@@ -5,7 +5,7 @@ import 'package:kopa/model/player_rating_summary.dart';
 import 'package:kopa/model/user_details.dart';
 
 class MatchDetails {
-  static const Duration postMatchDetailsDelay = Duration(hours: 1);
+  static const Duration resultReminderDelay = Duration(minutes: 30);
 
   final int id;
   final String type;
@@ -112,16 +112,14 @@ class MatchDetails {
     return '${homeTeam ?? "?"} vs ${awayTeam ?? "?"}';
   }
 
-  bool get hasMatchBeenPlayed {
-    return isPostMatchAt(DateTime.now());
-  }
-
-  bool isPostMatchAt(DateTime now) {
-    return !now.isBefore(date.add(postMatchDetailsDelay));
-  }
-
   bool get hasFinalScore {
     return homeTeamScore != null && awayTeamScore != null;
+  }
+
+  bool get hasMatchBeenPlayed => hasFinalScore;
+
+  bool shouldPromptForResultAt(DateTime now) {
+    return !hasFinalScore && !now.isBefore(date.add(resultReminderDelay));
   }
 
   bool canSetFinalScore(UserDetails user, {DateTime? now}) {

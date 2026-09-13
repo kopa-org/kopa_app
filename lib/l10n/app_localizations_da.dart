@@ -121,6 +121,16 @@ class AppLocalizationsDa extends AppLocalizations {
   String get matchScoreDialogTitle => 'Indtast resultat';
 
   @override
+  String get matchResultReminderTitle => 'Indtast kampens resultat';
+
+  @override
+  String get matchResultReminderMessage =>
+      'Der er gået 30 minutter siden kampstart. Indtast kampens slutresultat, så kampen bliver vist som spillet.';
+
+  @override
+  String get matchResultReminderAction => 'Indtast resultat';
+
+  @override
   String get commonCancel => 'Annuller';
 
   @override

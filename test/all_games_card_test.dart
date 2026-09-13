@@ -185,7 +185,7 @@ void main() {
       ),
     );
 
-    expect(find.text('Færdig'), findsOneWidget);
+    expect(find.text('19:00'), findsOneWidget);
     expect(find.text('Tabt'), findsOneWidget);
     expect(find.text('Uafgjort'), findsOneWidget);
     expect(find.text('Tilmeldt'), findsOneWidget);
@@ -196,7 +196,7 @@ void main() {
     expect(find.text('Sejr'), findsOneWidget);
 
     final registeredStyle = tester.widget<Text>(find.text('Tilmeldt')).style!;
-    for (final label in ['Færdig', 'Tabt', 'Uafgjort', 'Frameldt']) {
+    for (final label in ['Tabt', 'Uafgjort', 'Frameldt']) {
       final style = tester.widget<Text>(find.text(label)).style!;
       expect(style.fontFamily, registeredStyle.fontFamily);
       expect(style.fontSize, registeredStyle.fontSize);
@@ -206,17 +206,15 @@ void main() {
     }
 
     final registeredChip = _chipFor(tester, 'Tilmeldt');
-    final finishedChip = _chipFor(tester, 'Færdig');
     final winChip = _chipFor(tester, 'Sejr');
     final declinedChip = _chipFor(tester, 'Frameldt');
     final lossChip = _chipFor(tester, 'Tabt');
 
-    expect(finishedChip.status, registeredChip.status);
     expect(winChip.status, registeredChip.status);
     expect(lossChip.status, declinedChip.status);
 
     final registeredDecoration = _chipDecoration(tester, 'Tilmeldt');
-    for (final label in ['Færdig', 'Sejr']) {
+    for (final label in ['Sejr']) {
       expect(
         _chipDecoration(tester, label).color,
         registeredDecoration.color,

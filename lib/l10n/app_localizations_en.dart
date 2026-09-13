@@ -122,6 +122,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get matchScoreDialogTitle => 'Enter result';
 
   @override
+  String get matchResultReminderTitle => 'Type match result';
+
+  @override
+  String get matchResultReminderMessage =>
+      'It has been 30 minutes since kick-off. Enter the final result so the match is marked as played.';
+
+  @override
+  String get matchResultReminderAction => 'Type match result';
+
+  @override
   String get commonCancel => 'Cancel';
 
   @override

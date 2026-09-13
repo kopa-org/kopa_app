@@ -4,9 +4,9 @@ import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/user_details.dart';
 
 void main() {
-  test('post-match details start one hour after kampstart', () {
+  test('a match is played only after both result scores are entered', () {
     final kickoff = DateTime(2026, 7, 28, 19);
-    final match = MatchDetails(
+    final unplayed = MatchDetails(
       id: 1,
       homeTeam: 'Kopa IF',
       awayTeam: 'Fremad',
@@ -15,13 +15,38 @@ void main() {
       createdAt: kickoff,
       updatedAt: kickoff,
     );
+    final played = MatchDetails(
+      id: 2,
+      homeTeam: 'Kopa IF',
+      awayTeam: 'Fremad',
+      date: kickoff,
+      location: 'Kopa Stadion',
+      createdAt: kickoff,
+      updatedAt: kickoff,
+      homeTeamScore: 0,
+      awayTeamScore: 0,
+    );
 
+    expect(unplayed.hasMatchBeenPlayed, isFalse);
     expect(
-        match.isPostMatchAt(kickoff.add(const Duration(minutes: 59))), isFalse);
-    expect(match.isPostMatchAt(kickoff.add(const Duration(hours: 1))), isTrue);
+        unplayed.shouldPromptForResultAt(
+          kickoff.add(const Duration(minutes: 29)),
+        ),
+        isFalse);
+    expect(
+        unplayed.shouldPromptForResultAt(
+          kickoff.add(const Duration(minutes: 30)),
+        ),
+        isTrue);
+    expect(played.hasMatchBeenPlayed, isTrue);
+    expect(
+        played.shouldPromptForResultAt(
+          kickoff.add(const Duration(hours: 2)),
+        ),
+        isFalse);
   });
 
-  test('final score is independent from post-match timing', () {
+  test('an unrecorded result remains unplayed after the match time', () {
     final kickoff = DateTime(2026, 7, 28, 19);
     final match = MatchDetails(
       id: 1,
@@ -33,7 +58,7 @@ void main() {
       updatedAt: kickoff,
     );
 
-    expect(match.isPostMatchAt(kickoff.add(const Duration(hours: 2))), isTrue);
+    expect(match.hasMatchBeenPlayed, isFalse);
     expect(match.hasFinalScore, isFalse);
   });
 

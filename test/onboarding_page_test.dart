@@ -99,6 +99,102 @@ void main() {
     expect(find.text('11-mand'), findsNothing);
   });
 
+  testWidgets('formation segmented toggle matches the Figma states',
+      (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final onboardingCubit = _TestOnboardingCubit();
+
+    await tester.pumpWidget(
+      MultiBlocProvider(
+        providers: [
+          BlocProvider<AuthCubit>(
+            create: (_) => AuthCubit(authRepository: _FakeAuthRepository()),
+          ),
+          BlocProvider<OnboardingCubit>.value(value: onboardingCubit),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          locale: const Locale('da'),
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('da'),
+            Locale('en'),
+          ],
+          home: const OnboardingPage(),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Ja, jeg er holdleder'));
+    await tester.pump();
+    await tester.enterText(find.byType(TextField), 'Kopa FC');
+    await tester.pump();
+    await tester.tap(find.text('Fortsæt'));
+    await tester.pumpAndSettle();
+
+    final toggleFinder =
+        find.byKey(const ValueKey('onboarding-formation-toggle'));
+    expect(toggleFinder, findsOneWidget);
+    expect(tester.getSize(toggleFinder), const Size(342, 40));
+
+    final selectedOptionFinder =
+        find.byKey(const ValueKey('onboarding-formation-option-11-mand'));
+    final inactiveOptionFinder =
+        find.byKey(const ValueKey('onboarding-formation-option-7-mand'));
+    final selectedDecoration = tester
+        .widget<DecoratedBox>(selectedOptionFinder)
+        .decoration as BoxDecoration;
+    final inactiveDecoration = tester
+        .widget<DecoratedBox>(inactiveOptionFinder)
+        .decoration as BoxDecoration;
+
+    expect(selectedDecoration.color, Colors.white);
+    expect(selectedDecoration.borderRadius, BorderRadius.circular(17));
+    expect(selectedDecoration.boxShadow, hasLength(1));
+    expect(selectedDecoration.boxShadow!.single.offset, const Offset(0, 2));
+    expect(selectedDecoration.boxShadow!.single.blurRadius, 2);
+    expect(inactiveDecoration.color, Colors.transparent);
+    expect(
+      tester.widget<Text>(find.text('11-mand')).style,
+      isNotNull,
+    );
+    expect(
+      tester.widget<Text>(find.text('11-mand')).style!.fontSize,
+      13,
+    );
+    expect(
+      tester.widget<Text>(find.text('11-mand')).style!.fontWeight,
+      FontWeight.bold,
+    );
+    expect(
+      tester.widget<Text>(find.text('7-mand')).style!.fontWeight,
+      FontWeight.w600,
+    );
+
+    await tester.tap(inactiveOptionFinder);
+    await tester.pump();
+
+    final sevenMandDecoration = tester
+        .widget<DecoratedBox>(inactiveOptionFinder)
+        .decoration as BoxDecoration;
+    final elevenMandDecoration = tester
+        .widget<DecoratedBox>(selectedOptionFinder)
+        .decoration as BoxDecoration;
+    expect(sevenMandDecoration.color, Colors.white);
+    expect(sevenMandDecoration.boxShadow, hasLength(1));
+    expect(elevenMandDecoration.color, Colors.transparent);
+    expect(elevenMandDecoration.boxShadow, isNull);
+  });
+
   testWidgets('creates the team and link before showing the final step',
       (tester) async {
     final onboardingCubit = _CreateTestOnboardingCubit();

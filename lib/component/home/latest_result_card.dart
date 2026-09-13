@@ -51,7 +51,7 @@ class HomeLatestResultCard extends StatelessWidget {
     final ownTeamLogo = currentUser.teamDetails?.logoDesign;
 
     return HomeBentoCard(
-      padding: const EdgeInsets.fromLTRB(Spacing.lg, 0, Spacing.lg, Spacing.md),
+      padding: const EdgeInsets.fromLTRB(Spacing.lg, Spacing.sm, Spacing.lg, Spacing.md),
       color: appColors.white,
       child: InkWell(
         onTap: match == null ? null : () => onOpenMatch(match),

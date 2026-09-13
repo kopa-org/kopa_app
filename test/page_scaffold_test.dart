@@ -157,4 +157,46 @@ void main() {
 
     expect(bottomInset, 100);
   });
+
+  testWidgets('tab scaffold keeps an Android FAB above the tab bar',
+      (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          platform: TargetPlatform.android,
+          extensions: <ThemeExtension<dynamic>>[
+            AppColors.light,
+            AppTextStyles.light,
+          ],
+        ),
+        home: Scaffold(
+          extendBody: true,
+          body: PageScaffold.tab(
+            title: 'Kampe',
+            floatingActionButton: FloatingActionButton(
+              key: const ValueKey('android-fab'),
+              onPressed: () {},
+              child: const Icon(Icons.add),
+            ),
+            body: const SizedBox.expand(),
+          ),
+          bottomNavigationBar: const SizedBox(
+            key: ValueKey('tab-navigation-bar'),
+            height: 100,
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      tester.getRect(find.byKey(const ValueKey('android-fab'))).bottom,
+      lessThanOrEqualTo(
+        tester
+            .getRect(
+              find.byKey(const ValueKey('tab-navigation-bar')),
+            )
+            .top,
+      ),
+    );
+  });
 }

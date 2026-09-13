@@ -6,6 +6,8 @@ import 'package:kopa/theme/app_text_styles.dart';
 import 'package:kopa/theme/spacing.dart';
 
 class HomeBentoCard extends StatelessWidget {
+  static const double cardRadius = Spacing.borderRadiusLarge;
+
   final Widget child;
   final EdgeInsetsGeometry padding;
   final Color? color;
@@ -21,7 +23,13 @@ class HomeBentoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return KopaCard(padding: padding, color: color, clip: clip, child: child);
+    return KopaCard(
+      padding: padding,
+      color: color,
+      clip: clip,
+      borderRadius: cardRadius,
+      child: child,
+    );
   }
 }
 

@@ -1030,36 +1030,39 @@ class _PositionStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (fixedPlayerCount == null) ...[
-          _SegmentedToggle(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (fixedPlayerCount == null) ...[
+            _SegmentedToggle(
+              colors: colors,
+              textStyles: textStyles,
+              usesElevenAside: usesElevenAside,
+              onChanged: onFormationChanged,
+            ),
+            const SizedBox(height: 18),
+          ],
+          _PitchPicker(
             colors: colors,
             textStyles: textStyles,
+            selectedPosition: selectedPosition,
             usesElevenAside: usesElevenAside,
-            onChanged: onFormationChanged,
+            onPositionChanged: onPositionChanged,
           ),
           const SizedBox(height: 18),
-        ],
-        _PitchPicker(
-          colors: colors,
-          textStyles: textStyles,
-          selectedPosition: selectedPosition,
-          usesElevenAside: usesElevenAside,
-          onPositionChanged: onPositionChanged,
-        ),
-        const SizedBox(height: 18),
-        Text(
-          'Du valgte: ${selectedPosition.label} (${selectedPosition.shortLabel})',
-          textAlign: TextAlign.center,
-          style: textStyles.body3.copyWith(
-            color: colors.textSecondary,
-            fontWeight: FontWeight.w500,
-            letterSpacing: 0,
+          Text(
+            'Du valgte: ${selectedPosition.label} (${selectedPosition.shortLabel})',
+            textAlign: TextAlign.center,
+            style: textStyles.body3.copyWith(
+              color: colors.textSecondary,
+              fontWeight: FontWeight.w500,
+              letterSpacing: 0,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -1080,6 +1083,7 @@ class _SegmentedToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      key: const ValueKey('onboarding-formation-toggle'),
       height: 40,
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
@@ -1126,20 +1130,41 @@ class _SegmentedOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final borderRadius = BorderRadius.circular(17);
+
     return Expanded(
-      child: Material(
-        color: selected ? colors.white : Colors.transparent,
-        borderRadius: BorderRadius.circular(17),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(17),
-          child: Center(
-            child: Text(
-              label,
-              style: textStyles.caption2.copyWith(
-                color: selected ? colors.textPrimary : colors.textSecondary,
-                fontWeight: selected ? FontWeight.w800 : FontWeight.w700,
-                letterSpacing: 0,
+      child: DecoratedBox(
+        key: ValueKey('onboarding-formation-option-$label'),
+        decoration: BoxDecoration(
+          color: selected ? Colors.white : Colors.transparent,
+          borderRadius: borderRadius,
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.06),
+                    offset: const Offset(0, 2),
+                    blurRadius: 2,
+                  ),
+                ]
+              : null,
+        ),
+        child: Material(
+          type: MaterialType.transparency,
+          borderRadius: borderRadius,
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: borderRadius,
+            child: Center(
+              child: Text(
+                label,
+                style: textStyles.caption2.copyWith(
+                  color: selected ? colors.dirt : colors.grey5,
+                  fontSize: 13,
+                  fontWeight: selected ? FontWeight.bold : FontWeight.w600,
+                  height: 1.2,
+                  letterSpacing: 0,
+                ),
               ),
             ),
           ),
