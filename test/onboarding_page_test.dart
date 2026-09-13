@@ -140,6 +140,10 @@ void main() {
     await tester.pump();
     await tester.tap(find.text('Fortsæt'));
     await tester.pumpAndSettle();
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Fortsæt'));
+    await tester.pumpAndSettle();
 
     final toggleFinder =
         find.byKey(const ValueKey('onboarding-formation-toggle'));
@@ -302,6 +306,8 @@ void main() {
     await tester.tap(find.text('Fortsæt'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Fortsæt'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Fortsæt'));
     await tester.pumpAndSettle();
