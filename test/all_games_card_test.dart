@@ -171,6 +171,36 @@ void main() {
 
     final icon = tester.widget<Icon>(find.byIcon(Icons.info_outline));
     expect(icon.color, AppColors.light.sun);
+    expect(
+      tester.getRect(find.byIcon(Icons.info_outline)).right,
+      greaterThan(
+        tester.getRect(find.byKey(const ValueKey('match-entry-9'))).right - 50,
+      ),
+    );
+    expect(
+      tester.getRect(find.byIcon(Icons.info_outline)).top,
+      lessThan(
+        tester.getRect(find.byKey(const ValueKey('match-entry-9'))).center.dy,
+      ),
+    );
+    final reminderCircle = tester.widget<Container>(
+      find
+          .ancestor(
+            of: find.byIcon(Icons.info_outline),
+            matching: find.byType(Container),
+          )
+          .first,
+    );
+    expect(
+      (reminderCircle.decoration! as BoxDecoration).color,
+      AppColors.light.sunset,
+    );
+
+    await tester.tap(find.byKey(const ValueKey('match-result-reminder')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Indtast kampens resultat'), findsOneWidget);
+    expect(find.text('Indtast resultat'), findsOneWidget);
   });
 
   testWidgets('uses shared title-case typography for match status chips',

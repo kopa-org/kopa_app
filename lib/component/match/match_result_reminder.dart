@@ -9,11 +9,13 @@ import 'package:kopa/theme/app_text_styles.dart';
 class MatchResultReminderButton extends StatefulWidget {
   final MatchDetails match;
   final VoidCallback onPressed;
+  final Color? backgroundColor;
 
   const MatchResultReminderButton({
     super.key,
     required this.match,
     required this.onPressed,
+    this.backgroundColor,
   });
 
   @override
@@ -89,7 +91,7 @@ class _MatchResultReminderButtonState extends State<MatchResultReminderButton> {
         height: 34,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: colors.white,
+          color: widget.backgroundColor ?? colors.white,
           shape: BoxShape.circle,
         ),
         child: Icon(
@@ -116,7 +118,20 @@ Future<void> showMatchResultReminderDialog(
           AppTextStyles.light;
 
       return AlertDialog(
-        icon: Icon(Icons.info_outline, color: colors.sun),
+        icon: Container(
+          width: 34,
+          height: 34,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: colors.sunset,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            Icons.info_outline,
+            color: colors.sun,
+            size: 25,
+          ),
+        ),
         title: Text(l10n.matchResultReminderTitle),
         content: Text(
           l10n.matchResultReminderMessage,

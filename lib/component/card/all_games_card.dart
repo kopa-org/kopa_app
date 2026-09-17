@@ -143,71 +143,82 @@ class _GameResultRow extends StatelessWidget {
           child: InkWell(
             onTap: onTap,
             borderRadius: borderRadius,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(Spacing.md, 12, 12, 12),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Row(
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(Spacing.md, 12, 60, 12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Icon(
-                              CupertinoIcons.calendar,
-                              size: 14,
-                              color: appColors.grey5,
-                            ),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: Text(
-                                DateHelper.getFormattedShortWeekdayDate(
-                                        match.date)
-                                    .toUpperCase(),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: appTextStyles.buttonTiny.copyWith(
+                            Row(
+                              children: [
+                                Icon(
+                                  CupertinoIcons.calendar,
+                                  size: 14,
                                   color: appColors.grey5,
-                                  fontWeight: FontWeight.w700,
                                 ),
-                              ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    DateHelper.getFormattedShortWeekdayDate(
+                                            match.date)
+                                        .toUpperCase(),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: appTextStyles.buttonTiny.copyWith(
+                                      color: appColors.grey5,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                                if (match.isCurrentUserRegistered) ...[
+                                  const SizedBox(width: 6),
+                                  const _AttendanceBadge.registered(),
+                                ] else if (currentUserDeclined) ...[
+                                  const SizedBox(width: 6),
+                                  const _AttendanceBadge.declined(),
+                                ],
+                                const SizedBox(width: 6),
+                                _StatusBadge(status: status),
+                              ],
                             ),
-                            if (match.isCurrentUserRegistered) ...[
-                              const SizedBox(width: 6),
-                              const _AttendanceBadge.registered(),
-                            ] else if (currentUserDeclined) ...[
-                              const SizedBox(width: 6),
-                              const _AttendanceBadge.declined(),
-                            ],
-                            const SizedBox(width: 6),
-                            _StatusBadge(status: status),
+                            const SizedBox(height: 12),
+                            _GameTeamLine(
+                              name: match.homeTeam ?? 'Hjemme',
+                              score: match.homeTeamScore,
+                              isOwnTeam: ownSide.isHome,
+                              ownTeamLogoDesign: ownTeamLogoDesign,
+                            ),
+                            const SizedBox(height: Spacing.sm),
+                            _GameTeamLine(
+                              name: match.awayTeam ?? 'Ude',
+                              score: match.awayTeamScore,
+                              isOwnTeam: ownSide.isAway,
+                              ownTeamLogoDesign: ownTeamLogoDesign,
+                            ),
                           ],
                         ),
-                        const SizedBox(height: 12),
-                        _GameTeamLine(
-                          name: match.homeTeam ?? 'Hjemme',
-                          score: match.homeTeamScore,
-                          isOwnTeam: ownSide.isHome,
-                          ownTeamLogoDesign: ownTeamLogoDesign,
-                        ),
-                        const SizedBox(height: Spacing.sm),
-                        _GameTeamLine(
-                          name: match.awayTeam ?? 'Ude',
-                          score: match.awayTeamScore,
-                          isOwnTeam: ownSide.isAway,
-                          ownTeamLogoDesign: ownTeamLogoDesign,
-                        ),
-                      ],
+                      ),
+                    ],
+                  ),
+                ),
+                if (canManageTeam)
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: MatchResultReminderButton(
+                      match: match,
+                      backgroundColor: appColors.sunset,
+                      onPressed: () => _showResultReminder(context),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  if (canManageTeam)
-                    MatchResultReminderButton(
-                      match: match,
-                      onPressed: onTap,
-                    ),
-                  if (canManageTeam) const SizedBox(width: 4),
-                  Container(
+                Positioned(
+                  right: 12,
+                  bottom: 12,
+                  child: Container(
                     width: 36,
                     height: 36,
                     alignment: Alignment.center,
@@ -217,12 +228,19 @@ class _GameResultRow extends StatelessWidget {
                       color: appColors.dirt,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Future<void> _showResultReminder(BuildContext context) async {
+    await showMatchResultReminderDialog(
+      context,
+      onEnterResult: onTap,
     );
   }
 

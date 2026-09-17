@@ -386,6 +386,18 @@ abstract class AppLocalizations {
   /// **'Choose event'**
   String get matchEventChooseEvent;
 
+  /// No description provided for @matchDetailsMatchEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'Match events'**
+  String get matchDetailsMatchEvents;
+
+  /// No description provided for @matchDetailsMatchEventsUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Match events will become available once the match result has been entered.'**
+  String get matchDetailsMatchEventsUnavailable;
+
   /// No description provided for @externalPlayerTitle.
   ///
   /// In en, this message translates to:
@@ -451,6 +463,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Full time'**
   String get matchTimelineFullTime;
+
+  /// No description provided for @matchTimelineGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal'**
+  String get matchTimelineGoal;
+
+  /// No description provided for @matchTimelineSubstitution.
+  ///
+  /// In en, this message translates to:
+  /// **'Substitution'**
+  String get matchTimelineSubstitution;
 
   /// No description provided for @matchRegisterResult.
   ///

@@ -74,14 +74,14 @@ class AppColors extends ThemeExtension<AppColors> {
   });
 
   static const AppColors light = AppColors(
-    background: Color(0xFFE8F2ED), // Off White
+    background: Color(0xFFF1F3F2), // Neutral off-white page canvas
     surface: Color(0xFFFDFDFD), // Figma White
     primary: Color(0xFF00943C), // Græs / Grass
     divider: Color(0xFFB7B7B7), // Grey 3
     textPrimary: Color(0xFF2D1000), // Jord
     textSecondary: Color(0xFF454B45), // Readable on white and off-white
     lightGrass: Color(0xFF9FFDCC),
-    offWhite: Color(0xFFE8F2ED),
+    offWhite: Color(0xFFF1F3F2),
     white: Color(0xFFFDFDFD),
     // Kept for legacy overlays not present as a Figma token.
     black: Color(0xFF101010),

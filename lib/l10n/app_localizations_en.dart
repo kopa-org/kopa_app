@@ -160,6 +160,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get matchEventChooseEvent => 'Choose event';
 
   @override
+  String get matchDetailsMatchEvents => 'Match events';
+
+  @override
+  String get matchDetailsMatchEventsUnavailable =>
+      'Match events will become available once the match result has been entered.';
+
+  @override
   String get externalPlayerTitle => 'Add external player';
 
   @override
@@ -192,6 +199,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get matchTimelineFullTime => 'Full time';
+
+  @override
+  String get matchTimelineGoal => 'Goal';
+
+  @override
+  String get matchTimelineSubstitution => 'Substitution';
 
   @override
   String get matchRegisterResult => 'Register match result';

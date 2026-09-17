@@ -158,6 +158,13 @@ class AppLocalizationsDa extends AppLocalizations {
   String get matchEventChooseEvent => 'Vælg begivenhed';
 
   @override
+  String get matchDetailsMatchEvents => 'Kamp begivenheder';
+
+  @override
+  String get matchDetailsMatchEventsUnavailable =>
+      'Kampbegivenheder bliver tilgængelige, når kampens resultat er indtastet.';
+
+  @override
   String get externalPlayerTitle => 'Tilføj lånespiller';
 
   @override
@@ -190,6 +197,12 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String get matchTimelineFullTime => 'Kamp slut';
+
+  @override
+  String get matchTimelineGoal => 'Mål';
+
+  @override
+  String get matchTimelineSubstitution => 'Udskiftning';
 
   @override
   String get matchRegisterResult => 'Registrer kampens resultat';

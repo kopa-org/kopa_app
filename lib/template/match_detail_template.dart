@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:kopa/component/card/kopa_card.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/component/section_header/section_header.dart';
 import 'package:kopa/theme/app_colors.dart';
@@ -32,6 +33,8 @@ class MatchDetailTemplate extends StatelessWidget {
   final String timelineSegmentLabel;
   final String attendanceEmptyMessage;
   final String timelineEmptyMessage;
+  final bool timelinePreview;
+  final String timelinePreviewMessage;
   final bool showTimelineSegment;
   final bool usePrematchLayout;
   final Widget? attendanceHeader;
@@ -61,6 +64,8 @@ class MatchDetailTemplate extends StatelessWidget {
     this.timelineSegmentLabel = 'Kampforløb',
     this.attendanceEmptyMessage = 'Ingen tilmeldte spillere endnu.',
     this.timelineEmptyMessage = 'Ingen begivenheder registreret.',
+    this.timelinePreview = false,
+    this.timelinePreviewMessage = '',
     this.showTimelineSegment = true,
     this.usePrematchLayout = false,
     this.attendanceHeader,
@@ -245,6 +250,16 @@ class MatchDetailTemplate extends StatelessWidget {
             ...attendanceList,
         ];
       case MatchDetailSegment.timeline:
+        if (timelinePreview) {
+          return [
+            _PrematchSectionTitle(title: timelineTitle),
+            _PrematchTimelinePreview(
+              items: timelineItems,
+              message: timelinePreviewMessage,
+            ),
+          ];
+        }
+
         return [
           SectionHeader(title: timelineTitle),
           const SizedBox(height: Spacing.md),
@@ -427,6 +442,67 @@ class _EmptySegmentMessage extends StatelessWidget {
           textAlign: TextAlign.center,
         ),
       ),
+    );
+  }
+}
+
+class _PrematchTimelinePreview extends StatelessWidget {
+  final List<Widget> items;
+  final String message;
+
+  const _PrematchTimelinePreview({
+    required this.items,
+    required this.message,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final styles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        IgnorePointer(
+          child: Opacity(
+            key: const ValueKey('match-details-events-preview-content'),
+            opacity: 0.38,
+            child: KopaCard(
+              borderRadius: Spacing.borderRadiusLargeIncreased,
+              padding: const EdgeInsets.all(20),
+              child: Column(children: items),
+            ),
+          ),
+        ),
+        const SizedBox(height: Spacing.lg),
+        Container(
+          key: const ValueKey('match-details-events-preview-message'),
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: colors.grey2,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                CupertinoIcons.info_circle,
+                color: colors.grey5,
+                size: 20,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  message,
+                  style: styles.body3.copyWith(color: colors.grey5),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

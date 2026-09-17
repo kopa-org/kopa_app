@@ -33,6 +33,7 @@ import 'package:kopa/theme/spacing.dart';
 import 'package:kopa/utils/app_analytics.dart';
 import 'package:kopa/utils/crash_reporting.dart';
 import 'package:kopa/template/match_detail_template.dart';
+import 'package:kopa/component/timeline/timeline_item.dart';
 import 'package:kopa/component/card/match_hero_card.dart';
 import 'package:kopa/component/info_row/info_row.dart';
 import 'package:kopa/component/list_item/player_list_item.dart';
@@ -288,7 +289,11 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       attendanceTitle: 'Tilmeldte spillere',
       attendanceSegmentLabel:
           'Tilmeldte (${matchDetails.attendingAttendanceDetails.length})',
-      showTimelineSegment: false,
+      timelineTitle: l10n.matchDetailsMatchEvents,
+      timelineSegmentLabel: l10n.matchDetailsMatchEvents,
+      timelinePreview: true,
+      timelinePreviewMessage: l10n.matchDetailsMatchEventsUnavailable,
+      timelineItems: _buildMatchEventsPreviewItems(l10n),
       overviewWidgets: [
         if (canManageTeam && !matchDetails.hasFinalScore) ...[
           SizedBox(height: Spacing.lg),
@@ -337,6 +342,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
   }
 
   Widget _buildInitialLoadingState(MatchDetails match) {
+    final l10n = AppLocalizations.of(context)!;
+
     return MatchDetailTemplate(
       selectedSegment: _selectedSegment,
       onSegmentChanged: _selectSegment,
@@ -348,7 +355,11 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         animateCard: widget.heroTag != null,
       ),
       usePrematchLayout: true,
-      showTimelineSegment: false,
+      timelineTitle: l10n.matchDetailsMatchEvents,
+      timelineSegmentLabel: l10n.matchDetailsMatchEvents,
+      timelinePreview: true,
+      timelinePreviewMessage: l10n.matchDetailsMatchEventsUnavailable,
+      timelineItems: _buildMatchEventsPreviewItems(l10n),
       bottomNavigationBar: widget.showBottomNavigationBar
           ? _buildMatchDetailsBottomNavigationBar(context)
           : null,
@@ -357,6 +368,39 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
           : null,
       useParentBottomNavigationBar: !widget.showBottomNavigationBar,
     );
+  }
+
+  List<Widget> _buildMatchEventsPreviewItems(AppLocalizations l10n) {
+    return [
+      TimelineItem(
+        title: l10n.matchTimelineKickoff,
+        time: "0'",
+        icon: Icons.play_arrow,
+      ),
+      TimelineItem(
+        title: l10n.matchTimelineGoal,
+        subtitle: l10n.matchTimelineGoal,
+        time: "23'",
+        icon: Icons.sports_soccer,
+      ),
+      TimelineItem(
+        title: l10n.matchTimelineHalftime,
+        time: "45'",
+        icon: Icons.pause,
+      ),
+      TimelineItem(
+        title: l10n.matchTimelineSubstitution,
+        subtitle: l10n.matchTimelineSubstitution,
+        time: "67'",
+        icon: Icons.swap_horiz,
+      ),
+      TimelineItem(
+        title: l10n.matchTimelineFullTime,
+        time: "90'",
+        icon: Icons.flag,
+        isLast: true,
+      ),
+    ];
   }
 
   Widget _buildMatchDetailsBottomNavigationBar(BuildContext context) {

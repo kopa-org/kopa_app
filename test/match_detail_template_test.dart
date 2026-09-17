@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kopa/component/timeline/timeline_item.dart';
 import 'package:kopa/template/match_detail_template.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
@@ -142,6 +143,74 @@ void main() {
     );
 
     expect(selected, MatchDetailSegment.attendance);
+  });
+
+  testWidgets('prematch events segment shows a disabled timeline preview',
+      (tester) async {
+    const message =
+        'Kampbegivenheder bliver tilgængelige, når kampens resultat er indtastet.';
+
+    Widget buildTemplate(
+        {MatchDetailSegment selectedSegment = MatchDetailSegment.overview}) {
+      return MaterialApp(
+        home: MatchDetailTemplate(
+          selectedSegment: selectedSegment,
+          onSegmentChanged: (_) {},
+          heroCard: const SizedBox(height: 1),
+          usePrematchLayout: true,
+          timelineTitle: 'Kamp begivenheder',
+          timelineSegmentLabel: 'Kamp begivenheder',
+          timelinePreview: true,
+          timelinePreviewMessage: message,
+          timelineItems: const [
+            TimelineItem(
+              title: 'Kampstart',
+              time: "0'",
+              icon: Icons.play_arrow,
+            ),
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTemplate());
+
+    expect(
+      find.byKey(const ValueKey('match-details-segment-overview')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('match-details-segment-attendance')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('match-details-segment-timeline')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('match-details-events-preview-content')),
+      findsNothing,
+    );
+
+    await tester.pumpWidget(
+      buildTemplate(selectedSegment: MatchDetailSegment.timeline),
+    );
+
+    expect(find.text('Kamp begivenheder'), findsNWidgets(2));
+    expect(find.text(message), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('match-details-events-preview-content')),
+      findsOneWidget,
+    );
+    expect(
+      tester
+          .widget<Opacity>(
+            find.byKey(const ValueKey('match-details-events-preview-content')),
+          )
+          .opacity,
+      closeTo(0.38, 0.001),
+    );
+    expect(find.byType(TimelineItem), findsOneWidget);
   });
 
   testWidgets('prematch response content belongs to the attendance segment',

@@ -77,6 +77,18 @@ void main() {
 
     expect(find.text('Indtast kampens resultat'), findsOneWidget);
     expect(find.text('Indtast resultat'), findsOneWidget);
+    final dialogCircle = tester.widget<Container>(
+      find
+          .ancestor(
+            of: find.byIcon(Icons.info_outline),
+            matching: find.byType(Container),
+          )
+          .first,
+    );
+    expect(
+      (dialogCircle.decoration! as BoxDecoration).color,
+      AppColors.light.sunset,
+    );
 
     await tester.tap(find.text('Indtast resultat'));
     await tester.pumpAndSettle();
