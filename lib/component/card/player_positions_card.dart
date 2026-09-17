@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/football_pitch.dart';
 import 'package:kopa/component/card/kopa_card.dart';
-import 'package:kopa/model/user_details.dart';
+import 'package:kopa/model/match_player.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 import 'package:kopa/theme/spacing.dart';
@@ -10,8 +10,8 @@ import 'package:kopa/theme/spacing.dart';
 class PlayerPositionsCard extends StatelessWidget {
   final int playerCount;
   final String formation;
-  final List<UserDetails> players;
-  final List<UserDetails?>? positionedPlayers;
+  final List<MatchPlayer> players;
+  final List<MatchPlayer?>? positionedPlayers;
   final VoidCallback? onEditFormation;
   final VoidCallback? onToggleVisibility;
   final bool isVisibleToPlayers;
@@ -130,7 +130,7 @@ class PlayerPositionsCard extends StatelessWidget {
     );
   }
 
-  List<UserDetails?> _startingPlayersForFormation(PlayerFormation formation) {
+  List<MatchPlayer?> _startingPlayersForFormation(PlayerFormation formation) {
     final sortedPlayers = preservePlayerOrder
         ? [...players]
         : _sortPlayersForFormation(players, formation);
@@ -138,19 +138,19 @@ class PlayerPositionsCard extends StatelessWidget {
     return sortedPlayers.take(formation.slots.length).toList();
   }
 
-  List<UserDetails?> _normalizePositionedPlayers(
-    List<UserDetails?> positionedPlayers,
+  List<MatchPlayer?> _normalizePositionedPlayers(
+    List<MatchPlayer?> positionedPlayers,
     int slotCount,
   ) {
-    return List<UserDetails?>.generate(
+    return List<MatchPlayer?>.generate(
       slotCount,
       (slot) =>
           slot < positionedPlayers.length ? positionedPlayers[slot] : null,
     );
   }
 
-  List<UserDetails> _benchPlayersFor(
-    List<UserDetails?> starters,
+  List<MatchPlayer> _benchPlayersFor(
+    List<MatchPlayer?> starters,
     PlayerFormation formation,
   ) {
     if (positionedPlayers == null) {
@@ -161,18 +161,22 @@ class PlayerPositionsCard extends StatelessWidget {
       return sortedPlayers.skip(formation.slots.length).toList();
     }
 
-    final starterIds =
-        starters.whereType<UserDetails>().map((player) => player.id).toSet();
+    final starterIds = starters
+        .whereType<MatchPlayer>()
+        .map((player) => player.stableId)
+        .toSet();
 
-    return players.where((player) => !starterIds.contains(player.id)).toList();
+    return players
+        .where((player) => !starterIds.contains(player.stableId))
+        .toList();
   }
 
-  List<UserDetails> _sortPlayersForFormation(
-    List<UserDetails> players,
+  List<MatchPlayer> _sortPlayersForFormation(
+    List<MatchPlayer> players,
     PlayerFormation formation,
   ) {
     final remaining = [...players];
-    final ordered = <UserDetails>[];
+    final ordered = <MatchPlayer>[];
 
     for (final role in formation.slots.map((slot) => slot.role)) {
       final matchIndex = remaining.indexWhere(
@@ -246,7 +250,7 @@ class _FormationChip extends StatelessWidget {
 }
 
 class _BenchLegend extends StatelessWidget {
-  final List<UserDetails> bench;
+  final List<MatchPlayer> bench;
 
   const _BenchLegend({required this.bench});
 
@@ -306,7 +310,7 @@ class _Pitch extends StatelessWidget {
   final AppColors colors;
   final AppTextStyles styles;
   final List<FormationSlot> slots;
-  final List<UserDetails?> players;
+  final List<MatchPlayer?> players;
 
   const _Pitch({
     required this.colors,
@@ -343,7 +347,7 @@ class _Pitch extends StatelessWidget {
 
 class _PositionedPlayer extends StatelessWidget {
   final FormationSlot slot;
-  final UserDetails? player;
+  final MatchPlayer? player;
   final AppColors colors;
   final AppTextStyles styles;
 

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:kopa/helpers/api_config.dart';
 import 'package:kopa/model/create_match_comand.dart';
 import 'package:kopa/model/create_match_event_command.dart';
+import 'package:kopa/model/external_player_details.dart';
 import 'package:kopa/model/register_for_unregister_from_match_command.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/update_match_score_command.dart';
@@ -304,6 +305,34 @@ class MatchRepository {
     }
 
     invalidateMatchSummaries();
+  }
+
+  static Future<ExternalPlayerDetails> createExternalPlayer(
+    int matchId,
+    String name,
+  ) async {
+    final url = Uri.parse('${ApiConfig.baseUrl}/match/external_player');
+    final response = await _apiClient.postJson(
+      url,
+      body: {
+        'event_id': matchId,
+        'name': name,
+      },
+    );
+
+    if (response.statusCode == 401) {
+      throw Exception('Unauthorized. Please log in again.');
+    } else if (response.statusCode != 201) {
+      throw Exception('Failed to add external player');
+    }
+
+    final json = jsonDecode(response.body)['external_player'];
+    if (json is! Map<String, dynamic>) {
+      throw Exception('External player was not returned');
+    }
+
+    invalidateMatchSummaries();
+    return ExternalPlayerDetails.fromJson(json);
   }
 
   static Future<List<int>> createMatchEvents(

@@ -6,8 +6,10 @@ class CreateMatchEventCommand {
   final MatchEventType type;
   final int? minute;
   final int teamId;
-  final int goalscorerUserId;
+  final int? goalscorerUserId;
+  final int? goalscorerExternalPlayerId;
   final int? assistMakerUserId;
+  final int? assistMakerExternalPlayerId;
   final CardType? cardType;
 
   CreateMatchEventCommand({
@@ -15,8 +17,10 @@ class CreateMatchEventCommand {
     required this.type,
     this.minute,
     required this.teamId,
-    required this.goalscorerUserId,
+    this.goalscorerUserId,
+    this.goalscorerExternalPlayerId,
     this.assistMakerUserId,
+    this.assistMakerExternalPlayerId,
     this.cardType,
   });
 
@@ -26,8 +30,12 @@ class CreateMatchEventCommand {
       'type': type.wire,
       if (minute != null) 'minute': minute,
       'team_id': teamId,
-      'goalscorer_user_id': goalscorerUserId,
+      if (goalscorerUserId != null) 'goalscorer_user_id': goalscorerUserId,
+      if (goalscorerExternalPlayerId != null)
+        'goalscorer_external_player_id': goalscorerExternalPlayerId,
       if (assistMakerUserId != null) 'assist_maker_user_id': assistMakerUserId,
+      if (assistMakerExternalPlayerId != null)
+        'assist_maker_external_player_id': assistMakerExternalPlayerId,
       if (cardType != null) 'card_type': cardType!.wire,
     };
   }

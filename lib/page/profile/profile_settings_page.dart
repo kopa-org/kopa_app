@@ -9,6 +9,7 @@ import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/onboarding_cubit.dart';
 import 'package:kopa/l10n/app_localizations.dart';
+import 'package:kopa/model/team_details.dart';
 import 'package:kopa/navigation/app_router.dart';
 import 'package:kopa/page/profile/dbu_calendar_import_flow.dart';
 import 'package:kopa/page/profile/dbu_webview_page.dart';
@@ -32,7 +33,9 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
   bool _isLoading = false;
   bool _isSharingKopa = false;
   bool _isSavingMeetingOffset = false;
+  bool _isSavingRsvpSelectionMode = false;
   int? _selectedMeetingOffsetMinutes;
+  String _selectedRsvpSelectionMode = TeamDetails.firstComeFirstServed;
   DbuWebviewOperation? _activeDbuSync;
   String? _errorMessage;
 
@@ -52,6 +55,8 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
     final currentUser = context.read<AuthCubit>().state.user;
     _selectedMeetingOffsetMinutes =
         currentUser?.teamDetails?.defaultMeetingOffsetMinutes;
+    _selectedRsvpSelectionMode = currentUser?.teamDetails?.rsvpSelectionMode ??
+        TeamDetails.firstComeFirstServed;
   }
 
   @override
@@ -149,6 +154,51 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                     : 'Gem mødetid',
                 loading: _isSavingMeetingOffset,
                 onPressed: _isSavingMeetingOffset ? () {} : _saveMeetingOffset,
+              ),
+            ],
+            if (currentUser?.canManageTeam == true) ...[
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                initialValue: {
+                  TeamDetails.firstComeFirstServed,
+                  TeamDetails.teamLeaderSelection,
+                }.contains(_selectedRsvpSelectionMode)
+                    ? _selectedRsvpSelectionMode
+                    : TeamDetails.firstComeFirstServed,
+                decoration: InputDecoration(
+                  labelText: l10n.teamRsvpSelectionModeLabel,
+                  border: const OutlineInputBorder(),
+                ),
+                items: [
+                  DropdownMenuItem<String>(
+                    value: TeamDetails.firstComeFirstServed,
+                    child: Text(l10n.teamRsvpFirstComeOption),
+                  ),
+                  DropdownMenuItem<String>(
+                    value: TeamDetails.teamLeaderSelection,
+                    child: Text(l10n.teamRsvpLeaderOption),
+                  ),
+                ],
+                onChanged: _isSavingRsvpSelectionMode
+                    ? null
+                    : (value) {
+                        if (value == null) return;
+                        setState(() => _selectedRsvpSelectionMode = value);
+                      },
+              ),
+              const SizedBox(height: 8),
+              Text(
+                l10n.teamRsvpSelectionModeDescription,
+                style: appTextStyles.caption,
+              ),
+              const SizedBox(height: 8),
+              FullWidthButton(
+                buttonText: _isSavingRsvpSelectionMode
+                    ? l10n.teamRsvpSelectionSaving
+                    : l10n.teamRsvpSelectionSave,
+                loading: _isSavingRsvpSelectionMode,
+                onPressed:
+                    _isSavingRsvpSelectionMode ? () {} : _saveRsvpSelectionMode,
               ),
             ],
             BlocBuilder<OnboardingCubit, OnboardingState>(
@@ -315,6 +365,51 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
       if (!mounted) return;
       setState(() {
         _isSavingMeetingOffset = false;
+        _errorMessage = error.toString().replaceFirst('Exception: ', '');
+      });
+    }
+  }
+
+  Future<void> _saveRsvpSelectionMode() async {
+    final currentUser = context.read<AuthCubit>().state.user;
+    final team = currentUser?.teamDetails;
+
+    if (currentUser?.canManageTeam != true || team == null) {
+      setState(
+        () =>
+            _errorMessage = AppLocalizations.of(context)!.teamSettingsOwnerOnly,
+      );
+      return;
+    }
+
+    setState(() {
+      _isSavingRsvpSelectionMode = true;
+      _errorMessage = null;
+    });
+
+    try {
+      await UsersRepository.updateTeamSettings(
+        teamId: team.id,
+        defaultMeetingOffsetMinutes: team.defaultMeetingOffsetMinutes,
+        rsvpSelectionMode: _selectedRsvpSelectionMode,
+      );
+      if (!mounted) return;
+
+      await context.read<AuthCubit>().init();
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.teamRsvpSelectionSaved,
+          ),
+        ),
+      );
+      setState(() => _isSavingRsvpSelectionMode = false);
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _isSavingRsvpSelectionMode = false;
         _errorMessage = error.toString().replaceFirst('Exception: ', '');
       });
     }

@@ -6,8 +6,9 @@ import 'package:kopa/component/football_pitch.dart';
 import 'package:kopa/component/card/player_positions_card.dart';
 import 'package:kopa/component/dialog/lineup_unsaved_changes_dialog.dart';
 import 'package:kopa/model/event_attendance_details.dart';
+import 'package:kopa/model/external_player_details.dart';
 import 'package:kopa/model/match_details.dart';
-import 'package:kopa/model/user_details.dart';
+import 'package:kopa/model/match_player.dart';
 import 'package:kopa/repository/match_repository.dart';
 import 'package:kopa/services/secure_storage_service.dart';
 import 'package:kopa/theme/app_colors.dart';
@@ -61,13 +62,17 @@ class _LineupEditorPageState extends State<LineupEditorPage> {
         .where((attendance) => attendance.isAttending)
         .map(_LineupPlayer.fromAttendance)
         .toList();
+    attending.addAll(
+      (widget.match.externalPlayerDetailsList ?? const [])
+          .map(_LineupPlayer.fromExternal),
+    );
 
     _starters = List<_LineupPlayer?>.filled(_formation.slots.length, null);
 
     // Only persisted slots are starters. New attendees stay on the bench
     // until the team leader places them manually.
     for (final player in attending) {
-      final slot = player.attendance.lineupSlot;
+      final slot = player.lineupSlot;
       if (slot != null && slot >= 0 && slot < _starters.length) {
         _starters[slot] = player.copyWith(selected: true);
       }
@@ -75,15 +80,15 @@ class _LineupEditorPageState extends State<LineupEditorPage> {
 
     final placedIds = _starters
         .whereType<_LineupPlayer>()
-        .map((player) => player.user.id)
+        .map((player) => player.player.stableId)
         .toSet();
 
     _bench = attending
-        .where((player) => !placedIds.contains(player.user.id))
+        .where((player) => !placedIds.contains(player.player.stableId))
         .toList()
       ..sort((a, b) {
         if (a.selected != b.selected) return a.selected ? -1 : 1;
-        return a.user.name.compareTo(b.user.name);
+        return a.player.name.compareTo(b.player.name);
       });
   }
 
@@ -152,7 +157,7 @@ class _LineupEditorPageState extends State<LineupEditorPage> {
   }
 
   void _handleDragStarted(_LineupPlayer player) {
-    setState(() => _draggingName = player.user.name);
+    setState(() => _draggingName = player.player.name);
   }
 
   void _handleDragEnded() {
@@ -193,10 +198,20 @@ class _LineupEditorPageState extends State<LineupEditorPage> {
     for (var slot = 0; slot < _starters.length; slot++) {
       final player = _starters[slot];
       if (player == null) continue;
-      lineup.add({'user_id': player.user.id, 'lineup_slot': slot});
+      lineup.add({
+        if (player.player.userId != null) 'user_id': player.player.userId,
+        if (player.player.externalPlayerId != null)
+          'external_player_id': player.player.externalPlayerId,
+        'lineup_slot': slot,
+      });
     }
     for (final player in _bench.where((player) => player.selected)) {
-      lineup.add({'user_id': player.user.id, 'lineup_slot': null});
+      lineup.add({
+        if (player.player.userId != null) 'user_id': player.player.userId,
+        if (player.player.externalPlayerId != null)
+          'external_player_id': player.player.externalPlayerId,
+        'lineup_slot': null,
+      });
     }
 
     try {
@@ -231,14 +246,20 @@ class _LineupEditorPageState extends State<LineupEditorPage> {
 
   void _moveToSlot(_LineupDragData data, int targetSlot) {
     setState(() {
+      final sourceSlot = data.fromSlot;
       final dragged = _takeDraggedPlayer(data)?.copyWith(selected: true);
       if (dragged == null) return;
 
       _hasUnsavedChanges = true;
       final displaced = _starters[targetSlot];
       _starters[targetSlot] = dragged;
-      if (displaced != null && displaced.user.id != dragged.user.id) {
-        _bench.add(displaced.copyWith(selected: true));
+      if (displaced != null &&
+          displaced.player.stableId != dragged.player.stableId) {
+        if (sourceSlot != null && sourceSlot != targetSlot) {
+          _starters[sourceSlot] = displaced.copyWith(selected: true);
+        } else {
+          _bench.add(displaced.copyWith(selected: true));
+        }
       }
       _sortBench();
       _draggingName = null;
@@ -265,8 +286,9 @@ class _LineupEditorPageState extends State<LineupEditorPage> {
       return player;
     }
 
-    final index =
-        _bench.indexWhere((player) => player.user.id == data.player.user.id);
+    final index = _bench.indexWhere(
+      (player) => player.player.stableId == data.player.player.stableId,
+    );
     if (index == -1) return data.player;
     return _bench.removeAt(index);
   }
@@ -282,7 +304,7 @@ class _LineupEditorPageState extends State<LineupEditorPage> {
             .map(
               (player) => CupertinoActionSheetAction(
                 onPressed: () => Navigator.of(context).pop(player),
-                child: Text(player.user.name),
+                child: Text(player.player.name),
               ),
             )
             .toList(),
@@ -341,7 +363,7 @@ class _LineupEditorPageState extends State<LineupEditorPage> {
   void _sortBench() {
     _bench.sort((a, b) {
       if (a.selected != b.selected) return a.selected ? -1 : 1;
-      return a.user.name.compareTo(b.user.name);
+      return a.player.name.compareTo(b.player.name);
     });
   }
 }
@@ -682,7 +704,7 @@ class _DraggablePlayerBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final badge = _PlayerBadge(
-      name: player.user.name,
+      name: player.player.name,
       label: label,
       colors: colors,
       styles: styles,
@@ -840,7 +862,7 @@ class _BenchPlayerCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            _firstName(player.user.name),
+            _firstName(player.player.name),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: styles.caption2.copyWith(
@@ -849,7 +871,7 @@ class _BenchPlayerCard extends StatelessWidget {
             ),
           ),
           Text(
-            _positionShortLabel(player.user.position),
+            _positionShortLabel(player.player.position),
             style: styles.caption3.copyWith(
               color: colors.primary,
               fontWeight: FontWeight.w800,
@@ -1062,26 +1084,36 @@ class _FormationOption extends StatelessWidget {
 }
 
 class _LineupPlayer {
-  final EventAttendanceDetails attendance;
+  final MatchPlayer player;
+  final int? lineupSlot;
   final bool selected;
 
   const _LineupPlayer({
-    required this.attendance,
+    required this.player,
+    required this.lineupSlot,
     required this.selected,
   });
 
   factory _LineupPlayer.fromAttendance(EventAttendanceDetails attendance) {
     return _LineupPlayer(
-      attendance: attendance,
+      player: MatchPlayer.user(attendance.userDetails),
+      lineupSlot: attendance.lineupSlot,
       selected: attendance.isSelected == true,
     );
   }
 
-  UserDetails get user => attendance.userDetails;
+  factory _LineupPlayer.fromExternal(ExternalPlayerDetails player) {
+    return _LineupPlayer(
+      player: MatchPlayer.external(player),
+      lineupSlot: player.lineupSlot,
+      selected: true,
+    );
+  }
 
   _LineupPlayer copyWith({bool? selected}) {
     return _LineupPlayer(
-      attendance: attendance,
+      player: player,
+      lineupSlot: lineupSlot,
       selected: selected ?? this.selected,
     );
   }

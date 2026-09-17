@@ -104,6 +104,41 @@ void main() {
     expect(fabPressed, isTrue);
   });
 
+  testWidgets('iOS scaffold provides Material to body ink controls',
+      (tester) async {
+    var pressed = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          platform: TargetPlatform.iOS,
+          extensions: <ThemeExtension<dynamic>>[
+            AppColors.light,
+            AppTextStyles.light,
+          ],
+        ),
+        home: PageScaffold(
+          title: 'Detaljer',
+          showTopBar: false,
+          body: InkWell(
+            key: const ValueKey('ios-body-ink-control'),
+            onTap: () => pressed = true,
+            child: const SizedBox(
+              width: 160,
+              height: 80,
+              child: Text('Tryk'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(const ValueKey('ios-body-ink-control')));
+    await tester.pump();
+
+    expect(pressed, isTrue);
+  });
+
   testWidgets('tab scaffold removes an empty top bar', (tester) async {
     await tester.pumpWidget(
       MaterialApp(

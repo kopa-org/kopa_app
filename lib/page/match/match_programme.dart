@@ -172,6 +172,8 @@ class _MatchListState extends State<_MatchList> {
     final ownTeamLogoDesign =
         context.read<AuthCubit>().state.user?.teamDetails?.logoDesign;
     final currentUserId = context.read<AuthCubit>().state.user?.id;
+    final canManageTeam =
+        context.read<AuthCubit>().state.user?.canManageTeam ?? false;
 
     return ListView(
       key: _listViewKey,
@@ -186,6 +188,7 @@ class _MatchListState extends State<_MatchList> {
           ownTeamName: ownTeamName,
           ownTeamLogoDesign: ownTeamLogoDesign,
           currentUserId: currentUserId,
+          canManageTeam: canManageTeam,
           matchItemKeys: _matchKeys,
           onMatchTap: (match) => _openMatch(context, match),
         ),

@@ -111,30 +111,33 @@ class PageScaffold extends StatelessWidget {
               style: appTextStyles.body.copyWith(
                 decoration: TextDecoration.none,
               ),
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  SafeArea(
-                    top: useTopSafeArea,
-                    bottom: useBottomSafeArea,
-                    child: onRefresh != null
-                        ? CustomScrollView(
-                            slivers: [
-                              CupertinoSliverRefreshControl(
-                                onRefresh: onRefresh!,
-                              ),
-                              SliverFillRemaining(child: body),
-                            ],
-                          )
-                        : body,
-                  ),
-                  if (floatingActionButton != null)
-                    Positioned(
-                      right: 16,
-                      bottom: floatingActionButtonBottomInset,
-                      child: floatingActionButton!,
+              child: Material(
+                type: MaterialType.transparency,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    SafeArea(
+                      top: useTopSafeArea,
+                      bottom: useBottomSafeArea,
+                      child: onRefresh != null
+                          ? CustomScrollView(
+                              slivers: [
+                                CupertinoSliverRefreshControl(
+                                  onRefresh: onRefresh!,
+                                ),
+                                SliverFillRemaining(child: body),
+                              ],
+                            )
+                          : body,
                     ),
-                ],
+                    if (floatingActionButton != null)
+                      Positioned(
+                        right: 16,
+                        bottom: floatingActionButtonBottomInset,
+                        child: floatingActionButton!,
+                      ),
+                  ],
+                ),
               ),
             ),
           )

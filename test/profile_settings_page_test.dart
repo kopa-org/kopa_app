@@ -63,6 +63,28 @@ void main() {
 
     expect(find.text('Ændre hold logo'), findsNothing);
   });
+
+  testWidgets('team admins can configure the RSVP selection mode',
+      (tester) async {
+    final authCubit = AuthCubit(
+      authRepository: _FakeAuthRepository(
+        _user(isTeamOwner: false, isAdmin: true),
+      ),
+    )..updateUser(_user(isTeamOwner: false, isAdmin: true));
+    final onboardingCubit = OnboardingCubit(OnboardingRepository());
+    addTearDown(authCubit.close);
+    addTearDown(onboardingCubit.close);
+
+    await tester.pumpWidget(
+      _testApp(
+        authCubit: authCubit,
+        onboardingCubit: onboardingCubit,
+      ),
+    );
+
+    expect(find.text('Tilmeldingsmetode'), findsOneWidget);
+    expect(find.text('Gem tilmeldingsmetode'), findsOneWidget);
+  });
 }
 
 Widget _testApp({
@@ -94,6 +116,7 @@ Widget _testApp({
 
 UserDetails _user({
   required bool isTeamOwner,
+  bool isAdmin = false,
   TeamLogoDesign logoDesign = TeamLogoDesign.defaultDesign,
 }) {
   final now = DateTime(2026, 8, 20);
@@ -102,6 +125,7 @@ UserDetails _user({
     name: 'Owner',
     email: 'owner@example.com',
     isTeamOwner: isTeamOwner,
+    isAdmin: isAdmin,
     roleId: isTeamOwner ? 1 : 2,
     createdAt: now,
     updatedAt: now,

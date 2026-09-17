@@ -22,6 +22,7 @@ class PostMatchDetailsPage extends StatelessWidget {
   final List<Widget> attendanceList;
   final Future<void> Function()? onRefresh;
   final VoidCallback onAddEvent;
+  final Widget? attendanceActionBar;
   final VoidCallback onSetMatchScore;
   final VoidCallback onCreateMatchPoll;
   final VoidCallback? onEditMatchPoll;
@@ -37,6 +38,7 @@ class PostMatchDetailsPage extends StatelessWidget {
     required this.heroCard,
     required this.attendanceList,
     required this.onAddEvent,
+    this.attendanceActionBar,
     required this.onSetMatchScore,
     required this.onCreateMatchPoll,
     this.onEditMatchPoll,
@@ -92,6 +94,7 @@ class PostMatchDetailsPage extends StatelessWidget {
       ratingsSection: null,
       timelineItems: const [],
       bottomNavigationBar: bottomNavigationBar,
+      attendanceActionBar: attendanceActionBar,
       useParentBottomNavigationBar: useParentBottomNavigationBar,
     );
   }

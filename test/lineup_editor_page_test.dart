@@ -4,6 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/model/event_attendance_details.dart';
+import 'package:kopa/model/external_player_details.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/page/match/lineup_editor_page.dart';
@@ -91,6 +92,39 @@ void main() {
     );
   });
 
+  testWidgets('match-only external players start on the bench', (tester) async {
+    FlutterSecureStorage.setMockInitialValues({'lineupDragHintSeen': 'true'});
+    final now = DateTime(2026, 8, 9, 12);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        home: LineupEditorPage(
+          match: _match(
+            externalPlayerDetailsList: [
+              ExternalPlayerDetails(
+                id: 99,
+                eventId: 1,
+                name: 'Guest Player',
+                createdAt: now,
+                updatedAt: now,
+              ),
+            ],
+          ),
+          playerCount: 7,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final benchHeader = find.text('Bænken (1 spillere)');
+    expect(benchHeader, findsOneWidget);
+    expect(
+      tester.getRect(find.text('Guest')).top,
+      greaterThan(tester.getRect(benchHeader).top),
+    );
+  });
+
   testWidgets('dragging a starter to the bench removes them from the field',
       (tester) async {
     tester.view.physicalSize = const Size(390, 844);
@@ -135,6 +169,59 @@ void main() {
       tester.getRect(player).top,
       greaterThan(tester.getRect(benchHeader).top),
     );
+  });
+
+  testWidgets('dragging a starter onto another starter swaps their slots',
+      (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    FlutterSecureStorage.setMockInitialValues({'lineupDragHintSeen': 'true'});
+    final now = DateTime(2026, 8, 9, 12);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        home: LineupEditorPage(
+          match: _match(
+            attendanceDetailsList: [
+              _attendance(
+                id: 1,
+                user: _user(id: 1, name: 'Alice Jensen', now: now),
+                now: now,
+                lineupSlot: 0,
+              ),
+              _attendance(
+                id: 2,
+                user: _user(id: 2, name: 'Bob Hansen', now: now),
+                now: now,
+                lineupSlot: 1,
+              ),
+            ],
+          ),
+          playerCount: 7,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final alice = find.text('Alice');
+    final bob = find.text('Bob');
+    final aliceCenter = tester.getRect(alice).center;
+    final bobCenter = tester.getRect(bob).center;
+    expect(aliceCenter.dy, lessThan(bobCenter.dy));
+
+    final gesture = await tester.startGesture(aliceCenter);
+    await tester.pump(const Duration(milliseconds: 600));
+    await gesture.moveTo(bobCenter);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bænken (0 spillere)'), findsOneWidget);
+    expect(tester.getRect(find.text('Alice')).top,
+        greaterThan(tester.getRect(find.text('Bob')).top));
   });
 
   testWidgets('warns before leaving after an unsaved lineup edit',
@@ -219,7 +306,10 @@ void main() {
   });
 }
 
-MatchDetails _match({List<EventAttendanceDetails>? attendanceDetailsList}) {
+MatchDetails _match({
+  List<EventAttendanceDetails>? attendanceDetailsList,
+  List<ExternalPlayerDetails>? externalPlayerDetailsList,
+}) {
   final now = DateTime(2026, 8, 9, 12);
   return MatchDetails(
     id: 1,
@@ -230,6 +320,7 @@ MatchDetails _match({List<EventAttendanceDetails>? attendanceDetailsList}) {
     createdAt: now,
     updatedAt: now,
     attendanceDetailsList: attendanceDetailsList ?? const [],
+    externalPlayerDetailsList: externalPlayerDetailsList ?? const [],
   );
 }
 

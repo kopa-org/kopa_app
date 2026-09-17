@@ -55,6 +55,26 @@ void main() {
     expect(taps, 1);
   });
 
+  testWidgets('solid action colors can use the grass token', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        home: Scaffold(
+          body: Button(
+            buttonText: 'Opret lånespiller',
+            backgroundColor: AppColors.light.grass,
+            foregroundColor: AppColors.light.white,
+            onPressed: () {},
+          ),
+        ),
+      ),
+    );
+
+    final style = tester.widget<FilledButton>(find.byType(FilledButton)).style!;
+    expect(style.backgroundColor?.resolve({}), AppColors.light.grass);
+    expect(style.foregroundColor?.resolve({}), AppColors.light.white);
+  });
+
   testWidgets('cards remain tappable after surface consolidation',
       (tester) async {
     var taps = 0;

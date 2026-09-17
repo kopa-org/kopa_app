@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kopa/model/event_attendance_details.dart';
 import 'package:kopa/model/match_details.dart';
+import 'package:kopa/model/match_player.dart';
 import 'package:kopa/model/user_details.dart';
 
 void main() {
@@ -155,6 +156,30 @@ void main() {
 
     expect(match.isCurrentUserRegistered, isFalse);
     expect(match.isCurrentUserAttending, isFalse);
+  });
+
+  test('parses match-only external players', () {
+    final match = MatchDetails.fromJson({
+      ..._matchJson(),
+      'external_player_details_list': [
+        {
+          'id': 42,
+          'event_id': 1,
+          'name': 'Guest Player',
+          'lineup_slot': null,
+          'created_at': '2026-07-28T12:00:00Z',
+          'updated_at': '2026-07-28T12:00:00Z',
+        },
+      ],
+    });
+
+    expect(match.externalPlayerDetailsList, hasLength(1));
+    expect(match.externalPlayerDetailsList!.single.name, 'Guest Player');
+    expect(match.externalPlayerDetailsList!.single.lineupSlot, isNull);
+    expect(
+      MatchPlayer.external(match.externalPlayerDetailsList!.single).isExternal,
+      isTrue,
+    );
   });
 }
 

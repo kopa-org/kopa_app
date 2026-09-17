@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:kopa/component/button/button.dart';
 import 'package:kopa/model/create_match_event_command.dart';
 import 'package:kopa/model/match_event_type.dart';
+import 'package:kopa/model/match_player.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/repository/match_repository.dart';
 import 'package:kopa/theme/app_colors.dart';
@@ -15,8 +16,8 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class _EventDraft {
   MatchEventType? type;
-  int? primaryId;
-  int? secondaryId;
+  MatchPlayer? primaryPlayer;
+  MatchPlayer? secondaryPlayer;
   int? minute;
 
   _EventDraft();
@@ -25,7 +26,7 @@ class _EventDraft {
 Future<void> showAddMatchEventModal(
   BuildContext context,
   int matchId,
-  List<UserDetails> squad,
+  List<MatchPlayer> players,
   UserDetails currentUserData,
   Future<void> Function() onSaved,
 ) async {
@@ -35,7 +36,7 @@ Future<void> showAddMatchEventModal(
     enableDrag: false,
     builder: (modalContext) => _AddMatchEventScreen(
       matchId: matchId,
-      squad: squad,
+      players: players,
       currentUserData: currentUserData,
       onSaved: onSaved,
     ),
@@ -44,13 +45,13 @@ Future<void> showAddMatchEventModal(
 
 class _AddMatchEventScreen extends StatefulWidget {
   final int matchId;
-  final List<UserDetails> squad;
+  final List<MatchPlayer> players;
   final UserDetails currentUserData;
   final Future<void> Function() onSaved;
 
   const _AddMatchEventScreen({
     required this.matchId,
-    required this.squad,
+    required this.players,
     required this.currentUserData,
     required this.onSaved,
   });
@@ -190,23 +191,23 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
                     .copyWith(decoration: TextDecoration.none)))
       ));
     }
-    if (_draft.primaryId != null) {
+    if (_draft.primaryPlayer != null) {
       itemsToFly.add((
         _headerPrimaryKey,
         Center(
             child: AppAvatar(
-          initials: _getInitials(getUserName(_draft.primaryId)),
+          initials: _getInitials(_draft.primaryPlayer!.name),
           radius: 15,
           backgroundColor: appColors.surface,
         ))
       ));
     }
-    if (_draft.secondaryId != null) {
+    if (_draft.secondaryPlayer != null) {
       itemsToFly.add((
         _headerSecondaryKey,
         Center(
             child: AppAvatar(
-          initials: _getInitials(getUserName(_draft.secondaryId)),
+          initials: _getInitials(_draft.secondaryPlayer!.name),
           radius: 15,
           backgroundColor: appColors.surface,
         ))
@@ -340,15 +341,6 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
     });
   }
 
-  String getUserName(int? id) {
-    if (id == null) return '';
-    try {
-      return widget.squad.firstWhere((u) => u.id == id).name;
-    } catch (_) {
-      return 'Ukendt';
-    }
-  }
-
   String _getInitials(String name) {
     if (name.isEmpty) {
       return '?';
@@ -408,14 +400,17 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
     setState(() => _isSaving = true);
     try {
       final commands = _staged
-          .where((d) => d.primaryId != null && d.type != null)
+          .where((d) => d.primaryPlayer != null && d.type != null)
           .map((d) => CreateMatchEventCommand(
                 eventId: widget.matchId,
                 type: d.type!,
                 minute: d.minute,
                 teamId: widget.currentUserData.teamDetails!.id,
-                goalscorerUserId: d.primaryId!,
-                assistMakerUserId: d.secondaryId,
+                goalscorerUserId: d.primaryPlayer!.userId,
+                goalscorerExternalPlayerId: d.primaryPlayer!.externalPlayerId,
+                assistMakerUserId: d.secondaryPlayer?.userId,
+                assistMakerExternalPlayerId:
+                    d.secondaryPlayer?.externalPlayerId,
               ))
           .toList();
 
@@ -531,15 +526,15 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
               appTextStyles),
           _buildHeaderAvatarChip(
               _headerPrimaryKey,
-              _draft.primaryId != null
-                  ? _getInitials(getUserName(_draft.primaryId))
+              _draft.primaryPlayer != null
+                  ? _getInitials(_draft.primaryPlayer!.name)
                   : null,
               appColors,
               appTextStyles),
           _buildHeaderAvatarChip(
               _headerSecondaryKey,
-              _draft.secondaryId != null
-                  ? _getInitials(getUserName(_draft.secondaryId))
+              _draft.secondaryPlayer != null
+                  ? _getInitials(_draft.secondaryPlayer!.name)
                   : null,
               appColors,
               appTextStyles),
@@ -719,14 +714,14 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
         const SizedBox(height: 24),
         Expanded(
           child: ListView.builder(
-            itemCount: widget.squad.length,
+            itemCount: widget.players.length,
             itemBuilder: (context, index) {
-              final user = widget.squad[index];
+              final player = widget.players[index];
               final itemKey = GlobalKey();
-              final initials = _getInitials(user.name);
+              final initials = _getInitials(player.name);
               return _buildPlayerOption(
                 itemKey: itemKey,
-                user: user,
+                player: player,
                 appColors: appColors,
                 onTap: () {
                   // Capture specific avatar position relative to the whole item
@@ -740,7 +735,7 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
                       backgroundColor: appColors.offWhite,
                     ),
                     onComplete: () {
-                      setState(() => _draft.primaryId = user.id);
+                      setState(() => _draft.primaryPlayer = player);
                       if (getSecondaryLabel(_draft.type) != null) {
                         _onStepComplete(3);
                       }
@@ -761,8 +756,11 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
     }
 
     final filteredSquad = _draft.type == MatchEventType.substitution
-        ? widget.squad.where((u) => u.id != _draft.primaryId).toList()
-        : widget.squad;
+        ? widget.players
+            .where(
+                (player) => player.stableId != _draft.primaryPlayer?.stableId)
+            .toList()
+        : widget.players;
 
     return Column(
       children: [
@@ -771,12 +769,12 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
           child: ListView.builder(
             itemCount: filteredSquad.length,
             itemBuilder: (context, index) {
-              final user = filteredSquad[index];
+              final player = filteredSquad[index];
               final itemKey = GlobalKey();
-              final initials = _getInitials(user.name);
+              final initials = _getInitials(player.name);
               return _buildPlayerOption(
                 itemKey: itemKey,
-                user: user,
+                player: player,
                 appColors: appColors,
                 onTap: () {
                   _animateSelection(
@@ -789,7 +787,7 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
                       backgroundColor: appColors.offWhite,
                     ),
                     onComplete: () {
-                      setState(() => _draft.secondaryId = user.id);
+                      setState(() => _draft.secondaryPlayer = player);
                     },
                   );
                 },
@@ -803,7 +801,7 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
 
   Widget _buildPlayerOption({
     required GlobalKey itemKey,
-    required UserDetails user,
+    required MatchPlayer player,
     required AppColors appColors,
     required VoidCallback onTap,
   }) {
@@ -815,7 +813,7 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
         clipBehavior: Clip.antiAlias,
         child: PlayerListItem(
           key: itemKey,
-          name: user.name,
+          name: player.name,
           avatarBackgroundColor: appColors.offWhite,
           onTap: onTap,
         ),
@@ -856,7 +854,7 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(getUserName(event.primaryId),
+                      Text(event.primaryPlayer?.name ?? 'Ukendt spiller',
                           style: appTextStyles.caption
                               .copyWith(fontWeight: FontWeight.bold)),
                       Text(
@@ -883,8 +881,8 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
   Widget _buildBottomTray(AppColors appColors, AppTextStyles appTextStyles) {
     final isSubstitution = _draft.type == MatchEventType.substitution;
     final hasRequired = _draft.type != null &&
-        _draft.primaryId != null &&
-        (!isSubstitution || _draft.secondaryId != null);
+        _draft.primaryPlayer != null &&
+        (!isSubstitution || _draft.secondaryPlayer != null);
 
     return Container(
       padding: const EdgeInsets.all(16.0),

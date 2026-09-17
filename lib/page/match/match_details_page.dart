@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kopa/component/button/full_width_button.dart';
 import 'package:kopa/component/card/player_positions_card.dart';
 import 'package:kopa/component/dialog/lineup_visibility_confirmation_dialog.dart';
 import 'package:kopa/component/error_message.dart';
@@ -9,12 +10,14 @@ import 'package:kopa/component/loading_indicator.dart';
 import 'package:kopa/cubits/match_polls_cubit.dart';
 import 'package:kopa/helpers/date_helper.dart';
 import 'package:kopa/model/event_attendance_details.dart';
+import 'package:kopa/model/match_player.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/match_poll_details.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/model/user_vote.dart';
 import 'package:kopa/navigation/app_router.dart';
 import 'package:kopa/page/match/add_match_event_modal.dart';
+import 'package:kopa/page/match/add_external_player_dialog.dart';
 import 'package:kopa/page/match/lineup_editor_page.dart';
 import 'package:kopa/page/match/match_score_sheet.dart';
 import 'package:kopa/page/match/post_match_details_page.dart';
@@ -40,6 +43,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 enum _MatchRsvpState {
   pending,
+  awaitingSelection,
   attending,
   declined,
 }
@@ -56,6 +60,12 @@ _MatchRsvpState _matchRsvpStateFor(MatchDetails match, int userId) {
   if (match.isCurrentUserAttending == false ||
       currentUserAttendance?.isAttending == false) {
     return _MatchRsvpState.declined;
+  }
+
+  if (match.isCurrentUserAttending == true &&
+      match.usesTeamLeaderSelection &&
+      match.isCurrentUserSelected == null) {
+    return _MatchRsvpState.awaitingSelection;
   }
 
   if (match.isCurrentUserAttending == true ||
@@ -97,6 +107,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
   bool _isApprovingAllAttendances = false;
   bool _isUpdatingRegistration = false;
   bool _isUpdatingLineupVisibility = false;
+  bool _isAddingExternalPlayer = false;
   int? _homeGoals;
   int? _awayGoals;
   MatchDetailSegment _selectedSegment = MatchDetailSegment.overview;
@@ -195,10 +206,12 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       return const Center(child: Text('Ingen bruger fundet.'));
     }
 
+    final l10n = AppLocalizations.of(context)!;
     final matchDetails = data['matchDetails'] as MatchDetails;
     final squad = data['squad'] as List<UserDetails>;
     final hasBeenPlayed = matchDetails.hasMatchBeenPlayed;
-    final canManageResult = user.isTeamOwner;
+    final canManageTeam = user.canManageTeam;
+    final canManageResult = canManageTeam;
     final rsvpState = _matchRsvpStateFor(matchDetails, user.id);
     final bottomNavigationBar = widget.showBottomNavigationBar
         ? _buildMatchDetailsBottomNavigationBar(context)
@@ -228,6 +241,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         attendanceList: _buildAttendanceList(matchDetails, squad, user),
         onRefresh: _refreshMatchAndSquad,
         onAddEvent: () => addMatchEvent(user),
+        attendanceActionBar:
+            canManageTeam ? _buildExternalPlayerActionBar(matchDetails) : null,
         onSetMatchScore: () => setMatchScore(matchDetails),
         onCreateMatchPoll: () => _openCreateMatchPoll(matchDetails, squad),
         onEditMatchPoll: () => _openEditMatchPoll(matchDetails, squad),
@@ -244,8 +259,19 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       onSegmentChanged: _selectSegment,
       heroCard: heroCard,
       usePrematchLayout: true,
-      inlineResponseStatus: switch (rsvpState) {
+      attendanceHeader: switch (rsvpState) {
+        _MatchRsvpState.pending => _PrematchRsvpDecisionBar(
+            isSaving: _isUpdatingRegistration,
+            onAccept: () => _registerForMatch(matchDetails),
+            onDecline: () => _unregisterFromMatch(matchDetails),
+          ),
         _MatchRsvpState.attending => _PrematchRsvpInlineStatus(
+            isSaving: _isUpdatingRegistration,
+            onDecline: () => _unregisterFromMatch(matchDetails),
+          ),
+        _MatchRsvpState.awaitingSelection => _PrematchRsvpInlineStatus(
+            statusLabel: l10n.matchDetailsRsvpPendingSelection,
+            isPending: true,
             isSaving: _isUpdatingRegistration,
             onDecline: () => _unregisterFromMatch(matchDetails),
           ),
@@ -253,18 +279,10 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
             isSaving: _isUpdatingRegistration,
             onAccept: () => _registerForMatch(matchDetails),
           ),
-        _MatchRsvpState.pending => null,
       },
-      stickyActionBar: rsvpState == _MatchRsvpState.pending
-          ? _PrematchRsvpBar(
-              match: matchDetails,
-              currentUser: user,
-              isSaving: _isUpdatingRegistration,
-              onAccept: () => _registerForMatch(matchDetails),
-              onDecline: () => _unregisterFromMatch(matchDetails),
-            )
-          : null,
       bottomNavigationBar: bottomNavigationBar,
+      attendanceActionBar:
+          canManageTeam ? _buildExternalPlayerActionBar(matchDetails) : null,
       useParentBottomNavigationBar: !widget.showBottomNavigationBar,
       overviewTitle: 'Praktisk information',
       attendanceTitle: 'Tilmeldte spillere',
@@ -272,7 +290,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
           'Tilmeldte (${matchDetails.attendingAttendanceDetails.length})',
       showTimelineSegment: false,
       overviewWidgets: [
-        if (user.isTeamOwner && !matchDetails.hasFinalScore) ...[
+        if (canManageTeam && !matchDetails.hasFinalScore) ...[
           SizedBox(height: Spacing.lg),
           MatchResultActionCard(
             onPressed: () => setMatchScore(matchDetails),
@@ -282,7 +300,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       ],
       infoRows: _buildPracticalInfoRows(matchDetails),
       votingModule: null,
-      playerPositions: user.isTeamOwner || matchDetails.lineupVisible
+      playerPositions: canManageTeam || matchDetails.lineupVisible
           ? PlayerPositionsCard(
               playerCount: _teamPlayerCount(matchDetails, user),
               formation: matchDetails.formation,
@@ -292,10 +310,10 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
               // fallback from turning new registrations into starters.
               positionedPlayers: _lineupPositionedPlayers(matchDetails, user),
               preservePlayerOrder: true,
-              onEditFormation: user.isTeamOwner
+              onEditFormation: canManageTeam
                   ? () => _openLineupEditor(matchDetails, user)
                   : null,
-              onToggleVisibility: user.isTeamOwner
+              onToggleVisibility: canManageTeam
                   ? () => _toggleLineupVisibility(matchDetails)
                   : null,
               isVisibleToPlayers: matchDetails.lineupVisible,
@@ -333,6 +351,9 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       showTimelineSegment: false,
       bottomNavigationBar: widget.showBottomNavigationBar
           ? _buildMatchDetailsBottomNavigationBar(context)
+          : null,
+      attendanceActionBar: _currentUser?.canManageTeam == true
+          ? _buildExternalPlayerActionBar(match)
           : null,
       useParentBottomNavigationBar: !widget.showBottomNavigationBar,
     );
@@ -493,7 +514,9 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     final declined = match.declinedAttendanceDetails;
     final noRsvp = _membersWithoutRsvp(match, squad);
 
-    if (user.isTeamOwner && !match.hasMatchBeenPlayed) {
+    if (user.canManageTeam &&
+        match.usesTeamLeaderSelection &&
+        !match.hasMatchBeenPlayed) {
       return _buildLeaderAttendanceApprovalList(
         match,
         attending,
@@ -511,6 +534,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
                     ? 'Ikke udtaget'
                     : a.userDetails.email,
           )),
+      ..._buildExternalPlayersSection(match),
       ..._buildNoRsvpSection(noRsvp),
       ..._buildDeclinedAttendanceSection(declined),
     ];
@@ -600,6 +624,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
 
     widgets.addAll(_buildNoRsvpSection(noRsvp));
     widgets.addAll(_buildDeclinedAttendanceSection(declined));
+    widgets.addAll(_buildExternalPlayersSection(match));
 
     return widgets;
   }
@@ -656,6 +681,29 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
                 name: attendance.userDetails.name,
                 subtitle: 'Frameldt',
                 subtitleColor: colors.error,
+              ),
+            )
+            .toList(),
+      ),
+    ];
+  }
+
+  List<Widget> _buildExternalPlayersSection(MatchDetails match) {
+    final externalPlayers = match.externalPlayerDetailsList ?? const [];
+    if (externalPlayers.isEmpty) return const [];
+
+    final l10n = AppLocalizations.of(context)!;
+    return [
+      const SizedBox(height: Spacing.lg),
+      _AttendanceApprovalSection(
+        key: const ValueKey('external-player-attendance'),
+        title: '${l10n.externalPlayerLabel} (${externalPlayers.length})',
+        children: externalPlayers
+            .map(
+              (player) => PlayerListItem(
+                name: player.name,
+                subtitle: l10n.externalPlayerSubstitute,
+                trailing: const Icon(CupertinoIcons.person_add),
               ),
             )
             .toList(),
@@ -767,7 +815,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     return userTeamCount == 11 ? 11 : 7;
   }
 
-  List<UserDetails> _lineupPlayers(MatchDetails match) {
+  List<MatchPlayer> _lineupPlayers(MatchDetails match) {
     final attendances = match.attendanceDetailsList ?? [];
     final selected = attendances
         .where((attendance) =>
@@ -777,17 +825,23 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       ..sort(_compareLineupAttendance);
 
     final selectedUsers =
-        selected.map((attendance) => attendance.userDetails).toList();
+        selected.map((attendance) => MatchPlayer.user(attendance.userDetails));
+    final externalPlayers =
+        (match.externalPlayerDetailsList ?? const []).map(MatchPlayer.external);
 
-    if (selectedUsers.isNotEmpty) return selectedUsers;
+    if (selectedUsers.isNotEmpty) {
+      return [...selectedUsers, ...externalPlayers];
+    }
 
-    return attendances
-        .where((attendance) => attendance.isAttending)
-        .map((attendance) => attendance.userDetails)
-        .toList();
+    return [
+      ...attendances
+          .where((attendance) => attendance.isAttending)
+          .map((attendance) => MatchPlayer.user(attendance.userDetails)),
+      ...externalPlayers,
+    ];
   }
 
-  List<UserDetails?> _lineupPositionedPlayers(
+  List<MatchPlayer?> _lineupPositionedPlayers(
     MatchDetails match,
     UserDetails user,
   ) {
@@ -795,7 +849,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       match.formation,
       playerCount: _teamPlayerCount(match, user),
     );
-    final positioned = List<UserDetails?>.filled(formation.slots.length, null);
+    final positioned = List<MatchPlayer?>.filled(formation.slots.length, null);
 
     for (final attendance in match.attendanceDetailsList ?? []) {
       final slot = attendance.lineupSlot;
@@ -806,7 +860,14 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         continue;
       }
 
-      positioned[slot] = attendance.userDetails;
+      positioned[slot] = MatchPlayer.user(attendance.userDetails);
+    }
+
+    for (final externalPlayer in match.externalPlayerDetailsList ?? const []) {
+      final slot = externalPlayer.lineupSlot;
+      if (slot != null && slot >= 0 && slot < positioned.length) {
+        positioned[slot] = MatchPlayer.external(externalPlayer);
+      }
     }
 
     return positioned;
@@ -897,6 +958,52 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         });
       }
     }
+  }
+
+  Future<void> _addExternalPlayer(MatchDetails match) async {
+    if (_isAddingExternalPlayer) return;
+
+    final name = await showAddExternalPlayerDialog(context);
+    if (!mounted || name == null) return;
+
+    setState(() => _isAddingExternalPlayer = true);
+    try {
+      await MatchRepository.createExternalPlayer(match.id, name);
+      AppAnalytics.logEvent('match_external_player_added');
+      await _refreshMatchAndSquad();
+    } catch (error, stack) {
+      CrashReporting.logWebError(error, stack);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content:
+                  Text(AppLocalizations.of(context)!.externalPlayerAddFailed)),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isAddingExternalPlayer = false);
+    }
+  }
+
+  Widget _buildExternalPlayerActionBar(MatchDetails match) {
+    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final l10n = AppLocalizations.of(context)!;
+
+    return Padding(
+      key: const ValueKey('create-external-player-action-bar'),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      child: FullWidthButton(
+        key: const ValueKey('create-external-player'),
+        buttonText: l10n.externalPlayerCreateButton,
+        icon: CupertinoIcons.person_add,
+        variant: FullWidthButtonVariant.grass,
+        backgroundColor: colors.grass,
+        foregroundColor: colors.white,
+        onPressed: () => _addExternalPlayer(match),
+        enabled: !_isAddingExternalPlayer,
+        loading: _isAddingExternalPlayer,
+      ),
+    );
   }
 
   Future<void> _registerForMatch(MatchDetails match) async {
@@ -1019,11 +1126,18 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         throw Exception('Squad data is missing or invalid');
       }
       final squad = List<UserDetails>.from(squadRaw);
+      final match = data['matchDetails'] as MatchDetails;
+      final players = [
+        ...squad.map(MatchPlayer.user),
+        ...(match.externalPlayerDetailsList ?? const []).map(
+          MatchPlayer.external,
+        ),
+      ];
 
       await showAddMatchEventModal(
         context,
         widget.matchId,
-        squad,
+        players,
         currentUserData,
         _refreshMatchAndSquad,
       );
@@ -1098,40 +1212,6 @@ class _LocationMapsLink extends StatelessWidget {
   }
 }
 
-class _PrematchRsvpBar extends StatelessWidget {
-  final MatchDetails match;
-  final UserDetails currentUser;
-  final bool isSaving;
-  final VoidCallback onAccept;
-  final VoidCallback onDecline;
-
-  const _PrematchRsvpBar({
-    required this.match,
-    required this.currentUser,
-    required this.isSaving,
-    required this.onAccept,
-    required this.onDecline,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    switch (_matchRsvpStateFor(match, currentUser.id)) {
-      case _MatchRsvpState.pending:
-        return _PrematchRsvpDecisionBar(
-          isSaving: isSaving,
-          onAccept: onAccept,
-          onDecline: onDecline,
-        );
-      case _MatchRsvpState.attending:
-        // Attending users get the compact response status below the tabs.
-        return const SizedBox.shrink();
-      case _MatchRsvpState.declined:
-        // Declined users get the same inline treatment as attending users.
-        return const SizedBox.shrink();
-    }
-  }
-}
-
 class _PrematchRsvpDecisionBar extends StatelessWidget {
   final bool isSaving;
   final VoidCallback onAccept;
@@ -1149,7 +1229,7 @@ class _PrematchRsvpDecisionBar extends StatelessWidget {
     final styles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
 
-    return _PrematchStickySurface(
+    return _PrematchRsvpSurface(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1238,10 +1318,14 @@ class _PrematchRsvpChoiceBar extends StatelessWidget {
 
 class _PrematchRsvpInlineStatus extends StatelessWidget {
   final bool isSaving;
+  final String? statusLabel;
+  final bool isPending;
   final VoidCallback onDecline;
 
   const _PrematchRsvpInlineStatus({
     required this.isSaving,
+    this.statusLabel,
+    this.isPending = false,
     required this.onDecline,
   });
 
@@ -1250,29 +1334,33 @@ class _PrematchRsvpInlineStatus extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final styles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final statusColor =
+        isPending ? const Color(0xFF8A5A00) : const Color(0xFF00964E);
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFFE8F2ED),
+        color: isPending ? const Color(0xFFF8F0E4) : const Color(0xFFE8F2ED),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-          const Icon(
-            CupertinoIcons.checkmark_circle_fill,
-            color: Color(0xFF00964E),
+          Icon(
+            isPending
+                ? CupertinoIcons.clock_fill
+                : CupertinoIcons.checkmark_circle_fill,
+            color: statusColor,
             size: 18,
           ),
           const SizedBox(width: 8),
           Flexible(
             child: Text(
-              l10n.matchDetailsRsvpRegistered,
+              statusLabel ?? l10n.matchDetailsRsvpRegistered,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: styles.body3.copyWith(
-                color: const Color(0xFF00964E),
+                color: statusColor,
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
                 height: 18 / 14,
@@ -1454,10 +1542,10 @@ class _PrematchRsvpButton extends StatelessWidget {
   }
 }
 
-class _PrematchStickySurface extends StatelessWidget {
+class _PrematchRsvpSurface extends StatelessWidget {
   final Widget child;
 
-  const _PrematchStickySurface({required this.child});
+  const _PrematchRsvpSurface({required this.child});
 
   @override
   Widget build(BuildContext context) {

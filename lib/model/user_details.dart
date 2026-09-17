@@ -5,6 +5,7 @@ class UserDetails {
   final String name;
   final String email;
   final bool isTeamOwner;
+  final bool isAdmin;
   final int roleId;
   final DateTime? dateOfBirth;
   final String? position;
@@ -18,6 +19,7 @@ class UserDetails {
       required this.name,
       required this.email,
       required this.isTeamOwner,
+      this.isAdmin = false,
       required this.roleId,
       this.dateOfBirth,
       this.position,
@@ -32,6 +34,7 @@ class UserDetails {
       name: json['name'],
       email: json['email'],
       isTeamOwner: json['is_team_owner'],
+      isAdmin: json['is_admin'] ?? false,
       roleId: json['role_id'],
       dateOfBirth: json['date_of_birth'] == null
           ? null
@@ -47,6 +50,8 @@ class UserDetails {
           : UserOnboardingState.fromJson(json['onboarding_state']),
     );
   }
+
+  bool get canManageTeam => isTeamOwner || isAdmin;
 }
 
 class UserOnboardingState {

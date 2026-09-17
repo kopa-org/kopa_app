@@ -7,9 +7,11 @@ class MatchEventDetails {
   final MatchEventType type;
   final int? minute;
   final int teamId;
-  final int goalscorerUserId;
+  final int? goalscorerUserId;
+  final int? goalscorerExternalPlayerId;
   final String goalscorerUserName;
   final int? assistMakerUserId;
+  final int? assistMakerExternalPlayerId;
   final String? assistMakerUserName;
   final CardType? cardType;
 
@@ -19,9 +21,11 @@ class MatchEventDetails {
     required this.type,
     this.minute,
     required this.teamId,
-    required this.goalscorerUserId,
+    this.goalscorerUserId,
+    this.goalscorerExternalPlayerId,
     required this.goalscorerUserName,
     this.assistMakerUserId,
+    this.assistMakerExternalPlayerId,
     this.assistMakerUserName,
     this.cardType,
   });
@@ -34,8 +38,10 @@ class MatchEventDetails {
       minute: json['minute'],
       teamId: json['team_id'],
       goalscorerUserId: json['goalscorer_user_id'],
-      goalscorerUserName: json['goalscorer_user_name'],
+      goalscorerExternalPlayerId: json['goalscorer_external_player_id'],
+      goalscorerUserName: json['goalscorer_user_name'] ?? 'Ukendt spiller',
       assistMakerUserId: json['assist_maker_user_id'],
+      assistMakerExternalPlayerId: json['assist_maker_external_player_id'],
       assistMakerUserName: json['assist_maker_user_name'],
       cardType: json['card_type'] != null
           ? CardType.values.firstWhere((e) => e.wire == json['card_type'])

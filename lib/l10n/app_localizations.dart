@@ -182,6 +182,60 @@ abstract class AppLocalizations {
   /// **'Not registered'**
   String get matchDetailsRsvpDeclined;
 
+  /// No description provided for @matchDetailsRsvpPendingSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the team leader\'s selection'**
+  String get matchDetailsRsvpPendingSelection;
+
+  /// No description provided for @teamRsvpSelectionModeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Signup method'**
+  String get teamRsvpSelectionModeLabel;
+
+  /// No description provided for @teamRsvpSelectionModeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose whether players are automatically included or the team leader selects from the players who sign up.'**
+  String get teamRsvpSelectionModeDescription;
+
+  /// No description provided for @teamRsvpFirstComeOption.
+  ///
+  /// In en, this message translates to:
+  /// **'First come, first served'**
+  String get teamRsvpFirstComeOption;
+
+  /// No description provided for @teamRsvpLeaderOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Team leader selects'**
+  String get teamRsvpLeaderOption;
+
+  /// No description provided for @teamRsvpSelectionSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save signup method'**
+  String get teamRsvpSelectionSave;
+
+  /// No description provided for @teamRsvpSelectionSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving signup method...'**
+  String get teamRsvpSelectionSaving;
+
+  /// No description provided for @teamRsvpSelectionSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Signup method saved.'**
+  String get teamRsvpSelectionSaved;
+
+  /// No description provided for @teamSettingsOwnerOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Only a team owner or admin can change team settings.'**
+  String get teamSettingsOwnerOnly;
+
   /// No description provided for @matchScoreHome.
   ///
   /// In en, this message translates to:
@@ -331,6 +385,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose event'**
   String get matchEventChooseEvent;
+
+  /// No description provided for @externalPlayerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add external player'**
+  String get externalPlayerTitle;
+
+  /// No description provided for @externalPlayerNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Player name'**
+  String get externalPlayerNameHint;
+
+  /// No description provided for @externalPlayerAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get externalPlayerAdd;
+
+  /// No description provided for @externalPlayerCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get externalPlayerCancel;
+
+  /// No description provided for @externalPlayerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'External players'**
+  String get externalPlayerLabel;
+
+  /// No description provided for @externalPlayerCreateButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Create external player'**
+  String get externalPlayerCreateButton;
+
+  /// No description provided for @externalPlayerSubstitute.
+  ///
+  /// In en, this message translates to:
+  /// **'External player · On the bench'**
+  String get externalPlayerSubstitute;
+
+  /// No description provided for @externalPlayerAddFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The external player could not be added. Please try again.'**
+  String get externalPlayerAddFailed;
 
   /// No description provided for @matchTimelineKickoff.
   ///

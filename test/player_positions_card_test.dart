@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kopa/component/card/player_positions_card.dart';
 import 'package:kopa/model/user_details.dart';
+import 'package:kopa/model/match_player.dart';
 import 'package:kopa/theme/app_theme.dart';
 
 void main() {
@@ -19,7 +20,7 @@ void main() {
           body: PlayerPositionsCard(
             playerCount: 7,
             formation: '2-3-1',
-            players: [_user(id: 1, name: 'Nicklas Hansen')],
+            players: [_player(id: 1, name: 'Nicklas Hansen')],
             onToggleVisibility: () {},
           ),
         ),
@@ -47,8 +48,16 @@ void main() {
           body: PlayerPositionsCard(
             playerCount: 7,
             formation: '2-3-1',
-            players: [nicklas],
-            positionedPlayers: [null, null, null, nicklas, null, null, null],
+            players: [MatchPlayer.user(nicklas)],
+            positionedPlayers: [
+              null,
+              null,
+              null,
+              MatchPlayer.user(nicklas),
+              null,
+              null,
+              null,
+            ],
             preservePlayerOrder: true,
           ),
         ),
@@ -79,7 +88,7 @@ void main() {
                 return PlayerPositionsCard(
                   playerCount: 7,
                   formation: '2-3-1',
-                  players: [_user(id: 1, name: 'Nicklas Hansen')],
+                  players: [_player(id: 1, name: 'Nicklas Hansen')],
                   isVisibleToPlayers: visible,
                   onToggleVisibility: () {
                     setState(() {
@@ -125,4 +134,8 @@ UserDetails _user({
     updatedAt: now,
     teamDetails: null,
   );
+}
+
+MatchPlayer _player({required int id, required String name}) {
+  return MatchPlayer.user(_user(id: id, name: name));
 }

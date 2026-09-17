@@ -34,9 +34,10 @@ class MatchDetailTemplate extends StatelessWidget {
   final String timelineEmptyMessage;
   final bool showTimelineSegment;
   final bool usePrematchLayout;
-  final Widget? inlineResponseStatus;
+  final Widget? attendanceHeader;
   final Widget? stickyActionBar;
   final Widget? bottomNavigationBar;
+  final Widget? attendanceActionBar;
   final bool useParentBottomNavigationBar;
 
   const MatchDetailTemplate({
@@ -62,9 +63,10 @@ class MatchDetailTemplate extends StatelessWidget {
     this.timelineEmptyMessage = 'Ingen begivenheder registreret.',
     this.showTimelineSegment = true,
     this.usePrematchLayout = false,
-    this.inlineResponseStatus,
+    this.attendanceHeader,
     this.stickyActionBar,
     this.bottomNavigationBar,
+    this.attendanceActionBar,
     this.useParentBottomNavigationBar = false,
   });
 
@@ -90,12 +92,19 @@ class MatchDetailTemplate extends StatelessWidget {
     final contentBottomPadding = useParentBottomNavigationBar
         ? mainTabBottomContentPadding(context)
         : 0.0;
+    final showAttendanceActionBar = attendanceActionBar != null &&
+        _effectiveSelectedSegment == MatchDetailSegment.attendance;
+    const attendanceActionBarHeight = 80.0;
+    final actionBarBottomPadding =
+        showAttendanceActionBar ? attendanceActionBarHeight : 0.0;
+    final stickyActionBarBottom = contentBottomPadding + actionBarBottomPadding;
     final bottomPadding = (usePrematchLayout
             ? stickyActionBar == null
                 ? 32.0
                 : 144.0
             : 32.0) +
-        contentBottomPadding;
+        contentBottomPadding +
+        actionBarBottomPadding;
 
     return Stack(
       fit: StackFit.expand,
@@ -110,10 +119,6 @@ class MatchDetailTemplate extends StatelessWidget {
               SizedBox(height: segmentSpacing),
               _buildSegmentedControl(context),
               SizedBox(height: segmentSpacing),
-              if (inlineResponseStatus != null) ...[
-                inlineResponseStatus!,
-                const SizedBox(height: 16),
-              ],
               ..._buildSelectedSegment(context),
             ],
           ),
@@ -122,8 +127,15 @@ class MatchDetailTemplate extends StatelessWidget {
           Positioned(
             left: 0,
             right: 0,
-            bottom: 0,
+            bottom: stickyActionBarBottom,
             child: stickyActionBar!,
+          ),
+        if (showAttendanceActionBar)
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: contentBottomPadding,
+            child: attendanceActionBar!,
           ),
       ],
     );
@@ -223,6 +235,10 @@ class MatchDetailTemplate extends StatelessWidget {
         ];
       case MatchDetailSegment.attendance:
         return [
+          if (attendanceHeader != null) ...[
+            attendanceHeader!,
+            const SizedBox(height: 16),
+          ],
           if (attendanceList.isEmpty)
             _EmptySegmentMessage(message: attendanceEmptyMessage)
           else
@@ -339,9 +355,11 @@ class _MatchDetailsHeader extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 14),
-          Text(
-            'Kampdetaljer',
-            style: styles.h5.copyWith(fontWeight: FontWeight.w800),
+          Expanded(
+            child: Text(
+              'Kampdetaljer',
+              style: styles.h5.copyWith(fontWeight: FontWeight.w800),
+            ),
           ),
         ],
       ),

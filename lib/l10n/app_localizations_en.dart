@@ -52,6 +52,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get matchDetailsRsvpDeclined => 'Not registered';
 
   @override
+  String get matchDetailsRsvpPendingSelection =>
+      'Waiting for the team leader\'s selection';
+
+  @override
+  String get teamRsvpSelectionModeLabel => 'Signup method';
+
+  @override
+  String get teamRsvpSelectionModeDescription =>
+      'Choose whether players are automatically included or the team leader selects from the players who sign up.';
+
+  @override
+  String get teamRsvpFirstComeOption => 'First come, first served';
+
+  @override
+  String get teamRsvpLeaderOption => 'Team leader selects';
+
+  @override
+  String get teamRsvpSelectionSave => 'Save signup method';
+
+  @override
+  String get teamRsvpSelectionSaving => 'Saving signup method...';
+
+  @override
+  String get teamRsvpSelectionSaved => 'Signup method saved.';
+
+  @override
+  String get teamSettingsOwnerOnly =>
+      'Only a team owner or admin can change team settings.';
+
+  @override
   String get matchScoreHome => 'Home';
 
   @override
@@ -128,6 +158,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get matchEventChooseEvent => 'Choose event';
+
+  @override
+  String get externalPlayerTitle => 'Add external player';
+
+  @override
+  String get externalPlayerNameHint => 'Player name';
+
+  @override
+  String get externalPlayerAdd => 'Add';
+
+  @override
+  String get externalPlayerCancel => 'Cancel';
+
+  @override
+  String get externalPlayerLabel => 'External players';
+
+  @override
+  String get externalPlayerCreateButton => 'Create external player';
+
+  @override
+  String get externalPlayerSubstitute => 'External player · On the bench';
+
+  @override
+  String get externalPlayerAddFailed =>
+      'The external player could not be added. Please try again.';
 
   @override
   String get matchTimelineKickoff => 'Kick-off';

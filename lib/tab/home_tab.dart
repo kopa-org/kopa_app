@@ -823,7 +823,7 @@ class _HeroTeamPanel extends StatelessWidget {
                                   'VS',
                                   textAlign: TextAlign.center,
                                   style: appTextStyles.h5.copyWith(
-                                    color: appColors.grass,
+                                    color: appColors.dirt,
                                     fontWeight: FontWeight.w800,
                                   ),
                                 ),

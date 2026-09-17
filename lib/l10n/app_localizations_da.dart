@@ -52,6 +52,35 @@ class AppLocalizationsDa extends AppLocalizations {
   String get matchDetailsRsvpDeclined => 'Ikke tilmeldt';
 
   @override
+  String get matchDetailsRsvpPendingSelection => 'Afventer holdlederens valg';
+
+  @override
+  String get teamRsvpSelectionModeLabel => 'Tilmeldingsmetode';
+
+  @override
+  String get teamRsvpSelectionModeDescription =>
+      'Vælg om spillere automatisk er med, eller om holdlederen vælger blandt dem, der melder sig.';
+
+  @override
+  String get teamRsvpFirstComeOption => 'Først til mølle';
+
+  @override
+  String get teamRsvpLeaderOption => 'Holdlederen vælger';
+
+  @override
+  String get teamRsvpSelectionSave => 'Gem tilmeldingsmetode';
+
+  @override
+  String get teamRsvpSelectionSaving => 'Gemmer tilmeldingsmetode...';
+
+  @override
+  String get teamRsvpSelectionSaved => 'Tilmeldingsmetoden er gemt.';
+
+  @override
+  String get teamSettingsOwnerOnly =>
+      'Kun en holdleder eller administrator kan ændre holdindstillinger.';
+
+  @override
   String get matchScoreHome => 'Hjemme';
 
   @override
@@ -127,6 +156,31 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String get matchEventChooseEvent => 'Vælg begivenhed';
+
+  @override
+  String get externalPlayerTitle => 'Tilføj lånespiller';
+
+  @override
+  String get externalPlayerNameHint => 'Navn på spiller';
+
+  @override
+  String get externalPlayerAdd => 'Tilføj';
+
+  @override
+  String get externalPlayerCancel => 'Annuller';
+
+  @override
+  String get externalPlayerLabel => 'Lånespillere';
+
+  @override
+  String get externalPlayerCreateButton => 'Opret lånespiller';
+
+  @override
+  String get externalPlayerSubstitute => 'Lånespiller · På bænken';
+
+  @override
+  String get externalPlayerAddFailed =>
+      'Lånespilleren kunne ikke tilføjes. Prøv igen.';
 
   @override
   String get matchTimelineKickoff => 'Kampstart';

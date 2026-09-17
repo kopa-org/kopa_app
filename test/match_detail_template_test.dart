@@ -47,6 +47,51 @@ void main() {
     expect(tester.getTopLeft(header).dy, lessThan(initialTop));
   });
 
+  testWidgets('attendance action is fixed and absent from the header',
+      (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MatchDetailTemplate(
+          selectedSegment: MatchDetailSegment.attendance,
+          heroCard: const SizedBox(height: 1),
+          attendanceList: [
+            for (var i = 0; i < 20; i++)
+              SizedBox(height: 64, child: Text('Player $i')),
+          ],
+          attendanceActionBar: const SizedBox(
+            key: ValueKey('create-external-player-action-bar'),
+            height: 80,
+            child: Text('Opret lånespiller'),
+          ),
+        ),
+      ),
+    );
+
+    final actionBar =
+        find.byKey(const ValueKey('create-external-player-action-bar'));
+    expect(
+      find.byKey(const ValueKey('add-external-player')),
+      findsNothing,
+    );
+    expect(actionBar, findsOneWidget);
+
+    final initialActionBottom = tester.getRect(actionBar).bottom;
+    await tester.drag(
+      find.byType(SingleChildScrollView),
+      const Offset(0, -300),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.getRect(actionBar).bottom,
+      closeTo(initialActionBottom, 0.1),
+    );
+    expect(
+      find.text('Opret lånespiller'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('match details segments use the underline design',
       (tester) async {
     MatchDetailSegment? selected;
@@ -99,18 +144,19 @@ void main() {
     expect(selected, MatchDetailSegment.attendance);
   });
 
-  testWidgets('prematch response status sits above content and nav',
+  testWidgets('prematch response content belongs to the attendance segment',
       (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: MatchDetailTemplate(
+          selectedSegment: MatchDetailSegment.attendance,
           heroCard: const SizedBox(height: 1),
           usePrematchLayout: true,
-          inlineResponseStatus: Container(
-            key: const ValueKey('inline-response-status'),
+          attendanceHeader: Container(
+            key: const ValueKey('attendance-rsvp-content'),
             height: 38,
           ),
-          infoRows: const [SizedBox(height: 20)],
+          attendanceList: const [Text('Attending Player')],
           bottomNavigationBar: const SizedBox(
             key: ValueKey('match-details-bottom-navigation'),
             height: 72,
@@ -119,16 +165,38 @@ void main() {
       ),
     );
 
-    final responseStatus = find.byKey(const ValueKey('inline-response-status'));
-    final practicalTitle = find.text('Praktisk information');
+    final responseStatus =
+        find.byKey(const ValueKey('attendance-rsvp-content'));
+    final attendancePlayer = find.text('Attending Player');
+    final attendanceSegment =
+        find.byKey(const ValueKey('match-details-segment-attendance'));
     final navigation =
         find.byKey(const ValueKey('match-details-bottom-navigation'));
 
     expect(
       tester.getTopLeft(responseStatus).dy,
-      lessThan(tester.getTopLeft(practicalTitle).dy),
+      greaterThan(tester.getRect(attendanceSegment).bottom),
+    );
+    expect(
+      tester.getTopLeft(responseStatus).dy,
+      lessThan(tester.getTopLeft(attendancePlayer).dy),
     );
     expect(tester.getSize(navigation).height, 72);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MatchDetailTemplate(
+          heroCard: const SizedBox(height: 1),
+          usePrematchLayout: true,
+          attendanceHeader: Container(
+            key: const ValueKey('attendance-rsvp-content'),
+            height: 38,
+          ),
+        ),
+      ),
+    );
+
+    expect(responseStatus, findsNothing);
   });
 
   testWidgets('match details layout supports the iOS refresh scaffold',

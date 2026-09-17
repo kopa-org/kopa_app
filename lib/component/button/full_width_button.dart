@@ -11,6 +11,8 @@ class FullWidthButton extends StatelessWidget {
   final bool loading;
   final IconData? icon;
   final FullWidthButtonVariant variant;
+  final Color? backgroundColor;
+  final Color? foregroundColor;
 
   const FullWidthButton({
     super.key,
@@ -21,6 +23,8 @@ class FullWidthButton extends StatelessWidget {
     this.loading = false,
     this.icon = Icons.arrow_forward,
     this.variant = FullWidthButtonVariant.grass,
+    this.backgroundColor,
+    this.foregroundColor,
   });
 
   @override
@@ -33,6 +37,8 @@ class FullWidthButton extends StatelessWidget {
       loading: loading,
       icon: icon,
       width: double.infinity,
+      backgroundColor: backgroundColor,
+      foregroundColor: foregroundColor,
       variant: variant == FullWidthButtonVariant.sky
           ? ButtonVariant.secondary
           : ButtonVariant.primary,

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/avatar/team_badge_label.dart';
 import 'package:kopa/component/chip/match_result_badge.dart';
+import 'package:kopa/component/match/match_result_reminder.dart';
 import 'package:kopa/helpers/date_helper.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/team_logo_design.dart';
@@ -16,6 +17,7 @@ class AllGamesCard extends StatelessWidget {
   final String? ownTeamName;
   final TeamLogoDesign? ownTeamLogoDesign;
   final int? currentUserId;
+  final bool canManageTeam;
 
   const AllGamesCard({
     required this.matches,
@@ -24,6 +26,7 @@ class AllGamesCard extends StatelessWidget {
     this.ownTeamName,
     this.ownTeamLogoDesign,
     this.currentUserId,
+    this.canManageTeam = false,
     super.key,
   });
 
@@ -40,6 +43,7 @@ class AllGamesCard extends StatelessWidget {
       ownTeamName: resolvedOwnTeamName,
       ownTeamLogoDesign: ownTeamLogoDesign,
       currentUserId: currentUserId,
+      canManageTeam: canManageTeam,
     );
   }
 }
@@ -51,6 +55,7 @@ class _MatchList extends StatelessWidget {
   final String? ownTeamName;
   final TeamLogoDesign? ownTeamLogoDesign;
   final int? currentUserId;
+  final bool canManageTeam;
 
   const _MatchList({
     required this.matches,
@@ -59,6 +64,7 @@ class _MatchList extends StatelessWidget {
     this.ownTeamName,
     this.ownTeamLogoDesign,
     this.currentUserId,
+    required this.canManageTeam,
   });
 
   @override
@@ -72,6 +78,7 @@ class _MatchList extends StatelessWidget {
           ownTeamName: ownTeamName,
           ownTeamLogoDesign: ownTeamLogoDesign,
           currentUserId: currentUserId,
+          canManageTeam: canManageTeam,
         );
         final itemKey = matchItemKeys?[entry.$2.id];
 
@@ -80,7 +87,7 @@ class _MatchList extends StatelessWidget {
           yield const SizedBox(height: Spacing.sm);
         }
         if (entry.$1 == matches.length - 1) {
-          yield const SizedBox(height: Spacing.lg*3);
+          yield const SizedBox(height: Spacing.lg * 3);
         }
       }).toList(),
     );
@@ -93,6 +100,7 @@ class _GameResultRow extends StatelessWidget {
   final String? ownTeamName;
   final TeamLogoDesign? ownTeamLogoDesign;
   final int? currentUserId;
+  final bool canManageTeam;
 
   const _GameResultRow({
     required this.match,
@@ -100,6 +108,7 @@ class _GameResultRow extends StatelessWidget {
     required this.ownTeamName,
     required this.ownTeamLogoDesign,
     required this.currentUserId,
+    required this.canManageTeam,
   });
 
   @override
@@ -192,6 +201,12 @@ class _GameResultRow extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
+                  if (canManageTeam)
+                    MatchResultReminderButton(
+                      match: match,
+                      onPressed: onTap,
+                    ),
+                  if (canManageTeam) const SizedBox(width: 4),
                   Container(
                     width: 36,
                     height: 36,

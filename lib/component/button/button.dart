@@ -13,6 +13,8 @@ class Button extends StatelessWidget {
   final IconData? icon;
   final double? width;
   final ButtonVariant variant;
+  final Color? backgroundColor;
+  final Color? foregroundColor;
 
   const Button({
     super.key,
@@ -24,6 +26,8 @@ class Button extends StatelessWidget {
     this.icon,
     this.width,
     this.variant = ButtonVariant.primary,
+    this.backgroundColor,
+    this.foregroundColor,
   });
 
   @override
@@ -32,15 +36,17 @@ class Button extends StatelessWidget {
     final colors = theme.extension<AppColors>() ?? AppColors.light;
     final styles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
     final role = outlined ? ButtonVariant.secondary : variant;
-    final foreground = role == ButtonVariant.destructive
-        ? colors.errorForeground
-        : colors.dirt;
-    final background = switch (role) {
-      ButtonVariant.primary => colors.lightGrass,
-      ButtonVariant.secondary => colors.surface,
-      ButtonVariant.tertiary => Colors.transparent,
-      ButtonVariant.destructive => colors.errorSurface,
-    };
+    final foreground = foregroundColor ??
+        (role == ButtonVariant.destructive
+            ? colors.errorForeground
+            : colors.dirt);
+    final background = backgroundColor ??
+        switch (role) {
+          ButtonVariant.primary => colors.lightGrass,
+          ButtonVariant.secondary => colors.surface,
+          ButtonVariant.tertiary => Colors.transparent,
+          ButtonVariant.destructive => colors.errorSurface,
+        };
 
     return SizedBox(
       width: width,

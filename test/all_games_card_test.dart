@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:kopa/component/card/all_games_card.dart';
 import 'package:kopa/component/chip/match_result_badge.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/model/event_attendance_details.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/theme/app_colors.dart';
@@ -107,6 +108,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        locale: const Locale('da'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         theme: ThemeData(
           extensions: <ThemeExtension<dynamic>>[
             AppColors.light,
@@ -130,6 +134,43 @@ void main() {
       tester.widget<Text>(find.text('Frameldt')).style?.color,
       AppColors.light.errorForeground,
     );
+  });
+
+  testWidgets('shows overdue result reminder for team managers',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final overdueMatch = _match(
+      id: 9,
+      date: DateTime.now().subtract(const Duration(hours: 2)),
+      homeTeam: 'Kopa IF',
+      awayTeam: 'Fremad',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('da'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        theme: ThemeData(
+          extensions: <ThemeExtension<dynamic>>[
+            AppColors.light,
+            AppTextStyles.light,
+          ],
+        ),
+        home: Scaffold(
+          body: AllGamesCard(
+            matches: [overdueMatch],
+            canManageTeam: true,
+            onMatchTap: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    final icon = tester.widget<Icon>(find.byIcon(Icons.info_outline));
+    expect(icon.color, AppColors.light.sun);
   });
 
   testWidgets('uses shared title-case typography for match status chips',

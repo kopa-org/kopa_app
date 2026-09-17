@@ -74,7 +74,7 @@ class MatchHeroCard extends StatelessWidget {
                     child: Text(
                       'VS',
                       style: appTextStyles.h5.copyWith(
-                        color: appColors.grass,
+                        color: appColors.dirt,
                         fontWeight: FontWeight.w900,
                       ),
                     ),

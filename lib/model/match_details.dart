@@ -1,11 +1,14 @@
 import 'package:kopa/model/match_event_details.dart';
 import 'package:kopa/model/match_poll_details.dart';
 import 'package:kopa/model/event_attendance_details.dart';
+import 'package:kopa/model/external_player_details.dart';
 import 'package:kopa/model/player_rating_summary.dart';
 import 'package:kopa/model/user_details.dart';
 
 class MatchDetails {
   static const Duration resultReminderDelay = Duration(minutes: 30);
+  static const String firstComeFirstServed = 'first_come_first_served';
+  static const String teamLeaderSelection = 'team_leader_selection';
 
   final int id;
   final String type;
@@ -27,11 +30,13 @@ class MatchDetails {
   final int registeredCount;
   final int unavailableCount;
   final int teamPlayerCount;
+  final String rsvpSelectionMode;
   final String formation;
   final bool lineupVisible;
   final double? latitude;
   final double? longitude;
   final List<EventAttendanceDetails>? attendanceDetailsList;
+  final List<ExternalPlayerDetails>? externalPlayerDetailsList;
   final List<MatchEventDetails>? matchEventDetailsList;
   final List<PlayerRatingSummary>? playerRatingDetailsList;
 
@@ -56,11 +61,13 @@ class MatchDetails {
     this.registeredCount = 0,
     this.unavailableCount = 0,
     this.teamPlayerCount = 7,
+    this.rsvpSelectionMode = firstComeFirstServed,
     this.formation = '2-3-1',
     this.lineupVisible = false,
     this.latitude,
     this.longitude,
     this.attendanceDetailsList = const [],
+    this.externalPlayerDetailsList = const [],
     this.matchEventDetailsList = const [],
     this.playerRatingDetailsList = const [],
   });
@@ -89,6 +96,8 @@ class MatchDetails {
       registeredCount: json['registered_count'] ?? 0,
       unavailableCount: json['unavailable_count'] ?? 0,
       teamPlayerCount: json['team_player_count'] ?? 7,
+      rsvpSelectionMode:
+          json['rsvp_selection_mode'] as String? ?? firstComeFirstServed,
       formation: json['formation'] ?? '2-3-1',
       lineupVisible: json['lineup_visible'] ?? false,
       latitude: (json['latitude'] as num?)?.toDouble(),
@@ -96,6 +105,11 @@ class MatchDetails {
       attendanceDetailsList: json['attendance_details_list'] != null
           ? List<EventAttendanceDetails>.from(json['attendance_details_list']
               .map((x) => EventAttendanceDetails.fromJson(x)))
+          : [],
+      externalPlayerDetailsList: json['external_player_details_list'] != null
+          ? List<ExternalPlayerDetails>.from(
+              json['external_player_details_list']
+                  .map((x) => ExternalPlayerDetails.fromJson(x)))
           : [],
       matchEventDetailsList: json['match_event_details_list'] != null
           ? List<MatchEventDetails>.from(json['match_event_details_list']
@@ -116,6 +130,8 @@ class MatchDetails {
     return homeTeamScore != null && awayTeamScore != null;
   }
 
+  bool get usesTeamLeaderSelection => rsvpSelectionMode == teamLeaderSelection;
+
   bool get hasMatchBeenPlayed => hasFinalScore;
 
   bool shouldPromptForResultAt(DateTime now) {
@@ -125,7 +141,7 @@ class MatchDetails {
   bool canSetFinalScore(UserDetails user, {DateTime? now}) {
     // Keep the optional clock for callers that provide deterministic timing;
     // result entry is intentionally not gated by it.
-    return user.isTeamOwner && !hasFinalScore;
+    return user.canManageTeam && !hasFinalScore;
   }
 
   List<EventAttendanceDetails> get attendingAttendanceDetails {
