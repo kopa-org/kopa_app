@@ -1,0 +1,113 @@
+name: iOS TestFlight (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Select enabled only when you intend to upload to TestFlight
+        required: true
+        type: choice
+        options:
+          - disabled
+          - enabled
+        default: disabled
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-testflight
+  cancel-in-progress: false
+
+jobs:
+  testflight:
+    if: ${{ inputs.publish == 'enabled' }}
+    runs-on: macos-15
+    environment: testflight
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Show tool versions
+        run: |
+          flutter --version
+          xcodebuild -version
+
+      - name: Restore environment files
+        shell: bash
+        env:
+          KOPA_ENV_LOCAL: ${{ secrets.KOPA_ENV_LOCAL }}
+          KOPA_ENV_DEPLOY: ${{ secrets.KOPA_ENV_DEPLOY }}
+        run: |
+          set -euo pipefail
+          test -n "$KOPA_ENV_LOCAL"
+          test -n "$KOPA_ENV_DEPLOY"
+          printf '%s' "$KOPA_ENV_LOCAL" > .env.local
+          printf '%s' "$KOPA_ENV_DEPLOY" > .env.deploy
+
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      - name: Install CocoaPods dependencies
+        working-directory: ios
+        run: pod install
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test --no-pub
+
+      - name: Import Apple Distribution certificate
+        uses: apple-actions/import-codesign-certs@v7
+        with:
+          p12-file-base64: ${{ secrets.APPSTORE_CERTIFICATES_FILE_BASE64 }}
+          p12-password: ${{ secrets.APPSTORE_CERTIFICATES_PASSWORD }}
+
+      - name: Download App Store provisioning profile
+        uses: apple-actions/download-provisioning-profiles@v6
+        with:
+          bundle-id: dk.kopa.app
+          profile-type: IOS_APP_STORE
+          issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+
+      - name: Set unique build number
+        shell: bash
+        run: echo "BUILD_NUMBER=$((1000 + GITHUB_RUN_NUMBER))" >> "$GITHUB_ENV"
+
+      - name: Build IPA
+        run: |
+          flutter build ipa \
+            --release \
+            --no-pub \
+            --build-number "$BUILD_NUMBER" \
+            --export-method app-store
+
+      - name: Locate IPA
+        id: ipa
+        shell: bash
+        run: |
+          set -euo pipefail
+          ipa_path="$(find build/ios/ipa -maxdepth 1 -type f -name '*.ipa' -print -quit)"
+          test -n "$ipa_path"
+          echo "path=$ipa_path" >> "$GITHUB_OUTPUT"
+
+      - name: Upload to TestFlight
+        uses: apple-actions/upload-testflight-build@v5
+        with:
+          app-path: ${{ steps.ipa.outputs.path }}
+          app-type: ios
+          issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+          wait-for-processing: 'false'

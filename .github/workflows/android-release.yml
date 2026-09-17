@@ -1,0 +1,103 @@
+name: Android release (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      build:
+        description: Select enabled only when you intend to build a signed AAB
+        required: true
+        type: choice
+        options:
+          - disabled
+          - enabled
+        default: disabled
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-release
+  cancel-in-progress: false
+
+jobs:
+  android:
+    if: ${{ inputs.build == 'enabled' }}
+    runs-on: ubuntu-24.04
+    environment: play-store
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Restore environment files
+        shell: bash
+        env:
+          KOPA_ENV_LOCAL: ${{ secrets.KOPA_ENV_LOCAL }}
+          KOPA_ENV_DEPLOY: ${{ secrets.KOPA_ENV_DEPLOY }}
+        run: |
+          set -euo pipefail
+          test -n "$KOPA_ENV_LOCAL"
+          test -n "$KOPA_ENV_DEPLOY"
+          printf '%s' "$KOPA_ENV_LOCAL" > .env.local
+          printf '%s' "$KOPA_ENV_DEPLOY" > .env.deploy
+
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test --no-pub
+
+      - name: Restore Android upload signing
+        shell: bash
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          test -n "$ANDROID_KEYSTORE_BASE64"
+          test -n "$ANDROID_KEYSTORE_PASSWORD"
+          test -n "$ANDROID_KEY_ALIAS"
+          test -n "$ANDROID_KEY_PASSWORD"
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/upload-keystore.jks
+          test -s android/upload-keystore.jks
+          printf 'storePassword=%s\nkeyPassword=%s\nkeyAlias=%s\nstoreFile=upload-keystore.jks\n' \
+            "$ANDROID_KEYSTORE_PASSWORD" \
+            "$ANDROID_KEY_PASSWORD" \
+            "$ANDROID_KEY_ALIAS" > android/key.properties
+
+      - name: Set unique build number
+        shell: bash
+        run: echo "BUILD_NUMBER=$((1000 + GITHUB_RUN_NUMBER))" >> "$GITHUB_ENV"
+
+      - name: Build Android App Bundle
+        run: |
+          flutter build appbundle \
+            --release \
+            --no-pub \
+            --build-number "$BUILD_NUMBER"
+
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kopa-android-aab-${{ github.run_number }}
+          path: build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          retention-days: 14
