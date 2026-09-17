@@ -3,13 +3,14 @@ name: Android release (manual)
 on:
   workflow_dispatch:
     inputs:
-      build:
-        description: Select enabled only when you intend to build a signed AAB
+      mode:
+        description: Choose whether to build only or publish to closed testing
         required: true
         type: choice
         options:
           - disabled
-          - enabled
+          - build-only
+          - closed-test
         default: disabled
 
 permissions:
@@ -21,7 +22,7 @@ concurrency:
 
 jobs:
   android:
-    if: ${{ inputs.build == 'enabled' }}
+    if: ${{ inputs.mode != 'disabled' }}
     runs-on: ubuntu-24.04
     environment: play-store
     timeout-minutes: 30
@@ -101,3 +102,13 @@ jobs:
           path: build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error
           retention-days: 14
+
+      - name: Upload to Google Play closed testing
+        if: ${{ inputs.mode == 'closed-test' }}
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: dk.kopa.app
+          releaseFiles: build/app/outputs/bundle/release/app-release.aab
+          tracks: closed
+          status: completed

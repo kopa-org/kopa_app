@@ -4,8 +4,8 @@ The repository now contains two deliberately manual-only workflows:
 
 - `.github/workflows/ios-testflight.yml` builds and uploads iOS to TestFlight.
 - `.github/workflows/android-release.yml` builds a signed Android App Bundle
-  and stores it as a GitHub Actions artifact. It does not publish to Google
-  Play yet.
+  and stores it as a GitHub Actions artifact. When started in `closed-test`
+  mode, it also publishes the bundle to the Google Play closed testing track.
 
 Neither workflow runs on pushes or pull requests. Both default to `disabled`
 when started manually. The iOS workflow also uses the protected `testflight`
@@ -69,16 +69,16 @@ The keystore secret must be the upload keystore that Google Play already
 accepts for this app. Do not create a replacement keystore casually; losing the
 correct upload key can prevent future uploads.
 
-For the future Google Play upload step, also create this secret:
+Additional secret for `closed-test` publishing:
 
 ```text
 GOOGLE_PLAY_SERVICE_ACCOUNT_JSON
 ```
 
-It should contain the complete JSON key for a Google Cloud service account
-that has been invited in Play Console with only the permissions needed to
-upload releases. The current Android workflow intentionally does not consume
-this secret yet.
+`GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` should contain the complete, raw JSON key
+for a Google Cloud service account that has been invited in Play Console with
+the permission to release apps to testing tracks. The workflow consumes this
+secret only when started in `closed-test` mode.
 
 ## Preparing the secret values
 
@@ -106,9 +106,14 @@ the Runner Release configuration should use the matching Apple Distribution
 certificate and App Store provisioning profile. The downloaded profile should
 match the bundle ID and the Release signing settings.
 
-## Future Google Play upload
+## Android workflow modes
 
-After the signed artifact has been validated manually, add an upload step using
-the `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` secret and target the `internal` track
-first. Publishing to production should remain a separate, explicitly approved
-operation.
+When starting **Android release (manual)** from the Actions tab, choose:
+
+- `disabled`: skip the job.
+- `build-only`: build and retain the signed AAB artifact without publishing it.
+- `closed-test`: build and upload the AAB to the Google Play `closed` track.
+
+The workflow does not publish to production. The app/package must already exist
+in Play Console for `dk.kopa.app`; if Google Play reports “Package not found”,
+complete the initial app setup or first manual upload in Play Console.
