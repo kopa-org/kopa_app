@@ -121,6 +121,10 @@ class MatchDetailTemplate extends StatelessWidget {
             children: [
               const _MatchDetailsHeader(),
               heroCard,
+              if (attendanceHeader != null) ...[
+                SizedBox(height: segmentSpacing),
+                attendanceHeader!,
+              ],
               SizedBox(height: segmentSpacing),
               _buildSegmentedControl(context),
               SizedBox(height: segmentSpacing),
@@ -240,10 +244,6 @@ class MatchDetailTemplate extends StatelessWidget {
         ];
       case MatchDetailSegment.attendance:
         return [
-          if (attendanceHeader != null) ...[
-            attendanceHeader!,
-            const SizedBox(height: 16),
-          ],
           if (attendanceList.isEmpty)
             _EmptySegmentMessage(message: attendanceEmptyMessage)
           else

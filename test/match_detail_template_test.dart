@@ -213,13 +213,15 @@ void main() {
     expect(find.byType(TimelineItem), findsOneWidget);
   });
 
-  testWidgets('prematch response content belongs to the attendance segment',
+  testWidgets('prematch response content sits between the hero and top bar',
       (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: MatchDetailTemplate(
-          selectedSegment: MatchDetailSegment.attendance,
-          heroCard: const SizedBox(height: 1),
+          heroCard: const SizedBox(
+            key: ValueKey('match-details-hero'),
+            height: 1,
+          ),
           usePrematchLayout: true,
           attendanceHeader: Container(
             key: const ValueKey('attendance-rsvp-content'),
@@ -236,7 +238,6 @@ void main() {
 
     final responseStatus =
         find.byKey(const ValueKey('attendance-rsvp-content'));
-    final attendancePlayer = find.text('Attending Player');
     final attendanceSegment =
         find.byKey(const ValueKey('match-details-segment-attendance'));
     final navigation =
@@ -244,28 +245,40 @@ void main() {
 
     expect(
       tester.getTopLeft(responseStatus).dy,
-      greaterThan(tester.getRect(attendanceSegment).bottom),
+      greaterThan(tester
+          .getRect(find.byKey(const ValueKey('match-details-hero')))
+          .bottom),
     );
     expect(
       tester.getTopLeft(responseStatus).dy,
-      lessThan(tester.getTopLeft(attendancePlayer).dy),
+      lessThan(tester.getTopLeft(attendanceSegment).dy),
     );
     expect(tester.getSize(navigation).height, 72);
 
     await tester.pumpWidget(
       MaterialApp(
         home: MatchDetailTemplate(
+          selectedSegment: MatchDetailSegment.attendance,
           heroCard: const SizedBox(height: 1),
           usePrematchLayout: true,
           attendanceHeader: Container(
             key: const ValueKey('attendance-rsvp-content'),
             height: 38,
           ),
+          attendanceList: const [Text('Attending Player')],
         ),
       ),
     );
 
-    expect(responseStatus, findsNothing);
+    expect(responseStatus, findsOneWidget);
+    expect(
+      tester.getTopLeft(responseStatus).dy,
+      lessThan(tester.getTopLeft(attendanceSegment).dy),
+    );
+    expect(
+      tester.getTopLeft(find.text('Attending Player')).dy,
+      greaterThan(tester.getRect(attendanceSegment).bottom),
+    );
   });
 
   testWidgets('match details layout supports the iOS refresh scaffold',

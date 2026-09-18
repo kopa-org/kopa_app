@@ -1384,10 +1384,6 @@ class _PrematchRsvpInlineStatus extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: isPending ? const Color(0xFFF8F0E4) : const Color(0xFFE8F2ED),
-        borderRadius: BorderRadius.circular(12),
-      ),
       child: Row(
         children: [
           Icon(
@@ -1461,12 +1457,6 @@ class _PrematchRsvpDeclinedInlineStatus extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        // Keep the declined state in the same inline flow as the accepted
-        // state; only its status treatment changes.
-        color: colors.background,
-        borderRadius: BorderRadius.circular(12),
-      ),
       child: Row(
         children: [
           Icon(
