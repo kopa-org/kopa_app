@@ -2,11 +2,14 @@ import 'package:kopa/model/match_event_details.dart';
 import 'package:kopa/model/match_poll_details.dart';
 import 'package:kopa/model/event_attendance_details.dart';
 import 'package:kopa/model/external_player_details.dart';
+import 'package:kopa/model/event_type.dart';
 import 'package:kopa/model/player_rating_summary.dart';
 import 'package:kopa/model/user_details.dart';
 
 class MatchDetails {
   static const Duration resultReminderDelay = Duration(minutes: 30);
+  static const String matchType = 'MATCH';
+  static const String trainingType = 'TRAINING';
   static const String firstComeFirstServed = 'first_come_first_served';
   static const String teamLeaderSelection = 'team_leader_selection';
 
@@ -17,6 +20,7 @@ class MatchDetails {
   final DateTime date;
   final DateTime? meetingTime;
   final String location;
+  final String? category;
   final String? notes;
   final MatchPollDetails? matchPollDetails;
   final DateTime createdAt;
@@ -48,6 +52,7 @@ class MatchDetails {
     required this.date,
     this.meetingTime,
     required this.location,
+    this.category,
     required this.createdAt,
     required this.updatedAt,
     this.notes,
@@ -81,6 +86,7 @@ class MatchDetails {
       date: _parseEventDate(json['date']),
       meetingTime: _parseMeetingTime(json['meeting_time']),
       location: json['location'],
+      category: json['category'] as String?,
       notes: json['notes'],
       matchPollDetails: json['match_poll'] != null
           ? MatchPollDetails.fromJson(json['match_poll'])
@@ -123,8 +129,13 @@ class MatchDetails {
   }
 
   String get matchName {
+    if (isTraining) return 'Training';
     return '${homeTeam ?? "?"} vs ${awayTeam ?? "?"}';
   }
+
+  bool get isTraining => kopaEventTypeFromApi(type).isTraining;
+
+  bool get isMatch => !isTraining;
 
   bool get hasFinalScore {
     return homeTeamScore != null && awayTeamScore != null;
@@ -132,16 +143,18 @@ class MatchDetails {
 
   bool get usesTeamLeaderSelection => rsvpSelectionMode == teamLeaderSelection;
 
-  bool get hasMatchBeenPlayed => hasFinalScore;
+  bool get hasMatchBeenPlayed => isMatch && hasFinalScore;
 
   bool shouldPromptForResultAt(DateTime now) {
-    return !hasFinalScore && !now.isBefore(date.add(resultReminderDelay));
+    return isMatch &&
+        !hasFinalScore &&
+        !now.isBefore(date.add(resultReminderDelay));
   }
 
   bool canSetFinalScore(UserDetails user, {DateTime? now}) {
     // Keep the optional clock for callers that provide deterministic timing;
     // result entry is intentionally not gated by it.
-    return user.canManageTeam && !hasFinalScore;
+    return isMatch && user.canManageTeam && !hasFinalScore;
   }
 
   List<EventAttendanceDetails> get attendingAttendanceDetails {

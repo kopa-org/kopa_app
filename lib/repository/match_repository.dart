@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:kopa/helpers/api_config.dart';
 import 'package:kopa/model/create_match_comand.dart';
 import 'package:kopa/model/create_match_event_command.dart';
+import 'package:kopa/model/event_type.dart';
 import 'package:kopa/model/external_player_details.dart';
 import 'package:kopa/model/register_for_unregister_from_match_command.dart';
 import 'package:kopa/model/match_details.dart';
@@ -82,20 +83,64 @@ class MatchRepository {
     DateTime? meetingTime, {
     String? notes,
   }) async {
+    return createEvent(
+      type: KopaEventType.match,
+      firstTeam: firstTeam,
+      secondTeam: secondTeam,
+      date: date,
+      location: location,
+      meetingTime: meetingTime,
+      notes: notes,
+    );
+  }
+
+  static Future<int> createTraining(
+    DateTime date,
+    String location, {
+    String? category,
+    String? notes,
+  }) {
+    return createEvent(
+      type: KopaEventType.training,
+      date: date,
+      location: location,
+      category: category,
+      notes: notes,
+    );
+  }
+
+  static Future<int> createEvent({
+    required KopaEventType type,
+    required DateTime date,
+    required String location,
+    String? firstTeam,
+    String? secondTeam,
+    DateTime? meetingTime,
+    String? category,
+    String? notes,
+  }) async {
     final url = Uri.parse('${ApiConfig.baseUrl}/match');
 
-    final createMatchCommand = CreateMatchCommand(
-        firstTeam, secondTeam, location, meetingTime, date, notes);
+    final createEventCommand = CreateMatchCommand(
+      firstTeam,
+      secondTeam,
+      location,
+      meetingTime,
+      date,
+      notes,
+      eventType: type,
+      category: category,
+    );
 
     final response = await _apiClient.postJson(
       url,
-      body: createMatchCommand.toJson(),
+      body: createEventCommand.toJson(),
     );
 
     if (response.statusCode == 401) {
       throw Exception('Unauthorized. Please log in again.');
     } else if (response.statusCode != 200 && response.statusCode != 201) {
-      throw Exception('Failed to create match');
+      throw Exception('Failed to create event');
     }
 
     final decodedJson = jsonDecode(response.body);

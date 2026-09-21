@@ -4,14 +4,21 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:kopa/cubits/match_programme_cubit.dart';
 import 'package:kopa/cubits/match_programme_state.dart';
+import 'package:kopa/l10n/app_localizations.dart';
+import 'package:kopa/model/event_type.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 
 class CreateMatchPage extends StatefulWidget {
   final List<MatchDetails> matches;
+  final KopaEventType eventType;
 
-  const CreateMatchPage({super.key, required this.matches});
+  const CreateMatchPage({
+    super.key,
+    required this.matches,
+    this.eventType = KopaEventType.match,
+  });
 
   @override
   State<CreateMatchPage> createState() => _CreateMatchPageState();
@@ -21,6 +28,7 @@ class _CreateMatchPageState extends State<CreateMatchPage> {
   final _teamAController = TextEditingController();
   final _teamBController = TextEditingController();
   final _locationController = TextEditingController();
+  final _categoryController = TextEditingController();
   final _noteController = TextEditingController();
   DateTime? _selectedDate;
   DateTime? _selectedMeetingTime;
@@ -30,6 +38,7 @@ class _CreateMatchPageState extends State<CreateMatchPage> {
     _teamAController.dispose();
     _teamBController.dispose();
     _locationController.dispose();
+    _categoryController.dispose();
     _noteController.dispose();
     super.dispose();
   }
@@ -90,12 +99,17 @@ class _CreateMatchPageState extends State<CreateMatchPage> {
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final l10n = AppLocalizations.of(context)!;
+    final isTraining = widget.eventType.isTraining;
 
     return CupertinoPageScaffold(
         backgroundColor: appColors.background,
         navigationBar: CupertinoNavigationBar(
           backgroundColor: appColors.background,
-          middle: Text('Opret kamp', style: appTextStyles.sectionHeader),
+          middle: Text(
+            isTraining ? l10n.eventCreateTraining : l10n.eventCreateMatch,
+            style: appTextStyles.sectionHeader,
+          ),
           leading: GestureDetector(
             onTap: () => Navigator.pop(context, false),
             child: Icon(CupertinoIcons.clear, color: appColors.textPrimary),
@@ -128,12 +142,17 @@ class _CreateMatchPageState extends State<CreateMatchPage> {
             child: CupertinoFormSection.insetGrouped(
               backgroundColor: appColors.background,
               children: [
-                _buildFormRow('Hjemmehold', _teamAController, 'Fx Sønderjyske',
-                    appTextStyles),
-                _buildFormRow(
-                    'Udehold', _teamBController, 'Fx AGF', appTextStyles),
+                if (!isTraining) ...[
+                  _buildFormRow('Hjemmehold', _teamAController,
+                      'Fx Sønderjyske', appTextStyles),
+                  _buildFormRow(
+                      'Udehold', _teamBController, 'Fx AGF', appTextStyles),
+                ],
                 CupertinoFormRow(
-                  prefix: Text('Tidspunkt', style: appTextStyles.bodyBold),
+                  prefix: Text(
+                    isTraining ? l10n.eventTrainingTime : 'Tidspunkt',
+                    style: appTextStyles.bodyBold,
+                  ),
                   child: GestureDetector(
                     onTap: _pickDateTime,
                     behavior: HitTestBehavior.opaque,
@@ -154,11 +173,25 @@ class _CreateMatchPageState extends State<CreateMatchPage> {
                     ),
                   ),
                 ),
-                _buildFormRow('Lokation', _locationController,
-                    'Fx Sydbank Park', appTextStyles),
                 _buildFormRow(
-                    'Noter', _noteController, 'Evt. kommentarer', appTextStyles,
-                    maxLines: 2),
+                  'Lokation',
+                  _locationController,
+                  isTraining
+                      ? l10n.eventCreateTrainingLocationHint
+                      : 'Fx Sydbank Park',
+                  appTextStyles,
+                ),
+                if (isTraining)
+                  _buildFormRow(
+                    l10n.eventTrainingCategory,
+                    _categoryController,
+                    l10n.eventTrainingCategoryHint,
+                    appTextStyles,
+                  ),
+                if (!isTraining)
+                  _buildFormRow('Noter', _noteController, 'Evt. kommentarer',
+                      appTextStyles,
+                      maxLines: 2),
               ],
             ),
           ),
@@ -183,30 +216,45 @@ class _CreateMatchPageState extends State<CreateMatchPage> {
     final teamA = _teamAController.text.trim();
     final teamB = _teamBController.text.trim();
     final location = _locationController.text.trim();
+    final category = _categoryController.text.trim();
     final notes = _noteController.text.trim();
     final date = _selectedDate;
     final meetingTime = _selectedMeetingTime;
+    final l10n = AppLocalizations.of(context)!;
+    final isTraining = widget.eventType.isTraining;
 
-    if (teamA.isEmpty || teamB.isEmpty || location.isEmpty || date == null) {
-      await _showError('Udfyld begge hold, lokation og vælg dato.');
+    if (location.isEmpty ||
+        date == null ||
+        (!isTraining && (teamA.isEmpty || teamB.isEmpty))) {
+      await _showError(
+        isTraining
+            ? l10n.eventCreateTrainingMissingFields
+            : 'Udfyld begge hold, lokation og vælg dato.',
+      );
       return false;
     }
 
-    if (teamA.toLowerCase() == teamB.toLowerCase()) {
+    if (!isTraining && teamA.toLowerCase() == teamB.toLowerCase()) {
       await _showError('Første og andet hold må ikke være ens.');
       return false;
     }
 
-    final created = await context.read<MatchProgrammeCubit>().createMatch(
-          homeTeam: teamA,
-          awayTeam: teamB,
+    final created = await context.read<MatchProgrammeCubit>().createEvent(
+          type: widget.eventType,
+          homeTeam: isTraining ? null : teamA,
+          awayTeam: isTraining ? null : teamB,
           date: date,
           location: location,
-          meetingTime: meetingTime,
+          meetingTime: isTraining ? null : meetingTime,
+          category: isTraining ? category : null,
           notes: notes,
         );
     if (!created) {
-      await _showError('Kunne ikke oprette kampen.');
+      await _showError(
+        isTraining
+            ? l10n.eventCreateTrainingFailed
+            : l10n.eventCreateMatchFailed,
+      );
     }
     return created;
   }

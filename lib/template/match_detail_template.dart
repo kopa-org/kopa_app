@@ -42,6 +42,7 @@ class MatchDetailTemplate extends StatelessWidget {
   final Widget? bottomNavigationBar;
   final Widget? attendanceActionBar;
   final bool useParentBottomNavigationBar;
+  final String pageTitle;
 
   const MatchDetailTemplate({
     super.key,
@@ -73,12 +74,13 @@ class MatchDetailTemplate extends StatelessWidget {
     this.bottomNavigationBar,
     this.attendanceActionBar,
     this.useParentBottomNavigationBar = false,
+    this.pageTitle = 'Kampdetaljer',
   });
 
   @override
   Widget build(BuildContext context) {
     return PageScaffold(
-      title: 'Kampdetaljer',
+      title: pageTitle,
       showTopBar: false,
       onRefresh: onRefresh,
       useBottomSafeArea:
@@ -119,7 +121,7 @@ class MatchDetailTemplate extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const _MatchDetailsHeader(),
+              _MatchDetailsHeader(title: pageTitle),
               heroCard,
               if (attendanceHeader != null) ...[
                 SizedBox(height: segmentSpacing),
@@ -346,7 +348,9 @@ class _MatchDetailSegmentButton extends StatelessWidget {
 }
 
 class _MatchDetailsHeader extends StatelessWidget {
-  const _MatchDetailsHeader();
+  final String title;
+
+  const _MatchDetailsHeader({required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -372,7 +376,7 @@ class _MatchDetailsHeader extends StatelessWidget {
           const SizedBox(width: 14),
           Expanded(
             child: Text(
-              'Kampdetaljer',
+              title,
               style: styles.h5.copyWith(fontWeight: FontWeight.w800),
             ),
           ),

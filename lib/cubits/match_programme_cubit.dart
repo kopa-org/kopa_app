@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopa/cubits/match_programme_state.dart';
+import 'package:kopa/model/event_type.dart';
 import 'package:kopa/repository/match_repository.dart';
 import 'package:kopa/utils/app_analytics.dart';
 
@@ -42,21 +43,46 @@ class MatchProgrammeCubit extends Cubit<MatchProgrammeState> {
     required DateTime? meetingTime,
     String? notes,
   }) async {
+    return createEvent(
+      type: KopaEventType.match,
+      homeTeam: homeTeam,
+      awayTeam: awayTeam,
+      date: date,
+      location: location,
+      meetingTime: meetingTime,
+      notes: notes,
+    );
+  }
+
+  Future<bool> createEvent({
+    required KopaEventType type,
+    String? homeTeam,
+    String? awayTeam,
+    required DateTime date,
+    required String location,
+    DateTime? meetingTime,
+    String? category,
+    String? notes,
+  }) async {
     emit(state.copyWith(
       status: MatchProgrammeStatus.creating,
       errorMessage: null,
     ));
 
     try {
-      await MatchRepository.createMatch(
-        homeTeam,
-        awayTeam,
-        date,
-        location,
-        meetingTime,
+      await MatchRepository.createEvent(
+        type: type,
+        firstTeam: homeTeam,
+        secondTeam: awayTeam,
+        date: date,
+        location: location,
+        meetingTime: meetingTime,
+        category: category,
         notes: notes,
       );
-      AppAnalytics.logEvent('match_created');
+      AppAnalytics.logEvent(
+        type == KopaEventType.training ? 'training_created' : 'match_created',
+      );
       MatchRepository.invalidateMatchSummaries();
       await loadMatches(forceRefresh: true);
       return true;

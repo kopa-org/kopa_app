@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:kopa/component/avatar/team_badge_label.dart';
 import 'package:kopa/component/card/kopa_card.dart';
+import 'package:kopa/helpers/date_helper.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/team_logo_design.dart';
 import 'package:kopa/theme/app_colors.dart';
@@ -33,74 +35,79 @@ class MatchHeroCard extends StatelessWidget {
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
+    final l10n = AppLocalizations.of(context)!;
     final hasScore = match.hasFinalScore;
 
     final cardContent = KopaCard(
       onTap: onTap,
       padding: EdgeInsets.zero,
       borderRadius: Spacing.borderRadiusLargeIncreased,
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 20,
-              vertical: 20,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: match.isTraining
+          ? _TrainingHeroContent(match: match, title: l10n.eventTraining)
+          : Column(
               children: [
-                SizedBox(
-                  width: 100,
-                  child: TeamBadgeLabel(
-                    teamName: match.homeTeam ?? 'Hjemme',
-                    teamId: stableTeamSeed(match.homeTeam ?? 'Hjemme'),
-                    logoDesign: _logoForTeam(match.homeTeam ?? 'Hjemme'),
-                    heroTag: heroTag == null
-                        ? null
-                        : logoHeroTag(heroTag!, TeamSide.home),
-                    radius: 23,
-                    labelMaxLines: 1,
-                    labelStyle: appTextStyles.caption.copyWith(
-                      color: appColors.dirt,
-                      fontWeight: FontWeight.w800,
-                    ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 20,
                   ),
-                ),
-                if (hasScore)
-                  _FinalScorePill(match: match)
-                else
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
-                    child: Text(
-                      'VS',
-                      style: appTextStyles.h5.copyWith(
-                        color: appColors.dirt,
-                        fontWeight: FontWeight.w900,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      SizedBox(
+                        width: 100,
+                        child: TeamBadgeLabel(
+                          teamName: match.homeTeam ?? 'Hjemme',
+                          teamId: stableTeamSeed(match.homeTeam ?? 'Hjemme'),
+                          logoDesign: _logoForTeam(match.homeTeam ?? 'Hjemme'),
+                          heroTag: heroTag == null
+                              ? null
+                              : logoHeroTag(heroTag!, TeamSide.home),
+                          radius: 23,
+                          labelMaxLines: 1,
+                          labelStyle: appTextStyles.caption.copyWith(
+                            color: appColors.dirt,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                SizedBox(
-                  width: 100,
-                  child: TeamBadgeLabel(
-                    teamName: match.awayTeam ?? 'Ude',
-                    teamId: stableTeamSeed(match.awayTeam ?? 'Ude'),
-                    logoDesign: _logoForTeam(match.awayTeam ?? 'Ude'),
-                    heroTag: heroTag == null
-                        ? null
-                        : logoHeroTag(heroTag!, TeamSide.away),
-                    radius: 23,
-                    labelMaxLines: 1,
-                    labelStyle: appTextStyles.caption.copyWith(
-                      color: appColors.dirt,
-                      fontWeight: FontWeight.w800,
-                    ),
+                      if (hasScore)
+                        _FinalScorePill(match: match)
+                      else
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: Spacing.md,
+                          ),
+                          child: Text(
+                            'VS',
+                            style: appTextStyles.h5.copyWith(
+                              color: appColors.dirt,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                      SizedBox(
+                        width: 100,
+                        child: TeamBadgeLabel(
+                          teamName: match.awayTeam ?? 'Ude',
+                          teamId: stableTeamSeed(match.awayTeam ?? 'Ude'),
+                          logoDesign: _logoForTeam(match.awayTeam ?? 'Ude'),
+                          heroTag: heroTag == null
+                              ? null
+                              : logoHeroTag(heroTag!, TeamSide.away),
+                          radius: 23,
+                          labelMaxLines: 1,
+                          labelStyle: appTextStyles.caption.copyWith(
+                            color: appColors.dirt,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-          ),
-        ],
-      ),
     );
 
     final card = topRightAction == null
@@ -141,6 +148,75 @@ class MatchHeroCard extends StatelessWidget {
 
   static String logoHeroTag(String cardHeroTag, TeamSide side) {
     return '$cardHeroTag-${side.name}-team-logo';
+  }
+}
+
+class _TrainingHeroContent extends StatelessWidget {
+  final MatchDetails match;
+  final String title;
+
+  const _TrainingHeroContent({required this.match, required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      child: Row(
+        children: [
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              color: appColors.lightGrass,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.fitness_center,
+              color: appColors.grass,
+              size: 28,
+            ),
+          ),
+          const SizedBox(width: Spacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: appTextStyles.h5.copyWith(
+                    color: appColors.dirt,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                if (match.category?.trim().isNotEmpty ?? false) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    match.category!.trim(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: appTextStyles.body3.copyWith(
+                      color: appColors.grey5,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 4),
+                Text(
+                  '${DateHelper.getFormattedTime(match.date)} · ${match.location}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: appTextStyles.body3.copyWith(color: appColors.grey5),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

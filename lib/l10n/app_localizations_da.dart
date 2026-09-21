@@ -365,4 +365,66 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String get matchPollErrorTitle => 'Fejl';
+
+  @override
+  String get eventCreateTitle => 'Opret begivenhed';
+
+  @override
+  String get eventCreateMatch => 'Opret kamp';
+
+  @override
+  String get eventCreateTraining => 'Opret træning';
+
+  @override
+  String get eventTypeMatch => 'Kamp';
+
+  @override
+  String get eventTypeTraining => 'Træning';
+
+  @override
+  String get eventTraining => 'Træning';
+
+  @override
+  String get eventTrainingCategory => 'Kategori';
+
+  @override
+  String get eventTrainingCategoryHint => 'Fx pasninger, øvelser eller forsvar';
+
+  @override
+  String get eventCreateChoose => 'Hvad vil du oprette?';
+
+  @override
+  String get eventOpenMatch => 'Åbn kamp';
+
+  @override
+  String get eventOpenTraining => 'Åbn træning';
+
+  @override
+  String get eventDetailsMatch => 'Kampdetaljer';
+
+  @override
+  String get eventDetailsTraining => 'Træningsdetaljer';
+
+  @override
+  String get eventTrainingTime => 'Træningstid';
+
+  @override
+  String get eventCreateTrainingLocationHint => 'Fx træningsbanen';
+
+  @override
+  String get eventCreateTrainingMissingFields =>
+      'Udfyld lokation og vælg dato og tid.';
+
+  @override
+  String get eventCreateTrainingFailed => 'Kunne ikke oprette træningen.';
+
+  @override
+  String get eventCreateMatchFailed => 'Kunne ikke oprette kampen.';
+
+  @override
+  String get eventCreateFailed => 'Begivenheden kunne ikke oprettes.';
+
+  @override
+  String get eventRsvpFailed =>
+      'Kunne ikke opdatere din tilmelding. Prøv igen.';
 }

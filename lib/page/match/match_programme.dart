@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kopa/component/button/expandable_fab.dart';
 import 'package:kopa/component/card/all_games_card.dart';
 import 'package:kopa/component/error_message.dart';
 import 'package:kopa/component/future_handler.dart';
@@ -10,12 +11,14 @@ import 'package:kopa/cubits/match_programme_cubit.dart';
 import 'package:kopa/cubits/match_programme_state.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/user_details.dart';
+import 'package:kopa/model/event_type.dart';
 import 'package:kopa/page/match/create_match_page.dart';
 import 'package:kopa/page/match/match_details_page.dart';
 import 'package:kopa/state/match_programme_refresh_notifier.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/spacing.dart';
 import 'package:kopa/utils/app_analytics.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class MatchProgrammePage extends StatefulWidget {
@@ -53,13 +56,36 @@ class _MatchProgrammePageState extends State<MatchProgrammePage> {
           onError: (_) => const SizedBox.shrink(),
           onSuccess: (context, user) {
             if (!user.isTeamOwner) return const SizedBox.shrink();
+            final l10n = AppLocalizations.of(context)!;
 
-            return FloatingActionButton(
+            return ExpandableFab(
+              distance: 88,
+              openButtonKey: const ValueKey('create-match-fab'),
               heroTag: 'create-match-fab',
-              tooltip: 'Opret kamp',
+              tooltip: l10n.eventCreateTitle,
               backgroundColor: colors.white,
-              onPressed: () => _showCreateMatch(context),
-              child: Icon(Icons.add, color: colors.primary, size: 32),
+              foregroundColor: colors.primary,
+              icon: const Icon(Icons.add, size: 32),
+              children: [
+                FloatingActionButton.small(
+                  heroTag: 'create-match-fab-match',
+                  tooltip: l10n.eventCreateMatch,
+                  backgroundColor: colors.primary,
+                  foregroundColor: colors.white,
+                  onPressed: () =>
+                      _showCreateEvent(context, KopaEventType.match),
+                  child: const Icon(Icons.sports_soccer),
+                ),
+                FloatingActionButton.small(
+                  heroTag: 'create-match-fab-training',
+                  tooltip: l10n.eventCreateTraining,
+                  backgroundColor: colors.primary,
+                  foregroundColor: colors.white,
+                  onPressed: () =>
+                      _showCreateEvent(context, KopaEventType.training),
+                  child: const Icon(Icons.fitness_center),
+                ),
+              ],
             );
           },
         ),
@@ -70,14 +96,22 @@ class _MatchProgrammePageState extends State<MatchProgrammePage> {
     );
   }
 
-  Future<void> _showCreateMatch(BuildContext context) async {
+  Future<void> _showCreateEvent(
+    BuildContext context,
+    KopaEventType eventType,
+  ) async {
     final cubit = context.read<MatchProgrammeCubit>();
+    if (!context.mounted) return;
+
     await showCupertinoModalBottomSheet(
       expand: true,
       context: context,
       builder: (modalContext) => BlocProvider.value(
         value: cubit,
-        child: CreateMatchPage(matches: cubit.state.matches),
+        child: CreateMatchPage(
+          matches: cubit.state.matches,
+          eventType: eventType,
+        ),
       ),
     );
   }

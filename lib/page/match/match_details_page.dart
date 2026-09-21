@@ -211,6 +211,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     final matchDetails = data['matchDetails'] as MatchDetails;
     final squad = data['squad'] as List<UserDetails>;
     final hasBeenPlayed = matchDetails.hasMatchBeenPlayed;
+    final isTraining = matchDetails.isTraining;
     final canManageTeam = user.canManageTeam;
     final canManageResult = canManageTeam;
     final rsvpState = _matchRsvpStateFor(matchDetails, user.id);
@@ -234,7 +235,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
           : null,
     );
 
-    if (hasBeenPlayed) {
+    if (hasBeenPlayed && !isTraining) {
       return PostMatchDetailsPage(
         match: matchDetails,
         user: user,
@@ -255,6 +256,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     }
 
     return MatchDetailTemplate(
+      pageTitle:
+          isTraining ? l10n.eventDetailsTraining : l10n.eventDetailsMatch,
       onRefresh: _refreshMatchAndSquad,
       selectedSegment: _selectedSegment,
       onSegmentChanged: _selectSegment,
@@ -282,8 +285,9 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
           ),
       },
       bottomNavigationBar: bottomNavigationBar,
-      attendanceActionBar:
-          canManageTeam ? _buildExternalPlayerActionBar(matchDetails) : null,
+      attendanceActionBar: !isTraining && canManageTeam
+          ? _buildExternalPlayerActionBar(matchDetails)
+          : null,
       useParentBottomNavigationBar: !widget.showBottomNavigationBar,
       overviewTitle: 'Praktisk information',
       attendanceTitle: 'Tilmeldte spillere',
@@ -291,11 +295,13 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
           'Tilmeldte (${matchDetails.attendingAttendanceDetails.length})',
       timelineTitle: l10n.matchDetailsMatchEvents,
       timelineSegmentLabel: l10n.matchDetailsMatchEvents,
-      timelinePreview: true,
+      showTimelineSegment: !isTraining,
+      timelinePreview: !isTraining,
       timelinePreviewMessage: l10n.matchDetailsMatchEventsUnavailable,
-      timelineItems: _buildMatchEventsPreviewItems(l10n),
+      timelineItems:
+          isTraining ? const [] : _buildMatchEventsPreviewItems(l10n),
       overviewWidgets: [
-        if (canManageTeam && !matchDetails.hasFinalScore) ...[
+        if (!isTraining && canManageTeam && !matchDetails.hasFinalScore) ...[
           SizedBox(height: Spacing.lg),
           MatchResultActionCard(
             onPressed: () => setMatchScore(matchDetails),
@@ -305,7 +311,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       ],
       infoRows: _buildPracticalInfoRows(matchDetails),
       votingModule: null,
-      playerPositions: canManageTeam || matchDetails.lineupVisible
+      playerPositions: !isTraining &&
+              (canManageTeam || matchDetails.lineupVisible)
           ? PlayerPositionsCard(
               playerCount: _teamPlayerCount(matchDetails, user),
               formation: matchDetails.formation,
@@ -327,7 +334,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
             )
           : null,
       attendanceList: _buildAttendanceList(matchDetails, squad, user),
-      ratingsSection: _buildRatingsSection(matchDetails),
+      ratingsSection: isTraining ? null : _buildRatingsSection(matchDetails),
     );
   }
 
@@ -345,6 +352,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     final l10n = AppLocalizations.of(context)!;
 
     return MatchDetailTemplate(
+      pageTitle:
+          match.isTraining ? l10n.eventDetailsTraining : l10n.eventDetailsMatch,
       selectedSegment: _selectedSegment,
       onSegmentChanged: _selectSegment,
       heroCard: MatchHeroCard(
@@ -357,15 +366,18 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       usePrematchLayout: true,
       timelineTitle: l10n.matchDetailsMatchEvents,
       timelineSegmentLabel: l10n.matchDetailsMatchEvents,
-      timelinePreview: true,
+      showTimelineSegment: !match.isTraining,
+      timelinePreview: !match.isTraining,
       timelinePreviewMessage: l10n.matchDetailsMatchEventsUnavailable,
-      timelineItems: _buildMatchEventsPreviewItems(l10n),
+      timelineItems:
+          match.isTraining ? const [] : _buildMatchEventsPreviewItems(l10n),
       bottomNavigationBar: widget.showBottomNavigationBar
           ? _buildMatchDetailsBottomNavigationBar(context)
           : null,
-      attendanceActionBar: _currentUser?.canManageTeam == true
-          ? _buildExternalPlayerActionBar(match)
-          : null,
+      attendanceActionBar:
+          !match.isTraining && _currentUser?.canManageTeam == true
+              ? _buildExternalPlayerActionBar(match)
+              : null,
       useParentBottomNavigationBar: !widget.showBottomNavigationBar,
     );
   }
@@ -498,7 +510,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
 
   List<Widget> _buildPracticalInfoRows(MatchDetails matchDetails) {
     final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    return [
+    final l10n = AppLocalizations.of(context)!;
+    final rows = <Widget>[
       InfoRow(
         icon: CupertinoIcons.calendar,
         title: 'Dato',
@@ -508,11 +521,6 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         icon: CupertinoIcons.time,
         title: 'Tidspunkt',
         value: DateHelper.getFormattedTime(matchDetails.date),
-      ),
-      InfoRow(
-        icon: CupertinoIcons.alarm,
-        title: 'Mødetid',
-        value: DateHelper.getFormattedTime(matchDetails.meetingTime),
       ),
       InfoRow(
         icon: CupertinoIcons.location_solid,
@@ -532,24 +540,56 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         title: 'Tilmeldinger',
         value: '${matchDetails.registeredCount} tilmeldte',
       ),
-      InfoRow(
-        icon: CupertinoIcons.checkmark_seal,
-        title: 'Din udtagelse',
-        value: matchDetails.isCurrentUserSelected == true
-            ? 'Udtaget'
-            : matchDetails.isCurrentUserSelected == false
-                ? 'Ikke udtaget'
-                : 'Afventer',
-        valueColor: matchDetails.isCurrentUserSelected == true
-            ? colors.successForeground
-            : colors.warningForeground,
-      ),
-      InfoRow(
-        icon: CupertinoIcons.pencil,
-        title: 'Noter',
-        value: matchDetails.notes ?? 'Ingen noter',
-      ),
     ];
+
+    if (matchDetails.isTraining &&
+        (matchDetails.category?.trim().isNotEmpty ?? false)) {
+      rows.insert(
+        2,
+        InfoRow(
+          icon: CupertinoIcons.tag,
+          title: l10n.eventTrainingCategory,
+          value: matchDetails.category!.trim(),
+        ),
+      );
+    }
+
+    if (!matchDetails.isTraining) {
+      rows.insert(
+        2,
+        InfoRow(
+          icon: CupertinoIcons.alarm,
+          title: 'Mødetid',
+          value: DateHelper.getFormattedTime(matchDetails.meetingTime),
+        ),
+      );
+      rows.add(
+        InfoRow(
+          icon: CupertinoIcons.checkmark_seal,
+          title: 'Din udtagelse',
+          value: matchDetails.isCurrentUserSelected == true
+              ? 'Udtaget'
+              : matchDetails.isCurrentUserSelected == false
+                  ? 'Ikke udtaget'
+                  : 'Afventer',
+          valueColor: matchDetails.isCurrentUserSelected == true
+              ? colors.successForeground
+              : colors.warningForeground,
+        ),
+      );
+    }
+
+    if (matchDetails.notes != null && matchDetails.notes!.isNotEmpty) {
+      rows.add(
+        InfoRow(
+          icon: CupertinoIcons.pencil,
+          title: 'Noter',
+          value: matchDetails.notes!,
+        ),
+      );
+    }
+
+    return rows;
   }
 
   List<Widget> _buildAttendanceList(
@@ -1059,14 +1099,16 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
 
     try {
       await MatchRepository.registerForMatch(match.id);
-      AppAnalytics.logEvent('match_registered');
+      AppAnalytics.logEvent(
+        match.isTraining ? 'training_registered' : 'match_registered',
+      );
       await _refreshMatchAndSquad();
     } catch (error, stack) {
       CrashReporting.logWebError(error, stack);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Kunne ikke tilmelde dig kampen. Prøv igen.'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.eventRsvpFailed),
           ),
         );
       }
@@ -1088,14 +1130,16 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
 
     try {
       await MatchRepository.unregisterFromMatch(match.id);
-      AppAnalytics.logEvent('match_unregistered');
+      AppAnalytics.logEvent(
+        match.isTraining ? 'training_unregistered' : 'match_unregistered',
+      );
       await _refreshMatchAndSquad();
     } catch (error, stack) {
       CrashReporting.logWebError(error, stack);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Kunne ikke melde afbud. Prøv igen.'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.eventRsvpFailed),
           ),
         );
       }

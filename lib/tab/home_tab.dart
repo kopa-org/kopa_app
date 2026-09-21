@@ -706,6 +706,7 @@ class _HeroTeamPanel extends StatelessWidget {
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
     final match = this.match;
+    final isTraining = match?.isTraining == true;
     final homeTeam =
         match?.homeTeam ?? currentUser.teamDetails?.title ?? 'Hold';
     final awayTeam = match?.awayTeam ?? 'Modstander';
@@ -755,12 +756,19 @@ class _HeroTeamPanel extends StatelessWidget {
                 children: [
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.fromLTRB(
-                      Spacing.md,
-                      14,
-                      Spacing.md,
-                      28,
-                    ),
+                    padding: isTraining
+                        ? const EdgeInsets.fromLTRB(
+                            Spacing.md,
+                            14,
+                            Spacing.md,
+                            14,
+                          )
+                        : const EdgeInsets.fromLTRB(
+                            Spacing.md,
+                            14,
+                            Spacing.md,
+                            28,
+                          ),
                     decoration: BoxDecoration(
                       color: appColors.lightGrass,
                       borderRadius: heroRadius,
@@ -781,81 +789,92 @@ class _HeroTeamPanel extends StatelessWidget {
                             if (match != null && currentUser.isTeamOwner)
                               MatchResultReminderButton(
                                 match: match,
+                                backgroundColor: appColors.sunset,
                                 onPressed: () =>
                                     _openMatchResultReminder(context, match),
                               ),
                           ],
                         ),
                         const SizedBox(height: 10),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                child: Center(
-                                  child: TeamBadgeLabel(
-                                    teamName: homeTeam,
-                                    teamId: stableTeamSeed(homeTeam),
-                                    logoDesign: ownTeamName != null &&
-                                            teamNamesMatch(
-                                                homeTeam, ownTeamName)
-                                        ? ownTeamLogo
-                                        : null,
-                                    heroTag: cardHeroTag == null
-                                        ? null
-                                        : MatchHeroCard.logoHeroTag(
-                                            cardHeroTag,
-                                            TeamSide.home,
-                                          ),
-                                    width: 86,
-                                    radius: 22,
-                                    labelStyle: appTextStyles.caption.copyWith(
+                        if (isTraining)
+                          _TrainingHeroEventContent(
+                            category: match?.category,
+                            colors: appColors,
+                            textStyles: appTextStyles,
+                          )
+                        else
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Expanded(
+                                  child: Center(
+                                    child: TeamBadgeLabel(
+                                      teamName: homeTeam,
+                                      teamId: stableTeamSeed(homeTeam),
+                                      logoDesign: ownTeamName != null &&
+                                              teamNamesMatch(
+                                                  homeTeam, ownTeamName)
+                                          ? ownTeamLogo
+                                          : null,
+                                      heroTag: cardHeroTag == null
+                                          ? null
+                                          : MatchHeroCard.logoHeroTag(
+                                              cardHeroTag,
+                                              TeamSide.home,
+                                            ),
+                                      width: 86,
+                                      radius: 22,
+                                      labelStyle:
+                                          appTextStyles.caption.copyWith(
+                                        color: appColors.dirt,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 54,
+                                  child: Text(
+                                    'VS',
+                                    textAlign: TextAlign.center,
+                                    style: appTextStyles.h5.copyWith(
                                       color: appColors.dirt,
                                       fontWeight: FontWeight.w800,
                                     ),
                                   ),
                                 ),
-                              ),
-                              SizedBox(
-                                width: 54,
-                                child: Text(
-                                  'VS',
-                                  textAlign: TextAlign.center,
-                                  style: appTextStyles.h5.copyWith(
-                                    color: appColors.dirt,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: Center(
-                                  child: TeamBadgeLabel(
-                                    teamName: awayTeam,
-                                    teamId: stableTeamSeed(awayTeam),
-                                    logoDesign: ownTeamName != null &&
-                                            teamNamesMatch(
-                                                awayTeam, ownTeamName)
-                                        ? ownTeamLogo
-                                        : null,
-                                    heroTag: cardHeroTag == null
-                                        ? null
-                                        : MatchHeroCard.logoHeroTag(
-                                            cardHeroTag,
-                                            TeamSide.away,
-                                          ),
-                                    width: 86,
-                                    radius: 22,
-                                    labelStyle: appTextStyles.caption.copyWith(
-                                      color: appColors.dirt,
-                                      fontWeight: FontWeight.w800,
+                                Expanded(
+                                  child: Center(
+                                    child: TeamBadgeLabel(
+                                      teamName: awayTeam,
+                                      teamId: stableTeamSeed(awayTeam),
+                                      logoDesign: ownTeamName != null &&
+                                              teamNamesMatch(
+                                                  awayTeam, ownTeamName)
+                                          ? ownTeamLogo
+                                          : null,
+                                      heroTag: cardHeroTag == null
+                                          ? null
+                                          : MatchHeroCard.logoHeroTag(
+                                              cardHeroTag,
+                                              TeamSide.away,
+                                            ),
+                                      width: 86,
+                                      radius: 22,
+                                      labelStyle:
+                                          appTextStyles.caption.copyWith(
+                                        color: appColors.dirt,
+                                        fontWeight: FontWeight.w800,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
                         if (match == null)
                           Padding(
                             padding: const EdgeInsets.only(top: Spacing.md),
@@ -905,6 +924,46 @@ class _HeroTeamPanel extends StatelessWidget {
   }
 }
 
+class _TrainingHeroEventContent extends StatelessWidget {
+  final String? category;
+  final AppColors colors;
+  final AppTextStyles textStyles;
+
+  const _TrainingHeroEventContent({
+    this.category,
+    required this.colors,
+    required this.textStyles,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Column(
+      children: [
+        Icon(Icons.fitness_center, color: colors.grass, size: 32),
+        const SizedBox(height: Spacing.sm),
+        Text(
+          l10n.eventTraining,
+          style: textStyles.h5.copyWith(
+            color: colors.dirt,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        if (category?.trim().isNotEmpty ?? false) ...[
+          const SizedBox(height: 4),
+          Text(
+            category!.trim(),
+            style: textStyles.body3.copyWith(color: colors.grey5),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ],
+    );
+  }
+}
+
 class _MatchInfoList extends StatelessWidget {
   static const _primaryTextColor = Color(0xFF111827);
   static const _labelTextColor = Color(0xFF4B5563);
@@ -924,6 +983,7 @@ class _MatchInfoList extends StatelessWidget {
   Widget build(BuildContext context) {
     final appColors =
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final l10n = AppLocalizations.of(context)!;
     final meetingTime = match.meetingTime;
     final location = match.location.isEmpty ? 'Ingen lokation' : match.location;
 
@@ -934,18 +994,21 @@ class _MatchInfoList extends StatelessWidget {
         _MatchInfoListRow(
           icon: Icons.schedule_outlined,
           iconColor: appColors.sky,
-          label: 'Kampstart',
+          label: match.isTraining ? l10n.eventTrainingTime : 'Kampstart',
           value: _matchTime(match.date),
           valueColor: _primaryTextColor,
         ),
-        const _MatchInfoDivider(),
-        _MatchInfoListRow(
-          icon: Icons.access_time,
-          iconColor: appColors.sunset,
-          label: 'Mødetid',
-          value: meetingTime == null ? '--:--' : _clockTime(meetingTime),
-          valueColor: meetingTime == null ? _mutedTextColor : _primaryTextColor,
-        ),
+        if (!match.isTraining) ...[
+          const _MatchInfoDivider(),
+          _MatchInfoListRow(
+            icon: Icons.access_time,
+            iconColor: appColors.sunset,
+            label: 'Mødetid',
+            value: meetingTime == null ? '--:--' : _clockTime(meetingTime),
+            valueColor:
+                meetingTime == null ? _mutedTextColor : _primaryTextColor,
+          ),
+        ],
         const _MatchInfoDivider(),
         _MatchInfoListRow(
           icon: Icons.location_on_outlined,

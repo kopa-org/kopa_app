@@ -68,6 +68,9 @@ void main() {
     expect(find.text('Tilmeldt'), findsOneWidget);
     expect(find.text('20:00'), findsOneWidget);
     expect(find.text('Sejr'), findsNWidgets(2));
+    final timeChip = _chipFor(tester, '20:00');
+    expect(timeChip.status, MatchOverviewChipStatus.info);
+    expect(timeChip.icon, isNull);
     expect(find.byIcon(CupertinoIcons.chevron_right), findsNWidgets(3));
     expect(find.byType(Hero), findsNothing);
     expect(
@@ -301,6 +304,55 @@ void main() {
       tester.widget<Text>(find.text('Tabt')).style?.color,
       tester.widget<Text>(find.text('Frameldt')).style?.color,
     );
+  });
+
+  testWidgets('renders training without opponent or result controls',
+      (tester) async {
+    final date = DateTime(2027, 8, 14, 18);
+    final training = MatchDetails(
+      id: 20,
+      type: MatchDetails.trainingType,
+      date: date,
+      location: 'Træningsbanen',
+      category: 'Pasninger',
+      createdAt: date,
+      updatedAt: date,
+      isCurrentUserRegistered: true,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('da'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        theme: ThemeData(
+          extensions: <ThemeExtension<dynamic>>[
+            AppColors.light,
+            AppTextStyles.light,
+          ],
+        ),
+        home: Scaffold(
+          body: AllGamesCard(
+            matches: [training],
+            canManageTeam: true,
+            onMatchTap: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Træning'), findsOneWidget);
+    expect(find.text('Pasninger'), findsOneWidget);
+    expect(find.text('18:00'), findsOneWidget);
+    final timeChip = _chipFor(tester, '18:00');
+    expect(timeChip.status, MatchOverviewChipStatus.info);
+    expect(timeChip.icon, isNull);
+    expect(find.byIcon(CupertinoIcons.calendar), findsOneWidget);
+    expect(find.textContaining('Træningsbanen'), findsOneWidget);
+    expect(find.text('Hjemme'), findsNothing);
+    expect(find.text('Ude'), findsNothing);
+    expect(find.byKey(const ValueKey('match-result-reminder')), findsNothing);
+    expect(find.byKey(const ValueKey('training-entry-20')), findsOneWidget);
   });
 }
 

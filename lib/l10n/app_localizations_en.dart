@@ -367,4 +367,66 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get matchPollErrorTitle => 'Error';
+
+  @override
+  String get eventCreateTitle => 'Create event';
+
+  @override
+  String get eventCreateMatch => 'Create match';
+
+  @override
+  String get eventCreateTraining => 'Create training';
+
+  @override
+  String get eventTypeMatch => 'Match';
+
+  @override
+  String get eventTypeTraining => 'Training';
+
+  @override
+  String get eventTraining => 'Training';
+
+  @override
+  String get eventTrainingCategory => 'Category';
+
+  @override
+  String get eventTrainingCategoryHint => 'E.g. passing, drills or defence';
+
+  @override
+  String get eventCreateChoose => 'What do you want to create?';
+
+  @override
+  String get eventOpenMatch => 'Open match';
+
+  @override
+  String get eventOpenTraining => 'Open training';
+
+  @override
+  String get eventDetailsMatch => 'Match details';
+
+  @override
+  String get eventDetailsTraining => 'Training details';
+
+  @override
+  String get eventTrainingTime => 'Training time';
+
+  @override
+  String get eventCreateTrainingLocationHint => 'E.g. training pitch';
+
+  @override
+  String get eventCreateTrainingMissingFields =>
+      'Enter a location and choose a date and time.';
+
+  @override
+  String get eventCreateTrainingFailed => 'Could not create the training.';
+
+  @override
+  String get eventCreateMatchFailed => 'Could not create the match.';
+
+  @override
+  String get eventCreateFailed => 'The event could not be created.';
+
+  @override
+  String get eventRsvpFailed =>
+      'Could not update your attendance. Please try again.';
 }

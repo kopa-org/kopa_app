@@ -63,6 +63,38 @@ void main() {
     expect(match.hasFinalScore, isFalse);
   });
 
+  test('training has no match result state', () {
+    final date = DateTime(2026, 7, 28, 19);
+    final training = MatchDetails(
+      id: 3,
+      type: MatchDetails.trainingType,
+      date: date,
+      location: 'Training Pitch',
+      createdAt: date,
+      updatedAt: date,
+      homeTeamScore: 1,
+      awayTeamScore: 0,
+    );
+
+    expect(training.isTraining, isTrue);
+    expect(training.hasMatchBeenPlayed, isFalse);
+    expect(training.shouldPromptForResultAt(date.add(const Duration(hours: 1))),
+        isFalse);
+    expect(training.canSetFinalScore(_user(isTeamOwner: true)), isFalse);
+  });
+
+  test('training category is optional and parsed from the API', () {
+    final training = MatchDetails.fromJson({
+      ..._matchJson(),
+      'type': MatchDetails.trainingType,
+      'home_team': null,
+      'away_team': null,
+      'category': 'Pasninger',
+    });
+
+    expect(training.category, 'Pasninger');
+  });
+
   test('score entry is available to owners at any time', () {
     final kickoff = DateTime(2026, 7, 28, 19);
     final owner = _user(isTeamOwner: true);

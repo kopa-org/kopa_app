@@ -1,10 +1,14 @@
+import 'package:kopa/model/event_type.dart';
+
 class CreateMatchCommand {
-  final String firstTeam;
-  final String secondTeam;
+  final String? firstTeam;
+  final String? secondTeam;
   final String location;
   final DateTime? meetingTime;
   final DateTime date;
   final String? notes;
+  final KopaEventType eventType;
+  final String? category;
 
   CreateMatchCommand(
     this.firstTeam,
@@ -12,15 +16,22 @@ class CreateMatchCommand {
     this.location,
     this.meetingTime,
     this.date,
-    this.notes,
-  );
+    this.notes, {
+    this.eventType = KopaEventType.match,
+    this.category,
+  });
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> json = {
-      'home_team': firstTeam,
-      'away_team': secondTeam,
+      'type': eventType.apiValue,
+      if (firstTeam != null && firstTeam!.trim().isNotEmpty)
+        'home_team': firstTeam,
+      if (secondTeam != null && secondTeam!.trim().isNotEmpty)
+        'away_team': secondTeam,
       'location': location,
       'date': date.toUtc().toIso8601String(),
+      if (category != null && category!.trim().isNotEmpty)
+        'category': category!.trim(),
       if (notes != null && notes!.trim().isNotEmpty) 'notes': notes,
     };
 

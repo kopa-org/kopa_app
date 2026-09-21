@@ -4,6 +4,7 @@ import 'package:kopa/component/avatar/team_badge_label.dart';
 import 'package:kopa/component/chip/match_result_badge.dart';
 import 'package:kopa/component/match/match_result_reminder.dart';
 import 'package:kopa/helpers/date_helper.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/team_logo_design.dart';
 import 'package:kopa/theme/app_colors.dart';
@@ -113,6 +114,14 @@ class _GameResultRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (match.isTraining) {
+      return _TrainingEventRow(
+        match: match,
+        onTap: onTap,
+        currentUserId: currentUserId,
+      );
+    }
+
     final appColors =
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
@@ -255,6 +264,137 @@ class _GameResultRow extends StatelessWidget {
   }
 }
 
+class _TrainingEventRow extends StatelessWidget {
+  final MatchDetails match;
+  final VoidCallback onTap;
+  final int? currentUserId;
+
+  const _TrainingEventRow({
+    required this.match,
+    required this.onTap,
+    required this.currentUserId,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final l10n = AppLocalizations.of(context)!;
+    final isDeclined = match.isCurrentUserAttending == false ||
+        (match.attendanceDetailsList ?? []).any(
+          (attendance) =>
+              attendance.userDetails.id == currentUserId &&
+              !attendance.isAttending,
+        );
+    final borderRadius = BorderRadius.circular(Spacing.borderRadiusSmall);
+
+    return Semantics(
+      key: ValueKey('training-entry-${match.id}'),
+      button: true,
+      label: l10n.eventOpenTraining,
+      child: Material(
+        color: Colors.transparent,
+        child: Ink(
+          decoration: BoxDecoration(
+            color: appColors.white,
+            borderRadius: borderRadius,
+            boxShadow: [
+              BoxShadow(
+                color: appColors.black.withValues(alpha: 0.04),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: borderRadius,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(Spacing.md, 12, 12, 12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              CupertinoIcons.calendar,
+                              color: appColors.grey5,
+                              size: 14,
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                DateHelper.getFormattedShortWeekdayDate(
+                                        match.date)
+                                    .toUpperCase(),
+                                style: appTextStyles.buttonTiny.copyWith(
+                                  color: appColors.grey5,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            _TimeBadge(
+                              time: DateHelper.getFormattedTime(match.date),
+                            ),
+                            if (match.isCurrentUserRegistered)
+                              const _AttendanceBadge.registered()
+                            else if (isDeclined)
+                              const _AttendanceBadge.declined(),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          l10n.eventTraining,
+                          style: appTextStyles.body1.copyWith(
+                            color: appColors.dirt,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        if (match.category?.trim().isNotEmpty ?? false) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            match.category!.trim(),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: appTextStyles.body4.copyWith(
+                              color: appColors.grey5,
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 2),
+                        Text(
+                          match.location,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: appTextStyles.body4.copyWith(
+                            color: appColors.grey5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: Spacing.sm),
+                  Icon(
+                    CupertinoIcons.chevron_right,
+                    size: 17,
+                    color: appColors.dirt,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _AttendanceBadge extends StatelessWidget {
   final String label;
   final IconData icon;
@@ -292,9 +432,27 @@ class _StatusBadge extends StatelessWidget {
       return MatchResultBadge(result: result);
     }
 
+    if (status.chipStatus == MatchOverviewChipStatus.info) {
+      return _TimeBadge(time: status.label!);
+    }
+
     return MatchOverviewChip(
       label: status.label!,
       status: status.chipStatus!,
+    );
+  }
+}
+
+class _TimeBadge extends StatelessWidget {
+  final String time;
+
+  const _TimeBadge({required this.time});
+
+  @override
+  Widget build(BuildContext context) {
+    return MatchOverviewChip(
+      label: time,
+      status: MatchOverviewChipStatus.info,
     );
   }
 }

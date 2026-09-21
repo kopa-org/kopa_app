@@ -751,6 +751,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error'**
   String get matchPollErrorTitle;
+
+  /// No description provided for @eventCreateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create event'**
+  String get eventCreateTitle;
+
+  /// No description provided for @eventCreateMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Create match'**
+  String get eventCreateMatch;
+
+  /// No description provided for @eventCreateTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Create training'**
+  String get eventCreateTraining;
+
+  /// No description provided for @eventTypeMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Match'**
+  String get eventTypeMatch;
+
+  /// No description provided for @eventTypeTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Training'**
+  String get eventTypeTraining;
+
+  /// No description provided for @eventTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Training'**
+  String get eventTraining;
+
+  /// No description provided for @eventTrainingCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get eventTrainingCategory;
+
+  /// No description provided for @eventTrainingCategoryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g. passing, drills or defence'**
+  String get eventTrainingCategoryHint;
+
+  /// No description provided for @eventCreateChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'What do you want to create?'**
+  String get eventCreateChoose;
+
+  /// No description provided for @eventOpenMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Open match'**
+  String get eventOpenMatch;
+
+  /// No description provided for @eventOpenTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Open training'**
+  String get eventOpenTraining;
+
+  /// No description provided for @eventDetailsMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Match details'**
+  String get eventDetailsMatch;
+
+  /// No description provided for @eventDetailsTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Training details'**
+  String get eventDetailsTraining;
+
+  /// No description provided for @eventTrainingTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Training time'**
+  String get eventTrainingTime;
+
+  /// No description provided for @eventCreateTrainingLocationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g. training pitch'**
+  String get eventCreateTrainingLocationHint;
+
+  /// No description provided for @eventCreateTrainingMissingFields.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a location and choose a date and time.'**
+  String get eventCreateTrainingMissingFields;
+
+  /// No description provided for @eventCreateTrainingFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create the training.'**
+  String get eventCreateTrainingFailed;
+
+  /// No description provided for @eventCreateMatchFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create the match.'**
+  String get eventCreateMatchFailed;
+
+  /// No description provided for @eventCreateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The event could not be created.'**
+  String get eventCreateFailed;
+
+  /// No description provided for @eventRsvpFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update your attendance. Please try again.'**
+  String get eventRsvpFailed;
 }
 
 class _AppLocalizationsDelegate
