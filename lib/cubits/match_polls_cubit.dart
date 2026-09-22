@@ -28,6 +28,14 @@ class MatchPollsCubit extends Cubit<MatchPollsState> {
     ));
   }
 
+  Future<void> loadFullMatchForPoll() async {
+    if (state.matches.isEmpty) return;
+    final match = await MatchRepository.getMatch(state.matches.first.id);
+    emit(state.copyWith(
+      matches: [match, ...state.matches.skip(1)],
+    ));
+  }
+
   Future<void> load() async {
     emit(state.copyWith(
       status: MatchPollsStatus.loading,
@@ -188,10 +196,7 @@ class MatchPollsCubit extends Cubit<MatchPollsState> {
     return matchPolls.map((poll) {
       return MatchPollRow(
         matchPoll: poll,
-        user: squad.firstWhere(
-          (user) => user.id == poll.playerOfTheMatchDetails.id,
-          orElse: () => poll.playerOfTheMatchDetails,
-        ),
+        playerName: poll.winnerName,
       );
     }).toList();
   }

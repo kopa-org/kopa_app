@@ -446,6 +446,54 @@ abstract class AppLocalizations {
   /// **'The external player could not be added. Please try again.'**
   String get externalPlayerAddFailed;
 
+  /// No description provided for @matchDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete match'**
+  String get matchDelete;
+
+  /// No description provided for @matchEventDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete event'**
+  String get matchEventDelete;
+
+  /// No description provided for @externalPlayerDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete external player'**
+  String get externalPlayerDelete;
+
+  /// No description provided for @matchDeleteConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'This cannot be undone.'**
+  String get matchDeleteConfirmation;
+
+  /// No description provided for @matchDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete. Please try again.'**
+  String get matchDeleteFailed;
+
+  /// No description provided for @externalPlayerDeleteInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'This player is used in match events or MOTM. Remove those first.'**
+  String get externalPlayerDeleteInUse;
+
+  /// No description provided for @matchPollLoadPlayersFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load players for the poll. Please try again.'**
+  String get matchPollLoadPlayersFailed;
+
+  /// No description provided for @matchPollUnknownPlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown player'**
+  String get matchPollUnknownPlayer;
+
   /// No description provided for @matchTimelineKickoff.
   ///
   /// In en, this message translates to:
@@ -739,12 +787,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Saving...'**
   String get matchPollSaving;
-
-  /// No description provided for @matchPollUnknownPlayer.
-  ///
-  /// In en, this message translates to:
-  /// **'Unknown player'**
-  String get matchPollUnknownPlayer;
 
   /// No description provided for @matchPollErrorTitle.
   ///

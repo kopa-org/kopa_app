@@ -83,13 +83,44 @@ void main() {
     final benchHeader = find.text('Bænken (2 spillere)');
     expect(benchHeader, findsOneWidget);
     expect(
-      tester.getRect(find.text('Alice')).top,
+      tester.getRect(find.text('Alice Jensen')).top,
       greaterThan(tester.getRect(benchHeader).top),
     );
     expect(
-      tester.getRect(find.text('Bob')).top,
+      tester.getRect(find.text('Bob Hansen')).top,
       greaterThan(tester.getRect(benchHeader).top),
     );
+  });
+
+  testWidgets('changing formation does not put bench players on the field',
+      (tester) async {
+    FlutterSecureStorage.setMockInitialValues({'lineupDragHintSeen': 'true'});
+    final now = DateTime(2026, 8, 9, 12);
+
+    await tester.pumpWidget(MaterialApp(
+      theme: AppTheme.lightTheme,
+      home: LineupEditorPage(
+        match: _match(attendanceDetailsList: [
+          _attendance(
+            id: 1,
+            user: _user(id: 1, name: 'Alice Jensen', now: now),
+            now: now,
+          ),
+        ]),
+        playerCount: 7,
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Rediger formation (2-3-1)'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Formation 3-2-1'));
+    await tester.pumpAndSettle();
+
+    final benchHeader = find.text('Bænken (1 spillere)');
+    expect(benchHeader, findsOneWidget);
+    expect(tester.getRect(find.text('Alice Jensen')).top,
+        greaterThan(tester.getRect(benchHeader).top));
   });
 
   testWidgets('match-only external players start on the bench', (tester) async {
@@ -120,7 +151,7 @@ void main() {
     final benchHeader = find.text('Bænken (1 spillere)');
     expect(benchHeader, findsOneWidget);
     expect(
-      tester.getRect(find.text('Guest')).top,
+      tester.getRect(find.text('Guest Player')).top,
       greaterThan(tester.getRect(benchHeader).top),
     );
   });
@@ -154,7 +185,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final player = find.text('Alice');
+    final player = find.text('Alice Jensen');
     final emptyBench = find.text('Ingen spillere på bænken');
     final gesture = await tester.startGesture(tester.getRect(player).center);
     await tester.pump(const Duration(milliseconds: 600));
@@ -206,8 +237,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final alice = find.text('Alice');
-    final bob = find.text('Bob');
+    final alice = find.text('Alice Jensen');
+    final bob = find.text('Bob Hansen');
     final aliceCenter = tester.getRect(alice).center;
     final bobCenter = tester.getRect(bob).center;
     expect(aliceCenter.dy, lessThan(bobCenter.dy));
@@ -220,8 +251,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Bænken (0 spillere)'), findsOneWidget);
-    expect(tester.getRect(find.text('Alice')).top,
-        greaterThan(tester.getRect(find.text('Bob')).top));
+    expect(tester.getRect(find.text('Alice Jensen')).top,
+        greaterThan(tester.getRect(find.text('Bob Hansen')).top));
   });
 
   testWidgets('warns before leaving after an unsaved lineup edit',
@@ -278,7 +309,7 @@ void main() {
     await tester.tap(find.text('Open editor'));
     await tester.pumpAndSettle();
 
-    final player = find.text('Alice');
+    final player = find.text('Alice Jensen');
     final emptyBench = find.text('Ingen spillere på bænken');
     final gesture = await tester.startGesture(tester.getRect(player).center);
     await tester.pump(const Duration(milliseconds: 600));

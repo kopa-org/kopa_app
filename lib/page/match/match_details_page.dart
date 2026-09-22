@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kopa/component/button/full_width_button.dart';
+import 'package:kopa/component/button/button.dart';
 import 'package:kopa/component/card/player_positions_card.dart';
 import 'package:kopa/component/dialog/lineup_visibility_confirmation_dialog.dart';
 import 'package:kopa/component/error_message.dart';
@@ -37,7 +38,8 @@ import 'package:kopa/component/timeline/timeline_item.dart';
 import 'package:kopa/component/card/match_hero_card.dart';
 import 'package:kopa/component/info_row/info_row.dart';
 import 'package:kopa/component/list_item/player_list_item.dart';
-import 'package:kopa/component/match/match_result_action_card.dart';
+import 'package:kopa/component/match/match_poll_details_card.dart';
+import 'package:kopa/component/match/player_of_match_summary_card.dart';
 import 'package:kopa/config/app_feature_flags.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -233,16 +235,34 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
               onPressed: () => setMatchScore(matchDetails),
             )
           : null,
+      bottomAction: canManageResult && !matchDetails.hasFinalScore
+          ? Button(
+              buttonText: l10n.matchRegisterResult,
+              icon: CupertinoIcons.pencil,
+              width: double.infinity,
+              onPressed: () => setMatchScore(matchDetails),
+            )
+          : null,
     );
+    final deleteMatchAction = canManageTeam
+        ? IconButton(
+            key: const ValueKey('delete-match-action'),
+            tooltip: l10n.matchDelete,
+            icon: const Icon(CupertinoIcons.delete),
+            onPressed: () => _deleteMatch(matchDetails),
+          )
+        : null;
 
     if (hasBeenPlayed && !isTraining) {
       return PostMatchDetailsPage(
         match: matchDetails,
         user: user,
         heroCard: heroCard,
+        headerAction: deleteMatchAction,
         attendanceList: _buildAttendanceList(matchDetails, squad, user),
         onRefresh: _refreshMatchAndSquad,
         onAddEvent: () => addMatchEvent(user),
+        onDeleteEvent: _deleteMatchEvent,
         attendanceActionBar:
             canManageTeam ? _buildExternalPlayerActionBar(matchDetails) : null,
         onSetMatchScore: () => setMatchScore(matchDetails),
@@ -262,6 +282,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       selectedSegment: _selectedSegment,
       onSegmentChanged: _selectSegment,
       heroCard: heroCard,
+      headerAction: deleteMatchAction,
       usePrematchLayout: true,
       attendanceHeader: switch (rsvpState) {
         _MatchRsvpState.pending => _PrematchRsvpDecisionBar(
@@ -301,11 +322,22 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       timelineItems:
           isTraining ? const [] : _buildMatchEventsPreviewItems(l10n),
       overviewWidgets: [
-        if (!isTraining && canManageTeam && !matchDetails.hasFinalScore) ...[
-          SizedBox(height: Spacing.lg),
-          MatchResultActionCard(
-            onPressed: () => setMatchScore(matchDetails),
-          ),
+        if (!isTraining) ...[
+          const SizedBox(height: Spacing.lg),
+          if (matchDetails.matchPollDetails == null)
+            PlayerOfMatchSummaryCard(
+              playerName: null,
+              onPressed: canManageTeam
+                  ? () => _openCreateMatchPoll(matchDetails, squad)
+                  : null,
+            )
+          else
+            MatchPollDetailsCard(
+              poll: matchDetails.matchPollDetails!,
+              onEdit: canManageTeam
+                  ? () => _openEditMatchPoll(matchDetails, squad)
+                  : null,
+            ),
           const SizedBox(height: Spacing.lg),
         ],
       ],
@@ -396,11 +428,6 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         icon: Icons.sports_soccer,
       ),
       TimelineItem(
-        title: l10n.matchTimelineHalftime,
-        time: "45'",
-        icon: Icons.pause,
-      ),
-      TimelineItem(
         title: l10n.matchTimelineSubstitution,
         subtitle: l10n.matchTimelineSubstitution,
         time: "67'",
@@ -480,6 +507,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         .map(
           (vote) => UserVote(
             userId: vote.userId,
+            externalPlayerId: vote.externalPlayerId,
             votes: vote.numberOfVotes,
           ),
         )
@@ -787,7 +815,14 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
               (player) => PlayerListItem(
                 name: player.name,
                 subtitle: l10n.externalPlayerSubstitute,
-                trailing: const Icon(CupertinoIcons.person_add),
+                trailing: _currentUser?.canManageTeam == true
+                    ? IconButton(
+                        key: ValueKey('delete-external-player-${player.id}'),
+                        tooltip: l10n.externalPlayerDelete,
+                        icon: const Icon(CupertinoIcons.delete),
+                        onPressed: () => _deleteExternalPlayer(player.id),
+                      )
+                    : const Icon(CupertinoIcons.person_add),
               ),
             )
             .toList(),
@@ -1204,6 +1239,81 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     await _refreshMatchAndSquad();
   }
 
+  Future<bool> _confirmDeletion(String title) async {
+    final l10n = AppLocalizations.of(context)!;
+    return await showCupertinoDialog<bool>(
+          context: context,
+          builder: (dialogContext) => CupertinoAlertDialog(
+            title: Text(title),
+            content: Text(l10n.matchDeleteConfirmation),
+            actions: [
+              CupertinoDialogAction(
+                child: Text(l10n.commonCancel),
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+              ),
+              CupertinoDialogAction(
+                isDestructiveAction: true,
+                child: Text(l10n.commonDelete),
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
+
+  Future<void> _showDeletionError(String message) async {
+    if (!mounted) return;
+    await showCupertinoDialog<void>(
+      context: context,
+      builder: (dialogContext) => CupertinoAlertDialog(
+        content: Text(message),
+        actions: [
+          CupertinoDialogAction(
+            child: Text(AppLocalizations.of(context)!.commonOk),
+            onPressed: () => Navigator.of(dialogContext).pop(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _deleteMatch(MatchDetails match) async {
+    final l10n = AppLocalizations.of(context)!;
+    if (!await _confirmDeletion(l10n.matchDelete)) return;
+    try {
+      await MatchRepository.deleteMatch(match.id);
+      if (!mounted) return;
+      GoRouter.of(context).go(AppRouter.match);
+    } catch (_) {
+      await _showDeletionError(l10n.matchDeleteFailed);
+    }
+  }
+
+  Future<void> _deleteMatchEvent(int id) async {
+    final l10n = AppLocalizations.of(context)!;
+    if (!await _confirmDeletion(l10n.matchEventDelete)) return;
+    try {
+      await MatchRepository.deleteMatchEvent(id);
+      if (mounted) await _refreshMatchAndSquad();
+    } catch (_) {
+      await _showDeletionError(l10n.matchDeleteFailed);
+    }
+  }
+
+  Future<void> _deleteExternalPlayer(int id) async {
+    final l10n = AppLocalizations.of(context)!;
+    if (!await _confirmDeletion(l10n.externalPlayerDelete)) return;
+    try {
+      await MatchRepository.deleteExternalPlayer(id);
+      if (mounted) await _refreshMatchAndSquad();
+    } on StateError {
+      await _showDeletionError(l10n.externalPlayerDeleteInUse);
+    } catch (_) {
+      await _showDeletionError(l10n.matchDeleteFailed);
+    }
+  }
+
   Future<void> addMatchEvent(UserDetails currentUserData) async {
     try {
       final data = _matchAndSquadData ?? await _fetchMatchAndSquad();
@@ -1451,30 +1561,15 @@ class _PrematchRsvpInlineStatus extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 8),
-          const Icon(
-            CupertinoIcons.arrow_left,
-            color: Color(0xFF877B70),
-            size: 16,
-          ),
-          const SizedBox(width: 8),
-          CupertinoButton(
+          const SizedBox(width: 12),
+          _PrematchRsvpButton(
             key: const ValueKey('match-details-rsvp-decline-action'),
-            minimumSize: const Size(0, 18),
-            padding: EdgeInsets.zero,
-            onPressed: isSaving ? null : onDecline,
-            child: isSaving
-                ? const CupertinoActivityIndicator(radius: 8)
-                : Text(
-                    l10n.matchDetailsRsvpDeclineAction,
-                    style: styles.body3.copyWith(
-                      color: const Color(0xFF877B70),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      height: 18 / 14,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
+            label: l10n.matchDetailsRsvpDeclineAction,
+            foregroundColor: const Color(0xFF524438),
+            backgroundColor: Colors.transparent,
+            borderColor: const Color(0xFF524438),
+            isSaving: isSaving,
+            onPressed: onDecline,
           ),
         ],
       ),
@@ -1522,30 +1617,14 @@ class _PrematchRsvpDeclinedInlineStatus extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 8),
-          const Icon(
-            CupertinoIcons.arrow_left,
-            color: Color(0xFF877B70),
-            size: 16,
-          ),
-          const SizedBox(width: 8),
-          CupertinoButton(
+          const SizedBox(width: 12),
+          _PrematchRsvpButton(
             key: const ValueKey('match-details-rsvp-accept-action'),
-            minimumSize: const Size(0, 18),
-            padding: EdgeInsets.zero,
-            onPressed: isSaving ? null : onAccept,
-            child: isSaving
-                ? const CupertinoActivityIndicator(radius: 8)
-                : Text(
-                    l10n.matchDetailsRsvpAccept,
-                    style: styles.body3.copyWith(
-                      color: const Color(0xFF877B70),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      height: 18 / 14,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
+            label: l10n.matchDetailsRsvpAccept,
+            foregroundColor: Colors.white,
+            backgroundColor: const Color(0xFF00964E),
+            isSaving: isSaving,
+            onPressed: onAccept,
           ),
         ],
       ),
@@ -1563,6 +1642,7 @@ class _PrematchRsvpButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   const _PrematchRsvpButton({
+    super.key,
     required this.label,
     required this.foregroundColor,
     required this.backgroundColor,

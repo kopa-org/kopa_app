@@ -44,7 +44,8 @@ class MatchPollsRepository {
     List<CreateMatchPollUserVoteCommand> createMatchPollUserVoteCommands =
         userVotes
             .map((userVote) => CreateMatchPollUserVoteCommand(
-                  userId: userVote.userId.toString(),
+                  userId: userVote.userId?.toString(),
+                  externalPlayerId: userVote.externalPlayerId?.toString(),
                   userVotes: userVote.votes.toString(),
                 ))
             .toList();
@@ -77,7 +78,10 @@ class MatchPollsRepository {
           userVotes
               .map(
                 (userVote) => {
-                  'user_id': userVote.userId.toString(),
+                  if (userVote.userId != null)
+                    'user_id': userVote.userId.toString(),
+                  if (userVote.externalPlayerId != null)
+                    'external_player_id': userVote.externalPlayerId.toString(),
                   'user_votes': userVote.votes.toString(),
                 },
               )

@@ -44,10 +44,12 @@ PageRoute<T> createMatchPollPageRoute<T>({required Widget child}) {
 
 class CreateMatchPollPage extends StatefulWidget {
   final MatchPollDetails? initialPoll;
+  final bool loadFullMatch;
 
   const CreateMatchPollPage({
     super.key,
     this.initialPoll,
+    this.loadFullMatch = false,
   });
 
   bool get isEditing => initialPoll != null;
@@ -58,10 +60,29 @@ class CreateMatchPollPage extends StatefulWidget {
 
 class _CreateMatchPollPageState extends State<CreateMatchPollPage> {
   int selectedMatchIndex = 0;
+  bool _loadingFullMatch = false;
 
   @override
   void initState() {
     super.initState();
+    if (widget.loadFullMatch) {
+      _loadingFullMatch = true;
+      _loadFullMatch();
+    }
+  }
+
+  Future<void> _loadFullMatch() async {
+    try {
+      await context.read<MatchPollsCubit>().loadFullMatchForPoll();
+    } catch (_) {
+      if (mounted) {
+        await _showError(
+            AppLocalizations.of(context)!.matchPollLoadPlayersFailed);
+        if (mounted) Navigator.of(context).pop();
+      }
+    } finally {
+      if (mounted) setState(() => _loadingFullMatch = false);
+    }
   }
 
   @override
@@ -185,7 +206,8 @@ class _CreateMatchPollPageState extends State<CreateMatchPollPage> {
                           ? l10n.matchPollSaveAction
                           : l10n.matchPollCreateAction),
                   width: double.infinity,
-                  enabled: !state.isSubmitting && hasMatches,
+                  enabled:
+                      !state.isSubmitting && hasMatches && !_loadingFullMatch,
                   onPressed: () => _submitPoll(safeIdx, userVotes),
                 ),
               ),
@@ -250,10 +272,24 @@ class _CreateMatchPollPageState extends State<CreateMatchPollPage> {
         userId: user.id,
         userName: user.name,
         isUserPlayerOfTheMatch:
-            widget.initialPoll?.playerOfTheMatchDetails.id == user.id,
+            widget.initialPoll?.playerOfTheMatchDetails?.id == user.id,
       );
 
       matchPollRowItems.add(matchPollItem);
+    }
+
+    if (state.matches.isNotEmpty) {
+      final match = state.matches[_safeIndex(state.matches.length)];
+      for (final player in match.externalPlayerDetailsList ?? const []) {
+        matchPollRowItems.add(MatchPollRowItem(
+          userId: player.id,
+          userName: player.name,
+          isExternal: true,
+          isUserPlayerOfTheMatch:
+              widget.initialPoll?.playerOfTheMatchExternalPlayerDetails?.id ==
+                  player.id,
+        ));
+      }
     }
 
     return matchPollRowItems;

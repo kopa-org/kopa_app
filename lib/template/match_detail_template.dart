@@ -15,6 +15,7 @@ enum MatchDetailSegment {
 
 class MatchDetailTemplate extends StatelessWidget {
   final Widget heroCard;
+  final Widget? headerAction;
   final List<Widget> overviewWidgets;
   final List<Widget> infoRows;
   final List<Widget> attendanceList;
@@ -47,6 +48,7 @@ class MatchDetailTemplate extends StatelessWidget {
   const MatchDetailTemplate({
     super.key,
     required this.heroCard,
+    this.headerAction,
     this.overviewWidgets = const [],
     this.infoRows = const [],
     this.attendanceList = const [],
@@ -121,7 +123,7 @@ class MatchDetailTemplate extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _MatchDetailsHeader(title: pageTitle),
+              _MatchDetailsHeader(title: pageTitle, action: headerAction),
               heroCard,
               if (attendanceHeader != null) ...[
                 SizedBox(height: segmentSpacing),
@@ -349,8 +351,9 @@ class _MatchDetailSegmentButton extends StatelessWidget {
 
 class _MatchDetailsHeader extends StatelessWidget {
   final String title;
+  final Widget? action;
 
-  const _MatchDetailsHeader({required this.title});
+  const _MatchDetailsHeader({required this.title, this.action});
 
   @override
   Widget build(BuildContext context) {
@@ -380,6 +383,7 @@ class _MatchDetailsHeader extends StatelessWidget {
               style: styles.h5.copyWith(fontWeight: FontWeight.w800),
             ),
           ),
+          if (action != null) action!,
         ],
       ),
     );

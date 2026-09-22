@@ -10,6 +10,7 @@ class TimelineItem extends StatelessWidget {
   final IconData icon;
   final bool isLast;
   final Color? iconColor;
+  final Widget? trailing;
 
   const TimelineItem({
     super.key,
@@ -19,6 +20,7 @@ class TimelineItem extends StatelessWidget {
     required this.icon,
     this.isLast = false,
     this.iconColor,
+    this.trailing,
   });
 
   @override
@@ -108,6 +110,7 @@ class TimelineItem extends StatelessWidget {
               ),
             ),
           ),
+          if (trailing != null) trailing!,
         ],
       ),
     );

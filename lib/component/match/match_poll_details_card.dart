@@ -23,7 +23,10 @@ class MatchPollDetailsCard extends StatelessWidget {
     final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final styles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final winner = poll.playerOfTheMatchDetails;
+    final winnerId = poll.playerOfTheMatchDetails?.id ??
+        -(poll.playerOfTheMatchExternalPlayerDetails?.id ?? 0);
+    final votes = [...poll.matchPollUserVotesDetails]
+      ..sort((a, b) => b.numberOfVotes.compareTo(a.numberOfVotes));
 
     return KopaCard(
       padding: const EdgeInsets.all(Spacing.md),
@@ -58,7 +61,12 @@ class MatchPollDetailsCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      l10n.matchPollTotalVotes(poll.playerOfTheMatchVotes),
+                      l10n.matchPollTotalVotes(
+                        votes.isEmpty
+                            ? poll.playerOfTheMatchVotes
+                            : votes.fold<int>(
+                                0, (sum, vote) => sum + vote.numberOfVotes),
+                      ),
                       style: styles.caption,
                     ),
                   ],
@@ -74,18 +82,37 @@ class MatchPollDetailsCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: Spacing.md),
-          Padding(
-            key: const ValueKey('match-poll-winner'),
-            padding: const EdgeInsets.only(bottom: Spacing.sm),
-            child: _MatchPollVoteRow(
-              row: _MatchPollRowData(
-                userId: winner.id,
-                userName: winner.name,
-                votes: poll.playerOfTheMatchVotes,
+          if (votes.isEmpty)
+            Padding(
+              key: const ValueKey('match-poll-winner'),
+              padding: const EdgeInsets.only(bottom: Spacing.sm),
+              child: _MatchPollVoteRow(
+                row: _MatchPollRowData(
+                  userId: winnerId,
+                  userName: poll.winnerName,
+                  votes: poll.playerOfTheMatchVotes,
+                ),
+                winnerId: winnerId,
               ),
-              winnerId: winner.id,
             ),
-          ),
+          for (final vote in votes)
+            Padding(
+              key: ValueKey(
+                  'match-poll-vote-${vote.userId ?? -vote.externalPlayerId!}'),
+              padding: const EdgeInsets.only(bottom: Spacing.sm),
+              child: _MatchPollVoteRow(
+                row: _MatchPollRowData(
+                  userId: vote.userId ?? -vote.externalPlayerId!,
+                  userName: vote.userName ??
+                      vote.externalPlayerName ??
+                      ((vote.userId ?? -vote.externalPlayerId!) == winnerId
+                          ? poll.winnerName
+                          : l10n.matchPollUnknownPlayer),
+                  votes: vote.numberOfVotes,
+                ),
+                winnerId: winnerId,
+              ),
+            ),
         ],
       ),
     );

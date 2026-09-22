@@ -9,7 +9,11 @@ class UserVotesState extends ChangeNotifier {
   UserVotesState({Iterable<UserVote> initialVotes = const []}) {
     _userVotes.addAll(
       initialVotes.map(
-        (vote) => UserVote(userId: vote.userId, votes: vote.votes),
+        (vote) => UserVote(
+          userId: vote.userId,
+          externalPlayerId: vote.externalPlayerId,
+          votes: vote.votes,
+        ),
       ),
     );
   }
@@ -18,29 +22,33 @@ class UserVotesState extends ChangeNotifier {
       UnmodifiableListView(_userVotes);
 
   int votesForUser(int userId) {
-    final index = _userVotes.indexWhere((x) => x.userId == userId);
+    final index = _userVotes.indexWhere((x) => x.stableId == userId);
     return index == -1 ? 0 : _userVotes[index].votes;
   }
 
   void addUserVote(UserVote userVote) {
     bool doesUserHaveNotVotesYet =
-        !_userVotes.any((x) => x.userId == userVote.userId);
+        !_userVotes.any((x) => x.stableId == userVote.stableId);
 
     if (doesUserHaveNotVotesYet) {
       _userVotes.add(userVote);
       notifyListeners();
     } else {
-      updateUserVote(userVote.userId, userVote.votes);
+      updateUserVote(userVote.stableId, userVote.votes);
     }
   }
 
   void updateUserVote(int userId, int votes) {
-    final index = _userVotes.indexWhere((x) => x.userId == userId);
+    final index = _userVotes.indexWhere((x) => x.stableId == userId);
 
     if (votes == 0) {
-      _userVotes.removeWhere((x) => x.userId == userId);
+      _userVotes.removeWhere((x) => x.stableId == userId);
     } else if (index == -1) {
-      _userVotes.add(UserVote(userId: userId, votes: votes));
+      _userVotes.add(UserVote(
+        userId: userId > 0 ? userId : null,
+        externalPlayerId: userId < 0 ? -userId : null,
+        votes: votes,
+      ));
     } else {
       _userVotes[index].setVotes(votes);
     }

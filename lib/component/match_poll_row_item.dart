@@ -11,6 +11,7 @@ class MatchPollRowItem extends StatelessWidget {
   final bool disabled;
   final int userId;
   final String userName;
+  final bool isExternal;
   final bool isUserPlayerOfTheMatch;
 
   const MatchPollRowItem({
@@ -18,6 +19,7 @@ class MatchPollRowItem extends StatelessWidget {
     this.disabled = false,
     required this.userId,
     required this.userName,
+    this.isExternal = false,
     this.isUserPlayerOfTheMatch = false,
   });
 
@@ -28,7 +30,8 @@ class MatchPollRowItem extends StatelessWidget {
     final appTextStyles =
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
     final votesState = context.watch<UserVotesState>();
-    final votes = votesState.votesForUser(userId);
+    final stableId = isExternal ? -userId : userId;
+    final votes = votesState.votesForUser(stableId);
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -74,7 +77,9 @@ class MatchPollRowItem extends StatelessWidget {
             votes: votes,
             disabled: disabled,
             onChanged: (nextVotes) {
-              context.read<UserVotesState>().updateUserVote(userId, nextVotes);
+              context
+                  .read<UserVotesState>()
+                  .updateUserVote(stableId, nextVotes);
             },
           ),
         ],

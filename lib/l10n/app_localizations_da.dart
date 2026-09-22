@@ -190,6 +190,32 @@ class AppLocalizationsDa extends AppLocalizations {
       'Lånespilleren kunne ikke tilføjes. Prøv igen.';
 
   @override
+  String get matchDelete => 'Slet kamp';
+
+  @override
+  String get matchEventDelete => 'Slet hændelse';
+
+  @override
+  String get externalPlayerDelete => 'Slet lånespiller';
+
+  @override
+  String get matchDeleteConfirmation => 'Dette kan ikke fortrydes.';
+
+  @override
+  String get matchDeleteFailed => 'Kunne ikke slette. Prøv igen.';
+
+  @override
+  String get externalPlayerDeleteInUse =>
+      'Lånespilleren bruges i kampbegivenheder eller MOTM. Fjern dem først.';
+
+  @override
+  String get matchPollLoadPlayersFailed =>
+      'Kunne ikke hente spillere til afstemningen. Prøv igen.';
+
+  @override
+  String get matchPollUnknownPlayer => 'Ukendt spiller';
+
+  @override
   String get matchTimelineKickoff => 'Kampstart';
 
   @override
@@ -359,9 +385,6 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String get matchPollSaving => 'Gemmer...';
-
-  @override
-  String get matchPollUnknownPlayer => 'Ukendt spiller';
 
   @override
   String get matchPollErrorTitle => 'Fejl';

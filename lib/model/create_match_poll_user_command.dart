@@ -1,13 +1,15 @@
 class CreateMatchPollUserVoteCommand {
-  String userId;
+  String? userId;
+  String? externalPlayerId;
   String userVotes;
 
   CreateMatchPollUserVoteCommand(
-      {required this.userId, required this.userVotes});
+      {this.userId, this.externalPlayerId, required this.userVotes});
 
   Map<String, dynamic> toJson() {
     return {
-      'user_id': userId,
+      if (userId != null) 'user_id': userId,
+      if (externalPlayerId != null) 'external_player_id': externalPlayerId,
       'user_votes': userVotes,
     };
   }

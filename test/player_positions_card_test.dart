@@ -64,7 +64,7 @@ void main() {
       ),
     );
 
-    final nicklasCenter = tester.getCenter(find.text('Nicklas'));
+    final nicklasCenter = tester.getCenter(find.text('Nicklas Hansen'));
     final goalkeeperCenter = tester.getCenter(find.text('MM'));
 
     expect(nicklasCenter.dy, greaterThan(goalkeeperCenter.dy + 80));

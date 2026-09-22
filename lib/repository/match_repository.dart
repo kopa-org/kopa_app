@@ -380,6 +380,19 @@ class MatchRepository {
     return ExternalPlayerDetails.fromJson(json);
   }
 
+  static Future<void> deleteExternalPlayer(int playerId) async {
+    final url =
+        Uri.parse('${ApiConfig.baseUrl}/match/external_player/$playerId');
+    final response = await _apiClient.delete(url);
+    if (response.statusCode == 409) {
+      throw StateError('external_player_in_use');
+    }
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete external player');
+    }
+    invalidateMatchSummaries();
+  }
+
   static Future<List<int>> createMatchEvents(
       List<CreateMatchEventCommand> createMatchEventCommands) async {
     final url = Uri.parse('${ApiConfig.baseUrl}/match/event');

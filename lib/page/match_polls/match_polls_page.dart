@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopa/state/user_votes_state.dart';
 import 'package:provider/provider.dart';
@@ -7,6 +8,7 @@ import 'package:kopa/page/match_polls/create_match_poll_page.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/match_polls_cubit.dart';
 import 'package:kopa/cubits/match_polls_state.dart';
+import 'package:kopa/component/match/match_poll_details_card.dart';
 
 class MatchPollsListPage extends StatefulWidget {
   const MatchPollsListPage({super.key});
@@ -99,16 +101,39 @@ class _MatchPollsListView extends StatelessWidget {
                   children: List.generate(state.rows.length, (index) {
                     final row = state.rows[index];
                     final matchPoll = row.matchPoll;
-                    final user = row.user;
 
                     return CupertinoListTile(
+                      onTap: () => showCupertinoModalPopup<void>(
+                        context: context,
+                        builder: (_) => Material(
+                          type: MaterialType.transparency,
+                          child: SafeArea(
+                            child: Align(
+                              alignment: Alignment.bottomCenter,
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    maxHeight:
+                                        MediaQuery.sizeOf(context).height * 0.7,
+                                  ),
+                                  child: SingleChildScrollView(
+                                    child:
+                                        MatchPollDetailsCard(poll: matchPoll),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                       padding: const EdgeInsets.only(
                         top: 20.0,
                         bottom: 20.0,
                         left: 20,
                         right: 20,
                       ),
-                      title: Text(user.name),
+                      title: Text(row.playerName),
                       subtitle: Text(
                         '${_matchNameFor(state, matchPoll.eventId)} - d. ${DateHelper.getFormattedDate(matchPoll.createdAt)}',
                       ),
@@ -133,7 +158,7 @@ class _MatchPollsListView extends StatelessWidget {
           value: context.read<MatchPollsCubit>(),
           child: ChangeNotifierProvider(
             create: (context) => UserVotesState(),
-            child: const CreateMatchPollPage(),
+            child: const CreateMatchPollPage(loadFullMatch: true),
           ),
         ),
       ),

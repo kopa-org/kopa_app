@@ -334,20 +334,23 @@ class _LineupEditorPageState extends State<LineupEditorPage> {
 
     setState(() {
       _hasUnsavedChanges = true;
-      final existing = [
-        ..._starters.whereType<_LineupPlayer>(),
-        ..._bench,
-      ];
+      final existingStarters = List<_LineupPlayer?>.from(_starters);
+      final existingBench = List<_LineupPlayer>.from(_bench);
       _formationLabel = selected;
       _formation = PlayerFormation.fromString(
         _formationLabel,
         playerCount: widget.playerCount,
       );
       _starters = List<_LineupPlayer?>.filled(_formation.slots.length, null);
-      for (var i = 0; i < _starters.length && i < existing.length; i++) {
-        _starters[i] = existing[i].copyWith(selected: true);
+      for (var i = 0;
+          i < _starters.length && i < existingStarters.length;
+          i++) {
+        _starters[i] = existingStarters[i];
       }
-      _bench = existing.skip(_starters.length).toList();
+      _bench = [
+        ...existingBench,
+        ...existingStarters.skip(_starters.length).whereType<_LineupPlayer>(),
+      ];
       _sortBench();
     });
   }
@@ -657,7 +660,7 @@ class _BenchSection extends StatelessWidget {
                 )
               else
                 SizedBox(
-                  height: 98,
+                  height: 114,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: bench.length,
@@ -755,14 +758,15 @@ class _PlayerBadge extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Text(
-              _firstName(name),
-              maxLines: 1,
+              name,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: styles.caption3.copyWith(
                 color: const Color(0xFF105230),
                 fontWeight: FontWeight.w900,
-                fontSize: 11,
+                fontSize: 9,
+                height: 1.05,
               ),
             ),
           ),
@@ -838,7 +842,7 @@ class _BenchPlayerCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final card = Container(
-      width: 106,
+      width: 122,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: colors.white,
@@ -862,8 +866,8 @@ class _BenchPlayerCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            _firstName(player.player.name),
-            maxLines: 1,
+            player.player.name,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: styles.caption2.copyWith(
               color: colors.dirt,
@@ -1127,12 +1131,6 @@ class _LineupDragData {
     required this.player,
     this.fromSlot,
   });
-}
-
-String _firstName(String name) {
-  final trimmed = name.trim();
-  if (trimmed.isEmpty) return '?';
-  return trimmed.split(RegExp(r'\s+')).first;
 }
 
 String _positionShortLabel(String? position) {

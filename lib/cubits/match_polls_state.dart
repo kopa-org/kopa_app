@@ -9,15 +9,15 @@ const Object _unset = Object();
 
 class MatchPollRow extends Equatable {
   final MatchPollDetails matchPoll;
-  final UserDetails user;
+  final String playerName;
 
   const MatchPollRow({
     required this.matchPoll,
-    required this.user,
+    required this.playerName,
   });
 
   @override
-  List<Object?> get props => [matchPoll, user];
+  List<Object?> get props => [matchPoll, playerName];
 }
 
 class MatchPollsState extends Equatable {

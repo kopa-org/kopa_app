@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:kopa/component/card/kopa_card.dart';
 import 'package:kopa/component/match/match_poll_details_card.dart';
 import 'package:kopa/component/match/player_of_match_summary_card.dart';
-import 'package:kopa/component/match/match_result_action_card.dart';
 import 'package:kopa/component/timeline/timeline_item.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/model/match_details.dart';
@@ -19,9 +18,11 @@ class PostMatchDetailsPage extends StatelessWidget {
   final MatchDetails match;
   final UserDetails user;
   final Widget heroCard;
+  final Widget? headerAction;
   final List<Widget> attendanceList;
   final Future<void> Function()? onRefresh;
   final VoidCallback onAddEvent;
+  final ValueChanged<int>? onDeleteEvent;
   final Widget? attendanceActionBar;
   final VoidCallback onSetMatchScore;
   final VoidCallback onCreateMatchPoll;
@@ -36,8 +37,10 @@ class PostMatchDetailsPage extends StatelessWidget {
     required this.match,
     required this.user,
     required this.heroCard,
+    this.headerAction,
     required this.attendanceList,
     required this.onAddEvent,
+    this.onDeleteEvent,
     this.attendanceActionBar,
     required this.onSetMatchScore,
     required this.onCreateMatchPoll,
@@ -58,6 +61,7 @@ class PostMatchDetailsPage extends StatelessWidget {
       selectedSegment: selectedSegment,
       onSegmentChanged: onSegmentChanged,
       heroCard: heroCard,
+      headerAction: headerAction,
       overviewTitle: 'Efter kampen',
       attendanceTitle: 'Tilmeldte',
       timelineTitle: 'Kampbegivenheder',
@@ -66,24 +70,20 @@ class PostMatchDetailsPage extends StatelessWidget {
       showTimelineSegment: false,
       timelineEmptyMessage: 'Ingen kampbegivenheder registreret endnu.',
       overviewWidgets: [
-        if (user.isTeamOwner && !match.hasFinalScore) ...[
-          MatchResultActionCard(onPressed: onSetMatchScore),
-          const SizedBox(height: Spacing.lg),
-        ],
         if (match.matchPollDetails == null)
           PlayerOfMatchSummaryCard(
             playerName: null,
-            onPressed: user.isTeamOwner ? onCreateMatchPoll : null,
+            onPressed: user.canManageTeam ? onCreateMatchPoll : null,
           )
         else
           MatchPollDetailsCard(
             poll: match.matchPollDetails!,
-            onEdit: user.isTeamOwner ? onEditMatchPoll : null,
+            onEdit: user.canManageTeam ? onEditMatchPoll : null,
           ),
         const SizedBox(height: Spacing.lg),
         _MatchTimelineSection(
           items: _buildTimelineItems(match, l10n),
-          canAddEvent: user.isTeamOwner,
+          canAddEvent: user.canManageTeam,
           onAddEvent: onAddEvent,
         ),
       ],
@@ -113,12 +113,6 @@ class PostMatchDetailsPage extends StatelessWidget {
       ...(match.matchEventDetailsList ?? const [])
           .map(_MatchTimelineEntry.event),
       _MatchTimelineEntry.phase(
-        minute: 45,
-        sortOrder: 1,
-        title: l10n.matchTimelineHalftime,
-        icon: Icons.pause,
-      ),
-      _MatchTimelineEntry.phase(
         minute: 90,
         sortOrder: 1,
         title: l10n.matchTimelineFullTime,
@@ -140,6 +134,14 @@ class PostMatchDetailsPage extends StatelessWidget {
         iconColor: item.iconColor,
         isLast: entry.$1 == entries.length - 1,
         subtitle: item.subtitle,
+        trailing: item.eventId != null && onDeleteEvent != null
+            ? IconButton(
+                key: ValueKey('delete-match-event-${item.eventId}'),
+                tooltip: l10n.commonDelete,
+                icon: const Icon(CupertinoIcons.delete),
+                onPressed: () => onDeleteEvent!(item.eventId!),
+              )
+            : null,
       );
     }).toList();
   }
@@ -153,6 +155,7 @@ class _MatchTimelineEntry {
   final String time;
   final IconData icon;
   final Color? iconColor;
+  final int? eventId;
 
   const _MatchTimelineEntry({
     required this.minute,
@@ -162,6 +165,7 @@ class _MatchTimelineEntry {
     required this.icon,
     this.subtitle,
     this.iconColor,
+    this.eventId,
   });
 
   factory _MatchTimelineEntry.phase({
@@ -190,6 +194,7 @@ class _MatchTimelineEntry {
       time: item.timeLabel,
       icon: item.icon,
       iconColor: item.iconColor,
+      eventId: event.id,
     );
   }
 }

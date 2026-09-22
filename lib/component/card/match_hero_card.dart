@@ -13,6 +13,7 @@ class MatchHeroCard extends StatelessWidget {
   final MatchDetails match;
   final VoidCallback? onTap;
   final Widget? topRightAction;
+  final Widget? bottomAction;
   final bool animateCard;
   final String? heroTag;
   final String? ownTeamName;
@@ -23,6 +24,7 @@ class MatchHeroCard extends StatelessWidget {
     required this.match,
     this.onTap,
     this.topRightAction,
+    this.bottomAction,
     this.animateCard = true,
     this.heroTag,
     this.ownTeamName,
@@ -42,6 +44,7 @@ class MatchHeroCard extends StatelessWidget {
       onTap: onTap,
       padding: EdgeInsets.zero,
       borderRadius: Spacing.borderRadiusLargeIncreased,
+      color: match.isTraining ? appColors.lightSky55 : null,
       child: match.isTraining
           ? _TrainingHeroContent(match: match, title: l10n.eventTraining)
           : Column(
@@ -106,6 +109,11 @@ class MatchHeroCard extends StatelessWidget {
                     ],
                   ),
                 ),
+                if (bottomAction != null)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                    child: bottomAction!,
+                  ),
               ],
             ),
     );
@@ -172,12 +180,12 @@ class _TrainingHeroContent extends StatelessWidget {
             width: 52,
             height: 52,
             decoration: BoxDecoration(
-              color: appColors.lightGrass,
+              color: appColors.lightSky65,
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.fitness_center,
-              color: appColors.grass,
+              color: appColors.infoForeground,
               size: 28,
             ),
           ),

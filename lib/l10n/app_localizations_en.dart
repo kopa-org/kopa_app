@@ -192,6 +192,32 @@ class AppLocalizationsEn extends AppLocalizations {
       'The external player could not be added. Please try again.';
 
   @override
+  String get matchDelete => 'Delete match';
+
+  @override
+  String get matchEventDelete => 'Delete event';
+
+  @override
+  String get externalPlayerDelete => 'Delete external player';
+
+  @override
+  String get matchDeleteConfirmation => 'This cannot be undone.';
+
+  @override
+  String get matchDeleteFailed => 'Could not delete. Please try again.';
+
+  @override
+  String get externalPlayerDeleteInUse =>
+      'This player is used in match events or MOTM. Remove those first.';
+
+  @override
+  String get matchPollLoadPlayersFailed =>
+      'Could not load players for the poll. Please try again.';
+
+  @override
+  String get matchPollUnknownPlayer => 'Unknown player';
+
+  @override
   String get matchTimelineKickoff => 'Kick-off';
 
   @override
@@ -361,9 +387,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get matchPollSaving => 'Saving...';
-
-  @override
-  String get matchPollUnknownPlayer => 'Unknown player';
 
   @override
   String get matchPollErrorTitle => 'Error';

@@ -262,7 +262,7 @@ class _BenchLegend extends StatelessWidget {
 
     final labels = bench.isEmpty
         ? const ['Ingen bænk']
-        : bench.take(4).map((player) => _initials(player.name)).toList();
+        : bench.map((player) => player.name).toList();
 
     return Column(
       children: [
@@ -412,14 +412,15 @@ class _PlayerPositionBadge extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Text(
-              _firstName(name),
-              maxLines: 1,
+              name,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: styles.caption3.copyWith(
                 color: const Color(0xFF105230),
                 fontWeight: FontWeight.w900,
-                fontSize: 11,
+                fontSize: 9,
+                height: 1.05,
               ),
             ),
           ),
@@ -585,27 +586,4 @@ class FormationSlot {
     this.fallbackLabel,
     this.fallbackName,
   );
-}
-
-String _initials(String name) {
-  final parts = name
-      .trim()
-      .split(RegExp(r'\s+'))
-      .where((part) => part.isNotEmpty)
-      .toList();
-  if (parts.isEmpty) return '?';
-  if (parts.length == 1) {
-    return parts.first.characters.take(2).toString().toUpperCase();
-  }
-  return parts
-      .take(2)
-      .map((part) => part.characters.first)
-      .join()
-      .toUpperCase();
-}
-
-String _firstName(String name) {
-  final trimmed = name.trim();
-  if (trimmed.isEmpty) return '?';
-  return trimmed.split(RegExp(r'\s+')).first;
 }

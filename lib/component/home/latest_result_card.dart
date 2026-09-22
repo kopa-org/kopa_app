@@ -36,7 +36,7 @@ class HomeLatestResultCard extends StatelessWidget {
         ? '--'
         : '${match.homeTeamScore ?? 0} - ${match.awayTeamScore ?? 0}';
     final result = _resultStatus(match, currentUser);
-    final motm = match?.matchPollDetails?.playerOfTheMatchDetails.name;
+    final motm = match?.matchPollDetails?.winnerName;
     final motmVotes = match?.matchPollDetails?.playerOfTheMatchVotes;
     final events = match?.matchEventDetailsList ?? const [];
     final goalCount =
@@ -51,7 +51,8 @@ class HomeLatestResultCard extends StatelessWidget {
     final ownTeamLogo = currentUser.teamDetails?.logoDesign;
 
     return HomeBentoCard(
-      padding: const EdgeInsets.fromLTRB(Spacing.lg, Spacing.sm, Spacing.lg, Spacing.md),
+      padding: const EdgeInsets.fromLTRB(
+          Spacing.lg, Spacing.sm, Spacing.lg, Spacing.md),
       color: appColors.white,
       child: InkWell(
         onTap: match == null ? null : () => onOpenMatch(match),
@@ -60,7 +61,6 @@ class HomeLatestResultCard extends StatelessWidget {
           children: [
             Row(
               children: [
-
                 if (result != null) MatchResultBadge(result: result),
               ],
             ),

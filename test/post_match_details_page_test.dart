@@ -45,13 +45,11 @@ void main() {
       ),
     );
 
-    expect(find.text('Registrer kampens resultat'), findsOneWidget);
-    expect(find.text('Indtast'), findsOneWidget);
+    expect(find.text('Registrer kampens resultat'), findsNothing);
 
     final labels = [
       'Kampstart',
       'Mål: Tidlig målscorer',
-      'Pause',
       'Mål: Sen målscorer',
       'Kamp slut',
     ];
@@ -60,7 +58,7 @@ void main() {
         labels.map((label) => tester.getTopLeft(find.text(label)).dy).toList();
 
     expect(find.text('Kampstart'), findsOneWidget);
-    expect(find.text('Pause'), findsOneWidget);
+    expect(find.text('Pause'), findsNothing);
     expect(find.text('Kamp slut'), findsOneWidget);
     expect(
       verticalPositions,
