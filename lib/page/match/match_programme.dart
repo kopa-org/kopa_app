@@ -59,7 +59,7 @@ class _MatchProgrammePageState extends State<MatchProgrammePage> {
             final l10n = AppLocalizations.of(context)!;
 
             return ExpandableFab(
-              distance: 88,
+              distance: 104,
               openButtonKey: const ValueKey('create-match-fab'),
               heroTag: 'create-match-fab',
               tooltip: l10n.eventCreateTitle,
@@ -67,7 +67,7 @@ class _MatchProgrammePageState extends State<MatchProgrammePage> {
               foregroundColor: colors.primary,
               icon: const Icon(Icons.add, size: 32),
               children: [
-                FloatingActionButton.small(
+                FloatingActionButton(
                   heroTag: 'create-match-fab-match',
                   tooltip: l10n.eventCreateMatch,
                   backgroundColor: colors.primary,
@@ -76,11 +76,11 @@ class _MatchProgrammePageState extends State<MatchProgrammePage> {
                       _showCreateEvent(context, KopaEventType.match),
                   child: const Icon(Icons.sports_soccer),
                 ),
-                FloatingActionButton.small(
+                FloatingActionButton(
                   heroTag: 'create-match-fab-training',
                   tooltip: l10n.eventCreateTraining,
-                  backgroundColor: colors.primary,
-                  foregroundColor: colors.white,
+                  backgroundColor: colors.lightSky65,
+                  foregroundColor: colors.sky,
                   onPressed: () =>
                       _showCreateEvent(context, KopaEventType.training),
                   child: const Icon(Icons.fitness_center),

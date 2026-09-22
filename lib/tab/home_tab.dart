@@ -251,6 +251,12 @@ class _HeroSection extends StatelessWidget {
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final l10n = AppLocalizations.of(context)!;
+    final countdownLabel = nextMatch == null
+        ? 'Ingen kommende kamp'
+        : nextMatch!.isTraining
+            ? l10n.homeTrainingCountdownLabel
+            : l10n.homeMatchCountdownLabel;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(
@@ -265,7 +271,7 @@ class _HeroSection extends StatelessWidget {
         children: [
           const SizedBox(height: Spacing.sm),
           Text(
-            nextMatch == null ? 'Ingen kommende kamp' : 'Spilles om:',
+            countdownLabel,
             style: appTextStyles.caption2.copyWith(
               color: appColors.dirt,
               fontWeight: FontWeight.w800,
@@ -770,7 +776,9 @@ class _HeroTeamPanel extends StatelessWidget {
                             28,
                           ),
                     decoration: BoxDecoration(
-                      color: appColors.lightGrass,
+                      color: isTraining
+                          ? appColors.lightSky65
+                          : appColors.lightGrass,
                       borderRadius: heroRadius,
                     ),
                     child: Column(
@@ -941,7 +949,7 @@ class _TrainingHeroEventContent extends StatelessWidget {
 
     return Column(
       children: [
-        Icon(Icons.fitness_center, color: colors.grass, size: 32),
+        Icon(Icons.fitness_center, color: colors.sky, size: 32),
         const SizedBox(height: Spacing.sm),
         Text(
           l10n.eventTraining,

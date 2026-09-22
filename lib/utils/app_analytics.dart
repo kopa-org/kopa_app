@@ -25,7 +25,11 @@ abstract final class AppAnalytics {
       return;
     }
 
-    await _analytics.setAnalyticsCollectionEnabled(true);
+    await _analytics.setAnalyticsCollectionEnabled(!kDebugMode);
+    if (kDebugMode) {
+      return;
+    }
+
     _initialized = true;
     await _setDefaultEventParameters();
   }

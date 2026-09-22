@@ -44,7 +44,7 @@ class MatchHeroCard extends StatelessWidget {
       onTap: onTap,
       padding: EdgeInsets.zero,
       borderRadius: Spacing.borderRadiusLargeIncreased,
-      color: match.isTraining ? appColors.lightSky55 : null,
+      color: match.isTraining ? appColors.lightSky65 : null,
       child: match.isTraining
           ? _TrainingHeroContent(match: match, title: l10n.eventTraining)
           : Column(
@@ -180,12 +180,12 @@ class _TrainingHeroContent extends StatelessWidget {
             width: 52,
             height: 52,
             decoration: BoxDecoration(
-              color: appColors.lightSky65,
+              color: appColors.lightSky95,
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.fitness_center,
-              color: appColors.infoForeground,
+              color: appColors.sky,
               size: 28,
             ),
           ),

@@ -140,6 +140,18 @@ abstract class AppLocalizations {
   /// **'Change your response'**
   String get homeAttendanceChange;
 
+  /// No description provided for @homeMatchCountdownLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Match in:'**
+  String get homeMatchCountdownLabel;
+
+  /// No description provided for @homeTrainingCountdownLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Training in:'**
+  String get homeTrainingCountdownLabel;
+
   /// No description provided for @matchDetailsDecisionTitle.
   ///
   /// In en, this message translates to:

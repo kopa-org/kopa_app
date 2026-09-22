@@ -6,6 +6,8 @@
   "homeAttendanceNo": "Nej",
   "homeAttendanceSaving": "Gemmer…",
   "homeAttendanceChange": "Ændr dit svar",
+  "homeMatchCountdownLabel": "Spilles om:",
+  "homeTrainingCountdownLabel": "Træning om:",
   "matchDetailsDecisionTitle": "Beslutning",
   "matchDetailsDecisionPending": "Du er tilmeldt, men din udtagelse afventer stadig.",
   "matchDetailsRsvpDecline": "Nej, kan ikke",

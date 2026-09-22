@@ -30,6 +30,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeAttendanceChange => 'Change your response';
 
   @override
+  String get homeMatchCountdownLabel => 'Match in:';
+
+  @override
+  String get homeTrainingCountdownLabel => 'Training in:';
+
+  @override
   String get matchDetailsDecisionTitle => 'Decision';
 
   @override

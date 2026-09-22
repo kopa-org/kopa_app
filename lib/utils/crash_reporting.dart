@@ -39,7 +39,11 @@ abstract final class CrashReporting {
     }
 
     final crashlytics = FirebaseCrashlytics.instance;
-    await crashlytics.setCrashlyticsCollectionEnabled(true);
+    await crashlytics.setCrashlyticsCollectionEnabled(!kDebugMode);
+
+    if (kDebugMode) {
+      return;
+    }
 
     FlutterError.onError = crashlytics.recordFlutterFatalError;
     PlatformDispatcher.instance.onError = (error, stack) {
@@ -59,7 +63,7 @@ abstract final class CrashReporting {
           Future<void>.value();
     }
 
-    if (!isCrashlyticsSupported) {
+    if (kDebugMode || !isCrashlyticsSupported) {
       return body();
     }
 
@@ -70,7 +74,7 @@ abstract final class CrashReporting {
   }
 
   static Future<void> setUserIdentifier(int? userId) async {
-    if (!isCrashlyticsSupported) {
+    if (kDebugMode || !isCrashlyticsSupported) {
       return;
     }
 
@@ -99,7 +103,7 @@ abstract final class CrashReporting {
   }
 
   static Future<void> recordTestException() async {
-    if (!isCrashlyticsSupported) {
+    if (kDebugMode || !isCrashlyticsSupported) {
       return;
     }
 
@@ -111,7 +115,7 @@ abstract final class CrashReporting {
   }
 
   static void triggerTestCrash() {
-    if (!isCrashlyticsSupported) {
+    if (kDebugMode || !isCrashlyticsSupported) {
       return;
     }
 

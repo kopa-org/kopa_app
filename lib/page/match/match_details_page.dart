@@ -1584,6 +1584,7 @@ class _PrematchRsvpInlineStatus extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Flexible(
+            flex: 2,
             child: Text(
               statusLabel ?? l10n.matchDetailsRsvpRegistered,
               maxLines: 1,
@@ -1597,14 +1598,17 @@ class _PrematchRsvpInlineStatus extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          _PrematchRsvpButton(
-            key: const ValueKey('match-details-rsvp-decline-action'),
-            label: l10n.matchDetailsRsvpDeclineAction,
-            foregroundColor: const Color(0xFF524438),
-            backgroundColor: Colors.transparent,
-            borderColor: const Color(0xFF524438),
-            isSaving: isSaving,
-            onPressed: onDecline,
+          Flexible(
+            flex: 3,
+            child: _PrematchRsvpButton(
+              key: const ValueKey('match-details-rsvp-decline-action'),
+              label: l10n.matchDetailsRsvpDeclineAction,
+              foregroundColor: const Color(0xFF524438),
+              backgroundColor: Colors.transparent,
+              borderColor: const Color(0xFF524438),
+              isSaving: isSaving,
+              onPressed: onDecline,
+            ),
           ),
         ],
       ),
@@ -1640,6 +1644,7 @@ class _PrematchRsvpDeclinedInlineStatus extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Flexible(
+            flex: 2,
             child: Text(
               l10n.matchDetailsRsvpDeclined,
               maxLines: 1,
@@ -1653,13 +1658,16 @@ class _PrematchRsvpDeclinedInlineStatus extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          _PrematchRsvpButton(
-            key: const ValueKey('match-details-rsvp-accept-action'),
-            label: l10n.matchDetailsRsvpAccept,
-            foregroundColor: Colors.white,
-            backgroundColor: const Color(0xFF00964E),
-            isSaving: isSaving,
-            onPressed: onAccept,
+          Flexible(
+            flex: 3,
+            child: _PrematchRsvpButton(
+              key: const ValueKey('match-details-rsvp-accept-action'),
+              label: l10n.matchDetailsRsvpAccept,
+              foregroundColor: Colors.white,
+              backgroundColor: const Color(0xFF00964E),
+              isSaving: isSaving,
+              onPressed: onAccept,
+            ),
           ),
         ],
       ),

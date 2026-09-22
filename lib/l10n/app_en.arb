@@ -6,6 +6,8 @@
   "homeAttendanceNo": "No",
   "homeAttendanceSaving": "Saving…",
   "homeAttendanceChange": "Change your response",
+  "homeMatchCountdownLabel": "Match in:",
+  "homeTrainingCountdownLabel": "Training in:",
   "matchDetailsDecisionTitle": "Decision",
   "matchDetailsDecisionPending": "You are signed up, but your selection is still pending.",
   "matchDetailsRsvpDecline": "No, I can't",
