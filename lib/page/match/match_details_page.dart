@@ -9,8 +9,10 @@ import 'package:kopa/component/dialog/lineup_visibility_confirmation_dialog.dart
 import 'package:kopa/component/error_message.dart';
 import 'package:kopa/component/loading_indicator.dart';
 import 'package:kopa/cubits/match_polls_cubit.dart';
+import 'package:kopa/cubits/match_programme_cubit.dart';
 import 'package:kopa/helpers/date_helper.dart';
 import 'package:kopa/model/event_attendance_details.dart';
+import 'package:kopa/model/event_type.dart';
 import 'package:kopa/model/match_player.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/match_poll_details.dart';
@@ -19,6 +21,7 @@ import 'package:kopa/model/user_vote.dart';
 import 'package:kopa/navigation/app_router.dart';
 import 'package:kopa/page/match/add_match_event_modal.dart';
 import 'package:kopa/page/match/add_external_player_dialog.dart';
+import 'package:kopa/page/match/create_match_page.dart';
 import 'package:kopa/page/match/lineup_editor_page.dart';
 import 'package:kopa/page/match/match_score_sheet.dart';
 import 'package:kopa/page/match/post_match_details_page.dart';
@@ -247,18 +250,32 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     final deleteMatchAction = canManageTeam
         ? IconButton(
             key: const ValueKey('delete-match-action'),
-            tooltip: l10n.matchDelete,
+            tooltip: isTraining ? l10n.eventDeleteTraining : l10n.matchDelete,
             icon: const Icon(CupertinoIcons.delete),
             onPressed: () => _deleteMatch(matchDetails),
           )
         : null;
+    final headerAction = canManageTeam && isTraining
+        ? Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                key: const ValueKey('edit-training-action'),
+                tooltip: l10n.eventEditTrainingAction,
+                icon: const Icon(CupertinoIcons.pencil),
+                onPressed: () => _editTraining(matchDetails),
+              ),
+              deleteMatchAction!,
+            ],
+          )
+        : deleteMatchAction;
 
     if (hasBeenPlayed && !isTraining) {
       return PostMatchDetailsPage(
         match: matchDetails,
         user: user,
         heroCard: heroCard,
-        headerAction: deleteMatchAction,
+        headerAction: headerAction,
         attendanceList: _buildAttendanceList(matchDetails, squad, user),
         onRefresh: _refreshMatchAndSquad,
         onAddEvent: () => addMatchEvent(user),
@@ -282,7 +299,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       selectedSegment: _selectedSegment,
       onSegmentChanged: _selectSegment,
       heroCard: heroCard,
-      headerAction: deleteMatchAction,
+      headerAction: headerAction,
       usePrematchLayout: true,
       attendanceHeader: switch (rsvpState) {
         _MatchRsvpState.pending => _PrematchRsvpDecisionBar(
@@ -1280,7 +1297,9 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
 
   Future<void> _deleteMatch(MatchDetails match) async {
     final l10n = AppLocalizations.of(context)!;
-    if (!await _confirmDeletion(l10n.matchDelete)) return;
+    final title =
+        match.isTraining ? l10n.eventDeleteTraining : l10n.matchDelete;
+    if (!await _confirmDeletion(title)) return;
     try {
       await MatchRepository.deleteMatch(match.id);
       if (!mounted) return;
@@ -1288,6 +1307,22 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     } catch (_) {
       await _showDeletionError(l10n.matchDeleteFailed);
     }
+  }
+
+  Future<void> _editTraining(MatchDetails training) async {
+    final updated = await Navigator.of(context).push<bool>(
+      CupertinoPageRoute<bool>(
+        builder: (_) => BlocProvider(
+          create: (_) => MatchProgrammeCubit(),
+          child: CreateMatchPage(
+            matches: const [],
+            eventType: KopaEventType.training,
+            initialMatch: training,
+          ),
+        ),
+      ),
+    );
+    if (updated == true && mounted) await _refreshMatchAndSquad();
   }
 
   Future<void> _deleteMatchEvent(int id) async {

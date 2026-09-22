@@ -63,6 +63,7 @@ class MatchProgrammeCubit extends Cubit<MatchProgrammeState> {
     DateTime? meetingTime,
     String? category,
     String? notes,
+    List<DateTime>? occurrences,
   }) async {
     emit(state.copyWith(
       status: MatchProgrammeStatus.creating,
@@ -79,6 +80,7 @@ class MatchProgrammeCubit extends Cubit<MatchProgrammeState> {
         meetingTime: meetingTime,
         category: category,
         notes: notes,
+        occurrences: occurrences,
       );
       AppAnalytics.logEvent(
         type == KopaEventType.training ? 'training_created' : 'match_created',

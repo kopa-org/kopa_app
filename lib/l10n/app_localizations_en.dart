@@ -452,4 +452,75 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get eventRsvpFailed =>
       'Could not update your attendance. Please try again.';
+
+  @override
+  String get eventEditTraining => 'Edit training';
+
+  @override
+  String get eventEditTrainingAction => 'Edit training';
+
+  @override
+  String get eventDeleteTraining => 'Delete training';
+
+  @override
+  String get eventSaveTraining => 'Save';
+
+  @override
+  String get eventCreateAction => 'Create';
+
+  @override
+  String get eventSelectDateTime => 'Choose date and time';
+
+  @override
+  String get eventRepeatWeekly => 'Repeat weekly';
+
+  @override
+  String get eventRepeatWeekdays => 'Choose weekdays and times';
+
+  @override
+  String get eventRepeatUntil => 'Repeat until';
+
+  @override
+  String get eventRepeatUntilHint => 'Choose an end date';
+
+  @override
+  String get eventRepeatMissingWeekday =>
+      'Choose at least one weekday for the repetition.';
+
+  @override
+  String get eventRepeatMissingEndDate =>
+      'Choose when the repetition should stop.';
+
+  @override
+  String get eventRepeatEndBeforeStart =>
+      'The end date must be on or after the start date.';
+
+  @override
+  String get eventRepeatTooMany =>
+      'This creates too many trainings. Choose an earlier end date.';
+
+  @override
+  String get eventUpdateTrainingFailed =>
+      'Could not save the training changes.';
+
+  @override
+  String get eventWeekdayMonday => 'Monday';
+
+  @override
+  String get eventWeekdayTuesday => 'Tuesday';
+
+  @override
+  String get eventWeekdayWednesday => 'Wednesday';
+
+  @override
+  String get eventWeekdayThursday => 'Thursday';
+
+  @override
+  String get eventWeekdayFriday => 'Friday';
+
+  @override
+  String get eventWeekdaySaturday => 'Saturday';
+
+  @override
+  String get eventWeekdaySunday => 'Sunday';
 }

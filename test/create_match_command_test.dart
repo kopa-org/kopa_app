@@ -37,6 +37,28 @@ void main() {
     expect(command.toJson()['category'], 'Pasninger');
   });
 
+  test('recurring training sends each occurrence as a UTC timestamp', () {
+    final occurrences = [
+      DateTime(2026, 9, 22, 18, 30),
+      DateTime(2026, 9, 24, 20),
+    ];
+    final command = CreateMatchCommand(
+      null,
+      null,
+      'Training Pitch',
+      null,
+      occurrences.first,
+      null,
+      eventType: KopaEventType.training,
+      occurrences: occurrences,
+    );
+
+    expect(command.toJson()['occurrences'], [
+      for (final occurrence in occurrences)
+        occurrence.toUtc().toIso8601String(),
+    ]);
+  });
+
   test('match creation remains the default payload', () {
     final command = CreateMatchCommand(
       'Kopa IF',

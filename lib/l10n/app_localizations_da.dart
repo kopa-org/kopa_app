@@ -450,4 +450,75 @@ class AppLocalizationsDa extends AppLocalizations {
   @override
   String get eventRsvpFailed =>
       'Kunne ikke opdatere din tilmelding. Prøv igen.';
+
+  @override
+  String get eventEditTraining => 'Rediger træning';
+
+  @override
+  String get eventEditTrainingAction => 'Rediger træning';
+
+  @override
+  String get eventDeleteTraining => 'Slet træning';
+
+  @override
+  String get eventSaveTraining => 'Gem';
+
+  @override
+  String get eventCreateAction => 'Opret';
+
+  @override
+  String get eventSelectDateTime => 'Vælg dato og tid';
+
+  @override
+  String get eventRepeatWeekly => 'Gentag hver uge';
+
+  @override
+  String get eventRepeatWeekdays => 'Vælg ugedage og tidspunkter';
+
+  @override
+  String get eventRepeatUntil => 'Gentag indtil';
+
+  @override
+  String get eventRepeatUntilHint => 'Vælg slutdato';
+
+  @override
+  String get eventRepeatMissingWeekday =>
+      'Vælg mindst én ugedag for gentagelsen.';
+
+  @override
+  String get eventRepeatMissingEndDate =>
+      'Vælg, hvornår gentagelsen skal stoppe.';
+
+  @override
+  String get eventRepeatEndBeforeStart =>
+      'Slutdatoen skal være samme dag eller senere end startdatoen.';
+
+  @override
+  String get eventRepeatTooMany =>
+      'Gentagelsen giver for mange træninger. Vælg en tidligere slutdato.';
+
+  @override
+  String get eventUpdateTrainingFailed =>
+      'Kunne ikke gemme ændringerne til træningen.';
+
+  @override
+  String get eventWeekdayMonday => 'Mandag';
+
+  @override
+  String get eventWeekdayTuesday => 'Tirsdag';
+
+  @override
+  String get eventWeekdayWednesday => 'Onsdag';
+
+  @override
+  String get eventWeekdayThursday => 'Torsdag';
+
+  @override
+  String get eventWeekdayFriday => 'Fredag';
+
+  @override
+  String get eventWeekdaySaturday => 'Lørdag';
+
+  @override
+  String get eventWeekdaySunday => 'Søndag';
 }

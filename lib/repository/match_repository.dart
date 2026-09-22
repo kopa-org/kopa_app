@@ -118,6 +118,7 @@ class MatchRepository {
     DateTime? meetingTime,
     String? category,
     String? notes,
+    List<DateTime>? occurrences,
   }) async {
     final url = Uri.parse('${ApiConfig.baseUrl}/match');
 
@@ -130,6 +131,7 @@ class MatchRepository {
       notes,
       eventType: type,
       category: category,
+      occurrences: occurrences,
     );
 
     final response = await _apiClient.postJson(
@@ -147,6 +149,32 @@ class MatchRepository {
     invalidateMatchSummaries();
 
     return decodedJson['id'] ?? decodedJson['match']['id'];
+  }
+
+  static Future<void> updateTraining({
+    required int id,
+    required DateTime date,
+    required String location,
+    String? category,
+  }) async {
+    final url = Uri.parse('${ApiConfig.baseUrl}/match/training/$id');
+    final response = await _apiClient.patchJson(
+      url,
+      body: {
+        'date': date.toUtc().toIso8601String(),
+        'location': location,
+        'category': category,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      invalidateMatchSummaries();
+      return;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized. Please log in again.');
+    } else {
+      throw Exception('Failed to update training');
+    }
   }
 
   static Future<void> deleteMatch(int id) async {

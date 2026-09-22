@@ -913,6 +913,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not update your attendance. Please try again.'**
   String get eventRsvpFailed;
+
+  /// No description provided for @eventEditTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit training'**
+  String get eventEditTraining;
+
+  /// No description provided for @eventEditTrainingAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit training'**
+  String get eventEditTrainingAction;
+
+  /// No description provided for @eventDeleteTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete training'**
+  String get eventDeleteTraining;
+
+  /// No description provided for @eventSaveTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get eventSaveTraining;
+
+  /// No description provided for @eventCreateAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get eventCreateAction;
+
+  /// No description provided for @eventSelectDateTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose date and time'**
+  String get eventSelectDateTime;
+
+  /// No description provided for @eventRepeatWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat weekly'**
+  String get eventRepeatWeekly;
+
+  /// No description provided for @eventRepeatWeekdays.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose weekdays and times'**
+  String get eventRepeatWeekdays;
+
+  /// No description provided for @eventRepeatUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat until'**
+  String get eventRepeatUntil;
+
+  /// No description provided for @eventRepeatUntilHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an end date'**
+  String get eventRepeatUntilHint;
+
+  /// No description provided for @eventRepeatMissingWeekday.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose at least one weekday for the repetition.'**
+  String get eventRepeatMissingWeekday;
+
+  /// No description provided for @eventRepeatMissingEndDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose when the repetition should stop.'**
+  String get eventRepeatMissingEndDate;
+
+  /// No description provided for @eventRepeatEndBeforeStart.
+  ///
+  /// In en, this message translates to:
+  /// **'The end date must be on or after the start date.'**
+  String get eventRepeatEndBeforeStart;
+
+  /// No description provided for @eventRepeatTooMany.
+  ///
+  /// In en, this message translates to:
+  /// **'This creates too many trainings. Choose an earlier end date.'**
+  String get eventRepeatTooMany;
+
+  /// No description provided for @eventUpdateTrainingFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the training changes.'**
+  String get eventUpdateTrainingFailed;
+
+  /// No description provided for @eventWeekdayMonday.
+  ///
+  /// In en, this message translates to:
+  /// **'Monday'**
+  String get eventWeekdayMonday;
+
+  /// No description provided for @eventWeekdayTuesday.
+  ///
+  /// In en, this message translates to:
+  /// **'Tuesday'**
+  String get eventWeekdayTuesday;
+
+  /// No description provided for @eventWeekdayWednesday.
+  ///
+  /// In en, this message translates to:
+  /// **'Wednesday'**
+  String get eventWeekdayWednesday;
+
+  /// No description provided for @eventWeekdayThursday.
+  ///
+  /// In en, this message translates to:
+  /// **'Thursday'**
+  String get eventWeekdayThursday;
+
+  /// No description provided for @eventWeekdayFriday.
+  ///
+  /// In en, this message translates to:
+  /// **'Friday'**
+  String get eventWeekdayFriday;
+
+  /// No description provided for @eventWeekdaySaturday.
+  ///
+  /// In en, this message translates to:
+  /// **'Saturday'**
+  String get eventWeekdaySaturday;
+
+  /// No description provided for @eventWeekdaySunday.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunday'**
+  String get eventWeekdaySunday;
 }
 
 class _AppLocalizationsDelegate

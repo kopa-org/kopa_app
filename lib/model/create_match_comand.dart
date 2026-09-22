@@ -9,6 +9,7 @@ class CreateMatchCommand {
   final String? notes;
   final KopaEventType eventType;
   final String? category;
+  final List<DateTime>? occurrences;
 
   CreateMatchCommand(
     this.firstTeam,
@@ -19,6 +20,7 @@ class CreateMatchCommand {
     this.notes, {
     this.eventType = KopaEventType.match,
     this.category,
+    this.occurrences,
   });
 
   Map<String, dynamic> toJson() {
@@ -33,6 +35,10 @@ class CreateMatchCommand {
       if (category != null && category!.trim().isNotEmpty)
         'category': category!.trim(),
       if (notes != null && notes!.trim().isNotEmpty) 'notes': notes,
+      if (occurrences != null)
+        'occurrences': occurrences!
+            .map((occurrence) => occurrence.toUtc().toIso8601String())
+            .toList(growable: false),
     };
 
     if (meetingTime != null) {
