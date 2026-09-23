@@ -445,6 +445,7 @@ class MatchRepository {
     final response = await _apiClient.delete(url);
 
     if (response.statusCode == 200) {
+      invalidateMatchSummaries();
       return true;
     } else if (response.statusCode == 401) {
       throw Exception('Unauthorized. Please log in again.');

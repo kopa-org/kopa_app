@@ -1301,14 +1301,19 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     final title =
         match.isTraining ? l10n.eventDeleteTraining : l10n.matchDelete;
     if (!await _confirmDeletion(title)) return;
+    if (!mounted) return;
+    final refreshNotifier = context.read<MatchProgrammeRefreshNotifier>();
     try {
       await MatchRepository.deleteMatch(match.id);
-      if (!mounted) return;
+      if (!mounted) {
+        refreshNotifier.notifyMatchesChanged();
+        return;
+      }
 
       final navigator = Navigator.of(context);
       final hasPopTarget = navigator.canPop();
       if (widget.showBottomNavigationBar || !hasPopTarget) {
-        context.read<MatchProgrammeRefreshNotifier>().notifyMatchesChanged();
+        refreshNotifier.notifyMatchesChanged();
       }
 
       if (hasPopTarget) {
@@ -1340,8 +1345,11 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
   Future<void> _deleteMatchEvent(int id) async {
     final l10n = AppLocalizations.of(context)!;
     if (!await _confirmDeletion(l10n.matchEventDelete)) return;
+    if (!mounted) return;
+    final refreshNotifier = context.read<MatchProgrammeRefreshNotifier>();
     try {
       await MatchRepository.deleteMatchEvent(id);
+      refreshNotifier.notifyMatchesChanged();
       if (mounted) await _refreshMatchAndSquad();
     } catch (_) {
       await _showDeletionError(l10n.matchDeleteFailed);
@@ -1351,8 +1359,11 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
   Future<void> _deleteExternalPlayer(int id) async {
     final l10n = AppLocalizations.of(context)!;
     if (!await _confirmDeletion(l10n.externalPlayerDelete)) return;
+    if (!mounted) return;
+    final refreshNotifier = context.read<MatchProgrammeRefreshNotifier>();
     try {
       await MatchRepository.deleteExternalPlayer(id);
+      refreshNotifier.notifyMatchesChanged();
       if (mounted) await _refreshMatchAndSquad();
     } on StateError {
       await _showDeletionError(l10n.externalPlayerDeleteInUse);
