@@ -74,9 +74,10 @@ class _ExpandableFabState extends State<ExpandableFab>
 
   @override
   Widget build(BuildContext context) {
+    final extent = widget.children.isEmpty ? 56.0 : widget.distance + 60.0;
     return SizedBox(
-      width: 56,
-      height: 56,
+      width: extent,
+      height: extent,
       child: Stack(
         alignment: Alignment.bottomRight,
         clipBehavior: Clip.none,
@@ -136,6 +137,7 @@ class _ExpandableFabState extends State<ExpandableFab>
           directionInDegrees: angleInDegrees,
           maxDistance: widget.distance,
           progress: _expandAnimation,
+          isOpen: _open,
           child: widget.children[i],
         ),
       );
@@ -179,12 +181,14 @@ class _ExpandingActionButton extends StatelessWidget {
     required this.directionInDegrees,
     required this.maxDistance,
     required this.progress,
+    required this.isOpen,
     required this.child,
   });
 
   final double directionInDegrees;
   final double maxDistance;
   final Animation<double> progress;
+  final bool isOpen;
   final Widget child;
 
   @override
@@ -208,7 +212,10 @@ class _ExpandingActionButton extends StatelessWidget {
           ),
         );
       },
-      child: FadeTransition(opacity: progress, child: child),
+      child: IgnorePointer(
+        ignoring: !isOpen,
+        child: FadeTransition(opacity: progress, child: child),
+      ),
     );
   }
 }

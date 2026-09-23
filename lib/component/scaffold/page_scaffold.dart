@@ -134,8 +134,6 @@ class PageScaffold extends StatelessWidget {
                       Positioned(
                         right: 16,
                         bottom: floatingActionButtonBottomInset,
-                        width: 56,
-                        height: 56,
                         child: floatingActionButton!,
                       ),
                   ],
