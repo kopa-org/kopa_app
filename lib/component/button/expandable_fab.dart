@@ -74,7 +74,9 @@ class _ExpandableFabState extends State<ExpandableFab>
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox.expand(
+    return SizedBox(
+      width: 56,
+      height: 56,
       child: Stack(
         alignment: Alignment.bottomRight,
         clipBehavior: Clip.none,
