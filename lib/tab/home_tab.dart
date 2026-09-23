@@ -72,16 +72,16 @@ class _HomeTabViewState extends State<_HomeTabView> {
   void initState() {
     super.initState();
     _matchRefreshNotifier = context.read<MatchProgrammeRefreshNotifier>();
-    _matchRefreshNotifier.addListener(_refreshDashboardAfterImport);
+    _matchRefreshNotifier.addListener(_refreshDashboardAfterChange);
   }
 
   @override
   void dispose() {
-    _matchRefreshNotifier.removeListener(_refreshDashboardAfterImport);
+    _matchRefreshNotifier.removeListener(_refreshDashboardAfterChange);
     super.dispose();
   }
 
-  void _refreshDashboardAfterImport() {
+  void _refreshDashboardAfterChange() {
     final teamId = context.read<AuthCubit>().state.user?.teamDetails?.id;
     if (teamId == null) return;
 

@@ -30,6 +30,7 @@ import 'package:kopa/repository/match_repository.dart';
 import 'package:kopa/repository/users_repository.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/l10n/app_localizations.dart';
+import 'package:kopa/state/match_programme_refresh_notifier.dart';
 import 'package:kopa/state/user_votes_state.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
@@ -1303,7 +1304,18 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     try {
       await MatchRepository.deleteMatch(match.id);
       if (!mounted) return;
-      GoRouter.of(context).go(AppRouter.match);
+
+      final navigator = Navigator.of(context);
+      final hasPopTarget = navigator.canPop();
+      if (widget.showBottomNavigationBar || !hasPopTarget) {
+        context.read<MatchProgrammeRefreshNotifier>().notifyMatchesChanged();
+      }
+
+      if (hasPopTarget) {
+        navigator.pop(true);
+      } else {
+        GoRouter.of(context).go(AppRouter.match);
+      }
     } catch (_) {
       await _showDeletionError(l10n.matchDeleteFailed);
     }

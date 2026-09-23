@@ -5,7 +5,7 @@ class MatchProgrammeRefreshNotifier extends ChangeNotifier {
 
   int get generation => _generation;
 
-  void notifyImported() {
+  void notifyMatchesChanged() {
     _generation++;
     notifyListeners();
   }

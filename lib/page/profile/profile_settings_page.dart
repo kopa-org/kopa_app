@@ -263,7 +263,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
 
       if (!mounted) return;
       if (message != null) {
-        context.read<MatchProgrammeRefreshNotifier>().notifyImported();
+        context.read<MatchProgrammeRefreshNotifier>().notifyMatchesChanged();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(message)),
         );

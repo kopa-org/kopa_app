@@ -135,16 +135,16 @@ class _MatchProgrammeRefreshListenerState
   void initState() {
     super.initState();
     _matchRefreshNotifier = context.read<MatchProgrammeRefreshNotifier>();
-    _matchRefreshNotifier.addListener(_refreshMatchesAfterImport);
+    _matchRefreshNotifier.addListener(_refreshMatchesAfterChange);
   }
 
   @override
   void dispose() {
-    _matchRefreshNotifier.removeListener(_refreshMatchesAfterImport);
+    _matchRefreshNotifier.removeListener(_refreshMatchesAfterChange);
     super.dispose();
   }
 
-  void _refreshMatchesAfterImport() {
+  void _refreshMatchesAfterChange() {
     context.read<MatchProgrammeCubit>().loadMatches(
           showLoading: false,
           forceRefresh: true,
