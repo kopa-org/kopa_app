@@ -1600,12 +1600,9 @@ class _PrematchRsvpInlineStatus extends StatelessWidget {
           const SizedBox(width: 12),
           Flexible(
             flex: 3,
-            child: _PrematchRsvpButton(
+            child: _PrematchRsvpStatusAction(
               key: const ValueKey('match-details-rsvp-decline-action'),
               label: l10n.matchDetailsRsvpDeclineAction,
-              foregroundColor: const Color(0xFF524438),
-              backgroundColor: Colors.transparent,
-              borderColor: const Color(0xFF524438),
               isSaving: isSaving,
               onPressed: onDecline,
             ),
@@ -1660,16 +1657,77 @@ class _PrematchRsvpDeclinedInlineStatus extends StatelessWidget {
           const SizedBox(width: 12),
           Flexible(
             flex: 3,
-            child: _PrematchRsvpButton(
+            child: _PrematchRsvpStatusAction(
               key: const ValueKey('match-details-rsvp-accept-action'),
               label: l10n.matchDetailsRsvpAccept,
-              foregroundColor: Colors.white,
-              backgroundColor: const Color(0xFF00964E),
               isSaving: isSaving,
               onPressed: onAccept,
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _PrematchRsvpStatusAction extends StatelessWidget {
+  final String label;
+  final bool isSaving;
+  final VoidCallback onPressed;
+
+  const _PrematchRsvpStatusAction({
+    super.key,
+    required this.label,
+    required this.isSaving,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final styles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    const actionColor = Color(0xFF877B70);
+
+    return SizedBox(
+      width: double.infinity,
+      child: CupertinoButton(
+        minimumSize: const Size(0, 44),
+        padding: EdgeInsets.zero,
+        onPressed: isSaving ? null : onPressed,
+        child: Align(
+          alignment: Alignment.centerRight,
+          child: isSaving
+              ? const CupertinoActivityIndicator(
+                  radius: 8,
+                  color: actionColor,
+                )
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      CupertinoIcons.arrow_left,
+                      color: actionColor,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.right,
+                        style: styles.body3.copyWith(
+                          color: actionColor,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          height: 18 / 14,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+        ),
       ),
     );
   }
@@ -1685,7 +1743,6 @@ class _PrematchRsvpButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   const _PrematchRsvpButton({
-    super.key,
     required this.label,
     required this.foregroundColor,
     required this.backgroundColor,
