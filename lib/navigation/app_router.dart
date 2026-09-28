@@ -18,7 +18,10 @@ import 'package:kopa/page/statistics/statistics_page.dart';
 import 'package:kopa/pages/landing_page.dart';
 import 'package:kopa/pages/login_page.dart';
 import 'package:kopa/pages/onboarding_page.dart';
+import 'package:kopa/pages/forgot_password_page.dart';
 import 'package:kopa/pages/register_page.dart';
+import 'package:kopa/pages/reset_password_page.dart';
+import 'package:kopa/model/password_reset_request.dart';
 import 'package:kopa/tab/home_tab.dart';
 import 'package:kopa/tab/profile_tab.dart';
 import 'package:kopa/utils/app_analytics.dart';
@@ -30,6 +33,8 @@ const double _androidNavigationBarRadius = 28;
 abstract final class AppRouter {
   static const login = '/login';
   static const register = '/register';
+  static const forgotPassword = '/forgot-password';
+  static const resetPassword = '/reset-password';
   static const welcome = '/welcome';
   static const home = '/';
   static const match = '/match';
@@ -154,6 +159,22 @@ abstract final class AppRouter {
           path: register,
           builder: (context, state) => const RegisterPage(),
         ),
+        GoRoute(
+          path: forgotPassword,
+          builder: (context, state) => ForgotPasswordPage(
+            initialEmail: state.extra is String ? state.extra! as String : '',
+          ),
+        ),
+        GoRoute(
+          path: resetPassword,
+          redirect: (_, state) =>
+              state.extra is PasswordResetRequest ? null : forgotPassword,
+          builder: (context, state) {
+            return ResetPasswordPage(
+              request: state.extra! as PasswordResetRequest,
+            );
+          },
+        ),
         if (!featureFlags.showStatistics)
           GoRoute(
             path: statistics,
@@ -240,6 +261,8 @@ abstract final class AppRouter {
         (authState.status == AuthStatus.loading && authState.user != null);
     final isLoggingIn = path == login;
     final isRegistering = path == register;
+    final isForgotPassword = path == forgotPassword;
+    final isResetPassword = path == resetPassword;
     final isWelcome = path == welcome;
     final isJoin = path == join;
     final isOnboarding = path == onboarding;
@@ -252,7 +275,11 @@ abstract final class AppRouter {
             authState.user?.onboardingState?.isWaitingApproval == true;
 
     if (!isLoggedIn) {
-      if (isJoin || isLoggingIn || isRegistering) {
+      if (isJoin ||
+          isLoggingIn ||
+          isRegistering ||
+          isForgotPassword ||
+          isResetPassword) {
         return null;
       }
 
@@ -271,7 +298,10 @@ abstract final class AppRouter {
       // Keep the signup route available while a newly registered user is
       // standing on the onboarding stack. RegisterPage pushes onboarding so
       // its back button can return here.
-      if (isJoin || isOnboarding || isRegistering || path == dbuWebview) {
+      if (isJoin ||
+          isOnboarding ||
+          isRegistering ||
+          path == dbuWebview) {
         return null;
       }
 
@@ -281,6 +311,8 @@ abstract final class AppRouter {
     if (isLoggedIn &&
         (isLoggingIn ||
             isRegistering ||
+            isForgotPassword ||
+            isResetPassword ||
             isWelcome ||
             (isOnboarding && !hasActiveOnboardingTeam))) {
       return home;

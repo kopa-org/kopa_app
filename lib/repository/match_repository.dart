@@ -439,6 +439,29 @@ class MatchRepository {
     return _parseIds(jsonDecoded);
   }
 
+  static Future<void> reorderMatchEvents(
+    int eventId,
+    List<int> matchEventIds,
+  ) async {
+    final url = Uri.parse('${ApiConfig.baseUrl}/match/events/order');
+    final response = await _apiClient.patchJson(
+      url,
+      body: {
+        'event_id': eventId,
+        'match_event_ids': matchEventIds,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      invalidateMatchSummaries();
+      return;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized. Please log in again.');
+    } else {
+      throw Exception('Failed to reorder match events');
+    }
+  }
+
   static Future<bool> deleteMatchEvent(int matchEventId) async {
     final url = Uri.parse('${ApiConfig.baseUrl}/match/event/$matchEventId');
 

@@ -6,6 +6,8 @@ import 'package:kopa/cubits/auth_state.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:kopa/l10n/app_localizations.dart';
+import 'package:kopa/navigation/app_router.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -37,6 +39,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
@@ -131,6 +134,22 @@ class _LoginPageState extends State<LoginPage> {
                       },
                       child: Text(
                         'Har du ikke en bruger? Tilmeld dig her',
+                        style: appTextStyles.body.copyWith(
+                          color: appColors.primary,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextButton(
+                      onPressed: () {
+                        context.push(
+                          AppRouter.forgotPassword,
+                          extra: _emailController.text.trim(),
+                        );
+                      },
+                      child: Text(
+                        l10n.loginForgotPassword,
                         style: appTextStyles.body.copyWith(
                           color: appColors.primary,
                           decoration: TextDecoration.underline,

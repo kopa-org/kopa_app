@@ -11,6 +11,15 @@ import 'auth_state.dart';
 class AuthCubit extends Cubit<AuthState> {
   final AuthRepository _authRepository;
 
+  PasswordResetRepository get _passwordResetRepository {
+    final repository = _authRepository;
+    if (repository is PasswordResetRepository) {
+      return repository as PasswordResetRepository;
+    }
+    throw UnsupportedError(
+        'Password reset is not supported by this repository');
+  }
+
   AuthCubit({required AuthRepository authRepository})
       : _authRepository = authRepository,
         super(const AuthState());
@@ -84,6 +93,34 @@ class AuthCubit extends Cubit<AuthState> {
     emit(state.copyWith(
       status: AuthStatus.unauthenticated,
       user: null,
+      hasAuthenticatedBefore: true,
+    ));
+  }
+
+  Future<void> requestPasswordResetCode(String email) {
+    return _passwordResetRepository.requestPasswordResetCode(email);
+  }
+
+  Future<bool> verifyPasswordResetCode(String email, String code) {
+    return _passwordResetRepository.verifyPasswordResetCode(email, code);
+  }
+
+  Future<void> resetPassword({
+    required String email,
+    required String code,
+    required String password,
+  }) async {
+    final user = await _passwordResetRepository.resetPassword(
+      email: email,
+      code: code,
+      password: password,
+    );
+    MatchRepository.invalidateMatchSummaries();
+    await SecureStorageService.setHasAuthenticatedBefore();
+    await AppAnalytics.setCurrentUser(user);
+    emit(state.copyWith(
+      status: AuthStatus.authenticated,
+      user: user,
       hasAuthenticatedBefore: true,
     ));
   }

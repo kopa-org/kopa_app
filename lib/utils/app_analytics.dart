@@ -45,6 +45,7 @@ abstract final class AppAnalytics {
       await _guard(() async {
         await _analytics.setUserId(id: null);
         await _analytics.setUserProperty(name: 'team_id', value: null);
+        await _analytics.setUserProperty(name: 'team_name', value: null);
         await _analytics.setUserProperty(name: 'role_id', value: null);
         await _analytics.setUserProperty(name: 'is_team_owner', value: null);
         await _analytics.setUserProperty(name: 'has_team', value: null);
@@ -58,6 +59,10 @@ abstract final class AppAnalytics {
       await _analytics.setUserProperty(
         name: 'team_id',
         value: user.teamDetails?.id.toString(),
+      );
+      await _analytics.setUserProperty(
+        name: 'team_name',
+        value: _boundedTeamName(user.teamDetails?.title, 36),
       );
       await _analytics.setUserProperty(
         name: 'role_id',
@@ -90,6 +95,23 @@ abstract final class AppAnalytics {
     });
   }
 
+  static Map<String, Object> teamContextParameters({
+    int? teamId,
+    String? teamName,
+  }) {
+    final parameters = <String, Object>{};
+    if (teamId != null) {
+      parameters['team_id'] = teamId.toString();
+    }
+
+    final boundedTeamName = _boundedTeamName(teamName, 100);
+    if (boundedTeamName != null) {
+      parameters['team_name'] = boundedTeamName;
+    }
+
+    return parameters;
+  }
+
   static Future<void> logLogin({required bool success}) {
     return logEvent(success ? 'login_success' : 'login_failure');
   }
@@ -119,16 +141,32 @@ abstract final class AppAnalytics {
     }
 
     final teamId = user?.teamDetails?.id.toString();
+    final teamName = _boundedTeamName(user?.teamDetails?.title, 100);
     final roleId = user?.roleId.toString();
     final isTeamOwner = user?.isTeamOwner.toString();
 
     await _guard(() {
       return _analytics.setDefaultEventParameters({
         'team_id': teamId,
+        'team_name': teamName,
         'role_id': roleId,
         'is_team_owner': isTeamOwner,
         'has_team': (user?.teamDetails != null).toString(),
       });
     });
+  }
+
+  static String? _boundedTeamName(String? value, int maxRunes) {
+    final teamName = value?.trim();
+    if (teamName == null || teamName.isEmpty) {
+      return null;
+    }
+
+    final runes = teamName.runes;
+    if (runes.length <= maxRunes) {
+      return teamName;
+    }
+
+    return String.fromCharCodes(runes.take(maxRunes));
   }
 }

@@ -281,6 +281,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         onRefresh: _refreshMatchAndSquad,
         onAddEvent: () => addMatchEvent(user),
         onDeleteEvent: _deleteMatchEvent,
+        onReorderEvents: _reorderMatchEvents,
         attendanceActionBar:
             canManageTeam ? _buildExternalPlayerActionBar(matchDetails) : null,
         onSetMatchScore: () => setMatchScore(matchDetails),
@@ -1353,6 +1354,19 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       if (mounted) await _refreshMatchAndSquad();
     } catch (_) {
       await _showDeletionError(l10n.matchDeleteFailed);
+    }
+  }
+
+  Future<void> _reorderMatchEvents(List<int> matchEventIds) async {
+    final refreshNotifier = context.read<MatchProgrammeRefreshNotifier>();
+    await MatchRepository.reorderMatchEvents(widget.matchId, matchEventIds);
+    if (!mounted) return;
+
+    refreshNotifier.notifyMatchesChanged();
+    try {
+      await _refreshMatchAndSquad();
+    } catch (error, stack) {
+      CrashReporting.logWebError(error, stack);
     }
   }
 

@@ -98,6 +98,138 @@ abstract class AppLocalizations {
     Locale('en')
   ];
 
+  /// No description provided for @loginForgotPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get loginForgotPassword;
+
+  /// No description provided for @forgotPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password'**
+  String get forgotPasswordTitle;
+
+  /// No description provided for @forgotPasswordInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email address and we’ll send you a code to reset your password.'**
+  String get forgotPasswordInstructions;
+
+  /// No description provided for @forgotPasswordCodeInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit code we sent to your email.'**
+  String get forgotPasswordCodeInstructions;
+
+  /// No description provided for @forgotPasswordEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get forgotPasswordEmail;
+
+  /// No description provided for @forgotPasswordEmailRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email address.'**
+  String get forgotPasswordEmailRequired;
+
+  /// No description provided for @forgotPasswordEmailInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email address.'**
+  String get forgotPasswordEmailInvalid;
+
+  /// No description provided for @forgotPasswordCode.
+  ///
+  /// In en, this message translates to:
+  /// **'6-digit code'**
+  String get forgotPasswordCode;
+
+  /// No description provided for @forgotPasswordCodeLength.
+  ///
+  /// In en, this message translates to:
+  /// **'The code must contain 6 digits.'**
+  String get forgotPasswordCodeLength;
+
+  /// No description provided for @forgotPasswordResend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send the code again'**
+  String get forgotPasswordResend;
+
+  /// No description provided for @forgotPasswordVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify code'**
+  String get forgotPasswordVerify;
+
+  /// No description provided for @forgotPasswordSendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Send code'**
+  String get forgotPasswordSendCode;
+
+  /// No description provided for @resetCodeSent.
+  ///
+  /// In en, this message translates to:
+  /// **'If the account exists, we’ve sent a code. Check your inbox.'**
+  String get resetCodeSent;
+
+  /// No description provided for @resetRequestFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn’t send the code right now. Please try again.'**
+  String get resetRequestFailed;
+
+  /// No description provided for @resetCodeInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'The code is invalid or has expired. Please try again.'**
+  String get resetCodeInvalid;
+
+  /// No description provided for @resetPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a new password'**
+  String get resetPasswordTitle;
+
+  /// No description provided for @resetPasswordNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get resetPasswordNewPassword;
+
+  /// No description provided for @resetPasswordConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm password'**
+  String get resetPasswordConfirm;
+
+  /// No description provided for @resetPasswordMinimumLength.
+  ///
+  /// In en, this message translates to:
+  /// **'The password must be at least 8 characters.'**
+  String get resetPasswordMinimumLength;
+
+  /// No description provided for @resetPasswordMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The passwords do not match.'**
+  String get resetPasswordMismatch;
+
+  /// No description provided for @resetPasswordSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save password'**
+  String get resetPasswordSave;
+
+  /// No description provided for @resetPasswordFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn’t change the password. The code may have expired. Please try again.'**
+  String get resetPasswordFailed;
+
   /// No description provided for @homeAttendanceGoing.
   ///
   /// In en, this message translates to:
@@ -469,6 +601,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete event'**
   String get matchEventDelete;
+
+  /// No description provided for @matchEventReorderTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag to change the order'**
+  String get matchEventReorderTooltip;
+
+  /// No description provided for @matchEventReorderFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the event order. Please try again.'**
+  String get matchEventReorderFailed;
 
   /// No description provided for @externalPlayerDelete.
   ///

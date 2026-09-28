@@ -23,6 +23,7 @@ class PostMatchDetailsPage extends StatelessWidget {
   final Future<void> Function()? onRefresh;
   final VoidCallback onAddEvent;
   final ValueChanged<int>? onDeleteEvent;
+  final Future<void> Function(List<int>)? onReorderEvents;
   final Widget? attendanceActionBar;
   final VoidCallback onSetMatchScore;
   final VoidCallback onCreateMatchPoll;
@@ -41,6 +42,7 @@ class PostMatchDetailsPage extends StatelessWidget {
     required this.attendanceList,
     required this.onAddEvent,
     this.onDeleteEvent,
+    this.onReorderEvents,
     this.attendanceActionBar,
     required this.onSetMatchScore,
     required this.onCreateMatchPoll,
@@ -82,9 +84,12 @@ class PostMatchDetailsPage extends StatelessWidget {
           ),
         const SizedBox(height: Spacing.lg),
         _MatchTimelineSection(
-          items: _buildTimelineItems(match, l10n),
+          events: match.matchEventDetailsList ?? const [],
           canAddEvent: user.canManageTeam,
+          canReorderEvents: user.canManageTeam && onReorderEvents != null,
           onAddEvent: onAddEvent,
+          onDeleteEvent: onDeleteEvent,
+          onReorderEvents: onReorderEvents,
         ),
       ],
       infoRows: const [],
@@ -96,105 +101,6 @@ class PostMatchDetailsPage extends StatelessWidget {
       bottomNavigationBar: bottomNavigationBar,
       attendanceActionBar: attendanceActionBar,
       useParentBottomNavigationBar: useParentBottomNavigationBar,
-    );
-  }
-
-  List<Widget> _buildTimelineItems(
-    MatchDetails match,
-    AppLocalizations l10n,
-  ) {
-    final entries = <_MatchTimelineEntry>[
-      _MatchTimelineEntry.phase(
-        minute: 0,
-        sortOrder: -1,
-        title: l10n.matchTimelineKickoff,
-        icon: Icons.play_arrow,
-      ),
-      ...(match.matchEventDetailsList ?? const [])
-          .map(_MatchTimelineEntry.event),
-      _MatchTimelineEntry.phase(
-        minute: 90,
-        sortOrder: 1,
-        title: l10n.matchTimelineFullTime,
-        icon: Icons.flag,
-      ),
-    ]..sort((a, b) {
-        final minuteComparison = a.minute.compareTo(b.minute);
-        if (minuteComparison != 0) return minuteComparison;
-        return a.sortOrder.compareTo(b.sortOrder);
-      });
-
-    return entries.indexed.map((entry) {
-      final item = entry.$2;
-
-      return TimelineItem(
-        title: item.title,
-        time: item.time,
-        icon: item.icon,
-        iconColor: item.iconColor,
-        isLast: entry.$1 == entries.length - 1,
-        subtitle: item.subtitle,
-        trailing: item.eventId != null && onDeleteEvent != null
-            ? IconButton(
-                key: ValueKey('delete-match-event-${item.eventId}'),
-                tooltip: l10n.commonDelete,
-                icon: const Icon(CupertinoIcons.delete),
-                onPressed: () => onDeleteEvent!(item.eventId!),
-              )
-            : null,
-      );
-    }).toList();
-  }
-}
-
-class _MatchTimelineEntry {
-  final int minute;
-  final int sortOrder;
-  final String title;
-  final String? subtitle;
-  final String time;
-  final IconData icon;
-  final Color? iconColor;
-  final int? eventId;
-
-  const _MatchTimelineEntry({
-    required this.minute,
-    required this.sortOrder,
-    required this.title,
-    required this.time,
-    required this.icon,
-    this.subtitle,
-    this.iconColor,
-    this.eventId,
-  });
-
-  factory _MatchTimelineEntry.phase({
-    required int minute,
-    required int sortOrder,
-    required String title,
-    required IconData icon,
-  }) {
-    return _MatchTimelineEntry(
-      minute: minute,
-      sortOrder: sortOrder,
-      title: title,
-      time: '$minute\'',
-      icon: icon,
-    );
-  }
-
-  factory _MatchTimelineEntry.event(MatchEventDetails event) {
-    final item = _TimelineEventItem.from(event);
-
-    return _MatchTimelineEntry(
-      minute: event.minute ?? 0,
-      sortOrder: 0,
-      title: item.title,
-      subtitle: item.subtitle,
-      time: item.timeLabel,
-      icon: item.icon,
-      iconColor: item.iconColor,
-      eventId: event.id,
     );
   }
 }
@@ -268,26 +174,55 @@ class _TimelineEventItem {
   }
 }
 
-class _MatchTimelineSection extends StatelessWidget {
-  final List<Widget> items;
+class _MatchTimelineSection extends StatefulWidget {
+  final List<MatchEventDetails> events;
   final bool canAddEvent;
+  final bool canReorderEvents;
   final VoidCallback onAddEvent;
+  final ValueChanged<int>? onDeleteEvent;
+  final Future<void> Function(List<int>)? onReorderEvents;
 
   const _MatchTimelineSection({
-    required this.items,
+    required this.events,
     required this.canAddEvent,
+    required this.canReorderEvents,
     required this.onAddEvent,
+    required this.onDeleteEvent,
+    required this.onReorderEvents,
   });
 
   @override
+  State<_MatchTimelineSection> createState() => _MatchTimelineSectionState();
+}
+
+class _MatchTimelineSectionState extends State<_MatchTimelineSection> {
+  late List<MatchEventDetails> _events;
+  bool _savingOrder = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _events = _sortMatchEvents(widget.events);
+  }
+
+  @override
+  void didUpdateWidget(covariant _MatchTimelineSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.events, widget.events)) {
+      _events = _sortMatchEvents(widget.events);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (items.isEmpty) {
+    if (_events.isEmpty) {
       return _MatchTimelineEmptyState(
-        canAddEvent: canAddEvent,
-        onAddEvent: onAddEvent,
+        canAddEvent: widget.canAddEvent,
+        onAddEvent: widget.onAddEvent,
       );
     }
 
+    final l10n = AppLocalizations.of(context)!;
     final styles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
 
@@ -302,15 +237,153 @@ class _MatchTimelineSection extends StatelessWidget {
         KopaCard(
           borderRadius: Spacing.borderRadiusLargeIncreased,
           padding: const EdgeInsets.all(20),
-          child: Column(children: items),
+          child: Column(
+            children: [
+              TimelineItem(
+                title: l10n.matchTimelineKickoff,
+                time: '0\'',
+                icon: Icons.play_arrow,
+              ),
+              ReorderableListView.builder(
+                shrinkWrap: true,
+                padding: EdgeInsets.zero,
+                physics: const NeverScrollableScrollPhysics(),
+                buildDefaultDragHandles: false,
+                itemCount: _events.length,
+                onReorder: _reorderEvents,
+                itemBuilder: (context, index) => _buildEventItem(
+                  context,
+                  _events[index],
+                  index,
+                  l10n,
+                ),
+              ),
+              TimelineItem(
+                title: l10n.matchTimelineFullTime,
+                time: '90\'',
+                icon: Icons.flag,
+                isLast: true,
+              ),
+            ],
+          ),
         ),
-        if (canAddEvent) ...[
+        if (widget.canAddEvent) ...[
           const SizedBox(height: Spacing.lg),
-          _AddMatchEventOutlineButton(onPressed: onAddEvent),
+          _AddMatchEventOutlineButton(onPressed: widget.onAddEvent),
         ],
       ],
     );
   }
+
+  Widget _buildEventItem(
+    BuildContext context,
+    MatchEventDetails event,
+    int index,
+    AppLocalizations l10n,
+  ) {
+    final item = _TimelineEventItem.from(event);
+    final trailing = <Widget>[];
+
+    if (widget.onDeleteEvent != null) {
+      trailing.add(
+        IconButton(
+          key: ValueKey('delete-match-event-${event.id}'),
+          tooltip: l10n.commonDelete,
+          icon: const Icon(CupertinoIcons.delete),
+          onPressed: () => widget.onDeleteEvent!(event.id),
+        ),
+      );
+    }
+
+    if (widget.canReorderEvents && _events.length > 1 && !_savingOrder) {
+      trailing.add(
+        ReorderableDragStartListener(
+          index: index,
+          child: Tooltip(
+            message: l10n.matchEventReorderTooltip,
+            child: const SizedBox(
+              width: 40,
+              height: 48,
+              child: Icon(Icons.drag_handle),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return TimelineItem(
+      key: ValueKey('match-event-timeline-${event.id}'),
+      title: item.title,
+      time: item.timeLabel,
+      icon: item.icon,
+      iconColor: item.iconColor,
+      subtitle: item.subtitle,
+      trailing: trailing.isEmpty
+          ? null
+          : Row(mainAxisSize: MainAxisSize.min, children: trailing),
+    );
+  }
+
+  Future<void> _reorderEvents(int oldIndex, int newIndex) async {
+    if (_savingOrder ||
+        oldIndex == newIndex ||
+        widget.onReorderEvents == null) {
+      return;
+    }
+
+    final adjustedIndex = newIndex > oldIndex ? newIndex - 1 : newIndex;
+    if (adjustedIndex == oldIndex) return;
+
+    final previousEvents = List<MatchEventDetails>.of(_events);
+    final reorderedEvents = List<MatchEventDetails>.of(_events);
+    final movedEvent = reorderedEvents.removeAt(oldIndex);
+    reorderedEvents.insert(adjustedIndex, movedEvent);
+
+    setState(() {
+      _events = reorderedEvents;
+      _savingOrder = true;
+    });
+
+    try {
+      await widget.onReorderEvents!(
+        reorderedEvents.map((event) => event.id).toList(growable: false),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _events = previousEvents;
+      });
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.matchEventReorderFailed),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _savingOrder = false;
+        });
+      }
+    }
+  }
+}
+
+List<MatchEventDetails> _sortMatchEvents(List<MatchEventDetails> events) {
+  final hasSavedOrder = events.every((event) => event.sortOrder != null);
+  final sortedEvents = List<MatchEventDetails>.of(events);
+
+  sortedEvents.sort((a, b) {
+    if (hasSavedOrder) {
+      final orderComparison = a.sortOrder!.compareTo(b.sortOrder!);
+      if (orderComparison != 0) return orderComparison;
+    }
+
+    final minuteComparison = (a.minute ?? 0).compareTo(b.minute ?? 0);
+    if (minuteComparison != 0) return minuteComparison;
+    return a.id.compareTo(b.id);
+  });
+
+  return sortedEvents;
 }
 
 class _MatchTimelineEmptyState extends StatelessWidget {

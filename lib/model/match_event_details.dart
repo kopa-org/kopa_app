@@ -6,6 +6,7 @@ class MatchEventDetails {
   final int eventId;
   final MatchEventType type;
   final int? minute;
+  final int? sortOrder;
   final int teamId;
   final int? goalscorerUserId;
   final int? goalscorerExternalPlayerId;
@@ -20,6 +21,7 @@ class MatchEventDetails {
     required this.eventId,
     required this.type,
     this.minute,
+    this.sortOrder,
     required this.teamId,
     this.goalscorerUserId,
     this.goalscorerExternalPlayerId,
@@ -36,6 +38,7 @@ class MatchEventDetails {
       eventId: json['event_id'],
       type: MatchEventType.values.firstWhere((e) => e.wire == json['type']),
       minute: json['minute'],
+      sortOrder: json['sort_order'],
       teamId: json['team_id'],
       goalscorerUserId: json['goalscorer_user_id'],
       goalscorerExternalPlayerId: json['goalscorer_external_player_id'],

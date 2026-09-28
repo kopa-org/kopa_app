@@ -386,9 +386,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   Future<void> _requestJoin(Map<String, dynamic> team) async {
     setState(() => _pendingJoinTeam = team);
-    final success = await context
-        .read<OnboardingCubit>()
-        .requestToJoinTeam(team['id'] as int);
+    final success = await context.read<OnboardingCubit>().requestToJoinTeam(
+          team['id'] as int,
+          teamName: team['title']?.toString(),
+        );
     if (!success && mounted) {
       setState(() => _pendingJoinTeam = null);
     }

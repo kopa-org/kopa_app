@@ -9,6 +9,79 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get loginForgotPassword => 'Forgot password?';
+
+  @override
+  String get forgotPasswordTitle => 'Forgot password';
+
+  @override
+  String get forgotPasswordInstructions =>
+      'Enter your email address and we’ll send you a code to reset your password.';
+
+  @override
+  String get forgotPasswordCodeInstructions =>
+      'Enter the 6-digit code we sent to your email.';
+
+  @override
+  String get forgotPasswordEmail => 'Email';
+
+  @override
+  String get forgotPasswordEmailRequired => 'Enter your email address.';
+
+  @override
+  String get forgotPasswordEmailInvalid => 'Enter a valid email address.';
+
+  @override
+  String get forgotPasswordCode => '6-digit code';
+
+  @override
+  String get forgotPasswordCodeLength => 'The code must contain 6 digits.';
+
+  @override
+  String get forgotPasswordResend => 'Send the code again';
+
+  @override
+  String get forgotPasswordVerify => 'Verify code';
+
+  @override
+  String get forgotPasswordSendCode => 'Send code';
+
+  @override
+  String get resetCodeSent =>
+      'If the account exists, we’ve sent a code. Check your inbox.';
+
+  @override
+  String get resetRequestFailed =>
+      'We couldn’t send the code right now. Please try again.';
+
+  @override
+  String get resetCodeInvalid =>
+      'The code is invalid or has expired. Please try again.';
+
+  @override
+  String get resetPasswordTitle => 'Choose a new password';
+
+  @override
+  String get resetPasswordNewPassword => 'New password';
+
+  @override
+  String get resetPasswordConfirm => 'Confirm password';
+
+  @override
+  String get resetPasswordMinimumLength =>
+      'The password must be at least 8 characters.';
+
+  @override
+  String get resetPasswordMismatch => 'The passwords do not match.';
+
+  @override
+  String get resetPasswordSave => 'Save password';
+
+  @override
+  String get resetPasswordFailed =>
+      'We couldn’t change the password. The code may have expired. Please try again.';
+
+  @override
   String get homeAttendanceGoing => 'You\'re going';
 
   @override
@@ -202,6 +275,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get matchEventDelete => 'Delete event';
+
+  @override
+  String get matchEventReorderTooltip => 'Drag to change the order';
+
+  @override
+  String get matchEventReorderFailed =>
+      'Could not save the event order. Please try again.';
 
   @override
   String get externalPlayerDelete => 'Delete external player';

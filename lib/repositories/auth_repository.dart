@@ -16,7 +16,17 @@ abstract interface class AuthRepository {
   });
 }
 
-class ApiAuthRepository implements AuthRepository {
+abstract interface class PasswordResetRepository {
+  Future<void> requestPasswordResetCode(String email);
+  Future<bool> verifyPasswordResetCode(String email, String code);
+  Future<UserDetails> resetPassword({
+    required String email,
+    required String code,
+    required String password,
+  });
+}
+
+class ApiAuthRepository implements AuthRepository, PasswordResetRepository {
   static const _requestTimeout = Duration(seconds: 20);
   final http.Client _httpClient;
 
@@ -103,5 +113,71 @@ class ApiAuthRepository implements AuthRepository {
       print('Error registering user: $e');
     }
     return false;
+  }
+
+  @override
+  Future<void> requestPasswordResetCode(String email) async {
+    final url = Uri.parse(
+      '${ApiConfig.baseUrl}/authentication/password/reset/request',
+    );
+    final response = await _httpClient
+        .post(
+          url,
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode({'email': email}),
+        )
+        .timeout(_requestTimeout);
+
+    if (response.statusCode != 200) {
+      throw Exception('Could not request password reset code');
+    }
+  }
+
+  @override
+  Future<bool> verifyPasswordResetCode(String email, String code) async {
+    final url = Uri.parse(
+      '${ApiConfig.baseUrl}/authentication/password/reset/verify',
+    );
+    final response = await _httpClient
+        .post(
+          url,
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode({'email': email, 'code': code}),
+        )
+        .timeout(_requestTimeout);
+
+    if (response.statusCode == 200) return true;
+    if (response.statusCode == 422) return false;
+    throw Exception('Could not verify password reset code');
+  }
+
+  @override
+  Future<UserDetails> resetPassword({
+    required String email,
+    required String code,
+    required String password,
+  }) async {
+    final url = Uri.parse('${ApiConfig.baseUrl}/authentication/password/reset');
+    final response = await _httpClient
+        .post(
+          url,
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode({
+            'email': email,
+            'code': code,
+            'password': password,
+          }),
+        )
+        .timeout(_requestTimeout);
+
+    if (response.statusCode != 200) {
+      throw Exception('Could not reset password');
+    }
+
+    final data = json.decode(response.body) as Map<String, dynamic>;
+    final user = UserDetails.fromJson(data['user'] as Map<String, dynamic>);
+    await SecureStorageService.setToken(data['token'] as String);
+    await SecureStorageService.setUserInfo(user);
+    return user;
   }
 }

@@ -9,6 +9,78 @@ class AppLocalizationsDa extends AppLocalizations {
   AppLocalizationsDa([String locale = 'da']) : super(locale);
 
   @override
+  String get loginForgotPassword => 'Glemt adgangskode?';
+
+  @override
+  String get forgotPasswordTitle => 'Glemt adgangskode';
+
+  @override
+  String get forgotPasswordInstructions =>
+      'Skriv din e-mailadresse, så sender vi dig en kode til at nulstille din adgangskode.';
+
+  @override
+  String get forgotPasswordCodeInstructions =>
+      'Indtast den 6-cifrede kode, vi har sendt til din e-mail.';
+
+  @override
+  String get forgotPasswordEmail => 'E-mail';
+
+  @override
+  String get forgotPasswordEmailRequired => 'Indtast din e-mailadresse.';
+
+  @override
+  String get forgotPasswordEmailInvalid => 'Indtast en gyldig e-mailadresse.';
+
+  @override
+  String get forgotPasswordCode => '6-cifret kode';
+
+  @override
+  String get forgotPasswordCodeLength => 'Koden skal være 6 cifre.';
+
+  @override
+  String get forgotPasswordResend => 'Send koden igen';
+
+  @override
+  String get forgotPasswordVerify => 'Bekræft kode';
+
+  @override
+  String get forgotPasswordSendCode => 'Send kode';
+
+  @override
+  String get resetCodeSent =>
+      'Hvis kontoen findes, har vi sendt en kode. Tjek din indbakke.';
+
+  @override
+  String get resetRequestFailed =>
+      'Koden kunne ikke sendes lige nu. Prøv igen.';
+
+  @override
+  String get resetCodeInvalid => 'Koden er ugyldig eller udløbet. Prøv igen.';
+
+  @override
+  String get resetPasswordTitle => 'Vælg en ny adgangskode';
+
+  @override
+  String get resetPasswordNewPassword => 'Ny adgangskode';
+
+  @override
+  String get resetPasswordConfirm => 'Bekræft adgangskode';
+
+  @override
+  String get resetPasswordMinimumLength =>
+      'Adgangskoden skal være mindst 8 tegn.';
+
+  @override
+  String get resetPasswordMismatch => 'Adgangskoderne er ikke ens.';
+
+  @override
+  String get resetPasswordSave => 'Gem adgangskode';
+
+  @override
+  String get resetPasswordFailed =>
+      'Adgangskoden kunne ikke ændres. Koden kan være udløbet. Prøv igen.';
+
+  @override
   String get homeAttendanceGoing => 'Du er tilmeldt';
 
   @override
@@ -200,6 +272,13 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String get matchEventDelete => 'Slet hændelse';
+
+  @override
+  String get matchEventReorderTooltip => 'Træk for at ændre rækkefølgen';
+
+  @override
+  String get matchEventReorderFailed =>
+      'Rækkefølgen kunne ikke gemmes. Prøv igen.';
 
   @override
   String get externalPlayerDelete => 'Slet lånespiller';

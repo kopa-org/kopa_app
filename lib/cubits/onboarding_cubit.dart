@@ -147,7 +147,13 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     final result = await _repository.joinTeam(state.inviteToken!);
 
     if (result['success'] == true) {
-      AppAnalytics.logEvent('team_joined');
+      AppAnalytics.logEvent(
+        'team_joined',
+        parameters: AppAnalytics.teamContextParameters(
+          teamId: state.teamId,
+          teamName: state.teamTitle,
+        ),
+      );
       emit(state.copyWith(status: OnboardingStatus.success, inviteToken: null));
       return true;
     } else {
@@ -228,6 +234,10 @@ class OnboardingCubit extends Cubit<OnboardingState> {
       AppAnalytics.logEvent(
         'team_created',
         parameters: {
+          ...AppAnalytics.teamContextParameters(
+            teamId: teamId,
+            teamName: teamTitle,
+          ),
           'has_dbu_context': dbuContext == null ? 0 : 1,
         },
       );
@@ -284,11 +294,17 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     ));
   }
 
-  Future<bool> requestToJoinTeam(int teamId) async {
+  Future<bool> requestToJoinTeam(int teamId, {String? teamName}) async {
     emit(state.copyWith(status: OnboardingStatus.loading, errorMessage: null));
     final result = await _repository.requestToJoinTeam(teamId);
     if (result['success'] == true) {
-      AppAnalytics.logEvent('team_join_requested');
+      AppAnalytics.logEvent(
+        'team_join_requested',
+        parameters: AppAnalytics.teamContextParameters(
+          teamId: teamId,
+          teamName: teamName,
+        ),
+      );
       final request = result['join_request'] as Map<String, dynamic>?;
       emit(state.copyWith(
         status: OnboardingStatus.waitingApproval,
