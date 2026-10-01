@@ -31,7 +31,7 @@ class PlayerOfMatchSummaryCard extends StatelessWidget {
     final child = SizedBox(
       width: double.infinity,
       child: Material(
-        color: Colors.transparent,
+        color: AppColors.transparent,
         borderRadius: BorderRadius.circular(16),
         clipBehavior: Clip.antiAlias,
         child: Ink(

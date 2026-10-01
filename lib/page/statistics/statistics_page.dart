@@ -178,9 +178,9 @@ class _InFormCallout extends StatelessWidget {
                   color: colors.grass,
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.local_fire_department,
-                  color: Colors.white,
+                  color: AppColors.of(context).white,
                 ),
               ),
               const SizedBox(width: 14),
@@ -457,7 +457,7 @@ class _PlayerPlusStatTile extends StatelessWidget {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.transparent,
       builder: (context) => _LeaderboardSheet(
         tile: tile,
         currentUserId: currentUserId,

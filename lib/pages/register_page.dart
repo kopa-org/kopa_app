@@ -87,9 +87,9 @@ class _RegisterPageState extends State<RegisterPage> {
               }
             } else if (state.status == OnboardingStatus.success) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
+                SnackBar(
                   content: Text('Du er nu tilmeldt holdet!'),
-                  backgroundColor: Colors.green,
+                  backgroundColor: AppColors.of(context).success,
                 ),
               );
               final authCubit = context.read<AuthCubit>();
@@ -115,7 +115,7 @@ class _RegisterPageState extends State<RegisterPage> {
           return Scaffold(
             backgroundColor: appColors.background,
             appBar: AppBar(
-              backgroundColor: Colors.transparent,
+              backgroundColor: AppColors.transparent,
               elevation: 0,
               leading: BackButton(color: appColors.black),
             ),
@@ -219,7 +219,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             : _onRegisterPressed,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: appColors.primary,
-                          foregroundColor: Colors.white,
+                          foregroundColor: AppColors.of(context).white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -227,8 +227,8 @@ class _RegisterPageState extends State<RegisterPage> {
                           textStyle: appTextStyles.button,
                         ),
                         child: state.status == AuthStatus.loading
-                            ? const CircularProgressIndicator(
-                                color: Colors.white)
+                            ? CircularProgressIndicator(
+                                color: AppColors.of(context).white)
                             : const Text('OPRET KONTO'),
                       ),
                     ],

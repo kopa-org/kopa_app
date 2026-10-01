@@ -28,9 +28,9 @@ class PlayerProfilePage extends StatelessWidget {
     return PageScaffold(
       title: player.name,
       showBackButton: true,
-      backgroundColor: _ProfileColors.background,
+      backgroundColor: AppColors.of(context).background,
       systemOverlayStyle: SystemUiOverlayStyle.dark.copyWith(
-        statusBarColor: _ProfileColors.background,
+        statusBarColor: AppColors.of(context).background,
         systemNavigationBarColor: appColors.surface,
       ),
       body: FutureHandler<PlayerProfile>(
@@ -88,7 +88,7 @@ class _PlayerHero extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: appColors.black.withValues(alpha: 0.03),
             blurRadius: 6,
             offset: const Offset(0, 4),
           ),
@@ -255,7 +255,7 @@ class _StatTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: appColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _ProfileColors.border, width: 0.5),
+        border: Border.all(color: appColors.divider, width: 0.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -380,10 +380,10 @@ class _MatchHistoryCard extends StatelessWidget {
     return BoxDecoration(
       color: appColors.surface,
       borderRadius: BorderRadius.circular(20),
-      border: Border.all(color: _ProfileColors.border, width: 0.5),
+      border: Border.all(color: appColors.divider, width: 0.5),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withValues(alpha: 0.03),
+          color: appColors.black.withValues(alpha: 0.03),
           blurRadius: 12,
           offset: const Offset(0, 4),
         ),
@@ -419,7 +419,7 @@ class _SeasonDivider extends StatelessWidget {
       decoration: BoxDecoration(
         color: appColors.offWhite,
         border: Border(
-          bottom: BorderSide(color: _ProfileColors.border),
+          bottom: BorderSide(color: AppColors.of(context).divider),
         ),
       ),
       child: Row(
@@ -466,7 +466,7 @@ class _MatchHistoryRow extends StatelessWidget {
       constraints: const BoxConstraints(minHeight: 75),
       decoration: BoxDecoration(
         border: showDivider
-            ? Border(bottom: BorderSide(color: _ProfileColors.border))
+            ? Border(bottom: BorderSide(color: AppColors.of(context).divider))
             : null,
       ),
       padding: const EdgeInsets.all(Spacing.md),
@@ -702,9 +702,9 @@ class _MatchIndicators extends StatelessWidget {
         _CountBadge(
             iconData: Icons.handshake, value: match.assistsCount.toString()),
       if (match.yellowCardsCount > 0)
-        _CardIndicator(color: _ProfileColors.yellowCard),
+        _CardIndicator(color: AppColors.of(context).sun),
       if (match.redCardsCount > 0)
-        _CardIndicator(color: _ProfileColors.redCard),
+        _CardIndicator(color: AppColors.of(context).error),
       if (match.playerOfTheMatch) const _MotmBadge(),
     ];
 
@@ -776,7 +776,7 @@ class _MotmBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF3CD),
+        color: AppColors.of(context).warningSurface,
         borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
@@ -814,11 +814,4 @@ class _CardIndicator extends StatelessWidget {
       ),
     );
   }
-}
-
-abstract final class _ProfileColors {
-  static const background = Color(0xFFF0F2F0);
-  static const border = Color(0xFFDCE5E2);
-  static const yellowCard = Color(0xFFFFCC00);
-  static const redCard = Color(0xFFFF3B30);
 }

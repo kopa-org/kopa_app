@@ -52,7 +52,7 @@ class _PlayerPlusPageState extends State<PlayerPlusPage> {
                   child: Text(
                     'Kopa Player+',
                     style: appTextStyles.caption.copyWith(
-                      color: Colors.white,
+                      color: AppColors.of(context).white,
                       fontWeight: FontWeight.w700,
                     ),
                   ),

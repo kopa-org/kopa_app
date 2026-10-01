@@ -204,5 +204,43 @@
   "eventWeekdayThursday": "Torsdag",
   "eventWeekdayFriday": "Fredag",
   "eventWeekdaySaturday": "Lørdag",
-  "eventWeekdaySunday": "Søndag"
+  "eventWeekdaySunday": "Søndag",
+  "matchPollNoParticipants": "Ingen deltagere registreret til kampen. Opdatér tilmeldingerne for at oprette en afstemning.",
+  "matchEventPlayer": "Spiller",
+  "matchEventScorer": "Målscorer",
+  "matchEventPlayerIn": "Spiller ind",
+  "matchEventPlayerOut": "Spiller ud",
+  "matchEventShooter": "Skytte",
+  "matchEventAssist": "Assist (valgfrit)",
+  "matchEventChooseMinute": "Vælg minut (valgfrit)",
+  "matchEventAddMinute": "Tilføj minut (valgfrit)",
+  "matchEventChangeMinute": "Ret minut",
+  "matchEventWithoutMinute": "Uden minut",
+  "matchEventUseMinute": "Brug minut",
+  "matchEventYellowCard": "Gult kort",
+  "matchEventRedCard": "Rødt kort",
+  "matchEventPenalty": "Straffespark",
+  "matchEventSaveFailed": "Hændelserne kunne ikke gemmes. Prøv igen.",
+  "matchEventAddMore": "Tilføj mere",
+  "matchEventSaveAndClose": "Gem og afslut",
+  "matchEventTimelineTitle": "Kampforløb",
+  "matchEventEmptyTitle": "Ingen hændelser endnu",
+  "matchEventEmptyDescription": "Tilføj mål, kort og udskiftninger. Minut er valgfrit.",
+  "matchEventAddAction": "+ Tilføj hændelse",
+  "matchEventAssistedBy": "Assisteret af {playerName}",
+  "matchEventPlayerOff": "Ud: {playerName}",
+  "@matchEventAssistedBy": {
+    "placeholders": {
+      "playerName": {
+        "type": "String"
+      }
+    }
+  },
+  "@matchEventPlayerOff": {
+    "placeholders": {
+      "playerName": {
+        "type": "String"
+      }
+    }
+  }
 }

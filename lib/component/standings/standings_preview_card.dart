@@ -49,7 +49,7 @@ class StandingsPreviewCard extends StatelessWidget {
         ],
       ),
       child: Material(
-        color: Colors.transparent,
+        color: AppColors.transparent,
         child: InkWell(
           onTap: () => _openStandings(context, standings, currentUser),
           child: Column(
@@ -229,7 +229,7 @@ class _StandingPreviewRow extends StatelessWidget {
         vertical: 9,
       ),
       decoration: BoxDecoration(
-        color: isCurrentTeam ? appColors.lightGrass55 : Colors.transparent,
+        color: isCurrentTeam ? appColors.lightGrass55 : AppColors.transparent,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(

@@ -390,7 +390,7 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
                 _SmallBadge(
                   label: '${unpaidFines.length} ubetalte',
                   backgroundColor: appColors.warning.withValues(alpha: .18),
-                  textColor: const Color(0xFFB77900),
+                  textColor: AppColors.of(context).warningForeground,
                 ),
               ],
             ),
@@ -1257,7 +1257,7 @@ class _SelectionDot extends StatelessWidget {
       width: 22,
       height: 22,
       decoration: BoxDecoration(
-        color: selected ? appColors.success : Colors.transparent,
+        color: selected ? appColors.success : AppColors.transparent,
         borderRadius: BorderRadius.circular(11),
         border: Border.all(
           color: selected ? appColors.success : appColors.grey4,

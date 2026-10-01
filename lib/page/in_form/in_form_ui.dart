@@ -222,7 +222,7 @@ class InFormPill extends StatelessWidget {
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
     final background =
         selected ? selectedColor ?? colors.grass : colors.surface;
-    final foreground = selected ? Colors.white : colors.dirt;
+    final foreground = selected ? AppColors.of(context).white : colors.dirt;
 
     return Material(
       color: background,

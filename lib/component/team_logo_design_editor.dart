@@ -61,7 +61,7 @@ class _TeamLogoDesignEditorState extends State<TeamLogoDesignEditor> {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.02),
+                color: AppColors.of(context).black.withValues(alpha: 0.02),
                 blurRadius: 8,
                 offset: const Offset(0, 8),
               ),
@@ -176,7 +176,7 @@ class _LogoColorPicker extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        for (final color in _logoColors)
+        for (final color in AppColors.of(context).teamLogoPalette)
           GestureDetector(
             key: ValueKey(
               '$keyPrefix-color-${TeamLogoDesign.colorToHex(color)}',
@@ -190,7 +190,7 @@ class _LogoColorPicker extends StatelessWidget {
                 color: color,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: Colors.white,
+                  color: AppColors.of(context).white,
                   width: selected == color ? 3 : 0,
                 ),
                 boxShadow: selected == color
@@ -239,7 +239,7 @@ class _LogoShapePicker extends StatelessWidget {
             onTap: () => onChanged(shape),
             child: _LogoPreview(
               initials: initials,
-              color: selected == shape ? color : const Color(0xFFDCE5E2),
+              color: selected == shape ? color : AppColors.of(context).divider,
               shape: shape,
               pattern: selected == shape ? pattern : TeamLogoPattern.solid,
               size: 56,
@@ -287,7 +287,7 @@ class _LogoPatternPicker extends StatelessWidget {
                 border: Border.all(
                   color: selected == pattern
                       ? colors.primary
-                      : const Color(0xFFD1D6E0),
+                      : AppColors.of(context).divider,
                   width: selected == pattern ? 2 : 1,
                 ),
               ),
@@ -326,12 +326,12 @@ class _LogoPreview extends StatelessWidget {
       alignment: Alignment.center,
       decoration: ShapeDecoration(
         color: pattern == TeamLogoPattern.solid ? color : null,
-        gradient: _logoGradient(color, pattern),
-        shape: _logoShape(shape, selected),
+        gradient: _logoGradient(color, pattern, AppColors.of(context).white),
+        shape: _logoShape(shape, selected, AppColors.of(context).white),
         shadows: selected
             ? [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
+                  color: AppColors.of(context).black.withValues(alpha: 0.1),
                   blurRadius: size >= 100 ? 8 : 4,
                   offset: Offset(0, size >= 100 ? 4 : 2),
                 ),
@@ -341,7 +341,7 @@ class _LogoPreview extends StatelessWidget {
       child: Text(
         initials,
         style: TextStyle(
-          color: textColor ?? Colors.white,
+          color: textColor ?? AppColors.of(context).white,
           fontWeight: FontWeight.w900,
           fontSize: size >= 100 ? 48 : 16,
           letterSpacing: 0,
@@ -367,26 +367,15 @@ class _PatternPreview extends StatelessWidget {
       height: 18,
       decoration: BoxDecoration(
         color: color,
-        gradient: _logoGradient(color, pattern),
+        gradient: _logoGradient(color, pattern, AppColors.of(context).white),
         borderRadius: BorderRadius.circular(4),
       ),
     );
   }
 }
 
-const _logoColors = <Color>[
-  Color(0xFF1B8B4B),
-  Color(0xFF15213D),
-  Color(0xFFD22B2B),
-  Color(0xFF1975F2),
-  Color(0xFFF05A00),
-  Color(0xFF6E22A8),
-  Color(0xFF008E7B),
-  Color(0xFF263238),
-];
-
-Gradient? _logoGradient(Color color, TeamLogoPattern pattern) {
-  final secondary = Color.lerp(color, Colors.white, 0.78)!;
+Gradient? _logoGradient(Color color, TeamLogoPattern pattern, Color white) {
+  final secondary = Color.lerp(color, white, 0.78)!;
   return switch (pattern) {
     TeamLogoPattern.solid => null,
     TeamLogoPattern.verticalSplit => LinearGradient(
@@ -404,15 +393,13 @@ Gradient? _logoGradient(Color color, TeamLogoPattern pattern) {
     TeamLogoPattern.gradient => LinearGradient(
         begin: Alignment.centerLeft,
         end: Alignment.centerRight,
-        colors: [color, Colors.white],
+        colors: [color, white],
       ),
   };
 }
 
-ShapeBorder _logoShape(TeamLogoShape shape, bool selected) {
-  final side = selected
-      ? const BorderSide(color: Colors.white, width: 4)
-      : BorderSide.none;
+ShapeBorder _logoShape(TeamLogoShape shape, bool selected, Color white) {
+  final side = selected ? BorderSide(color: white, width: 4) : BorderSide.none;
   return switch (shape) {
     TeamLogoShape.circle => CircleBorder(side: side),
     TeamLogoShape.square => RoundedRectangleBorder(

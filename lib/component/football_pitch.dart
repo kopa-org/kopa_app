@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kopa/theme/app_colors.dart';
 
 class FootballPitch extends StatelessWidget {
   final Widget? child;
@@ -18,6 +19,7 @@ class FootballPitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     return LayoutBuilder(
       builder: (context, constraints) {
         final height = constraints.maxHeight;
@@ -25,9 +27,10 @@ class FootballPitch extends StatelessWidget {
         return Container(
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
-            color: const Color(0xFF106E35),
+            color: colors.pitch,
             borderRadius: borderRadius,
-            border: Border.all(color: Colors.white, width: borderWidth),
+            border: Border.all(
+                color: AppColors.of(context).white, width: borderWidth),
             boxShadow: boxShadow,
           ),
           child: Stack(
@@ -39,14 +42,14 @@ class FootballPitch extends StatelessWidget {
                   right: 0,
                   height: height / 14,
                   child: ColoredBox(
-                    color: const Color(0xFF167E44).withValues(alpha: 0.3),
+                    color: colors.pitchStripe.withValues(alpha: 0.3),
                   ),
                 ),
               Positioned.fill(
                 child: Padding(
                   padding: linePadding,
-                  child: const CustomPaint(
-                    painter: FootballPitchPainter(),
+                  child: CustomPaint(
+                    painter: FootballPitchPainter(lineColor: colors.white),
                   ),
                 ),
               ),
@@ -60,16 +63,19 @@ class FootballPitch extends StatelessWidget {
 }
 
 class FootballPitchPainter extends CustomPainter {
-  const FootballPitchPainter();
+  final Color lineColor;
+
+  FootballPitchPainter({Color? lineColor})
+      : lineColor = lineColor ?? AppColors.light.white;
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.38)
+      ..color = lineColor.withValues(alpha: 0.38)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
     final thinPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.28)
+      ..color = lineColor.withValues(alpha: 0.28)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
 
@@ -87,7 +93,7 @@ class FootballPitchPainter extends CustomPainter {
     canvas.drawCircle(
       Offset(size.width / 2, size.height / 2),
       3,
-      Paint()..color = Colors.white.withValues(alpha: 0.5),
+      Paint()..color = lineColor.withValues(alpha: 0.5),
     );
     _drawBoxFromGoalLine(
       canvas,
@@ -141,5 +147,6 @@ class FootballPitchPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant FootballPitchPainter oldDelegate) =>
+      oldDelegate.lineColor != lineColor;
 }

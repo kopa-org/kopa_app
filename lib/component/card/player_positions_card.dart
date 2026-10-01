@@ -325,7 +325,7 @@ class _Pitch extends StatelessWidget {
       borderRadius: BorderRadius.circular(24),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withValues(alpha: 0.08),
+          color: AppColors.of(context).black.withValues(alpha: 0.08),
           blurRadius: 16,
           offset: const Offset(0, 8),
         ),
@@ -417,7 +417,7 @@ class _PlayerPositionBadge extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: styles.caption3.copyWith(
-                color: const Color(0xFF105230),
+                color: AppColors.of(context).successForeground,
                 fontWeight: FontWeight.w900,
                 fontSize: 9,
                 height: 1.05,
@@ -454,16 +454,16 @@ class _EmptyPositionBadge extends StatelessWidget {
       height: 34,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: Colors.transparent,
+        color: AppColors.transparent,
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white, width: 1.6),
+        border: Border.all(color: AppColors.of(context).white, width: 1.6),
       ),
       child: Text(
         label,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: styles.caption.copyWith(
-          color: Colors.white,
+          color: AppColors.of(context).white,
           fontWeight: FontWeight.w800,
           fontSize: 11,
         ),

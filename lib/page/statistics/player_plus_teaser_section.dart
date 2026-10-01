@@ -33,7 +33,7 @@ class PlayerPlusTeaserSection extends StatelessWidget {
                 child: Text(
                   'Player+',
                   style: appTextStyles.caption.copyWith(
-                    color: Colors.white,
+                    color: AppColors.of(context).white,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -96,7 +96,7 @@ class _HeroTeaserCard extends StatelessWidget {
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return Material(
-      color: Colors.transparent,
+      color: AppColors.transparent,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(28),
@@ -142,7 +142,9 @@ class _HeroTeaserCard extends StatelessWidget {
                       child: BackdropFilter(
                         filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
                         child: Container(
-                          color: Colors.white.withValues(alpha: 0.18),
+                          color: AppColors.of(context)
+                              .white
+                              .withValues(alpha: 0.18),
                           alignment: Alignment.center,
                           child: Container(
                             padding: const EdgeInsets.symmetric(
@@ -156,7 +158,7 @@ class _HeroTeaserCard extends StatelessWidget {
                             child: Text(
                               'Se konkurrencerne',
                               style: appTextStyles.caption.copyWith(
-                                color: Colors.white,
+                                color: AppColors.of(context).white,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -239,7 +241,7 @@ class _MiniTeaserCard extends StatelessWidget {
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return Material(
-      color: Colors.transparent,
+      color: AppColors.transparent,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),

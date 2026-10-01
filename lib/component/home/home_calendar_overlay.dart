@@ -30,7 +30,7 @@ Future<void> showHomeCalendarOverlay({
     context: context,
     barrierDismissible: true,
     barrierLabel: 'Luk kalender',
-    barrierColor: Colors.black.withValues(alpha: 0.22),
+    barrierColor: AppColors.of(context).black.withValues(alpha: 0.22),
     transitionDuration: const Duration(milliseconds: 360),
     pageBuilder: (dialogContext, animation, secondaryAnimation) {
       return SafeArea(
@@ -251,7 +251,7 @@ class _MonthButton extends StatelessWidget {
         tooltip: tooltip,
         padding: EdgeInsets.zero,
         style: IconButton.styleFrom(
-          backgroundColor: filled ? colors.lightSky55 : Colors.transparent,
+          backgroundColor: filled ? colors.lightSky55 : AppColors.transparent,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(Spacing.borderRadiusSmall),
           ),
@@ -366,7 +366,7 @@ class _CalendarDay extends StatelessWidget {
               height: 30,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: isToday ? colors.lightGrass : Colors.transparent,
+                color: isToday ? colors.lightGrass : AppColors.transparent,
                 shape: BoxShape.circle,
               ),
               child: Text(

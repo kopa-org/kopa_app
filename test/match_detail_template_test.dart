@@ -119,7 +119,7 @@ void main() {
       ),
     );
     final selectedDecoration = selectedIndicator.decoration! as BoxDecoration;
-    expect(selectedDecoration.color, const Color(0xFF105230));
+    expect(selectedDecoration.color, AppColors.light.successForeground);
     expect(
       tester
           .getSize(

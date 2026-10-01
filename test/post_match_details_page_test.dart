@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kopa/l10n/app_localizations.dart';
+import 'package:kopa/component/match/match_events_timeline.dart';
+import 'package:kopa/component/timeline/timeline_item.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/match_event_details.dart';
 import 'package:kopa/model/match_event_type.dart';
@@ -9,6 +11,39 @@ import 'package:kopa/page/match/post_match_details_page.dart';
 import 'package:kopa/template/match_detail_template.dart';
 
 void main() {
+  testWidgets(
+      'untimed events show the event label once and allow registration during play',
+      (tester) async {
+    var adds = 0;
+    await tester.pumpWidget(MaterialApp(
+      locale: const Locale('da'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: Scaffold(
+          body: SingleChildScrollView(
+              child: MatchEventsTimeline(
+        events: [_event(id: 1, name: 'Alice Jensen')],
+        canAddEvent: true,
+        canReorderEvents: false,
+        onAddEvent: () => adds++,
+        onDeleteEvent: null,
+        onReorderEvents: null,
+        showFullTime: false,
+      ))),
+    ));
+    expect(find.text('Mål: Alice Jensen'), findsOneWidget);
+    expect(find.text('MÅL'), findsNothing);
+    expect(find.text('Mål'), findsNothing);
+    expect(find.text('Kamp slut'), findsNothing);
+    final goal = tester.widget<TimelineItem>(
+        find.byKey(const ValueKey('match-event-timeline-1')));
+    expect(goal.time, isEmpty);
+    expect(goal.subtitle, isNull);
+    await tester.tap(find.text('+ Tilføj hændelse'));
+    expect(adds, 1);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('shows match phases in chronological order with events',
       (tester) async {
     final kickoff = DateTime(2026, 1, 1, 19);
@@ -69,7 +104,7 @@ void main() {
 
 MatchEventDetails _event({
   required int id,
-  required int minute,
+  int? minute,
   required String name,
 }) {
   return MatchEventDetails(

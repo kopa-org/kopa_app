@@ -105,18 +105,12 @@ class _LandingLogo extends StatelessWidget {
 class _LandingActionButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
-  final Color? backgroundColor;
-  final Color? foregroundColor;
-  final Color? borderColor;
-  final List<BoxShadow> boxShadow;
+  final bool isSecondary;
 
   const _LandingActionButton._({
     required this.label,
     required this.onPressed,
-    this.backgroundColor,
-    this.foregroundColor,
-    this.borderColor,
-    this.boxShadow = const [],
+    this.isSecondary = false,
   });
 
   factory _LandingActionButton.primary({
@@ -126,13 +120,6 @@ class _LandingActionButton extends StatelessWidget {
     return _LandingActionButton._(
       label: label,
       onPressed: onPressed,
-      boxShadow: [
-        BoxShadow(
-          color: const Color(0xFF0C8A45).withValues(alpha: 0.2),
-          blurRadius: 8,
-          offset: const Offset(0, 8),
-        ),
-      ],
     );
   }
 
@@ -143,9 +130,7 @@ class _LandingActionButton extends StatelessWidget {
     return _LandingActionButton._(
       label: label,
       onPressed: onPressed,
-      backgroundColor: Colors.white,
-      foregroundColor: const Color(0xFF2D1000),
-      borderColor: const Color(0xFFD1D6E0),
+      isSecondary: true,
     );
   }
 
@@ -163,17 +148,25 @@ class _LandingActionButton extends StatelessWidget {
         height: 52,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: backgroundColor ?? const Color(0xFF0C8A45),
-          border: borderColor == null
-              ? null
-              : Border.all(color: borderColor!, width: 1.5),
+          color: isSecondary ? colors.surface : colors.primary,
+          border: isSecondary
+              ? Border.all(color: colors.divider, width: 1.5)
+              : null,
           borderRadius: BorderRadius.circular(28),
-          boxShadow: boxShadow,
+          boxShadow: isSecondary
+              ? const []
+              : [
+                  BoxShadow(
+                    color: colors.primary.withValues(alpha: 0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 8),
+                  )
+                ],
         ),
         child: Text(
           label,
           style: styles.subtitle2.copyWith(
-            color: foregroundColor ?? colors.white,
+            color: isSecondary ? colors.dirt : colors.white,
             fontWeight: FontWeight.w800,
           ),
         ),

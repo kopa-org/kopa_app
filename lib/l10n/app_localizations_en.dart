@@ -609,4 +609,83 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get eventWeekdaySunday => 'Sunday';
+
+  @override
+  String get matchPollNoParticipants =>
+      'No participants are registered for this match. Update attendance to create a poll.';
+
+  @override
+  String get matchEventPlayer => 'Player';
+
+  @override
+  String get matchEventScorer => 'Goalscorer';
+
+  @override
+  String get matchEventPlayerIn => 'Player on';
+
+  @override
+  String get matchEventPlayerOut => 'Player off';
+
+  @override
+  String get matchEventShooter => 'Taker';
+
+  @override
+  String get matchEventAssist => 'Assist (optional)';
+
+  @override
+  String get matchEventChooseMinute => 'Choose minute (optional)';
+
+  @override
+  String get matchEventAddMinute => 'Add minute (optional)';
+
+  @override
+  String get matchEventChangeMinute => 'Change minute';
+
+  @override
+  String get matchEventWithoutMinute => 'Without minute';
+
+  @override
+  String get matchEventUseMinute => 'Use minute';
+
+  @override
+  String get matchEventYellowCard => 'Yellow card';
+
+  @override
+  String get matchEventRedCard => 'Red card';
+
+  @override
+  String get matchEventPenalty => 'Penalty kick';
+
+  @override
+  String get matchEventSaveFailed =>
+      'Could not save the events. Please try again.';
+
+  @override
+  String get matchEventAddMore => 'Add more';
+
+  @override
+  String get matchEventSaveAndClose => 'Save and close';
+
+  @override
+  String get matchEventTimelineTitle => 'Match events';
+
+  @override
+  String get matchEventEmptyTitle => 'No events yet';
+
+  @override
+  String get matchEventEmptyDescription =>
+      'Add goals, cards and substitutions. The minute is optional.';
+
+  @override
+  String get matchEventAddAction => '+ Add event';
+
+  @override
+  String matchEventAssistedBy(String playerName) {
+    return 'Assisted by $playerName';
+  }
+
+  @override
+  String matchEventPlayerOff(String playerName) {
+    return 'Off: $playerName';
+  }
 }

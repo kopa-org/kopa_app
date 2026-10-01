@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:kopa/theme/app_colors.dart';
 
 enum TeamLogoShape { circle, square, shield, rounded }
 
 enum TeamLogoPattern { solid, verticalSplit, horizontalSplit, gradient }
 
 class TeamLogoDesign {
-  static const defaultColor = Color(0xFF1B8B4B);
+  static const defaultColor = AppColors.defaultTeamLogoColor;
   static const defaultDesign = TeamLogoDesign();
 
   final Color color;

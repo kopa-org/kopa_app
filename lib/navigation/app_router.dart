@@ -1,3 +1,4 @@
+import 'package:kopa/theme/app_colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -208,6 +209,7 @@ abstract final class AppRouter {
             }
 
             return Scaffold(
+              backgroundColor: AppColors.of(context).background,
               extendBody: true,
               body: navigationShell,
               bottomNavigationBar: AppRouter.mainNavigationBar(
@@ -298,10 +300,7 @@ abstract final class AppRouter {
       // Keep the signup route available while a newly registered user is
       // standing on the onboarding stack. RegisterPage pushes onboarding so
       // its back button can return here.
-      if (isJoin ||
-          isOnboarding ||
-          isRegistering ||
-          path == dbuWebview) {
+      if (isJoin || isOnboarding || isRegistering || path == dbuWebview) {
         return null;
       }
 
@@ -366,11 +365,11 @@ class _MainTabNavigationBar extends StatelessWidget {
       return GlassTabBar.bottom(
         selectedIndex: selectedIndex,
         onTabSelected: onTabSelected,
-        selectedIconColor: theme.colorScheme.primary,
-        selectedLabelColor: theme.colorScheme.primary,
+        selectedIconColor: AppColors.of(context).primary,
+        selectedLabelColor: AppColors.of(context).primary,
         unselectedIconColor: theme.unselectedWidgetColor,
         unselectedLabelColor: theme.unselectedWidgetColor,
-        indicatorColor: theme.colorScheme.primary.withValues(alpha: 0.12),
+        indicatorColor: AppColors.of(context).primary.withValues(alpha: 0.12),
         tabs: [
           for (final tab in tabs)
             GlassTab(
@@ -406,7 +405,7 @@ class _TransparentAndroidNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final selectedColor = theme.colorScheme.onPrimaryContainer;
+    final selectedColor = AppColors.of(context).dirt;
     final unselectedColor = theme.unselectedWidgetColor;
 
     return SafeArea(
@@ -416,17 +415,17 @@ class _TransparentAndroidNavigationBar extends StatelessWidget {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(_androidNavigationBarRadius),
           child: GNav(
-            backgroundColor: theme.colorScheme.surface.withValues(
-              alpha: _androidNavigationSurfaceOpacity,
-            ),
-            rippleColor: theme.colorScheme.primary.withValues(alpha: 0.1),
-            hoverColor: theme.colorScheme.primary.withValues(alpha: 0.1),
+            backgroundColor: AppColors.of(context).surface.withValues(
+                  alpha: _androidNavigationSurfaceOpacity,
+                ),
+            rippleColor: AppColors.of(context).primary.withValues(alpha: 0.1),
+            hoverColor: AppColors.of(context).primary.withValues(alpha: 0.1),
             gap: 8,
             activeColor: selectedColor,
             iconSize: 24,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             duration: const Duration(milliseconds: 400),
-            tabBackgroundColor: theme.colorScheme.primaryContainer,
+            tabBackgroundColor: AppColors.of(context).lightGrass,
             color: unselectedColor,
             selectedIndex: selectedIndex,
             onTabChange: onTabSelected,

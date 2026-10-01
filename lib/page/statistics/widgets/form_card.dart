@@ -92,7 +92,7 @@ class _FormResult extends StatelessWidget {
       child: Text(
         label,
         style: textStyles.bodyBold.copyWith(
-          color: Colors.white,
+          color: AppColors.of(context).white,
         ),
       ),
     );

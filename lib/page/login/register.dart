@@ -6,6 +6,7 @@ import 'package:kopa/component/button/full_width_button.dart';
 import 'package:kopa/component/loading_indicator.dart';
 import 'package:kopa/repository/authentication_repository.dart';
 import 'package:kopa/services/platform_service.dart';
+import 'package:kopa/theme/app_colors.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -247,11 +248,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
     // Wrap in the native scaffold for each platform
     return useCupertino
         ? CupertinoPageScaffold(
-            backgroundColor: CupertinoColors.systemGrey6,
+            backgroundColor: AppColors.of(context).background,
             child: content,
           )
         : Scaffold(
-            backgroundColor: theme.colorScheme.surface,
+            backgroundColor: AppColors.of(context).background,
             body: content,
           );
   }
@@ -292,8 +293,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 padding: const EdgeInsets.only(top: 5, left: 8),
                 child: Text(
                   state.errorText!,
-                  style: const TextStyle(
-                    color: CupertinoColors.systemRed,
+                  style: TextStyle(
+                    color: AppColors.of(context).error,
                     fontSize: 13,
                   ),
                 ),

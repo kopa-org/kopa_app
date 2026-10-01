@@ -204,5 +204,43 @@
   "eventWeekdayThursday": "Thursday",
   "eventWeekdayFriday": "Friday",
   "eventWeekdaySaturday": "Saturday",
-  "eventWeekdaySunday": "Sunday"
+  "eventWeekdaySunday": "Sunday",
+  "matchPollNoParticipants": "No participants are registered for this match. Update attendance to create a poll.",
+  "matchEventPlayer": "Player",
+  "matchEventScorer": "Goalscorer",
+  "matchEventPlayerIn": "Player on",
+  "matchEventPlayerOut": "Player off",
+  "matchEventShooter": "Taker",
+  "matchEventAssist": "Assist (optional)",
+  "matchEventChooseMinute": "Choose minute (optional)",
+  "matchEventAddMinute": "Add minute (optional)",
+  "matchEventChangeMinute": "Change minute",
+  "matchEventWithoutMinute": "Without minute",
+  "matchEventUseMinute": "Use minute",
+  "matchEventYellowCard": "Yellow card",
+  "matchEventRedCard": "Red card",
+  "matchEventPenalty": "Penalty kick",
+  "matchEventSaveFailed": "Could not save the events. Please try again.",
+  "matchEventAddMore": "Add more",
+  "matchEventSaveAndClose": "Save and close",
+  "matchEventTimelineTitle": "Match events",
+  "matchEventEmptyTitle": "No events yet",
+  "matchEventEmptyDescription": "Add goals, cards and substitutions. The minute is optional.",
+  "matchEventAddAction": "+ Add event",
+  "matchEventAssistedBy": "Assisted by {playerName}",
+  "matchEventPlayerOff": "Off: {playerName}",
+  "@matchEventAssistedBy": {
+    "placeholders": {
+      "playerName": {
+        "type": "String"
+      }
+    }
+  },
+  "@matchEventPlayerOff": {
+    "placeholders": {
+      "playerName": {
+        "type": "String"
+      }
+    }
+  }
 }

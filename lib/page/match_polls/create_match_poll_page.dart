@@ -9,6 +9,7 @@ import 'package:kopa/cubits/match_polls_cubit.dart';
 import 'package:kopa/cubits/match_polls_state.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/model/match_poll_details.dart';
+import 'package:kopa/model/match_player.dart';
 import 'package:kopa/model/user_vote.dart';
 import 'package:kopa/state/user_votes_state.dart';
 import 'package:kopa/theme/app_colors.dart';
@@ -101,6 +102,7 @@ class _CreateMatchPollPageState extends State<CreateMatchPollPage> {
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     final hasMatches = state.matches.isNotEmpty;
+    final candidates = _candidates(state);
     final safeIdx = _safeIndex(state.matches.length);
 
     return PageScaffold(
@@ -162,6 +164,9 @@ class _CreateMatchPollPageState extends State<CreateMatchPollPage> {
                         ],
                       ),
                       const SizedBox(height: Spacing.md),
+                      if (!_loadingFullMatch && candidates.isEmpty)
+                        Text(l10n.matchPollNoParticipants,
+                            style: appTextStyles.body),
                       ...getMatchPollRowItems(state).map(
                         (item) => Padding(
                           padding: const EdgeInsets.only(bottom: Spacing.sm),
@@ -183,7 +188,7 @@ class _CreateMatchPollPageState extends State<CreateMatchPollPage> {
                 color: appColors.background,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
+                    color: AppColors.of(context).black.withValues(alpha: 0.08),
                     blurRadius: 18,
                     offset: const Offset(0, -6),
                   ),
@@ -206,8 +211,10 @@ class _CreateMatchPollPageState extends State<CreateMatchPollPage> {
                           ? l10n.matchPollSaveAction
                           : l10n.matchPollCreateAction),
                   width: double.infinity,
-                  enabled:
-                      !state.isSubmitting && hasMatches && !_loadingFullMatch,
+                  enabled: !state.isSubmitting &&
+                      hasMatches &&
+                      candidates.isNotEmpty &&
+                      !_loadingFullMatch,
                   onPressed: () => _submitPoll(safeIdx, userVotes),
                 ),
               ),
@@ -220,6 +227,11 @@ class _CreateMatchPollPageState extends State<CreateMatchPollPage> {
 
   Future<void> _submitPoll(int safeIdx, List<UserVote> userVotes) async {
     final matchPollsCubit = context.read<MatchPollsCubit>();
+    final eligibleIds = _candidates(matchPollsCubit.state)
+        .map((player) => player.stableId)
+        .toSet();
+    userVotes =
+        userVotes.where((vote) => eligibleIds.contains(vote.stableId)).toList();
     final userVotesState = context.read<UserVotesState>();
     final navigator = Navigator.of(context);
     final updatedOrCreatedPoll = widget.initialPoll == null
@@ -264,35 +276,33 @@ class _CreateMatchPollPageState extends State<CreateMatchPollPage> {
     );
   }
 
+  List<MatchPlayer> _candidates(MatchPollsState state) {
+    if (state.matches.isEmpty || _loadingFullMatch) return const [];
+    final match = state.matches[_safeIndex(state.matches.length)];
+    return [
+      ...(match.attendanceDetailsList ?? const [])
+          .where((attendance) =>
+              attendance.isAttending && attendance.isSelected != false)
+          .map((attendance) => MatchPlayer.user(attendance.userDetails)),
+      ...(match.externalPlayerDetailsList ?? const [])
+          .map(MatchPlayer.external),
+    ];
+  }
+
   List<MatchPollRowItem> getMatchPollRowItems(MatchPollsState state) {
-    List<MatchPollRowItem> matchPollRowItems = [];
-
-    for (var user in state.squad) {
-      var matchPollItem = MatchPollRowItem(
-        userId: user.id,
-        userName: user.name,
-        isUserPlayerOfTheMatch:
-            widget.initialPoll?.playerOfTheMatchDetails?.id == user.id,
-      );
-
-      matchPollRowItems.add(matchPollItem);
-    }
-
-    if (state.matches.isNotEmpty) {
-      final match = state.matches[_safeIndex(state.matches.length)];
-      for (final player in match.externalPlayerDetailsList ?? const []) {
-        matchPollRowItems.add(MatchPollRowItem(
-          userId: player.id,
-          userName: player.name,
-          isExternal: true,
-          isUserPlayerOfTheMatch:
-              widget.initialPoll?.playerOfTheMatchExternalPlayerDetails?.id ==
-                  player.id,
-        ));
-      }
-    }
-
-    return matchPollRowItems;
+    return _candidates(state)
+        .map((player) => MatchPollRowItem(
+              userId: player.userId ?? player.externalPlayerId!,
+              userName: player.name,
+              isExternal: player.isExternal,
+              isUserPlayerOfTheMatch: player.isExternal
+                  ? widget.initialPoll?.playerOfTheMatchExternalPlayerDetails
+                          ?.id ==
+                      player.externalPlayerId
+                  : widget.initialPoll?.playerOfTheMatchDetails?.id ==
+                      player.userId,
+            ))
+        .toList();
   }
 
   int _safeIndex(int length) {

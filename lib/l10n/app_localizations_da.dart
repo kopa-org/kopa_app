@@ -606,4 +606,83 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String get eventWeekdaySunday => 'Søndag';
+
+  @override
+  String get matchPollNoParticipants =>
+      'Ingen deltagere registreret til kampen. Opdatér tilmeldingerne for at oprette en afstemning.';
+
+  @override
+  String get matchEventPlayer => 'Spiller';
+
+  @override
+  String get matchEventScorer => 'Målscorer';
+
+  @override
+  String get matchEventPlayerIn => 'Spiller ind';
+
+  @override
+  String get matchEventPlayerOut => 'Spiller ud';
+
+  @override
+  String get matchEventShooter => 'Skytte';
+
+  @override
+  String get matchEventAssist => 'Assist (valgfrit)';
+
+  @override
+  String get matchEventChooseMinute => 'Vælg minut (valgfrit)';
+
+  @override
+  String get matchEventAddMinute => 'Tilføj minut (valgfrit)';
+
+  @override
+  String get matchEventChangeMinute => 'Ret minut';
+
+  @override
+  String get matchEventWithoutMinute => 'Uden minut';
+
+  @override
+  String get matchEventUseMinute => 'Brug minut';
+
+  @override
+  String get matchEventYellowCard => 'Gult kort';
+
+  @override
+  String get matchEventRedCard => 'Rødt kort';
+
+  @override
+  String get matchEventPenalty => 'Straffespark';
+
+  @override
+  String get matchEventSaveFailed =>
+      'Hændelserne kunne ikke gemmes. Prøv igen.';
+
+  @override
+  String get matchEventAddMore => 'Tilføj mere';
+
+  @override
+  String get matchEventSaveAndClose => 'Gem og afslut';
+
+  @override
+  String get matchEventTimelineTitle => 'Kampforløb';
+
+  @override
+  String get matchEventEmptyTitle => 'Ingen hændelser endnu';
+
+  @override
+  String get matchEventEmptyDescription =>
+      'Tilføj mål, kort og udskiftninger. Minut er valgfrit.';
+
+  @override
+  String get matchEventAddAction => '+ Tilføj hændelse';
+
+  @override
+  String matchEventAssistedBy(String playerName) {
+    return 'Assisteret af $playerName';
+  }
+
+  @override
+  String matchEventPlayerOff(String playerName) {
+    return 'Ud: $playerName';
+  }
 }

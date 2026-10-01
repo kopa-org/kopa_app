@@ -136,7 +136,7 @@ class _GameResultRow extends StatelessWidget {
       button: true,
       label: 'Åbn kamp: ${match.matchName}',
       child: Material(
-        color: Colors.transparent,
+        color: AppColors.transparent,
         child: Ink(
           decoration: BoxDecoration(
             color: appColors.white,
@@ -295,7 +295,7 @@ class _TrainingEventRow extends StatelessWidget {
       button: true,
       label: l10n.eventOpenTraining,
       child: Material(
-        color: Colors.transparent,
+        color: AppColors.transparent,
         child: Ink(
           decoration: BoxDecoration(
             color: appColors.white,

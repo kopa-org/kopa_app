@@ -123,6 +123,43 @@ void main() {
         greaterThan(tester.getRect(benchHeader).top));
   });
 
+  testWidgets(
+      'formation changes preserve sparse starters and full player names',
+      (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    FlutterSecureStorage.setMockInitialValues({'lineupDragHintSeen': 'true'});
+    final now = DateTime(2026, 8, 9, 12);
+    await tester.pumpWidget(MaterialApp(
+      theme: AppTheme.lightTheme,
+      home: LineupEditorPage(
+          match: _match(attendanceDetailsList: [
+            _attendance(
+                id: 1,
+                user: _user(id: 1, name: 'Nicklas Hansen', now: now),
+                now: now,
+                lineupSlot: 3),
+            _attendance(
+                id: 2,
+                user: _user(id: 2, name: 'Christian Andersen', now: now),
+                now: now),
+          ]),
+          playerCount: 7),
+    ));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Rediger formation (2-3-1)'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Formation 3-2-1'));
+    await tester.pumpAndSettle();
+    final benchTop = tester.getRect(find.text('Bænken (1 spillere)')).top;
+    expect(tester.getRect(find.text('Nicklas Hansen')).top, lessThan(benchTop));
+    expect(tester.getRect(find.text('Christian Andersen')).top,
+        greaterThan(benchTop));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('match-only external players start on the bench', (tester) async {
     FlutterSecureStorage.setMockInitialValues({'lineupDragHintSeen': 'true'});
     final now = DateTime(2026, 8, 9, 12);

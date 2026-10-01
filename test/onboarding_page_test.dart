@@ -15,6 +15,7 @@ import 'package:kopa/pages/register_page.dart';
 import 'package:kopa/repositories/auth_repository.dart';
 import 'package:kopa/repository/onboarding_repository.dart';
 import 'package:kopa/theme/app_theme.dart';
+import 'package:kopa/theme/app_colors.dart';
 
 void main() {
   testWidgets('role question scrolls on a compact viewport', (tester) async {
@@ -161,7 +162,7 @@ void main() {
         .widget<DecoratedBox>(inactiveOptionFinder)
         .decoration as BoxDecoration;
 
-    expect(selectedDecoration.color, Colors.white);
+    expect(selectedDecoration.color, AppColors.light.white);
     expect(selectedDecoration.borderRadius, BorderRadius.circular(17));
     expect(selectedDecoration.boxShadow, hasLength(1));
     expect(selectedDecoration.boxShadow!.single.offset, const Offset(0, 2));
@@ -193,7 +194,7 @@ void main() {
     final elevenMandDecoration = tester
         .widget<DecoratedBox>(selectedOptionFinder)
         .decoration as BoxDecoration;
-    expect(sevenMandDecoration.color, Colors.white);
+    expect(sevenMandDecoration.color, AppColors.light.white);
     expect(sevenMandDecoration.boxShadow, hasLength(1));
     expect(elevenMandDecoration.color, Colors.transparent);
     expect(elevenMandDecoration.boxShadow, isNull);

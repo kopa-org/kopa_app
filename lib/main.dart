@@ -28,10 +28,10 @@ import 'package:kopa/state/match_programme_refresh_notifier.dart';
 import 'package:kopa/utils/app_analytics.dart';
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 import 'package:provider/provider.dart';
+import 'package:kopa/theme/app_colors.dart';
 
 const _envFileFromDefine = String.fromEnvironment('ENV_FILE');
 const _minimumSplashDuration = Duration(milliseconds: 1500);
-const _splashBackgroundColor = Color(0xFFE8F2ED);
 const _splashAnimationCacheWidth = 690;
 const _splashAnimationCacheHeight = 428;
 
@@ -374,9 +374,10 @@ class _AnimatedSplashApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: _AnimatedSplashScreen(),
+      theme: AppTheme.lightTheme,
+      home: const _AnimatedSplashScreen(),
     );
   }
 }
@@ -387,7 +388,7 @@ class _AnimatedSplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _splashBackgroundColor,
+      backgroundColor: AppColors.of(context).background,
       body: Center(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -419,8 +420,9 @@ class _SplashErrorApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: AppTheme.lightTheme,
       home: Scaffold(
-        backgroundColor: _splashBackgroundColor,
+        backgroundColor: AppColors.of(context).background,
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -429,8 +431,8 @@ class _SplashErrorApp extends StatelessWidget {
                   ? 'Kopa kunne ikke starte.'
                   : 'Kopa kunne ikke starte.\n$error',
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Color(0xFF00943C),
+              style: TextStyle(
+                color: AppColors.of(context).primary,
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),

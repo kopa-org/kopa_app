@@ -112,7 +112,7 @@ class AppTheme {
       appBarTheme: AppBarTheme(
         backgroundColor: colors.background,
         foregroundColor: colors.dirt,
-        surfaceTintColor: Colors.transparent,
+        surfaceTintColor: AppColors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
@@ -120,7 +120,7 @@ class AppTheme {
       ),
       cardTheme: CardThemeData(
         color: colors.surface,
-        surfaceTintColor: Colors.transparent,
+        surfaceTintColor: AppColors.transparent,
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -147,7 +147,7 @@ class AppTheme {
       ),
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: colors.surface,
-        surfaceTintColor: Colors.transparent,
+        surfaceTintColor: AppColors.transparent,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
@@ -155,7 +155,7 @@ class AppTheme {
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: colors.surface,
-        surfaceTintColor: Colors.transparent,
+        surfaceTintColor: AppColors.transparent,
         titleTextStyle: styles.sectionHeader,
         contentTextStyle: styles.body,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),

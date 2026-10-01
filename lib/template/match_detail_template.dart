@@ -294,15 +294,15 @@ class _MatchDetailSegmentButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const selectedColor = Color(0xFF105230);
-    const unselectedColor = Color(0xFF524438);
+    final selectedColor = AppColors.of(context).successForeground;
+    final unselectedColor = AppColors.of(context).textSecondary;
 
     return Semantics(
       button: true,
       selected: selected,
       label: label,
       child: Material(
-        color: Colors.transparent,
+        color: AppColors.transparent,
         child: InkWell(
           onTap: onPressed,
           child: SizedBox(
@@ -335,7 +335,7 @@ class _MatchDetailSegmentButton extends StatelessWidget {
                     height: 2,
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      color: selected ? selectedColor : Colors.transparent,
+                      color: selected ? selectedColor : AppColors.transparent,
                       borderRadius: BorderRadius.circular(1),
                     ),
                   ),

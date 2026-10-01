@@ -874,8 +874,8 @@ class _RoleQuestionView extends StatelessWidget {
                               style: OutlinedButton.styleFrom(
                                 minimumSize: const Size.fromHeight(51),
                                 foregroundColor: colors.textPrimary,
-                                side: const BorderSide(
-                                  color: Color(0xFFD1D6E0),
+                                side: BorderSide(
+                                  color: AppColors.of(context).divider,
                                   width: 1.5,
                                 ),
                                 textStyle: textStyles.body1.copyWith(
@@ -925,7 +925,7 @@ class _HeaderStepDots extends StatelessWidget {
             width: 6,
             height: 6,
             decoration: BoxDecoration(
-              color: const Color(0xFFD1D6E0),
+              color: AppColors.of(context).divider,
               borderRadius: BorderRadius.circular(3),
             ),
           ),
@@ -1114,7 +1114,7 @@ class _SegmentedToggle extends StatelessWidget {
       height: 40,
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
-        color: const Color(0xFFDCE5E2),
+        color: AppColors.of(context).divider,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -1163,12 +1163,12 @@ class _SegmentedOption extends StatelessWidget {
       child: DecoratedBox(
         key: ValueKey('onboarding-formation-option-$label'),
         decoration: BoxDecoration(
-          color: selected ? Colors.white : Colors.transparent,
+          color: selected ? AppColors.of(context).white : AppColors.transparent,
           borderRadius: borderRadius,
           boxShadow: selected
               ? [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.06),
+                    color: AppColors.of(context).black.withValues(alpha: 0.06),
                     offset: const Offset(0, 2),
                     blurRadius: 2,
                   ),
@@ -1230,7 +1230,7 @@ class _PitchPicker extends StatelessWidget {
           return FootballPitch(
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
+                color: AppColors.of(context).black.withValues(alpha: 0.08),
                 blurRadius: 16,
                 offset: const Offset(0, 8),
               ),
@@ -1430,7 +1430,7 @@ class _TeamSearchCard extends StatelessWidget {
           _Avatar(
             colors: colors,
             initials: _initials(title),
-            backgroundColor: _teamAccentColor(title),
+            backgroundColor: _teamAccentColor(title, colors),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -1543,7 +1543,7 @@ class _InviteTeamStep extends StatelessWidget {
                   color: colors.background,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: const Color(0xFFD1D6E0),
+                    color: AppColors.of(context).divider,
                     width: 0.8,
                   ),
                 ),
@@ -1720,7 +1720,7 @@ class _StepDots extends StatelessWidget {
             width: i == step ? 16 : 6,
             height: 6,
             decoration: BoxDecoration(
-              color: i == step ? colors.primary : const Color(0xFFD1D6E0),
+              color: i == step ? colors.primary : AppColors.of(context).divider,
               borderRadius: BorderRadius.circular(3),
             ),
           ),
@@ -1823,7 +1823,7 @@ class _TextInput extends StatelessWidget {
       decoration: InputDecoration(
         hintText: hintText,
         filled: true,
-        fillColor: Colors.white,
+        fillColor: AppColors.of(context).white,
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         enabledBorder: OutlineInputBorder(
@@ -1867,7 +1867,7 @@ class _SearchInput extends StatelessWidget {
         prefixIconConstraints:
             const BoxConstraints(minWidth: 38, minHeight: 37),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: AppColors.of(context).white,
         isDense: true,
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -2070,7 +2070,7 @@ class _WaitingView extends StatelessWidget {
             style: OutlinedButton.styleFrom(
               minimumSize: const Size.fromHeight(47),
               foregroundColor: colors.error,
-              backgroundColor: const Color(0xFFFEF2F2),
+              backgroundColor: AppColors.of(context).errorSurface,
               side: BorderSide(color: colors.error, width: 1.5),
               textStyle: textStyles.body1.copyWith(
                 fontWeight: FontWeight.w900,
@@ -2164,7 +2164,7 @@ class _WaitingView extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFFBEB),
+                    color: AppColors.of(context).warningSurface,
                     borderRadius: BorderRadius.circular(100),
                     border: Border.all(color: colors.warning),
                   ),
@@ -2364,15 +2364,8 @@ String _initials(String name) {
   return parts.take(2).map((part) => part[0].toUpperCase()).join();
 }
 
-Color _teamAccentColor(String seed) {
-  const colors = <Color>[
-    Color(0xFF00943C),
-    Color(0xFF3B82F6),
-    Color(0xFFEC4899),
-    Color(0xFF8B5CF6),
-    Color(0xFFF59E0B),
-    Color(0xFF14B8A6),
-  ];
+Color _teamAccentColor(String seed, AppColors appColors) {
+  final colors = appColors.onboardingTeamPalette;
   if (seed.trim().isEmpty) return colors.first;
   final index =
       seed.codeUnits.fold<int>(0, (sum, code) => sum + code) % colors.length;

@@ -106,7 +106,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     return Scaffold(
       backgroundColor: appColors.background,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.transparent,
         elevation: 0,
         leading: BackButton(color: appColors.black),
       ),
@@ -194,7 +194,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                           : _requestCode,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: appColors.primary,
-                    foregroundColor: Colors.white,
+                    foregroundColor: AppColors.of(context).white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -202,7 +202,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     textStyle: appTextStyles.button,
                   ),
                   child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
+                      ? CircularProgressIndicator(
+                          color: AppColors.of(context).white)
                       : Text(_codeSent
                           ? l10n.forgotPasswordVerify
                           : l10n.forgotPasswordSendCode),

@@ -240,7 +240,7 @@ class _JoinRequestRow extends StatelessWidget {
                 _JoinRequestActionButton(
                   icon: CupertinoIcons.xmark,
                   color: colors.error,
-                  backgroundColor: const Color(0xFFFFEBEE),
+                  backgroundColor: AppColors.of(context).errorSurface,
                   semanticLabel: 'Afvis ${request.userName}',
                   onPressed: onReject,
                 ),
@@ -248,7 +248,7 @@ class _JoinRequestRow extends StatelessWidget {
                 _JoinRequestActionButton(
                   icon: CupertinoIcons.checkmark_alt,
                   color: colors.primary,
-                  backgroundColor: const Color(0xFFE8F5E9),
+                  backgroundColor: AppColors.of(context).successSurface,
                   semanticLabel: 'Godkend ${request.userName}',
                   onPressed: onApprove,
                 ),

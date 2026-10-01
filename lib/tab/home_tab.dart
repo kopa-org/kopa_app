@@ -106,7 +106,7 @@ class _HomeTabViewState extends State<_HomeTabView> {
 
     return PageScaffold.tab(
       title: 'Kopa',
-      backgroundColor: appColors.offWhite,
+      backgroundColor: appColors.background,
       showTopBar: false,
       body: RefreshIndicator(
         color: appColors.primary,
@@ -155,7 +155,7 @@ class _HomeTabViewState extends State<_HomeTabView> {
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
                 SliverAppBar(
-                  backgroundColor: appColors.offWhite,
+                  backgroundColor: appColors.background,
                   foregroundColor: appColors.grass,
                   elevation: 0,
                   scrolledUnderElevation: 0,
@@ -265,7 +265,7 @@ class _HeroSection extends StatelessWidget {
         Spacing.md,
         Spacing.lg,
       ),
-      decoration: BoxDecoration(color: appColors.offWhite),
+      decoration: BoxDecoration(color: appColors.background),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -532,7 +532,7 @@ class _HeroMatchCarouselState extends State<_HeroMatchCarousel> {
   Widget build(BuildContext context) {
     final pages = _pages;
     return ColoredBox(
-      color: Colors.transparent,
+      color: AppColors.transparent,
       child: Column(
         children: [
           _HeroSection(
@@ -973,12 +973,6 @@ class _TrainingHeroEventContent extends StatelessWidget {
 }
 
 class _MatchInfoList extends StatelessWidget {
-  static const _primaryTextColor = Color(0xFF111827);
-  static const _labelTextColor = Color(0xFF4B5563);
-  static const _mutedTextColor = Color(0xFF9CA3AF);
-  static const _dividerColor = Color(0xFFE5E7EB);
-  static const _actionColor = Color(0xFF059669);
-
   final MatchDetails match;
   final VoidCallback? onOpenNavigation;
 
@@ -1004,7 +998,7 @@ class _MatchInfoList extends StatelessWidget {
           iconColor: appColors.sky,
           label: match.isTraining ? l10n.eventTrainingTime : 'Kampstart',
           value: _matchTime(match.date),
-          valueColor: _primaryTextColor,
+          valueColor: AppColors.of(context).textPrimary,
         ),
         if (!match.isTraining) ...[
           const _MatchInfoDivider(),
@@ -1013,8 +1007,9 @@ class _MatchInfoList extends StatelessWidget {
             iconColor: appColors.sunset,
             label: 'Mødetid',
             value: meetingTime == null ? '--:--' : _clockTime(meetingTime),
-            valueColor:
-                meetingTime == null ? _mutedTextColor : _primaryTextColor,
+            valueColor: meetingTime == null
+                ? AppColors.of(context).grey4
+                : AppColors.of(context).textPrimary,
           ),
         ],
         const _MatchInfoDivider(),
@@ -1068,7 +1063,7 @@ class _MatchInfoListRow extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: appTextStyles.body3.copyWith(
-                color: _MatchInfoList._labelTextColor,
+                color: AppColors.of(context).textSecondary,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -1081,14 +1076,14 @@ class _MatchInfoListRow extends StatelessWidget {
                 minimumSize: Size.zero,
                 padding: EdgeInsets.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                foregroundColor: _MatchInfoList._actionColor,
+                foregroundColor: AppColors.of(context).primary,
               ),
               child: Text(
                 actionLabel,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: appTextStyles.body4.copyWith(
-                  color: _MatchInfoList._actionColor,
+                  color: AppColors.of(context).primary,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -1100,7 +1095,7 @@ class _MatchInfoListRow extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.end,
               style: appTextStyles.subtitle2.copyWith(
-                color: valueColor ?? _MatchInfoList._primaryTextColor,
+                color: valueColor ?? AppColors.of(context).textPrimary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -1115,12 +1110,12 @@ class _MatchInfoDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
+    return Padding(
       padding: EdgeInsets.symmetric(vertical: 12),
       child: Divider(
         height: 1,
         thickness: 1,
-        color: _MatchInfoList._dividerColor,
+        color: AppColors.of(context).divider,
       ),
     );
   }
@@ -1172,7 +1167,7 @@ class HomeMatchResponseCard extends StatelessWidget {
       if (isRegistering) return;
       final response = await showModalBottomSheet<bool>(
         context: context,
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.transparent,
         isScrollControlled: true,
         useSafeArea: true,
         builder: (_) => _AttendanceResponseSheet(

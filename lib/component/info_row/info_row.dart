@@ -43,7 +43,7 @@ class InfoRow extends StatelessWidget {
             child: Text(
               title,
               style: appTextStyles.body3.copyWith(
-                color: const Color(0xFF524438),
+                color: AppColors.of(context).textSecondary,
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
               ),

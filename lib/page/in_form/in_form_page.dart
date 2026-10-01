@@ -523,7 +523,7 @@ class _PodiumRow extends StatelessWidget {
             _RankBadge(
               rank: row.rank,
               color: leader ? accent : accent.withValues(alpha: .14),
-              foregroundColor: leader ? Colors.white : accent,
+              foregroundColor: leader ? AppColors.of(context).white : accent,
               size: leader ? 34 : 30,
             ),
             const SizedBox(width: 12),

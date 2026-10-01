@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:kopa/model/team_logo_design.dart';
 import 'package:kopa/theme/app_text_styles.dart';
+import 'package:kopa/theme/app_colors.dart';
 
 class TeamAvatar extends StatelessWidget {
   static final Map<String, Future<ColorScheme?>> _colorSchemeCache = {};
@@ -27,7 +28,8 @@ class TeamAvatar extends StatelessWidget {
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
     final seed = _stableSeed('$teamId:$teamName');
-    final fallbackColors = _badgePalettes[seed % _badgePalettes.length];
+    final palettes = AppColors.of(context).teamBadgePalettes;
+    final fallbackColors = palettes[seed % palettes.length];
     final normalizedUrl = colorSourceUrl?.trim();
 
     return Semantics(
@@ -49,12 +51,14 @@ class TeamAvatar extends StatelessWidget {
                   logoDesign?.color ?? fallbackColors.$1,
                   logoDesign == null
                       ? fallbackColors.$2
-                      : Color.lerp(logoDesign!.color, Colors.white, 0.78)!
+                      : Color.lerp(
+                          logoDesign!.color, AppColors.of(context).white, 0.78)!
                 );
 
           return CustomPaint(
             size: Size.square(radius * 2),
             painter: _TeamBadgePainter(
+              white: AppColors.of(context).white,
               primary: colors.$1,
               secondary: colors.$2,
               pattern: seed % 4,
@@ -67,7 +71,7 @@ class TeamAvatar extends StatelessWidget {
                 child: Text(
                   _initials(teamName),
                   style: appTextStyles.buttonTiny.copyWith(
-                    color: Colors.white,
+                    color: AppColors.of(context).white,
                     fontSize: radius * 0.72,
                     fontWeight: FontWeight.w700,
                   ),
@@ -127,6 +131,7 @@ class TeamLogoShapeBorder extends ShapeBorder {
 }
 
 class _TeamBadgePainter extends CustomPainter {
+  final Color white;
   final Color primary;
   final Color secondary;
   final int pattern;
@@ -134,6 +139,7 @@ class _TeamBadgePainter extends CustomPainter {
   final TeamLogoPattern? logoPattern;
 
   const _TeamBadgePainter({
+    required this.white,
     required this.primary,
     required this.secondary,
     required this.pattern,
@@ -153,7 +159,7 @@ class _TeamBadgePainter extends CustomPainter {
 
     final secondaryPaint = Paint()..color = secondary;
     final stripePaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.34)
+      ..color = white.withValues(alpha: 0.34)
       ..strokeWidth = math.max(2, size.width * 0.14);
 
     if (logoPattern != null) {
@@ -179,7 +185,7 @@ class _TeamBadgePainter extends CustomPainter {
           fillPaint.shader = LinearGradient(
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
-            colors: [primary, Colors.white],
+            colors: [primary, white],
           ).createShader(bounds);
       }
       canvas.drawRect(bounds, fillPaint);
@@ -226,7 +232,7 @@ class _TeamBadgePainter extends CustomPainter {
             center,
             radius * 0.69,
             Paint()
-              ..color = Colors.white.withValues(alpha: 0.34)
+              ..color = white.withValues(alpha: 0.34)
               ..style = PaintingStyle.stroke
               ..strokeWidth = math.max(2, size.width * 0.1),
           );
@@ -237,7 +243,7 @@ class _TeamBadgePainter extends CustomPainter {
     canvas.drawPath(
       logoPath,
       Paint()
-        ..color = Colors.white.withValues(alpha: 0.85)
+        ..color = white.withValues(alpha: 0.85)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.5,
     );
@@ -245,6 +251,7 @@ class _TeamBadgePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _TeamBadgePainter oldDelegate) =>
+      oldDelegate.white != white ||
       oldDelegate.primary != primary ||
       oldDelegate.secondary != secondary ||
       oldDelegate.pattern != pattern ||
@@ -274,17 +281,6 @@ Path _logoPath(Rect bounds, TeamLogoShape shape) {
       ..addRRect(RRect.fromRectAndRadius(bounds, Radius.circular(size * 0.22))),
   };
 }
-
-const _badgePalettes = <(Color, Color)>[
-  (Color(0xFF1975F2), Color(0xFF00943C)),
-  (Color(0xFFED2415), Color(0xFF2D1000)),
-  (Color(0xFFFF9F1A), Color(0xFF1975F2)),
-  (Color(0xFF7B3FB5), Color(0xFF00943C)),
-  (Color(0xFF00838F), Color(0xFFFF9F1A)),
-  (Color(0xFF455A64), Color(0xFFED2415)),
-  (Color(0xFF3949AB), Color(0xFF00A86B)),
-  (Color(0xFFC2185B), Color(0xFF1975F2)),
-];
 
 int _stableSeed(String value) {
   var hash = 0x811C9DC5;

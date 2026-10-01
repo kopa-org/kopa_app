@@ -6,6 +6,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kopa/repository/scraper_repository.dart';
 import 'package:kopa/utils/app_analytics.dart';
+import 'package:kopa/theme/app_colors.dart';
 
 enum DbuWebviewOperation {
   fullImport('full_import'),
@@ -218,7 +219,9 @@ class _DbuWebviewPageState extends State<DbuWebviewPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.of(context).background,
       appBar: AppBar(
+        backgroundColor: AppColors.of(context).background,
         title: Text(switch (widget.operation) {
           DbuWebviewOperation.fullImport => 'DBU Login',
           DbuWebviewOperation.standings => 'Synkroniser stilling',
@@ -253,17 +256,17 @@ class _BlockingLoader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final colors = AppColors.of(context);
 
     return Stack(
       children: [
-        const ModalBarrier(
+        ModalBarrier(
           dismissible: false,
-          color: Color(0x66000000),
+          color: AppColors.of(context).black.withValues(alpha: 0.4),
         ),
         Center(
           child: Material(
-            color: colorScheme.surface,
+            color: colors.surface,
             elevation: 8,
             borderRadius: BorderRadius.circular(16),
             child: const Padding(

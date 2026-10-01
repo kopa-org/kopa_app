@@ -8,6 +8,7 @@ import 'package:kopa/component/match/player_of_match_summary_card.dart';
 import 'package:kopa/cubits/match_polls_cubit.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/model/match_details.dart';
+import 'package:kopa/model/event_attendance_details.dart';
 import 'package:kopa/model/external_player_details.dart';
 import 'package:kopa/model/match_poll_details.dart';
 import 'package:kopa/model/match_poll_user_votes_details.dart';
@@ -105,6 +106,52 @@ void main() {
     expect(find.byType(MatchPollRowItem), findsNWidgets(2));
     expect(find.text('3'), findsOneWidget);
     expect(find.text('1'), findsOneWidget);
+  });
+
+  testWidgets('MOTM only lists attending players who were not deselected',
+      (tester) async {
+    final now = DateTime(2026, 1, 1);
+    final users = [
+      for (var id = 1; id <= 5; id++) _user(id, 'Player $id', now)
+    ];
+    final cubit = MatchPollsCubit()
+      ..setData(squad: users, matches: [
+        MatchDetails(
+          id: 20,
+          date: now,
+          location: 'Park',
+          createdAt: now,
+          updatedAt: now,
+          attendanceDetailsList: [
+            for (var i = 0; i < 4; i++)
+              EventAttendanceDetails(
+                id: i + 1,
+                userDetails: users[i],
+                isAttending: i != 1,
+                isSelected: i == 2
+                    ? false
+                    : i == 3
+                        ? null
+                        : true,
+                createdAt: now,
+                updatedAt: now,
+              ),
+          ],
+        ),
+      ]);
+    final votes = UserVotesState();
+    addTearDown(cubit.close);
+    addTearDown(votes.dispose);
+    await tester.pumpWidget(_app(BlocProvider.value(
+        value: cubit,
+        child: ChangeNotifierProvider.value(
+            value: votes, child: const CreateMatchPollPage()))));
+    expect(find.text('Player 1'), findsOneWidget);
+    expect(find.text('Player 4'), findsOneWidget);
+    for (final id in [2, 3, 5]) {
+      expect(find.text('Player $id'), findsNothing);
+    }
+    expect(find.byType(MatchPollRowItem), findsNWidgets(2));
   });
 
   testWidgets('loan player can receive a MOTM vote', (tester) async {
@@ -206,6 +253,15 @@ MatchDetails _match(DateTime now) {
     location: 'Kopa Park',
     createdAt: now,
     updatedAt: now,
+    attendanceDetailsList: [
+      for (final user in [_user(1, 'Alice', now), _user(2, 'Bob', now)])
+        EventAttendanceDetails(
+            id: user.id,
+            userDetails: user,
+            isAttending: true,
+            createdAt: now,
+            updatedAt: now),
+    ],
   );
 }
 

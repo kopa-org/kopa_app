@@ -33,13 +33,13 @@ class FinesCard extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.account_balance_wallet,
-                  color: Colors.white, size: 28),
+              Icon(Icons.account_balance_wallet,
+                  color: AppColors.of(context).white, size: 28),
               const SizedBox(height: 8),
               Text(
                 'Udestående Bøder',
                 style: appTextStyles.bodyBold.copyWith(
-                  color: Colors.white,
+                  color: AppColors.of(context).white,
                 ),
               ),
             ],
@@ -47,7 +47,7 @@ class FinesCard extends StatelessWidget {
           Text(
             '${totalFines.toInt()} kr',
             style: appTextStyles.pageTitle.copyWith(
-              color: Colors.white,
+              color: AppColors.of(context).white,
             ),
           ),
         ],

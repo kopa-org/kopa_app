@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:kopa/theme/app_colors.dart';
 
 class ErrorMessage extends StatelessWidget {
   final String message;
@@ -17,7 +18,7 @@ class ErrorMessage extends StatelessWidget {
           'Der skete en fejl. Prøv venligst igen senere.',
           style: TextStyle(
             fontSize: 16.0,
-            color: CupertinoColors.systemRed,
+            color: AppColors.of(context).error,
           ),
           textAlign: TextAlign.center,
         ),

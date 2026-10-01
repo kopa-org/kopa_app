@@ -68,7 +68,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     return Scaffold(
       backgroundColor: appColors.background,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.transparent,
         elevation: 0,
         leading: BackButton(color: appColors.black),
       ),
@@ -123,7 +123,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   onPressed: _isLoading ? null : _resetPassword,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: appColors.primary,
-                    foregroundColor: Colors.white,
+                    foregroundColor: AppColors.of(context).white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -131,7 +131,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                     textStyle: appTextStyles.button,
                   ),
                   child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
+                      ? CircularProgressIndicator(
+                          color: AppColors.of(context).white)
                       : Text(l10n.resetPasswordSave),
                 ),
               ],

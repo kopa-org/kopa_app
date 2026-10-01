@@ -69,6 +69,7 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
   final List<_EventDraft> _staged = [];
   bool _isSaving = false;
   bool _isFlyingDown = false;
+  bool _isSelecting = false;
 
   int _animatingIndex = -1;
   final GlobalKey _newItemKey = GlobalKey();
@@ -107,12 +108,15 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
     required VoidCallback onComplete,
     Size? customSourceSize,
   }) {
+    if (_isSelecting || !mounted) return;
+    setState(() => _isSelecting = true);
     final RenderBox? sourceBox =
         sourceKey.currentContext?.findRenderObject() as RenderBox?;
     final RenderBox? targetBox =
         targetKey.currentContext?.findRenderObject() as RenderBox?;
 
     if (sourceBox == null || targetBox == null) {
+      setState(() => _isSelecting = false);
       onComplete();
       return;
     }
@@ -145,7 +149,7 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
             child: SizedBox(
               width: sourceSize.width,
               height: sourceSize.height,
-              child: Material(color: Colors.transparent, child: child),
+              child: Material(color: AppColors.transparent, child: child),
             ),
           ),
         ),
@@ -156,6 +160,8 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
     controller.forward().then((_) {
       entry.remove();
       controller.dispose();
+      if (!mounted) return;
+      setState(() => _isSelecting = false);
       onComplete();
     });
   }
@@ -320,7 +326,8 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
                 child: SizedBox(
                     width: sourceSize.width,
                     height: sourceSize.height,
-                    child: Material(color: Colors.transparent, child: item.$2)),
+                    child:
+                        Material(color: AppColors.transparent, child: item.$2)),
               ),
             ),
           ),
@@ -337,7 +344,7 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
         entry.remove();
       }
       controller.dispose();
-      onComplete();
+      if (mounted) onComplete();
     });
   }
 
@@ -369,27 +376,29 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
   }
 
   String getPrimaryLabel(MatchEventType? type) {
-    if (type == null) return 'Spiller';
+    final l10n = AppLocalizations.of(context)!;
+    if (type == null) return l10n.matchEventPlayer;
     switch (type) {
       case MatchEventType.goal:
-        return 'Målscorer';
+        return l10n.matchEventScorer;
       case MatchEventType.substitution:
-        return 'Spiller ind';
+        return l10n.matchEventPlayerIn;
       case MatchEventType.penaltyKick:
-        return 'Skytte';
+        return l10n.matchEventShooter;
       case MatchEventType.yellowCard:
       case MatchEventType.redCard:
-        return 'Spiller';
+        return l10n.matchEventPlayer;
     }
   }
 
   String? getSecondaryLabel(MatchEventType? type) {
+    final l10n = AppLocalizations.of(context)!;
     if (type == null) return null;
     switch (type) {
       case MatchEventType.goal:
-        return 'Assist';
+        return l10n.matchEventAssist;
       case MatchEventType.substitution:
-        return 'Spiller ud';
+        return l10n.matchEventPlayerOut;
       default:
         return null;
     }
@@ -429,7 +438,12 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
       await widget.onSaved();
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
+      if (!mounted) return;
       setState(() => _isSaving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(AppLocalizations.of(context)!.matchEventSaveFailed)),
+      );
     }
   }
 
@@ -441,51 +455,56 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return Scaffold(
-      backgroundColor: appColors.offWhite,
+      backgroundColor: appColors.background,
       body: SafeArea(
-        child: Column(
-          children: [
-            CupertinoNavigationBar(
-              backgroundColor: appColors.offWhite,
-              middle: Text(_flowTitle(), style: appTextStyles.sectionHeader),
-              leading: CupertinoButton(
-                padding: EdgeInsets.zero,
-                child: Icon(
-                    _currentStep == 0
-                        ? CupertinoIcons.xmark
-                        : CupertinoIcons.chevron_back,
-                    color: appColors.primary),
-                onPressed: () {
-                  if (_currentStep == 0) {
-                    Navigator.of(context).pop();
-                  } else {
-                    _onStepComplete(_currentStep - 1);
-                  }
-                },
+        child: AbsorbPointer(
+          absorbing: _isSaving || _isFlyingDown || _isSelecting,
+          child: Column(
+            children: [
+              CupertinoNavigationBar(
+                backgroundColor: appColors.background,
+                middle: Text(_flowTitle(), style: appTextStyles.sectionHeader),
+                leading: CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  child: Icon(
+                      _currentStep == 0
+                          ? CupertinoIcons.xmark
+                          : CupertinoIcons.chevron_back,
+                      color: appColors.primary),
+                  onPressed: () {
+                    if (_currentStep == 0) {
+                      Navigator.of(context).pop();
+                    } else {
+                      _onStepComplete(_currentStep == 3
+                          ? (getSecondaryLabel(_draft.type) != null ? 2 : 1)
+                          : _currentStep - 1);
+                    }
+                  },
+                ),
               ),
-            ),
-            _buildHeader(appTextStyles, appColors),
-            Expanded(
-              child: PageView(
-                controller: _pageController,
-                physics: const NeverScrollableScrollPhysics(),
-                children: [
-                  _buildTypeStep(appTextStyles, appColors),
-                  _buildTimeStep(appTextStyles, appColors),
-                  _buildPrimaryPlayerStep(appColors),
-                  _buildSecondaryPlayerStep(appColors),
-                ],
+              _buildHeader(appTextStyles, appColors),
+              Expanded(
+                child: PageView(
+                  controller: _pageController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: [
+                    _buildTypeStep(appTextStyles, appColors),
+                    _buildPrimaryPlayerStep(appColors),
+                    _buildSecondaryPlayerStep(appColors),
+                    _buildTimeStep(appTextStyles, appColors),
+                  ],
+                ),
               ),
-            ),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              height: _staged.isEmpty && !_isFlyingDown ? 0 : 90,
-              key: _draftContainerKey,
-              child:
-                  ClipRect(child: _buildStagedDraft(appTextStyles, appColors)),
-            ),
-            _buildBottomTray(appColors, appTextStyles),
-          ],
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                height: _staged.isEmpty && !_isFlyingDown ? 0 : 90,
+                key: _draftContainerKey,
+                child: ClipRect(
+                    child: _buildStagedDraft(appTextStyles, appColors)),
+              ),
+              _buildBottomTray(appColors, appTextStyles),
+            ],
+          ),
         ),
       ),
     );
@@ -496,11 +515,12 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
       case 0:
         return AppLocalizations.of(context)!.matchEventChooseEvent;
       case 1:
-        return 'Vælg minut';
-      case 2:
         return getPrimaryLabel(_draft.type);
+      case 2:
+        return getSecondaryLabel(_draft.type) ??
+            AppLocalizations.of(context)!.matchEventPlayer;
       case 3:
-        return getSecondaryLabel(_draft.type) ?? 'Spiller';
+        return AppLocalizations.of(context)!.matchEventChooseMinute;
       default:
         return AppLocalizations.of(context)!.matchEventChooseEvent;
     }
@@ -511,7 +531,7 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
       height: 60,
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(color: appColors.offWhite),
+      decoration: BoxDecoration(color: appColors.background),
       child: Row(
         children: [
           _buildHeaderChip(
@@ -551,7 +571,7 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
         key: key,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: value != null ? appColors.surface : Colors.transparent,
+          color: value != null ? appColors.surface : AppColors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Text(value ?? '-',
@@ -573,7 +593,7 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
         width: 34,
         height: 34,
         decoration: BoxDecoration(
-          color: initials != null ? appColors.surface : Colors.transparent,
+          color: initials != null ? appColors.surface : AppColors.transparent,
           shape: BoxShape.circle,
         ),
         alignment: Alignment.center,
@@ -591,12 +611,18 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
   }
 
   Widget _buildTypeStep(AppTextStyles appTextStyles, AppColors appColors) {
+    final l10n = AppLocalizations.of(context)!;
     final types = [
-      (MatchEventType.goal, 'Mål', '⚽', GlobalKey()),
-      (MatchEventType.substitution, 'Udskiftning', '🔄', GlobalKey()),
-      (MatchEventType.yellowCard, 'Gult kort', '🟨', GlobalKey()),
-      (MatchEventType.redCard, 'Rødt kort', '🟥', GlobalKey()),
-      (MatchEventType.penaltyKick, 'Straffespark', '🎯', GlobalKey()),
+      (MatchEventType.goal, l10n.matchTimelineGoal, '⚽', GlobalKey()),
+      (
+        MatchEventType.substitution,
+        l10n.matchTimelineSubstitution,
+        '🔄',
+        GlobalKey()
+      ),
+      (MatchEventType.yellowCard, l10n.matchEventYellowCard, '🟨', GlobalKey()),
+      (MatchEventType.redCard, l10n.matchEventRedCard, '🟥', GlobalKey()),
+      (MatchEventType.penaltyKick, l10n.matchEventPenalty, '🎯', GlobalKey()),
     ];
 
     return GridView.builder(
@@ -673,16 +699,19 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
             children: [
               Expanded(
                   child: Button(
-                      buttonText: 'Overspring',
+                      buttonText:
+                          AppLocalizations.of(context)!.matchEventWithoutMinute,
                       width: double.infinity,
                       onPressed: () {
                         setState(() => _draft.minute = null);
-                        _onStepComplete(2);
+                        _onStepComplete(
+                            getSecondaryLabel(_draft.type) != null ? 2 : 1);
                       })),
               const SizedBox(width: 12),
               Expanded(
                   child: Button(
-                      buttonText: 'Næste',
+                      buttonText:
+                          AppLocalizations.of(context)!.matchEventUseMinute,
                       width: double.infinity,
                       onPressed: () {
                         final selectedIndex =
@@ -697,7 +726,8 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
                                       decoration: TextDecoration.none))),
                           onComplete: () {
                             setState(() => _draft.minute = selectedIndex);
-                            _onStepComplete(2);
+                            _onStepComplete(
+                                getSecondaryLabel(_draft.type) != null ? 2 : 1);
                           },
                         );
                       })),
@@ -737,7 +767,7 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
                     onComplete: () {
                       setState(() => _draft.primaryPlayer = player);
                       if (getSecondaryLabel(_draft.type) != null) {
-                        _onStepComplete(3);
+                        _onStepComplete(2);
                       }
                     },
                   );
@@ -755,12 +785,9 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
       return const SizedBox.shrink();
     }
 
-    final filteredSquad = _draft.type == MatchEventType.substitution
-        ? widget.players
-            .where(
-                (player) => player.stableId != _draft.primaryPlayer?.stableId)
-            .toList()
-        : widget.players;
+    final filteredSquad = widget.players
+        .where((player) => player.stableId != _draft.primaryPlayer?.stableId)
+        .toList();
 
     return Column(
       children: [
@@ -854,13 +881,17 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(event.primaryPlayer?.name ?? 'Ukendt spiller',
+                      Text(
+                          event.primaryPlayer?.name ??
+                              AppLocalizations.of(context)!
+                                  .matchPollUnknownPlayer,
                           style: appTextStyles.caption
                               .copyWith(fontWeight: FontWeight.bold)),
                       Text(
                           event.minute != null
                               ? '${event.minute}\''
-                              : 'Ingen tid',
+                              : AppLocalizations.of(context)!
+                                  .matchEventWithoutMinute,
                           style: appTextStyles.caption.copyWith(fontSize: 10)),
                     ],
                   ),
@@ -888,13 +919,24 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(color: appColors.surface, boxShadow: [
         BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: AppColors.of(context).black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, -4))
       ]),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          if (hasRequired && _currentStep != 3)
+            CupertinoButton(
+              key: const ValueKey('match-event-add-minute'),
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              onPressed: () {
+                _onStepComplete(3);
+              },
+              child: Text(_draft.minute == null
+                  ? AppLocalizations.of(context)!.matchEventAddMinute
+                  : AppLocalizations.of(context)!.matchEventChangeMinute),
+            ),
           Row(
             children: [
               if (hasRequired)
@@ -910,7 +952,8 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
                         decoration: BoxDecoration(
                             color: appColors.surface,
                             borderRadius: BorderRadius.circular(12)),
-                        child: Text('Tilføj flere',
+                        child: Text(
+                            AppLocalizations.of(context)!.matchEventAddMore,
                             style: TextStyle(
                                 color: appColors.primary,
                                 fontWeight: FontWeight.bold)),
@@ -923,21 +966,26 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
                   padding: EdgeInsets.zero,
                   onPressed: hasRequired
                       ? () => _syncAndConfirm(thenSave: true)
-                      : null,
+                      : _staged.isNotEmpty
+                          ? saveAll
+                          : null,
                   child: Container(
                     height: 50,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                        color: hasRequired
-                            ? Colors.green
+                        color: hasRequired || _staged.isNotEmpty
+                            ? appColors.primary
                             : appColors.primary.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(12)),
                     child: _isSaving
-                        ? const CupertinoActivityIndicator(color: Colors.white)
-                        : Text('Gem & Afslut',
+                        ? CupertinoActivityIndicator(
+                            color: AppColors.of(context).white)
+                        : Text(
+                            AppLocalizations.of(context)!
+                                .matchEventSaveAndClose,
                             style: TextStyle(
-                                color: hasRequired
-                                    ? Colors.white
+                                color: hasRequired || _staged.isNotEmpty
+                                    ? appColors.white
                                     : appColors.textSecondary,
                                 fontWeight: FontWeight.bold)),
                   ),

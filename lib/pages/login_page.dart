@@ -116,7 +116,7 @@ class _LoginPageState extends State<LoginPage> {
                           : _onLoginPressed,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: appColors.primary,
-                        foregroundColor: Colors.white,
+                        foregroundColor: AppColors.of(context).white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -124,7 +124,8 @@ class _LoginPageState extends State<LoginPage> {
                         textStyle: appTextStyles.button,
                       ),
                       child: state.status == AuthStatus.loading
-                          ? const CircularProgressIndicator(color: Colors.white)
+                          ? CircularProgressIndicator(
+                              color: AppColors.of(context).white)
                           : const Text('LOG IND'),
                     ),
                     const SizedBox(height: 16),

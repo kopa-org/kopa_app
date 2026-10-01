@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:kopa/theme/app_colors.dart';
 
 class AppTextStyles extends ThemeExtension<AppTextStyles> {
   final TextStyle pageTitle;
@@ -52,8 +53,8 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
     required this.buttonTiny,
   });
 
-  static const Color _dirt = Color(0xFF2D1000);
-  static const Color _grey5 = Color(0xFF454B45);
+  static Color get _dirt => AppColors.light.textPrimary;
+  static Color get _grey5 => AppColors.light.textSecondary;
 
   static TextStyle _rethink({
     required double fontSize,

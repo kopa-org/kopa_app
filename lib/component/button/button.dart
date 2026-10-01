@@ -44,7 +44,7 @@ class Button extends StatelessWidget {
         switch (role) {
           ButtonVariant.primary => colors.lightGrass,
           ButtonVariant.secondary => colors.surface,
-          ButtonVariant.tertiary => Colors.transparent,
+          ButtonVariant.tertiary => AppColors.transparent,
           ButtonVariant.destructive => colors.errorSurface,
         };
 

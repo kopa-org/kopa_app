@@ -245,7 +245,7 @@ class _StandingsRow extends StatelessWidget {
       constraints: BoxConstraints(minHeight: compact ? 48 : 54),
       padding: EdgeInsets.symmetric(horizontal: compact ? 6 : Spacing.sm),
       decoration: BoxDecoration(
-        color: isCurrentTeam ? appColors.lightGrass : Colors.transparent,
+        color: isCurrentTeam ? appColors.lightGrass : AppColors.transparent,
       ),
       child: Row(
         children: [

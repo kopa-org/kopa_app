@@ -43,6 +43,7 @@ import 'package:kopa/component/card/match_hero_card.dart';
 import 'package:kopa/component/info_row/info_row.dart';
 import 'package:kopa/component/list_item/player_list_item.dart';
 import 'package:kopa/component/match/match_poll_details_card.dart';
+import 'package:kopa/component/match/match_events_timeline.dart';
 import 'package:kopa/component/match/player_of_match_summary_card.dart';
 import 'package:kopa/config/app_feature_flags.dart';
 import 'package:provider/provider.dart';
@@ -336,10 +337,23 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       timelineTitle: l10n.matchDetailsMatchEvents,
       timelineSegmentLabel: l10n.matchDetailsMatchEvents,
       showTimelineSegment: !isTraining,
-      timelinePreview: !isTraining,
+      timelinePreview: !isTraining && matchDetails.date.isAfter(DateTime.now()),
       timelinePreviewMessage: l10n.matchDetailsMatchEventsUnavailable,
-      timelineItems:
-          isTraining ? const [] : _buildMatchEventsPreviewItems(l10n),
+      timelineItems: isTraining
+          ? const []
+          : matchDetails.date.isAfter(DateTime.now())
+              ? _buildMatchEventsPreviewItems(l10n)
+              : [
+                  MatchEventsTimeline(
+                    events: matchDetails.matchEventDetailsList ?? const [],
+                    canAddEvent: canManageTeam,
+                    canReorderEvents: canManageTeam,
+                    onAddEvent: () => addMatchEvent(user),
+                    onDeleteEvent: canManageTeam ? _deleteMatchEvent : null,
+                    onReorderEvents: canManageTeam ? _reorderMatchEvents : null,
+                    showFullTime: false,
+                  )
+                ],
       overviewWidgets: [
         if (!isTraining) ...[
           const SizedBox(height: Spacing.lg),
@@ -442,13 +456,11 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       ),
       TimelineItem(
         title: l10n.matchTimelineGoal,
-        subtitle: l10n.matchTimelineGoal,
         time: "23'",
         icon: Icons.sports_soccer,
       ),
       TimelineItem(
         title: l10n.matchTimelineSubstitution,
-        subtitle: l10n.matchTimelineSubstitution,
         time: "67'",
         icon: Icons.swap_horiz,
       ),
@@ -1509,7 +1521,7 @@ class _PrematchRsvpDecisionBar extends StatelessWidget {
               Text(
                 l10n.matchDetailsDecisionTitle,
                 style: styles.body1.copyWith(
-                  color: const Color(0xFF2A1808),
+                  color: AppColors.of(context).textPrimary,
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   height: 20 / 16,
@@ -1519,7 +1531,7 @@ class _PrematchRsvpDecisionBar extends StatelessWidget {
               Text(
                 l10n.matchDetailsDecisionPending,
                 style: styles.body3.copyWith(
-                  color: const Color(0xFF524438),
+                  color: AppColors.of(context).textSecondary,
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                   height: 18 / 13,
@@ -1563,9 +1575,9 @@ class _PrematchRsvpChoiceBar extends StatelessWidget {
         Expanded(
           child: _PrematchRsvpButton(
             label: declineLabel,
-            foregroundColor: const Color(0xFF524438),
-            backgroundColor: Colors.transparent,
-            borderColor: const Color(0xFF524438),
+            foregroundColor: AppColors.of(context).textSecondary,
+            backgroundColor: AppColors.transparent,
+            borderColor: AppColors.of(context).textSecondary,
             isSaving: isSaving,
             onPressed: onDecline,
           ),
@@ -1575,8 +1587,8 @@ class _PrematchRsvpChoiceBar extends StatelessWidget {
           child: _PrematchRsvpButton(
             label: acceptLabel,
             icon: CupertinoIcons.checkmark,
-            foregroundColor: Colors.white,
-            backgroundColor: const Color(0xFF00964E),
+            foregroundColor: AppColors.of(context).white,
+            backgroundColor: AppColors.of(context).grass,
             isSaving: isSaving,
             onPressed: onAccept,
           ),
@@ -1604,8 +1616,9 @@ class _PrematchRsvpInlineStatus extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final styles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final statusColor =
-        isPending ? const Color(0xFF8A5A00) : const Color(0xFF00964E);
+    final statusColor = isPending
+        ? AppColors.of(context).warningForeground
+        : AppColors.of(context).grass;
 
     return Container(
       width: double.infinity,
@@ -1723,7 +1736,7 @@ class _PrematchRsvpStatusAction extends StatelessWidget {
   Widget build(BuildContext context) {
     final styles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    const actionColor = Color(0xFF877B70);
+    final actionColor = AppColors.of(context).textSecondary;
 
     return SizedBox(
       width: double.infinity,
@@ -1734,14 +1747,14 @@ class _PrematchRsvpStatusAction extends StatelessWidget {
         child: Align(
           alignment: Alignment.centerRight,
           child: isSaving
-              ? const CupertinoActivityIndicator(
+              ? CupertinoActivityIndicator(
                   radius: 8,
                   color: actionColor,
                 )
               : Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
+                    Icon(
                       CupertinoIcons.arrow_left,
                       color: actionColor,
                       size: 16,
@@ -1846,13 +1859,13 @@ class _PrematchRsvpSurface extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: const Border(
-          top: BorderSide(color: Color(0xFFE0E6E2)),
+        color: AppColors.of(context).white,
+        border: Border(
+          top: BorderSide(color: AppColors.of(context).divider),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: AppColors.of(context).black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, -4),
           ),
@@ -2326,18 +2339,18 @@ class _ApproveAllAttendancesButton extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (isSaving)
-                const CupertinoActivityIndicator(color: Colors.white)
+                CupertinoActivityIndicator(color: AppColors.of(context).white)
               else ...[
-                const Icon(
+                Icon(
                   CupertinoIcons.checkmark_alt_circle,
                   size: 18,
-                  color: Colors.white,
+                  color: AppColors.of(context).white,
                 ),
                 const SizedBox(width: Spacing.sm),
                 Text(
                   'Godkend alle',
                   style: styles.body1.copyWith(
-                    color: Colors.white,
+                    color: AppColors.of(context).white,
                     fontWeight: FontWeight.w800,
                   ),
                 ),

@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
 
 class AppColors extends ThemeExtension<AppColors> {
+  static const transparent = Colors.transparent;
+  static const defaultTeamLogoColor = Color(0xFF1B8B4B);
+
+  static AppColors of(BuildContext context) =>
+      Theme.of(context).extension<AppColors>() ?? light;
+
+  final Color pitch;
+  final Color pitchStripe;
   final Color background;
   final Color surface;
   final Color primary;
@@ -40,6 +48,8 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color error;
 
   const AppColors({
+    this.pitch = const Color(0xFF106E35),
+    this.pitchStripe = const Color(0xFF167E44),
     required this.background,
     required this.surface,
     required this.primary,
@@ -108,6 +118,37 @@ class AppColors extends ThemeExtension<AppColors> {
     error: Color(0xFFED2415),
   );
 
+  List<Color> get teamLogoPalette => const [
+        defaultTeamLogoColor,
+        Color(0xFF15213D),
+        Color(0xFFD22B2B),
+        Color(0xFF1975F2),
+        Color(0xFFF05A00),
+        Color(0xFF6E22A8),
+        Color(0xFF008E7B),
+        Color(0xFF263238),
+      ];
+
+  List<(Color, Color)> get teamBadgePalettes => [
+        (sky, grass),
+        (error, dirt),
+        (sunset, sky),
+        (const Color(0xFF7B3FB5), grass),
+        (const Color(0xFF00838F), sunset),
+        (const Color(0xFF455A64), error),
+        (const Color(0xFF3949AB), const Color(0xFF00A86B)),
+        (const Color(0xFFC2185B), sky),
+      ];
+
+  List<Color> get onboardingTeamPalette => [
+        grass,
+        sky,
+        const Color(0xFFEC4899),
+        const Color(0xFF8B5CF6),
+        sunset,
+        const Color(0xFF14B8A6),
+      ];
+
   // Semantic pairs keep small labels readable without changing brand swatches.
   Color get successForeground => const Color(0xFF006B35);
   Color get successSurface => lightGrass55;
@@ -120,6 +161,8 @@ class AppColors extends ThemeExtension<AppColors> {
 
   @override
   AppColors copyWith({
+    Color? pitch,
+    Color? pitchStripe,
     Color? background,
     Color? surface,
     Color? primary,
@@ -153,6 +196,8 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? error,
   }) {
     return AppColors(
+      pitch: pitch ?? this.pitch,
+      pitchStripe: pitchStripe ?? this.pitchStripe,
       background: background ?? this.background,
       surface: surface ?? this.surface,
       primary: primary ?? this.primary,
@@ -193,6 +238,8 @@ class AppColors extends ThemeExtension<AppColors> {
       return this;
     }
     return AppColors(
+      pitch: Color.lerp(pitch, other.pitch, t)!,
+      pitchStripe: Color.lerp(pitchStripe, other.pitchStripe, t)!,
       background: Color.lerp(background, other.background, t)!,
       surface: Color.lerp(surface, other.surface, t)!,
       primary: Color.lerp(primary, other.primary, t)!,

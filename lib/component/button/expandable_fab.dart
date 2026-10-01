@@ -1,3 +1,4 @@
+import 'package:kopa/theme/app_colors.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -94,10 +95,10 @@ class _ExpandableFabState extends State<ExpandableFab>
     final theme = Theme.of(context);
     final backgroundColor = widget.backgroundColor ??
         theme.floatingActionButtonTheme.backgroundColor ??
-        theme.colorScheme.primary;
+        AppColors.of(context).primary;
     final foregroundColor = widget.foregroundColor ??
         theme.floatingActionButtonTheme.foregroundColor ??
-        theme.colorScheme.onPrimary;
+        AppColors.of(context).white;
 
     return SizedBox(
       width: 56,

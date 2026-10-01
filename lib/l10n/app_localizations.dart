@@ -1201,6 +1201,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sunday'**
   String get eventWeekdaySunday;
+
+  /// No description provided for @matchPollNoParticipants.
+  ///
+  /// In en, this message translates to:
+  /// **'No participants are registered for this match. Update attendance to create a poll.'**
+  String get matchPollNoParticipants;
+
+  /// No description provided for @matchEventPlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Player'**
+  String get matchEventPlayer;
+
+  /// No description provided for @matchEventScorer.
+  ///
+  /// In en, this message translates to:
+  /// **'Goalscorer'**
+  String get matchEventScorer;
+
+  /// No description provided for @matchEventPlayerIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Player on'**
+  String get matchEventPlayerIn;
+
+  /// No description provided for @matchEventPlayerOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Player off'**
+  String get matchEventPlayerOut;
+
+  /// No description provided for @matchEventShooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Taker'**
+  String get matchEventShooter;
+
+  /// No description provided for @matchEventAssist.
+  ///
+  /// In en, this message translates to:
+  /// **'Assist (optional)'**
+  String get matchEventAssist;
+
+  /// No description provided for @matchEventChooseMinute.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose minute (optional)'**
+  String get matchEventChooseMinute;
+
+  /// No description provided for @matchEventAddMinute.
+  ///
+  /// In en, this message translates to:
+  /// **'Add minute (optional)'**
+  String get matchEventAddMinute;
+
+  /// No description provided for @matchEventChangeMinute.
+  ///
+  /// In en, this message translates to:
+  /// **'Change minute'**
+  String get matchEventChangeMinute;
+
+  /// No description provided for @matchEventWithoutMinute.
+  ///
+  /// In en, this message translates to:
+  /// **'Without minute'**
+  String get matchEventWithoutMinute;
+
+  /// No description provided for @matchEventUseMinute.
+  ///
+  /// In en, this message translates to:
+  /// **'Use minute'**
+  String get matchEventUseMinute;
+
+  /// No description provided for @matchEventYellowCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Yellow card'**
+  String get matchEventYellowCard;
+
+  /// No description provided for @matchEventRedCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Red card'**
+  String get matchEventRedCard;
+
+  /// No description provided for @matchEventPenalty.
+  ///
+  /// In en, this message translates to:
+  /// **'Penalty kick'**
+  String get matchEventPenalty;
+
+  /// No description provided for @matchEventSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the events. Please try again.'**
+  String get matchEventSaveFailed;
+
+  /// No description provided for @matchEventAddMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Add more'**
+  String get matchEventAddMore;
+
+  /// No description provided for @matchEventSaveAndClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Save and close'**
+  String get matchEventSaveAndClose;
+
+  /// No description provided for @matchEventTimelineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Match events'**
+  String get matchEventTimelineTitle;
+
+  /// No description provided for @matchEventEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No events yet'**
+  String get matchEventEmptyTitle;
+
+  /// No description provided for @matchEventEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Add goals, cards and substitutions. The minute is optional.'**
+  String get matchEventEmptyDescription;
+
+  /// No description provided for @matchEventAddAction.
+  ///
+  /// In en, this message translates to:
+  /// **'+ Add event'**
+  String get matchEventAddAction;
+
+  /// No description provided for @matchEventAssistedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Assisted by {playerName}'**
+  String matchEventAssistedBy(String playerName);
+
+  /// No description provided for @matchEventPlayerOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off: {playerName}'**
+  String matchEventPlayerOff(String playerName);
 }
 
 class _AppLocalizationsDelegate

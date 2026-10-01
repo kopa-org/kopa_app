@@ -9,6 +9,7 @@ import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/match_polls_cubit.dart';
 import 'package:kopa/cubits/match_polls_state.dart';
 import 'package:kopa/component/match/match_poll_details_card.dart';
+import 'package:kopa/theme/app_colors.dart';
 
 class MatchPollsListPage extends StatefulWidget {
   const MatchPollsListPage({super.key});
@@ -37,7 +38,7 @@ class _MatchPollsListView extends StatelessWidget {
     return SizedBox(
       height: double.infinity,
       child: CupertinoPageScaffold(
-        backgroundColor: CupertinoColors.systemGrey6,
+        backgroundColor: AppColors.of(context).background,
         navigationBar: CupertinoNavigationBar(
           transitionBetweenRoutes: false,
           middle: const Text('Afstemninger'),

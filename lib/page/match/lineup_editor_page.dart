@@ -322,7 +322,7 @@ class _LineupEditorPageState extends State<LineupEditorPage> {
   Future<void> _showFormationSheet() async {
     final selected = await showModalBottomSheet<String>(
       context: context,
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.transparent,
       isScrollControlled: true,
       builder: (context) => _FormationSheet(
         currentFormation: _formation.label,
@@ -417,7 +417,7 @@ class _EditorHeader extends StatelessWidget {
             color: colors.primary,
             onPressed: saving ? null : onSave,
             child: saving
-                ? const CupertinoActivityIndicator(color: Colors.white)
+                ? CupertinoActivityIndicator(color: AppColors.of(context).white)
                 : Text(
                     'Gem',
                     style: styles.caption2.copyWith(
@@ -470,7 +470,7 @@ class _LineupCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: AppColors.of(context).black.withValues(alpha: 0.03),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -532,7 +532,7 @@ class _LineupCard extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFF105230),
+                color: AppColors.of(context).successForeground,
                 borderRadius: BorderRadius.circular(100),
               ),
               child: Text(
@@ -635,7 +635,7 @@ class _BenchSection extends StatelessWidget {
           decoration: BoxDecoration(
             color: isDropTarget
                 ? colors.lightGrass55.withValues(alpha: 0.55)
-                : Colors.transparent,
+                : AppColors.transparent,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
@@ -716,7 +716,7 @@ class _DraggablePlayerBadge extends StatelessWidget {
     return LongPressDraggable<_LineupDragData>(
       data: _LineupDragData(player: player, fromSlot: fromSlot),
       feedback: Material(
-        color: Colors.transparent,
+        color: AppColors.transparent,
         child: Transform.scale(scale: 1.05, child: badge),
       ),
       childWhenDragging: Opacity(opacity: 0.25, child: badge),
@@ -763,7 +763,7 @@ class _PlayerBadge extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: styles.caption3.copyWith(
-                color: const Color(0xFF105230),
+                color: AppColors.of(context).successForeground,
                 fontWeight: FontWeight.w900,
                 fontSize: 9,
                 height: 1.05,
@@ -888,7 +888,7 @@ class _BenchPlayerCard extends StatelessWidget {
     return LongPressDraggable<_LineupDragData>(
       data: _LineupDragData(player: player),
       feedback: Material(
-        color: Colors.transparent,
+        color: AppColors.transparent,
         child: Transform.scale(scale: 1.04, child: card),
       ),
       childWhenDragging: Opacity(opacity: 0.35, child: card),
@@ -920,18 +920,18 @@ class _EmptySlotBadge extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          color: Colors.white,
+          color: AppColors.of(context).white,
           width: highlighted ? 2.4 : 1.6,
           style: BorderStyle.solid,
         ),
         color: highlighted
-            ? Colors.white.withValues(alpha: 0.18)
-            : Colors.transparent,
+            ? AppColors.of(context).white.withValues(alpha: 0.18)
+            : AppColors.transparent,
       ),
       child: Text(
         label,
         style: styles.caption3.copyWith(
-          color: Colors.white,
+          color: AppColors.of(context).white,
           fontWeight: FontWeight.w800,
         ),
       ),
@@ -975,7 +975,7 @@ class _FormationSheet extends StatelessWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF877B70),
+                  color: AppColors.of(context).textSecondary,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),

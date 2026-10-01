@@ -36,7 +36,7 @@ class AppAvatar extends StatelessWidget {
 
     return CircleAvatar(
       radius: radius,
-      backgroundColor: backgroundColor ?? Colors.white,
+      backgroundColor: backgroundColor ?? AppColors.of(context).white,
       child: normalizedImageUrl == null || normalizedImageUrl.isEmpty
           ? fallback
           : ClipOval(

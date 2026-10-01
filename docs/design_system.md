@@ -37,3 +37,11 @@ shared visual changes. Refresh the golden intentionally with
 `flutter test --update-goldens test/design_system_test.dart` and inspect it.
 Golden changes require the same Flutter/font environment for comparison.
 The isolated preview is not verification of full screens on a physical device.
+
+## Background colors
+
+- Use the active `AppColors.background` for page canvases and headers. `offWhite` is a separate tint for inset surfaces and disabled controls.
+- Use `surface` for standard cards, sheets, and input fills; use semantic surface tokens for status backgrounds.
+- Resolve colors with `AppColors.of(context)` or the existing theme extension lookup. Define palette literals in `lib/theme/app_colors.dart`.
+- Pitch fills use `pitch` and `pitchStripe`; custom painters receive colors from the active theme and repaint when those colors change.
+- Team logo choices are centralized in `AppColors`; a saved team logo color remains user data.
