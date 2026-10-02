@@ -18,6 +18,7 @@ class MatchHeroCard extends StatelessWidget {
   final String? heroTag;
   final String? ownTeamName;
   final TeamLogoDesign? ownTeamLogoDesign;
+  final bool darkHeader;
 
   const MatchHeroCard({
     super.key,
@@ -29,6 +30,7 @@ class MatchHeroCard extends StatelessWidget {
     this.heroTag,
     this.ownTeamName,
     this.ownTeamLogoDesign,
+    this.darkHeader = false,
   });
 
   @override
@@ -39,12 +41,19 @@ class MatchHeroCard extends StatelessWidget {
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
     final l10n = AppLocalizations.of(context)!;
     final hasScore = match.hasFinalScore;
+    final useDarkHeader = darkHeader && !match.isTraining;
+    final heroTextColor =
+        useDarkHeader ? AppColors.matchDetailsHeaderForeground : appColors.dirt;
 
     final cardContent = KopaCard(
       onTap: onTap,
       padding: EdgeInsets.zero,
       borderRadius: Spacing.borderRadiusLargeIncreased,
-      color: match.isTraining ? appColors.lightSky65 : null,
+      color: useDarkHeader
+          ? AppColors.matchDetailsHeader
+          : match.isTraining
+              ? appColors.lightSky65
+              : null,
       child: match.isTraining
           ? _TrainingHeroContent(match: match, title: l10n.eventTraining)
           : Column(
@@ -69,13 +78,19 @@ class MatchHeroCard extends StatelessWidget {
                           radius: 23,
                           labelMaxLines: 1,
                           labelStyle: appTextStyles.caption.copyWith(
-                            color: appColors.dirt,
-                            fontWeight: FontWeight.w800,
+                            color: heroTextColor,
+                            fontWeight: useDarkHeader
+                                ? FontWeight.w400
+                                : FontWeight.w800,
+                            fontSize: useDarkHeader ? 12 : null,
                           ),
                         ),
                       ),
                       if (hasScore)
-                        _FinalScorePill(match: match)
+                        _FinalScorePill(
+                          match: match,
+                          textColor: heroTextColor,
+                        )
                       else
                         Padding(
                           padding: const EdgeInsets.symmetric(
@@ -84,7 +99,7 @@ class MatchHeroCard extends StatelessWidget {
                           child: Text(
                             'VS',
                             style: appTextStyles.h5.copyWith(
-                              color: appColors.dirt,
+                              color: heroTextColor,
                               fontWeight: FontWeight.w900,
                             ),
                           ),
@@ -101,8 +116,11 @@ class MatchHeroCard extends StatelessWidget {
                           radius: 23,
                           labelMaxLines: 1,
                           labelStyle: appTextStyles.caption.copyWith(
-                            color: appColors.dirt,
-                            fontWeight: FontWeight.w800,
+                            color: heroTextColor,
+                            fontWeight: useDarkHeader
+                                ? FontWeight.w400
+                                : FontWeight.w800,
+                            fontSize: useDarkHeader ? 12 : null,
                           ),
                         ),
                       ),
@@ -230,13 +248,12 @@ class _TrainingHeroContent extends StatelessWidget {
 
 class _FinalScorePill extends StatelessWidget {
   final MatchDetails match;
+  final Color textColor;
 
-  const _FinalScorePill({required this.match});
+  const _FinalScorePill({required this.match, required this.textColor});
 
   @override
   Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
 
@@ -246,7 +263,7 @@ class _FinalScorePill extends StatelessWidget {
         Text(
           '${match.homeTeamScore} - ${match.awayTeamScore}',
           style: appTextStyles.h3.copyWith(
-            color: appColors.dirt,
+            color: textColor,
             fontWeight: FontWeight.w900,
           ),
         ),

@@ -5,19 +5,20 @@ void main() {
   group('UrlOpener MobilePay Box URLs', () {
     test('converts kroner to minor units for Box amount parameter', () {
       final uri = UrlOpener.mobilePayBoxUriFromIdForTesting(
-        'test-box',
+        '518aff76-4902-4482-ae1d-967fde993155',
         amount: 100,
         message: 'Bøder - Test',
       );
 
-      expect(uri.toString(), contains('/box/test-box/pay-in'));
+      expect(uri.toString(),
+          contains('/box/518aff76-4902-4482-ae1d-967fde993155/pay-in'));
       expect(uri.queryParameters['amount'], '10000');
       expect(uri.queryParameters['message'], 'Bøder - Test');
     });
 
     test('keeps existing query parameters and skips empty optional values', () {
       final uri = UrlOpener.mobilePayBoxUriForTesting(
-        'https://qr.mobilepay.dk/box/test-box/pay-in?source=kopa',
+        'https://qr.mobilepay.dk/box/518aff76-4902-4482-ae1d-967fde993155/pay-in?source=kopa',
         amount: 0,
         message: '  ',
       );

@@ -72,7 +72,6 @@ void main() {
           heroCard: const SizedBox(height: 1),
           attendanceList: const [],
           onAddEvent: _noop,
-          onSetMatchScore: _noop,
           onCreateMatchPoll: _noop,
           selectedSegment: MatchDetailSegment.overview,
           onSegmentChanged: (_) {},

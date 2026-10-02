@@ -1345,6 +1345,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Off: {playerName}'**
   String matchEventPlayerOff(String playerName);
+
+  /// No description provided for @mobilePayBoxTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'MobilePay Box'**
+  String get mobilePayBoxTitle;
+
+  /// No description provided for @mobilePayBoxMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'MobilePay Box missing'**
+  String get mobilePayBoxMissing;
+
+  /// No description provided for @mobilePayBoxInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste the payment link from Share in your MobilePay Box. The short Box code cannot open a payment link.'**
+  String get mobilePayBoxInstructions;
+
+  /// No description provided for @mobilePayBoxOwnerRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'The team owner must add the MobilePay Box payment link first.'**
+  String get mobilePayBoxOwnerRequired;
+
+  /// No description provided for @mobilePayBoxEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit MobilePay Box link'**
+  String get mobilePayBoxEdit;
+
+  /// No description provided for @mobilePayBoxAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Box link'**
+  String get mobilePayBoxAdd;
+
+  /// No description provided for @mobilePayBoxInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste the full MobilePay Box payment link. A short code such as 5289PN is not enough.'**
+  String get mobilePayBoxInvalid;
+
+  /// No description provided for @mobilePayBoxSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save MobilePay Box'**
+  String get mobilePayBoxSave;
+
+  /// No description provided for @mobilePayBoxSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save MobilePay Box. Try again.'**
+  String get mobilePayBoxSaveFailed;
+
+  /// No description provided for @mobilePayOpenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open MobilePay. Check that the app is installed and try again.'**
+  String get mobilePayOpenFailed;
+
+  /// No description provided for @mobilePayBoxLinkRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'This Box has a short code instead of a payment link. Ask the team owner to edit the Box and paste its shared payment link.'**
+  String get mobilePayBoxLinkRequired;
+
+  /// No description provided for @mobilePayDeposit.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay with MobilePay'**
+  String get mobilePayDeposit;
+
+  /// No description provided for @mobilePayGoToBox.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to MobilePay Box'**
+  String get mobilePayGoToBox;
+
+  /// No description provided for @mobilePayAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay {amount} kr. with MobilePay'**
+  String mobilePayAmount(int amount);
+
+  /// No description provided for @matchRsvpQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you coming?'**
+  String get matchRsvpQuestion;
+
+  /// No description provided for @matchRsvpHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Let your team know if you can make it.'**
+  String get matchRsvpHint;
+
+  /// No description provided for @matchRsvpAwaitingResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting response'**
+  String get matchRsvpAwaitingResponse;
+
+  /// No description provided for @matchRsvpConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'You are registered for the match'**
+  String get matchRsvpConfirmed;
+
+  /// No description provided for @matchRsvpTrainingConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'You are registered for training'**
+  String get matchRsvpTrainingConfirmed;
+
+  /// No description provided for @matchRsvpDeclinedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You have declined'**
+  String get matchRsvpDeclinedMessage;
+
+  /// No description provided for @matchRsvpCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel attendance'**
+  String get matchRsvpCancel;
+
+  /// No description provided for @matchRsvpAttendeeCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} registered'**
+  String matchRsvpAttendeeCount(int count);
+
+  /// No description provided for @matchActionsMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Match options'**
+  String get matchActionsMore;
+
+  /// No description provided for @matchActionsEditResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit match result'**
+  String get matchActionsEditResult;
 }
 
 class _AppLocalizationsDelegate

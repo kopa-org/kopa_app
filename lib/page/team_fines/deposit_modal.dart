@@ -9,8 +9,10 @@ import 'package:kopa/utils/app_analytics.dart';
 
 class DepositModal extends StatefulWidget {
   final int fineBoxId;
+  final String? mobilePayBoxId;
 
-  const DepositModal({super.key, required this.fineBoxId});
+  const DepositModal(
+      {super.key, required this.fineBoxId, required this.mobilePayBoxId});
 
   @override
   State<DepositModal> createState() => _DepositModalState();
@@ -135,6 +137,7 @@ class _DepositModalState extends State<DepositModal> {
                         MobilePayButton(
                           amount: int.tryParse(_depositController.text),
                           message: 'Bødekassen',
+                          mobilePayBoxId: widget.mobilePayBoxId,
                         ),
                       ],
                     )

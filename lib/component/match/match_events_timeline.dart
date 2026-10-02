@@ -190,12 +190,19 @@ class _MatchEventsTimelineState extends State<MatchEventsTimeline> {
       );
     }
 
-    if (widget.canReorderEvents && _events.length > 1 && !_savingOrder) {
+    if (widget.canReorderEvents &&
+        widget.onReorderEvents != null &&
+        _events.length > 1 &&
+        !_savingOrder) {
       trailing.add(
         ReorderableDragStartListener(
           index: index,
           child: Tooltip(
             message: l10n.matchEventReorderTooltip,
+            // A long-press tooltip wins the gesture arena before a held
+            // handle can start dragging. Keep hover help without consuming
+            // the touch gesture.
+            triggerMode: TooltipTriggerMode.manual,
             child: const SizedBox(
               width: 40,
               height: 48,

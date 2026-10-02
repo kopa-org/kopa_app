@@ -688,4 +688,86 @@ class AppLocalizationsEn extends AppLocalizations {
   String matchEventPlayerOff(String playerName) {
     return 'Off: $playerName';
   }
+
+  @override
+  String get mobilePayBoxTitle => 'MobilePay Box';
+
+  @override
+  String get mobilePayBoxMissing => 'MobilePay Box missing';
+
+  @override
+  String get mobilePayBoxInstructions =>
+      'Paste the payment link from Share in your MobilePay Box. The short Box code cannot open a payment link.';
+
+  @override
+  String get mobilePayBoxOwnerRequired =>
+      'The team owner must add the MobilePay Box payment link first.';
+
+  @override
+  String get mobilePayBoxEdit => 'Edit MobilePay Box link';
+
+  @override
+  String get mobilePayBoxAdd => 'Add Box link';
+
+  @override
+  String get mobilePayBoxInvalid =>
+      'Paste the full MobilePay Box payment link. A short code such as 5289PN is not enough.';
+
+  @override
+  String get mobilePayBoxSave => 'Save MobilePay Box';
+
+  @override
+  String get mobilePayBoxSaveFailed =>
+      'Could not save MobilePay Box. Try again.';
+
+  @override
+  String get mobilePayOpenFailed =>
+      'Could not open MobilePay. Check that the app is installed and try again.';
+
+  @override
+  String get mobilePayBoxLinkRequired =>
+      'This Box has a short code instead of a payment link. Ask the team owner to edit the Box and paste its shared payment link.';
+
+  @override
+  String get mobilePayDeposit => 'Pay with MobilePay';
+
+  @override
+  String get mobilePayGoToBox => 'Go to MobilePay Box';
+
+  @override
+  String mobilePayAmount(int amount) {
+    return 'Pay $amount kr. with MobilePay';
+  }
+
+  @override
+  String get matchRsvpQuestion => 'Are you coming?';
+
+  @override
+  String get matchRsvpHint => 'Let your team know if you can make it.';
+
+  @override
+  String get matchRsvpAwaitingResponse => 'Awaiting response';
+
+  @override
+  String get matchRsvpConfirmed => 'You are registered for the match';
+
+  @override
+  String get matchRsvpTrainingConfirmed => 'You are registered for training';
+
+  @override
+  String get matchRsvpDeclinedMessage => 'You have declined';
+
+  @override
+  String get matchRsvpCancel => 'Cancel attendance';
+
+  @override
+  String matchRsvpAttendeeCount(int count) {
+    return '$count registered';
+  }
+
+  @override
+  String get matchActionsMore => 'Match options';
+
+  @override
+  String get matchActionsEditResult => 'Edit match result';
 }

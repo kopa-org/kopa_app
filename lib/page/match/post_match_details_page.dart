@@ -12,14 +12,14 @@ class PostMatchDetailsPage extends StatelessWidget {
   final UserDetails user;
   final Widget heroCard;
   final Widget? headerAction;
+  final Widget? belowHeaderAction;
   final List<Widget> attendanceList;
   final Future<void> Function()? onRefresh;
   final VoidCallback onAddEvent;
   final ValueChanged<int>? onDeleteEvent;
   final Future<void> Function(List<int>)? onReorderEvents;
   final Widget? attendanceActionBar;
-  final VoidCallback onSetMatchScore;
-  final VoidCallback onCreateMatchPoll;
+  final VoidCallback? onCreateMatchPoll;
   final VoidCallback? onEditMatchPoll;
   final MatchDetailSegment selectedSegment;
   final ValueChanged<MatchDetailSegment> onSegmentChanged;
@@ -32,12 +32,12 @@ class PostMatchDetailsPage extends StatelessWidget {
     required this.user,
     required this.heroCard,
     this.headerAction,
+    this.belowHeaderAction,
     required this.attendanceList,
     required this.onAddEvent,
     this.onDeleteEvent,
     this.onReorderEvents,
     this.attendanceActionBar,
-    required this.onSetMatchScore,
     required this.onCreateMatchPoll,
     this.onEditMatchPoll,
     required this.selectedSegment,
@@ -51,10 +51,12 @@ class PostMatchDetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return MatchDetailTemplate(
       onRefresh: onRefresh,
+      useDarkMatchHeader: true,
       selectedSegment: selectedSegment,
       onSegmentChanged: onSegmentChanged,
       heroCard: heroCard,
       headerAction: headerAction,
+      belowHeaderAction: belowHeaderAction,
       overviewTitle: 'Efter kampen',
       attendanceTitle: 'Tilmeldte',
       timelineTitle: 'Kampbegivenheder',

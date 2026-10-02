@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kopa/component/card/kopa_card.dart';
+import 'package:kopa/component/card/match_hero_card.dart';
 import 'package:kopa/component/timeline/timeline_item.dart';
+import 'package:kopa/l10n/app_localizations.dart';
+import 'package:kopa/model/match_details.dart';
 import 'package:kopa/template/match_detail_template.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
@@ -29,6 +33,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: MatchDetailTemplate(
+          useDarkMatchHeader: true,
           heroCard: const SizedBox(height: 220, child: Text('Hero')),
           overviewWidgets: [
             for (var i = 0; i < 20; i++)
@@ -145,6 +150,138 @@ void main() {
     expect(selected, MatchDetailSegment.attendance);
   });
 
+  testWidgets('match header uses the dark Figma surface and leaves body light',
+      (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          extensions: <ThemeExtension<dynamic>>[
+            AppColors.light,
+            AppTextStyles.light,
+          ],
+        ),
+        home: MatchDetailTemplate(
+          useDarkMatchHeader: true,
+          pageTitle: 'Kampdag',
+          heroCard: const SizedBox(height: 120, child: Text('Match hero')),
+          overviewWidgets: const [Text('Existing body content')],
+          showTimelineSegment: false,
+        ),
+      ),
+    );
+
+    final header = tester.widget<ColoredBox>(
+      find.byKey(const ValueKey('match-details-dark-header')),
+    );
+    final contentBackground = tester.widget<ColoredBox>(
+      find.byKey(const ValueKey('match-details-content-background')),
+    );
+    final segmentControl = tester.widget<Container>(
+      find.byKey(const ValueKey('match-details-dark-segment-control')),
+    );
+    final overviewSurface = tester.widget<Container>(
+      find.byKey(const ValueKey('match-details-segment-overview-surface')),
+    );
+    final overviewDecoration = overviewSurface.decoration! as BoxDecoration;
+
+    expect(header.color, AppColors.matchDetailsHeader);
+    expect(
+      tester
+          .getSize(find.byKey(const ValueKey('match-details-dark-header')))
+          .width,
+      tester.getSize(find.byType(Scaffold)).width,
+    );
+    expect(contentBackground.color, AppColors.light.background);
+    expect(
+      (segmentControl.decoration! as BoxDecoration).color,
+      AppColors.matchDetailsHeaderTrack,
+    );
+    expect(overviewDecoration.color, Colors.white);
+    expect(find.text('Existing body content'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('result action sits below the dark header before practical info',
+      (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          extensions: <ThemeExtension<dynamic>>[
+            AppColors.light,
+            AppTextStyles.light,
+          ],
+        ),
+        home: MatchDetailTemplate(
+          useDarkMatchHeader: true,
+          usePrematchLayout: true,
+          heroCard: const SizedBox(height: 120, child: Text('Match hero')),
+          belowHeaderAction: const SizedBox(
+            key: ValueKey('match-register-result-action'),
+            height: 48,
+            child: Text('Register match result'),
+          ),
+          infoRows: const [Text('Match venue')],
+          showTimelineSegment: false,
+        ),
+      ),
+    );
+
+    final headerRect = tester.getRect(
+      find.byKey(const ValueKey('match-details-dark-header')),
+    );
+    final actionRect = tester.getRect(
+      find.byKey(const ValueKey('match-register-result-action')),
+    );
+    final practicalInfoRect = tester.getRect(
+      find.text('Praktisk information'),
+    );
+
+    expect(actionRect.top, greaterThanOrEqualTo(headerRect.bottom));
+    expect(practicalInfoRect.top, greaterThan(actionRect.bottom));
+  });
+
+  testWidgets('match hero uses white team labels on the dark header',
+      (tester) async {
+    final kickoff = DateTime(2026, 8, 17, 20);
+    final match = MatchDetails(
+      id: 1,
+      homeTeam: 'Kopa IF',
+      awayTeam: 'Fremad',
+      date: kickoff,
+      location: 'Kopa Stadion',
+      createdAt: kickoff,
+      updatedAt: kickoff,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('da'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        theme: ThemeData(
+          extensions: <ThemeExtension<dynamic>>[
+            AppColors.light,
+            AppTextStyles.light,
+          ],
+        ),
+        home: Scaffold(
+          body: MatchHeroCard(
+            match: match,
+            darkHeader: true,
+            animateCard: false,
+          ),
+        ),
+      ),
+    );
+
+    final card = tester.widget<KopaCard>(find.byType(KopaCard));
+    final homeTeam = tester.widget<Text>(find.text('Kopa IF'));
+
+    expect(card.color, AppColors.matchDetailsHeader);
+    expect(homeTeam.style!.color, Colors.white);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('prematch events segment shows a disabled timeline preview',
       (tester) async {
     const message =
@@ -222,6 +359,7 @@ void main() {
             key: ValueKey('match-details-hero'),
             height: 1,
           ),
+          useDarkMatchHeader: true,
           usePrematchLayout: true,
           attendanceHeader: Container(
             key: const ValueKey('attendance-rsvp-content'),
@@ -259,6 +397,7 @@ void main() {
       MaterialApp(
         home: MatchDetailTemplate(
           selectedSegment: MatchDetailSegment.attendance,
+          useDarkMatchHeader: true,
           heroCard: const SizedBox(height: 1),
           usePrematchLayout: true,
           attendanceHeader: Container(

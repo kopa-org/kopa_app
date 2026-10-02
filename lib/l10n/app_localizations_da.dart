@@ -685,4 +685,86 @@ class AppLocalizationsDa extends AppLocalizations {
   String matchEventPlayerOff(String playerName) {
     return 'Ud: $playerName';
   }
+
+  @override
+  String get mobilePayBoxTitle => 'MobilePay Box';
+
+  @override
+  String get mobilePayBoxMissing => 'MobilePay Box mangler';
+
+  @override
+  String get mobilePayBoxInstructions =>
+      'Indsæt betalingslinket fra Del i din MobilePay Box. Det korte Box-nummer kan ikke åbne et betalingslink.';
+
+  @override
+  String get mobilePayBoxOwnerRequired =>
+      'Holdlederen skal først tilføje betalingslinket til holdets MobilePay Box.';
+
+  @override
+  String get mobilePayBoxEdit => 'Rediger MobilePay Box-link';
+
+  @override
+  String get mobilePayBoxAdd => 'Tilføj Box-link';
+
+  @override
+  String get mobilePayBoxInvalid =>
+      'Indsæt det fulde betalingslink til MobilePay Box. Et kort nummer som 5289PN er ikke nok.';
+
+  @override
+  String get mobilePayBoxSave => 'Gem MobilePay Box';
+
+  @override
+  String get mobilePayBoxSaveFailed =>
+      'MobilePay Box kunne ikke gemmes. Prøv igen.';
+
+  @override
+  String get mobilePayOpenFailed =>
+      'MobilePay kunne ikke åbnes. Kontrollér, at appen er installeret, og prøv igen.';
+
+  @override
+  String get mobilePayBoxLinkRequired =>
+      'Denne Box har et kort nummer i stedet for et betalingslink. Bed holdlederen om at redigere Boxen og indsætte det delte betalingslink.';
+
+  @override
+  String get mobilePayDeposit => 'Indbetal med MobilePay';
+
+  @override
+  String get mobilePayGoToBox => 'Gå til MobilePay Box';
+
+  @override
+  String mobilePayAmount(int amount) {
+    return 'Betal $amount kr. med MobilePay';
+  }
+
+  @override
+  String get matchRsvpQuestion => 'Kommer du?';
+
+  @override
+  String get matchRsvpHint => 'Fortæl holdet, om du kan komme.';
+
+  @override
+  String get matchRsvpAwaitingResponse => 'Afventer svar';
+
+  @override
+  String get matchRsvpConfirmed => 'Du er tilmeldt kampen';
+
+  @override
+  String get matchRsvpTrainingConfirmed => 'Du er tilmeldt træningen';
+
+  @override
+  String get matchRsvpDeclinedMessage => 'Du har meldt afbud';
+
+  @override
+  String get matchRsvpCancel => 'Meld afbud';
+
+  @override
+  String matchRsvpAttendeeCount(int count) {
+    return '$count tilmeldte';
+  }
+
+  @override
+  String get matchActionsMore => 'Kampindstillinger';
+
+  @override
+  String get matchActionsEditResult => 'Rediger kampresultat';
 }

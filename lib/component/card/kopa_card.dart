@@ -9,6 +9,8 @@ class KopaCard extends StatelessWidget {
   final double borderRadius;
   final Color? color;
   final bool clip;
+  final BorderSide borderSide;
+  final List<BoxShadow> boxShadow;
 
   const KopaCard({
     super.key,
@@ -19,6 +21,8 @@ class KopaCard extends StatelessWidget {
     this.borderRadius = 16,
     this.color,
     this.clip = false,
+    this.borderSide = BorderSide.none,
+    this.boxShadow = const [],
   });
 
   @override
@@ -27,16 +31,19 @@ class KopaCard extends StatelessWidget {
     final radius = BorderRadius.circular(borderRadius);
     return Padding(
       padding: margin ?? EdgeInsets.zero,
-      child: Material(
-        color: color ?? colors.surface,
-        borderRadius: radius,
-        clipBehavior: clip || onTap != null ? Clip.antiAlias : Clip.none,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: radius,
-          child: Padding(
-            padding: padding ?? const EdgeInsets.all(16),
-            child: child,
+      child: DecoratedBox(
+        decoration: BoxDecoration(borderRadius: radius, boxShadow: boxShadow),
+        child: Material(
+          color: color ?? colors.surface,
+          shape: RoundedRectangleBorder(borderRadius: radius, side: borderSide),
+          clipBehavior: clip || onTap != null ? Clip.antiAlias : Clip.none,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: radius,
+            child: Padding(
+              padding: padding ?? const EdgeInsets.all(16),
+              child: child,
+            ),
           ),
         ),
       ),

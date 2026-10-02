@@ -16,6 +16,7 @@ import 'package:kopa/model/user_fine_details.dart';
 import 'package:kopa/page/team_fines/assign_fines_modal.dart';
 import 'package:kopa/page/team_fines/create_fine_type_modal.dart';
 import 'package:kopa/page/team_fines/deposit_modal.dart';
+import 'package:kopa/page/team_fines/mobile_pay_setup_modal.dart';
 import 'package:kopa/repository/fines_repository.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
@@ -220,11 +221,12 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
               ],
             ),
           ),
-          if (!fineBox.hasMobilePayBox) ...[
+          if (user.isTeamOwner || !fineBox.hasMobilePayBox) ...[
             const SizedBox(height: 16),
             _MobilePaySetupPanel(
               isTeamOwner: user.isTeamOwner,
-              onSetup: _openMobilePaySetup,
+              onSetup: () => _openMobilePaySetup(fineBox.mobilePayBoxId),
+              configuredBox: fineBox.mobilePayBoxId,
             ),
           ],
           const SizedBox(height: 16),
@@ -454,7 +456,8 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
               userName: user.name,
               mobilePayBoxId: fineBox.mobilePayBoxId,
               isTeamOwner: user.isTeamOwner,
-              onSetupMobilePay: _openMobilePaySetup,
+              onSetupMobilePay: () =>
+                  _openMobilePaySetup(fineBox.mobilePayBoxId),
               onCashPaid: selectedFines.isEmpty
                   ? null
                   : () => _markSelectedPersonalFinesPaid(
@@ -486,7 +489,8 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
     final result = await showCupertinoModalBottomSheet(
       expand: true,
       context: context,
-      builder: (context) => DepositModal(fineBoxId: fineBox.id),
+      builder: (context) => DepositModal(
+          fineBoxId: fineBox.id, mobilePayBoxId: fineBox.mobilePayBoxId),
     );
 
     if (result != null) {
@@ -508,11 +512,11 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
     }
   }
 
-  Future<void> _openMobilePaySetup() async {
+  Future<void> _openMobilePaySetup([String? initialValue]) async {
     final result = await showCupertinoModalBottomSheet(
       expand: false,
       context: context,
-      builder: (context) => const _MobilePaySetupModal(),
+      builder: (context) => MobilePaySetupModal(initialValue: initialValue),
     );
 
     if (result == true) {
@@ -1521,11 +1525,13 @@ class _MobilePaySetupPanel extends StatelessWidget {
   final bool isTeamOwner;
   final VoidCallback? onSetup;
   final bool framed;
+  final String? configuredBox;
 
   const _MobilePaySetupPanel({
     required this.isTeamOwner,
     required this.onSetup,
     this.framed = true,
+    this.configuredBox,
   });
 
   @override
@@ -1535,6 +1541,8 @@ class _MobilePaySetupPanel extends StatelessWidget {
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
 
+    final l10n = AppLocalizations.of(context)!;
+    final isConfigured = configuredBox?.trim().isNotEmpty ?? false;
     final content = Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1557,7 +1565,9 @@ class _MobilePaySetupPanel extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'MobilePay Box mangler',
+                isConfigured
+                    ? l10n.mobilePayBoxTitle
+                    : l10n.mobilePayBoxMissing,
                 style: appTextStyles.subtitle2.copyWith(
                   color: appColors.textPrimary,
                   fontWeight: FontWeight.w700,
@@ -1566,8 +1576,8 @@ class _MobilePaySetupPanel extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 isTeamOwner
-                    ? 'Tilføj holdets MobilePay Box nummer, så spillere kan betale direkte til bødekassen.'
-                    : 'Holdlederen skal tilføje holdets MobilePay Box, før MobilePay kan bruges her.',
+                    ? l10n.mobilePayBoxInstructions
+                    : l10n.mobilePayBoxOwnerRequired,
                 style: appTextStyles.body3.copyWith(
                   color: appColors.textSecondary,
                 ),
@@ -1575,8 +1585,12 @@ class _MobilePaySetupPanel extends StatelessWidget {
               if (isTeamOwner && onSetup != null) ...[
                 const SizedBox(height: 12),
                 _MiniActionButton(
-                  label: 'Tilføj Box',
-                  icon: CupertinoIcons.plus_circle,
+                  label: isConfigured
+                      ? l10n.mobilePayBoxEdit
+                      : l10n.mobilePayBoxAdd,
+                  icon: isConfigured
+                      ? CupertinoIcons.pencil
+                      : CupertinoIcons.plus_circle,
                   onPressed: onSetup!,
                 ),
               ],
@@ -1720,7 +1734,14 @@ class _PaymentFooter extends StatelessWidget {
                 amount: selectedAmount,
                 message: 'Bøder - $userName',
                 mobilePayBoxId: mobilePayBoxId,
-                buttonText: 'Indbetal med MobilePay',
+                buttonText: AppLocalizations.of(context)!.mobilePayDeposit,
+              ),
+            if (isTeamOwner &&
+                mobilePayBoxId != null &&
+                onSetupMobilePay != null)
+              CupertinoButton(
+                onPressed: onSetupMobilePay,
+                child: Text(AppLocalizations.of(context)!.mobilePayBoxEdit),
               ),
             const SizedBox(height: 8),
             CupertinoButton(
@@ -1737,141 +1758,6 @@ class _PaymentFooter extends StatelessWidget {
                   decoration: TextDecoration.underline,
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _MobilePaySetupModal extends StatefulWidget {
-  const _MobilePaySetupModal();
-
-  @override
-  State<_MobilePaySetupModal> createState() => _MobilePaySetupModalState();
-}
-
-class _MobilePaySetupModalState extends State<_MobilePaySetupModal> {
-  final TextEditingController _controller = TextEditingController();
-  bool _isSaving = false;
-  String? _error;
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  Future<void> _save() async {
-    final boxId = _normalizeMobilePayBoxId(_controller.text);
-
-    if (boxId.isEmpty) {
-      setState(() {
-        _error = 'Indtast MobilePay Box nummer eller link.';
-      });
-      return;
-    }
-
-    setState(() {
-      _isSaving = true;
-      _error = null;
-    });
-
-    try {
-      await FinesRepository.updateMobilePayBoxId(boxId);
-      if (mounted) {
-        Navigator.of(context).pop(true);
-      }
-    } catch (_) {
-      if (mounted) {
-        setState(() {
-          _isSaving = false;
-          _error = 'MobilePay Box kunne ikke gemmes.';
-        });
-      }
-    }
-  }
-
-  String _normalizeMobilePayBoxId(String value) {
-    final trimmed = value.trim();
-    final uri = Uri.tryParse(trimmed);
-
-    if (uri != null && uri.pathSegments.contains('box')) {
-      final boxIndex = uri.pathSegments.indexOf('box');
-      if (boxIndex >= 0 && boxIndex + 1 < uri.pathSegments.length) {
-        return uri.pathSegments[boxIndex + 1].trim();
-      }
-    }
-
-    return trimmed.replaceAll(RegExp(r'\s+'), '');
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: 20,
-          right: 20,
-          top: 18,
-          bottom: 20 + MediaQuery.of(context).viewInsets.bottom,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'MobilePay Box',
-              style: appTextStyles.h5.copyWith(
-                color: appColors.textPrimary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'Indsæt holdets MobilePay Box nummer eller det link, du får fra MobilePay.',
-              style: appTextStyles.body3.copyWith(
-                color: appColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 16),
-            CupertinoTextField(
-              controller: _controller,
-              enabled: !_isSaving,
-              autocorrect: false,
-              textCapitalization: TextCapitalization.characters,
-              placeholder: 'Fx 5289PN',
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-              decoration: BoxDecoration(
-                color: appColors.surface,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: appColors.divider),
-              ),
-            ),
-            if (_error != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                _error!,
-                style: appTextStyles.caption2.copyWith(
-                  color: appColors.error,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
-            const SizedBox(height: 18),
-            _PrimaryActionButton(
-              icon: _isSaving
-                  ? CupertinoIcons.hourglass
-                  : CupertinoIcons.check_mark_circled,
-              label: _isSaving ? 'Gemmer' : 'Gem MobilePay Box',
-              onPressed: _isSaving ? () {} : _save,
             ),
           ],
         ),

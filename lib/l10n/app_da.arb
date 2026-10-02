@@ -242,5 +242,37 @@
         "type": "String"
       }
     }
-  }
+  },
+  "mobilePayBoxTitle": "MobilePay Box",
+  "mobilePayBoxMissing": "MobilePay Box mangler",
+  "mobilePayBoxInstructions": "Indsæt betalingslinket fra Del i din MobilePay Box. Det korte Box-nummer kan ikke åbne et betalingslink.",
+  "mobilePayBoxOwnerRequired": "Holdlederen skal først tilføje betalingslinket til holdets MobilePay Box.",
+  "mobilePayBoxEdit": "Rediger MobilePay Box-link",
+  "mobilePayBoxAdd": "Tilføj Box-link",
+  "mobilePayBoxInvalid": "Indsæt det fulde betalingslink til MobilePay Box. Et kort nummer som 5289PN er ikke nok.",
+  "mobilePayBoxSave": "Gem MobilePay Box",
+  "mobilePayBoxSaveFailed": "MobilePay Box kunne ikke gemmes. Prøv igen.",
+  "mobilePayOpenFailed": "MobilePay kunne ikke åbnes. Kontrollér, at appen er installeret, og prøv igen.",
+  "mobilePayBoxLinkRequired": "Denne Box har et kort nummer i stedet for et betalingslink. Bed holdlederen om at redigere Boxen og indsætte det delte betalingslink.",
+  "mobilePayDeposit": "Indbetal med MobilePay",
+  "mobilePayGoToBox": "Gå til MobilePay Box",
+  "mobilePayAmount": "Betal {amount} kr. med MobilePay",
+  "@mobilePayAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "matchRsvpQuestion": "Kommer du?",
+  "matchRsvpHint": "Fortæl holdet, om du kan komme.",
+  "matchRsvpAwaitingResponse": "Afventer svar",
+  "matchRsvpConfirmed": "Du er tilmeldt kampen",
+  "matchRsvpTrainingConfirmed": "Du er tilmeldt træningen",
+  "matchRsvpDeclinedMessage": "Du har meldt afbud",
+  "matchRsvpCancel": "Meld afbud",
+  "matchRsvpAttendeeCount": "{count} tilmeldte",
+  "@matchRsvpAttendeeCount": {"placeholders": {"count": {"type": "int"}}},
+  "matchActionsMore": "Kampindstillinger",
+  "matchActionsEditResult": "Rediger kampresultat"
 }

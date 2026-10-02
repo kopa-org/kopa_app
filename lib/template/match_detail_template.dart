@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:kopa/component/card/kopa_card.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/component/section_header/section_header.dart';
@@ -39,11 +40,14 @@ class MatchDetailTemplate extends StatelessWidget {
   final bool showTimelineSegment;
   final bool usePrematchLayout;
   final Widget? attendanceHeader;
+  final bool attendanceHeaderInBody;
   final Widget? stickyActionBar;
   final Widget? bottomNavigationBar;
   final Widget? attendanceActionBar;
   final bool useParentBottomNavigationBar;
   final String pageTitle;
+  final bool useDarkMatchHeader;
+  final Widget? belowHeaderAction;
 
   const MatchDetailTemplate({
     super.key,
@@ -72,26 +76,43 @@ class MatchDetailTemplate extends StatelessWidget {
     this.showTimelineSegment = true,
     this.usePrematchLayout = false,
     this.attendanceHeader,
+    this.attendanceHeaderInBody = false,
     this.stickyActionBar,
     this.bottomNavigationBar,
     this.attendanceActionBar,
     this.useParentBottomNavigationBar = false,
     this.pageTitle = 'Kampdetaljer',
+    this.useDarkMatchHeader = false,
+    this.belowHeaderAction,
   });
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
     return PageScaffold(
       title: pageTitle,
       showTopBar: false,
+      backgroundColor: useDarkMatchHeader ? AppColors.matchDetailsHeader : null,
+      systemOverlayStyle: useDarkMatchHeader
+          ? const SystemUiOverlayStyle(
+              statusBarColor: AppColors.matchDetailsHeader,
+              statusBarIconBrightness: Brightness.light,
+              statusBarBrightness: Brightness.dark,
+            )
+          : null,
       onRefresh: onRefresh,
       useBottomSafeArea:
           bottomNavigationBar == null && !useParentBottomNavigationBar,
-      body: Column(
-        children: [
-          Expanded(child: _buildScrollableContent(context)),
-          if (bottomNavigationBar != null) bottomNavigationBar!,
-        ],
+      body: ColoredBox(
+        key: const ValueKey('match-details-content-background'),
+        color: colors.background,
+        child: Column(
+          children: [
+            Expanded(child: _buildScrollableContent(context)),
+            if (bottomNavigationBar != null) bottomNavigationBar!,
+          ],
+        ),
       ),
     );
   }
@@ -114,27 +135,40 @@ class MatchDetailTemplate extends StatelessWidget {
             : 32.0) +
         contentBottomPadding +
         actionBarBottomPadding;
+    final scrollContent = useDarkMatchHeader
+        ? _buildDarkHeaderContent(
+            context: context,
+            segmentSpacing: segmentSpacing,
+            bottomPadding: bottomPadding,
+          )
+        : Padding(
+            padding: EdgeInsets.fromLTRB(16, 0, 16, bottomPadding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _MatchDetailsHeader(title: pageTitle, action: headerAction),
+                heroCard,
+                if (attendanceHeader != null && !attendanceHeaderInBody) ...[
+                  SizedBox(height: segmentSpacing),
+                  attendanceHeader!,
+                ],
+                SizedBox(height: segmentSpacing),
+                _buildSegmentedControl(context),
+                SizedBox(height: segmentSpacing),
+                if (attendanceHeader != null && attendanceHeaderInBody) ...[
+                  attendanceHeader!,
+                  const SizedBox(height: Spacing.md),
+                ],
+                ..._buildSelectedSegment(context),
+              ],
+            ),
+          );
 
     return Stack(
       fit: StackFit.expand,
       children: [
         SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(16, 0, 16, bottomPadding),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _MatchDetailsHeader(title: pageTitle, action: headerAction),
-              heroCard,
-              if (attendanceHeader != null) ...[
-                SizedBox(height: segmentSpacing),
-                attendanceHeader!,
-              ],
-              SizedBox(height: segmentSpacing),
-              _buildSegmentedControl(context),
-              SizedBox(height: segmentSpacing),
-              ..._buildSelectedSegment(context),
-            ],
-          ),
+          child: scrollContent,
         ),
         if (stickyActionBar != null)
           Positioned(
@@ -154,7 +188,76 @@ class MatchDetailTemplate extends StatelessWidget {
     );
   }
 
-  Widget _buildSegmentedControl(BuildContext context) {
+  Widget _buildDarkHeaderContent({
+    required BuildContext context,
+    required double segmentSpacing,
+    required double bottomPadding,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ColoredBox(
+          key: const ValueKey('match-details-dark-header'),
+          color: AppColors.matchDetailsHeader,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _MatchDetailsHeader(
+                  title: pageTitle,
+                  action: headerAction,
+                  darkHeader: true,
+                ),
+                const SizedBox(height: 12),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: heroCard,
+                ),
+                if (attendanceHeader != null && !attendanceHeaderInBody) ...[
+                  SizedBox(height: segmentSpacing),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: attendanceHeader!,
+                  ),
+                ],
+                SizedBox(height: segmentSpacing),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: _buildSegmentedControl(
+                    context,
+                    darkHeader: true,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.fromLTRB(16, segmentSpacing, 16, bottomPadding),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (belowHeaderAction != null) ...[
+                belowHeaderAction!,
+                const SizedBox(height: Spacing.md),
+              ],
+              if (attendanceHeader != null && attendanceHeaderInBody) ...[
+                attendanceHeader!,
+                const SizedBox(height: Spacing.md),
+              ],
+              ..._buildSelectedSegment(context),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSegmentedControl(
+    BuildContext context, {
+    bool darkHeader = false,
+  }) {
     final styles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
 
@@ -165,29 +268,44 @@ class MatchDetailTemplate extends StatelessWidget {
         (segment: MatchDetailSegment.timeline, label: timelineSegmentLabel),
     ];
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: Row(
-        children: [
-          for (var index = 0; index < segments.length; index++) ...[
-            if (index > 0) const SizedBox(width: 8),
-            Expanded(
-              child: _MatchDetailSegmentButton(
-                key: ValueKey(
-                  'match-details-segment-${segments[index].segment.name}',
-                ),
-                segment: segments[index].segment,
-                label: segments[index].label,
-                selected: _effectiveSelectedSegment == segments[index].segment,
-                textStyle: styles.body3,
-                onPressed: () => onSegmentChanged?.call(
-                  segments[index].segment,
-                ),
+    final row = Row(
+      children: [
+        for (var index = 0; index < segments.length; index++) ...[
+          if (index > 0) SizedBox(width: darkHeader ? 4 : 8),
+          Expanded(
+            child: _MatchDetailSegmentButton(
+              key: ValueKey(
+                'match-details-segment-${segments[index].segment.name}',
+              ),
+              segment: segments[index].segment,
+              label: segments[index].label,
+              selected: _effectiveSelectedSegment == segments[index].segment,
+              textStyle: styles.body3,
+              darkHeader: darkHeader,
+              onPressed: () => onSegmentChanged?.call(
+                segments[index].segment,
               ),
             ),
-          ],
+          ),
         ],
-      ),
+      ],
+    );
+
+    if (darkHeader) {
+      return Container(
+        key: const ValueKey('match-details-dark-segment-control'),
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: AppColors.matchDetailsHeaderTrack,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: row,
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: row,
     );
   }
 
@@ -281,6 +399,7 @@ class _MatchDetailSegmentButton extends StatelessWidget {
   final String label;
   final bool selected;
   final TextStyle textStyle;
+  final bool darkHeader;
   final VoidCallback onPressed;
 
   const _MatchDetailSegmentButton({
@@ -289,13 +408,58 @@ class _MatchDetailSegmentButton extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.textStyle,
+    required this.darkHeader,
     required this.onPressed,
   });
 
   @override
   Widget build(BuildContext context) {
-    final selectedColor = AppColors.of(context).successForeground;
-    final unselectedColor = AppColors.of(context).textSecondary;
+    final selectedColor = darkHeader
+        ? AppColors.matchDetailsHeader
+        : AppColors.of(context).successForeground;
+    final unselectedColor = darkHeader
+        ? AppColors.matchDetailsHeaderMuted
+        : AppColors.of(context).textSecondary;
+
+    if (darkHeader) {
+      return Semantics(
+        button: true,
+        selected: selected,
+        label: label,
+        child: Material(
+          color: AppColors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(9),
+            onTap: onPressed,
+            child: Container(
+              key: ValueKey('match-details-segment-${segment.name}-surface'),
+              height: 34,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: selected
+                    ? AppColors.matchDetailsHeaderForeground
+                    : AppColors.transparent,
+                borderRadius: BorderRadius.circular(9),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: textStyle.copyWith(
+                    color: selected ? selectedColor : unselectedColor,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    height: 14 / 10,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     return Semantics(
       button: true,
@@ -352,8 +516,13 @@ class _MatchDetailSegmentButton extends StatelessWidget {
 class _MatchDetailsHeader extends StatelessWidget {
   final String title;
   final Widget? action;
+  final bool darkHeader;
 
-  const _MatchDetailsHeader({required this.title, this.action});
+  const _MatchDetailsHeader({
+    required this.title,
+    this.action,
+    this.darkHeader = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -363,27 +532,58 @@ class _MatchDetailsHeader extends StatelessWidget {
 
     return Padding(
       key: const ValueKey('match-details-scroll-header'),
-      padding: const EdgeInsets.fromLTRB(0, 12, 0, 20),
+      padding: darkHeader
+          ? const EdgeInsets.fromLTRB(16, 10, 16, 10)
+          : const EdgeInsets.fromLTRB(0, 12, 0, 20),
       child: Row(
         children: [
           CupertinoButton(
             minimumSize: const Size(32, 32),
             padding: EdgeInsets.zero,
             onPressed: () => Navigator.of(context).pop(),
-            child: Icon(
-              CupertinoIcons.back,
-              color: colors.dirt,
-              size: 30,
-            ),
+            child: darkHeader
+                ? Container(
+                    width: 32,
+                    height: 32,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: AppColors.matchDetailsHeaderBackButton,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Icon(
+                      CupertinoIcons.back,
+                      color: AppColors.matchDetailsHeaderForeground,
+                      size: 20,
+                    ),
+                  )
+                : Icon(
+                    CupertinoIcons.back,
+                    color: colors.dirt,
+                    size: 30,
+                  ),
           ),
           const SizedBox(width: 14),
           Expanded(
             child: Text(
               title,
-              style: styles.h5.copyWith(fontWeight: FontWeight.w800),
+              style: styles.h5.copyWith(
+                color:
+                    darkHeader ? AppColors.matchDetailsHeaderForeground : null,
+                fontWeight: darkHeader ? FontWeight.w400 : FontWeight.w800,
+                fontSize: darkHeader ? 17 : null,
+              ),
             ),
           ),
-          if (action != null) action!,
+          if (action != null)
+            if (darkHeader)
+              IconTheme.merge(
+                data: const IconThemeData(
+                  color: AppColors.matchDetailsHeaderForeground,
+                ),
+                child: action!,
+              )
+            else
+              action!,
         ],
       ),
     );

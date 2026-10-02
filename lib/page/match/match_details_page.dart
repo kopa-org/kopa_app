@@ -2,8 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:kopa/component/button/full_width_button.dart';
-import 'package:kopa/component/button/button.dart';
 import 'package:kopa/component/card/player_positions_card.dart';
 import 'package:kopa/component/dialog/lineup_visibility_confirmation_dialog.dart';
 import 'package:kopa/component/error_message.dart';
@@ -44,19 +42,14 @@ import 'package:kopa/component/info_row/info_row.dart';
 import 'package:kopa/component/list_item/player_list_item.dart';
 import 'package:kopa/component/match/match_poll_details_card.dart';
 import 'package:kopa/component/match/match_events_timeline.dart';
+import 'package:kopa/component/match/match_rsvp_card.dart';
+import 'package:kopa/component/match/match_actions_menu.dart';
 import 'package:kopa/component/match/player_of_match_summary_card.dart';
 import 'package:kopa/config/app_feature_flags.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-enum _MatchRsvpState {
-  pending,
-  awaitingSelection,
-  attending,
-  declined,
-}
-
-_MatchRsvpState _matchRsvpStateFor(MatchDetails match, int userId) {
+MatchRsvpStatus _matchRsvpStateFor(MatchDetails match, int userId) {
   EventAttendanceDetails? currentUserAttendance;
   for (final attendance in match.attendanceDetailsList ?? []) {
     if (attendance.userDetails.id == userId) {
@@ -67,22 +60,22 @@ _MatchRsvpState _matchRsvpStateFor(MatchDetails match, int userId) {
 
   if (match.isCurrentUserAttending == false ||
       currentUserAttendance?.isAttending == false) {
-    return _MatchRsvpState.declined;
+    return MatchRsvpStatus.declined;
   }
 
   if (match.isCurrentUserAttending == true &&
       match.usesTeamLeaderSelection &&
       match.isCurrentUserSelected == null) {
-    return _MatchRsvpState.awaitingSelection;
+    return MatchRsvpStatus.awaitingSelection;
   }
 
   if (match.isCurrentUserAttending == true ||
       match.isCurrentUserRegistered ||
       currentUserAttendance?.isAttending == true) {
-    return _MatchRsvpState.attending;
+    return MatchRsvpStatus.attending;
   }
 
-  return _MatchRsvpState.pending;
+  return MatchRsvpStatus.pending;
 }
 
 class MatchDetailsPage extends StatefulWidget {
@@ -90,6 +83,8 @@ class MatchDetailsPage extends StatefulWidget {
   final MatchDetails? initialMatch;
   final String? heroTag;
   final bool showBottomNavigationBar;
+  final Future<MatchDetails> Function(int) loadMatch;
+  final Future<List<UserDetails>> Function() loadSquad;
 
   const MatchDetailsPage({
     super.key,
@@ -97,6 +92,8 @@ class MatchDetailsPage extends StatefulWidget {
     this.initialMatch,
     this.heroTag,
     this.showBottomNavigationBar = true,
+    this.loadMatch = MatchRepository.getMatch,
+    this.loadSquad = UsersRepository.getSquad,
   });
 
   @override
@@ -108,8 +105,6 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
   Object? _loadError;
   UserDetails? _currentUser;
   Object? _currentUserError;
-  bool _showLoadedContent = false;
-  bool _enableHeroCardActions = false;
   final Set<int> _savingAttendanceSelectionIds = {};
   final Set<int> _editingAttendanceSelectionIds = {};
   bool _isApprovingAllAttendances = false;
@@ -133,7 +128,6 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       _currentUser = user;
     }
     _loadMatchAndSquad();
-    _showLoadedContentAfterTransition();
   }
 
   Future<void> _loadMatchAndSquad() async {
@@ -152,30 +146,11 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     }
   }
 
-  void _showLoadedContentAfterTransition() {
-    if (widget.initialMatch == null) {
-      _showLoadedContent = true;
-      _enableHeroCardActions = true;
-      return;
-    }
-
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await Future<void>.delayed(const Duration(milliseconds: 350));
-      if (!mounted) return;
-      setState(() {
-        _showLoadedContent = true;
-      });
-      await Future<void>.delayed(const Duration(milliseconds: 250));
-      if (!mounted) return;
-      setState(() {
-        _enableHeroCardActions = true;
-      });
-    });
-  }
-
   Future<Map<String, dynamic>> _fetchMatchAndSquad() async {
-    final squad = await UsersRepository.getSquad();
-    final matchDetails = await MatchRepository.getMatch(widget.matchId);
+    final (matchDetails, squad) = await (
+      widget.loadMatch(widget.matchId),
+      widget.loadSquad(),
+    ).wait;
     return {
       'squad': squad,
       'matchDetails': matchDetails,
@@ -200,12 +175,10 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     }
 
     final data = _matchAndSquadData;
-    if (data == null || !_showLoadedContent) {
-      final initialMatch = widget.initialMatch;
-      if (initialMatch != null) {
-        return _buildInitialLoadingState(initialMatch);
-      }
-
+    // Keep the same layout and hero targets while Home's snapshot is hydrated.
+    final matchDetails =
+        data?['matchDetails'] as MatchDetails? ?? widget.initialMatch;
+    if (matchDetails == null) {
       return const LoadingIndicator();
     }
 
@@ -215,13 +188,18 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     }
 
     final l10n = AppLocalizations.of(context)!;
-    final matchDetails = data['matchDetails'] as MatchDetails;
-    final squad = data['squad'] as List<UserDetails>;
+    final squad = data?['squad'] as List<UserDetails>? ?? const <UserDetails>[];
+    final attendanceList = data == null
+        ? const <Widget>[LoadingIndicator()]
+        : _buildAttendanceList(matchDetails, squad, user);
     final hasBeenPlayed = matchDetails.hasMatchBeenPlayed;
     final isTraining = matchDetails.isTraining;
     final canManageTeam = user.canManageTeam;
-    final canManageResult = canManageTeam;
     final rsvpState = _matchRsvpStateFor(matchDetails, user.id);
+    final attendeeCount = data == null
+        ? matchDetails.registeredCount
+        : matchDetails.attendingAttendanceDetails.length +
+            (matchDetails.externalPlayerDetailsList?.length ?? 0);
     final bottomNavigationBar = widget.showBottomNavigationBar
         ? _buildMatchDetailsBottomNavigationBar(context)
         : null;
@@ -232,45 +210,22 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       ownTeamLogoDesign: user.teamDetails?.logoDesign,
       heroTag: widget.heroTag,
       animateCard: widget.heroTag != null,
-      onTap: _enableHeroCardActions && matchDetails.canSetFinalScore(user)
+      darkHeader: !isTraining,
+      onTap: matchDetails.canSetFinalScore(user)
           ? () => setMatchScore(matchDetails)
           : null,
-      topRightAction: canManageResult && matchDetails.hasFinalScore
-          ? _EditMatchScoreButton(
-              onPressed: () => setMatchScore(matchDetails),
-            )
-          : null,
-      bottomAction: canManageResult && !matchDetails.hasFinalScore
-          ? Button(
-              buttonText: l10n.matchRegisterResult,
-              icon: CupertinoIcons.pencil,
-              width: double.infinity,
-              onPressed: () => setMatchScore(matchDetails),
-            )
-          : null,
     );
-    final deleteMatchAction = canManageTeam
-        ? IconButton(
-            key: const ValueKey('delete-match-action'),
-            tooltip: isTraining ? l10n.eventDeleteTraining : l10n.matchDelete,
-            icon: const Icon(CupertinoIcons.delete),
-            onPressed: () => _deleteMatch(matchDetails),
+    final headerAction = canManageTeam
+        ? MatchActionsMenu(
+            isTraining: isTraining,
+            hasFinalScore: matchDetails.hasFinalScore,
+            isAddingExternalPlayer: _isAddingExternalPlayer,
+            onDelete: () => _deleteMatch(matchDetails),
+            onEnterResult: () => setMatchScore(matchDetails),
+            onCreateExternalPlayer: () => _addExternalPlayer(matchDetails),
+            onEditTraining: () => _editTraining(matchDetails),
           )
         : null;
-    final headerAction = canManageTeam && isTraining
-        ? Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                key: const ValueKey('edit-training-action'),
-                tooltip: l10n.eventEditTrainingAction,
-                icon: const Icon(CupertinoIcons.pencil),
-                onPressed: () => _editTraining(matchDetails),
-              ),
-              deleteMatchAction!,
-            ],
-          )
-        : deleteMatchAction;
 
     if (hasBeenPlayed && !isTraining) {
       return PostMatchDetailsPage(
@@ -278,16 +233,16 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         user: user,
         heroCard: heroCard,
         headerAction: headerAction,
-        attendanceList: _buildAttendanceList(matchDetails, squad, user),
+        attendanceList: attendanceList,
         onRefresh: _refreshMatchAndSquad,
         onAddEvent: () => addMatchEvent(user),
         onDeleteEvent: _deleteMatchEvent,
         onReorderEvents: _reorderMatchEvents,
-        attendanceActionBar:
-            canManageTeam ? _buildExternalPlayerActionBar(matchDetails) : null,
-        onSetMatchScore: () => setMatchScore(matchDetails),
-        onCreateMatchPoll: () => _openCreateMatchPoll(matchDetails, squad),
-        onEditMatchPoll: () => _openEditMatchPoll(matchDetails, squad),
+        onCreateMatchPoll: data == null
+            ? null
+            : () => _openCreateMatchPoll(matchDetails, squad),
+        onEditMatchPoll:
+            data == null ? null : () => _openEditMatchPoll(matchDetails, squad),
         selectedSegment: _selectedSegment,
         onSegmentChanged: _selectSegment,
         bottomNavigationBar: bottomNavigationBar,
@@ -299,41 +254,32 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       pageTitle:
           isTraining ? l10n.eventDetailsTraining : l10n.eventDetailsMatch,
       onRefresh: _refreshMatchAndSquad,
+      useDarkMatchHeader: !isTraining,
       selectedSegment: _selectedSegment,
       onSegmentChanged: _selectSegment,
       heroCard: heroCard,
       headerAction: headerAction,
       usePrematchLayout: true,
-      attendanceHeader: switch (rsvpState) {
-        _MatchRsvpState.pending => _PrematchRsvpDecisionBar(
-            isSaving: _isUpdatingRegistration,
-            onAccept: () => _registerForMatch(matchDetails),
-            onDecline: () => _unregisterFromMatch(matchDetails),
-          ),
-        _MatchRsvpState.attending => _PrematchRsvpInlineStatus(
-            isSaving: _isUpdatingRegistration,
-            onDecline: () => _unregisterFromMatch(matchDetails),
-          ),
-        _MatchRsvpState.awaitingSelection => _PrematchRsvpInlineStatus(
-            statusLabel: l10n.matchDetailsRsvpPendingSelection,
-            isPending: true,
-            isSaving: _isUpdatingRegistration,
-            onDecline: () => _unregisterFromMatch(matchDetails),
-          ),
-        _MatchRsvpState.declined => _PrematchRsvpDeclinedInlineStatus(
-            isSaving: _isUpdatingRegistration,
-            onAccept: () => _registerForMatch(matchDetails),
-          ),
-      },
+      attendanceHeaderInBody: true,
+      attendanceHeader: MatchRsvpCard(
+        status: rsvpState,
+        isTraining: isTraining,
+        isSaving: _isUpdatingRegistration,
+        attendeeNames: [
+          ...matchDetails.attendingAttendanceDetails
+              .map((a) => a.userDetails.name),
+          ...(matchDetails.externalPlayerDetailsList ?? []).map((p) => p.name),
+        ],
+        attendeeCount: attendeeCount,
+        onAccept: () => _registerForMatch(matchDetails),
+        onDecline: () => _unregisterFromMatch(matchDetails),
+        onShowAttendees: () => _selectSegment(MatchDetailSegment.attendance),
+      ),
       bottomNavigationBar: bottomNavigationBar,
-      attendanceActionBar: !isTraining && canManageTeam
-          ? _buildExternalPlayerActionBar(matchDetails)
-          : null,
       useParentBottomNavigationBar: !widget.showBottomNavigationBar,
       overviewTitle: 'Praktisk information',
       attendanceTitle: 'Tilmeldte spillere',
-      attendanceSegmentLabel:
-          'Tilmeldte (${matchDetails.attendingAttendanceDetails.length})',
+      attendanceSegmentLabel: l10n.matchRsvpAttendeeCount(attendeeCount),
       timelineTitle: l10n.matchDetailsMatchEvents,
       timelineSegmentLabel: l10n.matchDetailsMatchEvents,
       showTimelineSegment: !isTraining,
@@ -360,14 +306,14 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
           if (matchDetails.matchPollDetails == null)
             PlayerOfMatchSummaryCard(
               playerName: null,
-              onPressed: canManageTeam
+              onPressed: canManageTeam && data != null
                   ? () => _openCreateMatchPoll(matchDetails, squad)
                   : null,
             )
           else
             MatchPollDetailsCard(
               poll: matchDetails.matchPollDetails!,
-              onEdit: canManageTeam
+              onEdit: canManageTeam && data != null
                   ? () => _openEditMatchPoll(matchDetails, squad)
                   : null,
             ),
@@ -387,10 +333,10 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
               // fallback from turning new registrations into starters.
               positionedPlayers: _lineupPositionedPlayers(matchDetails, user),
               preservePlayerOrder: true,
-              onEditFormation: canManageTeam
+              onEditFormation: canManageTeam && data != null
                   ? () => _openLineupEditor(matchDetails, user)
                   : null,
-              onToggleVisibility: canManageTeam
+              onToggleVisibility: canManageTeam && data != null
                   ? () => _toggleLineupVisibility(matchDetails)
                   : null,
               isVisibleToPlayers: matchDetails.lineupVisible,
@@ -398,7 +344,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
               showTitle: false,
             )
           : null,
-      attendanceList: _buildAttendanceList(matchDetails, squad, user),
+      attendanceList: attendanceList,
       ratingsSection: isTraining ? null : _buildRatingsSection(matchDetails),
     );
   }
@@ -411,40 +357,6 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     setState(() {
       _selectedSegment = segment;
     });
-  }
-
-  Widget _buildInitialLoadingState(MatchDetails match) {
-    final l10n = AppLocalizations.of(context)!;
-
-    return MatchDetailTemplate(
-      pageTitle:
-          match.isTraining ? l10n.eventDetailsTraining : l10n.eventDetailsMatch,
-      selectedSegment: _selectedSegment,
-      onSegmentChanged: _selectSegment,
-      heroCard: MatchHeroCard(
-        match: match,
-        ownTeamName: _currentUser?.teamDetails?.title,
-        ownTeamLogoDesign: _currentUser?.teamDetails?.logoDesign,
-        heroTag: widget.heroTag,
-        animateCard: widget.heroTag != null,
-      ),
-      usePrematchLayout: true,
-      timelineTitle: l10n.matchDetailsMatchEvents,
-      timelineSegmentLabel: l10n.matchDetailsMatchEvents,
-      showTimelineSegment: !match.isTraining,
-      timelinePreview: !match.isTraining,
-      timelinePreviewMessage: l10n.matchDetailsMatchEventsUnavailable,
-      timelineItems:
-          match.isTraining ? const [] : _buildMatchEventsPreviewItems(l10n),
-      bottomNavigationBar: widget.showBottomNavigationBar
-          ? _buildMatchDetailsBottomNavigationBar(context)
-          : null,
-      attendanceActionBar:
-          !match.isTraining && _currentUser?.canManageTeam == true
-              ? _buildExternalPlayerActionBar(match)
-              : null,
-      useParentBottomNavigationBar: !widget.showBottomNavigationBar,
-    );
   }
 
   List<Widget> _buildMatchEventsPreviewItems(AppLocalizations l10n) {
@@ -1135,27 +1047,6 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     }
   }
 
-  Widget _buildExternalPlayerActionBar(MatchDetails match) {
-    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final l10n = AppLocalizations.of(context)!;
-
-    return Padding(
-      key: const ValueKey('create-external-player-action-bar'),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      child: FullWidthButton(
-        key: const ValueKey('create-external-player'),
-        buttonText: l10n.externalPlayerCreateButton,
-        icon: CupertinoIcons.person_add,
-        variant: FullWidthButtonVariant.grass,
-        backgroundColor: colors.grass,
-        foregroundColor: colors.white,
-        onPressed: () => _addExternalPlayer(match),
-        enabled: !_isAddingExternalPlayer,
-        loading: _isAddingExternalPlayer,
-      ),
-    );
-  }
-
   Future<void> _registerForMatch(MatchDetails match) async {
     if (_isUpdatingRegistration) return;
 
@@ -1494,391 +1385,6 @@ class _LocationMapsLink extends StatelessWidget {
   }
 }
 
-class _PrematchRsvpDecisionBar extends StatelessWidget {
-  final bool isSaving;
-  final VoidCallback onAccept;
-  final VoidCallback onDecline;
-
-  const _PrematchRsvpDecisionBar({
-    required this.isSaving,
-    required this.onAccept,
-    required this.onDecline,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final styles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    return _PrematchRsvpSurface(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.matchDetailsDecisionTitle,
-                style: styles.body1.copyWith(
-                  color: AppColors.of(context).textPrimary,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  height: 20 / 16,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                l10n.matchDetailsDecisionPending,
-                style: styles.body3.copyWith(
-                  color: AppColors.of(context).textSecondary,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  height: 18 / 13,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          _PrematchRsvpChoiceBar(
-            declineLabel: l10n.matchDetailsRsvpDecline,
-            acceptLabel: l10n.matchDetailsRsvpAccept,
-            isSaving: isSaving,
-            onAccept: onAccept,
-            onDecline: onDecline,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PrematchRsvpChoiceBar extends StatelessWidget {
-  final String declineLabel;
-  final String acceptLabel;
-  final bool isSaving;
-  final VoidCallback onAccept;
-  final VoidCallback onDecline;
-
-  const _PrematchRsvpChoiceBar({
-    required this.declineLabel,
-    required this.acceptLabel,
-    required this.isSaving,
-    required this.onAccept,
-    required this.onDecline,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _PrematchRsvpButton(
-            label: declineLabel,
-            foregroundColor: AppColors.of(context).textSecondary,
-            backgroundColor: AppColors.transparent,
-            borderColor: AppColors.of(context).textSecondary,
-            isSaving: isSaving,
-            onPressed: onDecline,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _PrematchRsvpButton(
-            label: acceptLabel,
-            icon: CupertinoIcons.checkmark,
-            foregroundColor: AppColors.of(context).white,
-            backgroundColor: AppColors.of(context).grass,
-            isSaving: isSaving,
-            onPressed: onAccept,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _PrematchRsvpInlineStatus extends StatelessWidget {
-  final bool isSaving;
-  final String? statusLabel;
-  final bool isPending;
-  final VoidCallback onDecline;
-
-  const _PrematchRsvpInlineStatus({
-    required this.isSaving,
-    this.statusLabel,
-    this.isPending = false,
-    required this.onDecline,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final styles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final statusColor = isPending
-        ? AppColors.of(context).warningForeground
-        : AppColors.of(context).grass;
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      child: Row(
-        children: [
-          Icon(
-            isPending
-                ? CupertinoIcons.clock_fill
-                : CupertinoIcons.checkmark_circle_fill,
-            color: statusColor,
-            size: 18,
-          ),
-          const SizedBox(width: 8),
-          Flexible(
-            flex: 2,
-            child: Text(
-              statusLabel ?? l10n.matchDetailsRsvpRegistered,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: styles.body3.copyWith(
-                color: statusColor,
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                height: 18 / 14,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Flexible(
-            flex: 3,
-            child: _PrematchRsvpStatusAction(
-              key: const ValueKey('match-details-rsvp-decline-action'),
-              label: l10n.matchDetailsRsvpDeclineAction,
-              isSaving: isSaving,
-              onPressed: onDecline,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PrematchRsvpDeclinedInlineStatus extends StatelessWidget {
-  final bool isSaving;
-  final VoidCallback onAccept;
-
-  const _PrematchRsvpDeclinedInlineStatus({
-    required this.isSaving,
-    required this.onAccept,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final styles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      child: Row(
-        children: [
-          Icon(
-            CupertinoIcons.xmark_circle_fill,
-            color: colors.error,
-            size: 18,
-          ),
-          const SizedBox(width: 8),
-          Flexible(
-            flex: 2,
-            child: Text(
-              l10n.matchDetailsRsvpDeclined,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: styles.body3.copyWith(
-                color: colors.error,
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                height: 18 / 14,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Flexible(
-            flex: 3,
-            child: _PrematchRsvpStatusAction(
-              key: const ValueKey('match-details-rsvp-accept-action'),
-              label: l10n.matchDetailsRsvpAccept,
-              isSaving: isSaving,
-              onPressed: onAccept,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PrematchRsvpStatusAction extends StatelessWidget {
-  final String label;
-  final bool isSaving;
-  final VoidCallback onPressed;
-
-  const _PrematchRsvpStatusAction({
-    super.key,
-    required this.label,
-    required this.isSaving,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final styles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final actionColor = AppColors.of(context).textSecondary;
-
-    return SizedBox(
-      width: double.infinity,
-      child: CupertinoButton(
-        minimumSize: const Size(0, 44),
-        padding: EdgeInsets.zero,
-        onPressed: isSaving ? null : onPressed,
-        child: Align(
-          alignment: Alignment.centerRight,
-          child: isSaving
-              ? CupertinoActivityIndicator(
-                  radius: 8,
-                  color: actionColor,
-                )
-              : Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      CupertinoIcons.arrow_left,
-                      color: actionColor,
-                      size: 16,
-                    ),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.right,
-                        style: styles.body3.copyWith(
-                          color: actionColor,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          height: 18 / 14,
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PrematchRsvpButton extends StatelessWidget {
-  final String label;
-  final IconData? icon;
-  final Color foregroundColor;
-  final Color backgroundColor;
-  final Color? borderColor;
-  final bool isSaving;
-  final VoidCallback onPressed;
-
-  const _PrematchRsvpButton({
-    required this.label,
-    required this.foregroundColor,
-    required this.backgroundColor,
-    this.borderColor,
-    required this.isSaving,
-    required this.onPressed,
-    this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final styles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    return CupertinoButton(
-      padding: EdgeInsets.zero,
-      minimumSize: const Size(0, 42),
-      onPressed: isSaving ? null : onPressed,
-      child: Container(
-        height: 42,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          border: borderColor == null ? null : Border.all(color: borderColor!),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: isSaving
-            ? CupertinoActivityIndicator(color: foregroundColor)
-            : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (icon != null) ...[
-                    Icon(icon, color: foregroundColor, size: 14),
-                    const SizedBox(width: 6),
-                  ],
-                  Flexible(
-                    child: Text(
-                      label,
-                      style: styles.body3.copyWith(
-                        color: foregroundColor,
-                        fontWeight: borderColor == null
-                            ? FontWeight.w700
-                            : FontWeight.w600,
-                        fontSize: 14,
-                        height: 18 / 14,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ],
-              ),
-      ),
-    );
-  }
-}
-
-class _PrematchRsvpSurface extends StatelessWidget {
-  final Widget child;
-
-  const _PrematchRsvpSurface({required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: AppColors.of(context).white,
-        border: Border(
-          top: BorderSide(color: AppColors.of(context).divider),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.of(context).black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: child,
-      ),
-    );
-  }
-}
-
 class _AttendanceApprovalSection extends StatefulWidget {
   final String title;
   final List<Widget> children;
@@ -2139,47 +1645,6 @@ class _AttendanceAvatar extends StatelessWidget {
     if (parts.length == 1) return parts.first.characters.first.toUpperCase();
     return '${parts.first.characters.first}${parts.last.characters.first}'
         .toUpperCase();
-  }
-}
-
-class _EditMatchScoreButton extends StatelessWidget {
-  final VoidCallback onPressed;
-
-  const _EditMatchScoreButton({required this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
-
-    return Semantics(
-      button: true,
-      label: 'Rediger kampens resultat',
-      child: CupertinoButton(
-        padding: EdgeInsets.zero,
-        minimumSize: const Size(36, 36),
-        onPressed: onPressed,
-        child: Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: colors.white,
-            borderRadius: BorderRadius.circular(18),
-            boxShadow: [
-              BoxShadow(
-                color: colors.black.withValues(alpha: 0.12),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Icon(
-            CupertinoIcons.pencil,
-            size: 18,
-            color: colors.dirt,
-          ),
-        ),
-      ),
-    );
   }
 }
 

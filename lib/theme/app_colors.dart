@@ -3,6 +3,13 @@ import 'package:flutter/material.dart';
 class AppColors extends ThemeExtension<AppColors> {
   static const transparent = Colors.transparent;
   static const defaultTeamLogoColor = Color(0xFF1B8B4B);
+  static const matchDetailsHeader = Color.fromARGB(255, 5, 114, 74);
+  static const matchDetailsHeaderAccent = Color(0xFF7DDEA9);
+  static const matchDetailsHeaderForeground = Color(0xFFFFFFFF);
+  static const matchDetailsHeaderMuted = Color(0xABFFFFFF);
+  static const matchDetailsHeaderTrack = Color(0x12FFFFFF);
+  static const matchDetailsHeaderBackButton = Color(0x4FFFFFFF);
+  static const matchDetailsHeaderErrorAccent = Color(0xFFFF8F87);
 
   static AppColors of(BuildContext context) =>
       Theme.of(context).extension<AppColors>() ?? light;

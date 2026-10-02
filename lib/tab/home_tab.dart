@@ -387,10 +387,8 @@ class _HeroCountdownState extends State<_HeroCountdown> {
 
   @override
   Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final styles = _displayStyle(context).copyWith(
-      color: appColors.dirt,
+      color: AppColors.matchDetailsHeader,
       fontSize: 32,
       height: 0.98,
     );
@@ -713,6 +711,10 @@ class _HeroTeamPanel extends StatelessWidget {
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
     final match = this.match;
     final isTraining = match?.isTraining == true;
+    final heroHeaderTextColor =
+        isTraining ? appColors.dirt : AppColors.matchDetailsHeaderForeground;
+    final heroHeaderAccentColor =
+        isTraining ? appColors.primary : AppColors.matchDetailsHeaderAccent;
     final homeTeam =
         match?.homeTeam ?? currentUser.teamDetails?.title ?? 'Hold';
     final awayTeam = match?.awayTeam ?? 'Modstander';
@@ -778,7 +780,7 @@ class _HeroTeamPanel extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: isTraining
                           ? appColors.lightSky65
-                          : appColors.lightGrass,
+                          : AppColors.matchDetailsHeader,
                       borderRadius: heroRadius,
                     ),
                     child: Column(
@@ -789,7 +791,7 @@ class _HeroTeamPanel extends StatelessWidget {
                               child: Text(
                                 title,
                                 style: appTextStyles.caption.copyWith(
-                                  color: appColors.dirt,
+                                  color: heroHeaderTextColor,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
@@ -837,7 +839,7 @@ class _HeroTeamPanel extends StatelessWidget {
                                       radius: 22,
                                       labelStyle:
                                           appTextStyles.caption.copyWith(
-                                        color: appColors.dirt,
+                                        color: heroHeaderTextColor,
                                         fontWeight: FontWeight.w800,
                                       ),
                                     ),
@@ -849,7 +851,7 @@ class _HeroTeamPanel extends StatelessWidget {
                                     'VS',
                                     textAlign: TextAlign.center,
                                     style: appTextStyles.h5.copyWith(
-                                      color: appColors.dirt,
+                                      color: heroHeaderTextColor,
                                       fontWeight: FontWeight.w800,
                                     ),
                                   ),
@@ -874,7 +876,7 @@ class _HeroTeamPanel extends StatelessWidget {
                                       radius: 22,
                                       labelStyle:
                                           appTextStyles.caption.copyWith(
-                                        color: appColors.dirt,
+                                        color: heroHeaderTextColor,
                                         fontWeight: FontWeight.w800,
                                       ),
                                     ),
@@ -889,7 +891,7 @@ class _HeroTeamPanel extends StatelessWidget {
                             child: Text(
                               'Ingen kamp planlagt',
                               style: appTextStyles.buttonSmall.copyWith(
-                                color: appColors.primary,
+                                color: heroHeaderAccentColor,
                                 fontWeight: FontWeight.w800,
                               ),
                             ),

@@ -102,6 +102,7 @@ flutter:
     - assets/mobilepay_logo.png
     - assets/googlemaps.png
     - assets/fonts/
+    - assets/icons/match/
     - assets/logos/
     - assets/illustrations/
     - assets/lottie/

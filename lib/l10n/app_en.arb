@@ -242,5 +242,37 @@
         "type": "String"
       }
     }
-  }
+  },
+  "mobilePayBoxTitle": "MobilePay Box",
+  "mobilePayBoxMissing": "MobilePay Box missing",
+  "mobilePayBoxInstructions": "Paste the payment link from Share in your MobilePay Box. The short Box code cannot open a payment link.",
+  "mobilePayBoxOwnerRequired": "The team owner must add the MobilePay Box payment link first.",
+  "mobilePayBoxEdit": "Edit MobilePay Box link",
+  "mobilePayBoxAdd": "Add Box link",
+  "mobilePayBoxInvalid": "Paste the full MobilePay Box payment link. A short code such as 5289PN is not enough.",
+  "mobilePayBoxSave": "Save MobilePay Box",
+  "mobilePayBoxSaveFailed": "Could not save MobilePay Box. Try again.",
+  "mobilePayOpenFailed": "Could not open MobilePay. Check that the app is installed and try again.",
+  "mobilePayBoxLinkRequired": "This Box has a short code instead of a payment link. Ask the team owner to edit the Box and paste its shared payment link.",
+  "mobilePayDeposit": "Pay with MobilePay",
+  "mobilePayGoToBox": "Go to MobilePay Box",
+  "mobilePayAmount": "Pay {amount} kr. with MobilePay",
+  "@mobilePayAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "matchRsvpQuestion": "Are you coming?",
+  "matchRsvpHint": "Let your team know if you can make it.",
+  "matchRsvpAwaitingResponse": "Awaiting response",
+  "matchRsvpConfirmed": "You are registered for the match",
+  "matchRsvpTrainingConfirmed": "You are registered for training",
+  "matchRsvpDeclinedMessage": "You have declined",
+  "matchRsvpCancel": "Cancel attendance",
+  "matchRsvpAttendeeCount": "{count} registered",
+  "@matchRsvpAttendeeCount": {"placeholders": {"count": {"type": "int"}}},
+  "matchActionsMore": "Match options",
+  "matchActionsEditResult": "Edit match result"
 }

@@ -1,56 +1,46 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:kopa/helpers/mobile_pay_box_link.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class UrlOpener {
-  static const _appStoreUrl = 'https://apps.apple.com/dk/app/624499138';
-
   static Future<bool> openMobilePay({
     int? amount,
     String? message,
     String? mobilePayBoxId,
   }) async {
-    final number = dotenv.maybeGet('MOBILEPAY_NUMBER')?.trim();
-    final boxUrl = dotenv.maybeGet('MOBILEPAY_BOX_URL')?.trim();
-    final configuredBoxId = mobilePayBoxId?.trim();
-
-    if (configuredBoxId != null && configuredBoxId.isNotEmpty) {
-      final target = _mobilePayBoxUriFromId(
-        configuredBoxId,
-        amount: amount,
-        message: message,
-      );
-
-      if (await _launch(target)) {
-        return true;
-      }
-    }
-
-    if (number != null && number.isNotEmpty) {
-      final deeplink = Uri(
+    final configuredBox = mobilePayBoxId?.trim();
+    final box = configuredBox != null && configuredBox.isNotEmpty
+        ? configuredBox
+        : dotenv.maybeGet('MOBILEPAY_BOX_URL')?.trim();
+    if (box != null && box.isNotEmpty) {
+      final uri = MobilePayBoxLink.webUri(box);
+      // A short Box code cannot be substituted for the shared link's UUID.
+      if (uri == null) return false;
+      final target =
+          _mobilePayBoxUri(uri.toString(), amount: amount, message: message);
+      final appLink = Uri(
         scheme: 'mobilepay',
-        host: 'send',
-        queryParameters: {
-          'phone': number,
-          if (amount != null && amount > 0) 'amount': amount.toString(),
-          if (message != null && message.trim().isNotEmpty)
-            'comment': message.trim(),
-        },
+        host: 'box',
+        path: target.path.substring('/box'.length),
+        queryParameters:
+            target.queryParameters.isEmpty ? null : target.queryParameters,
       );
-
-      if (await _launch(deeplink)) {
-        return true;
-      }
+      if (await _launch(appLink)) return true;
+      return _launch(target);
     }
 
-    final target = boxUrl != null && boxUrl.isNotEmpty
-        ? _mobilePayBoxUri(boxUrl, amount: amount, message: message)
-        : null;
-
-    if (target != null && await _launch(target)) {
-      return true;
-    }
-
-    return _launch(Uri.parse(_appStoreUrl));
+    final number = dotenv.maybeGet('MOBILEPAY_NUMBER')?.trim();
+    if (number == null || number.isEmpty) return false;
+    return _launch(Uri(
+      scheme: 'mobilepay',
+      host: 'send',
+      queryParameters: {
+        'phone': number,
+        if (amount != null && amount > 0) 'amount': amount.toString(),
+        if (message != null && message.trim().isNotEmpty)
+          'comment': message.trim(),
+      },
+    ));
   }
 
   static Uri _mobilePayBoxUri(
@@ -59,15 +49,14 @@ class UrlOpener {
     String? message,
   }) {
     final uri = Uri.parse(rawUrl);
-    return uri.replace(
-      queryParameters: {
-        ...uri.queryParameters,
-        if (amount != null && amount > 0)
-          'amount': _mobilePayBoxAmount(amount).toString(),
-        if (message != null && message.trim().isNotEmpty)
-          'message': message.trim(),
-      },
-    );
+    final parameters = {
+      ...uri.queryParameters,
+      if (amount != null && amount > 0)
+        'amount': _mobilePayBoxAmount(amount).toString(),
+      if (message != null && message.trim().isNotEmpty)
+        'message': message.trim(),
+    };
+    return parameters.isEmpty ? uri : uri.replace(queryParameters: parameters);
   }
 
   static Uri _mobilePayBoxUriFromId(
@@ -76,7 +65,7 @@ class UrlOpener {
     String? message,
   }) {
     return _mobilePayBoxUri(
-      'https://qr.mobilepay.dk/box/${Uri.encodeComponent(boxId)}/pay-in',
+      MobilePayBoxLink.webUri(boxId)!.toString(),
       amount: amount,
       message: message,
     );
@@ -102,7 +91,7 @@ class UrlOpener {
 
   static Future<bool> _launch(Uri uri) async {
     try {
-      return launchUrl(uri, mode: LaunchMode.externalApplication);
+      return await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (_) {
       return false;
     }
