@@ -743,7 +743,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get matchRsvpQuestion => 'Are you coming?';
 
   @override
-  String get matchRsvpHint => 'Let your team know if you can make it.';
+  String get matchRsvpHint => 'Let your team know.';
 
   @override
   String get matchRsvpAwaitingResponse => 'Awaiting response';

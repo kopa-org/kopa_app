@@ -265,7 +265,7 @@
     }
   },
   "matchRsvpQuestion": "Are you coming?",
-  "matchRsvpHint": "Let your team know if you can make it.",
+  "matchRsvpHint": "Let your team know.",
   "matchRsvpAwaitingResponse": "Awaiting response",
   "matchRsvpConfirmed": "You are registered for the match",
   "matchRsvpTrainingConfirmed": "You are registered for training",

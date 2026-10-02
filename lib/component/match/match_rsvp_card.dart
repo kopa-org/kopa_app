@@ -88,17 +88,19 @@ class MatchRsvpCard extends StatelessWidget {
               ],
             )),
             const SizedBox(width: 10),
-            Flexible(
+            ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 145),
                 child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                  color: statusSurface,
-                  borderRadius: BorderRadius.circular(999)),
-              child: Text(statusLabel,
-                  textAlign: TextAlign.center,
-                  style: styles.body3.copyWith(
-                      fontSize: 10, height: 13 / 10, color: statusColor)),
-            )),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                      color: statusSurface,
+                      borderRadius: BorderRadius.circular(999)),
+                  child: Text(statusLabel,
+                      textAlign: TextAlign.center,
+                      style: styles.body3.copyWith(
+                          fontSize: 10, height: 13 / 10, color: statusColor)),
+                )),
           ]),
           const SizedBox(height: 14),
           if (pending)
@@ -123,10 +125,7 @@ class MatchRsvpCard extends StatelessWidget {
               child: Column(children: [
                 if (!declined && !awaitingSelection)
                   SvgPicture.asset('assets/icons/match/rsvp_confirmed.svg',
-                      width: 18,
-                      height: 18,
-                      colorFilter:
-                          ColorFilter.mode(colors.grass, BlendMode.srcIn))
+                      width: 18, height: 18)
                 else
                   Icon(
                       declined
@@ -146,12 +145,13 @@ class MatchRsvpCard extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: styles.bodyBold.copyWith(
                         fontSize: 14, height: 18 / 14, color: statusColor)),
+                const SizedBox(height: 8),
                 CupertinoButton(
                   key: ValueKey(declined
                       ? 'match-details-rsvp-accept-action'
                       : 'match-details-rsvp-decline-action'),
                   padding: EdgeInsets.zero,
-                  minimumSize: const Size(0, 44),
+                  minimumSize: const Size(0, 18),
                   onPressed: isSaving
                       ? null
                       : declined
@@ -166,6 +166,7 @@ class MatchRsvpCard extends StatelessWidget {
                           textAlign: TextAlign.center,
                           style: styles.body3.copyWith(
                               fontSize: 14,
+                              height: 18 / 14,
                               fontWeight: FontWeight.w600,
                               color: colors.grey5,
                               decoration: TextDecoration.underline)),
@@ -181,7 +182,7 @@ class MatchRsvpCard extends StatelessWidget {
               onTap: onShowAttendees,
               borderRadius: BorderRadius.circular(14),
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
+                padding: EdgeInsets.zero,
                 child: Row(children: [
                   _AttendeePreview(names: attendeeNames, count: attendeeCount),
                   const SizedBox(width: 12),

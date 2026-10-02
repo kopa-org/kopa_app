@@ -740,7 +740,7 @@ class AppLocalizationsDa extends AppLocalizations {
   String get matchRsvpQuestion => 'Kommer du?';
 
   @override
-  String get matchRsvpHint => 'Fortæl holdet, om du kan komme.';
+  String get matchRsvpHint => 'Giv holdet besked.';
 
   @override
   String get matchRsvpAwaitingResponse => 'Afventer svar';

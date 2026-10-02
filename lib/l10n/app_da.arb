@@ -265,7 +265,7 @@
     }
   },
   "matchRsvpQuestion": "Kommer du?",
-  "matchRsvpHint": "Fortæl holdet, om du kan komme.",
+  "matchRsvpHint": "Giv holdet besked.",
   "matchRsvpAwaitingResponse": "Afventer svar",
   "matchRsvpConfirmed": "Du er tilmeldt kampen",
   "matchRsvpTrainingConfirmed": "Du er tilmeldt træningen",

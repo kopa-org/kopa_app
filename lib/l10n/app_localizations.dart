@@ -1439,7 +1439,7 @@ abstract class AppLocalizations {
   /// No description provided for @matchRsvpHint.
   ///
   /// In en, this message translates to:
-  /// **'Let your team know if you can make it.'**
+  /// **'Let your team know.'**
   String get matchRsvpHint;
 
   /// No description provided for @matchRsvpAwaitingResponse.

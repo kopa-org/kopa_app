@@ -3,12 +3,19 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kopa/component/match/match_rsvp_card.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/theme/app_theme.dart';
 
 void main() {
+  setUpAll(() async {
+    final icons = FontLoader('packages/cupertino_icons/CupertinoIcons')
+      ..addFont(rootBundle
+          .load('packages/cupertino_icons/assets/CupertinoIcons.ttf'));
+    await icons.load();
+  });
   for (final status in MatchRsvpStatus.values) {
     for (final width in [320.0, 390.0]) {
       testWidgets('$status supports RSVP and attendee navigation at $width',
@@ -54,6 +61,20 @@ void main() {
         expect(find.text('12 tilmeldte'), findsOneWidget);
         expect(find.text('+7'), findsOneWidget);
         expect(tester.takeException(), isNull);
+        if (width == 390 && status == MatchRsvpStatus.attending) {
+          expect(
+            tester
+                .getSize(find.byKey(const ValueKey('match-rsvp-card')))
+                .height,
+            closeTo(219, 1),
+          );
+          expect(
+            tester
+                .getSize(find.byKey(const ValueKey('match-rsvp-confirmation')))
+                .height,
+            closeTo(94, 1),
+          );
+        }
 
         // Optional rendered reference for comparison with the Figma card.
         final previewDirectory = Platform.environment['KOPA_RSVP_PREVIEW_DIR'];
