@@ -389,7 +389,7 @@ class _HeroCountdownState extends State<_HeroCountdown> {
   @override
   Widget build(BuildContext context) {
     final styles = _displayStyle(context).copyWith(
-      color: AppColors.matchDetailsHeader,
+      color: AppColors.of(context).dirt,
       fontSize: 32,
       height: 0.98,
     );
