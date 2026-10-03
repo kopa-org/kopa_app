@@ -1,4 +1,8 @@
 {
+  "matchFabMotmLabel": "MOTM",
+  "matchFabResultLabel": "Result",
+  "matchFabExternalPlayerLabel": "Add Ext Player",
+  "matchLineupWaiting": "Waiting for lineup",
   "loginForgotPassword": "Forgot password?",
   "forgotPasswordTitle": "Forgot password",
   "forgotPasswordInstructions": "Enter your email address and we’ll send you a code to reset your password.",
@@ -274,5 +278,9 @@
   "matchRsvpAttendeeCount": "{count} registered",
   "@matchRsvpAttendeeCount": {"placeholders": {"count": {"type": "int"}}},
   "matchActionsMore": "Match options",
-  "matchActionsEditResult": "Edit match result"
+  "matchActionsEditResult": "Edit match result",
+  "matchFabCreateMotmPoll": "MOTM: create poll",
+  "matchFabEditMotmPoll": "MOTM: edit poll",
+  "matchFabEnterResult": "Enter match result",
+  "matchFabAddExternalPlayers": "Add external players"
 }

@@ -482,25 +482,28 @@ class _LineupCard extends StatelessWidget {
             _LineupDragHint(colors: colors, styles: styles),
             const SizedBox(height: 10),
           ],
-          SizedBox(
-            height: 340,
-            child: FootballPitch(
-              borderRadius: BorderRadius.circular(16),
-              child: Stack(
-                children: [
-                  for (var i = 0; i < formation.slots.length; i++)
-                    _LineupSlotTarget(
-                      slotIndex: i,
-                      slot: formation.slots[i],
-                      player: i < starters.length ? starters[i] : null,
-                      colors: colors,
-                      styles: styles,
-                      onAccept: (data) => onSlotAccept(data, i),
-                      onTap: () => onSlotTap(i),
-                      onDragStarted: onDragStarted,
-                      onDragEnd: onDragEnd,
-                    ),
-                ],
+          LayoutBuilder(
+            builder: (context, constraints) => SizedBox(
+              // Leave room between formation rows, including on narrow screens.
+              height: (constraints.maxWidth / 0.65).clamp(460.0, 760.0),
+              child: FootballPitch(
+                borderRadius: BorderRadius.circular(16),
+                child: Stack(
+                  children: [
+                    for (var i = 0; i < formation.slots.length; i++)
+                      _LineupSlotTarget(
+                        slotIndex: i,
+                        slot: formation.slots[i],
+                        player: i < starters.length ? starters[i] : null,
+                        colors: colors,
+                        styles: styles,
+                        onAccept: (data) => onSlotAccept(data, i),
+                        onTap: () => onSlotTap(i),
+                        onDragStarted: onDragStarted,
+                        onDragEnd: onDragEnd,
+                      ),
+                  ],
+                ),
               ),
             ),
           ),

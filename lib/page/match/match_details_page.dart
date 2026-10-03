@@ -44,6 +44,7 @@ import 'package:kopa/component/match/match_poll_details_card.dart';
 import 'package:kopa/component/match/match_events_timeline.dart';
 import 'package:kopa/component/match/match_rsvp_card.dart';
 import 'package:kopa/component/match/match_actions_menu.dart';
+import 'package:kopa/component/match/match_quick_actions_fab.dart';
 import 'package:kopa/component/match/player_of_match_summary_card.dart';
 import 'package:kopa/config/app_feature_flags.dart';
 import 'package:provider/provider.dart';
@@ -203,6 +204,22 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     final bottomNavigationBar = widget.showBottomNavigationBar
         ? _buildMatchDetailsBottomNavigationBar(context)
         : null;
+    final quickActions = canManageTeam && !isTraining
+        ? MatchQuickActionsFab(
+            matchId: matchDetails.id,
+            hasPoll: matchDetails.matchPollDetails != null,
+            hasFinalScore: matchDetails.hasFinalScore,
+            onPoll: data == null
+                ? null
+                : () => matchDetails.matchPollDetails == null
+                    ? _openCreateMatchPoll(matchDetails, squad)
+                    : _openEditMatchPoll(matchDetails, squad),
+            onResult: () => setMatchScore(matchDetails),
+            onExternalPlayers: _isAddingExternalPlayer
+                ? null
+                : () => _addExternalPlayer(matchDetails),
+          )
+        : null;
 
     final heroCard = MatchHeroCard(
       match: matchDetails,
@@ -247,6 +264,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         onSegmentChanged: _selectSegment,
         bottomNavigationBar: bottomNavigationBar,
         useParentBottomNavigationBar: !widget.showBottomNavigationBar,
+        floatingActionButton: quickActions,
       );
     }
 
@@ -277,6 +295,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       ),
       bottomNavigationBar: bottomNavigationBar,
       useParentBottomNavigationBar: !widget.showBottomNavigationBar,
+      floatingActionButton: quickActions,
       overviewTitle: 'Praktisk information',
       attendanceTitle: 'Tilmeldte spillere',
       attendanceSegmentLabel: l10n.matchRsvpAttendeeCount(attendeeCount),
@@ -322,8 +341,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       ],
       infoRows: _buildPracticalInfoRows(matchDetails),
       votingModule: null,
-      playerPositions: !isTraining &&
-              (canManageTeam || matchDetails.lineupVisible)
+      playerPositions: !isTraining
           ? PlayerPositionsCard(
               playerCount: _teamPlayerCount(matchDetails, user),
               formation: matchDetails.formation,
@@ -340,6 +358,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
                   ? () => _toggleLineupVisibility(matchDetails)
                   : null,
               isVisibleToPlayers: matchDetails.lineupVisible,
+              isWaitingForLineup: !canManageTeam && !matchDetails.lineupVisible,
               isUpdatingVisibility: _isUpdatingLineupVisibility,
               showTitle: false,
             )

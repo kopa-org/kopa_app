@@ -17,6 +17,8 @@ class ExpandableFab extends StatefulWidget {
     this.foregroundColor,
     this.icon = const Icon(Icons.add),
     this.closeIcon = const Icon(Icons.close),
+    this.expandVertically = false,
+    this.expandedWidth,
   });
 
   final bool? initialOpen;
@@ -29,12 +31,14 @@ class ExpandableFab extends StatefulWidget {
   final Color? foregroundColor;
   final Widget icon;
   final Widget closeIcon;
+  final bool expandVertically;
+  final double? expandedWidth;
 
   @override
-  State<ExpandableFab> createState() => _ExpandableFabState();
+  State<ExpandableFab> createState() => ExpandableFabState();
 }
 
-class _ExpandableFabState extends State<ExpandableFab>
+class ExpandableFabState extends State<ExpandableFab>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _expandAnimation;
@@ -73,11 +77,22 @@ class _ExpandableFabState extends State<ExpandableFab>
     });
   }
 
+  /// Collapses the actions after an action opens its destination.
+  void close() {
+    if (!_open) return;
+    setState(() => _open = false);
+    _controller.reverse();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final extent = widget.children.isEmpty ? 56.0 : widget.distance + 60.0;
+    final extent = widget.children.isEmpty
+        ? 56.0
+        : widget.distance *
+                (widget.expandVertically ? widget.children.length : 1) +
+            60.0;
     return SizedBox(
-      width: extent,
+      width: widget.expandedWidth ?? extent,
       height: extent,
       child: Stack(
         alignment: Alignment.bottomRight,
@@ -100,27 +115,12 @@ class _ExpandableFabState extends State<ExpandableFab>
         theme.floatingActionButtonTheme.foregroundColor ??
         AppColors.of(context).white;
 
-    return SizedBox(
-      width: 56,
-      height: 56,
-      child: Center(
-        child: Material(
-          shape: const CircleBorder(),
-          clipBehavior: Clip.antiAlias,
-          color: backgroundColor,
-          elevation: 4,
-          child: InkWell(
-            onTap: _toggle,
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: IconTheme.merge(
-                data: IconThemeData(color: foregroundColor),
-                child: widget.closeIcon,
-              ),
-            ),
-          ),
-        ),
-      ),
+    return FloatingActionButton(
+      heroTag: null,
+      backgroundColor: backgroundColor,
+      foregroundColor: foregroundColor,
+      onPressed: _toggle,
+      child: widget.closeIcon,
     );
   }
 
@@ -135,8 +135,10 @@ class _ExpandableFabState extends State<ExpandableFab>
         i++, angleInDegrees += step) {
       children.add(
         _ExpandingActionButton(
-          directionInDegrees: angleInDegrees,
-          maxDistance: widget.distance,
+          directionInDegrees: widget.expandVertically ? 90 : angleInDegrees,
+          maxDistance:
+              widget.distance * (widget.expandVertically ? count - i : 1),
+          isVertical: widget.expandVertically,
           progress: _expandAnimation,
           isOpen: _open,
           child: widget.children[i],
@@ -181,6 +183,7 @@ class _ExpandingActionButton extends StatelessWidget {
   const _ExpandingActionButton({
     required this.directionInDegrees,
     required this.maxDistance,
+    required this.isVertical,
     required this.progress,
     required this.isOpen,
     required this.child,
@@ -188,6 +191,7 @@ class _ExpandingActionButton extends StatelessWidget {
 
   final double directionInDegrees;
   final double maxDistance;
+  final bool isVertical;
   final Animation<double> progress;
   final bool isOpen;
   final Widget child;
@@ -204,13 +208,15 @@ class _ExpandingActionButton extends StatelessWidget {
         return Positioned(
           right: 4.0 + offset.dx,
           bottom: 4.0 + offset.dy,
-          child: Transform.scale(
-            scale: 0.82 + (0.18 * progress.value),
-            child: Transform.rotate(
-              angle: (1.0 - progress.value) * math.pi / 2,
-              child: child!,
-            ),
-          ),
+          child: isVertical
+              ? child!
+              : Transform.scale(
+                  scale: 0.82 + (0.18 * progress.value),
+                  child: Transform.rotate(
+                    angle: (1.0 - progress.value) * math.pi / 2,
+                    child: child!,
+                  ),
+                ),
         );
       },
       child: IgnorePointer(

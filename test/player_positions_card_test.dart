@@ -2,11 +2,67 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kopa/component/card/player_positions_card.dart';
+import 'package:kopa/component/football_pitch.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/model/match_player.dart';
 import 'package:kopa/theme/app_theme.dart';
 
 void main() {
+  for (final (language, message) in [
+    ('en', 'Waiting for lineup'),
+    ('da', 'Venter på holdopstilling'),
+  ]) {
+    testWidgets('$language hidden lineup shows anonymous pitch until revealed',
+        (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final player = _player(id: 1, name: 'Hidden Player');
+
+      Future<void> pumpCard({required bool waiting}) async {
+        await tester.pumpWidget(MaterialApp(
+          theme: AppTheme.lightTheme,
+          locale: Locale(language),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: PlayerPositionsCard(
+              playerCount: 7,
+              formation: '3-2-1',
+              players: [player],
+              positionedPlayers: [player],
+              isWaitingForLineup: waiting,
+              isVisibleToPlayers: !waiting,
+              // Waiting must omit controls even with callbacks provided.
+              onEditFormation: waiting ? () {} : null,
+              onToggleVisibility: waiting ? () {} : null,
+            ),
+          ),
+        ));
+      }
+
+      await pumpCard(waiting: true);
+      expect(find.text(message), findsOneWidget);
+      expect(find.byType(FootballPitch), findsOneWidget);
+      expect(find.byType(ImageFiltered), findsOneWidget);
+      expect(find.text('Hidden Player'), findsNothing);
+      expect(find.text('3-2-1'), findsNothing);
+      expect(find.text('På bænken:'), findsNothing);
+      expect(find.byType(CupertinoButton), findsNothing);
+      expect(find.byType(Tooltip).hitTestable(), findsNothing);
+      expect(tester.takeException(), isNull);
+
+      await pumpCard(waiting: false);
+      expect(find.text(message), findsNothing);
+      expect(find.byType(ImageFiltered), findsNothing);
+      expect(find.text('Hidden Player'), findsOneWidget);
+      expect(find.text('3-2-1'), findsOneWidget);
+      expect(find.byType(CupertinoButton), findsNothing);
+    });
+  }
+
   testWidgets('visibility control defaults to hidden', (tester) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;

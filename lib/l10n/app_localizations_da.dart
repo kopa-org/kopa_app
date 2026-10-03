@@ -9,6 +9,18 @@ class AppLocalizationsDa extends AppLocalizations {
   AppLocalizationsDa([String locale = 'da']) : super(locale);
 
   @override
+  String get matchFabMotmLabel => 'MOTM';
+
+  @override
+  String get matchFabResultLabel => 'Resultat';
+
+  @override
+  String get matchFabExternalPlayerLabel => 'Tilføj ekst. spiller';
+
+  @override
+  String get matchLineupWaiting => 'Venter på holdopstilling';
+
+  @override
   String get loginForgotPassword => 'Glemt adgangskode?';
 
   @override
@@ -767,4 +779,16 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String get matchActionsEditResult => 'Rediger kampresultat';
+
+  @override
+  String get matchFabCreateMotmPoll => 'Kampens spiller: opret afstemning';
+
+  @override
+  String get matchFabEditMotmPoll => 'Kampens spiller: rediger afstemning';
+
+  @override
+  String get matchFabEnterResult => 'Indtast kampresultat';
+
+  @override
+  String get matchFabAddExternalPlayers => 'Tilføj eksterne spillere';
 }

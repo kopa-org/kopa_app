@@ -46,8 +46,8 @@ void main() {
     final header = find.byKey(const ValueKey('match-details-scroll-header'));
     final initialTop = tester.getTopLeft(header).dy;
 
-    await tester.drag(
-        find.byType(SingleChildScrollView), const Offset(0, -180));
+    await tester.drag(find.byKey(const ValueKey('match-details-sheet-scroll')),
+        const Offset(0, -180));
     await tester.pumpAndSettle();
 
     expect(tester.getTopLeft(header).dy, lessThan(initialTop));

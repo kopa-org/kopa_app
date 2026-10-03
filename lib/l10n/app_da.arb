@@ -1,4 +1,8 @@
 {
+  "matchFabMotmLabel": "MOTM",
+  "matchFabResultLabel": "Resultat",
+  "matchFabExternalPlayerLabel": "Tilføj ekst. spiller",
+  "matchLineupWaiting": "Venter på holdopstilling",
   "loginForgotPassword": "Glemt adgangskode?",
   "forgotPasswordTitle": "Glemt adgangskode",
   "forgotPasswordInstructions": "Skriv din e-mailadresse, så sender vi dig en kode til at nulstille din adgangskode.",
@@ -274,5 +278,9 @@
   "matchRsvpAttendeeCount": "{count} tilmeldte",
   "@matchRsvpAttendeeCount": {"placeholders": {"count": {"type": "int"}}},
   "matchActionsMore": "Kampindstillinger",
-  "matchActionsEditResult": "Rediger kampresultat"
+  "matchActionsEditResult": "Rediger kampresultat",
+  "matchFabCreateMotmPoll": "Kampens spiller: opret afstemning",
+  "matchFabEditMotmPoll": "Kampens spiller: rediger afstemning",
+  "matchFabEnterResult": "Indtast kampresultat",
+  "matchFabAddExternalPlayers": "Tilføj eksterne spillere"
 }

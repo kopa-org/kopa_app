@@ -65,7 +65,7 @@ class _MatchProgrammePageState extends State<MatchProgrammePage> {
               tooltip: l10n.eventCreateTitle,
               backgroundColor: colors.white,
               foregroundColor: colors.primary,
-              icon: const Icon(Icons.add, size: 32),
+              icon: const Icon(Icons.add, size: 24),
               children: [
                 FloatingActionButton(
                   heroTag: 'create-match-fab-match',

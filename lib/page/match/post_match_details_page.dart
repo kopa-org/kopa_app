@@ -25,6 +25,7 @@ class PostMatchDetailsPage extends StatelessWidget {
   final ValueChanged<MatchDetailSegment> onSegmentChanged;
   final Widget? bottomNavigationBar;
   final bool useParentBottomNavigationBar;
+  final Widget? floatingActionButton;
 
   const PostMatchDetailsPage({
     super.key,
@@ -45,6 +46,7 @@ class PostMatchDetailsPage extends StatelessWidget {
     this.onRefresh,
     this.bottomNavigationBar,
     this.useParentBottomNavigationBar = false,
+    this.floatingActionButton,
   });
 
   @override
@@ -94,6 +96,7 @@ class PostMatchDetailsPage extends StatelessWidget {
       bottomNavigationBar: bottomNavigationBar,
       attendanceActionBar: attendanceActionBar,
       useParentBottomNavigationBar: useParentBottomNavigationBar,
+      floatingActionButton: floatingActionButton,
     );
   }
 }

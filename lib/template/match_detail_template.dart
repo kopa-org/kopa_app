@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:kopa/component/card/kopa_card.dart';
+import 'package:kopa/component/match/match_details_sheet_scroll_view.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/component/section_header/section_header.dart';
 import 'package:kopa/theme/app_colors.dart';
@@ -48,6 +49,7 @@ class MatchDetailTemplate extends StatelessWidget {
   final String pageTitle;
   final bool useDarkMatchHeader;
   final Widget? belowHeaderAction;
+  final Widget? floatingActionButton;
 
   const MatchDetailTemplate({
     super.key,
@@ -84,6 +86,7 @@ class MatchDetailTemplate extends StatelessWidget {
     this.pageTitle = 'Kampdetaljer',
     this.useDarkMatchHeader = false,
     this.belowHeaderAction,
+    this.floatingActionButton,
   });
 
   @override
@@ -101,7 +104,7 @@ class MatchDetailTemplate extends StatelessWidget {
               statusBarBrightness: Brightness.dark,
             )
           : null,
-      onRefresh: onRefresh,
+      onRefresh: useDarkMatchHeader ? null : onRefresh,
       useBottomSafeArea:
           bottomNavigationBar == null && !useParentBottomNavigationBar,
       body: ColoredBox(
@@ -134,7 +137,8 @@ class MatchDetailTemplate extends StatelessWidget {
                 : 144.0
             : 32.0) +
         contentBottomPadding +
-        actionBarBottomPadding;
+        actionBarBottomPadding +
+        (floatingActionButton == null ? 0 : 72);
     final scrollContent = useDarkMatchHeader
         ? _buildDarkHeaderContent(
             context: context,
@@ -167,9 +171,10 @@ class MatchDetailTemplate extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        SingleChildScrollView(
-          child: scrollContent,
-        ),
+        if (useDarkMatchHeader)
+          scrollContent
+        else
+          SingleChildScrollView(child: scrollContent),
         if (stickyActionBar != null)
           Positioned(
             left: 0,
@@ -184,6 +189,12 @@ class MatchDetailTemplate extends StatelessWidget {
             bottom: contentBottomPadding,
             child: attendanceActionBar!,
           ),
+        if (floatingActionButton != null)
+          Positioned(
+            right: 16,
+            bottom: contentBottomPadding + actionBarBottomPadding + 16,
+            child: floatingActionButton!,
+          ),
       ],
     );
   }
@@ -193,64 +204,62 @@ class MatchDetailTemplate extends StatelessWidget {
     required double segmentSpacing,
     required double bottomPadding,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        ColoredBox(
-          key: const ValueKey('match-details-dark-header'),
-          color: AppColors.matchDetailsHeader,
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _MatchDetailsHeader(
-                  title: pageTitle,
-                  action: headerAction,
-                  darkHeader: true,
-                ),
-                const SizedBox(height: 12),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: heroCard,
-                ),
-                if (attendanceHeader != null && !attendanceHeaderInBody) ...[
-                  SizedBox(height: segmentSpacing),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: attendanceHeader!,
-                  ),
-                ],
+    return MatchDetailsSheetScrollView(
+      onRefresh: onRefresh,
+      header: ColoredBox(
+        key: const ValueKey('match-details-dark-header'),
+        color: AppColors.matchDetailsHeader,
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _MatchDetailsHeader(
+                title: pageTitle,
+                action: headerAction,
+                darkHeader: true,
+              ),
+              const SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: heroCard,
+              ),
+              if (attendanceHeader != null && !attendanceHeaderInBody) ...[
                 SizedBox(height: segmentSpacing),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: _buildSegmentedControl(
-                    context,
-                    darkHeader: true,
-                  ),
+                  child: attendanceHeader!,
                 ),
               ],
-            ),
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.fromLTRB(16, segmentSpacing, 16, bottomPadding),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (belowHeaderAction != null) ...[
-                belowHeaderAction!,
-                const SizedBox(height: Spacing.md),
-              ],
-              if (attendanceHeader != null && attendanceHeaderInBody) ...[
-                attendanceHeader!,
-                const SizedBox(height: Spacing.md),
-              ],
-              ..._buildSelectedSegment(context),
+              SizedBox(height: segmentSpacing),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: _buildSegmentedControl(
+                  context,
+                  darkHeader: true,
+                ),
+              ),
             ],
           ),
         ),
-      ],
+      ),
+      body: Padding(
+        padding: EdgeInsets.fromLTRB(16, segmentSpacing, 16, bottomPadding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (belowHeaderAction != null) ...[
+              belowHeaderAction!,
+              const SizedBox(height: Spacing.md),
+            ],
+            if (attendanceHeader != null && attendanceHeaderInBody) ...[
+              attendanceHeader!,
+              const SizedBox(height: Spacing.md),
+            ],
+            ..._buildSelectedSegment(context),
+          ],
+        ),
+      ),
     );
   }
 

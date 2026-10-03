@@ -136,6 +136,8 @@ void main() {
         expect(tester.getRect(practicalTitle), initialPracticalRect);
       }
       expect(tester.takeException(), isNull);
+      expect(find.byKey(const ValueKey('match-quick-actions-fab')),
+          variant == 'training' ? findsNothing : findsOneWidget);
     });
   }
 

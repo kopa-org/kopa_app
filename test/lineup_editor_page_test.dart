@@ -81,6 +81,16 @@ void main() {
     await tester.pumpAndSettle();
 
     final benchHeader = find.text('Bænken (2 spillere)');
+    await tester.scrollUntilVisible(
+      benchHeader,
+      200,
+      scrollable: find
+          .descendant(
+            of: find.byType(LineupEditorPage),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
     expect(benchHeader, findsOneWidget);
     expect(
       tester.getRect(find.text('Alice Jensen')).top,
@@ -112,12 +122,24 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.text('Rediger formation (2-3-1)'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Rediger formation (2-3-1)'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Formation 3-2-1'));
     await tester.pumpAndSettle();
 
     final benchHeader = find.text('Bænken (1 spillere)');
+    await tester.scrollUntilVisible(
+      benchHeader,
+      200,
+      scrollable: find
+          .descendant(
+            of: find.byType(LineupEditorPage),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
     expect(benchHeader, findsOneWidget);
     expect(tester.getRect(find.text('Alice Jensen')).top,
         greaterThan(tester.getRect(benchHeader).top));
@@ -186,6 +208,16 @@ void main() {
     await tester.pumpAndSettle();
 
     final benchHeader = find.text('Bænken (1 spillere)');
+    await tester.scrollUntilVisible(
+      benchHeader,
+      200,
+      scrollable: find
+          .descendant(
+            of: find.byType(LineupEditorPage),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
     expect(benchHeader, findsOneWidget);
     expect(
       tester.getRect(find.text('Guest Player')).top,

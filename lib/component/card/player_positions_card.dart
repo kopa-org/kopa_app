@@ -1,8 +1,11 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/football_pitch.dart';
 import 'package:kopa/component/card/kopa_card.dart';
 import 'package:kopa/model/match_player.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 import 'package:kopa/theme/spacing.dart';
@@ -18,6 +21,7 @@ class PlayerPositionsCard extends StatelessWidget {
   final bool isUpdatingVisibility;
   final bool preservePlayerOrder;
   final bool showTitle;
+  final bool isWaitingForLineup;
 
   const PlayerPositionsCard({
     super.key,
@@ -31,6 +35,7 @@ class PlayerPositionsCard extends StatelessWidget {
     this.isUpdatingVisibility = false,
     this.preservePlayerOrder = false,
     this.showTitle = true,
+    this.isWaitingForLineup = false,
   });
 
   @override
@@ -38,6 +43,61 @@ class PlayerPositionsCard extends StatelessWidget {
     final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final styles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    if (isWaitingForLineup) {
+      // Render only anonymous placeholders, even if cached lineup data exists.
+      final placeholderFormation = PlayerFormation.fromString(
+        '',
+        playerCount: playerCount,
+      );
+      return KopaCard(
+        padding: const EdgeInsets.all(Spacing.md),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              ExcludeSemantics(
+                child: IgnorePointer(
+                  child: ImageFiltered(
+                    imageFilter: ui.ImageFilter.blur(sigmaX: 3, sigmaY: 3),
+                    child: AspectRatio(
+                      aspectRatio: 0.72,
+                      child: _Pitch(
+                        colors: colors,
+                        styles: styles,
+                        slots: placeholderFormation.slots,
+                        players: const [],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned.fill(
+                child: ColoredBox(color: colors.pitch.withValues(alpha: 0.2)),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(Spacing.md),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: Spacing.md,
+                    vertical: Spacing.sm,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colors.surface,
+                    borderRadius: BorderRadius.circular(Spacing.borderRadius),
+                  ),
+                  child: Text(
+                    AppLocalizations.of(context)!.matchLineupWaiting,
+                    textAlign: TextAlign.center,
+                    style: styles.h4,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     final playerFormation = PlayerFormation.fromString(
       formation,
       playerCount: playerCount,

@@ -9,6 +9,18 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get matchFabMotmLabel => 'MOTM';
+
+  @override
+  String get matchFabResultLabel => 'Result';
+
+  @override
+  String get matchFabExternalPlayerLabel => 'Add Ext Player';
+
+  @override
+  String get matchLineupWaiting => 'Waiting for lineup';
+
+  @override
   String get loginForgotPassword => 'Forgot password?';
 
   @override
@@ -770,4 +782,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get matchActionsEditResult => 'Edit match result';
+
+  @override
+  String get matchFabCreateMotmPoll => 'MOTM: create poll';
+
+  @override
+  String get matchFabEditMotmPoll => 'MOTM: edit poll';
+
+  @override
+  String get matchFabEnterResult => 'Enter match result';
+
+  @override
+  String get matchFabAddExternalPlayers => 'Add external players';
 }

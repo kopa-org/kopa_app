@@ -98,6 +98,30 @@ abstract class AppLocalizations {
     Locale('en')
   ];
 
+  /// No description provided for @matchFabMotmLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'MOTM'**
+  String get matchFabMotmLabel;
+
+  /// No description provided for @matchFabResultLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Result'**
+  String get matchFabResultLabel;
+
+  /// No description provided for @matchFabExternalPlayerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Ext Player'**
+  String get matchFabExternalPlayerLabel;
+
+  /// No description provided for @matchLineupWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for lineup'**
+  String get matchLineupWaiting;
+
   /// No description provided for @loginForgotPassword.
   ///
   /// In en, this message translates to:
@@ -1489,6 +1513,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Edit match result'**
   String get matchActionsEditResult;
+
+  /// No description provided for @matchFabCreateMotmPoll.
+  ///
+  /// In en, this message translates to:
+  /// **'MOTM: create poll'**
+  String get matchFabCreateMotmPoll;
+
+  /// No description provided for @matchFabEditMotmPoll.
+  ///
+  /// In en, this message translates to:
+  /// **'MOTM: edit poll'**
+  String get matchFabEditMotmPoll;
+
+  /// No description provided for @matchFabEnterResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter match result'**
+  String get matchFabEnterResult;
+
+  /// No description provided for @matchFabAddExternalPlayers.
+  ///
+  /// In en, this message translates to:
+  /// **'Add external players'**
+  String get matchFabAddExternalPlayers;
 }
 
 class _AppLocalizationsDelegate
