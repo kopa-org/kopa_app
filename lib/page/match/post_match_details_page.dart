@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:kopa/component/match/match_poll_details_card.dart';
-import 'package:kopa/component/match/player_of_match_summary_card.dart';
 import 'package:kopa/component/match/match_events_timeline.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/template/match_detail_template.dart';
-import 'package:kopa/theme/spacing.dart';
 
 class PostMatchDetailsPage extends StatelessWidget {
   final MatchDetails match;
@@ -19,8 +16,6 @@ class PostMatchDetailsPage extends StatelessWidget {
   final ValueChanged<int>? onDeleteEvent;
   final Future<void> Function(List<int>)? onReorderEvents;
   final Widget? attendanceActionBar;
-  final VoidCallback? onCreateMatchPoll;
-  final VoidCallback? onEditMatchPoll;
   final MatchDetailSegment selectedSegment;
   final ValueChanged<MatchDetailSegment> onSegmentChanged;
   final Widget? bottomNavigationBar;
@@ -39,8 +34,6 @@ class PostMatchDetailsPage extends StatelessWidget {
     this.onDeleteEvent,
     this.onReorderEvents,
     this.attendanceActionBar,
-    required this.onCreateMatchPoll,
-    this.onEditMatchPoll,
     required this.selectedSegment,
     required this.onSegmentChanged,
     this.onRefresh,
@@ -67,17 +60,6 @@ class PostMatchDetailsPage extends StatelessWidget {
       showTimelineSegment: false,
       timelineEmptyMessage: 'Ingen kampbegivenheder registreret endnu.',
       overviewWidgets: [
-        if (match.matchPollDetails == null)
-          PlayerOfMatchSummaryCard(
-            playerName: null,
-            onPressed: user.canManageTeam ? onCreateMatchPoll : null,
-          )
-        else
-          MatchPollDetailsCard(
-            poll: match.matchPollDetails!,
-            onEdit: user.canManageTeam ? onEditMatchPoll : null,
-          ),
-        const SizedBox(height: Spacing.lg),
         MatchEventsTimeline(
           events: match.matchEventDetailsList ?? const [],
           canAddEvent: user.canManageTeam,

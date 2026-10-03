@@ -7,10 +7,8 @@ import 'package:kopa/component/dialog/lineup_visibility_confirmation_dialog.dart
 import 'package:kopa/component/error_message.dart';
 import 'package:kopa/component/loading_indicator.dart';
 import 'package:kopa/cubits/match_polls_cubit.dart';
-import 'package:kopa/cubits/match_programme_cubit.dart';
 import 'package:kopa/helpers/date_helper.dart';
 import 'package:kopa/model/event_attendance_details.dart';
-import 'package:kopa/model/event_type.dart';
 import 'package:kopa/model/match_player.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/match_poll_details.dart';
@@ -19,7 +17,6 @@ import 'package:kopa/model/user_vote.dart';
 import 'package:kopa/navigation/app_router.dart';
 import 'package:kopa/page/match/add_match_event_modal.dart';
 import 'package:kopa/page/match/add_external_player_dialog.dart';
-import 'package:kopa/page/match/create_match_page.dart';
 import 'package:kopa/page/match/lineup_editor_page.dart';
 import 'package:kopa/page/match/match_score_sheet.dart';
 import 'package:kopa/page/match/post_match_details_page.dart';
@@ -40,12 +37,10 @@ import 'package:kopa/component/timeline/timeline_item.dart';
 import 'package:kopa/component/card/match_hero_card.dart';
 import 'package:kopa/component/info_row/info_row.dart';
 import 'package:kopa/component/list_item/player_list_item.dart';
-import 'package:kopa/component/match/match_poll_details_card.dart';
 import 'package:kopa/component/match/match_events_timeline.dart';
 import 'package:kopa/component/match/match_rsvp_card.dart';
 import 'package:kopa/component/match/match_actions_menu.dart';
 import 'package:kopa/component/match/match_quick_actions_fab.dart';
-import 'package:kopa/component/match/player_of_match_summary_card.dart';
 import 'package:kopa/config/app_feature_flags.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -235,12 +230,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     final headerAction = canManageTeam
         ? MatchActionsMenu(
             isTraining: isTraining,
-            hasFinalScore: matchDetails.hasFinalScore,
-            isAddingExternalPlayer: _isAddingExternalPlayer,
             onDelete: () => _deleteMatch(matchDetails),
-            onEnterResult: () => setMatchScore(matchDetails),
-            onCreateExternalPlayer: () => _addExternalPlayer(matchDetails),
-            onEditTraining: () => _editTraining(matchDetails),
           )
         : null;
 
@@ -255,11 +245,6 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         onAddEvent: () => addMatchEvent(user),
         onDeleteEvent: _deleteMatchEvent,
         onReorderEvents: _reorderMatchEvents,
-        onCreateMatchPoll: data == null
-            ? null
-            : () => _openCreateMatchPoll(matchDetails, squad),
-        onEditMatchPoll:
-            data == null ? null : () => _openEditMatchPoll(matchDetails, squad),
         selectedSegment: _selectedSegment,
         onSegmentChanged: _selectSegment,
         bottomNavigationBar: bottomNavigationBar,
@@ -273,6 +258,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
           isTraining ? l10n.eventDetailsTraining : l10n.eventDetailsMatch,
       onRefresh: _refreshMatchAndSquad,
       useDarkMatchHeader: !isTraining,
+      useTrainingHeader: isTraining,
       selectedSegment: _selectedSegment,
       onSegmentChanged: _selectSegment,
       heroCard: heroCard,
@@ -319,26 +305,6 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
                     showFullTime: false,
                   )
                 ],
-      overviewWidgets: [
-        if (!isTraining) ...[
-          const SizedBox(height: Spacing.lg),
-          if (matchDetails.matchPollDetails == null)
-            PlayerOfMatchSummaryCard(
-              playerName: null,
-              onPressed: canManageTeam && data != null
-                  ? () => _openCreateMatchPoll(matchDetails, squad)
-                  : null,
-            )
-          else
-            MatchPollDetailsCard(
-              poll: matchDetails.matchPollDetails!,
-              onEdit: canManageTeam && data != null
-                  ? () => _openEditMatchPoll(matchDetails, squad)
-                  : null,
-            ),
-          const SizedBox(height: Spacing.lg),
-        ],
-      ],
       infoRows: _buildPracticalInfoRows(matchDetails),
       votingModule: null,
       playerPositions: !isTraining
@@ -1247,22 +1213,6 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     } catch (_) {
       await _showDeletionError(l10n.matchDeleteFailed);
     }
-  }
-
-  Future<void> _editTraining(MatchDetails training) async {
-    final updated = await Navigator.of(context).push<bool>(
-      CupertinoPageRoute<bool>(
-        builder: (_) => BlocProvider(
-          create: (_) => MatchProgrammeCubit(),
-          child: CreateMatchPage(
-            matches: const [],
-            eventType: KopaEventType.training,
-            initialMatch: training,
-          ),
-        ),
-      ),
-    );
-    if (updated == true && mounted) await _refreshMatchAndSquad();
   }
 
   Future<void> _deleteMatchEvent(int id) async {

@@ -5,6 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kopa/component/avatar/team_badge_label.dart';
 import 'package:kopa/component/card/match_hero_card.dart';
+import 'package:kopa/component/match/match_poll_details_card.dart';
+import 'package:kopa/component/match/player_of_match_summary_card.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/auth_state.dart';
 import 'package:kopa/l10n/app_localizations.dart';
@@ -13,6 +15,8 @@ import 'package:kopa/model/user_details.dart';
 import 'package:kopa/page/match/match_details_page.dart';
 import 'package:kopa/repositories/auth_repository.dart';
 import 'package:kopa/theme/app_theme.dart';
+import 'package:kopa/theme/app_colors.dart';
+import 'package:kopa/component/match/match_details_sheet_scroll_view.dart';
 
 void main() {
   for (final (platform, variant) in [
@@ -136,8 +140,48 @@ void main() {
         expect(tester.getRect(practicalTitle), initialPracticalRect);
       }
       expect(tester.takeException(), isNull);
+      expect(find.byType(PlayerOfMatchSummaryCard), findsNothing);
+      expect(find.byType(MatchPollDetailsCard), findsNothing);
       expect(find.byKey(const ValueKey('match-quick-actions-fab')),
           variant == 'training' ? findsNothing : findsOneWidget);
+      if (variant == 'training') {
+        expect(find.byType(MatchDetailsSheetScrollView), findsOneWidget);
+        expect(
+            tester
+                .widget<ColoredBox>(
+                    find.byKey(const ValueKey('match-details-dark-header')))
+                .color,
+            AppColors.light.lightSky65);
+        final track = tester.widget<Container>(
+            find.byKey(const ValueKey('match-details-dark-segment-control')));
+        expect((track.decoration! as BoxDecoration).color,
+            AppColors.light.lightSky95);
+        expect(find.byKey(const ValueKey('match-details-segment-timeline')),
+            findsNothing);
+        final sheet = find.byKey(const ValueKey('match-details-body-sheet'));
+        final originalSheetTop = tester.getRect(sheet).top;
+        await tester.drag(
+            find.byKey(const ValueKey('match-details-sheet-scroll')),
+            const Offset(0, -100));
+        await tester.pumpAndSettle();
+        expect(tester.getRect(sheet).top, lessThan(originalSheetTop));
+        expect(
+            tester
+                .widget<Opacity>(
+                    find.byKey(const ValueKey('match-details-header-fade')))
+                .opacity,
+            lessThan(1));
+        tester
+            .state<ScrollableState>(find.byType(Scrollable).first)
+            .position
+            .jumpTo(0);
+        await tester.pumpAndSettle();
+        await tester.tap(
+            find.byKey(const ValueKey('match-details-segment-attendance')));
+        await tester.pumpAndSettle();
+        expect(find.byKey(const ValueKey('match-rsvp-card')), findsNothing);
+        expect(tester.takeException(), isNull);
+      }
     });
   }
 

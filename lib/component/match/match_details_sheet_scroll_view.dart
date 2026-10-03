@@ -7,12 +7,14 @@ class MatchDetailsSheetScrollView extends StatelessWidget {
   final Widget header;
   final Widget body;
   final Future<void> Function()? onRefresh;
+  final Color headerBackgroundColor;
 
   const MatchDetailsSheetScrollView({
     super.key,
     required this.header,
     required this.body,
     this.onRefresh,
+    this.headerBackgroundColor = AppColors.matchDetailsHeader,
   });
 
   @override
@@ -21,7 +23,7 @@ class MatchDetailsSheetScrollView extends StatelessWidget {
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
     final isIOS = Theme.of(context).platform == TargetPlatform.iOS;
     return ColoredBox(
-      color: AppColors.matchDetailsHeader,
+      color: headerBackgroundColor,
       child: LayoutBuilder(builder: (context, viewport) {
         final scrollView = CustomScrollView(
           key: const ValueKey('match-details-sheet-scroll'),

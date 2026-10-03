@@ -10,6 +10,7 @@ import 'package:kopa/component/avatar/team_badge_label.dart';
 import 'package:kopa/component/card/match_hero_card.dart';
 import 'package:kopa/component/home/home_bento_card.dart';
 import 'package:kopa/component/home/home_calendar_overlay.dart';
+import 'package:kopa/component/home/home_carousel_indicator.dart';
 import 'package:kopa/component/home/home_fine_box_card.dart';
 import 'package:kopa/component/home/home_statistics_strip.dart';
 import 'package:kopa/component/home/latest_result_card.dart';
@@ -636,9 +637,9 @@ class _HeroMatchCarouselState extends State<_HeroMatchCarousel> {
           ),
           if (pages.length > 1) ...[
             const SizedBox(height: Spacing.sm),
-            _CarouselDots(
+            HomeCarouselIndicator(
               count: pages.length,
-              currentIndex: _currentIndex,
+              controller: _controller,
             ),
           ],
         ],
@@ -649,42 +650,6 @@ class _HeroMatchCarouselState extends State<_HeroMatchCarousel> {
   String? _heroPanelTitle(MatchDetails? match, {required bool isFirst}) {
     if (match == null || match.hasMatchBeenPlayed || isFirst) return null;
     return _matchDate(match.date);
-  }
-}
-
-class _CarouselDots extends StatelessWidget {
-  final int count;
-  final int currentIndex;
-
-  const _CarouselDots({
-    required this.count,
-    required this.currentIndex,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(count, (index) {
-        final isActive = index == currentIndex;
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          curve: Curves.easeOutCubic,
-          width: isActive ? 18 : 6,
-          height: 6,
-          margin: const EdgeInsets.symmetric(horizontal: 3),
-          decoration: BoxDecoration(
-            color: isActive
-                ? appColors.grass
-                : appColors.grass.withValues(alpha: 0.24),
-            borderRadius: BorderRadius.circular(999),
-          ),
-        );
-      }),
-    );
   }
 }
 

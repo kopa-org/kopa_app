@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/component/match/match_events_timeline.dart';
+import 'package:kopa/component/match/match_poll_details_card.dart';
+import 'package:kopa/component/match/player_of_match_summary_card.dart';
 import 'package:kopa/component/timeline/timeline_item.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/match_event_details.dart';
@@ -72,7 +74,6 @@ void main() {
           heroCard: const SizedBox(height: 1),
           attendanceList: const [],
           onAddEvent: _noop,
-          onCreateMatchPoll: _noop,
           selectedSegment: MatchDetailSegment.overview,
           onSegmentChanged: (_) {},
         ),
@@ -80,6 +81,8 @@ void main() {
     );
 
     expect(find.text('Registrer kampens resultat'), findsNothing);
+    expect(find.byType(PlayerOfMatchSummaryCard), findsNothing);
+    expect(find.byType(MatchPollDetailsCard), findsNothing);
 
     final labels = [
       'Kampstart',

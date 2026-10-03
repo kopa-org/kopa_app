@@ -4,26 +4,16 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/theme/app_colors.dart';
 
-enum _MatchAction { delete, result, externalPlayer, editTraining }
+enum _MatchAction { delete }
 
 class MatchActionsMenu extends StatelessWidget {
   final bool isTraining;
-  final bool hasFinalScore;
-  final bool isAddingExternalPlayer;
   final VoidCallback onDelete;
-  final VoidCallback onEnterResult;
-  final VoidCallback onCreateExternalPlayer;
-  final VoidCallback onEditTraining;
 
   const MatchActionsMenu({
     super.key,
     required this.isTraining,
-    required this.hasFinalScore,
-    required this.isAddingExternalPlayer,
     required this.onDelete,
-    required this.onEnterResult,
-    required this.onCreateExternalPlayer,
-    required this.onEditTraining,
   });
 
   @override
@@ -49,36 +39,9 @@ class MatchActionsMenu extends StatelessWidget {
         switch (action) {
           case _MatchAction.delete:
             onDelete();
-          case _MatchAction.result:
-            onEnterResult();
-          case _MatchAction.externalPlayer:
-            onCreateExternalPlayer();
-          case _MatchAction.editTraining:
-            onEditTraining();
         }
       },
       itemBuilder: (_) => [
-        if (isTraining)
-          PopupMenuItem(
-            key: const ValueKey('edit-training-action'),
-            value: _MatchAction.editTraining,
-            child: Text(l10n.eventEditTrainingAction),
-          ),
-        if (!isTraining) ...[
-          PopupMenuItem(
-            key: const ValueKey('match-register-result-action'),
-            value: _MatchAction.result,
-            child: Text(hasFinalScore
-                ? l10n.matchActionsEditResult
-                : l10n.matchRegisterResult),
-          ),
-          PopupMenuItem(
-            key: const ValueKey('create-external-player'),
-            value: _MatchAction.externalPlayer,
-            enabled: !isAddingExternalPlayer,
-            child: Text(l10n.externalPlayerCreateButton),
-          ),
-        ],
         PopupMenuItem(
           key: const ValueKey('delete-match-action'),
           value: _MatchAction.delete,

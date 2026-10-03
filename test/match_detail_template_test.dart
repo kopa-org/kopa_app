@@ -10,6 +10,30 @@ import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 
 void main() {
+  for (final darkHeader in [false, true]) {
+    for (final segment in MatchDetailSegment.values) {
+      testWidgets('RSVP only on overview: dark=$darkHeader segment=$segment',
+          (tester) async {
+        await tester.pumpWidget(MaterialApp(
+          home: MatchDetailTemplate(
+            heroCard: const SizedBox(height: 1),
+            useDarkMatchHeader: darkHeader,
+            attendanceHeaderInBody: true,
+            selectedSegment: segment,
+            attendanceHeader: const Text('RSVP controls'),
+            attendanceList: const [Text('Attending player')],
+          ),
+        ));
+        expect(
+            find.text('RSVP controls'),
+            segment == MatchDetailSegment.overview
+                ? findsOneWidget
+                : findsNothing);
+        expect(tester.takeException(), isNull);
+      });
+    }
+  }
+
   testWidgets('attendance segment does not render duplicate section header',
       (tester) async {
     await tester.pumpWidget(
@@ -409,11 +433,7 @@ void main() {
       ),
     );
 
-    expect(responseStatus, findsOneWidget);
-    expect(
-      tester.getTopLeft(responseStatus).dy,
-      lessThan(tester.getTopLeft(attendanceSegment).dy),
-    );
+    expect(responseStatus, findsNothing);
     expect(
       tester.getTopLeft(find.text('Attending Player')).dy,
       greaterThan(tester.getRect(attendanceSegment).bottom),
