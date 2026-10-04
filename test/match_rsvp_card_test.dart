@@ -60,20 +60,41 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text('12 tilmeldte'), findsOneWidget);
         expect(find.text('+7'), findsOneWidget);
+        final avatars = tester.getRect(
+          find.byKey(const ValueKey('match-rsvp-attendee-avatars')),
+        );
+        final count = tester.getRect(find.text('12 tilmeldte'));
+        expect(avatars.bottom, lessThan(count.top));
+        expect(avatars.right, closeTo(count.right, 0.1));
         expect(tester.takeException(), isNull);
-        if (width == 390 && status == MatchRsvpStatus.attending) {
-          expect(
-            tester
-                .getSize(find.byKey(const ValueKey('match-rsvp-card')))
-                .height,
-            closeTo(219, 1),
+        final context = tester.element(find.byType(MatchRsvpCard));
+        final l10n = AppLocalizations.of(context)!;
+        if (status == MatchRsvpStatus.pending) {
+          expect(find.text(l10n.matchRsvpQuestion), findsOneWidget);
+          expect(find.text(l10n.matchRsvpHint), findsOneWidget);
+        } else {
+          expect(find.text(l10n.matchRsvpQuestion), findsNothing);
+          expect(find.text(l10n.matchRsvpHint), findsNothing);
+          expect(find.text(l10n.matchDetailsRsvpRegistered), findsNothing);
+          expect(find.text(l10n.matchDetailsRsvpDeclined), findsNothing);
+          expect(find.byKey(const ValueKey('match-rsvp-confirmation')),
+              findsNothing);
+          expect(find.byIcon(Icons.keyboard_arrow_down), findsOneWidget);
+          final summary = tester.getRect(
+            find.byKey(const ValueKey('match-rsvp-attendees')),
           );
-          expect(
-            tester
-                .getSize(find.byKey(const ValueKey('match-rsvp-confirmation')))
-                .height,
-            closeTo(94, 1),
+          final dropdown = tester.getRect(
+            find.byKey(const ValueKey('match-details-rsvp-status')),
           );
+          expect(dropdown.right, lessThan(summary.left));
+          expect(dropdown.center.dy, closeTo(summary.center.dy, 0.1));
+          expect(
+              find.text(status == MatchRsvpStatus.awaitingSelection
+                  ? l10n.matchDetailsRsvpPendingSelection
+                  : status == MatchRsvpStatus.attending
+                      ? l10n.homeAttendanceGoing
+                      : l10n.homeAttendanceDeclined),
+              findsOneWidget);
         }
 
         // Optional rendered reference for comparison with the Figma card.
@@ -96,16 +117,26 @@ void main() {
           await tester.tap(find.byKey(const ValueKey('match-rsvp-decline')));
           expect(accepted, 1);
           expect(declined, 1);
-        } else if (status == MatchRsvpStatus.declined) {
-          await tester.tap(
-              find.byKey(const ValueKey('match-details-rsvp-accept-action')));
-          expect(accepted, 1);
-          expect(declined, 0);
         } else {
-          await tester.tap(
-              find.byKey(const ValueKey('match-details-rsvp-decline-action')));
+          final going = status != MatchRsvpStatus.declined;
+          final dropdown =
+              find.byKey(const ValueKey('match-details-rsvp-status'));
+          await tester.tap(dropdown);
+          await tester.pumpAndSettle();
+          expect(find.byType(BottomSheet), findsOneWidget);
+          // Keeping the current response closes the sheet without saving.
+          await tester.tap(find.byKey(ValueKey(
+              going ? 'attendance_response_yes' : 'attendance_response_no')));
+          await tester.pumpAndSettle();
           expect(accepted, 0);
-          expect(declined, 1);
+          expect(declined, 0);
+          await tester.tap(dropdown);
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(ValueKey(
+              going ? 'attendance_response_no' : 'attendance_response_yes')));
+          await tester.pumpAndSettle();
+          expect(accepted, going ? 0 : 1);
+          expect(declined, going ? 1 : 0);
         }
         await tester.tap(find.byKey(const ValueKey('match-rsvp-attendees')));
         expect(attendeesOpened, 1);
@@ -113,25 +144,34 @@ void main() {
     }
   }
 
-  testWidgets('saving disables both initial decisions', (tester) async {
-    var changes = 0;
-    await tester.pumpWidget(MaterialApp(
-      theme: AppTheme.lightTheme,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(
-          body: MatchRsvpCard(
-        status: MatchRsvpStatus.pending,
-        isSaving: true,
-        attendeeNames: const [],
-        attendeeCount: 0,
-        onAccept: () => changes++,
-        onDecline: () => changes++,
-        onShowAttendees: () {},
-      )),
-    ));
-    await tester.tap(find.byKey(const ValueKey('match-rsvp-accept')));
-    await tester.tap(find.byKey(const ValueKey('match-rsvp-decline')));
-    expect(changes, 0);
-  });
+  for (final status in MatchRsvpStatus.values) {
+    testWidgets('saving disables response changes for $status', (tester) async {
+      var changes = 0;
+      await tester.pumpWidget(MaterialApp(
+        theme: AppTheme.lightTheme,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+            body: MatchRsvpCard(
+          status: status,
+          isSaving: true,
+          attendeeNames: const [],
+          attendeeCount: 0,
+          onAccept: () => changes++,
+          onDecline: () => changes++,
+          onShowAttendees: () {},
+        )),
+      ));
+      if (status == MatchRsvpStatus.pending) {
+        await tester.tap(find.byKey(const ValueKey('match-rsvp-accept')));
+        await tester.tap(find.byKey(const ValueKey('match-rsvp-decline')));
+      } else {
+        await tester
+            .tap(find.byKey(const ValueKey('match-details-rsvp-status')));
+        await tester.pump();
+        expect(find.byType(BottomSheet), findsNothing);
+      }
+      expect(changes, 0);
+    });
+  }
 }

@@ -15,6 +15,7 @@ import 'package:kopa/component/home/home_fine_box_card.dart';
 import 'package:kopa/component/home/home_statistics_strip.dart';
 import 'package:kopa/component/home/latest_result_card.dart';
 import 'package:kopa/component/match/match_result_reminder.dart';
+import 'package:kopa/component/match/attendance_response_dropdown.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/component/standings/standings_preview_card.dart';
 import 'package:kopa/config/app_feature_flags.dart';
@@ -1128,29 +1129,6 @@ class HomeMatchResponseCard extends StatelessWidget {
 
     final l10n = AppLocalizations.of(context)!;
     final answered = isRegistered || isUnavailable;
-    final statusColor = isUnavailable ? appColors.error : appColors.grass;
-
-    Future<void> changeResponse() async {
-      if (isRegistering) return;
-      final response = await showModalBottomSheet<bool>(
-        context: context,
-        backgroundColor: AppColors.transparent,
-        isScrollControlled: true,
-        useSafeArea: true,
-        builder: (_) => _AttendanceResponseSheet(
-          currentResponse: isRegistered,
-          colors: appColors,
-          styles: appTextStyles,
-          l10n: l10n,
-        ),
-      );
-
-      if (!context.mounted || response == null || response == isRegistered) {
-        return;
-      }
-      response ? register() : decline();
-    }
-
     return Padding(
       padding: const EdgeInsets.symmetric(
           horizontal: Spacing.md, vertical: Spacing.sm),
@@ -1162,63 +1140,12 @@ class HomeMatchResponseCard extends StatelessWidget {
             children: [
               Expanded(
                 child: answered
-                    ? Align(
-                        alignment: Alignment.centerLeft,
-                        child: Semantics(
-                          button: true,
-                          label: l10n.homeAttendanceChange,
-                          child: Material(
-                            color: statusColor.withValues(alpha: 0.10),
-                            borderRadius: BorderRadius.circular(
-                              Spacing.borderRadiusFull,
-                            ),
-                            child: InkWell(
-                              key: const ValueKey('match_response_status'),
-                              onTap: isRegistering ? null : changeResponse,
-                              borderRadius: BorderRadius.circular(
-                                Spacing.borderRadiusFull,
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 10,
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      isRegistered ? Icons.check : Icons.close,
-                                      size: 18,
-                                      color: statusColor,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Flexible(
-                                      child: Text(
-                                        isRegistering
-                                            ? l10n.homeAttendanceSaving
-                                            : isRegistered
-                                                ? l10n.homeAttendanceGoing
-                                                : l10n.homeAttendanceDeclined,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: appTextStyles.body3.copyWith(
-                                          color: statusColor,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Icon(
-                                      Icons.keyboard_arrow_down,
-                                      size: 20,
-                                      color: statusColor,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
+                    ? AttendanceResponseDropdown(
+                        currentResponse: isRegistered,
+                        isSaving: isRegistering,
+                        onAccept: register,
+                        onDecline: decline,
+                        statusKey: const ValueKey('match_response_status'),
                       )
                     : Text(l10n.homeAttendanceQuestion,
                         style: appTextStyles.body3.copyWith(
@@ -1257,135 +1184,6 @@ class HomeMatchResponseCard extends StatelessWidget {
             ),
           ],
         ],
-      ),
-    );
-  }
-}
-
-class _AttendanceResponseSheet extends StatelessWidget {
-  final bool currentResponse;
-  final AppColors colors;
-  final AppTextStyles styles;
-  final AppLocalizations l10n;
-
-  const _AttendanceResponseSheet({
-    required this.currentResponse,
-    required this.colors,
-    required this.styles,
-    required this.l10n,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: colors.surface,
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-      clipBehavior: Clip.antiAlias,
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            Spacing.md,
-            12,
-            Spacing.md,
-            Spacing.md,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: colors.grey4,
-                    borderRadius: BorderRadius.circular(
-                      Spacing.borderRadiusFull,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: Spacing.md),
-              Text(l10n.homeAttendanceChange, style: styles.sectionHeader),
-              const SizedBox(height: Spacing.sm),
-              _AttendanceResponseOption(
-                key: const ValueKey('attendance_response_yes'),
-                label: l10n.homeAttendanceYes,
-                icon: Icons.how_to_reg,
-                color: colors.grass,
-                selected: currentResponse,
-                onTap: () => Navigator.of(context).pop(true),
-              ),
-              const SizedBox(height: Spacing.sm),
-              _AttendanceResponseOption(
-                key: const ValueKey('attendance_response_no'),
-                label: l10n.homeAttendanceNo,
-                icon: Icons.close,
-                color: colors.error,
-                selected: !currentResponse,
-                onTap: () => Navigator.of(context).pop(false),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _AttendanceResponseOption extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final Color color;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _AttendanceResponseOption({
-    super.key,
-    required this.label,
-    required this.icon,
-    required this.color,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final styles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    return Semantics(
-      button: true,
-      selected: selected,
-      label: label,
-      child: Material(
-        color: selected ? color.withValues(alpha: 0.10) : colors.offWhite,
-        borderRadius: BorderRadius.circular(Spacing.borderRadiusMedium),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(Spacing.borderRadiusMedium),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: Spacing.md,
-              vertical: 14,
-            ),
-            child: Row(
-              children: [
-                Icon(icon, color: color, size: 22),
-                const SizedBox(width: Spacing.sm),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: styles.bodyBold.copyWith(color: colors.dirt),
-                  ),
-                ),
-                if (selected) Icon(Icons.check, color: color, size: 22),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

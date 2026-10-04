@@ -119,7 +119,9 @@ void main() {
         final rsvpCard = tester.getRect(
           find.byKey(const ValueKey('match-rsvp-card')),
         );
-        final status = tester.getRect(find.text('Tilmeldt'));
+        final status = tester.getRect(
+          find.byKey(const ValueKey('match-details-rsvp-status')),
+        );
         expect(rsvpCard.top, greaterThan(darkHeader.bottom));
         expect(status.top, greaterThan(rsvpCard.top));
         expect(initialPracticalRect!.top, greaterThan(status.bottom));
