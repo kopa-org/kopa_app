@@ -95,7 +95,7 @@ void main() {
     expect(training.category, 'Pasninger');
   });
 
-  test('score entry is available to owners at any time', () {
+  test('score entry is available to owners and players at any time', () {
     final kickoff = DateTime(2026, 7, 28, 19);
     final owner = _user(isTeamOwner: true);
     final player = _user(isTeamOwner: false);
@@ -118,7 +118,7 @@ void main() {
     );
     expect(
       match.canSetFinalScore(player),
-      isFalse,
+      isTrue,
     );
   });
 

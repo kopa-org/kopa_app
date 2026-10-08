@@ -73,13 +73,12 @@ class AppTheme {
       unselectedWidgetColor: colors.textSecondary,
       iconTheme: IconThemeData(color: colors.dirt, size: 22),
       cupertinoOverrideTheme: CupertinoThemeData(
-        primaryColor: colors.successForeground,
+        primaryColor: colors.grass,
         scaffoldBackgroundColor: colors.background,
         barBackgroundColor: colors.background,
         textTheme: CupertinoTextThemeData(
           textStyle: styles.body,
-          actionTextStyle:
-              styles.button.copyWith(color: colors.successForeground),
+          actionTextStyle: styles.button.copyWith(color: colors.grass),
           navTitleTextStyle: styles.subtitle2,
           navLargeTitleTextStyle: styles.pageTitle,
           tabLabelTextStyle: styles.caption2,

@@ -8,6 +8,7 @@ import 'package:kopa/component/timeline/timeline_item.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/match_event_details.dart';
 import 'package:kopa/model/match_event_type.dart';
+import 'package:kopa/model/match_poll_details.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/page/match/post_match_details_page.dart';
 import 'package:kopa/template/match_detail_template.dart';
@@ -81,7 +82,7 @@ void main() {
     );
 
     expect(find.text('Registrer kampens resultat'), findsNothing);
-    expect(find.byType(PlayerOfMatchSummaryCard), findsNothing);
+    expect(find.byType(PlayerOfMatchSummaryCard), findsOneWidget);
     expect(find.byType(MatchPollDetailsCard), findsNothing);
 
     final labels = [
@@ -102,6 +103,73 @@ void main() {
       orderedEquals(verticalPositions.toList()..sort()),
     );
   });
+
+  for (final isManager in [true, false]) {
+    for (final hasPoll in [true, false]) {
+      testWidgets('post-match MOTM: manager=$isManager, poll=$hasPoll',
+          (tester) async {
+        final now = DateTime(2026, 1, 1);
+        var creates = 0;
+        var edits = 0;
+        final winner = _owner(now);
+        await tester.pumpWidget(MaterialApp(
+          locale: const Locale('da'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: PostMatchDetailsPage(
+            match: MatchDetails(
+              id: 1,
+              homeTeam: 'Kopa IF',
+              awayTeam: 'Fremad',
+              date: now,
+              location: 'Kopa Stadion',
+              createdAt: now,
+              updatedAt: now,
+              matchPollDetails: hasPoll
+                  ? MatchPollDetails(
+                      id: 1,
+                      eventId: 1,
+                      playerOfTheMatchDetails: winner,
+                      playerOfTheMatchVotes: 3,
+                      matchPollUserVotesDetails: const [],
+                      createdAt: now,
+                      updatedAt: now,
+                    )
+                  : null,
+            ),
+            user: _owner(now, isTeamOwner: isManager),
+            heroCard: const SizedBox(height: 1),
+            attendanceList: const [],
+            onAddEvent: _noop,
+            onCreateMatchPoll: () => creates++,
+            onEditMatchPoll: () => edits++,
+            selectedSegment: MatchDetailSegment.overview,
+            onSegmentChanged: (_) {},
+          ),
+        ));
+
+        expect(find.text('Kampens spiller'), findsOneWidget);
+        if (hasPoll) {
+          expect(find.byType(MatchPollDetailsCard), findsOneWidget);
+          expect(find.text('Owner'), findsOneWidget);
+          expect(find.text('3 stemmer'), findsOneWidget);
+          expect(find.byTooltip('Rediger afstemning'), findsOneWidget);
+          {
+            await tester.tap(find.byTooltip('Rediger afstemning'));
+            expect(edits, 1);
+          }
+        } else {
+          expect(find.byType(PlayerOfMatchSummaryCard), findsOneWidget);
+          expect(find.text('Opret afstemning'), findsOneWidget);
+          {
+            await tester.tap(find.text('Opret afstemning'));
+            expect(creates, 1);
+          }
+        }
+        expect(tester.takeException(), isNull);
+      });
+    }
+  }
 }
 
 MatchEventDetails _event({
@@ -120,13 +188,13 @@ MatchEventDetails _event({
   );
 }
 
-UserDetails _owner(DateTime now) {
+UserDetails _owner(DateTime now, {bool isTeamOwner = true}) {
   return UserDetails(
     id: 1,
     name: 'Owner',
     email: 'owner@example.com',
-    isTeamOwner: true,
-    roleId: 1,
+    isTeamOwner: isTeamOwner,
+    roleId: isTeamOwner ? 1 : 2,
     createdAt: now,
     updatedAt: now,
     teamDetails: null,

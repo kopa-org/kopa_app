@@ -9,6 +9,9 @@ class AppLocalizationsDa extends AppLocalizations {
   AppLocalizationsDa([String locale = 'da']) : super(locale);
 
   @override
+  String get matchDetailsLineupTab => 'Opstilling';
+
+  @override
   String get matchFabMotmLabel => 'MOTM';
 
   @override

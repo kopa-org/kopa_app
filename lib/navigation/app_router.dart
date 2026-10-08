@@ -425,7 +425,7 @@ class _TransparentAndroidNavigationBar extends StatelessWidget {
             iconSize: 24,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             duration: const Duration(milliseconds: 400),
-            tabBackgroundColor: AppColors.matchDetailsHeader,
+            tabBackgroundColor: AppColors.of(context).lightGrass,
             color: unselectedColor,
             selectedIndex: selectedIndex,
             onTabChange: onTabSelected,
@@ -433,13 +433,13 @@ class _TransparentAndroidNavigationBar extends StatelessWidget {
               for (var i = 0; i < tabs.length; i++)
                 GButton(
                   icon: tabs[i].materialIcon,
-                  textColor: Colors.white,
+                  textColor: selectedColor,
                   leading: tabs[i].assetPath == null
                       ? Icon(
                           tabs[i].materialIcon,
                           size: 24,
                           color: selectedIndex == i
-                              ? Colors.white
+                              ? selectedColor
                               : unselectedColor,
                         )
                       : SvgPicture.asset(
@@ -448,7 +448,7 @@ class _TransparentAndroidNavigationBar extends StatelessWidget {
                           height: 24,
                           colorFilter: ColorFilter.mode(
                             selectedIndex == i
-                                ? Colors.white
+                                ? selectedColor
                                 : unselectedColor,
                             BlendMode.srcIn,
                           ),

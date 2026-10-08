@@ -5,6 +5,7 @@ import 'package:kopa/component/card/kopa_card.dart';
 import 'package:kopa/component/match/match_details_sheet_scroll_view.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/component/section_header/section_header.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 import 'package:kopa/theme/spacing.dart';
@@ -12,6 +13,7 @@ import 'package:kopa/theme/spacing.dart';
 enum MatchDetailSegment {
   overview,
   attendance,
+  lineup,
   timeline,
 }
 
@@ -285,6 +287,11 @@ class MatchDetailTemplate extends StatelessWidget {
     final segments = <({MatchDetailSegment segment, String label})>[
       (segment: MatchDetailSegment.overview, label: overviewSegmentLabel),
       (segment: MatchDetailSegment.attendance, label: attendanceSegmentLabel),
+      if (playerPositions != null)
+        (
+          segment: MatchDetailSegment.lineup,
+          label: AppLocalizations.of(context)!.matchDetailsLineupTab
+        ),
       if (showTimelineSegment)
         (segment: MatchDetailSegment.timeline, label: timelineSegmentLabel),
     ];
@@ -342,15 +349,16 @@ class MatchDetailTemplate extends StatelessWidget {
         selectedSegment == MatchDetailSegment.timeline) {
       return MatchDetailSegment.overview;
     }
+    if (playerPositions == null &&
+        selectedSegment == MatchDetailSegment.lineup) {
+      return MatchDetailSegment.overview;
+    }
 
     return selectedSegment;
   }
 
   List<Widget> _buildSelectedSegment(BuildContext context) {
-    final effectiveSegment =
-        !showTimelineSegment && selectedSegment == MatchDetailSegment.timeline
-            ? MatchDetailSegment.overview
-            : selectedSegment;
+    final effectiveSegment = _effectiveSelectedSegment;
 
     switch (effectiveSegment) {
       case MatchDetailSegment.overview:
@@ -361,12 +369,6 @@ class MatchDetailTemplate extends StatelessWidget {
               _PrematchInfoCard(children: infoRows),
             ],
             ...overviewWidgets,
-            if (playerPositions != null) ...[
-              const SizedBox(height: 26),
-              _PrematchSectionTitle(title: 'Holdopstilling'),
-              playerPositions!,
-              const SizedBox(height: 18),
-            ],
           ];
         }
 
@@ -381,10 +383,6 @@ class MatchDetailTemplate extends StatelessWidget {
             const SectionHeader(title: 'Afstemning'),
             votingModule!,
           ],
-          if (playerPositions != null) ...[
-            const SizedBox(height: Spacing.lg),
-            playerPositions!,
-          ],
           if (ratingsSection != null) ...[
             const SizedBox(height: Spacing.lg),
             const SectionHeader(title: 'Kamprating'),
@@ -392,6 +390,8 @@ class MatchDetailTemplate extends StatelessWidget {
             ratingsSection!,
           ],
         ];
+      case MatchDetailSegment.lineup:
+        return [playerPositions!];
       case MatchDetailSegment.attendance:
         return [
           if (attendanceList.isEmpty)

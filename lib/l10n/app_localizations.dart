@@ -98,6 +98,12 @@ abstract class AppLocalizations {
     Locale('en')
   ];
 
+  /// No description provided for @matchDetailsLineupTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Lineup'**
+  String get matchDetailsLineupTab;
+
   /// No description provided for @matchFabMotmLabel.
   ///
   /// In en, this message translates to:

@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kopa/component/avatar/team_badge_label.dart';
 import 'package:kopa/component/card/match_hero_card.dart';
+import 'package:kopa/component/card/player_positions_card.dart';
 import 'package:kopa/component/match/match_poll_details_card.dart';
 import 'package:kopa/component/match/player_of_match_summary_card.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
@@ -142,7 +143,8 @@ void main() {
         expect(tester.getRect(practicalTitle), initialPracticalRect);
       }
       expect(tester.takeException(), isNull);
-      expect(find.byType(PlayerOfMatchSummaryCard), findsNothing);
+      expect(find.byType(PlayerOfMatchSummaryCard),
+          variant == 'scored' ? findsOneWidget : findsNothing);
       expect(find.byType(MatchPollDetailsCard), findsNothing);
       expect(find.byKey(const ValueKey('match-quick-actions-fab')),
           variant == 'training' ? findsNothing : findsOneWidget);
@@ -207,6 +209,52 @@ void main() {
     expect(find.text('Praktisk information'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+  for (final variant in ['pending', 'scored']) {
+    testWidgets(
+        'regular player has match actions and a separate lineup tab: $variant',
+        (tester) async {
+      final user = _user(isTeamOwner: false);
+      final auth = _AuthenticatedCubit(user);
+      addTearDown(auth.close);
+      await tester.pumpWidget(_app(
+        auth: auth,
+        home: MatchDetailsPage(
+          matchId: 42,
+          initialMatch: _match(variant, location: 'Stadium'),
+          showBottomNavigationBar: false,
+          loadMatch: (_) async => _match(variant, location: 'Stadium'),
+          loadSquad: () async => [user],
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(PlayerPositionsCard), findsNothing);
+      await tester.tap(find.byKey(const ValueKey('match-quick-actions-fab')));
+      await tester.pumpAndSettle();
+      for (final action in ['motm', 'result', 'external-players']) {
+        expect(
+            tester
+                .widget<FloatingActionButton>(
+                    find.byKey(ValueKey('match-fab-$action')))
+                .onPressed,
+            isNotNull);
+      }
+      await tester.tap(find.byIcon(Icons.close));
+      await tester.pumpAndSettle();
+      await tester
+          .tap(find.byKey(const ValueKey('match-details-segment-lineup')));
+      await tester.pumpAndSettle();
+
+      final lineup =
+          tester.widget<PlayerPositionsCard>(find.byType(PlayerPositionsCard));
+      expect(lineup.onEditFormation, isNotNull);
+      expect(lineup.onToggleVisibility, isNotNull);
+      expect(lineup.isWaitingForLineup, isFalse);
+      expect(find.text('Praktisk information'), findsNothing);
+      expect(find.byKey(const ValueKey('match-rsvp-card')), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+  }
 }
 
 Widget _app({
@@ -248,14 +296,14 @@ MatchDetails _match(String variant, {required String location}) {
   );
 }
 
-UserDetails _user() {
+UserDetails _user({bool isTeamOwner = true}) {
   final date = DateTime.now();
   return UserDetails(
     id: 1,
     name: 'Test owner',
     email: 'test@example.com',
-    isTeamOwner: true,
-    roleId: 1,
+    isTeamOwner: isTeamOwner,
+    roleId: isTeamOwner ? 1 : 2,
     createdAt: date,
     updatedAt: date,
     teamDetails: null,

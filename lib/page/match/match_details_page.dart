@@ -190,7 +190,6 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         : _buildAttendanceList(matchDetails, squad, user);
     final hasBeenPlayed = matchDetails.hasMatchBeenPlayed;
     final isTraining = matchDetails.isTraining;
-    final canManageTeam = user.canManageTeam;
     final rsvpState = _matchRsvpStateFor(matchDetails, user.id);
     final attendeeCount = data == null
         ? matchDetails.registeredCount
@@ -199,7 +198,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     final bottomNavigationBar = widget.showBottomNavigationBar
         ? _buildMatchDetailsBottomNavigationBar(context)
         : null;
-    final quickActions = canManageTeam && !isTraining
+    final quickActions = !isTraining
         ? MatchQuickActionsFab(
             matchId: matchDetails.id,
             hasPoll: matchDetails.matchPollDetails != null,
@@ -227,10 +226,31 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
           ? () => setMatchScore(matchDetails)
           : null,
     );
-    final headerAction = canManageTeam
-        ? MatchActionsMenu(
-            isTraining: isTraining,
-            onDelete: () => _deleteMatch(matchDetails),
+    final headerAction = MatchActionsMenu(
+      isTraining: isTraining,
+      onDelete: () => _deleteMatch(matchDetails),
+    );
+
+    final lineupCard = !isTraining
+        ? PlayerPositionsCard(
+            playerCount: _teamPlayerCount(matchDetails, user),
+            formation: matchDetails.formation,
+            players: _lineupPlayers(matchDetails),
+            // An attendee without a saved slot starts on the bench. Passing
+            // the empty slot list also prevents the card's formation-based
+            // fallback from turning new registrations into starters.
+            positionedPlayers: _lineupPositionedPlayers(matchDetails, user),
+            preservePlayerOrder: true,
+            onEditFormation: data != null
+                ? () => _openLineupEditor(matchDetails, user)
+                : null,
+            onToggleVisibility: data != null
+                ? () => _toggleLineupVisibility(matchDetails)
+                : null,
+            isVisibleToPlayers: matchDetails.lineupVisible,
+            isWaitingForLineup: false,
+            isUpdatingVisibility: _isUpdatingLineupVisibility,
+            showTitle: false,
           )
         : null;
 
@@ -243,6 +263,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         attendanceList: attendanceList,
         onRefresh: _refreshMatchAndSquad,
         onAddEvent: () => addMatchEvent(user),
+        onCreateMatchPoll: () => _openCreateMatchPoll(matchDetails, squad),
+        onEditMatchPoll: () => _openEditMatchPoll(matchDetails, squad),
         onDeleteEvent: _deleteMatchEvent,
         onReorderEvents: _reorderMatchEvents,
         selectedSegment: _selectedSegment,
@@ -250,6 +272,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         bottomNavigationBar: bottomNavigationBar,
         useParentBottomNavigationBar: !widget.showBottomNavigationBar,
         floatingActionButton: quickActions,
+        playerPositions: lineupCard,
       );
     }
 
@@ -297,38 +320,17 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
               : [
                   MatchEventsTimeline(
                     events: matchDetails.matchEventDetailsList ?? const [],
-                    canAddEvent: canManageTeam,
-                    canReorderEvents: canManageTeam,
+                    canAddEvent: true,
+                    canReorderEvents: true,
                     onAddEvent: () => addMatchEvent(user),
-                    onDeleteEvent: canManageTeam ? _deleteMatchEvent : null,
-                    onReorderEvents: canManageTeam ? _reorderMatchEvents : null,
+                    onDeleteEvent: _deleteMatchEvent,
+                    onReorderEvents: _reorderMatchEvents,
                     showFullTime: false,
                   )
                 ],
       infoRows: _buildPracticalInfoRows(matchDetails),
       votingModule: null,
-      playerPositions: !isTraining
-          ? PlayerPositionsCard(
-              playerCount: _teamPlayerCount(matchDetails, user),
-              formation: matchDetails.formation,
-              players: _lineupPlayers(matchDetails),
-              // An attendee without a saved slot starts on the bench. Passing
-              // the empty slot list also prevents the card's formation-based
-              // fallback from turning new registrations into starters.
-              positionedPlayers: _lineupPositionedPlayers(matchDetails, user),
-              preservePlayerOrder: true,
-              onEditFormation: canManageTeam && data != null
-                  ? () => _openLineupEditor(matchDetails, user)
-                  : null,
-              onToggleVisibility: canManageTeam && data != null
-                  ? () => _toggleLineupVisibility(matchDetails)
-                  : null,
-              isVisibleToPlayers: matchDetails.lineupVisible,
-              isWaitingForLineup: !canManageTeam && !matchDetails.lineupVisible,
-              isUpdatingVisibility: _isUpdatingLineupVisibility,
-              showTitle: false,
-            )
-          : null,
+      playerPositions: lineupCard,
       attendanceList: attendanceList,
       ratingsSection: isTraining ? null : _buildRatingsSection(matchDetails),
     );
@@ -554,9 +556,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     final declined = match.declinedAttendanceDetails;
     final noRsvp = _membersWithoutRsvp(match, squad);
 
-    if (user.canManageTeam &&
-        match.usesTeamLeaderSelection &&
-        !match.hasMatchBeenPlayed) {
+    if (match.usesTeamLeaderSelection && !match.hasMatchBeenPlayed) {
       return _buildLeaderAttendanceApprovalList(
         match,
         attending,
@@ -743,14 +743,12 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
               (player) => PlayerListItem(
                 name: player.name,
                 subtitle: l10n.externalPlayerSubstitute,
-                trailing: _currentUser?.canManageTeam == true
-                    ? IconButton(
-                        key: ValueKey('delete-external-player-${player.id}'),
-                        tooltip: l10n.externalPlayerDelete,
-                        icon: const Icon(CupertinoIcons.delete),
-                        onPressed: () => _deleteExternalPlayer(player.id),
-                      )
-                    : const Icon(CupertinoIcons.person_add),
+                trailing: IconButton(
+                  key: ValueKey('delete-external-player-${player.id}'),
+                  tooltip: l10n.externalPlayerDelete,
+                  icon: const Icon(CupertinoIcons.delete),
+                  onPressed: () => _deleteExternalPlayer(player.id),
+                ),
               ),
             )
             .toList(),

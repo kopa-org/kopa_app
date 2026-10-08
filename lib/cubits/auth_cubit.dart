@@ -10,6 +10,7 @@ import 'auth_state.dart';
 
 class AuthCubit extends Cubit<AuthState> {
   final AuthRepository _authRepository;
+  final Future<void> Function() _unregisterPushToken;
 
   PasswordResetRepository get _passwordResetRepository {
     final repository = _authRepository;
@@ -20,8 +21,12 @@ class AuthCubit extends Cubit<AuthState> {
         'Password reset is not supported by this repository');
   }
 
-  AuthCubit({required AuthRepository authRepository})
-      : _authRepository = authRepository,
+  AuthCubit({
+    required AuthRepository authRepository,
+    Future<void> Function()? unregisterPushToken,
+  })  : _authRepository = authRepository,
+        _unregisterPushToken = unregisterPushToken ??
+            PushNotificationsService.instance.unregisterCurrentToken,
         super(const AuthState());
 
   Future<void> init() async {
@@ -86,7 +91,13 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   Future<void> logout() async {
-    await PushNotificationsService.instance.unregisterCurrentToken();
+    // Try while credentials are still available, but a failed remote cleanup
+    // must not prevent the user from ending their local session.
+    try {
+      await _unregisterPushToken();
+    } catch (error) {
+      debugPrint('Push token cleanup during logout failed: $error');
+    }
     await _authRepository.logout();
     MatchRepository.invalidateMatchSummaries();
     await AppAnalytics.setCurrentUser(null);

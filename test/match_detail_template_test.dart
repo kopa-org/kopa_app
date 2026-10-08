@@ -15,7 +15,10 @@ void main() {
       testWidgets('RSVP only on overview: dark=$darkHeader segment=$segment',
           (tester) async {
         await tester.pumpWidget(MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: MatchDetailTemplate(
+            playerPositions: const Text('Lineup content'),
             heroCard: const SizedBox(height: 1),
             useDarkMatchHeader: darkHeader,
             attendanceHeaderInBody: true,
