@@ -51,6 +51,21 @@ class UserDetails {
     );
   }
 
+  UserDetails withTeamRole(bool isTeamLeader) => UserDetails(
+        id: id,
+        name: name,
+        email: email,
+        isTeamOwner: isTeamLeader,
+        isAdmin: isAdmin,
+        roleId: roleId,
+        dateOfBirth: dateOfBirth,
+        position: position,
+        createdAt: createdAt,
+        updatedAt: updatedAt,
+        teamDetails: teamDetails,
+        onboardingState: onboardingState,
+      );
+
   bool get canManageTeam => isTeamOwner || isAdmin;
 }
 

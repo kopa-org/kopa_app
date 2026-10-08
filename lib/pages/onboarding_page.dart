@@ -33,6 +33,7 @@ class OnboardingPage extends StatefulWidget {
 class _OnboardingPageState extends State<OnboardingPage> {
   final _teamNameController = TextEditingController();
   final _searchController = TextEditingController();
+  bool _hasSelectedMode = false;
   bool _hasSelectedRole = false;
   _OnboardingMode _mode = _OnboardingMode.create;
   int _createStep = 0;
@@ -85,7 +86,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
   void _applyInviteContext(OnboardingState state) {
     if (state.inviteToken == null || state.teamId == null) return;
 
-    _hasSelectedRole = true;
+    _hasSelectedMode = true;
+    _hasSelectedRole = state.isTeamLeader != null;
     _mode = _OnboardingMode.join;
     _joinStep = 0;
     _usesElevenAside = state.teamPlayerCount != 7;
@@ -98,6 +100,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     _pendingJoinTeam = {
       'id': state.teamId,
       'title': state.teamTitle ?? '',
+      'player_count': state.teamPlayerCount ?? 7,
       if (state.teamLeaderName?.trim().isNotEmpty == true)
         'leader_name': state.teamLeaderName,
     };
@@ -386,13 +389,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   Future<void> _requestJoin(Map<String, dynamic> team) async {
     setState(() => _pendingJoinTeam = team);
-    final success = await context.read<OnboardingCubit>().requestToJoinTeam(
+    await context.read<OnboardingCubit>().requestToJoinTeam(
           team['id'] as int,
           teamName: team['title']?.toString(),
         );
-    if (!success && mounted) {
-      setState(() => _pendingJoinTeam = null);
-    }
   }
 
   Future<void> _saveSelectedPosition() async {
@@ -437,7 +437,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   Future<void> _handlePrimaryAction() async {
     if (_mode == _OnboardingMode.join) {
-      if (_joinStep == 0) {
+      if (_isInviteJoinFlow || _joinStep == 1) {
         final onboardingState = context.read<OnboardingCubit>().state;
         final isInviteFlow = onboardingState.inviteToken != null;
         if (isInviteFlow) {
@@ -462,7 +462,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
           return;
         }
 
-        if (mounted) setState(() => _joinStep = 1);
+        if (mounted && _pendingJoinTeam != null) {
+          await _requestJoin(_pendingJoinTeam!);
+        }
       }
       return;
     }
@@ -505,8 +507,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
     if (_mode == _OnboardingMode.join) {
       if (_joinStep > 0) {
         setState(() => _joinStep -= 1);
-      } else {
+      } else if (_isInviteJoinFlow) {
         _leaveOnboarding();
+      } else {
+        setState(() => _hasSelectedRole = false);
       }
       return;
     }
@@ -519,17 +523,21 @@ class _OnboardingPageState extends State<OnboardingPage> {
     if (_createStep > 0) {
       setState(() => _createStep -= 1);
     } else {
-      _leaveOnboarding();
+      setState(() => _hasSelectedRole = false);
     }
   }
 
-  void _leaveOnboarding() {
-    if (context.canPop()) {
-      context.pop();
+  Future<void> _leaveOnboarding() async {
+    if (_savingPosition ||
+        _creatingTeam ||
+        context.read<OnboardingCubit>().state.status ==
+            OnboardingStatus.loading) {
       return;
     }
-
-    context.go(AppRouter.register);
+    final onboarding = context.read<OnboardingCubit>();
+    await context.read<AuthCubit>().logout();
+    onboarding.clearOnboarding();
+    if (mounted) context.go(AppRouter.login);
   }
 
   String _suggestedTeamName(Map<String, dynamic> dbuData) {
@@ -558,216 +566,290 @@ class _OnboardingPageState extends State<OnboardingPage> {
     final textStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
 
-    return BlocConsumer<OnboardingCubit, OnboardingState>(
-      listener: (context, state) {
-        if (state.inviteToken != null && state.teamId != null) {
-          setState(() => _applyInviteContext(state));
-        }
-        if (state.status == OnboardingStatus.waitingApproval &&
-            state.teamId != null) {
-          setState(() => _applyPendingJoinContext(state));
-        }
-        if (state.status == OnboardingStatus.failure &&
-            state.errorMessage != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.errorMessage ?? l10n.onboardingFailure),
-              backgroundColor: colors.error,
-            ),
-          );
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (!_hasSelectedMode ||
+            context.read<OnboardingCubit>().state.status ==
+                OnboardingStatus.waitingApproval) {
+          _leaveOnboarding();
+        } else if (!_hasSelectedRole) {
+          if (_isInviteJoinFlow) {
+            _leaveOnboarding();
+          } else {
+            setState(() => _hasSelectedMode = false);
+          }
+        } else {
+          _handleBack();
         }
       },
-      builder: (context, state) {
-        if (state.status == OnboardingStatus.waitingApproval ||
-            (state.status == OnboardingStatus.loading &&
-                state.pendingJoinRequestId != null)) {
-          return _WaitingView(
-            team: _pendingJoinTeam,
-            cancelLabel: l10n.onboardingCancel,
-            loading: state.status == OnboardingStatus.loading,
-            onCancel: () async {
-              await context.read<OnboardingCubit>().cancelPendingJoinRequest();
-              if (mounted) setState(() => _pendingJoinTeam = null);
-            },
-          );
-        }
+      child: BlocConsumer<OnboardingCubit, OnboardingState>(
+        listener: (context, state) {
+          if (state.inviteToken != null && state.teamId != null) {
+            setState(() => _applyInviteContext(state));
+          }
+          if (state.status == OnboardingStatus.waitingApproval &&
+              state.teamId != null) {
+            setState(() => _applyPendingJoinContext(state));
+          }
+          if (state.status == OnboardingStatus.failure &&
+              state.errorMessage != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.errorMessage ?? l10n.onboardingFailure),
+                backgroundColor: colors.error,
+              ),
+            );
+          }
+        },
+        builder: (context, state) {
+          if (state.status == OnboardingStatus.waitingApproval ||
+              state.pendingJoinRequestId != null) {
+            return _WaitingView(
+              team: _pendingJoinTeam,
+              cancelLabel: l10n.onboardingCancel,
+              loading: state.status == OnboardingStatus.loading,
+              onExit: _leaveOnboarding,
+              onCancel: () async {
+                final cubit = context.read<OnboardingCubit>();
+                await cubit.cancelPendingJoinRequest();
+                if (mounted && cubit.state.pendingJoinRequestId == null) {
+                  setState(() {
+                    _pendingJoinTeam = null;
+                    _joinStep = 0;
+                  });
+                }
+              },
+            );
+          }
 
-        if (!_hasSelectedRole) {
-          return _RoleQuestionView(
-            colors: colors,
-            textStyles: textStyles,
-            onLeaderSelected: () {
-              setState(() {
-                _hasSelectedRole = true;
+          if (!_hasSelectedMode) {
+            return _OnboardingChoiceView(
+              colors: colors,
+              textStyles: textStyles,
+              title: l10n.onboardingTeamChoiceTitle,
+              description: l10n.onboardingTeamChoiceDescription,
+              firstLabel: l10n.onboardingCreateTeam,
+              secondLabel: l10n.onboardingJoinTeam,
+              onExit: _leaveOnboarding,
+              onBack: _leaveOnboarding,
+              onFirstSelected: () => setState(() {
                 _mode = _OnboardingMode.create;
-              });
-            },
-            onPlayerSelected: () {
-              setState(() {
-                _hasSelectedRole = true;
+                _hasSelectedMode = true;
+              }),
+              onSecondSelected: () => setState(() {
                 _mode = _OnboardingMode.join;
-              });
-            },
-          );
-        }
+                _hasSelectedMode = true;
+              }),
+            );
+          }
 
-        final loading = state.status == OnboardingStatus.loading;
-        final actionLoading = loading || _savingPosition || _creatingTeam;
-        final fixedJoinPlayerCount =
-            _isInviteJoinFlow ? (state.teamPlayerCount == 7 ? 7 : 11) : null;
-        final step =
-            _mode == _OnboardingMode.create ? _createStep : _joinStep + 1;
-        final title = _mode == _OnboardingMode.join
-            ? switch (_joinStep) {
-                0 => 'Vælg din position',
-                _ => l10n.onboardingJoinTeam,
-              }
-            : switch (_createStep) {
-                0 => l10n.onboardingTitle,
-                1 => 'Vælg din position',
-                2 => l10n.teamLogoDesignTitle,
-                3 => 'Inviter dit hold',
-                _ => 'Inviter dit hold',
-              };
-        final subtitle = _mode == _OnboardingMode.join
-            ? switch (_joinStep) {
-                0 => 'Tryk på din position på banen',
-                _ =>
-                  'Søg efter dit hold og send en anmodning om at blive tilføjet',
-              }
-            : switch (_createStep) {
-                0 =>
-                  'Opret dit fodboldhold og saml spillere, kampe og statistikker ét sted.',
-                1 => 'Tryk på din position på banen',
-                2 => l10n.teamLogoDesignSubtitle,
-                3 => 'Del linket med spillerne, så de kan finde holdet.',
-                _ => 'Del linket med spillerne, så de kan finde holdet.',
-              };
-        final canAdvance = _mode == _OnboardingMode.create &&
-            (_createStep == 3 || _teamNameController.text.trim().isNotEmpty) &&
-            !actionLoading;
-        final primaryLabel = _mode == _OnboardingMode.create
-            ? switch (_createStep) {
-                3 => 'Fortsæt til Kopa',
-                _ => l10n.onboardingContinue,
-              }
-            : l10n.onboardingContinue;
-        final showBottomAction =
-            _mode == _OnboardingMode.create || _joinStep == 0;
+          if (!_hasSelectedRole) {
+            return _OnboardingChoiceView(
+              colors: colors,
+              textStyles: textStyles,
+              title: l10n.onboardingRoleChoiceTitle,
+              description: l10n.onboardingRoleChoiceDescription,
+              firstLabel: l10n.onboardingTeamLeader,
+              secondLabel: l10n.onboardingPlayer,
+              onExit: _leaveOnboarding,
+              onBack: _isInviteJoinFlow
+                  ? _leaveOnboarding
+                  : () => setState(() => _hasSelectedMode = false),
+              onFirstSelected: () {
+                context
+                    .read<OnboardingCubit>()
+                    .selectTeamRole(isTeamLeader: true);
+                setState(() => _hasSelectedRole = true);
+              },
+              onSecondSelected: () {
+                context
+                    .read<OnboardingCubit>()
+                    .selectTeamRole(isTeamLeader: false);
+                setState(() => _hasSelectedRole = true);
+              },
+            );
+          }
 
-        return Scaffold(
-          backgroundColor: colors.background,
-          bottomNavigationBar: showBottomAction
-              ? _BottomActionBar(
-                  colors: colors,
-                  textStyles: textStyles,
-                  label: primaryLabel,
-                  loading: actionLoading,
-                  icon: null,
-                  onPressed: _mode == _OnboardingMode.create
-                      ? (canAdvance ? _handlePrimaryAction : null)
-                      : (actionLoading ? null : _handlePrimaryAction),
-                )
-              : null,
-          body: SafeArea(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
-                    child: _KopaHeader(
-                      colors: colors,
-                      showBack: true,
-                      onBack: _creatingTeam ? null : _handleBack,
+          final loading = state.status == OnboardingStatus.loading;
+          final actionLoading = loading || _savingPosition || _creatingTeam;
+          final showingJoinPosition = _isInviteJoinFlow || _joinStep == 1;
+          final fixedJoinPlayerCount = _isInviteJoinFlow
+              ? (state.teamPlayerCount == 11 ? 11 : 7)
+              : (_pendingJoinTeam?['player_count'] == 11 ? 11 : 7);
+          final step =
+              _mode == _OnboardingMode.create ? _createStep : _joinStep + 1;
+          final title = _mode == _OnboardingMode.join
+              ? (showingJoinPosition
+                  ? l10n.onboardingPositionTitle
+                  : l10n.onboardingJoinTeam)
+              : switch (_createStep) {
+                  0 => l10n.onboardingTitle,
+                  1 => 'Vælg din position',
+                  2 => l10n.teamLogoDesignTitle,
+                  3 => 'Inviter dit hold',
+                  _ => 'Inviter dit hold',
+                };
+          final subtitle = _mode == _OnboardingMode.join
+              ? (showingJoinPosition
+                  ? l10n.onboardingPositionDescription
+                  : l10n.onboardingSearchDescription)
+              : switch (_createStep) {
+                  0 =>
+                    'Opret dit fodboldhold og saml spillere, kampe og statistikker ét sted.',
+                  1 => 'Tryk på din position på banen',
+                  2 => l10n.teamLogoDesignSubtitle,
+                  3 => 'Del linket med spillerne, så de kan finde holdet.',
+                  _ => 'Del linket med spillerne, så de kan finde holdet.',
+                };
+          final canAdvance = _mode == _OnboardingMode.create &&
+              (_createStep == 3 ||
+                  _teamNameController.text.trim().isNotEmpty) &&
+              !actionLoading;
+          final primaryLabel = _mode == _OnboardingMode.create
+              ? switch (_createStep) {
+                  3 => 'Fortsæt til Kopa',
+                  _ => l10n.onboardingContinue,
+                }
+              : l10n.onboardingContinue;
+          final showBottomAction =
+              _mode == _OnboardingMode.create || showingJoinPosition;
+
+          return Scaffold(
+            backgroundColor: colors.background,
+            bottomNavigationBar: showBottomAction
+                ? _BottomActionBar(
+                    colors: colors,
+                    textStyles: textStyles,
+                    label: primaryLabel,
+                    isPositionStep: _mode == _OnboardingMode.create
+                        ? _createStep == 1
+                        : showingJoinPosition,
+                    loading: actionLoading,
+                    icon: null,
+                    onPressed: _mode == _OnboardingMode.create
+                        ? (canAdvance ? _handlePrimaryAction : null)
+                        : (actionLoading ? null : _handlePrimaryAction),
+                  )
+                : null,
+            body: SafeArea(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+                      child: _KopaHeader(
+                        colors: colors,
+                        onExit: actionLoading ? null : _leaveOnboarding,
+                        showBack: true,
+                        onBack: _creatingTeam ? null : _handleBack,
+                      ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
-                    child: _OnboardingTitle(
-                      colors: colors,
-                      textStyles: textStyles,
-                      step: step,
-                      totalSteps: 4,
-                      title: title,
-                      subtitle: subtitle,
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+                      child: _OnboardingTitle(
+                        colors: colors,
+                        textStyles: textStyles,
+                        step: step,
+                        totalSteps: 4,
+                        title: title,
+                        subtitle: subtitle,
+                      ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
-                    child: _mode == _OnboardingMode.create
-                        ? _CreateTeamView(
-                            l10n: l10n,
-                            colors: colors,
-                            textStyles: textStyles,
-                            step: _createStep,
-                            teamNameController: _teamNameController,
-                            dbuData: _dbuData,
-                            selectedPosition: _selectedPosition,
-                            usesElevenAside: _usesElevenAside,
-                            teamLogoDesign: _teamLogoDesign,
-                            loading: loading,
-                            onOpenDbu: _openDbu,
-                            onTextChanged: () => setState(() {}),
-                            onFormationChanged: (value) =>
-                                setState(() => _usesElevenAside = value),
-                            onPositionChanged: (value) =>
-                                setState(() => _selectedPosition = value),
-                            onLogoDesignChanged: (value) =>
-                                setState(() => _teamLogoDesign = value),
-                            inviteUri: _createdTeamInviteUri,
-                            teamTitle: _createdTeamTitle ??
-                                _teamNameController.text.trim(),
-                            onCopyInvite: _copyCreatedTeamInvite,
-                            onShareInvite: _shareCreatedTeamInvite,
-                          )
-                        : _joinStep == 0
-                            ? _PositionStep(
-                                colors: colors,
-                                textStyles: textStyles,
-                                selectedPosition: _selectedPosition,
-                                usesElevenAside: fixedJoinPlayerCount == null
-                                    ? _usesElevenAside
-                                    : fixedJoinPlayerCount == 11,
-                                fixedPlayerCount: fixedJoinPlayerCount,
-                                onFormationChanged: (value) =>
-                                    setState(() => _usesElevenAside = value),
-                                onPositionChanged: (value) =>
-                                    setState(() => _selectedPosition = value),
-                              )
-                            : _JoinTeamView(
-                                l10n: l10n,
-                                colors: colors,
-                                textStyles: textStyles,
-                                controller: _searchController,
-                                results: state.searchResults,
-                                loading: loading,
-                                onSearch:
-                                    context.read<OnboardingCubit>().searchTeams,
-                                onRequestJoin: _requestJoin,
-                              ),
-                  ),
-                ],
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
+                      child: _mode == _OnboardingMode.create
+                          ? _CreateTeamView(
+                              l10n: l10n,
+                              colors: colors,
+                              textStyles: textStyles,
+                              step: _createStep,
+                              teamNameController: _teamNameController,
+                              dbuData: _dbuData,
+                              selectedPosition: _selectedPosition,
+                              usesElevenAside: _usesElevenAside,
+                              teamLogoDesign: _teamLogoDesign,
+                              loading: loading,
+                              onOpenDbu: _openDbu,
+                              onTextChanged: () => setState(() {}),
+                              onFormationChanged: (value) =>
+                                  setState(() => _usesElevenAside = value),
+                              onPositionChanged: (value) =>
+                                  setState(() => _selectedPosition = value),
+                              onLogoDesignChanged: (value) =>
+                                  setState(() => _teamLogoDesign = value),
+                              inviteUri: _createdTeamInviteUri,
+                              teamTitle: _createdTeamTitle ??
+                                  _teamNameController.text.trim(),
+                              onCopyInvite: _copyCreatedTeamInvite,
+                              onShareInvite: _shareCreatedTeamInvite,
+                            )
+                          : showingJoinPosition
+                              ? _PositionStep(
+                                  colors: colors,
+                                  textStyles: textStyles,
+                                  selectedPosition: _selectedPosition,
+                                  usesElevenAside: fixedJoinPlayerCount == 11,
+                                  fixedPlayerCount: fixedJoinPlayerCount,
+                                  onFormationChanged: (value) =>
+                                      setState(() => _usesElevenAside = value),
+                                  onPositionChanged: (value) =>
+                                      setState(() => _selectedPosition = value),
+                                )
+                              : _JoinTeamView(
+                                  l10n: l10n,
+                                  colors: colors,
+                                  textStyles: textStyles,
+                                  controller: _searchController,
+                                  results: state.searchResults,
+                                  loading: loading,
+                                  onSearch: context
+                                      .read<OnboardingCubit>()
+                                      .searchTeams,
+                                  onRequestJoin: (team) => setState(() {
+                                    _pendingJoinTeam = team;
+                                    _usesElevenAside =
+                                        team['player_count'] == 11;
+                                    _joinStep = 1;
+                                  }),
+                                ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
 
-class _RoleQuestionView extends StatelessWidget {
+class _OnboardingChoiceView extends StatelessWidget {
   final AppColors colors;
   final AppTextStyles textStyles;
-  final VoidCallback onLeaderSelected;
-  final VoidCallback onPlayerSelected;
+  final String title;
+  final String description;
+  final String firstLabel;
+  final String secondLabel;
+  final VoidCallback onFirstSelected;
+  final VoidCallback onSecondSelected;
+  final VoidCallback? onBack;
+  final VoidCallback? onExit;
 
-  const _RoleQuestionView({
+  const _OnboardingChoiceView({
     required this.colors,
     required this.textStyles,
-    required this.onLeaderSelected,
-    required this.onPlayerSelected,
+    required this.title,
+    required this.description,
+    required this.firstLabel,
+    required this.secondLabel,
+    required this.onFirstSelected,
+    required this.onSecondSelected,
+    this.onBack,
+    this.onExit,
   });
 
   @override
@@ -787,6 +869,9 @@ class _RoleQuestionView extends StatelessWidget {
                         padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
                         child: Row(
                           children: [
+                            if (onBack != null)
+                              BackButton(
+                                  onPressed: onBack, color: colors.grass),
                             SvgPicture.asset(
                               'assets/logos/Logo.svg',
                               height: 36,
@@ -796,7 +881,8 @@ class _RoleQuestionView extends StatelessWidget {
                               ),
                             ),
                             const Spacer(),
-                            _HeaderStepDots(colors: colors),
+                            if (onExit != null)
+                              _OnboardingExitButton(onPressed: onExit),
                           ],
                         ),
                       ),
@@ -822,7 +908,7 @@ class _RoleQuestionView extends StatelessWidget {
                             ),
                             const SizedBox(height: 32),
                             Text(
-                              'Er du holdleder?',
+                              title,
                               textAlign: TextAlign.center,
                               style: textStyles.h4.copyWith(
                                 color: colors.textPrimary,
@@ -832,7 +918,7 @@ class _RoleQuestionView extends StatelessWidget {
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              'Hvis du er holdleder, kan du oprette og administrere dit hold, spillere samt kampe.',
+                              description,
                               textAlign: TextAlign.center,
                               style: textStyles.body3.copyWith(
                                 color: colors.textSecondary,
@@ -848,46 +934,11 @@ class _RoleQuestionView extends StatelessWidget {
                       const Spacer(flex: 3),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(24, 20, 24, 44),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            FilledButton.icon(
-                              onPressed: onLeaderSelected,
-                              iconAlignment: IconAlignment.end,
-                              icon: const Icon(Icons.chevron_right, size: 20),
-                              label: const Text('Ja, jeg er holdleder'),
-                              style: FilledButton.styleFrom(
-                                minimumSize: const Size.fromHeight(51),
-                                backgroundColor: colors.primary,
-                                foregroundColor: colors.white,
-                                textStyle: textStyles.body1.copyWith(
-                                  fontWeight: FontWeight.w800,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            OutlinedButton(
-                              onPressed: onPlayerSelected,
-                              style: OutlinedButton.styleFrom(
-                                minimumSize: const Size.fromHeight(51),
-                                foregroundColor: colors.textPrimary,
-                                side: BorderSide(
-                                  color: AppColors.of(context).divider,
-                                  width: 1.5,
-                                ),
-                                textStyle: textStyles.body1.copyWith(
-                                  fontWeight: FontWeight.w800,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                              ),
-                              child: const Text('Nej, jeg er spiller'),
-                            ),
-                          ],
+                        child: _OnboardingChoiceButtons(
+                          firstLabel: firstLabel,
+                          secondLabel: secondLabel,
+                          onFirstSelected: onFirstSelected,
+                          onSecondSelected: onSecondSelected,
                         ),
                       ),
                     ],
@@ -902,35 +953,48 @@ class _RoleQuestionView extends StatelessWidget {
   }
 }
 
-class _HeaderStepDots extends StatelessWidget {
-  final AppColors colors;
+class _OnboardingChoiceButtons extends StatelessWidget {
+  final String firstLabel;
+  final String secondLabel;
+  final VoidCallback onFirstSelected;
+  final VoidCallback onSecondSelected;
 
-  const _HeaderStepDots({required this.colors});
+  const _OnboardingChoiceButtons({
+    required this.firstLabel,
+    required this.secondLabel,
+    required this.onFirstSelected,
+    required this.onSecondSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final styles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final style = OutlinedButton.styleFrom(
+      minimumSize: const Size(0, 52),
+      backgroundColor: colors.white,
+      foregroundColor: colors.grass,
+      side: BorderSide(color: colors.grass, width: 1.5),
+      shape: const StadiumBorder(),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      textStyle: styles.body3.copyWith(fontWeight: FontWeight.w800),
+    );
     return Row(
       children: [
-        Container(
-          width: 14,
-          height: 6,
-          decoration: BoxDecoration(
-            color: colors.primary,
-            borderRadius: BorderRadius.circular(3),
-          ),
-        ),
-        const SizedBox(width: 6),
-        for (var i = 0; i < 2; i++) ...[
-          Container(
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(
-              color: AppColors.of(context).divider,
-              borderRadius: BorderRadius.circular(3),
-            ),
-          ),
-          if (i == 0) const SizedBox(width: 6),
-        ],
+        Expanded(
+            child: OutlinedButton(
+          style: style,
+          onPressed: onFirstSelected,
+          child: Text(firstLabel, textAlign: TextAlign.center),
+        )),
+        const SizedBox(width: 12),
+        Expanded(
+            child: OutlinedButton(
+          style: style,
+          onPressed: onSecondSelected,
+          child: Text(secondLabel, textAlign: TextAlign.center),
+        )),
       ],
     );
   }
@@ -1380,7 +1444,7 @@ class _JoinTeamView extends StatelessWidget {
               colors: colors,
               textStyles: textStyles,
               team: team,
-              actionLabel: 'Ansøg',
+              actionLabel: l10n.onboardingSelectTeam,
               onPressed: () => onRequestJoin(team),
             ),
           );
@@ -1608,11 +1672,13 @@ class _KopaHeader extends StatelessWidget {
   final AppColors colors;
   final bool showBack;
   final VoidCallback? onBack;
+  final VoidCallback? onExit;
 
   const _KopaHeader({
     required this.colors,
     this.showBack = false,
     this.onBack,
+    this.onExit,
   });
 
   @override
@@ -1634,6 +1700,7 @@ class _KopaHeader extends StatelessWidget {
           colorFilter: ColorFilter.mode(colors.primary, BlendMode.srcIn),
         ),
         const Spacer(),
+        if (onExit != null) _OnboardingExitButton(onPressed: onExit),
       ],
     );
   }
@@ -1979,6 +2046,7 @@ class _BottomActionBar extends StatelessWidget {
   final AppTextStyles textStyles;
   final String label;
   final bool loading;
+  final bool isPositionStep;
   final IconData? icon;
   final VoidCallback? onPressed;
 
@@ -1987,6 +2055,7 @@ class _BottomActionBar extends StatelessWidget {
     required this.textStyles,
     required this.label,
     required this.loading,
+    required this.isPositionStep,
     required this.icon,
     required this.onPressed,
   });
@@ -2025,8 +2094,8 @@ class _BottomActionBar extends StatelessWidget {
   ButtonStyle get _buttonStyle {
     return FilledButton.styleFrom(
       minimumSize: const Size.fromHeight(48),
-      backgroundColor: colors.lightGrass,
-      foregroundColor: colors.dirt,
+      backgroundColor: isPositionStep ? colors.grass : colors.lightGrass,
+      foregroundColor: isPositionStep ? colors.white : colors.dirt,
       disabledBackgroundColor: colors.offWhite,
       disabledForegroundColor: colors.textSecondary,
       textStyle: textStyles.button,
@@ -2042,12 +2111,14 @@ class _WaitingView extends StatelessWidget {
   final String cancelLabel;
   final bool loading;
   final VoidCallback onCancel;
+  final VoidCallback onExit;
 
   const _WaitingView({
     required this.team,
     required this.cancelLabel,
     required this.loading,
     required this.onCancel,
+    required this.onExit,
   });
 
   @override
@@ -2098,7 +2169,7 @@ class _WaitingView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _KopaHeader(colors: colors),
+              _KopaHeader(colors: colors, onExit: onExit),
               const SizedBox(height: 12),
               Row(
                 children: [
@@ -2370,4 +2441,17 @@ Color _teamAccentColor(String seed, AppColors appColors) {
   final index =
       seed.codeUnits.fold<int>(0, (sum, code) => sum + code) % colors.length;
   return colors[index];
+}
+
+class _OnboardingExitButton extends StatelessWidget {
+  final VoidCallback? onPressed;
+  const _OnboardingExitButton({required this.onPressed});
+  @override
+  Widget build(BuildContext context) => IconButton(
+        key: const ValueKey('onboarding-exit-button'),
+        onPressed: onPressed,
+        tooltip: AppLocalizations.of(context)!.onboardingExit,
+        icon: const Icon(Icons.close),
+        color: AppColors.of(context).grass,
+      );
 }

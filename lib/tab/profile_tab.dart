@@ -1,57 +1,82 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:kopa/component/future_handler.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kopa/component/team/team_role_button.dart';
+import 'package:kopa/cubits/team_members_cubit.dart';
+import 'package:kopa/cubits/auth_cubit.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/page/profile/player_profile_page.dart';
-import 'package:kopa/repository/users_repository.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 import 'package:kopa/theme/spacing.dart';
 
-class ProfileTab extends StatefulWidget {
-  const ProfileTab({super.key});
+class ProfileTab extends StatelessWidget {
+  final TeamMembersCubit Function()? createMembersCubit;
+  const ProfileTab({super.key, this.createMembersCubit});
 
   @override
-  State<ProfileTab> createState() => _ProfileTabState();
+  Widget build(BuildContext context) => BlocProvider(
+        create: (_) =>
+            (createMembersCubit?.call() ?? TeamMembersCubit())..load(),
+        child: const _SquadTabView(),
+      );
 }
 
-class _ProfileTabState extends State<ProfileTab> {
-  late Future<List<UserDetails>> _squadFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _squadFuture = UsersRepository.getSquad();
-  }
-
-  Future<void> _refresh() async {
-    setState(() {
-      _squadFuture = UsersRepository.getSquad();
-    });
-  }
+class _SquadTabView extends StatelessWidget {
+  const _SquadTabView();
 
   @override
   Widget build(BuildContext context) {
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
-
+    final colors = AppColors.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return PageScaffold.tab(
-      title: 'Truppen',
-      backgroundColor: appColors.background,
+      title: l10n.teamSquadTitle,
+      backgroundColor: colors.background,
       systemOverlayStyle: SystemUiOverlayStyle.dark.copyWith(
-        statusBarColor: appColors.background,
-        systemNavigationBarColor: appColors.surface,
+        statusBarColor: colors.background,
+        systemNavigationBarColor: colors.surface,
       ),
-      body: RefreshIndicator(
-        onRefresh: _refresh,
-        child: FutureHandler<List<UserDetails>>(
-          future: _squadFuture,
-          noDataFoundMessage: 'Ingen spillere fundet.',
-          onSuccess: (context, squad) => _SquadRosterView(squad: squad),
-        ),
-      ),
+      body: BlocConsumer<TeamMembersCubit, TeamMembersState>(
+          listener: (context, state) {
+        if (state.loading || state.loadFailed || state.savingUserId != null) {
+          return;
+        }
+        final auth = context.read<AuthCubit>();
+        final current = auth.state.user;
+        if (current == null) return;
+        for (final member in state.members) {
+          if (member.id == current.id &&
+              member.isTeamOwner != current.isTeamOwner) {
+            auth.updateUser(current.withTeamRole(member.isTeamOwner));
+            break;
+          }
+        }
+      }, builder: (context, state) {
+        final cubit = context.read<TeamMembersCubit>();
+        return RefreshIndicator(
+          onRefresh: () async {
+            if (state.savingUserId == null) await cubit.load();
+          },
+          child: state.loading
+              ? const Center(child: CupertinoActivityIndicator())
+              : state.loadFailed
+                  ? ListView(children: [
+                      TextButton(
+                          onPressed: cubit.load,
+                          child: Text(l10n.teamSquadLoadFailed)),
+                    ])
+                  : state.members.isEmpty
+                      ? ListView(children: [
+                          Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Text(l10n.teamSquadEmpty)),
+                        ])
+                      : _SquadRosterView(squad: state.members),
+        );
+      }),
     );
   }
 }
@@ -79,7 +104,7 @@ class _SquadRosterView extends StatelessWidget {
       ),
       children: [
         Text(
-          'Truppen',
+          AppLocalizations.of(context)!.teamSquadTitle,
           style: styles.h4.copyWith(
             color: appColors.dirt,
             fontWeight: FontWeight.w800,
@@ -87,7 +112,7 @@ class _SquadRosterView extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          '${squad.length} spillere i truppen',
+          AppLocalizations.of(context)!.teamSquadCount(squad.length),
           style: styles.body3.copyWith(color: appColors.textSecondary),
         ),
         const SizedBox(height: 20),
@@ -201,11 +226,15 @@ class _RosterRow extends StatelessWidget {
     final theme = Theme.of(context);
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
     final styles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
-    final position = _positionLabel(player);
+    final l10n = AppLocalizations.of(context)!;
+    final role =
+        player.isTeamOwner ? l10n.onboardingTeamLeader : l10n.onboardingPlayer;
+    final position = player.position?.trim();
 
     return Material(
       color: appColors.surface,
       child: InkWell(
+        key: ValueKey('team-member-${player.id}'),
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
@@ -245,7 +274,9 @@ class _RosterRow extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      position,
+                      position == null || position.isEmpty
+                          ? role
+                          : '$position · $role',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: styles.body3.copyWith(
@@ -255,6 +286,7 @@ class _RosterRow extends StatelessWidget {
                   ],
                 ),
               ),
+              TeamRoleButton(player: player),
               Icon(
                 CupertinoIcons.chevron_right,
                 size: 18,
@@ -265,15 +297,6 @@ class _RosterRow extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String _positionLabel(UserDetails player) {
-    final position = player.position?.trim();
-    if (position != null && position.isNotEmpty) {
-      return position;
-    }
-
-    return player.isTeamOwner ? 'Holdleder' : 'Spiller';
   }
 }
 

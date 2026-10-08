@@ -25,6 +25,25 @@ class UsersRepository {
         json.map((content) => UserDetails.fromJson(content)));
   }
 
+  static Future<UserDetails> updateTeamRole({
+    required int teamId,
+    required int userId,
+    required bool isTeamLeader,
+  }) async {
+    final response = await _apiClient.patchJson(
+      Uri.parse('${ApiConfig.baseUrl}/teams/$teamId/members/$userId/role'),
+      body: {'is_team_leader': isTeamLeader},
+    );
+    if (response.statusCode != 200) {
+      final body = jsonDecode(response.body);
+      if (body['error'] == 'last_team_leader') {
+        throw const LastTeamLeaderException();
+      }
+      throw Exception('Failed to update team role');
+    }
+    return UserDetails.fromJson(jsonDecode(response.body)['user']);
+  }
+
   static Future<int> createPlayer(String name, String email) async {
     final url = Uri.parse('${ApiConfig.baseUrl}/user');
 
@@ -125,4 +144,8 @@ class UsersRepository {
 
     return UserDetails.fromJson(jsonDecode(response.body)['user']);
   }
+}
+
+class LastTeamLeaderException implements Exception {
+  const LastTeamLeaderException();
 }

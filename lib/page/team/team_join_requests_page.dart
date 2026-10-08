@@ -1,3 +1,4 @@
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -160,11 +161,13 @@ class _TeamJoinRequestsPageState extends State<TeamJoinRequestsPage> {
 class _TeamJoinRequest {
   final int id;
   final String userName;
+  final bool isTeamLeader;
   final DateTime? insertedAt;
 
   const _TeamJoinRequest({
     required this.id,
     required this.userName,
+    required this.isTeamLeader,
     required this.insertedAt,
   });
 
@@ -172,6 +175,7 @@ class _TeamJoinRequest {
     return _TeamJoinRequest(
       id: json['id'] as int,
       userName: json['user_name'] as String? ?? 'Ukendt spiller',
+      isTeamLeader: json['is_team_leader'] == true,
       insertedAt: DateTime.tryParse(json['inserted_at']?.toString() ?? ''),
     );
   }
@@ -216,6 +220,12 @@ class _JoinRequestRow extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: styles.body3.copyWith(fontWeight: FontWeight.w700),
+                ),
+                Text(
+                  request.isTeamLeader
+                      ? AppLocalizations.of(context)!.onboardingTeamLeader
+                      : AppLocalizations.of(context)!.onboardingPlayer,
+                  style: styles.caption2.copyWith(color: colors.grass),
                 ),
                 Text(
                   _requestedAtLabel(request.insertedAt),

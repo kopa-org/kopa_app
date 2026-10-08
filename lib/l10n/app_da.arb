@@ -1,4 +1,10 @@
 {
+  "onboardingPlayer": "Spiller",
+  "onboardingTeamLeader": "Holdleder",
+  "onboardingRoleChoiceDescription": "Vælg din rolle på holdet.",
+  "onboardingRoleChoiceTitle": "Hvad er din rolle?",
+  "onboardingTeamChoiceDescription": "Opret et nyt hold, eller find dit eksisterende hold på Kopa.",
+  "onboardingTeamChoiceTitle": "Opret eller tilmeld dig et hold",
   "matchDetailsLineupTab": "Opstilling",
   "matchFabMotmLabel": "MOTM",
   "matchFabResultLabel": "Resultat",
@@ -59,7 +65,7 @@
   "commonGoTo": "Gå til",
   "onboardingTitle": "Kom i gang med Kopa",
   "onboardingCreateTeam": "Opret hold",
-  "onboardingJoinTeam": "Find hold",
+  "onboardingJoinTeam": "Tilmeld hold",
   "onboardingTeamName": "Holdnavn",
   "onboardingManual": "Manuelt",
   "onboardingDbu": "DBU",
@@ -166,7 +172,6 @@
   "matchPollSaveAction": "Gem ændringer",
   "matchPollCreating": "Opretter...",
   "matchPollSaving": "Gemmer...",
-  "matchPollUnknownPlayer": "Ukendt spiller",
   "matchPollErrorTitle": "Fejl",
   "eventCreateTitle": "Opret begivenhed",
   "eventCreateMatch": "Opret kamp",
@@ -277,11 +282,36 @@
   "matchRsvpDeclinedMessage": "Du har meldt afbud",
   "matchRsvpCancel": "Meld afbud",
   "matchRsvpAttendeeCount": "{count} tilmeldte",
-  "@matchRsvpAttendeeCount": {"placeholders": {"count": {"type": "int"}}},
+  "@matchRsvpAttendeeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "matchActionsMore": "Kampindstillinger",
   "matchActionsEditResult": "Rediger kampresultat",
   "matchFabCreateMotmPoll": "Kampens spiller: opret afstemning",
   "matchFabEditMotmPoll": "Kampens spiller: rediger afstemning",
   "matchFabEnterResult": "Indtast kampresultat",
-  "matchFabAddExternalPlayers": "Tilføj eksterne spillere"
+  "matchFabAddExternalPlayers": "Tilføj eksterne spillere",
+  "onboardingPositionTitle": "Vælg din position",
+  "onboardingPositionDescription": "Tryk på din position på banen",
+  "onboardingSearchDescription": "Find dit hold, før du vælger din position.",
+  "onboardingSelectTeam": "Vælg hold",
+  "onboardingExit": "Forlad tilmelding og log ud",
+  "teamRoleEdit": "Skift rolle på holdet",
+  "teamRoleSaveFailed": "Kunne ikke ændre rollen. Prøv igen.",
+  "teamRoleLastLeader": "Udpeg en anden holdleder, før du skifter til spiller.",
+  "teamSquadTitle": "Truppen",
+  "teamSquadEmpty": "Ingen spillere fundet.",
+  "teamSquadLoadFailed": "Kunne ikke hente truppen. Tryk for at prøve igen.",
+  "teamSquadCount": "{count} spillere i truppen",
+  "@teamSquadCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

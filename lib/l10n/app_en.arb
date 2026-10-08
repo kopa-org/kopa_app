@@ -1,4 +1,10 @@
 {
+  "onboardingPlayer": "Player",
+  "onboardingTeamLeader": "Team leader",
+  "onboardingRoleChoiceDescription": "Choose your role on the team.",
+  "onboardingRoleChoiceTitle": "What is your role?",
+  "onboardingTeamChoiceDescription": "Start a new team or find your existing team on Kopa.",
+  "onboardingTeamChoiceTitle": "Create or join a team",
   "matchDetailsLineupTab": "Lineup",
   "matchFabMotmLabel": "MOTM",
   "matchFabResultLabel": "Result",
@@ -58,7 +64,7 @@
   "matchScoreSaveFailed": "Could not save the result. Please try again.",
   "commonGoTo": "Go to",
   "onboardingTitle": "Join Kopa",
-  "onboardingCreateTeam": "Create team",
+  "onboardingCreateTeam": "Create Team",
   "onboardingJoinTeam": "Join team",
   "onboardingTeamName": "Team name",
   "onboardingManual": "Manual",
@@ -166,7 +172,6 @@
   "matchPollSaveAction": "Save changes",
   "matchPollCreating": "Creating...",
   "matchPollSaving": "Saving...",
-  "matchPollUnknownPlayer": "Unknown player",
   "matchPollErrorTitle": "Error",
   "eventCreateTitle": "Create event",
   "eventCreateMatch": "Create match",
@@ -277,11 +282,36 @@
   "matchRsvpDeclinedMessage": "You have declined",
   "matchRsvpCancel": "Cancel attendance",
   "matchRsvpAttendeeCount": "{count} registered",
-  "@matchRsvpAttendeeCount": {"placeholders": {"count": {"type": "int"}}},
+  "@matchRsvpAttendeeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "matchActionsMore": "Match options",
   "matchActionsEditResult": "Edit match result",
   "matchFabCreateMotmPoll": "MOTM: create poll",
   "matchFabEditMotmPoll": "MOTM: edit poll",
   "matchFabEnterResult": "Enter match result",
-  "matchFabAddExternalPlayers": "Add external players"
+  "matchFabAddExternalPlayers": "Add external players",
+  "onboardingPositionTitle": "Choose your position",
+  "onboardingPositionDescription": "Tap your position on the pitch",
+  "onboardingSearchDescription": "Find your team before choosing your position.",
+  "onboardingSelectTeam": "Select team",
+  "onboardingExit": "Exit signup and log out",
+  "teamRoleEdit": "Change team role",
+  "teamRoleSaveFailed": "Could not change the role. Try again.",
+  "teamRoleLastLeader": "Assign another team leader before switching to player.",
+  "teamSquadTitle": "Squad",
+  "teamSquadEmpty": "No players found.",
+  "teamSquadLoadFailed": "Could not load the squad. Tap to try again.",
+  "teamSquadCount": "{count} players in the squad",
+  "@teamSquadCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

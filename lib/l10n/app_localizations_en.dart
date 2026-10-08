@@ -9,6 +9,25 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get onboardingPlayer => 'Player';
+
+  @override
+  String get onboardingTeamLeader => 'Team leader';
+
+  @override
+  String get onboardingRoleChoiceDescription => 'Choose your role on the team.';
+
+  @override
+  String get onboardingRoleChoiceTitle => 'What is your role?';
+
+  @override
+  String get onboardingTeamChoiceDescription =>
+      'Start a new team or find your existing team on Kopa.';
+
+  @override
+  String get onboardingTeamChoiceTitle => 'Create or join a team';
+
+  @override
   String get matchDetailsLineupTab => 'Lineup';
 
   @override
@@ -198,7 +217,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingTitle => 'Join Kopa';
 
   @override
-  String get onboardingCreateTeam => 'Create team';
+  String get onboardingCreateTeam => 'Create Team';
 
   @override
   String get onboardingJoinTeam => 'Join team';
@@ -797,4 +816,45 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get matchFabAddExternalPlayers => 'Add external players';
+
+  @override
+  String get onboardingPositionTitle => 'Choose your position';
+
+  @override
+  String get onboardingPositionDescription => 'Tap your position on the pitch';
+
+  @override
+  String get onboardingSearchDescription =>
+      'Find your team before choosing your position.';
+
+  @override
+  String get onboardingSelectTeam => 'Select team';
+
+  @override
+  String get onboardingExit => 'Exit signup and log out';
+
+  @override
+  String get teamRoleEdit => 'Change team role';
+
+  @override
+  String get teamRoleSaveFailed => 'Could not change the role. Try again.';
+
+  @override
+  String get teamRoleLastLeader =>
+      'Assign another team leader before switching to player.';
+
+  @override
+  String get teamSquadTitle => 'Squad';
+
+  @override
+  String get teamSquadEmpty => 'No players found.';
+
+  @override
+  String get teamSquadLoadFailed =>
+      'Could not load the squad. Tap to try again.';
+
+  @override
+  String teamSquadCount(int count) {
+    return '$count players in the squad';
+  }
 }

@@ -98,6 +98,42 @@ abstract class AppLocalizations {
     Locale('en')
   ];
 
+  /// No description provided for @onboardingPlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Player'**
+  String get onboardingPlayer;
+
+  /// No description provided for @onboardingTeamLeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Team leader'**
+  String get onboardingTeamLeader;
+
+  /// No description provided for @onboardingRoleChoiceDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your role on the team.'**
+  String get onboardingRoleChoiceDescription;
+
+  /// No description provided for @onboardingRoleChoiceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What is your role?'**
+  String get onboardingRoleChoiceTitle;
+
+  /// No description provided for @onboardingTeamChoiceDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a new team or find your existing team on Kopa.'**
+  String get onboardingTeamChoiceDescription;
+
+  /// No description provided for @onboardingTeamChoiceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create or join a team'**
+  String get onboardingTeamChoiceTitle;
+
   /// No description provided for @matchDetailsLineupTab.
   ///
   /// In en, this message translates to:
@@ -455,7 +491,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingCreateTeam.
   ///
   /// In en, this message translates to:
-  /// **'Create team'**
+  /// **'Create Team'**
   String get onboardingCreateTeam;
 
   /// No description provided for @onboardingJoinTeam.
@@ -1543,6 +1579,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add external players'**
   String get matchFabAddExternalPlayers;
+
+  /// No description provided for @onboardingPositionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your position'**
+  String get onboardingPositionTitle;
+
+  /// No description provided for @onboardingPositionDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap your position on the pitch'**
+  String get onboardingPositionDescription;
+
+  /// No description provided for @onboardingSearchDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Find your team before choosing your position.'**
+  String get onboardingSearchDescription;
+
+  /// No description provided for @onboardingSelectTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Select team'**
+  String get onboardingSelectTeam;
+
+  /// No description provided for @onboardingExit.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit signup and log out'**
+  String get onboardingExit;
+
+  /// No description provided for @teamRoleEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Change team role'**
+  String get teamRoleEdit;
+
+  /// No description provided for @teamRoleSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not change the role. Try again.'**
+  String get teamRoleSaveFailed;
+
+  /// No description provided for @teamRoleLastLeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign another team leader before switching to player.'**
+  String get teamRoleLastLeader;
+
+  /// No description provided for @teamSquadTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Squad'**
+  String get teamSquadTitle;
+
+  /// No description provided for @teamSquadEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No players found.'**
+  String get teamSquadEmpty;
+
+  /// No description provided for @teamSquadLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the squad. Tap to try again.'**
+  String get teamSquadLoadFailed;
+
+  /// No description provided for @teamSquadCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} players in the squad'**
+  String teamSquadCount(int count);
 }
 
 class _AppLocalizationsDelegate

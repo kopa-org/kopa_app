@@ -1,8 +1,27 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kopa/cubits/onboarding_cubit.dart';
 import 'package:kopa/repository/onboarding_repository.dart';
+import 'package:kopa/model/team_logo_design.dart';
 
 void main() {
+  for (final leader in [true, false]) {
+    test('chosen role $leader reaches create, invite and request APIs',
+        () async {
+      final repository =
+          _FakeOnboardingRepository(joinResult: {'success': true});
+      final cubit = OnboardingCubit(repository);
+      addTearDown(cubit.close);
+      cubit.selectTeamRole(isTeamLeader: leader);
+      expect(cubit.state.isTeamLeader, leader);
+      expect(await cubit.createTeam(title: 'Role FC', playerCount: 7), isTrue);
+      expect(repository.createdAsLeader, leader);
+      cubit.emit(cubit.state.copyWith(inviteToken: 'invite'));
+      expect(await cubit.joinTeamWithToken(), isTrue);
+      expect(repository.joinedAsLeader, leader);
+      expect(await cubit.requestToJoinTeam(42), isTrue);
+      expect(repository.requestedAsLeader, leader);
+    });
+  }
   test('joinTeamWithToken returns true and clears token on success', () async {
     final cubit = OnboardingCubit(_FakeOnboardingRepository(
       joinResult: {'success': true},
@@ -77,6 +96,9 @@ void main() {
 }
 
 class _FakeOnboardingRepository extends OnboardingRepository {
+  bool? createdAsLeader;
+  bool? joinedAsLeader;
+  bool? requestedAsLeader;
   final Map<String, dynamic> joinResult;
   final Map<String, dynamic> currentJoinRequestResult;
   final Map<String, dynamic> validateResult;
@@ -95,7 +117,37 @@ class _FakeOnboardingRepository extends OnboardingRepository {
       validateResult;
 
   @override
-  Future<Map<String, dynamic>> joinTeam(String token) async => joinResult;
+  Future<Map<String, dynamic>> joinTeam(String token,
+      {bool isTeamLeader = false}) async {
+    joinedAsLeader = isTeamLeader;
+    return joinResult;
+  }
+
+  @override
+  Future<Map<String, dynamic>> createTeam({
+    required String title,
+    required int playerCount,
+    bool isTeamLeader = true,
+    TeamLogoDesign? logoDesign,
+    Map<String, dynamic>? dbuContext,
+    List<Map<String, dynamic>> standings = const [],
+  }) async {
+    createdAsLeader = isTeamLeader;
+    return {
+      'success': true,
+      'team': {'id': 42, 'title': title}
+    };
+  }
+
+  @override
+  Future<Map<String, dynamic>> requestToJoinTeam(int teamId,
+      {bool isTeamLeader = false}) async {
+    requestedAsLeader = isTeamLeader;
+    return {
+      'success': true,
+      'join_request': {'id': 1, 'is_team_leader': isTeamLeader}
+    };
+  }
 
   @override
   Future<Map<String, dynamic>> getCurrentJoinRequest() async =>

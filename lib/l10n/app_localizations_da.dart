@@ -9,6 +9,25 @@ class AppLocalizationsDa extends AppLocalizations {
   AppLocalizationsDa([String locale = 'da']) : super(locale);
 
   @override
+  String get onboardingPlayer => 'Spiller';
+
+  @override
+  String get onboardingTeamLeader => 'Holdleder';
+
+  @override
+  String get onboardingRoleChoiceDescription => 'Vælg din rolle på holdet.';
+
+  @override
+  String get onboardingRoleChoiceTitle => 'Hvad er din rolle?';
+
+  @override
+  String get onboardingTeamChoiceDescription =>
+      'Opret et nyt hold, eller find dit eksisterende hold på Kopa.';
+
+  @override
+  String get onboardingTeamChoiceTitle => 'Opret eller tilmeld dig et hold';
+
+  @override
   String get matchDetailsLineupTab => 'Opstilling';
 
   @override
@@ -198,7 +217,7 @@ class AppLocalizationsDa extends AppLocalizations {
   String get onboardingCreateTeam => 'Opret hold';
 
   @override
-  String get onboardingJoinTeam => 'Find hold';
+  String get onboardingJoinTeam => 'Tilmeld hold';
 
   @override
   String get onboardingTeamName => 'Holdnavn';
@@ -794,4 +813,45 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String get matchFabAddExternalPlayers => 'Tilføj eksterne spillere';
+
+  @override
+  String get onboardingPositionTitle => 'Vælg din position';
+
+  @override
+  String get onboardingPositionDescription => 'Tryk på din position på banen';
+
+  @override
+  String get onboardingSearchDescription =>
+      'Find dit hold, før du vælger din position.';
+
+  @override
+  String get onboardingSelectTeam => 'Vælg hold';
+
+  @override
+  String get onboardingExit => 'Forlad tilmelding og log ud';
+
+  @override
+  String get teamRoleEdit => 'Skift rolle på holdet';
+
+  @override
+  String get teamRoleSaveFailed => 'Kunne ikke ændre rollen. Prøv igen.';
+
+  @override
+  String get teamRoleLastLeader =>
+      'Udpeg en anden holdleder, før du skifter til spiller.';
+
+  @override
+  String get teamSquadTitle => 'Truppen';
+
+  @override
+  String get teamSquadEmpty => 'Ingen spillere fundet.';
+
+  @override
+  String get teamSquadLoadFailed =>
+      'Kunne ikke hente truppen. Tryk for at prøve igen.';
+
+  @override
+  String teamSquadCount(int count) {
+    return '$count spillere i truppen';
+  }
 }

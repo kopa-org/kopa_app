@@ -23,7 +23,8 @@ class OnboardingRepository {
     }
   }
 
-  Future<Map<String, dynamic>> joinTeam(String token) async {
+  Future<Map<String, dynamic>> joinTeam(String token,
+      {bool isTeamLeader = false}) async {
     final userToken = await SecureStorageService.getToken();
     if (userToken == null) {
       return {'success': false, 'error': 'Ikke logget ind'};
@@ -37,7 +38,7 @@ class OnboardingRepository {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $userToken',
         },
-        body: json.encode({'token': token}),
+        body: json.encode({'token': token, 'is_team_leader': isTeamLeader}),
       );
 
       if (response.statusCode == 200) {
@@ -121,6 +122,7 @@ class OnboardingRepository {
   Future<Map<String, dynamic>> createTeam({
     required String title,
     required int playerCount,
+    bool isTeamLeader = true,
     TeamLogoDesign? logoDesign,
     Map<String, dynamic>? dbuContext,
     List<Map<String, dynamic>> standings = const [],
@@ -141,6 +143,7 @@ class OnboardingRepository {
         body: json.encode({
           'title': title,
           'player_count': playerCount,
+          'is_team_leader': isTeamLeader,
           if (logoDesign != null) ...logoDesign.toJson(),
           if (dbuContext != null) ..._dbuContextPayload(dbuContext),
           'standings': standings,
@@ -196,7 +199,8 @@ class OnboardingRepository {
     }
   }
 
-  Future<Map<String, dynamic>> requestToJoinTeam(int teamId) async {
+  Future<Map<String, dynamic>> requestToJoinTeam(int teamId,
+      {bool isTeamLeader = false}) async {
     final userToken = await SecureStorageService.getToken();
     if (userToken == null) {
       return {'success': false, 'error': 'Ikke logget ind'};
@@ -206,7 +210,11 @@ class OnboardingRepository {
     try {
       final response = await _apiClient.post(
         url,
-        headers: {'Authorization': 'Bearer $userToken'},
+        headers: {
+          'Authorization': 'Bearer $userToken',
+          'Content-Type': 'application/json'
+        },
+        body: json.encode({'is_team_leader': isTeamLeader}),
       );
       final body = response.body.isEmpty
           ? <String, dynamic>{}

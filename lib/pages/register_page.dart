@@ -63,6 +63,7 @@ class _RegisterPageState extends State<RegisterPage> {
       listeners: [
         BlocListener<AuthCubit, AuthState>(
           listener: (context, state) async {
+            if (ModalRoute.of(context)?.isCurrent != true) return;
             if (state.status == AuthStatus.failure) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -77,6 +78,7 @@ class _RegisterPageState extends State<RegisterPage> {
         ),
         BlocListener<OnboardingCubit, OnboardingState>(
           listener: (context, state) async {
+            if (ModalRoute.of(context)?.isCurrent != true) return;
             if (state.status == OnboardingStatus.validated &&
                 (state.email != null || state.name != null)) {
               if (state.email != null) {
@@ -117,7 +119,15 @@ class _RegisterPageState extends State<RegisterPage> {
             appBar: AppBar(
               backgroundColor: AppColors.transparent,
               elevation: 0,
-              leading: BackButton(color: appColors.black),
+              leading: BackButton(
+                  color: appColors.black,
+                  onPressed: () {
+                    if (context.canPop()) {
+                      context.pop();
+                    } else {
+                      context.go(AppRouter.welcome);
+                    }
+                  }),
             ),
             body: SafeArea(
               child: SingleChildScrollView(
