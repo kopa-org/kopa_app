@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:kopa/component/card/kopa_card.dart';
 import 'package:kopa/component/match/match_details_sheet_scroll_view.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
@@ -296,29 +297,51 @@ class MatchDetailTemplate extends StatelessWidget {
         (segment: MatchDetailSegment.timeline, label: timelineSegmentLabel),
     ];
 
-    final row = Row(
-      children: [
-        for (var index = 0; index < segments.length; index++) ...[
-          if (index > 0) SizedBox(width: darkHeader ? 4 : 8),
-          Expanded(
-            child: _MatchDetailSegmentButton(
+    final row = LayoutBuilder(builder: (context, constraints) {
+      final gap = darkHeader ? 4.0 : 8.0;
+      final availableWidth = constraints.maxWidth - gap * (segments.length - 1);
+      final collapsedWidth =
+          (availableWidth / segments.length).clamp(0.0, 44.0);
+      final maximumExpandedWidth =
+          availableWidth - collapsedWidth * (segments.length - 1);
+      double labelWidth(String label) {
+        final painter = TextPainter(
+          text: TextSpan(
+              text: label,
+              style: styles.body3
+                  .copyWith(fontSize: 12, fontWeight: FontWeight.w700)),
+          textDirection: Directionality.of(context),
+          textScaler: MediaQuery.textScalerOf(context),
+          maxLines: 1,
+        )..layout();
+        final width =
+            (painter.width + 48).clamp(collapsedWidth, maximumExpandedWidth);
+        painter.dispose();
+        return width;
+      }
+
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          for (var index = 0; index < segments.length; index++) ...[
+            if (index > 0) SizedBox(width: gap),
+            _MatchDetailSegmentButton(
               key: ValueKey(
-                'match-details-segment-${segments[index].segment.name}',
-              ),
+                  'match-details-segment-${segments[index].segment.name}'),
               segment: segments[index].segment,
               label: segments[index].label,
               selected: _effectiveSelectedSegment == segments[index].segment,
+              collapsedWidth: collapsedWidth,
+              expandedWidth: labelWidth(segments[index].label),
               textStyle: styles.body3,
               darkHeader: darkHeader,
               trainingHeader: useTrainingHeader,
-              onPressed: () => onSegmentChanged?.call(
-                segments[index].segment,
-              ),
+              onPressed: () => onSegmentChanged?.call(segments[index].segment),
             ),
-          ),
+          ],
         ],
-      ],
-    );
+      );
+    });
 
     if (darkHeader) {
       return Container(
@@ -426,6 +449,8 @@ class _MatchDetailSegmentButton extends StatelessWidget {
   final MatchDetailSegment segment;
   final String label;
   final bool selected;
+  final double collapsedWidth;
+  final double expandedWidth;
   final TextStyle textStyle;
   final bool darkHeader;
   final bool trainingHeader;
@@ -436,11 +461,20 @@ class _MatchDetailSegmentButton extends StatelessWidget {
     required this.segment,
     required this.label,
     required this.selected,
+    required this.collapsedWidth,
+    required this.expandedWidth,
     required this.textStyle,
     required this.darkHeader,
     required this.trainingHeader,
     required this.onPressed,
   });
+
+  IconData? get _icon => switch (segment) {
+        MatchDetailSegment.overview => Icons.info_outline_rounded,
+        MatchDetailSegment.attendance => Icons.groups_outlined,
+        MatchDetailSegment.lineup => null,
+        MatchDetailSegment.timeline => Icons.timeline_rounded,
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -449,98 +483,93 @@ class _MatchDetailSegmentButton extends StatelessWidget {
         ? colors.sky
         : darkHeader
             ? AppColors.matchDetailsHeader
-            : AppColors.of(context).successForeground;
+            : colors.successForeground;
     final unselectedColor = trainingHeader
         ? colors.textSecondary
         : darkHeader
             ? AppColors.matchDetailsHeaderMuted
-            : AppColors.of(context).textSecondary;
-
-    if (darkHeader) {
-      return Semantics(
-        button: true,
-        selected: selected,
-        label: label,
-        child: Material(
-          color: AppColors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(9),
-            onTap: onPressed,
-            child: Container(
-              key: ValueKey('match-details-segment-${segment.name}-surface'),
-              height: 34,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: selected
-                    ? trainingHeader
-                        ? colors.surface
-                        : AppColors.matchDetailsHeaderForeground
-                    : AppColors.transparent,
-                borderRadius: BorderRadius.circular(9),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: textStyle.copyWith(
-                    color: selected ? selectedColor : unselectedColor,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    height: 14 / 10,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
+            : colors.textSecondary;
+    final background = selected
+        ? darkHeader
+            ? trainingHeader
+                ? colors.surface
+                : AppColors.matchDetailsHeaderForeground
+            : colors.lightGrass
+        : AppColors.transparent;
+    final duration = MediaQuery.disableAnimationsOf(context)
+        ? Duration.zero
+        : const Duration(milliseconds: 400);
 
     return Semantics(
       button: true,
       selected: selected,
       label: label,
-      child: Material(
-        color: AppColors.transparent,
-        child: InkWell(
-          onTap: onPressed,
-          child: SizedBox(
-            height: 30,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 10),
-              child: Column(
-                children: [
-                  Expanded(
-                    child: Text(
-                      label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: textStyle.copyWith(
-                        color: selected
-                            ? selectedColor
-                            : unselectedColor.withValues(alpha: 0.5),
-                        fontSize: 14,
-                        fontWeight:
-                            selected ? FontWeight.w700 : FontWeight.w600,
-                        height: 18 / 14,
-                      ),
-                    ),
+      excludeSemantics: true,
+      onTap: onPressed,
+      child: Tooltip(
+        message: label,
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(begin: selected ? 1.0 : 0.0, end: selected ? 1.0 : 0.0),
+          duration: duration,
+          curve: Curves.easeOutCubic,
+          builder: (context, expansion, child) => SizedBox(
+            width:
+                collapsedWidth + (expandedWidth - collapsedWidth) * expansion,
+            height: 44,
+            child: Material(
+              color: AppColors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(22),
+                onTap: onPressed,
+                child: Container(
+                  key:
+                      ValueKey('match-details-segment-${segment.name}-surface'),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: background,
+                    borderRadius: BorderRadius.circular(22),
                   ),
-                  AnimatedContainer(
-                    key: ValueKey(
-                      'match-details-segment-${segment.name}-indicator',
-                    ),
-                    duration: const Duration(milliseconds: 220),
-                    height: 2,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: selected ? selectedColor : AppColors.transparent,
-                      borderRadius: BorderRadius.circular(1),
-                    ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (segment == MatchDetailSegment.lineup)
+                        SvgPicture.asset(
+                          'assets/icons/match/lineup.svg',
+                          key: const ValueKey('match-details-lineup-icon'),
+                          width: 20,
+                          height: 20,
+                          fit: BoxFit.contain,
+                          colorFilter: ColorFilter.mode(
+                            selected ? selectedColor : unselectedColor,
+                            BlendMode.srcIn,
+                          ),
+                        )
+                      else
+                        Icon(_icon,
+                            size: 20,
+                            color: selected ? selectedColor : unselectedColor),
+                      if (expansion > 0) ...[
+                        SizedBox(width: 4 * expansion),
+                        Expanded(
+                          child: Opacity(
+                            opacity: expansion,
+                            child: Text(
+                              label,
+                              maxLines: 1,
+                              softWrap: false,
+                              overflow: TextOverflow.ellipsis,
+                              style: textStyle.copyWith(
+                                color: selectedColor,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),

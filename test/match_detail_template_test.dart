@@ -1,5 +1,8 @@
+import 'dart:ui' show SemanticsAction;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:kopa/component/card/kopa_card.dart';
 import 'package:kopa/component/card/match_hero_card.dart';
 import 'package:kopa/component/timeline/timeline_item.dart';
@@ -36,6 +39,154 @@ void main() {
       });
     }
   }
+
+  for (final header in ['light', 'dark', 'training']) {
+    for (final language in ['da', 'en']) {
+      testWidgets('icon tabs expand without overflow: $header $language',
+          (tester) async {
+        tester.view.physicalSize = const Size(320, 640);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        final training = header == 'training';
+        var selected = MatchDetailSegment.overview;
+        await tester.pumpWidget(MaterialApp(
+          locale: Locale(language),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context)
+                .copyWith(textScaler: const TextScaler.linear(1.6)),
+            child: child!,
+          ),
+          home: StatefulBuilder(
+              builder: (context, setState) => MatchDetailTemplate(
+                    heroCard: const SizedBox(height: 1),
+                    useDarkMatchHeader: header == 'dark',
+                    useTrainingHeader: training,
+                    playerPositions:
+                        training ? null : const Text('Lineup content'),
+                    showTimelineSegment: !training,
+                    timelineSegmentLabel:
+                        language == 'da' ? 'Kamp begivenheder' : 'Match events',
+                    selectedSegment: selected,
+                    onSegmentChanged: (value) =>
+                        setState(() => selected = value),
+                  )),
+        ));
+        await tester.pumpAndSettle();
+        Finder tab(MatchDetailSegment segment) =>
+            find.byKey(ValueKey('match-details-segment-${segment.name}'));
+        double overviewIconOffset() =>
+            tester
+                .getCenter(find.descendant(
+                    of: tab(MatchDetailSegment.overview),
+                    matching: find.byType(Icon)))
+                .dx -
+            tester.getTopLeft(tab(MatchDetailSegment.overview)).dx;
+        final visible = training
+            ? [MatchDetailSegment.overview, MatchDetailSegment.attendance]
+            : MatchDetailSegment.values;
+        final initialWidth =
+            tester.getSize(tab(MatchDetailSegment.overview)).width;
+        expect(initialWidth, greaterThan(44));
+        for (final segment in visible.skip(1)) {
+          expect(tester.getSize(tab(segment)).width, 44);
+          expect(find.descendant(of: tab(segment), matching: find.byType(Text)),
+              findsNothing);
+        }
+        expect(find.byIcon(Icons.info_outline_rounded), findsOneWidget);
+        expect(find.byIcon(Icons.groups_outlined), findsOneWidget);
+        expect(find.byIcon(Icons.account_tree_outlined), findsNothing);
+        expect(find.byKey(const ValueKey('match-details-lineup-icon')),
+            training ? findsNothing : findsOneWidget);
+        expect(find.byIcon(Icons.timeline_rounded),
+            training ? findsNothing : findsOneWidget);
+        await tester.tap(tab(MatchDetailSegment.attendance));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
+        expect(tester.getSize(tab(MatchDetailSegment.attendance)).width,
+            greaterThan(44));
+        expect(tester.getSize(tab(MatchDetailSegment.attendance)).width,
+            lessThan(initialWidth));
+        expect(tester.takeException(), isNull);
+        expect(overviewIconOffset(), closeTo(22, 0.01));
+        // Resizing during expansion must use the current available width.
+        tester.view.physicalSize = const Size(300, 640);
+        await tester.pump();
+        expect(tester.takeException(), isNull);
+        await tester.pumpAndSettle();
+        expect(overviewIconOffset(), closeTo(22, 0.01));
+        for (final segment in visible) {
+          await tester.tap(tab(segment));
+          await tester.pumpAndSettle();
+          for (final candidate in visible) {
+            expect(
+                find.descendant(
+                    of: tab(candidate), matching: find.byType(Text)),
+                candidate == segment ? findsOneWidget : findsNothing);
+          }
+          if (!training) {
+            final icon = tester.widget<SvgPicture>(
+                find.byKey(const ValueKey('match-details-lineup-icon')));
+            final selectedColor = header == 'dark'
+                ? AppColors.matchDetailsHeader
+                : AppColors.light.successForeground;
+            final unselectedColor = header == 'dark'
+                ? AppColors.matchDetailsHeaderMuted
+                : AppColors.light.textSecondary;
+            expect(
+                icon.colorFilter,
+                ColorFilter.mode(
+                    segment == MatchDetailSegment.lineup
+                        ? selectedColor
+                        : unselectedColor,
+                    BlendMode.srcIn));
+            expect(
+                tester.getSize(
+                    find.byKey(const ValueKey('match-details-lineup-icon'))),
+                const Size(20, 20));
+          }
+          expect(tester.getSemantics(tab(segment)).getSemanticsData().label,
+              isNotEmpty);
+          expect(
+              tester
+                  .getSemantics(tab(segment))
+                  .getSemanticsData()
+                  .hasAction(SemanticsAction.tap),
+              isTrue);
+          expect(tester.takeException(), isNull);
+        }
+      });
+    }
+  }
+
+  testWidgets('tabs honor reduced motion immediately', (tester) async {
+    var selected = MatchDetailSegment.overview;
+    await tester.pumpWidget(MaterialApp(
+      builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(disableAnimations: true),
+          child: child!),
+      home: StatefulBuilder(
+          builder: (_, setState) => MatchDetailTemplate(
+                heroCard: const SizedBox(height: 1),
+                selectedSegment: selected,
+                onSegmentChanged: (value) => setState(() => selected = value),
+              )),
+    ));
+    await tester
+        .tap(find.byKey(const ValueKey('match-details-segment-attendance')));
+    await tester.pump();
+    expect(find.text('Tilmeldte'), findsOneWidget);
+    expect(find.text('Overblik'), findsNothing);
+    expect(
+        tester
+            .getSize(
+                find.byKey(const ValueKey('match-details-segment-overview')))
+            .width,
+        44);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('attendance segment does not render duplicate section header',
       (tester) async {
@@ -125,7 +276,7 @@ void main() {
     );
   });
 
-  testWidgets('match details segments use the underline design',
+  testWidgets('match details segments expand the selected icon and label',
       (tester) async {
     MatchDetailSegment? selected;
 
@@ -145,30 +296,29 @@ void main() {
       ),
     );
 
-    final selectedIndicator = tester.widget<AnimatedContainer>(
-      find.byKey(
-        const ValueKey('match-details-segment-overview-indicator'),
-      ),
-    );
-    final selectedDecoration = selectedIndicator.decoration! as BoxDecoration;
-    expect(selectedDecoration.color, AppColors.light.successForeground);
+    final selectedSurface = tester.widget<Container>(
+        find.byKey(const ValueKey('match-details-segment-overview-surface')));
+    expect((selectedSurface.decoration! as BoxDecoration).color,
+        AppColors.light.lightGrass);
     expect(
-      tester
-          .getSize(
-            find.byKey(const ValueKey('match-details-segment-overview')),
-          )
-          .height,
-      30,
-    );
-
-    final unselectedIndicator = tester.widget<AnimatedContainer>(
-      find.byKey(
-        const ValueKey('match-details-segment-attendance-indicator'),
-      ),
-    );
-    final unselectedDecoration =
-        unselectedIndicator.decoration! as BoxDecoration;
-    expect(unselectedDecoration.color, Colors.transparent);
+        tester
+            .getSize(
+                find.byKey(const ValueKey('match-details-segment-overview')))
+            .height,
+        44);
+    expect(
+        tester
+            .getSize(
+                find.byKey(const ValueKey('match-details-segment-overview')))
+            .width,
+        lessThan(140));
+    expect(find.text('Overblik'), findsOneWidget);
+    expect(find.text('Tilmeldte'), findsNothing);
+    expect(find.byIcon(Icons.groups_outlined), findsOneWidget);
+    final unselectedSurface = tester.widget<Container>(
+        find.byKey(const ValueKey('match-details-segment-attendance-surface')));
+    expect((unselectedSurface.decoration! as BoxDecoration).color,
+        Colors.transparent);
 
     await tester.tap(
       find.byKey(const ValueKey('match-details-segment-attendance')),
@@ -359,6 +509,7 @@ void main() {
     await tester.pumpWidget(
       buildTemplate(selectedSegment: MatchDetailSegment.timeline),
     );
+    await tester.pumpAndSettle();
 
     expect(find.text('Kamp begivenheder'), findsNWidgets(2));
     expect(find.text(message), findsOneWidget);
