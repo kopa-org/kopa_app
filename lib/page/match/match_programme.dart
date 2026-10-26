@@ -58,20 +58,20 @@ class _MatchProgrammePageState extends State<MatchProgrammePage> {
             if (!user.isTeamOwner) return const SizedBox.shrink();
             final l10n = AppLocalizations.of(context)!;
 
+            // Arc of icon actions, styled like the match details FAB.
             return ExpandableFab(
               distance: 104,
               openButtonKey: const ValueKey('create-match-fab'),
               heroTag: 'create-match-fab',
               tooltip: l10n.eventCreateTitle,
-              backgroundColor: colors.white,
-              foregroundColor: colors.primary,
-              icon: const Icon(Icons.add, size: 24),
+              backgroundColor: AppColors.matchDetailsHeader,
+              foregroundColor: colors.white,
               children: [
                 FloatingActionButton(
                   heroTag: 'create-match-fab-match',
                   tooltip: l10n.eventCreateMatch,
-                  backgroundColor: colors.primary,
-                  foregroundColor: colors.white,
+                  backgroundColor: colors.surface,
+                  foregroundColor: AppColors.matchDetailsHeader,
                   onPressed: () =>
                       _showCreateEvent(context, KopaEventType.match),
                   child: const Icon(Icons.sports_soccer),
@@ -79,7 +79,7 @@ class _MatchProgrammePageState extends State<MatchProgrammePage> {
                 FloatingActionButton(
                   heroTag: 'create-match-fab-training',
                   tooltip: l10n.eventCreateTraining,
-                  backgroundColor: colors.lightSky65,
+                  backgroundColor: colors.surface,
                   foregroundColor: colors.sky,
                   onPressed: () =>
                       _showCreateEvent(context, KopaEventType.training),

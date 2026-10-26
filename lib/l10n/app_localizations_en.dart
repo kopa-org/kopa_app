@@ -972,4 +972,61 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fineBoxMobilePayConnected => 'MobilePay Box connected';
+
+  @override
+  String get matchTasksTitle => 'Tasks';
+
+  @override
+  String get matchTasksQueueTitle => 'Player order';
+
+  @override
+  String get matchTasksQueuePlayer => 'Player';
+
+  @override
+  String get matchTasksQueueSelected => 'Selected for match';
+
+  @override
+  String get matchTasksNotSelected => 'Not selected';
+
+  @override
+  String get matchTasksAutoSelected => 'Automatically chosen';
+
+  @override
+  String get matchTasksChosenByLeader => 'Chosen by team leader';
+
+  @override
+  String get matchTasksReset => 'Reset';
+
+  @override
+  String get matchTasksResetConfirm =>
+      'Reset the player order to the order players joined the team?';
+
+  @override
+  String get matchTasksMarkDone => 'Done';
+
+  @override
+  String get matchTasksNoAssignee => 'No player selected yet';
+
+  @override
+  String get matchTasksCreate => 'New task';
+
+  @override
+  String get matchTasksNameLabel => 'Task name';
+
+  @override
+  String get matchTasksCreateConfirm => 'Create';
+
+  @override
+  String get matchTasksCancel => 'Cancel';
+
+  @override
+  String get matchTasksDelete => 'Delete task';
+
+  @override
+  String get matchTasksError => 'Could not update the task. Try again.';
+
+  @override
+  String matchTasksCompletedBy(String name) {
+    return 'Done by $name';
+  }
 }

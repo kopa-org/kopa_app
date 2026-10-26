@@ -1,4 +1,3 @@
-import 'package:kopa/theme/app_colors.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -98,29 +97,10 @@ class ExpandableFabState extends State<ExpandableFab>
         alignment: Alignment.bottomRight,
         clipBehavior: Clip.none,
         children: [
-          _buildTapToCloseFab(context),
           ..._buildExpandingActionButtons(),
-          _buildTapToOpenFab(),
+          _buildToggleFab(),
         ],
       ),
-    );
-  }
-
-  Widget _buildTapToCloseFab(BuildContext context) {
-    final theme = Theme.of(context);
-    final backgroundColor = widget.backgroundColor ??
-        theme.floatingActionButtonTheme.backgroundColor ??
-        AppColors.of(context).primary;
-    final foregroundColor = widget.foregroundColor ??
-        theme.floatingActionButtonTheme.foregroundColor ??
-        AppColors.of(context).white;
-
-    return FloatingActionButton(
-      heroTag: null,
-      backgroundColor: backgroundColor,
-      foregroundColor: foregroundColor,
-      onPressed: _toggle,
-      child: widget.closeIcon,
     );
   }
 
@@ -148,33 +128,54 @@ class ExpandableFabState extends State<ExpandableFab>
     return children;
   }
 
-  Widget _buildTapToOpenFab() {
-    return IgnorePointer(
-      ignoring: _open,
-      child: AnimatedContainer(
-        transformAlignment: Alignment.center,
-        transform: Matrix4.diagonal3Values(
-          _open ? 0.7 : 1.0,
-          _open ? 0.7 : 1.0,
-          1.0,
-        ),
-        duration: const Duration(milliseconds: 250),
-        curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
-        child: AnimatedOpacity(
-          opacity: _open ? 0.0 : 1.0,
-          curve: const Interval(0.25, 1.0, curve: Curves.easeInOut),
-          duration: const Duration(milliseconds: 250),
-          child: FloatingActionButton(
-            key: widget.openButtonKey,
-            heroTag: widget.heroTag,
-            tooltip: widget.tooltip,
-            backgroundColor: widget.backgroundColor,
-            foregroundColor: widget.foregroundColor,
-            onPressed: _toggle,
-            child: widget.icon,
-          ),
+  /// One button for both states: the icon turns and cross-fades instead of
+  /// two stacked buttons being scaled and faded against each other.
+  Widget _buildToggleFab() {
+    return Positioned(
+      right: 0,
+      bottom: 0,
+      child: FloatingActionButton(
+        key: widget.openButtonKey,
+        heroTag: widget.heroTag,
+        tooltip: widget.tooltip,
+        backgroundColor: widget.backgroundColor,
+        foregroundColor: widget.foregroundColor,
+        onPressed: _toggle,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            _buildToggleIcon(
+              widget.icon,
+              fade: ReverseAnimation(
+                CurvedAnimation(
+                  parent: _controller,
+                  curve: const Interval(0.0, 0.5, curve: Curves.easeIn),
+                ),
+              ),
+              turns: Tween(begin: 0.0, end: 0.25).animate(_controller),
+            ),
+            _buildToggleIcon(
+              widget.closeIcon,
+              fade: CurvedAnimation(
+                parent: _controller,
+                curve: const Interval(0.5, 1.0, curve: Curves.easeOut),
+              ),
+              turns: Tween(begin: -0.25, end: 0.0).animate(_controller),
+            ),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _buildToggleIcon(
+    Widget icon, {
+    required Animation<double> fade,
+    required Animation<double> turns,
+  }) {
+    return FadeTransition(
+      opacity: fade,
+      child: RotationTransition(turns: turns, child: icon),
     );
   }
 }

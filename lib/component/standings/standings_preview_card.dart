@@ -27,7 +27,6 @@ class StandingsPreviewCard extends StatelessWidget {
     final palette = _StandingsPreviewPalette(appColors);
     final allRows = standings?.rows ?? const <DbuStandingRow>[];
     final topRows = allRows.take(3).toList();
-    final standingsLabel = _standingsLabel(standings);
     final currentTeamRow = allRows.cast<DbuStandingRow?>().firstWhere(
           (row) => row != null && _isCurrentTeam(row, currentUser, standings),
           orElse: () => null,
@@ -54,25 +53,6 @@ class StandingsPreviewCard extends StatelessWidget {
           onTap: () => _openStandings(context, standings, currentUser),
           child: Column(
             children: [
-              Container(
-                padding: const EdgeInsets.all(Spacing.md),
-                color: appColors.lightGrass,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        standingsLabel,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: appTextStyles.label.copyWith(
-                          color: appColors.dirt,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
               Padding(
                 padding: const EdgeInsets.all(Spacing.md),
                 child: Column(
@@ -309,14 +289,6 @@ void _openStandings(
       ),
     ),
   );
-}
-
-String _standingsLabel(DbuStandings? standings) {
-  if (standings?.seriesName?.trim().isNotEmpty == true) {
-    return standings!.seriesName!.trim();
-  }
-  if (standings?.poolId == null) return 'Serie';
-  return 'Serie ${standings!.poolId}';
 }
 
 bool _isCurrentTeam(

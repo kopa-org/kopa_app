@@ -42,6 +42,7 @@ class MatchDetailTemplate extends StatelessWidget {
   final bool timelinePreview;
   final String timelinePreviewMessage;
   final bool showTimelineSegment;
+  final bool timelineInOverview;
   final bool usePrematchLayout;
   final bool overviewWidgetsBeforeInfo;
   final Widget? attendanceHeader;
@@ -80,6 +81,7 @@ class MatchDetailTemplate extends StatelessWidget {
     this.timelineEmptyMessage = 'Ingen begivenheder registreret.',
     this.timelinePreview = false,
     this.timelinePreviewMessage = '',
+    this.timelineInOverview = false,
     this.showTimelineSegment = true,
     this.usePrematchLayout = false,
     this.overviewWidgetsBeforeInfo = false,
@@ -295,7 +297,7 @@ class MatchDetailTemplate extends StatelessWidget {
           segment: MatchDetailSegment.lineup,
           label: AppLocalizations.of(context)!.matchDetailsLineupTab
         ),
-      if (showTimelineSegment)
+      if (_hasTimelineSegment)
         (segment: MatchDetailSegment.timeline, label: timelineSegmentLabel),
     ];
 
@@ -395,12 +397,14 @@ class MatchDetailTemplate extends StatelessWidget {
     );
   }
 
+  bool get _hasTimelineSegment => showTimelineSegment && !timelineInOverview;
+
   bool get _showAttendanceHeader =>
       attendanceHeader != null &&
       _effectiveSelectedSegment == MatchDetailSegment.overview;
 
   MatchDetailSegment get _effectiveSelectedSegment {
-    if (!showTimelineSegment &&
+    if (!_hasTimelineSegment &&
         selectedSegment == MatchDetailSegment.timeline) {
       return MatchDetailSegment.overview;
     }
@@ -424,9 +428,16 @@ class MatchDetailTemplate extends StatelessWidget {
               _PrematchInfoCard(children: infoRows),
             ],
           ];
-          return overviewWidgetsBeforeInfo
+          final overview = overviewWidgetsBeforeInfo
               ? [...overviewWidgets, ...info]
               : [...info, ...overviewWidgets];
+          return [
+            ...overview,
+            if (timelineInOverview && showTimelineSegment) ...[
+              const SizedBox(height: 20),
+              ..._buildTimelineSection(),
+            ],
+          ];
         }
 
         return [
@@ -457,29 +468,33 @@ class MatchDetailTemplate extends StatelessWidget {
             ...attendanceList,
         ];
       case MatchDetailSegment.timeline:
-        if (timelinePreview) {
-          return [
-            _PrematchSectionTitle(title: timelineTitle),
-            _PrematchTimelinePreview(
-              items: timelineItems,
-              message: timelinePreviewMessage,
-            ),
-          ];
-        }
-
-        return [
-          if (usePrematchLayout)
-            _PrematchSectionTitle(title: timelineTitle)
-          else ...[
-            SectionHeader(title: timelineTitle),
-            const SizedBox(height: Spacing.md),
-          ],
-          if (timelineItems.isEmpty)
-            _EmptySegmentMessage(message: timelineEmptyMessage)
-          else
-            ...timelineItems,
-        ];
+        return _buildTimelineSection();
     }
+  }
+
+  List<Widget> _buildTimelineSection() {
+    if (timelinePreview) {
+      return [
+        _PrematchSectionTitle(title: timelineTitle),
+        _PrematchTimelinePreview(
+          items: timelineItems,
+          message: timelinePreviewMessage,
+        ),
+      ];
+    }
+
+    return [
+      if (usePrematchLayout)
+        _PrematchSectionTitle(title: timelineTitle)
+      else ...[
+        SectionHeader(title: timelineTitle),
+        const SizedBox(height: Spacing.md),
+      ],
+      if (timelineItems.isEmpty)
+        _EmptySegmentMessage(message: timelineEmptyMessage)
+      else
+        ...timelineItems,
+    ];
   }
 }
 

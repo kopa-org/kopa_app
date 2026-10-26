@@ -969,4 +969,61 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String get fineBoxMobilePayConnected => 'MobilePay Box tilknyttet';
+
+  @override
+  String get matchTasksTitle => 'Opgaver';
+
+  @override
+  String get matchTasksQueueTitle => 'Spillerrækkefølge';
+
+  @override
+  String get matchTasksQueuePlayer => 'Spiller';
+
+  @override
+  String get matchTasksQueueSelected => 'Udtaget til kamp';
+
+  @override
+  String get matchTasksNotSelected => 'Ikke udtaget';
+
+  @override
+  String get matchTasksAutoSelected => 'Automatisk valgt';
+
+  @override
+  String get matchTasksChosenByLeader => 'Valgt af holdleder';
+
+  @override
+  String get matchTasksReset => 'Nulstil';
+
+  @override
+  String get matchTasksResetConfirm =>
+      'Nulstil spillerrækkefølgen til den rækkefølge spillerne kom på holdet?';
+
+  @override
+  String get matchTasksMarkDone => 'Udført';
+
+  @override
+  String get matchTasksNoAssignee => 'Ingen spiller udtaget endnu';
+
+  @override
+  String get matchTasksCreate => 'Ny opgave';
+
+  @override
+  String get matchTasksNameLabel => 'Opgavens navn';
+
+  @override
+  String get matchTasksCreateConfirm => 'Opret';
+
+  @override
+  String get matchTasksCancel => 'Annuller';
+
+  @override
+  String get matchTasksDelete => 'Slet opgave';
+
+  @override
+  String get matchTasksError => 'Opgaven kunne ikke opdateres. Prøv igen.';
+
+  @override
+  String matchTasksCompletedBy(String name) {
+    return 'Udført af $name';
+  }
 }

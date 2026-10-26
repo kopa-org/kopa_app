@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:kopa/component/avatar/team_badge_label.dart';
 import 'package:kopa/component/future_handler.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
+import 'package:kopa/component/team/team_role_button.dart';
 import 'package:kopa/model/player_profile.dart';
 import 'package:kopa/model/team_logo_design.dart';
 import 'package:kopa/model/user_details.dart';
@@ -28,6 +29,7 @@ class PlayerProfilePage extends StatelessWidget {
     return PageScaffold(
       title: player.name,
       showBackButton: true,
+      trailing: [TeamRoleButton(player: player)],
       backgroundColor: AppColors.of(context).background,
       systemOverlayStyle: SystemUiOverlayStyle.dark.copyWith(
         statusBarColor: AppColors.of(context).background,

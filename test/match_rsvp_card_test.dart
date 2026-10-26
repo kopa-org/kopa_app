@@ -26,7 +26,6 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         var accepted = 0;
         var declined = 0;
-        var attendeesOpened = 0;
         final boundaryKey = GlobalKey();
         await tester.pumpWidget(MaterialApp(
           theme: AppTheme.lightTheme,
@@ -41,31 +40,17 @@ void main() {
               child: MatchRsvpCard(
                 status: status,
                 isSaving: false,
-                attendeeNames: const [
-                  'Mads Jensen',
-                  'Anna Hansen',
-                  'Bo',
-                  'Ida',
-                  'Peter',
-                  'Søren'
-                ],
-                attendeeCount: 12,
                 onAccept: () => accepted++,
                 onDecline: () => declined++,
-                onShowAttendees: () => attendeesOpened++,
               ),
             ),
           )),
         ));
         await tester.pumpAndSettle();
-        expect(find.text('12 tilmeldte'), findsOneWidget);
-        expect(find.text('+7'), findsOneWidget);
-        final avatars = tester.getRect(
-          find.byKey(const ValueKey('match-rsvp-attendee-avatars')),
-        );
-        final count = tester.getRect(find.text('12 tilmeldte'));
-        expect(avatars.bottom, lessThan(count.top));
-        expect(avatars.right, closeTo(count.right, 0.1));
+        // The attendee summary lives under Overblik, not in the RSVP card.
+        expect(find.text('12 tilmeldte'), findsNothing);
+        expect(
+            find.byKey(const ValueKey('match-rsvp-attendees')), findsNothing);
         expect(tester.takeException(), isNull);
         final context = tester.element(find.byType(MatchRsvpCard));
         final l10n = AppLocalizations.of(context)!;
@@ -80,14 +65,6 @@ void main() {
           expect(find.byKey(const ValueKey('match-rsvp-confirmation')),
               findsNothing);
           expect(find.byIcon(Icons.keyboard_arrow_down), findsOneWidget);
-          final summary = tester.getRect(
-            find.byKey(const ValueKey('match-rsvp-attendees')),
-          );
-          final dropdown = tester.getRect(
-            find.byKey(const ValueKey('match-details-rsvp-status')),
-          );
-          expect(dropdown.right, lessThan(summary.left));
-          expect(dropdown.center.dy, closeTo(summary.center.dy, 0.1));
           expect(
               find.text(status == MatchRsvpStatus.awaitingSelection
                   ? l10n.matchDetailsRsvpPendingSelection
@@ -138,8 +115,6 @@ void main() {
           expect(accepted, going ? 0 : 1);
           expect(declined, going ? 1 : 0);
         }
-        await tester.tap(find.byKey(const ValueKey('match-rsvp-attendees')));
-        expect(attendeesOpened, 1);
       });
     }
   }
@@ -155,11 +130,8 @@ void main() {
             body: MatchRsvpCard(
           status: status,
           isSaving: true,
-          attendeeNames: const [],
-          attendeeCount: 0,
           onAccept: () => changes++,
           onDecline: () => changes++,
-          onShowAttendees: () {},
         )),
       ));
       if (status == MatchRsvpStatus.pending) {

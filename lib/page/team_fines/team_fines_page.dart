@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopa/component/button/mobile_pay_button.dart';
+import 'package:kopa/component/button/expandable_fab.dart';
 import 'package:kopa/component/future_handler.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
@@ -93,74 +94,97 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
     final appColors = AppColors.of(context);
     final l10n = AppLocalizations.of(context)!;
 
+    final fab = _buildCreateFineTypeFab();
+    final body = FutureHandler<UserDetails>(
+      future: currentUserData,
+      onSuccess: (context, user) {
+        final segment = user.isTeamOwner
+            ? _selectedSegment
+            : TeamOwnerFinesSegments.personal;
+
+        return FutureHandler<FineBoxDetails>(
+          future: fineBoxDetails,
+          onSuccess: (context, fineBox) {
+            return RefreshIndicator(
+              color: appColors.grass,
+              onRefresh: _refreshFineBox,
+              child: CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: _FineHeader(
+                      title: segment == TeamOwnerFinesSegments.personal
+                          ? l10n.fineBoxMyFines
+                          : l10n.fineBoxTitle,
+                      subtitle: _teamSubtitle(user),
+                      showBackButton: widget.showBackButton,
+                    ),
+                  ),
+                  if (user.isTeamOwner)
+                    SliverToBoxAdapter(
+                      child: _SegmentTabs(
+                        selectedSegment: _selectedSegment,
+                        onChanged: _selectSegment,
+                      ),
+                    ),
+                  SliverToBoxAdapter(
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 160),
+                      switchInCurve: Curves.easeOutCubic,
+                      switchOutCurve: Curves.easeInCubic,
+                      // The default layout centers both children, so the
+                      // shorter one jumps to the top when the other leaves.
+                      layoutBuilder: (currentChild, previousChildren) => Stack(
+                        alignment: Alignment.topCenter,
+                        children: [
+                          ...previousChildren,
+                          if (currentChild != null) currentChild,
+                        ],
+                      ),
+                      child: KeyedSubtree(
+                        key: ValueKey(segment),
+                        child: switch (segment) {
+                          TeamOwnerFinesSegments.overview =>
+                            _buildOverview(fineBox, user),
+                          TeamOwnerFinesSegments.fineTypes => _buildFineTypes(),
+                          TeamOwnerFinesSegments.personal =>
+                            _buildPersonal(fineBox, user),
+                        },
+                      ),
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: mainTabBottomContentPadding(context) + Spacing.lg,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+
+    // As a main tab the FAB must clear the bottom navigation bar, which the
+    // tab scaffold handles the same way as the match programme page.
+    if (!widget.showBackButton) {
+      return PageScaffold.tab(
+        title: l10n.fineBoxTitle,
+        showTopBar: false,
+        backgroundColor: appColors.background,
+        floatingActionButton: fab,
+        body: body,
+      );
+    }
+
     return PageScaffold(
       title: l10n.fineBoxTitle,
-      showBackButton: widget.showBackButton,
+      showBackButton: true,
       showTopBar: false,
       backgroundColor: appColors.background,
-      useBottomSafeArea: widget.showBackButton,
-      body: FutureHandler<UserDetails>(
-        future: currentUserData,
-        onSuccess: (context, user) {
-          final segment = user.isTeamOwner
-              ? _selectedSegment
-              : TeamOwnerFinesSegments.personal;
-
-          return FutureHandler<FineBoxDetails>(
-            future: fineBoxDetails,
-            onSuccess: (context, fineBox) {
-              return RefreshIndicator(
-                color: appColors.grass,
-                onRefresh: _refreshFineBox,
-                child: CustomScrollView(
-                  slivers: [
-                    SliverToBoxAdapter(
-                      child: _FineHeader(
-                        title: segment == TeamOwnerFinesSegments.personal
-                            ? l10n.fineBoxMyFines
-                            : l10n.fineBoxTitle,
-                        subtitle: _teamSubtitle(user),
-                        showBackButton: widget.showBackButton,
-                      ),
-                    ),
-                    if (user.isTeamOwner)
-                      SliverToBoxAdapter(
-                        child: _SegmentTabs(
-                          selectedSegment: _selectedSegment,
-                          onChanged: _selectSegment,
-                        ),
-                      ),
-                    SliverToBoxAdapter(
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 220),
-                        switchInCurve: Curves.easeOutCubic,
-                        switchOutCurve: Curves.easeInCubic,
-                        child: KeyedSubtree(
-                          key: ValueKey(segment),
-                          child: switch (segment) {
-                            TeamOwnerFinesSegments.overview =>
-                              _buildOverview(fineBox, user),
-                            TeamOwnerFinesSegments.fineTypes =>
-                              _buildFineTypes(),
-                            TeamOwnerFinesSegments.personal =>
-                              _buildPersonal(fineBox, user),
-                          },
-                        ),
-                      ),
-                    ),
-                    SliverToBoxAdapter(
-                      child: SizedBox(
-                        height:
-                            mainTabBottomContentPadding(context) + Spacing.lg,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          );
-        },
-      ),
+      floatingActionButtonBottomInset: 16,
+      floatingActionButton: fab,
+      body: body,
     );
   }
 
@@ -241,12 +265,6 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _PrimaryActionButton(
-                icon: CupertinoIcons.plus,
-                label: l10n.fineBoxCreateFineType,
-                onPressed: () => _openCreateFineType(fineTypes),
-              ),
-              const SizedBox(height: Spacing.lg),
               InFormSectionTitle(
                 title: l10n.fineBoxCatalogTitle,
                 action: fineTypes.isEmpty
@@ -416,6 +434,53 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
     if (result != null) {
       _refreshFineBox();
     }
+  }
+
+  Widget? _buildCreateFineTypeFab() {
+    if (_selectedSegment != TeamOwnerFinesSegments.fineTypes) return null;
+
+    return FutureHandler<UserDetails>(
+      future: currentUserData,
+      loadingIndicator: const SizedBox.shrink(),
+      onError: (_) => const SizedBox.shrink(),
+      onSuccess: (context, user) {
+        if (!user.isTeamOwner) return const SizedBox.shrink();
+
+        final l10n = AppLocalizations.of(context)!;
+        final colors = AppColors.of(context);
+        final fabKey = GlobalKey<ExpandableFabState>();
+
+        // Same expandable FAB look as the match details and programme pages.
+        final fab = ExpandableFab(
+          key: fabKey,
+          distance: 64,
+          expandVertically: true,
+          expandedWidth: 280,
+          openButtonKey: const ValueKey('create-fine-type-fab'),
+          heroTag: 'create-fine-type-fab',
+          tooltip: l10n.fineBoxCreateFineType,
+          backgroundColor: AppColors.matchDetailsHeader,
+          foregroundColor: colors.white,
+          children: [
+            FloatingActionButton.extended(
+              key: const ValueKey('create-fine-type-fab-action'),
+              heroTag: 'create-fine-type-fab-action',
+              tooltip: l10n.fineBoxCreateFineType,
+              backgroundColor: colors.surface,
+              foregroundColor: colors.grass,
+              onPressed: () async {
+                fabKey.currentState?.close();
+                _openCreateFineType(await fineTypeDetails);
+              },
+              icon: const Icon(CupertinoIcons.plus, size: 24),
+              label: Text(l10n.fineBoxCreateFineType),
+            ),
+          ],
+        );
+
+        return fab;
+      },
+    );
   }
 
   Future<void> _openCreateFineType(List<FineTypeDetails> fineTypes) async {
@@ -1233,48 +1298,6 @@ class _PressableTileState extends State<_PressableTile> {
             child: widget.child,
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _PrimaryActionButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onPressed;
-
-  const _PrimaryActionButton({
-    required this.icon,
-    required this.label,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final appColors = AppColors.of(context);
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    return _PressableTile(
-      color: appColors.grass,
-      onTap: onPressed,
-      padding: const EdgeInsets.symmetric(
-        horizontal: Spacing.lg,
-        vertical: Spacing.md,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: appColors.white, size: 20),
-          const SizedBox(width: Spacing.sm),
-          Text(
-            label,
-            style: appTextStyles.subtitle2.copyWith(
-              color: appColors.white,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
       ),
     );
   }

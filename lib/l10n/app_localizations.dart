@@ -1861,6 +1861,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'MobilePay Box connected'**
   String get fineBoxMobilePayConnected;
+
+  /// No description provided for @matchTasksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks'**
+  String get matchTasksTitle;
+
+  /// No description provided for @matchTasksQueueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Player order'**
+  String get matchTasksQueueTitle;
+
+  /// No description provided for @matchTasksQueuePlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Player'**
+  String get matchTasksQueuePlayer;
+
+  /// No description provided for @matchTasksQueueSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected for match'**
+  String get matchTasksQueueSelected;
+
+  /// No description provided for @matchTasksNotSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Not selected'**
+  String get matchTasksNotSelected;
+
+  /// No description provided for @matchTasksAutoSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically chosen'**
+  String get matchTasksAutoSelected;
+
+  /// No description provided for @matchTasksChosenByLeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Chosen by team leader'**
+  String get matchTasksChosenByLeader;
+
+  /// No description provided for @matchTasksReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get matchTasksReset;
+
+  /// No description provided for @matchTasksResetConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset the player order to the order players joined the team?'**
+  String get matchTasksResetConfirm;
+
+  /// No description provided for @matchTasksMarkDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get matchTasksMarkDone;
+
+  /// No description provided for @matchTasksNoAssignee.
+  ///
+  /// In en, this message translates to:
+  /// **'No player selected yet'**
+  String get matchTasksNoAssignee;
+
+  /// No description provided for @matchTasksCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'New task'**
+  String get matchTasksCreate;
+
+  /// No description provided for @matchTasksNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Task name'**
+  String get matchTasksNameLabel;
+
+  /// No description provided for @matchTasksCreateConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get matchTasksCreateConfirm;
+
+  /// No description provided for @matchTasksCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get matchTasksCancel;
+
+  /// No description provided for @matchTasksDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete task'**
+  String get matchTasksDelete;
+
+  /// No description provided for @matchTasksError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update the task. Try again.'**
+  String get matchTasksError;
+
+  /// No description provided for @matchTasksCompletedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Done by {name}'**
+  String matchTasksCompletedBy(String name);
 }
 
 class _AppLocalizationsDelegate

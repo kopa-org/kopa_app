@@ -376,5 +376,30 @@
     }
   },
   "fineBoxMarkCashPaid": "Or mark as paid in cash",
-  "fineBoxMobilePayConnected": "MobilePay Box connected"
+  "fineBoxMobilePayConnected": "MobilePay Box connected",
+  "matchTasksTitle": "Tasks",
+  "matchTasksQueueTitle": "Player order",
+  "matchTasksQueuePlayer": "Player",
+  "matchTasksQueueSelected": "Selected for match",
+  "matchTasksNotSelected": "Not selected",
+  "matchTasksAutoSelected": "Automatically chosen",
+  "matchTasksChosenByLeader": "Chosen by team leader",
+  "matchTasksReset": "Reset",
+  "matchTasksResetConfirm": "Reset the player order to the order players joined the team?",
+  "matchTasksMarkDone": "Done",
+  "matchTasksNoAssignee": "No player selected yet",
+  "matchTasksCreate": "New task",
+  "matchTasksNameLabel": "Task name",
+  "matchTasksCreateConfirm": "Create",
+  "matchTasksCancel": "Cancel",
+  "matchTasksDelete": "Delete task",
+  "matchTasksError": "Could not update the task. Try again.",
+  "matchTasksCompletedBy": "Done by {name}",
+  "@matchTasksCompletedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -58,6 +58,11 @@ class TeamRoleButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = context.watch<AuthCubit>().state.user;
     final state = context.watch<TeamMembersCubit>().state;
+    // The page may hold a stale snapshot, so prefer the live member.
+    final player = state.members.firstWhere(
+      (member) => member.id == this.player.id,
+      orElse: () => this.player,
+    );
     if (!(user?.canManageTeam == true ||
         (user?.id == player.id && player.isTeamOwner))) {
       return const SizedBox.shrink();
@@ -69,8 +74,7 @@ class TeamRoleButton extends StatelessWidget {
       tooltip: AppLocalizations.of(context)!.teamRoleEdit,
       onPressed:
           state.savingUserId != null ? null : () => _editRole(context, player),
-      icon: Icon(CupertinoIcons.person_crop_circle_badge_checkmark,
-          color: AppColors.of(context).grass),
+      icon: Icon(CupertinoIcons.pencil, color: AppColors.of(context).black),
     );
   }
 }

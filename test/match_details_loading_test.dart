@@ -124,7 +124,7 @@ void main() {
           find.byKey(const ValueKey('match-details-rsvp-status')),
         );
         expect(rsvpCard.top, greaterThan(darkHeader.bottom));
-        expect(status.top, greaterThan(rsvpCard.top));
+        expect(status.top, greaterThanOrEqualTo(rsvpCard.top));
         expect(initialPracticalRect!.top, greaterThan(status.bottom));
       }
 

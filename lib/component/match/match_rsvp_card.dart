@@ -1,8 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:kopa/component/avatar/app_avatar.dart';
-import 'package:kopa/component/card/kopa_card.dart';
 import 'package:kopa/component/match/attendance_response_dropdown.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/theme/app_colors.dart';
@@ -14,22 +12,16 @@ class MatchRsvpCard extends StatelessWidget {
   final MatchRsvpStatus status;
   final bool isTraining;
   final bool isSaving;
-  final List<String> attendeeNames;
-  final int attendeeCount;
   final VoidCallback onAccept;
   final VoidCallback onDecline;
-  final VoidCallback onShowAttendees;
 
   const MatchRsvpCard({
     super.key,
     required this.status,
     this.isTraining = false,
     required this.isSaving,
-    required this.attendeeNames,
-    required this.attendeeCount,
     required this.onAccept,
     required this.onDecline,
-    required this.onShowAttendees,
   });
 
   @override
@@ -40,44 +32,10 @@ class MatchRsvpCard extends StatelessWidget {
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
     final pending = status == MatchRsvpStatus.pending;
     final awaitingSelection = status == MatchRsvpStatus.awaitingSelection;
-    final attendeeSummary = Semantics(
-      button: true,
-      label: l10n.matchRsvpAttendeeCount(attendeeCount),
-      child: InkWell(
-        key: const ValueKey('match-rsvp-attendees'),
-        onTap: onShowAttendees,
-        borderRadius: BorderRadius.circular(14),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            if (attendeeCount > 0) ...[
-              _AttendeePreview(
-                key: const ValueKey('match-rsvp-attendee-avatars'),
-                names: attendeeNames,
-                count: attendeeCount,
-              ),
-              const SizedBox(height: 8),
-            ],
-            Text(l10n.matchRsvpAttendeeCount(attendeeCount),
-                textAlign: TextAlign.right,
-                style: styles.bodyBold.copyWith(fontSize: 11, height: 14 / 11)),
-          ],
-        ),
-      ),
-    );
 
-    return KopaCard(
+    // No card chrome: the RSVP sits directly on the page background.
+    return KeyedSubtree(
       key: const ValueKey('match-rsvp-card'),
-      borderRadius: 20,
-      color: colors.white,
-      borderSide: BorderSide(color: colors.grey4.withValues(alpha: 0.25)),
-      boxShadow: [
-        BoxShadow(
-            color: colors.black.withValues(alpha: 0.03),
-            blurRadius: 16,
-            offset: const Offset(0, 4))
-      ],
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -125,24 +83,14 @@ class MatchRsvpCard extends StatelessWidget {
                   child: _choice(context, l10n.matchDetailsRsvpAccept, onAccept,
                       accept: true)),
             ]),
-            const SizedBox(height: 14),
-            attendeeSummary,
           ] else
-            Row(
-              children: [
-                Expanded(
-                  child: AttendanceResponseDropdown(
-                    currentResponse: status != MatchRsvpStatus.declined,
-                    awaitingSelection: awaitingSelection,
-                    isSaving: isSaving,
-                    onAccept: onAccept,
-                    onDecline: onDecline,
-                    statusKey: const ValueKey('match-details-rsvp-status'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                attendeeSummary,
-              ],
+            AttendanceResponseDropdown(
+              currentResponse: status != MatchRsvpStatus.declined,
+              awaitingSelection: awaitingSelection,
+              isSaving: isSaving,
+              onAccept: onAccept,
+              onDecline: onDecline,
+              statusKey: const ValueKey('match-details-rsvp-status'),
             ),
         ],
       ),
@@ -187,51 +135,5 @@ class MatchRsvpCard extends StatelessWidget {
               ]),
       ),
     );
-  }
-}
-
-class _AttendeePreview extends StatelessWidget {
-  final List<String> names;
-  final int count;
-  const _AttendeePreview({super.key, required this.names, required this.count});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-    final visible = names.take(5).toList();
-    final remaining = (count - visible.length).clamp(0, count);
-    final slots = visible.length + (remaining > 0 ? 1 : 0);
-    return SizedBox(
-      width: slots == 0 ? 0 : 28 + (slots - 1) * 21.0,
-      height: 28,
-      child: Stack(children: [
-        for (var i = 0; i < slots; i++)
-          Positioned(
-            left: i * 21.0,
-            child: Container(
-              width: 28,
-              height: 28,
-              decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: colors.white, width: 2)),
-              child: AppAvatar(
-                radius: 12,
-                backgroundColor: colors.successSurface,
-                initials:
-                    i == visible.length ? '+$remaining' : _initials(visible[i]),
-              ),
-            ),
-          ),
-      ]),
-    );
-  }
-
-  String _initials(String name) {
-    final words =
-        name.trim().split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
-    if (words.isEmpty) return '?';
-    return (words.first.characters.first +
-            (words.length > 1 ? words.last.characters.first : ''))
-        .toUpperCase();
   }
 }

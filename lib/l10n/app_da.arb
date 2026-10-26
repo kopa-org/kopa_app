@@ -376,5 +376,30 @@
     }
   },
   "fineBoxMarkCashPaid": "Eller markér som kontant betalt",
-  "fineBoxMobilePayConnected": "MobilePay Box tilknyttet"
+  "fineBoxMobilePayConnected": "MobilePay Box tilknyttet",
+  "matchTasksTitle": "Opgaver",
+  "matchTasksQueueTitle": "Spillerrækkefølge",
+  "matchTasksQueuePlayer": "Spiller",
+  "matchTasksQueueSelected": "Udtaget til kamp",
+  "matchTasksNotSelected": "Ikke udtaget",
+  "matchTasksAutoSelected": "Automatisk valgt",
+  "matchTasksChosenByLeader": "Valgt af holdleder",
+  "matchTasksReset": "Nulstil",
+  "matchTasksResetConfirm": "Nulstil spillerrækkefølgen til den rækkefølge spillerne kom på holdet?",
+  "matchTasksMarkDone": "Udført",
+  "matchTasksNoAssignee": "Ingen spiller udtaget endnu",
+  "matchTasksCreate": "Ny opgave",
+  "matchTasksNameLabel": "Opgavens navn",
+  "matchTasksCreateConfirm": "Opret",
+  "matchTasksCancel": "Annuller",
+  "matchTasksDelete": "Slet opgave",
+  "matchTasksError": "Opgaven kunne ikke opdateres. Prøv igen.",
+  "matchTasksCompletedBy": "Udført af {name}",
+  "@matchTasksCompletedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

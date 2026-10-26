@@ -28,10 +28,11 @@ void main() {
     addTearDown(auth.close);
     await cubit.load();
     await _pump(tester, auth, cubit);
-    expect(find.byTooltip('Skift rolle på holdet'), findsNWidgets(2));
-    await tester.tap(find.descendant(
-        of: find.byKey(const ValueKey('team-member-2')),
-        matching: find.byType(IconButton)));
+    // The editor lives on the member's profile, not in the roster.
+    expect(find.byTooltip('Skift rolle på holdet'), findsNothing);
+    await _openProfile(tester, 2);
+    expect(find.byTooltip('Skift rolle på holdet'), findsOneWidget);
+    await tester.tap(find.byTooltip('Skift rolle på holdet'));
     await tester.pumpAndSettle(const Duration(milliseconds: 100),
         EnginePhase.sendSemanticsUpdate, const Duration(seconds: 5));
     await tester
@@ -39,9 +40,11 @@ void main() {
     await tester.pumpAndSettle(const Duration(milliseconds: 100),
         EnginePhase.sendSemanticsUpdate, const Duration(seconds: 5));
     expect(cubit.state.members.last.isTeamOwner, isTrue);
-    await tester.tap(find.descendant(
-        of: find.byKey(const ValueKey('team-member-1')),
-        matching: find.byType(IconButton)));
+    tester.state<NavigatorState>(find.byType(Navigator).first).pop();
+    await tester.pumpAndSettle(const Duration(milliseconds: 100),
+        EnginePhase.sendSemanticsUpdate, const Duration(seconds: 5));
+    await _openProfile(tester, 1);
+    await tester.tap(find.byTooltip('Skift rolle på holdet'));
     await tester.pumpAndSettle(const Duration(milliseconds: 100),
         EnginePhase.sendSemanticsUpdate, const Duration(seconds: 5));
     await tester
@@ -50,6 +53,9 @@ void main() {
         EnginePhase.sendSemanticsUpdate, const Duration(seconds: 5));
     expect(auth.state.user!.isTeamOwner, isFalse);
     expect(find.byTooltip('Skift rolle på holdet'), findsNothing);
+    tester.state<NavigatorState>(find.byType(Navigator).first).pop();
+    await tester.pumpAndSettle(const Duration(milliseconds: 100),
+        EnginePhase.sendSemanticsUpdate, const Duration(seconds: 5));
     expect(find.text('Holdleder'), findsOneWidget);
     await tester.pumpWidget(const SizedBox.shrink());
   });
@@ -62,7 +68,11 @@ void main() {
     final cubit = TeamMembersCubit(loadMembers: () async => [_user(1, leader)]);
     addTearDown(auth.close);
     await _pump(tester, auth, cubit);
+    await _openProfile(tester, 1);
     expect(find.byTooltip('Skift rolle på holdet'), findsNothing);
+    tester.state<NavigatorState>(find.byType(Navigator).first).pop();
+    await tester.pumpAndSettle(const Duration(milliseconds: 100),
+        EnginePhase.sendSemanticsUpdate, const Duration(seconds: 5));
     leader = true;
     await cubit.load();
     await tester.pumpAndSettle(const Duration(milliseconds: 100),
@@ -70,6 +80,7 @@ void main() {
     expect(auth.state.user!.isTeamOwner, isTrue);
     expect(
         identical(auth.state.user!.teamDetails, current.teamDetails), isTrue);
+    await _openProfile(tester, 1);
     expect(find.byTooltip('Skift rolle på holdet'), findsOneWidget);
     await tester.pumpWidget(const SizedBox.shrink());
   });
@@ -86,6 +97,7 @@ void main() {
     addTearDown(auth.close);
     await cubit.load();
     await _pump(tester, auth, cubit);
+    await _openProfile(tester, 1);
     await tester.tap(find.byTooltip('Skift rolle på holdet'));
     await tester.pumpAndSettle(const Duration(milliseconds: 100),
         EnginePhase.sendSemanticsUpdate, const Duration(seconds: 5));
@@ -100,6 +112,12 @@ void main() {
     expect(cubit.state.savingUserId, isNull);
     await tester.pumpWidget(const SizedBox.shrink());
   });
+}
+
+Future<void> _openProfile(WidgetTester tester, int id) async {
+  await tester.tap(find.byKey(ValueKey('team-member-$id')));
+  await tester.pumpAndSettle(const Duration(milliseconds: 100),
+      EnginePhase.sendSemanticsUpdate, const Duration(seconds: 5));
 }
 
 Future<void> _pump(

@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kopa/component/team/team_role_button.dart';
 import 'package:kopa/cubits/team_members_cubit.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/l10n/app_localizations.dart';
@@ -236,9 +235,15 @@ class _RosterRow extends StatelessWidget {
       child: InkWell(
         key: ValueKey('team-member-${player.id}'),
         onTap: () {
+          // The pushed route sits above this tab's provider, so hand the
+          // cubit over for the profile's role editor.
+          final members = context.read<TeamMembersCubit>();
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (_) => PlayerProfilePage(player: player),
+              builder: (_) => BlocProvider.value(
+                value: members,
+                child: PlayerProfilePage(player: player),
+              ),
             ),
           );
         },
@@ -286,7 +291,6 @@ class _RosterRow extends StatelessWidget {
                   ],
                 ),
               ),
-              TeamRoleButton(player: player),
               Icon(
                 CupertinoIcons.chevron_right,
                 size: 18,

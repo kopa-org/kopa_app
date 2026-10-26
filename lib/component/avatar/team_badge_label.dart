@@ -145,7 +145,6 @@ class _TeamBadgeShell extends StatelessWidget {
       decoration: ShapeDecoration(
         shape: TeamLogoShapeBorder(shape),
         color: appColors.white.withValues(alpha: 0.74),
-
       ),
       child: child,
     );

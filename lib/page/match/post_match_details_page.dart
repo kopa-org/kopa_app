@@ -28,6 +28,7 @@ class PostMatchDetailsPage extends StatelessWidget {
   final Widget? floatingActionButton;
   final Widget? playerPositions;
   final List<Widget> infoRows;
+  final Widget? tasksSection;
   final String attendanceSegmentLabel;
   final String timelineLabel;
 
@@ -53,6 +54,7 @@ class PostMatchDetailsPage extends StatelessWidget {
     this.floatingActionButton,
     this.playerPositions,
     this.infoRows = const [],
+    this.tasksSection,
     this.attendanceSegmentLabel = 'Tilmeldte',
     this.timelineLabel = 'Kampbegivenheder',
   });
@@ -76,6 +78,7 @@ class PostMatchDetailsPage extends StatelessWidget {
       attendanceSegmentLabel: attendanceSegmentLabel,
       timelineSegmentLabel: timelineLabel,
       showTimelineSegment: true,
+      timelineInOverview: true,
       timelineEmptyMessage: 'Ingen kampbegivenheder registreret endnu.',
       overviewWidgets: [
         if (match.matchPollDetails == null)
@@ -89,6 +92,7 @@ class PostMatchDetailsPage extends StatelessWidget {
             onEdit: onEditMatchPoll,
           ),
         if (infoRows.isNotEmpty) const SizedBox(height: Spacing.lg),
+        if (tasksSection != null) tasksSection!,
       ],
       infoRows: infoRows,
       votingModule: null,

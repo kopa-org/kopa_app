@@ -39,6 +39,7 @@ import 'package:kopa/component/info_row/info_row.dart';
 import 'package:kopa/component/list_item/player_list_item.dart';
 import 'package:kopa/component/match/match_events_timeline.dart';
 import 'package:kopa/component/match/match_rsvp_card.dart';
+import 'package:kopa/component/match/match_tasks_section.dart';
 import 'package:kopa/component/match/match_actions_menu.dart';
 import 'package:kopa/component/match/match_quick_actions_fab.dart';
 import 'package:kopa/config/app_feature_flags.dart';
@@ -226,6 +227,14 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
           ? () => setMatchScore(matchDetails)
           : null,
     );
+    final tasksSection = isTraining
+        ? null
+        : MatchTasksSection(
+            key: ValueKey('match-tasks-${matchDetails.id}'),
+            matchId: matchDetails.id,
+            currentUserId: user.id,
+            canManage: user.canManageTeam,
+          );
     final headerAction = MatchActionsMenu(
       isTraining: isTraining,
       onDelete: () => _deleteMatch(matchDetails),
@@ -274,6 +283,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         floatingActionButton: quickActions,
         playerPositions: lineupCard,
         infoRows: _buildPracticalInfoRows(matchDetails),
+        tasksSection: tasksSection,
         attendanceSegmentLabel: l10n.matchRsvpAttendeeCount(attendeeCount),
         timelineLabel: l10n.matchDetailsMatchEvents,
       );
@@ -295,15 +305,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         status: rsvpState,
         isTraining: isTraining,
         isSaving: _isUpdatingRegistration,
-        attendeeNames: [
-          ...matchDetails.attendingAttendanceDetails
-              .map((a) => a.userDetails.name),
-          ...(matchDetails.externalPlayerDetailsList ?? []).map((p) => p.name),
-        ],
-        attendeeCount: attendeeCount,
         onAccept: () => _registerForMatch(matchDetails),
         onDecline: () => _unregisterFromMatch(matchDetails),
-        onShowAttendees: () => _selectSegment(MatchDetailSegment.attendance),
       ),
       bottomNavigationBar: bottomNavigationBar,
       useParentBottomNavigationBar: !widget.showBottomNavigationBar,
@@ -314,6 +317,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       timelineTitle: l10n.matchDetailsMatchEvents,
       timelineSegmentLabel: l10n.matchDetailsMatchEvents,
       showTimelineSegment: !isTraining,
+      timelineInOverview: true,
       timelinePreview: !isTraining && matchDetails.date.isAfter(DateTime.now()),
       timelinePreviewMessage: l10n.matchDetailsMatchEventsUnavailable,
       timelineItems: isTraining
@@ -333,6 +337,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
                   )
                 ],
       infoRows: _buildPracticalInfoRows(matchDetails),
+      overviewWidgets: [if (tasksSection != null) tasksSection],
       votingModule: null,
       playerPositions: lineupCard,
       attendanceList: attendanceList,
@@ -560,27 +565,49 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     final declined = match.declinedAttendanceDetails;
     final noRsvp = _membersWithoutRsvp(match, squad);
 
-    if (match.usesTeamLeaderSelection && !match.hasMatchBeenPlayed) {
-      return _buildLeaderAttendanceApprovalList(
-        match,
-        attending,
-        declined,
-        noRsvp,
-      );
-    }
+    final attendingChildren = match.usesTeamLeaderSelection &&
+            !match.hasMatchBeenPlayed
+        ? _buildLeaderAttendanceApprovalList(match, attending, declined, noRsvp)
+        : attending
+            .map((a) => PlayerListItem(
+                  name: a.userDetails.name,
+                  subtitle: a.isSelected == true
+                      ? 'Udtaget'
+                      : a.isSelected == false
+                          ? 'Ikke udtaget'
+                          : a.userDetails.email,
+                ))
+            .toList();
+    final external = match.externalPlayerDetailsList ?? const [];
 
+    // A top menu replaces the stacked lists so the page stays compact.
     return [
-      ...attending.map((a) => PlayerListItem(
-            name: a.userDetails.name,
-            subtitle: a.isSelected == true
-                ? 'Udtaget'
-                : a.isSelected == false
-                    ? 'Ikke udtaget'
-                    : a.userDetails.email,
-          )),
-      ..._buildExternalPlayersSection(match),
-      ..._buildNoRsvpSection(noRsvp),
-      ..._buildDeclinedAttendanceSection(declined),
+      _AttendanceMenu(
+        key: const ValueKey('attendance-menu'),
+        tabs: [
+          _AttendanceMenuTab(
+            label: 'Tilmeldt',
+            count: attending.length,
+            children: attendingChildren,
+          ),
+          _AttendanceMenuTab(
+            label: 'Mangler svar',
+            count: noRsvp.length,
+            children: _buildNoRsvpSection(noRsvp),
+          ),
+          _AttendanceMenuTab(
+            label: 'Frameldt',
+            count: declined.length,
+            children: _buildDeclinedAttendanceSection(declined),
+          ),
+          if (external.isNotEmpty)
+            _AttendanceMenuTab(
+              label: AppLocalizations.of(context)!.externalPlayerLabel,
+              count: external.length,
+              children: _buildExternalPlayersSection(match),
+            ),
+        ],
+      ),
     ];
   }
 
@@ -665,10 +692,6 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         ),
       );
     }
-
-    widgets.addAll(_buildNoRsvpSection(noRsvp));
-    widgets.addAll(_buildDeclinedAttendanceSection(declined));
-    widgets.addAll(_buildExternalPlayersSection(match));
 
     return widgets;
   }
@@ -1795,6 +1818,78 @@ class _ApproveAllAttendancesButton extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _AttendanceMenuTab {
+  final String label;
+  final int count;
+  final List<Widget> children;
+
+  const _AttendanceMenuTab({
+    required this.label,
+    required this.count,
+    required this.children,
+  });
+}
+
+class _AttendanceMenu extends StatefulWidget {
+  final List<_AttendanceMenuTab> tabs;
+
+  const _AttendanceMenu({super.key, required this.tabs});
+
+  @override
+  State<_AttendanceMenu> createState() => _AttendanceMenuState();
+}
+
+class _AttendanceMenuState extends State<_AttendanceMenu> {
+  int _selected = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final styles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final selected = _selected.clamp(0, widget.tabs.length - 1);
+    final tab = widget.tabs[selected];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              for (var i = 0; i < widget.tabs.length; i++) ...[
+                if (i > 0) const SizedBox(width: Spacing.sm),
+                ChoiceChip(
+                  key: ValueKey('attendance-menu-$i'),
+                  label:
+                      Text('${widget.tabs[i].label} (${widget.tabs[i].count})'),
+                  selected: i == selected,
+                  showCheckmark: false,
+                  selectedColor: colors.black,
+                  backgroundColor: colors.white,
+                  labelStyle: styles.body3.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: i == selected ? colors.white : colors.black,
+                  ),
+                  onSelected: (_) => setState(() => _selected = i),
+                ),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(height: Spacing.md),
+        if (tab.children.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: Spacing.lg),
+            child: Text('Ingen spillere her.', style: styles.body3),
+          )
+        else
+          ...tab.children,
+      ],
     );
   }
 }

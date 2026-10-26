@@ -75,15 +75,13 @@ void main() {
           heroCard: const SizedBox(height: 1),
           attendanceList: const [],
           onAddEvent: _noop,
-          selectedSegment: MatchDetailSegment.timeline,
+          selectedSegment: MatchDetailSegment.overview,
           onSegmentChanged: (_) {},
         ),
       ),
     );
 
     expect(find.text('Registrer kampens resultat'), findsNothing);
-    expect(find.byType(PlayerOfMatchSummaryCard), findsNothing);
-    expect(find.byType(MatchPollDetailsCard), findsNothing);
 
     final labels = [
       'Kampstart',
@@ -135,19 +133,22 @@ void main() {
       ),
     ));
 
+    // Match events live under Overblik instead of a tab of their own.
     for (final segment in MatchDetailSegment.values) {
-      expect(find.byKey(ValueKey('match-details-segment-${segment.name}')),
-          findsOneWidget);
+      expect(
+        find.byKey(ValueKey('match-details-segment-${segment.name}')),
+        segment == MatchDetailSegment.timeline ? findsNothing : findsOneWidget,
+      );
     }
     expect(find.byType(PlayerOfMatchSummaryCard), findsOneWidget);
     expect(find.text('Kopa Stadion info'), findsOneWidget);
-    expect(find.byType(MatchEventsTimeline), findsNothing);
-
-    await tester
-        .tap(find.byKey(const ValueKey('match-details-segment-timeline')));
-    await tester.pumpAndSettle();
     expect(find.byType(MatchEventsTimeline), findsOneWidget);
     expect(find.text('Mål: Scorer'), findsOneWidget);
+
+    await tester
+        .tap(find.byKey(const ValueKey('match-details-segment-attendance')));
+    await tester.pumpAndSettle();
+    expect(find.byType(MatchEventsTimeline), findsNothing);
     expect(find.text('Kopa Stadion info'), findsNothing);
     expect(tester.takeException(), isNull);
   });
