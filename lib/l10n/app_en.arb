@@ -313,5 +313,68 @@
         "type": "int"
       }
     }
-  }
+  },
+  "fineBoxTitle": "Fine box",
+  "fineBoxMyFines": "My fines",
+  "fineBoxSegmentOverview": "Overview",
+  "fineBoxSegmentFineTypes": "Fine types",
+  "fineBoxSegmentFines": "Fines",
+  "fineBoxHeroEyebrow": "Team kitty",
+  "fineBoxCollected": "Collected",
+  "fineBoxOutstanding": "Outstanding",
+  "fineBoxPaidPercent": "{percent}% of all fines paid",
+  "@fineBoxPaidPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "fineBoxGiveFine": "Give fine",
+  "fineBoxGiveFineHint": "To one or more players",
+  "fineBoxDeposit": "Deposit",
+  "fineBoxPodiumTitle": "Fine leaders",
+  "fineBoxPodiumEmpty": "No outstanding fines. The squad has a clean sheet!",
+  "fineBoxRecentTitle": "Latest fines",
+  "fineBoxRecentEmpty": "No fines given yet.",
+  "fineBoxCreateFineType": "Create fine type",
+  "fineBoxCatalogTitle": "Fine catalog",
+  "fineBoxCatalogEmpty": "No fine types yet. Create the first one.",
+  "fineBoxCatalogCount": "{count} types",
+  "@fineBoxCatalogCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "fineBoxPersonalEyebrow": "Your balance",
+  "fineBoxPersonalOwed": "You owe the team",
+  "fineBoxDebtFreeTitle": "Debt free!",
+  "fineBoxDebtFreeBody": "You have no unpaid fines. Keep it that way.",
+  "fineBoxUnpaidCount": "{count} unpaid",
+  "@fineBoxUnpaidCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "fineBoxStatFines": "Fines",
+  "fineBoxStatPaid": "Paid",
+  "fineBoxUnpaidTitle": "Unpaid fines",
+  "fineBoxSelectAll": "Select all",
+  "fineBoxDeselectAll": "Deselect all",
+  "fineBoxHistoryTitle": "Previous fines",
+  "fineBoxPaidBadge": "Paid",
+  "fineBoxSelectedCount": "{count} selected",
+  "@fineBoxSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "fineBoxMarkCashPaid": "Or mark as paid in cash",
+  "fineBoxMobilePayConnected": "MobilePay Box connected"
 }

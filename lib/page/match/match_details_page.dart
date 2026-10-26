@@ -273,6 +273,9 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         useParentBottomNavigationBar: !widget.showBottomNavigationBar,
         floatingActionButton: quickActions,
         playerPositions: lineupCard,
+        infoRows: _buildPracticalInfoRows(matchDetails),
+        attendanceSegmentLabel: l10n.matchRsvpAttendeeCount(attendeeCount),
+        timelineLabel: l10n.matchDetailsMatchEvents,
       );
     }
 
@@ -326,6 +329,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
                     onDeleteEvent: _deleteMatchEvent,
                     onReorderEvents: _reorderMatchEvents,
                     showFullTime: false,
+                    showTitle: false,
                   )
                 ],
       infoRows: _buildPracticalInfoRows(matchDetails),
@@ -1330,7 +1334,7 @@ class _LocationMapsLink extends StatelessWidget {
             child: Text(
               location,
               style: styles.body3.copyWith(
-                color: colors.primary,
+                color: colors.dirt,
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
                 decoration: TextDecoration.underline,
@@ -1343,7 +1347,7 @@ class _LocationMapsLink extends StatelessWidget {
           const SizedBox(width: 4),
           Icon(
             CupertinoIcons.location_north,
-            color: colors.primary,
+            color: colors.dirt,
             size: 16,
           ),
         ],

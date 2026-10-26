@@ -27,6 +27,9 @@ class PostMatchDetailsPage extends StatelessWidget {
   final bool useParentBottomNavigationBar;
   final Widget? floatingActionButton;
   final Widget? playerPositions;
+  final List<Widget> infoRows;
+  final String attendanceSegmentLabel;
+  final String timelineLabel;
 
   const PostMatchDetailsPage({
     super.key,
@@ -49,6 +52,9 @@ class PostMatchDetailsPage extends StatelessWidget {
     this.useParentBottomNavigationBar = false,
     this.floatingActionButton,
     this.playerPositions,
+    this.infoRows = const [],
+    this.attendanceSegmentLabel = 'Tilmeldte',
+    this.timelineLabel = 'Kampbegivenheder',
   });
 
   @override
@@ -61,12 +67,15 @@ class PostMatchDetailsPage extends StatelessWidget {
       heroCard: heroCard,
       headerAction: headerAction,
       belowHeaderAction: belowHeaderAction,
-      overviewTitle: 'Efter kampen',
-      attendanceTitle: 'Tilmeldte',
-      timelineTitle: 'Kampbegivenheder',
-      attendanceSegmentLabel: 'Tilmeldte',
-      timelineSegmentLabel: 'Begivenheder',
-      showTimelineSegment: false,
+      // Same tabs and layout as before the match, so the page feels familiar.
+      usePrematchLayout: true,
+      overviewWidgetsBeforeInfo: true,
+      overviewTitle: 'Praktisk information',
+      attendanceTitle: 'Tilmeldte spillere',
+      timelineTitle: timelineLabel,
+      attendanceSegmentLabel: attendanceSegmentLabel,
+      timelineSegmentLabel: timelineLabel,
+      showTimelineSegment: true,
       timelineEmptyMessage: 'Ingen kampbegivenheder registreret endnu.',
       overviewWidgets: [
         if (match.matchPollDetails == null)
@@ -79,7 +88,14 @@ class PostMatchDetailsPage extends StatelessWidget {
             poll: match.matchPollDetails!,
             onEdit: onEditMatchPoll,
           ),
-        const SizedBox(height: Spacing.lg),
+        if (infoRows.isNotEmpty) const SizedBox(height: Spacing.lg),
+      ],
+      infoRows: infoRows,
+      votingModule: null,
+      playerPositions: playerPositions,
+      attendanceList: attendanceList,
+      ratingsSection: null,
+      timelineItems: [
         MatchEventsTimeline(
           events: match.matchEventDetailsList ?? const [],
           canAddEvent: true,
@@ -87,14 +103,10 @@ class PostMatchDetailsPage extends StatelessWidget {
           onAddEvent: onAddEvent,
           onDeleteEvent: onDeleteEvent,
           onReorderEvents: onReorderEvents,
+          // The tab already shows the section title.
+          showTitle: false,
         ),
       ],
-      infoRows: const [],
-      votingModule: null,
-      playerPositions: playerPositions,
-      attendanceList: attendanceList,
-      ratingsSection: null,
-      timelineItems: const [],
       bottomNavigationBar: bottomNavigationBar,
       attendanceActionBar: attendanceActionBar,
       useParentBottomNavigationBar: useParentBottomNavigationBar,

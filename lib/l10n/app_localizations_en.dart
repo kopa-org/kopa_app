@@ -857,4 +857,119 @@ class AppLocalizationsEn extends AppLocalizations {
   String teamSquadCount(int count) {
     return '$count players in the squad';
   }
+
+  @override
+  String get fineBoxTitle => 'Fine box';
+
+  @override
+  String get fineBoxMyFines => 'My fines';
+
+  @override
+  String get fineBoxSegmentOverview => 'Overview';
+
+  @override
+  String get fineBoxSegmentFineTypes => 'Fine types';
+
+  @override
+  String get fineBoxSegmentFines => 'Fines';
+
+  @override
+  String get fineBoxHeroEyebrow => 'Team kitty';
+
+  @override
+  String get fineBoxCollected => 'Collected';
+
+  @override
+  String get fineBoxOutstanding => 'Outstanding';
+
+  @override
+  String fineBoxPaidPercent(int percent) {
+    return '$percent% of all fines paid';
+  }
+
+  @override
+  String get fineBoxGiveFine => 'Give fine';
+
+  @override
+  String get fineBoxGiveFineHint => 'To one or more players';
+
+  @override
+  String get fineBoxDeposit => 'Deposit';
+
+  @override
+  String get fineBoxPodiumTitle => 'Fine leaders';
+
+  @override
+  String get fineBoxPodiumEmpty =>
+      'No outstanding fines. The squad has a clean sheet!';
+
+  @override
+  String get fineBoxRecentTitle => 'Latest fines';
+
+  @override
+  String get fineBoxRecentEmpty => 'No fines given yet.';
+
+  @override
+  String get fineBoxCreateFineType => 'Create fine type';
+
+  @override
+  String get fineBoxCatalogTitle => 'Fine catalog';
+
+  @override
+  String get fineBoxCatalogEmpty => 'No fine types yet. Create the first one.';
+
+  @override
+  String fineBoxCatalogCount(int count) {
+    return '$count types';
+  }
+
+  @override
+  String get fineBoxPersonalEyebrow => 'Your balance';
+
+  @override
+  String get fineBoxPersonalOwed => 'You owe the team';
+
+  @override
+  String get fineBoxDebtFreeTitle => 'Debt free!';
+
+  @override
+  String get fineBoxDebtFreeBody =>
+      'You have no unpaid fines. Keep it that way.';
+
+  @override
+  String fineBoxUnpaidCount(int count) {
+    return '$count unpaid';
+  }
+
+  @override
+  String get fineBoxStatFines => 'Fines';
+
+  @override
+  String get fineBoxStatPaid => 'Paid';
+
+  @override
+  String get fineBoxUnpaidTitle => 'Unpaid fines';
+
+  @override
+  String get fineBoxSelectAll => 'Select all';
+
+  @override
+  String get fineBoxDeselectAll => 'Deselect all';
+
+  @override
+  String get fineBoxHistoryTitle => 'Previous fines';
+
+  @override
+  String get fineBoxPaidBadge => 'Paid';
+
+  @override
+  String fineBoxSelectedCount(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get fineBoxMarkCashPaid => 'Or mark as paid in cash';
+
+  @override
+  String get fineBoxMobilePayConnected => 'MobilePay Box connected';
 }

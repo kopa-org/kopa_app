@@ -72,6 +72,7 @@ class MatchEventsTimeline extends StatefulWidget {
   final bool canReorderEvents;
   final VoidCallback onAddEvent;
   final bool showFullTime;
+  final bool showTitle;
   final ValueChanged<int>? onDeleteEvent;
   final Future<void> Function(List<int>)? onReorderEvents;
 
@@ -81,6 +82,7 @@ class MatchEventsTimeline extends StatefulWidget {
     required this.canReorderEvents,
     required this.onAddEvent,
     this.showFullTime = true,
+    this.showTitle = true,
     required this.onDeleteEvent,
     required this.onReorderEvents,
   });
@@ -123,11 +125,13 @@ class _MatchEventsTimelineState extends State<MatchEventsTimeline> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          l10n.matchEventTimelineTitle,
-          style: styles.subtitle1.copyWith(fontWeight: FontWeight.w800),
-        ),
-        const SizedBox(height: 12),
+        if (widget.showTitle) ...[
+          Text(
+            l10n.matchEventTimelineTitle,
+            style: styles.subtitle1.copyWith(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 12),
+        ],
         KopaCard(
           borderRadius: Spacing.borderRadiusLargeIncreased,
           padding: const EdgeInsets.all(20),

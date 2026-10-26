@@ -313,5 +313,68 @@
         "type": "int"
       }
     }
-  }
+  },
+  "fineBoxTitle": "Bødekassen",
+  "fineBoxMyFines": "Mine bøder",
+  "fineBoxSegmentOverview": "Overblik",
+  "fineBoxSegmentFineTypes": "Bødetyper",
+  "fineBoxSegmentFines": "Bøder",
+  "fineBoxHeroEyebrow": "Holdets kasse",
+  "fineBoxCollected": "Indsamlet",
+  "fineBoxOutstanding": "Mangler",
+  "fineBoxPaidPercent": "{percent}% af alle bøder er betalt",
+  "@fineBoxPaidPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "fineBoxGiveFine": "Giv bøde",
+  "fineBoxGiveFineHint": "Til en eller flere",
+  "fineBoxDeposit": "Indbetal",
+  "fineBoxPodiumTitle": "Bødetoppen",
+  "fineBoxPodiumEmpty": "Ingen udestående bøder. Holdet holder buret rent!",
+  "fineBoxRecentTitle": "Seneste bøder",
+  "fineBoxRecentEmpty": "Ingen bøder tildelt endnu.",
+  "fineBoxCreateFineType": "Opret bødetype",
+  "fineBoxCatalogTitle": "Bødekatalog",
+  "fineBoxCatalogEmpty": "Ingen bødetyper endnu. Opret den første.",
+  "fineBoxCatalogCount": "{count} typer",
+  "@fineBoxCatalogCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "fineBoxPersonalEyebrow": "Din saldo",
+  "fineBoxPersonalOwed": "Du skylder holdet",
+  "fineBoxDebtFreeTitle": "Gældfri!",
+  "fineBoxDebtFreeBody": "Du har ingen ubetalte bøder. Bliv ved sådan.",
+  "fineBoxUnpaidCount": "{count} ubetalte",
+  "@fineBoxUnpaidCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "fineBoxStatFines": "Bøder",
+  "fineBoxStatPaid": "Betalt",
+  "fineBoxUnpaidTitle": "Ubetalte bøder",
+  "fineBoxSelectAll": "Vælg alle",
+  "fineBoxDeselectAll": "Fravælg alle",
+  "fineBoxHistoryTitle": "Tidligere bøder",
+  "fineBoxPaidBadge": "Betalt",
+  "fineBoxSelectedCount": "{count} valgt",
+  "@fineBoxSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "fineBoxMarkCashPaid": "Eller markér som kontant betalt",
+  "fineBoxMobilePayConnected": "MobilePay Box tilknyttet"
 }

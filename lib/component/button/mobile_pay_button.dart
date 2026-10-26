@@ -9,6 +9,8 @@ class MobilePayButton extends StatelessWidget {
   final String? message;
   final String? mobilePayBoxId;
   final String? buttonText;
+  final bool outlined;
+  final double? width;
 
   const MobilePayButton({
     super.key,
@@ -16,6 +18,8 @@ class MobilePayButton extends StatelessWidget {
     this.message,
     this.mobilePayBoxId,
     this.buttonText,
+    this.outlined = true,
+    this.width,
   });
 
   @override
@@ -42,6 +46,7 @@ class MobilePayButton extends StatelessWidget {
             ));
           }
         },
-        outlined: true);
+        outlined: outlined,
+        width: width);
   }
 }

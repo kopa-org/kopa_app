@@ -1651,6 +1651,216 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} players in the squad'**
   String teamSquadCount(int count);
+
+  /// No description provided for @fineBoxTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fine box'**
+  String get fineBoxTitle;
+
+  /// No description provided for @fineBoxMyFines.
+  ///
+  /// In en, this message translates to:
+  /// **'My fines'**
+  String get fineBoxMyFines;
+
+  /// No description provided for @fineBoxSegmentOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview'**
+  String get fineBoxSegmentOverview;
+
+  /// No description provided for @fineBoxSegmentFineTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'Fine types'**
+  String get fineBoxSegmentFineTypes;
+
+  /// No description provided for @fineBoxSegmentFines.
+  ///
+  /// In en, this message translates to:
+  /// **'Fines'**
+  String get fineBoxSegmentFines;
+
+  /// No description provided for @fineBoxHeroEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Team kitty'**
+  String get fineBoxHeroEyebrow;
+
+  /// No description provided for @fineBoxCollected.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected'**
+  String get fineBoxCollected;
+
+  /// No description provided for @fineBoxOutstanding.
+  ///
+  /// In en, this message translates to:
+  /// **'Outstanding'**
+  String get fineBoxOutstanding;
+
+  /// No description provided for @fineBoxPaidPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% of all fines paid'**
+  String fineBoxPaidPercent(int percent);
+
+  /// No description provided for @fineBoxGiveFine.
+  ///
+  /// In en, this message translates to:
+  /// **'Give fine'**
+  String get fineBoxGiveFine;
+
+  /// No description provided for @fineBoxGiveFineHint.
+  ///
+  /// In en, this message translates to:
+  /// **'To one or more players'**
+  String get fineBoxGiveFineHint;
+
+  /// No description provided for @fineBoxDeposit.
+  ///
+  /// In en, this message translates to:
+  /// **'Deposit'**
+  String get fineBoxDeposit;
+
+  /// No description provided for @fineBoxPodiumTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fine leaders'**
+  String get fineBoxPodiumTitle;
+
+  /// No description provided for @fineBoxPodiumEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No outstanding fines. The squad has a clean sheet!'**
+  String get fineBoxPodiumEmpty;
+
+  /// No description provided for @fineBoxRecentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest fines'**
+  String get fineBoxRecentTitle;
+
+  /// No description provided for @fineBoxRecentEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No fines given yet.'**
+  String get fineBoxRecentEmpty;
+
+  /// No description provided for @fineBoxCreateFineType.
+  ///
+  /// In en, this message translates to:
+  /// **'Create fine type'**
+  String get fineBoxCreateFineType;
+
+  /// No description provided for @fineBoxCatalogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fine catalog'**
+  String get fineBoxCatalogTitle;
+
+  /// No description provided for @fineBoxCatalogEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No fine types yet. Create the first one.'**
+  String get fineBoxCatalogEmpty;
+
+  /// No description provided for @fineBoxCatalogCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} types'**
+  String fineBoxCatalogCount(int count);
+
+  /// No description provided for @fineBoxPersonalEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Your balance'**
+  String get fineBoxPersonalEyebrow;
+
+  /// No description provided for @fineBoxPersonalOwed.
+  ///
+  /// In en, this message translates to:
+  /// **'You owe the team'**
+  String get fineBoxPersonalOwed;
+
+  /// No description provided for @fineBoxDebtFreeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Debt free!'**
+  String get fineBoxDebtFreeTitle;
+
+  /// No description provided for @fineBoxDebtFreeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You have no unpaid fines. Keep it that way.'**
+  String get fineBoxDebtFreeBody;
+
+  /// No description provided for @fineBoxUnpaidCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} unpaid'**
+  String fineBoxUnpaidCount(int count);
+
+  /// No description provided for @fineBoxStatFines.
+  ///
+  /// In en, this message translates to:
+  /// **'Fines'**
+  String get fineBoxStatFines;
+
+  /// No description provided for @fineBoxStatPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get fineBoxStatPaid;
+
+  /// No description provided for @fineBoxUnpaidTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpaid fines'**
+  String get fineBoxUnpaidTitle;
+
+  /// No description provided for @fineBoxSelectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get fineBoxSelectAll;
+
+  /// No description provided for @fineBoxDeselectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Deselect all'**
+  String get fineBoxDeselectAll;
+
+  /// No description provided for @fineBoxHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous fines'**
+  String get fineBoxHistoryTitle;
+
+  /// No description provided for @fineBoxPaidBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get fineBoxPaidBadge;
+
+  /// No description provided for @fineBoxSelectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String fineBoxSelectedCount(int count);
+
+  /// No description provided for @fineBoxMarkCashPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Or mark as paid in cash'**
+  String get fineBoxMarkCashPaid;
+
+  /// No description provided for @fineBoxMobilePayConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'MobilePay Box connected'**
+  String get fineBoxMobilePayConnected;
 }
 
 class _AppLocalizationsDelegate

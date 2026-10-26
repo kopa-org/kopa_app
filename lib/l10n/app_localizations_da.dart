@@ -854,4 +854,119 @@ class AppLocalizationsDa extends AppLocalizations {
   String teamSquadCount(int count) {
     return '$count spillere i truppen';
   }
+
+  @override
+  String get fineBoxTitle => 'Bødekassen';
+
+  @override
+  String get fineBoxMyFines => 'Mine bøder';
+
+  @override
+  String get fineBoxSegmentOverview => 'Overblik';
+
+  @override
+  String get fineBoxSegmentFineTypes => 'Bødetyper';
+
+  @override
+  String get fineBoxSegmentFines => 'Bøder';
+
+  @override
+  String get fineBoxHeroEyebrow => 'Holdets kasse';
+
+  @override
+  String get fineBoxCollected => 'Indsamlet';
+
+  @override
+  String get fineBoxOutstanding => 'Mangler';
+
+  @override
+  String fineBoxPaidPercent(int percent) {
+    return '$percent% af alle bøder er betalt';
+  }
+
+  @override
+  String get fineBoxGiveFine => 'Giv bøde';
+
+  @override
+  String get fineBoxGiveFineHint => 'Til en eller flere';
+
+  @override
+  String get fineBoxDeposit => 'Indbetal';
+
+  @override
+  String get fineBoxPodiumTitle => 'Bødetoppen';
+
+  @override
+  String get fineBoxPodiumEmpty =>
+      'Ingen udestående bøder. Holdet holder buret rent!';
+
+  @override
+  String get fineBoxRecentTitle => 'Seneste bøder';
+
+  @override
+  String get fineBoxRecentEmpty => 'Ingen bøder tildelt endnu.';
+
+  @override
+  String get fineBoxCreateFineType => 'Opret bødetype';
+
+  @override
+  String get fineBoxCatalogTitle => 'Bødekatalog';
+
+  @override
+  String get fineBoxCatalogEmpty => 'Ingen bødetyper endnu. Opret den første.';
+
+  @override
+  String fineBoxCatalogCount(int count) {
+    return '$count typer';
+  }
+
+  @override
+  String get fineBoxPersonalEyebrow => 'Din saldo';
+
+  @override
+  String get fineBoxPersonalOwed => 'Du skylder holdet';
+
+  @override
+  String get fineBoxDebtFreeTitle => 'Gældfri!';
+
+  @override
+  String get fineBoxDebtFreeBody =>
+      'Du har ingen ubetalte bøder. Bliv ved sådan.';
+
+  @override
+  String fineBoxUnpaidCount(int count) {
+    return '$count ubetalte';
+  }
+
+  @override
+  String get fineBoxStatFines => 'Bøder';
+
+  @override
+  String get fineBoxStatPaid => 'Betalt';
+
+  @override
+  String get fineBoxUnpaidTitle => 'Ubetalte bøder';
+
+  @override
+  String get fineBoxSelectAll => 'Vælg alle';
+
+  @override
+  String get fineBoxDeselectAll => 'Fravælg alle';
+
+  @override
+  String get fineBoxHistoryTitle => 'Tidligere bøder';
+
+  @override
+  String get fineBoxPaidBadge => 'Betalt';
+
+  @override
+  String fineBoxSelectedCount(int count) {
+    return '$count valgt';
+  }
+
+  @override
+  String get fineBoxMarkCashPaid => 'Eller markér som kontant betalt';
+
+  @override
+  String get fineBoxMobilePayConnected => 'MobilePay Box tilknyttet';
 }

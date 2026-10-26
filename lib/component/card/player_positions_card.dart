@@ -137,7 +137,7 @@ class PlayerPositionsCard extends StatelessWidget {
                       onPressed: onEditFormation,
                       child: Icon(
                         CupertinoIcons.pencil_circle,
-                        color: colors.primary,
+                        color: colors.dirt,
                         size: 26,
                       ),
                     ),

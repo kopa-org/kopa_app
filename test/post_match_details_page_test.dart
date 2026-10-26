@@ -75,14 +75,14 @@ void main() {
           heroCard: const SizedBox(height: 1),
           attendanceList: const [],
           onAddEvent: _noop,
-          selectedSegment: MatchDetailSegment.overview,
+          selectedSegment: MatchDetailSegment.timeline,
           onSegmentChanged: (_) {},
         ),
       ),
     );
 
     expect(find.text('Registrer kampens resultat'), findsNothing);
-    expect(find.byType(PlayerOfMatchSummaryCard), findsOneWidget);
+    expect(find.byType(PlayerOfMatchSummaryCard), findsNothing);
     expect(find.byType(MatchPollDetailsCard), findsNothing);
 
     final labels = [
@@ -102,6 +102,54 @@ void main() {
       verticalPositions,
       orderedEquals(verticalPositions.toList()..sort()),
     );
+  });
+
+  testWidgets('post-match uses the same tabs as pre-match', (tester) async {
+    final kickoff = DateTime(2026, 1, 1, 19);
+    var selected = MatchDetailSegment.overview;
+    await tester.pumpWidget(MaterialApp(
+      locale: const Locale('da'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: StatefulBuilder(
+        builder: (context, setState) => PostMatchDetailsPage(
+          match: MatchDetails(
+            id: 1,
+            homeTeam: 'Kopa IF',
+            awayTeam: 'Fremad',
+            date: kickoff,
+            location: 'Kopa Stadion',
+            createdAt: kickoff,
+            updatedAt: kickoff,
+            matchEventDetailsList: [_event(id: 1, minute: 10, name: 'Scorer')],
+          ),
+          user: _owner(kickoff),
+          heroCard: const SizedBox(height: 1),
+          attendanceList: const [Text('Attending player')],
+          onAddEvent: _noop,
+          infoRows: const [Text('Kopa Stadion info')],
+          playerPositions: const Text('Lineup content'),
+          selectedSegment: selected,
+          onSegmentChanged: (value) => setState(() => selected = value),
+        ),
+      ),
+    ));
+
+    for (final segment in MatchDetailSegment.values) {
+      expect(find.byKey(ValueKey('match-details-segment-${segment.name}')),
+          findsOneWidget);
+    }
+    expect(find.byType(PlayerOfMatchSummaryCard), findsOneWidget);
+    expect(find.text('Kopa Stadion info'), findsOneWidget);
+    expect(find.byType(MatchEventsTimeline), findsNothing);
+
+    await tester
+        .tap(find.byKey(const ValueKey('match-details-segment-timeline')));
+    await tester.pumpAndSettle();
+    expect(find.byType(MatchEventsTimeline), findsOneWidget);
+    expect(find.text('Mål: Scorer'), findsOneWidget);
+    expect(find.text('Kopa Stadion info'), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 
   for (final isManager in [true, false]) {

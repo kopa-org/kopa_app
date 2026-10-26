@@ -365,11 +365,13 @@ class _MainTabNavigationBar extends StatelessWidget {
       return GlassTabBar.bottom(
         selectedIndex: selectedIndex,
         onTabSelected: onTabSelected,
-        selectedIconColor: AppColors.of(context).primary,
-        selectedLabelColor: AppColors.of(context).primary,
+        selectedIconColor: AppColors.of(context).white,
+        selectedLabelColor: AppColors.of(context).white,
         unselectedIconColor: theme.unselectedWidgetColor,
         unselectedLabelColor: theme.unselectedWidgetColor,
-        indicatorColor: AppColors.of(context).primary.withValues(alpha: 0.12),
+        indicatorColor: AppColors.of(context).dirt,
+        interactionGlowColor:
+            AppColors.of(context).dirt.withValues(alpha: 0.12),
         tabs: [
           for (final tab in tabs)
             GlassTab(
@@ -405,7 +407,8 @@ class _TransparentAndroidNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final selectedColor = AppColors.of(context).dirt;
+    final selectedColor = AppColors.of(context).white;
+    final selectedBackground = AppColors.of(context).dirt;
     final unselectedColor = theme.unselectedWidgetColor;
 
     return SafeArea(
@@ -418,14 +421,14 @@ class _TransparentAndroidNavigationBar extends StatelessWidget {
             backgroundColor: AppColors.of(context).surface.withValues(
                   alpha: _androidNavigationSurfaceOpacity,
                 ),
-            rippleColor: AppColors.of(context).primary.withValues(alpha: 0.1),
-            hoverColor: AppColors.of(context).primary.withValues(alpha: 0.1),
+            rippleColor: selectedBackground.withValues(alpha: 0.1),
+            hoverColor: selectedBackground.withValues(alpha: 0.1),
             gap: 8,
             activeColor: selectedColor,
             iconSize: 24,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             duration: const Duration(milliseconds: 400),
-            tabBackgroundColor: AppColors.of(context).lightGrass,
+            tabBackgroundColor: selectedBackground,
             color: unselectedColor,
             selectedIndex: selectedIndex,
             onTabChange: onTabSelected,

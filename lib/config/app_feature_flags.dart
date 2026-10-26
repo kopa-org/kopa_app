@@ -30,7 +30,7 @@ class AppFeatureFlags extends Equatable {
 
     return AppFeatureFlags(
       showStatistics: json['statistics'] == true,
-      showFineBox: json['fine_box'] == true,
+      showFineBox: true,
       maintenanceMode: json['maintenance'] == true,
       updateRequired: serverRequiresUpdate || buildRequiresUpdate,
       minimumRequiredBuildNumber: minimumRequiredBuildNumber,

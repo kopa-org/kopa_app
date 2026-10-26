@@ -43,6 +43,7 @@ class MatchDetailTemplate extends StatelessWidget {
   final String timelinePreviewMessage;
   final bool showTimelineSegment;
   final bool usePrematchLayout;
+  final bool overviewWidgetsBeforeInfo;
   final Widget? attendanceHeader;
   final bool attendanceHeaderInBody;
   final Widget? stickyActionBar;
@@ -81,6 +82,7 @@ class MatchDetailTemplate extends StatelessWidget {
     this.timelinePreviewMessage = '',
     this.showTimelineSegment = true,
     this.usePrematchLayout = false,
+    this.overviewWidgetsBeforeInfo = false,
     this.attendanceHeader,
     this.attendanceHeaderInBody = false,
     this.stickyActionBar,
@@ -297,51 +299,81 @@ class MatchDetailTemplate extends StatelessWidget {
         (segment: MatchDetailSegment.timeline, label: timelineSegmentLabel),
     ];
 
-    final row = LayoutBuilder(builder: (context, constraints) {
-      final gap = darkHeader ? 4.0 : 8.0;
-      final availableWidth = constraints.maxWidth - gap * (segments.length - 1);
-      final collapsedWidth =
-          (availableWidth / segments.length).clamp(0.0, 44.0);
-      final maximumExpandedWidth =
-          availableWidth - collapsedWidth * (segments.length - 1);
-      double labelWidth(String label) {
-        final painter = TextPainter(
-          text: TextSpan(
-              text: label,
-              style: styles.body3
-                  .copyWith(fontSize: 12, fontWeight: FontWeight.w700)),
-          textDirection: Directionality.of(context),
-          textScaler: MediaQuery.textScalerOf(context),
-          maxLines: 1,
-        )..layout();
-        final width =
-            (painter.width + 48).clamp(collapsedWidth, maximumExpandedWidth);
-        painter.dispose();
-        return width;
-      }
+    // Trainings only have two tabs, so both stay fully labelled side by side.
+    final row = useTrainingHeader
+        ? Row(
+            children: [
+              for (var index = 0; index < segments.length; index++) ...[
+                if (index > 0) SizedBox(width: darkHeader ? 4.0 : 8.0),
+                Expanded(
+                  child: _MatchDetailSegmentButton(
+                    key: ValueKey(
+                        'match-details-segment-${segments[index].segment.name}'),
+                    segment: segments[index].segment,
+                    label: segments[index].label,
+                    selected:
+                        _effectiveSelectedSegment == segments[index].segment,
+                    collapsedWidth: 0,
+                    expandedWidth: 0,
+                    fixed: true,
+                    textStyle: styles.body3,
+                    darkHeader: darkHeader,
+                    trainingHeader: useTrainingHeader,
+                    onPressed: () =>
+                        onSegmentChanged?.call(segments[index].segment),
+                  ),
+                ),
+              ],
+            ],
+          )
+        : LayoutBuilder(builder: (context, constraints) {
+            final gap = darkHeader ? 4.0 : 8.0;
+            final availableWidth =
+                constraints.maxWidth - gap * (segments.length - 1);
+            final collapsedWidth =
+                (availableWidth / segments.length).clamp(0.0, 44.0);
+            final maximumExpandedWidth =
+                availableWidth - collapsedWidth * (segments.length - 1);
+            double labelWidth(String label) {
+              final painter = TextPainter(
+                text: TextSpan(
+                    text: label,
+                    style: styles.body3
+                        .copyWith(fontSize: 12, fontWeight: FontWeight.w700)),
+                textDirection: Directionality.of(context),
+                textScaler: MediaQuery.textScalerOf(context),
+                maxLines: 1,
+              )..layout();
+              final width = (painter.width + 48)
+                  .clamp(collapsedWidth, maximumExpandedWidth);
+              painter.dispose();
+              return width;
+            }
 
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          for (var index = 0; index < segments.length; index++) ...[
-            if (index > 0) SizedBox(width: gap),
-            _MatchDetailSegmentButton(
-              key: ValueKey(
-                  'match-details-segment-${segments[index].segment.name}'),
-              segment: segments[index].segment,
-              label: segments[index].label,
-              selected: _effectiveSelectedSegment == segments[index].segment,
-              collapsedWidth: collapsedWidth,
-              expandedWidth: labelWidth(segments[index].label),
-              textStyle: styles.body3,
-              darkHeader: darkHeader,
-              trainingHeader: useTrainingHeader,
-              onPressed: () => onSegmentChanged?.call(segments[index].segment),
-            ),
-          ],
-        ],
-      );
-    });
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                for (var index = 0; index < segments.length; index++) ...[
+                  if (index > 0) SizedBox(width: gap),
+                  _MatchDetailSegmentButton(
+                    key: ValueKey(
+                        'match-details-segment-${segments[index].segment.name}'),
+                    segment: segments[index].segment,
+                    label: segments[index].label,
+                    selected:
+                        _effectiveSelectedSegment == segments[index].segment,
+                    collapsedWidth: collapsedWidth,
+                    expandedWidth: labelWidth(segments[index].label),
+                    textStyle: styles.body3,
+                    darkHeader: darkHeader,
+                    trainingHeader: useTrainingHeader,
+                    onPressed: () =>
+                        onSegmentChanged?.call(segments[index].segment),
+                  ),
+                ],
+              ],
+            );
+          });
 
     if (darkHeader) {
       return Container(
@@ -386,13 +418,15 @@ class MatchDetailTemplate extends StatelessWidget {
     switch (effectiveSegment) {
       case MatchDetailSegment.overview:
         if (usePrematchLayout) {
-          return [
+          final info = [
             if (infoRows.isNotEmpty) ...[
               _PrematchSectionTitle(title: overviewTitle),
               _PrematchInfoCard(children: infoRows),
             ],
-            ...overviewWidgets,
           ];
+          return overviewWidgetsBeforeInfo
+              ? [...overviewWidgets, ...info]
+              : [...info, ...overviewWidgets];
         }
 
         return [
@@ -434,8 +468,12 @@ class MatchDetailTemplate extends StatelessWidget {
         }
 
         return [
-          SectionHeader(title: timelineTitle),
-          const SizedBox(height: Spacing.md),
+          if (usePrematchLayout)
+            _PrematchSectionTitle(title: timelineTitle)
+          else ...[
+            SectionHeader(title: timelineTitle),
+            const SizedBox(height: Spacing.md),
+          ],
           if (timelineItems.isEmpty)
             _EmptySegmentMessage(message: timelineEmptyMessage)
           else
@@ -451,6 +489,7 @@ class _MatchDetailSegmentButton extends StatelessWidget {
   final bool selected;
   final double collapsedWidth;
   final double expandedWidth;
+  final bool fixed;
   final TextStyle textStyle;
   final bool darkHeader;
   final bool trainingHeader;
@@ -463,6 +502,7 @@ class _MatchDetailSegmentButton extends StatelessWidget {
     required this.selected,
     required this.collapsedWidth,
     required this.expandedWidth,
+    this.fixed = false,
     required this.textStyle,
     required this.darkHeader,
     required this.trainingHeader,
@@ -479,11 +519,7 @@ class _MatchDetailSegmentButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    final selectedColor = trainingHeader
-        ? colors.sky
-        : darkHeader
-            ? AppColors.matchDetailsHeader
-            : colors.successForeground;
+    final selectedColor = trainingHeader ? colors.sky : colors.dirt;
     final unselectedColor = trainingHeader
         ? colors.textSecondary
         : darkHeader
@@ -499,6 +535,59 @@ class _MatchDetailSegmentButton extends StatelessWidget {
     final duration = MediaQuery.disableAnimationsOf(context)
         ? Duration.zero
         : const Duration(milliseconds: 400);
+
+    if (fixed) {
+      final foreground = selected ? selectedColor : unselectedColor;
+      return Semantics(
+        button: true,
+        selected: selected,
+        label: label,
+        excludeSemantics: true,
+        onTap: onPressed,
+        child: SizedBox(
+          height: 44,
+          child: Material(
+            color: AppColors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(22),
+              onTap: onPressed,
+              child: AnimatedContainer(
+                key: ValueKey('match-details-segment-${segment.name}-surface'),
+                duration: duration == Duration.zero
+                    ? Duration.zero
+                    : const Duration(milliseconds: 200),
+                curve: Curves.easeOutCubic,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  color: background,
+                  borderRadius: BorderRadius.circular(22),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(_icon, size: 20, color: foreground),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        label,
+                        maxLines: 1,
+                        softWrap: false,
+                        overflow: TextOverflow.ellipsis,
+                        style: textStyle.copyWith(
+                          color: foreground,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     return Semantics(
       button: true,

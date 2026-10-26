@@ -40,7 +40,59 @@ void main() {
     }
   }
 
-  for (final header in ['light', 'dark', 'training']) {
+  for (final language in ['da', 'en']) {
+    testWidgets('training tabs stay fixed and labelled: $language',
+        (tester) async {
+      tester.view.physicalSize = const Size(320, 640);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      var selected = MatchDetailSegment.overview;
+      await tester.pumpWidget(MaterialApp(
+        locale: Locale(language),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context)
+              .copyWith(textScaler: const TextScaler.linear(1.6)),
+          child: child!,
+        ),
+        home: StatefulBuilder(
+            builder: (context, setState) => MatchDetailTemplate(
+                  heroCard: const SizedBox(height: 1),
+                  useTrainingHeader: true,
+                  showTimelineSegment: false,
+                  overviewSegmentLabel: 'Overblik',
+                  attendanceSegmentLabel: '3 tilmeldte',
+                  selectedSegment: selected,
+                  onSegmentChanged: (value) => setState(() => selected = value),
+                )),
+      ));
+      await tester.pumpAndSettle();
+      Finder tab(MatchDetailSegment segment) =>
+          find.byKey(ValueKey('match-details-segment-${segment.name}'));
+      final overview = tab(MatchDetailSegment.overview);
+      final attendance = tab(MatchDetailSegment.attendance);
+      expect(find.byKey(const ValueKey('match-details-segment-lineup')),
+          findsNothing);
+      expect(find.byKey(const ValueKey('match-details-segment-timeline')),
+          findsNothing);
+      final width = tester.getSize(overview).width;
+      expect(tester.getSize(attendance).width, width);
+      expect(find.text('Overblik'), findsOneWidget);
+      expect(find.text('3 tilmeldte'), findsOneWidget);
+      await tester.tap(attendance);
+      await tester.pumpAndSettle();
+      expect(selected, MatchDetailSegment.attendance);
+      expect(tester.getSize(overview).width, width);
+      expect(tester.getSize(attendance).width, width);
+      expect(find.text('Overblik'), findsOneWidget);
+      expect(find.text('3 tilmeldte'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  for (final header in ['light', 'dark']) {
     for (final language in ['da', 'en']) {
       testWidgets('icon tabs expand without overflow: $header $language',
           (tester) async {
@@ -129,9 +181,7 @@ void main() {
           if (!training) {
             final icon = tester.widget<SvgPicture>(
                 find.byKey(const ValueKey('match-details-lineup-icon')));
-            final selectedColor = header == 'dark'
-                ? AppColors.matchDetailsHeader
-                : AppColors.light.successForeground;
+            final selectedColor = AppColors.light.dirt;
             final unselectedColor = header == 'dark'
                 ? AppColors.matchDetailsHeaderMuted
                 : AppColors.light.textSecondary;
