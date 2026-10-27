@@ -14,6 +14,7 @@ import 'package:kopa/navigation/app_router.dart';
 import 'package:kopa/page/profile/dbu_calendar_import_flow.dart';
 import 'package:kopa/page/profile/dbu_webview_page.dart';
 import 'package:kopa/page/profile/team_logo_design_page.dart';
+import 'package:kopa/page/team/team_tasks_page.dart';
 import 'package:kopa/repository/team_dbu_repository.dart';
 import 'package:kopa/repository/users_repository.dart';
 import 'package:kopa/state/match_programme_refresh_notifier.dart';
@@ -157,6 +158,16 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
               ),
             ],
             if (currentUser?.canManageTeam == true) ...[
+              const SizedBox(height: 16),
+              FullWidthButton(
+                key: const ValueKey('profile-settings-team-tasks'),
+                buttonText: l10n.teamTasksTitle,
+                outlined: true,
+                icon: Icons.checklist_rounded,
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const TeamTasksPage()),
+                ),
+              ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 initialValue: {

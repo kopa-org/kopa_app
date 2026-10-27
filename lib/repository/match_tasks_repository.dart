@@ -67,6 +67,60 @@ class MatchTasksRepository {
     }
   }
 
+  /// Creates a one-off task that only belongs to this match and returns its
+  /// id.
+  static Future<int> createMatchTask(
+    int matchId,
+    String name, {
+    int? assigneeId,
+  }) async {
+    final response = await _apiClient.postJson(
+      _matchTaskUrl(matchId),
+      body: {'name': name, if (assigneeId != null) 'user_id': assigneeId},
+    );
+    if (response.statusCode != 201) {
+      throw Exception('Failed to create match task');
+    }
+
+    return (jsonDecode(response.body)['task'] as Map<String, dynamic>)['id']
+        as int;
+  }
+
+  /// The team's recurring tasks with their queue.
+  static Future<List<TeamTask>> getTeamTasks() async {
+    final response =
+        await _apiClient.get(Uri.parse('${ApiConfig.baseUrl}/tasks'));
+    if (response.statusCode != 200) {
+      throw Exception('Failed to fetch team tasks');
+    }
+
+    final tasks = jsonDecode(response.body)['tasks'] as List<dynamic>;
+    return tasks
+        .map((task) => TeamTask.fromJson(task as Map<String, dynamic>))
+        .toList();
+  }
+
+  static Future<void> renameTask(int taskId, String name) async {
+    final response = await _apiClient.patchJson(
+      Uri.parse('${ApiConfig.baseUrl}/tasks/$taskId'),
+      body: {'name': name},
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to rename task');
+    }
+  }
+
+  static Future<void> reorderQueue(int taskId, List<int> userIds) async {
+    final response = await _apiClient.patchJson(
+      Uri.parse('${ApiConfig.baseUrl}/tasks/$taskId/queue'),
+      body: {'user_ids': userIds},
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to reorder task queue');
+    }
+  }
+
+  /// Creates a recurring task for the whole team.
   static Future<void> createTask(String name) async {
     final response = await _apiClient.postJson(
       Uri.parse('${ApiConfig.baseUrl}/tasks'),

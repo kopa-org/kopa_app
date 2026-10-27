@@ -378,27 +378,99 @@
   "fineBoxMarkCashPaid": "Or mark as paid in cash",
   "fineBoxMobilePayConnected": "MobilePay Box connected",
   "matchTasksTitle": "Tasks",
-  "matchTasksQueueTitle": "Player order",
-  "matchTasksQueuePlayer": "Player",
-  "matchTasksQueueSelected": "Selected for match",
-  "matchTasksNotSelected": "Not selected",
-  "matchTasksAutoSelected": "Automatically chosen",
+  "matchTasksNoAssignee": "Nobody selected yet",
+  "matchTasksNextInLine": "Next in line",
   "matchTasksChosenByLeader": "Chosen by team leader",
-  "matchTasksReset": "Reset",
-  "matchTasksResetConfirm": "Reset the player order to the order players joined the team?",
+  "matchTasksUpNext": "Then: {names}",
+  "@matchTasksUpNext": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "matchTasksOneOffBadge": "This match only",
   "matchTasksMarkDone": "Done",
-  "matchTasksNoAssignee": "No player selected yet",
-  "matchTasksCreate": "New task",
-  "matchTasksNameLabel": "Task name",
-  "matchTasksCreateConfirm": "Create",
-  "matchTasksCancel": "Cancel",
-  "matchTasksDelete": "Delete task",
-  "matchTasksError": "Could not update the task. Try again.",
+  "matchTasksIDidIt": "I did it",
+  "matchTasksConfirmTitle": "Is {task} done?",
+  "@matchTasksConfirmTitle": {
+    "placeholders": {
+      "task": {
+        "type": "String"
+      }
+    }
+  },
+  "matchTasksConfirmRecurring": "{name} moves to the back of the queue.",
+  "@matchTasksConfirmRecurring": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "matchTasksConfirmOneOff": "The task is marked as done by {name}.",
+  "@matchTasksConfirmOneOff": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "matchTasksCompletedBy": "Done by {name}",
   "@matchTasksCompletedBy": {
     "placeholders": {
       "name": {
         "type": "String"
+      }
+    }
+  },
+  "matchTasksAddOneOff": "Add task for this match",
+  "matchTasksNameLabel": "Task name",
+  "matchTasksOneOffNameHint": "E.g. balls or water",
+  "matchTasksPickResponsible": "Who is responsible?",
+  "matchTasksNobodyYet": "Choose later",
+  "matchTasksSelectedTag": "Selected",
+  "matchTasksNotSelected": "Not selected",
+  "matchTasksChangeResponsible": "Change responsible",
+  "matchTasksQueueTitle": "Queue",
+  "matchTasksCreateConfirm": "Create",
+  "matchTasksCancel": "Cancel",
+  "matchTasksSave": "Save",
+  "matchTasksDelete": "Delete task",
+  "matchTasksDeleteConfirm": "Delete {task}? Its queue is deleted too.",
+  "@matchTasksDeleteConfirm": {
+    "placeholders": {
+      "task": {
+        "type": "String"
+      }
+    }
+  },
+  "matchTasksDeleteOneOffConfirm": "Delete {task} from this match?",
+  "@matchTasksDeleteOneOffConfirm": {
+    "placeholders": {
+      "task": {
+        "type": "String"
+      }
+    }
+  },
+  "matchTasksReset": "Reset queue",
+  "matchTasksResetConfirm": "Reset the queue to the order players joined the team?",
+  "matchTasksError": "The task could not be updated. Please try again.",
+  "matchTasksEmptyLeader": "No tasks yet. Create recurring tasks such as beer and laundry in the team settings.",
+  "matchTasksEmptyPlayer": "No tasks yet. Add a task for this match, e.g. balls or water.",
+  "matchTasksManage": "Recurring tasks",
+  "teamTasksTitle": "Match tasks",
+  "teamTasksIntro": "Recurring tasks rotate on every match. The player highest in the queue who is selected gets the task. Once it is done, that player moves to the back.",
+  "teamTasksEmpty": "No recurring tasks yet. Create e.g. beer, laundry or the candy bag.",
+  "teamTasksCreate": "New recurring task",
+  "teamTasksNameHint": "E.g. beer or laundry",
+  "teamTasksRename": "Rename",
+  "teamTasksQueueHint": "Drag the handle to change the order.",
+  "teamTasksPlayers": "{count} players in the queue",
+  "@teamTasksPlayers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
     }
   }

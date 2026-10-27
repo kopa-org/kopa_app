@@ -974,41 +974,74 @@ class AppLocalizationsDa extends AppLocalizations {
   String get matchTasksTitle => 'Opgaver';
 
   @override
-  String get matchTasksQueueTitle => 'Spillerrækkefølge';
+  String get matchTasksNoAssignee => 'Ingen udtaget endnu';
 
   @override
-  String get matchTasksQueuePlayer => 'Spiller';
-
-  @override
-  String get matchTasksQueueSelected => 'Udtaget til kamp';
-
-  @override
-  String get matchTasksNotSelected => 'Ikke udtaget';
-
-  @override
-  String get matchTasksAutoSelected => 'Automatisk valgt';
+  String get matchTasksNextInLine => 'Næste i køen';
 
   @override
   String get matchTasksChosenByLeader => 'Valgt af holdleder';
 
   @override
-  String get matchTasksReset => 'Nulstil';
+  String matchTasksUpNext(String names) {
+    return 'Derefter: $names';
+  }
 
   @override
-  String get matchTasksResetConfirm =>
-      'Nulstil spillerrækkefølgen til den rækkefølge spillerne kom på holdet?';
+  String get matchTasksOneOffBadge => 'Kun denne kamp';
 
   @override
   String get matchTasksMarkDone => 'Udført';
 
   @override
-  String get matchTasksNoAssignee => 'Ingen spiller udtaget endnu';
+  String get matchTasksIDidIt => 'Jeg har gjort det';
 
   @override
-  String get matchTasksCreate => 'Ny opgave';
+  String matchTasksConfirmTitle(String task) {
+    return 'Er $task klaret?';
+  }
+
+  @override
+  String matchTasksConfirmRecurring(String name) {
+    return '$name rykker bagerst i køen.';
+  }
+
+  @override
+  String matchTasksConfirmOneOff(String name) {
+    return 'Opgaven markeres som udført af $name.';
+  }
+
+  @override
+  String matchTasksCompletedBy(String name) {
+    return 'Udført af $name';
+  }
+
+  @override
+  String get matchTasksAddOneOff => 'Tilføj opgave til kampen';
 
   @override
   String get matchTasksNameLabel => 'Opgavens navn';
+
+  @override
+  String get matchTasksOneOffNameHint => 'Fx bolde eller vand';
+
+  @override
+  String get matchTasksPickResponsible => 'Hvem er ansvarlig?';
+
+  @override
+  String get matchTasksNobodyYet => 'Vælg senere';
+
+  @override
+  String get matchTasksSelectedTag => 'Udtaget';
+
+  @override
+  String get matchTasksNotSelected => 'Ikke udtaget';
+
+  @override
+  String get matchTasksChangeResponsible => 'Skift ansvarlig';
+
+  @override
+  String get matchTasksQueueTitle => 'Køen';
 
   @override
   String get matchTasksCreateConfirm => 'Opret';
@@ -1017,13 +1050,67 @@ class AppLocalizationsDa extends AppLocalizations {
   String get matchTasksCancel => 'Annuller';
 
   @override
+  String get matchTasksSave => 'Gem';
+
+  @override
   String get matchTasksDelete => 'Slet opgave';
+
+  @override
+  String matchTasksDeleteConfirm(String task) {
+    return 'Slet $task? Køen bliver også slettet.';
+  }
+
+  @override
+  String matchTasksDeleteOneOffConfirm(String task) {
+    return 'Slet $task fra kampen?';
+  }
+
+  @override
+  String get matchTasksReset => 'Nulstil kø';
+
+  @override
+  String get matchTasksResetConfirm =>
+      'Nulstil køen til den rækkefølge spillerne kom på holdet?';
 
   @override
   String get matchTasksError => 'Opgaven kunne ikke opdateres. Prøv igen.';
 
   @override
-  String matchTasksCompletedBy(String name) {
-    return 'Udført af $name';
+  String get matchTasksEmptyLeader =>
+      'Ingen opgaver endnu. Opret faste opgaver som øl og vasketøj under holdindstillingerne.';
+
+  @override
+  String get matchTasksEmptyPlayer =>
+      'Ingen opgaver endnu. Tilføj en opgave til kampen, fx bolde eller vand.';
+
+  @override
+  String get matchTasksManage => 'Faste opgaver';
+
+  @override
+  String get teamTasksTitle => 'Opgaver til kampe';
+
+  @override
+  String get teamTasksIntro =>
+      'Faste opgaver går på skift ved hver kamp. Den øverste spiller i køen, der er udtaget, får opgaven. Når den er klaret, rykker spilleren bagerst.';
+
+  @override
+  String get teamTasksEmpty =>
+      'Ingen faste opgaver endnu. Opret fx øl, vasketøj eller godteposen.';
+
+  @override
+  String get teamTasksCreate => 'Ny fast opgave';
+
+  @override
+  String get teamTasksNameHint => 'Fx øl eller vasketøj';
+
+  @override
+  String get teamTasksRename => 'Omdøb';
+
+  @override
+  String get teamTasksQueueHint => 'Træk i håndtaget for at ændre rækkefølgen.';
+
+  @override
+  String teamTasksPlayers(int count) {
+    return '$count spillere i køen';
   }
 }

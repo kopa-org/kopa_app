@@ -378,27 +378,99 @@
   "fineBoxMarkCashPaid": "Eller markér som kontant betalt",
   "fineBoxMobilePayConnected": "MobilePay Box tilknyttet",
   "matchTasksTitle": "Opgaver",
-  "matchTasksQueueTitle": "Spillerrækkefølge",
-  "matchTasksQueuePlayer": "Spiller",
-  "matchTasksQueueSelected": "Udtaget til kamp",
-  "matchTasksNotSelected": "Ikke udtaget",
-  "matchTasksAutoSelected": "Automatisk valgt",
+  "matchTasksNoAssignee": "Ingen udtaget endnu",
+  "matchTasksNextInLine": "Næste i køen",
   "matchTasksChosenByLeader": "Valgt af holdleder",
-  "matchTasksReset": "Nulstil",
-  "matchTasksResetConfirm": "Nulstil spillerrækkefølgen til den rækkefølge spillerne kom på holdet?",
+  "matchTasksUpNext": "Derefter: {names}",
+  "@matchTasksUpNext": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "matchTasksOneOffBadge": "Kun denne kamp",
   "matchTasksMarkDone": "Udført",
-  "matchTasksNoAssignee": "Ingen spiller udtaget endnu",
-  "matchTasksCreate": "Ny opgave",
-  "matchTasksNameLabel": "Opgavens navn",
-  "matchTasksCreateConfirm": "Opret",
-  "matchTasksCancel": "Annuller",
-  "matchTasksDelete": "Slet opgave",
-  "matchTasksError": "Opgaven kunne ikke opdateres. Prøv igen.",
+  "matchTasksIDidIt": "Jeg har gjort det",
+  "matchTasksConfirmTitle": "Er {task} klaret?",
+  "@matchTasksConfirmTitle": {
+    "placeholders": {
+      "task": {
+        "type": "String"
+      }
+    }
+  },
+  "matchTasksConfirmRecurring": "{name} rykker bagerst i køen.",
+  "@matchTasksConfirmRecurring": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "matchTasksConfirmOneOff": "Opgaven markeres som udført af {name}.",
+  "@matchTasksConfirmOneOff": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "matchTasksCompletedBy": "Udført af {name}",
   "@matchTasksCompletedBy": {
     "placeholders": {
       "name": {
         "type": "String"
+      }
+    }
+  },
+  "matchTasksAddOneOff": "Tilføj opgave til kampen",
+  "matchTasksNameLabel": "Opgavens navn",
+  "matchTasksOneOffNameHint": "Fx bolde eller vand",
+  "matchTasksPickResponsible": "Hvem er ansvarlig?",
+  "matchTasksNobodyYet": "Vælg senere",
+  "matchTasksSelectedTag": "Udtaget",
+  "matchTasksNotSelected": "Ikke udtaget",
+  "matchTasksChangeResponsible": "Skift ansvarlig",
+  "matchTasksQueueTitle": "Køen",
+  "matchTasksCreateConfirm": "Opret",
+  "matchTasksCancel": "Annuller",
+  "matchTasksSave": "Gem",
+  "matchTasksDelete": "Slet opgave",
+  "matchTasksDeleteConfirm": "Slet {task}? Køen bliver også slettet.",
+  "@matchTasksDeleteConfirm": {
+    "placeholders": {
+      "task": {
+        "type": "String"
+      }
+    }
+  },
+  "matchTasksDeleteOneOffConfirm": "Slet {task} fra kampen?",
+  "@matchTasksDeleteOneOffConfirm": {
+    "placeholders": {
+      "task": {
+        "type": "String"
+      }
+    }
+  },
+  "matchTasksReset": "Nulstil kø",
+  "matchTasksResetConfirm": "Nulstil køen til den rækkefølge spillerne kom på holdet?",
+  "matchTasksError": "Opgaven kunne ikke opdateres. Prøv igen.",
+  "matchTasksEmptyLeader": "Ingen opgaver endnu. Opret faste opgaver som øl og vasketøj under holdindstillingerne.",
+  "matchTasksEmptyPlayer": "Ingen opgaver endnu. Tilføj en opgave til kampen, fx bolde eller vand.",
+  "matchTasksManage": "Faste opgaver",
+  "teamTasksTitle": "Opgaver til kampe",
+  "teamTasksIntro": "Faste opgaver går på skift ved hver kamp. Den øverste spiller i køen, der er udtaget, får opgaven. Når den er klaret, rykker spilleren bagerst.",
+  "teamTasksEmpty": "Ingen faste opgaver endnu. Opret fx øl, vasketøj eller godteposen.",
+  "teamTasksCreate": "Ny fast opgave",
+  "teamTasksNameHint": "Fx øl eller vasketøj",
+  "teamTasksRename": "Omdøb",
+  "teamTasksQueueHint": "Træk i håndtaget for at ændre rækkefølgen.",
+  "teamTasksPlayers": "{count} spillere i køen",
+  "@teamTasksPlayers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
     }
   }

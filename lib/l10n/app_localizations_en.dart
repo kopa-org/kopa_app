@@ -977,41 +977,74 @@ class AppLocalizationsEn extends AppLocalizations {
   String get matchTasksTitle => 'Tasks';
 
   @override
-  String get matchTasksQueueTitle => 'Player order';
+  String get matchTasksNoAssignee => 'Nobody selected yet';
 
   @override
-  String get matchTasksQueuePlayer => 'Player';
-
-  @override
-  String get matchTasksQueueSelected => 'Selected for match';
-
-  @override
-  String get matchTasksNotSelected => 'Not selected';
-
-  @override
-  String get matchTasksAutoSelected => 'Automatically chosen';
+  String get matchTasksNextInLine => 'Next in line';
 
   @override
   String get matchTasksChosenByLeader => 'Chosen by team leader';
 
   @override
-  String get matchTasksReset => 'Reset';
+  String matchTasksUpNext(String names) {
+    return 'Then: $names';
+  }
 
   @override
-  String get matchTasksResetConfirm =>
-      'Reset the player order to the order players joined the team?';
+  String get matchTasksOneOffBadge => 'This match only';
 
   @override
   String get matchTasksMarkDone => 'Done';
 
   @override
-  String get matchTasksNoAssignee => 'No player selected yet';
+  String get matchTasksIDidIt => 'I did it';
 
   @override
-  String get matchTasksCreate => 'New task';
+  String matchTasksConfirmTitle(String task) {
+    return 'Is $task done?';
+  }
+
+  @override
+  String matchTasksConfirmRecurring(String name) {
+    return '$name moves to the back of the queue.';
+  }
+
+  @override
+  String matchTasksConfirmOneOff(String name) {
+    return 'The task is marked as done by $name.';
+  }
+
+  @override
+  String matchTasksCompletedBy(String name) {
+    return 'Done by $name';
+  }
+
+  @override
+  String get matchTasksAddOneOff => 'Add task for this match';
 
   @override
   String get matchTasksNameLabel => 'Task name';
+
+  @override
+  String get matchTasksOneOffNameHint => 'E.g. balls or water';
+
+  @override
+  String get matchTasksPickResponsible => 'Who is responsible?';
+
+  @override
+  String get matchTasksNobodyYet => 'Choose later';
+
+  @override
+  String get matchTasksSelectedTag => 'Selected';
+
+  @override
+  String get matchTasksNotSelected => 'Not selected';
+
+  @override
+  String get matchTasksChangeResponsible => 'Change responsible';
+
+  @override
+  String get matchTasksQueueTitle => 'Queue';
 
   @override
   String get matchTasksCreateConfirm => 'Create';
@@ -1020,13 +1053,68 @@ class AppLocalizationsEn extends AppLocalizations {
   String get matchTasksCancel => 'Cancel';
 
   @override
+  String get matchTasksSave => 'Save';
+
+  @override
   String get matchTasksDelete => 'Delete task';
 
   @override
-  String get matchTasksError => 'Could not update the task. Try again.';
+  String matchTasksDeleteConfirm(String task) {
+    return 'Delete $task? Its queue is deleted too.';
+  }
 
   @override
-  String matchTasksCompletedBy(String name) {
-    return 'Done by $name';
+  String matchTasksDeleteOneOffConfirm(String task) {
+    return 'Delete $task from this match?';
+  }
+
+  @override
+  String get matchTasksReset => 'Reset queue';
+
+  @override
+  String get matchTasksResetConfirm =>
+      'Reset the queue to the order players joined the team?';
+
+  @override
+  String get matchTasksError =>
+      'The task could not be updated. Please try again.';
+
+  @override
+  String get matchTasksEmptyLeader =>
+      'No tasks yet. Create recurring tasks such as beer and laundry in the team settings.';
+
+  @override
+  String get matchTasksEmptyPlayer =>
+      'No tasks yet. Add a task for this match, e.g. balls or water.';
+
+  @override
+  String get matchTasksManage => 'Recurring tasks';
+
+  @override
+  String get teamTasksTitle => 'Match tasks';
+
+  @override
+  String get teamTasksIntro =>
+      'Recurring tasks rotate on every match. The player highest in the queue who is selected gets the task. Once it is done, that player moves to the back.';
+
+  @override
+  String get teamTasksEmpty =>
+      'No recurring tasks yet. Create e.g. beer, laundry or the candy bag.';
+
+  @override
+  String get teamTasksCreate => 'New recurring task';
+
+  @override
+  String get teamTasksNameHint => 'E.g. beer or laundry';
+
+  @override
+  String get teamTasksRename => 'Rename';
+
+  @override
+  String get teamTasksQueueHint => 'Drag the handle to change the order.';
+
+  @override
+  String teamTasksPlayers(int count) {
+    return '$count players in the queue';
   }
 }

@@ -1868,35 +1868,17 @@ abstract class AppLocalizations {
   /// **'Tasks'**
   String get matchTasksTitle;
 
-  /// No description provided for @matchTasksQueueTitle.
+  /// No description provided for @matchTasksNoAssignee.
   ///
   /// In en, this message translates to:
-  /// **'Player order'**
-  String get matchTasksQueueTitle;
+  /// **'Nobody selected yet'**
+  String get matchTasksNoAssignee;
 
-  /// No description provided for @matchTasksQueuePlayer.
+  /// No description provided for @matchTasksNextInLine.
   ///
   /// In en, this message translates to:
-  /// **'Player'**
-  String get matchTasksQueuePlayer;
-
-  /// No description provided for @matchTasksQueueSelected.
-  ///
-  /// In en, this message translates to:
-  /// **'Selected for match'**
-  String get matchTasksQueueSelected;
-
-  /// No description provided for @matchTasksNotSelected.
-  ///
-  /// In en, this message translates to:
-  /// **'Not selected'**
-  String get matchTasksNotSelected;
-
-  /// No description provided for @matchTasksAutoSelected.
-  ///
-  /// In en, this message translates to:
-  /// **'Automatically chosen'**
-  String get matchTasksAutoSelected;
+  /// **'Next in line'**
+  String get matchTasksNextInLine;
 
   /// No description provided for @matchTasksChosenByLeader.
   ///
@@ -1904,17 +1886,17 @@ abstract class AppLocalizations {
   /// **'Chosen by team leader'**
   String get matchTasksChosenByLeader;
 
-  /// No description provided for @matchTasksReset.
+  /// No description provided for @matchTasksUpNext.
   ///
   /// In en, this message translates to:
-  /// **'Reset'**
-  String get matchTasksReset;
+  /// **'Then: {names}'**
+  String matchTasksUpNext(String names);
 
-  /// No description provided for @matchTasksResetConfirm.
+  /// No description provided for @matchTasksOneOffBadge.
   ///
   /// In en, this message translates to:
-  /// **'Reset the player order to the order players joined the team?'**
-  String get matchTasksResetConfirm;
+  /// **'This match only'**
+  String get matchTasksOneOffBadge;
 
   /// No description provided for @matchTasksMarkDone.
   ///
@@ -1922,23 +1904,89 @@ abstract class AppLocalizations {
   /// **'Done'**
   String get matchTasksMarkDone;
 
-  /// No description provided for @matchTasksNoAssignee.
+  /// No description provided for @matchTasksIDidIt.
   ///
   /// In en, this message translates to:
-  /// **'No player selected yet'**
-  String get matchTasksNoAssignee;
+  /// **'I did it'**
+  String get matchTasksIDidIt;
 
-  /// No description provided for @matchTasksCreate.
+  /// No description provided for @matchTasksConfirmTitle.
   ///
   /// In en, this message translates to:
-  /// **'New task'**
-  String get matchTasksCreate;
+  /// **'Is {task} done?'**
+  String matchTasksConfirmTitle(String task);
+
+  /// No description provided for @matchTasksConfirmRecurring.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} moves to the back of the queue.'**
+  String matchTasksConfirmRecurring(String name);
+
+  /// No description provided for @matchTasksConfirmOneOff.
+  ///
+  /// In en, this message translates to:
+  /// **'The task is marked as done by {name}.'**
+  String matchTasksConfirmOneOff(String name);
+
+  /// No description provided for @matchTasksCompletedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Done by {name}'**
+  String matchTasksCompletedBy(String name);
+
+  /// No description provided for @matchTasksAddOneOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Add task for this match'**
+  String get matchTasksAddOneOff;
 
   /// No description provided for @matchTasksNameLabel.
   ///
   /// In en, this message translates to:
   /// **'Task name'**
   String get matchTasksNameLabel;
+
+  /// No description provided for @matchTasksOneOffNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g. balls or water'**
+  String get matchTasksOneOffNameHint;
+
+  /// No description provided for @matchTasksPickResponsible.
+  ///
+  /// In en, this message translates to:
+  /// **'Who is responsible?'**
+  String get matchTasksPickResponsible;
+
+  /// No description provided for @matchTasksNobodyYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose later'**
+  String get matchTasksNobodyYet;
+
+  /// No description provided for @matchTasksSelectedTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected'**
+  String get matchTasksSelectedTag;
+
+  /// No description provided for @matchTasksNotSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Not selected'**
+  String get matchTasksNotSelected;
+
+  /// No description provided for @matchTasksChangeResponsible.
+  ///
+  /// In en, this message translates to:
+  /// **'Change responsible'**
+  String get matchTasksChangeResponsible;
+
+  /// No description provided for @matchTasksQueueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Queue'**
+  String get matchTasksQueueTitle;
 
   /// No description provided for @matchTasksCreateConfirm.
   ///
@@ -1952,23 +2000,113 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get matchTasksCancel;
 
+  /// No description provided for @matchTasksSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get matchTasksSave;
+
   /// No description provided for @matchTasksDelete.
   ///
   /// In en, this message translates to:
   /// **'Delete task'**
   String get matchTasksDelete;
 
+  /// No description provided for @matchTasksDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {task}? Its queue is deleted too.'**
+  String matchTasksDeleteConfirm(String task);
+
+  /// No description provided for @matchTasksDeleteOneOffConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {task} from this match?'**
+  String matchTasksDeleteOneOffConfirm(String task);
+
+  /// No description provided for @matchTasksReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset queue'**
+  String get matchTasksReset;
+
+  /// No description provided for @matchTasksResetConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset the queue to the order players joined the team?'**
+  String get matchTasksResetConfirm;
+
   /// No description provided for @matchTasksError.
   ///
   /// In en, this message translates to:
-  /// **'Could not update the task. Try again.'**
+  /// **'The task could not be updated. Please try again.'**
   String get matchTasksError;
 
-  /// No description provided for @matchTasksCompletedBy.
+  /// No description provided for @matchTasksEmptyLeader.
   ///
   /// In en, this message translates to:
-  /// **'Done by {name}'**
-  String matchTasksCompletedBy(String name);
+  /// **'No tasks yet. Create recurring tasks such as beer and laundry in the team settings.'**
+  String get matchTasksEmptyLeader;
+
+  /// No description provided for @matchTasksEmptyPlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'No tasks yet. Add a task for this match, e.g. balls or water.'**
+  String get matchTasksEmptyPlayer;
+
+  /// No description provided for @matchTasksManage.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring tasks'**
+  String get matchTasksManage;
+
+  /// No description provided for @teamTasksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Match tasks'**
+  String get teamTasksTitle;
+
+  /// No description provided for @teamTasksIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring tasks rotate on every match. The player highest in the queue who is selected gets the task. Once it is done, that player moves to the back.'**
+  String get teamTasksIntro;
+
+  /// No description provided for @teamTasksEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No recurring tasks yet. Create e.g. beer, laundry or the candy bag.'**
+  String get teamTasksEmpty;
+
+  /// No description provided for @teamTasksCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'New recurring task'**
+  String get teamTasksCreate;
+
+  /// No description provided for @teamTasksNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g. beer or laundry'**
+  String get teamTasksNameHint;
+
+  /// No description provided for @teamTasksRename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get teamTasksRename;
+
+  /// No description provided for @teamTasksQueueHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag the handle to change the order.'**
+  String get teamTasksQueueHint;
+
+  /// No description provided for @teamTasksPlayers.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} players in the queue'**
+  String teamTasksPlayers(int count);
 }
 
 class _AppLocalizationsDelegate
