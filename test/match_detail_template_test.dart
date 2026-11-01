@@ -182,9 +182,7 @@ void main() {
             final icon = tester.widget<SvgPicture>(
                 find.byKey(const ValueKey('match-details-lineup-icon')));
             final selectedColor = AppColors.light.dirt;
-            final unselectedColor = header == 'dark'
-                ? AppColors.matchDetailsHeaderMuted
-                : AppColors.light.textSecondary;
+            final unselectedColor = AppColors.light.textSecondary;
             expect(
                 icon.colorFilter,
                 ColorFilter.mode(
@@ -411,7 +409,7 @@ void main() {
     );
     final overviewDecoration = overviewSurface.decoration! as BoxDecoration;
 
-    expect(header.color, AppColors.matchDetailsHeader);
+    expect(header.color, AppColors.light.lightGrass);
     expect(
       tester
           .getSize(find.byKey(const ValueKey('match-details-dark-header')))
@@ -421,9 +419,9 @@ void main() {
     expect(contentBackground.color, AppColors.light.background);
     expect(
       (segmentControl.decoration! as BoxDecoration).color,
-      AppColors.matchDetailsHeaderTrack,
+      AppColors.light.lightGrass,
     );
-    expect(overviewDecoration.color, Colors.white);
+    expect(overviewDecoration.color, AppColors.light.surface);
     expect(find.text('Existing body content'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -467,7 +465,7 @@ void main() {
     expect(practicalInfoRect.top, greaterThan(actionRect.bottom));
   });
 
-  testWidgets('match hero uses white team labels on the dark header',
+  testWidgets('match hero uses dirt team labels on the tinted header',
       (tester) async {
     final kickoff = DateTime(2026, 8, 17, 20);
     final match = MatchDetails(
@@ -504,8 +502,8 @@ void main() {
     final card = tester.widget<KopaCard>(find.byType(KopaCard));
     final homeTeam = tester.widget<Text>(find.text('Kopa IF'));
 
-    expect(card.color, AppColors.matchDetailsHeader);
-    expect(homeTeam.style!.color, Colors.white);
+    expect(card.color, AppColors.light.lightGrass);
+    expect(homeTeam.style!.color, AppColors.light.dirt);
     expect(tester.takeException(), isNull);
   });
 

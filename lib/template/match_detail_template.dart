@@ -102,7 +102,7 @@ class MatchDetailTemplate extends StatelessWidget {
 
   Color _headerColor(BuildContext context) => useTrainingHeader
       ? AppColors.of(context).lightSky65
-      : AppColors.matchDetailsHeader;
+      : AppColors.of(context).lightGrass;
 
   @override
   Widget build(BuildContext context) {
@@ -115,10 +115,8 @@ class MatchDetailTemplate extends StatelessWidget {
       systemOverlayStyle: _usesSheetHeader
           ? SystemUiOverlayStyle(
               statusBarColor: _headerColor(context),
-              statusBarIconBrightness:
-                  useTrainingHeader ? Brightness.dark : Brightness.light,
-              statusBarBrightness:
-                  useTrainingHeader ? Brightness.light : Brightness.dark,
+              statusBarIconBrightness: Brightness.dark,
+              statusBarBrightness: Brightness.light,
             )
           : null,
       onRefresh: _usesSheetHeader ? null : onRefresh,
@@ -382,9 +380,7 @@ class MatchDetailTemplate extends StatelessWidget {
         key: const ValueKey('match-details-dark-segment-control'),
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: useTrainingHeader
-              ? AppColors.of(context).lightSky95
-              : AppColors.matchDetailsHeaderTrack,
+          color: _headerColor(context),
           borderRadius: BorderRadius.circular(12),
         ),
         child: row,
@@ -535,16 +531,10 @@ class _MatchDetailSegmentButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final selectedColor = trainingHeader ? colors.sky : colors.dirt;
-    final unselectedColor = trainingHeader
-        ? colors.textSecondary
-        : darkHeader
-            ? AppColors.matchDetailsHeaderMuted
-            : colors.textSecondary;
+    final unselectedColor = colors.textSecondary;
     final background = selected
         ? darkHeader
-            ? trainingHeader
-                ? colors.surface
-                : AppColors.matchDetailsHeaderForeground
+            ? colors.surface
             : colors.lightGrass
         : AppColors.transparent;
     final duration = MediaQuery.disableAnimationsOf(context)
@@ -701,64 +691,74 @@ class _MatchDetailsHeader extends StatelessWidget {
     final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final styles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final foreground =
-        trainingHeader ? colors.dirt : AppColors.matchDetailsHeaderForeground;
+    final backButton = CupertinoButton(
+      minimumSize: const Size(32, 32),
+      padding: EdgeInsets.zero,
+      onPressed: () => Navigator.of(context).pop(),
+      child: darkHeader
+          ? Container(
+              width: 32,
+              height: 32,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: trainingHeader ? colors.lightSky95 : colors.surface,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(
+                CupertinoIcons.back,
+                color: colors.dirt,
+                size: 20,
+              ),
+            )
+          : Icon(
+              CupertinoIcons.back,
+              color: colors.dirt,
+              size: 30,
+            ),
+    );
+
+    if (darkHeader) {
+      return Padding(
+        key: const ValueKey('match-details-scroll-header'),
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+        child: Row(
+          children: [
+            backButton,
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(
+                title,
+                style: styles.h5.copyWith(
+                  color: colors.dirt,
+                  fontWeight: FontWeight.w400,
+                  fontSize: 17,
+                ),
+              ),
+            ),
+            if (action != null)
+              IconTheme.merge(
+                data: IconThemeData(color: colors.dirt),
+                child: action!,
+              ),
+          ],
+        ),
+      );
+    }
 
     return Padding(
       key: const ValueKey('match-details-scroll-header'),
-      padding: darkHeader
-          ? const EdgeInsets.fromLTRB(16, 10, 16, 10)
-          : const EdgeInsets.fromLTRB(0, 12, 0, 20),
+      padding: const EdgeInsets.fromLTRB(0, 12, 0, 20),
       child: Row(
         children: [
-          CupertinoButton(
-            minimumSize: const Size(32, 32),
-            padding: EdgeInsets.zero,
-            onPressed: () => Navigator.of(context).pop(),
-            child: darkHeader
-                ? Container(
-                    width: 32,
-                    height: 32,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: trainingHeader
-                          ? colors.lightSky95
-                          : AppColors.matchDetailsHeaderBackButton,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Icon(
-                      CupertinoIcons.back,
-                      color: foreground,
-                      size: 20,
-                    ),
-                  )
-                : Icon(
-                    CupertinoIcons.back,
-                    color: colors.dirt,
-                    size: 30,
-                  ),
-          ),
+          backButton,
           const SizedBox(width: 14),
           Expanded(
             child: Text(
               title,
-              style: styles.h5.copyWith(
-                color: darkHeader ? foreground : null,
-                fontWeight: darkHeader ? FontWeight.w400 : FontWeight.w800,
-                fontSize: darkHeader ? 17 : null,
-              ),
+              style: styles.h5.copyWith(fontWeight: FontWeight.w800),
             ),
           ),
-          if (action != null)
-            if (darkHeader)
-              IconTheme.merge(
-                data: IconThemeData(
-                  color: foreground,
-                ),
-                child: action!,
-              )
-            else
-              action!,
+          if (action != null) action!,
         ],
       ),
     );

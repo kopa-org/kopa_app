@@ -31,7 +31,7 @@ class MatchActionsMenu extends StatelessWidget {
         width: 20,
         height: 20,
         colorFilter: ColorFilter.mode(
-          isTraining ? colors.textPrimary : colors.white,
+          colors.textPrimary,
           BlendMode.srcIn,
         ),
       ),

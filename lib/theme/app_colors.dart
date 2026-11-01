@@ -5,12 +5,6 @@ class AppColors extends ThemeExtension<AppColors> {
   static const defaultTeamLogoColor = Color(0xFF1B8B4B);
   // Primary Kopa green (Græs), the same value as AppColors.primary.
   static const matchDetailsHeader = Color(0xFF00943C);
-  static const matchDetailsHeaderAccent = Color(0xFF7DDEA9);
-  static const matchDetailsHeaderForeground = Color(0xFFFFFFFF);
-  static const matchDetailsHeaderMuted = Color(0xABFFFFFF);
-  static const matchDetailsHeaderTrack = Color(0x12FFFFFF);
-  static const matchDetailsHeaderBackButton = Color(0x4FFFFFFF);
-  static const matchDetailsHeaderErrorAccent = Color(0xFFFF8F87);
 
   static AppColors of(BuildContext context) =>
       Theme.of(context).extension<AppColors>() ?? light;

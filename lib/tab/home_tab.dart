@@ -677,10 +677,9 @@ class _HeroTeamPanel extends StatelessWidget {
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
     final match = this.match;
     final isTraining = match?.isTraining == true;
-    final heroHeaderTextColor =
-        isTraining ? appColors.dirt : AppColors.matchDetailsHeaderForeground;
+    final heroHeaderTextColor = appColors.dirt;
     final heroHeaderAccentColor =
-        isTraining ? appColors.primary : AppColors.matchDetailsHeaderAccent;
+        isTraining ? appColors.primary : appColors.dirt;
     final homeTeam =
         match?.homeTeam ?? currentUser.teamDetails?.title ?? 'Hold';
     final awayTeam = match?.awayTeam ?? 'Modstander';
@@ -746,7 +745,7 @@ class _HeroTeamPanel extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: isTraining
                           ? appColors.lightSky65
-                          : AppColors.matchDetailsHeader,
+                          : appColors.lightGrass,
                       borderRadius: heroRadius,
                     ),
                     child: Column(

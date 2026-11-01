@@ -159,7 +159,7 @@ void main() {
         final track = tester.widget<Container>(
             find.byKey(const ValueKey('match-details-dark-segment-control')));
         expect((track.decoration! as BoxDecoration).color,
-            AppColors.light.lightSky95);
+            AppColors.light.lightSky65);
         expect(find.byKey(const ValueKey('match-details-segment-timeline')),
             findsNothing);
         final sheet = find.byKey(const ValueKey('match-details-body-sheet'));

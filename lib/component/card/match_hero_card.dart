@@ -42,15 +42,14 @@ class MatchHeroCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final hasScore = match.hasFinalScore;
     final useDarkHeader = darkHeader && !match.isTraining;
-    final heroTextColor =
-        useDarkHeader ? AppColors.matchDetailsHeaderForeground : appColors.dirt;
+    final heroTextColor = appColors.dirt;
 
     final cardContent = KopaCard(
       onTap: onTap,
       padding: EdgeInsets.zero,
       borderRadius: Spacing.borderRadiusLargeIncreased,
       color: useDarkHeader
-          ? AppColors.matchDetailsHeader
+          ? appColors.lightGrass
           : match.isTraining
               ? appColors.lightSky65
               : null,
@@ -79,10 +78,7 @@ class MatchHeroCard extends StatelessWidget {
                           labelMaxLines: 1,
                           labelStyle: appTextStyles.caption.copyWith(
                             color: heroTextColor,
-                            fontWeight: useDarkHeader
-                                ? FontWeight.w400
-                                : FontWeight.w800,
-                            fontSize: useDarkHeader ? 12 : null,
+                            fontWeight: FontWeight.w800,
                           ),
                         ),
                       ),
@@ -117,10 +113,7 @@ class MatchHeroCard extends StatelessWidget {
                           labelMaxLines: 1,
                           labelStyle: appTextStyles.caption.copyWith(
                             color: heroTextColor,
-                            fontWeight: useDarkHeader
-                                ? FontWeight.w400
-                                : FontWeight.w800,
-                            fontSize: useDarkHeader ? 12 : null,
+                            fontWeight: FontWeight.w800,
                           ),
                         ),
                       ),
