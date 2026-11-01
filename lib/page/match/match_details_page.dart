@@ -41,7 +41,7 @@ import 'package:kopa/component/match/match_events_timeline.dart';
 import 'package:kopa/component/match/match_rsvp_card.dart';
 import 'package:kopa/component/match/match_tasks_section.dart';
 import 'package:kopa/component/match/match_actions_menu.dart';
-import 'package:kopa/component/match/match_quick_actions_fab.dart';
+import 'package:kopa/component/match/match_external_player_fab.dart';
 import 'package:kopa/config/app_feature_flags.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -199,22 +199,15 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     final bottomNavigationBar = widget.showBottomNavigationBar
         ? _buildMatchDetailsBottomNavigationBar(context)
         : null;
-    final quickActions = !isTraining
-        ? MatchQuickActionsFab(
-            matchId: matchDetails.id,
-            hasPoll: matchDetails.matchPollDetails != null,
-            hasFinalScore: matchDetails.hasFinalScore,
-            onPoll: data == null
-                ? null
-                : () => matchDetails.matchPollDetails == null
-                    ? _openCreateMatchPoll(matchDetails, squad)
-                    : _openEditMatchPoll(matchDetails, squad),
-            onResult: () => setMatchScore(matchDetails),
-            onExternalPlayers: _isAddingExternalPlayer
-                ? null
-                : () => _addExternalPlayer(matchDetails),
-          )
-        : null;
+    final externalPlayerFab =
+        !isTraining && _selectedSegment == MatchDetailSegment.attendance
+            ? MatchExternalPlayerFab(
+                matchId: matchDetails.id,
+                onPressed: _isAddingExternalPlayer
+                    ? null
+                    : () => _addExternalPlayer(matchDetails),
+              )
+            : null;
 
     final heroCard = MatchHeroCard(
       match: matchDetails,
@@ -237,6 +230,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
           );
     final headerAction = MatchActionsMenu(
       isTraining: isTraining,
+      hasFinalScore: matchDetails.hasFinalScore,
+      onResult: isTraining ? null : () => setMatchScore(matchDetails),
       onDelete: () => _deleteMatch(matchDetails),
     );
 
@@ -280,7 +275,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         onSegmentChanged: _selectSegment,
         bottomNavigationBar: bottomNavigationBar,
         useParentBottomNavigationBar: !widget.showBottomNavigationBar,
-        floatingActionButton: quickActions,
+        floatingActionButton: externalPlayerFab,
         playerPositions: lineupCard,
         infoRows: _buildPracticalInfoRows(matchDetails),
         tasksSection: tasksSection,
@@ -310,7 +305,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       ),
       bottomNavigationBar: bottomNavigationBar,
       useParentBottomNavigationBar: !widget.showBottomNavigationBar,
-      floatingActionButton: quickActions,
+      floatingActionButton: externalPlayerFab,
       overviewTitle: 'Praktisk information',
       attendanceTitle: 'Tilmeldte spillere',
       attendanceSegmentLabel: l10n.matchRsvpAttendeeCount(attendeeCount),

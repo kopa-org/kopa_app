@@ -31,12 +31,6 @@ class AppLocalizationsDa extends AppLocalizations {
   String get matchDetailsLineupTab => 'Opstilling';
 
   @override
-  String get matchFabMotmLabel => 'MOTM';
-
-  @override
-  String get matchFabResultLabel => 'Resultat';
-
-  @override
   String get matchFabExternalPlayerLabel => 'Tilføj ekst. spiller';
 
   @override
@@ -801,12 +795,6 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String get matchActionsEditResult => 'Rediger kampresultat';
-
-  @override
-  String get matchFabCreateMotmPoll => 'Kampens spiller: opret afstemning';
-
-  @override
-  String get matchFabEditMotmPoll => 'Kampens spiller: rediger afstemning';
 
   @override
   String get matchFabEnterResult => 'Indtast kampresultat';

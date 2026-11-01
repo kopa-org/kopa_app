@@ -146,8 +146,8 @@ void main() {
       expect(find.byType(PlayerOfMatchSummaryCard),
           variant == 'scored' ? findsOneWidget : findsNothing);
       expect(find.byType(MatchPollDetailsCard), findsNothing);
-      expect(find.byKey(const ValueKey('match-quick-actions-fab')),
-          variant == 'training' ? findsNothing : findsOneWidget);
+      expect(find.byKey(const ValueKey('match-external-player-fab')),
+          findsNothing);
       if (variant == 'training') {
         expect(find.byType(MatchDetailsSheetScrollView), findsOneWidget);
         expect(
@@ -229,21 +229,27 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(PlayerPositionsCard), findsNothing);
-      await tester.tap(find.byKey(const ValueKey('match-quick-actions-fab')));
+      final externalPlayerFab =
+          find.byKey(const ValueKey('match-external-player-fab'));
+      expect(externalPlayerFab, findsNothing);
+
+      await tester.tap(find.byKey(const ValueKey('match-actions-menu')));
       await tester.pumpAndSettle();
-      for (final action in ['motm', 'result', 'external-players']) {
-        expect(
-            tester
-                .widget<FloatingActionButton>(
-                    find.byKey(ValueKey('match-fab-$action')))
-                .onPressed,
-            isNotNull);
-      }
-      await tester.tap(find.byIcon(Icons.close));
+      expect(find.byKey(const ValueKey('match-register-result-action')),
+          findsOneWidget);
+      await tester.tapAt(Offset.zero);
       await tester.pumpAndSettle();
+
+      await tester
+          .tap(find.byKey(const ValueKey('match-details-segment-attendance')));
+      await tester.pumpAndSettle();
+      expect(tester.widget<FloatingActionButton>(externalPlayerFab).onPressed,
+          isNotNull);
+
       await tester
           .tap(find.byKey(const ValueKey('match-details-segment-lineup')));
       await tester.pumpAndSettle();
+      expect(externalPlayerFab, findsNothing);
 
       final lineup =
           tester.widget<PlayerPositionsCard>(find.byType(PlayerPositionsCard));

@@ -4,15 +4,19 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/theme/app_colors.dart';
 
-enum _MatchAction { delete }
+enum _MatchAction { result, delete }
 
 class MatchActionsMenu extends StatelessWidget {
   final bool isTraining;
+  final bool hasFinalScore;
+  final VoidCallback? onResult;
   final VoidCallback onDelete;
 
   const MatchActionsMenu({
     super.key,
     required this.isTraining,
+    this.hasFinalScore = false,
+    this.onResult,
     required this.onDelete,
   });
 
@@ -37,11 +41,29 @@ class MatchActionsMenu extends StatelessWidget {
       ),
       onSelected: (action) {
         switch (action) {
+          case _MatchAction.result:
+            onResult?.call();
           case _MatchAction.delete:
             onDelete();
         }
       },
       itemBuilder: (_) => [
+        if (onResult != null)
+          PopupMenuItem(
+            key: const ValueKey('match-register-result-action'),
+            value: _MatchAction.result,
+            child: Row(children: [
+              Icon(Icons.scoreboard_outlined, size: 18, color: colors.dirt),
+              const SizedBox(width: 10),
+              Flexible(
+                child: Text(
+                  hasFinalScore
+                      ? l10n.matchActionsEditResult
+                      : l10n.matchFabEnterResult,
+                ),
+              ),
+            ]),
+          ),
         PopupMenuItem(
           key: const ValueKey('delete-match-action'),
           value: _MatchAction.delete,

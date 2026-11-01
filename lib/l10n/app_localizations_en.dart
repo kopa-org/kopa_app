@@ -31,12 +31,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get matchDetailsLineupTab => 'Lineup';
 
   @override
-  String get matchFabMotmLabel => 'MOTM';
-
-  @override
-  String get matchFabResultLabel => 'Result';
-
-  @override
   String get matchFabExternalPlayerLabel => 'Add Ext Player';
 
   @override
@@ -804,12 +798,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get matchActionsEditResult => 'Edit match result';
-
-  @override
-  String get matchFabCreateMotmPoll => 'MOTM: create poll';
-
-  @override
-  String get matchFabEditMotmPoll => 'MOTM: edit poll';
 
   @override
   String get matchFabEnterResult => 'Enter match result';

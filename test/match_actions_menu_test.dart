@@ -6,7 +6,8 @@ import 'package:kopa/theme/app_theme.dart';
 
 void main() {
   for (final isTraining in [false, true]) {
-    testWidgets('menu only offers deletion: training=$isTraining',
+    testWidgets(
+        'menu without a result action offers deletion: training=$isTraining',
         (tester) async {
       var deletions = 0;
       await tester.pumpWidget(_app(MatchActionsMenu(
@@ -25,6 +26,28 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('delete-match-action')));
       await tester.pumpAndSettle();
       expect(deletions, 1);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  for (final (hasFinalScore, label) in [
+    (false, 'Indtast kampresultat'),
+    (true, 'Rediger kampresultat'),
+  ]) {
+    testWidgets('match menu offers the result: scored=$hasFinalScore',
+        (tester) async {
+      var results = 0;
+      await tester.pumpWidget(_app(MatchActionsMenu(
+        isTraining: false,
+        hasFinalScore: hasFinalScore,
+        onResult: () => results++,
+        onDelete: () {},
+      )));
+      await tester.tap(find.byKey(const ValueKey('match-actions-menu')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(label));
+      await tester.pumpAndSettle();
+      expect(results, 1);
       expect(tester.takeException(), isNull);
     });
   }
