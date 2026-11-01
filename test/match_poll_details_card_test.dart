@@ -20,6 +20,40 @@ import 'package:kopa/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 
 void main() {
+  test('a tied poll names every winner', () {
+    final now = DateTime(2026, 1, 1);
+    MatchPollUserVotesDetails vote(int id, String name, int votes) =>
+        MatchPollUserVotesDetails(
+          id: id,
+          matchPollId: 1,
+          userId: id,
+          userName: name,
+          numberOfVotes: votes,
+          createdAt: now,
+          updatedAt: now,
+        );
+    MatchPollDetails poll(List<MatchPollUserVotesDetails> votes) =>
+        MatchPollDetails(
+          id: 1,
+          eventId: 1,
+          playerOfTheMatchDetails: _user(1, 'Alice', now),
+          playerOfTheMatchVotes: 3,
+          matchPollUserVotesDetails: votes,
+          createdAt: now,
+          updatedAt: now,
+        );
+
+    final tied = poll([
+      vote(1, 'Alice', 3),
+      vote(2, 'Bob', 3),
+      vote(3, 'Charlie', 1),
+    ]);
+    expect(tied.winningVotes.map((vote) => vote.userName), ['Alice', 'Bob']);
+    expect(tied.winnerName, 'Alice & Bob');
+    expect(poll([vote(1, 'Alice', 3), vote(2, 'Bob', 1)]).winnerName, 'Alice');
+    expect(poll(const []).winnerName, 'Alice');
+  });
+
   testWidgets('shows every vote total and exposes the edit action',
       (tester) async {
     final now = DateTime(2026, 1, 1);

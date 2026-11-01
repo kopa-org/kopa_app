@@ -295,14 +295,22 @@ class _CreateMatchPageState extends State<CreateMatchPage> {
               backgroundColor: appColors.background,
               children: [
                 if (!isTraining) ...[
-                  _buildFormRow('Hjemmehold', _teamAController,
-                      'Fx Sønderjyske', appTextStyles),
                   _buildFormRow(
-                      'Udehold', _teamBController, 'Fx AGF', appTextStyles),
+                      AppLocalizations.of(context)!.uiHomeTeam,
+                      _teamAController,
+                      AppLocalizations.of(context)!.uiEGSNderjyske,
+                      appTextStyles),
+                  _buildFormRow(
+                      AppLocalizations.of(context)!.uiAwayTeam,
+                      _teamBController,
+                      AppLocalizations.of(context)!.uiEGAgf,
+                      appTextStyles),
                 ],
                 CupertinoFormRow(
                   prefix: Text(
-                    isTraining ? l10n.eventTrainingTime : 'Tidspunkt',
+                    isTraining
+                        ? l10n.eventTrainingTime
+                        : AppLocalizations.of(context)!.uiTime,
                     style: appTextStyles.bodyBold,
                   ),
                   child: GestureDetector(
@@ -326,11 +334,11 @@ class _CreateMatchPageState extends State<CreateMatchPage> {
                   ),
                 ),
                 _buildFormRow(
-                  'Lokation',
+                  AppLocalizations.of(context)!.uiLocation,
                   _locationController,
                   isTraining
                       ? l10n.eventCreateTrainingLocationHint
-                      : 'Fx Sydbank Park',
+                      : AppLocalizations.of(context)!.uiEGSydbankPark,
                   appTextStyles,
                 ),
                 if (isTraining)
@@ -441,7 +449,10 @@ class _CreateMatchPageState extends State<CreateMatchPage> {
                   ],
                 ],
                 if (!isTraining)
-                  _buildFormRow('Noter', _noteController, 'Evt. kommentarer',
+                  _buildFormRow(
+                      AppLocalizations.of(context)!.uiNotes,
+                      _noteController,
+                      AppLocalizations.of(context)!.uiOptionalComments,
                       appTextStyles,
                       maxLines: 2),
               ],
@@ -481,13 +492,14 @@ class _CreateMatchPageState extends State<CreateMatchPage> {
       await _showError(
         isTraining
             ? l10n.eventCreateTrainingMissingFields
-            : 'Udfyld begge hold, lokation og vælg dato.',
+            : AppLocalizations.of(context)!.uiFillInBothTeamsAndThe,
       );
       return false;
     }
 
     if (!isTraining && teamA.toLowerCase() == teamB.toLowerCase()) {
-      await _showError('Første og andet hold må ikke være ens.');
+      await _showError(
+          AppLocalizations.of(context)!.uiTheFirstAndSecondTeamCannot);
       return false;
     }
 
@@ -598,7 +610,7 @@ class _CreateMatchPageState extends State<CreateMatchPage> {
     await showCupertinoDialog(
       context: context,
       builder: (dialogContext) => CupertinoAlertDialog(
-        title: Text('Fejl'),
+        title: Text(AppLocalizations.of(context)!.matchPollErrorTitle),
         content: Text(message),
         actions: <CupertinoDialogAction>[
           CupertinoDialogAction(

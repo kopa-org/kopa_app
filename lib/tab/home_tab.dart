@@ -103,7 +103,8 @@ class _HomeTabViewState extends State<_HomeTabView> {
     final currentUser = context.watch<AuthCubit>().state.user;
 
     if (currentUser == null) {
-      return const Center(child: Text('User not logged in'));
+      return Center(
+          child: Text(AppLocalizations.of(context)!.uiUserNotLoggedIn));
     }
 
     return PageScaffold.tab(
@@ -129,7 +130,9 @@ class _HomeTabViewState extends State<_HomeTabView> {
                 child: Padding(
                   padding: const EdgeInsets.all(Spacing.lg),
                   child: Text(
-                    state.errorMessage ?? 'Kunne ikke hente dashboard data',
+                    state.errorMessage ??
+                        AppLocalizations.of(context)!
+                            .uiCouldNotFetchDashboardData,
                     style: appTextStyles.body.copyWith(color: appColors.error),
                     textAlign: TextAlign.center,
                   ),
@@ -188,14 +191,14 @@ class _HomeTabViewState extends State<_HomeTabView> {
                   ),
                   actions: [
                     _HomeHeaderActionButton(
-                      tooltip: 'Kalender',
+                      tooltip: AppLocalizations.of(context)!.uiCalendar,
                       icon: Icons.calendar_today_outlined,
                       onPressed: openCalendar,
                     ),
                     Padding(
                       padding: const EdgeInsets.only(right: Spacing.md),
                       child: _HomeHeaderActionButton(
-                        tooltip: 'Profil',
+                        tooltip: AppLocalizations.of(context)!.uiProfile,
                         icon: Icons.account_circle_outlined,
                         onPressed: () => _openProfileSettings(context),
                       ),
@@ -255,7 +258,7 @@ class _HeroSection extends StatelessWidget {
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
     final l10n = AppLocalizations.of(context)!;
     final countdownLabel = nextMatch == null
-        ? 'Ingen kommende kamp'
+        ? AppLocalizations.of(context)!.uiNoUpcomingMatch
         : nextMatch!.isTraining
             ? l10n.homeTrainingCountdownLabel
             : l10n.homeMatchCountdownLabel;
@@ -397,7 +400,7 @@ class _HeroCountdownState extends State<_HeroCountdown> {
 
     if (widget.target == null) {
       return Text(
-        'Planen opdateres',
+        AppLocalizations.of(context)!.uiTheScheduleIsBeingUpdated,
         style: styles.copyWith(fontSize: 30),
       );
     }
@@ -680,13 +683,17 @@ class _HeroTeamPanel extends StatelessWidget {
     final heroHeaderTextColor = appColors.dirt;
     final heroHeaderAccentColor =
         isTraining ? appColors.primary : appColors.dirt;
-    final homeTeam =
-        match?.homeTeam ?? currentUser.teamDetails?.title ?? 'Hold';
-    final awayTeam = match?.awayTeam ?? 'Modstander';
+    final homeTeam = match?.homeTeam ??
+        currentUser.teamDetails?.title ??
+        AppLocalizations.of(context)!.uiTeam;
+    final awayTeam =
+        match?.awayTeam ?? AppLocalizations.of(context)!.uiOpponent;
     final ownTeamName = currentUser.teamDetails?.title;
     final ownTeamLogo = currentUser.teamDetails?.logoDesign;
     final title = titleOverride ??
-        (match == null ? 'Ingen kamp' : _matchDate(match.date));
+        (match == null
+            ? AppLocalizations.of(context)!.uiNoMatch
+            : _matchDate(match.date));
     final heroRadius = BorderRadius.circular(HomeBentoCard.cardRadius);
     final cardHeroTag = match == null || !enableLogoHeroes
         ? null
@@ -854,7 +861,7 @@ class _HeroTeamPanel extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.only(top: Spacing.md),
                             child: Text(
-                              'Ingen kamp planlagt',
+                              AppLocalizations.of(context)!.uiNoMatchPlanned,
                               style: appTextStyles.buttonSmall.copyWith(
                                 color: heroHeaderAccentColor,
                                 fontWeight: FontWeight.w800,
@@ -954,7 +961,9 @@ class _MatchInfoList extends StatelessWidget {
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final l10n = AppLocalizations.of(context)!;
     final meetingTime = match.meetingTime;
-    final location = match.location.isEmpty ? 'Ingen lokation' : match.location;
+    final location = match.location.isEmpty
+        ? AppLocalizations.of(context)!.uiNoLocation
+        : match.location;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -963,7 +972,9 @@ class _MatchInfoList extends StatelessWidget {
         _MatchInfoListRow(
           icon: Icons.schedule_outlined,
           iconColor: appColors.sky,
-          label: match.isTraining ? l10n.eventTrainingTime : 'Kampstart',
+          label: match.isTraining
+              ? l10n.eventTrainingTime
+              : AppLocalizations.of(context)!.matchTimelineKickoff,
           value: _matchTime(match.date),
           valueColor: AppColors.of(context).textPrimary,
         ),
@@ -972,7 +983,7 @@ class _MatchInfoList extends StatelessWidget {
           _MatchInfoListRow(
             icon: Icons.access_time,
             iconColor: appColors.sunset,
-            label: 'Mødetid',
+            label: AppLocalizations.of(context)!.uiMeetingTime,
             value: meetingTime == null ? '--:--' : _clockTime(meetingTime),
             valueColor: meetingTime == null
                 ? AppColors.of(context).grey4
@@ -984,7 +995,7 @@ class _MatchInfoList extends StatelessWidget {
           icon: Icons.location_on_outlined,
           iconColor: appColors.error,
           label: location,
-          actionLabel: 'Kort ›',
+          actionLabel: AppLocalizations.of(context)!.uiMap,
           onAction: onOpenNavigation,
         ),
       ],
@@ -1290,7 +1301,7 @@ class _MatchSignupSummary extends StatelessWidget {
           ),
           const SizedBox(width: 3),
           Text(
-            'tilmeldt',
+            AppLocalizations.of(context)!.uiRegistered2,
             style: appTextStyles.caption3.copyWith(
               color: appColors.grey5,
               fontWeight: FontWeight.w700,
@@ -1325,7 +1336,8 @@ class _BentoGrid extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (latestMatch != null) ...[
-          const HomeBentoSectionTitle(title: 'Seneste kamp'),
+          HomeBentoSectionTitle(
+              title: AppLocalizations.of(context)!.uiLatestMatch),
           const SizedBox(height: Spacing.sm),
           HomeLatestResultCard(
             match: latestMatch,
@@ -1335,7 +1347,7 @@ class _BentoGrid extends StatelessWidget {
           ),
           const SizedBox(height: Spacing.lg),
         ],
-        const HomeBentoSectionTitle(title: 'Stilling'),
+        HomeBentoSectionTitle(title: AppLocalizations.of(context)!.uiStandings),
         const SizedBox(height: Spacing.sm),
         StandingsPreviewCard(
           standings: standings,
@@ -1344,7 +1356,7 @@ class _BentoGrid extends StatelessWidget {
         if (featureFlags.showStatistics) ...[
           const SizedBox(height: Spacing.lg),
           HomeBentoSectionTitle(
-            title: 'Statistikker',
+            title: AppLocalizations.of(context)!.uiStatistics,
             onAction: () => _openStatistics(context),
           ),
           const SizedBox(height: Spacing.sm),
@@ -1356,7 +1368,7 @@ class _BentoGrid extends StatelessWidget {
         if (featureFlags.showFineBox) ...[
           const SizedBox(height: Spacing.lg),
           HomeBentoSectionTitle(
-            title: 'Bødekasse',
+            title: AppLocalizations.of(context)!.navFineBox,
             onAction: () => _openFineBox(context),
           ),
           const SizedBox(height: Spacing.sm),

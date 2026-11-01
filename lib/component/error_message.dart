@@ -1,3 +1,4 @@
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:kopa/theme/app_colors.dart';
 
@@ -15,7 +16,7 @@ class ErrorMessage extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.only(top: 40.0), // Tilføjer plads til siderne
         child: Text(
-          'Der skete en fejl. Prøv venligst igen senere.',
+          AppLocalizations.of(context)!.uiSomethingWentWrongPleaseTryAgain,
           style: TextStyle(
             fontSize: 16.0,
             color: AppColors.of(context).error,

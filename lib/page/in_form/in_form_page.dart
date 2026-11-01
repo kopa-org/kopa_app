@@ -1,3 +1,5 @@
+import 'package:kopa/l10n/current_l10n.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
@@ -66,7 +68,8 @@ class _InFormViewState extends State<_InFormView> {
       body: BlocBuilder<InFormCubit, InFormState>(
         builder: (context, state) {
           if (widget.teamId == null) {
-            return const Center(child: Text('Ingen hold valgt.'));
+            return Center(
+                child: Text(AppLocalizations.of(context)!.uiNoTeamSelected));
           }
 
           final rows = state.leaderboard?.rows ?? const [];
@@ -100,7 +103,8 @@ class _InFormViewState extends State<_InFormView> {
                           ),
                         ],
                         const SizedBox(height: Spacing.lg),
-                        const InFormSectionTitle(title: 'Rangliste'),
+                        InFormSectionTitle(
+                            title: AppLocalizations.of(context)!.uiTable),
                         const SizedBox(height: Spacing.sm),
                         _FilterBar(
                           period: state.period,
@@ -126,7 +130,8 @@ class _InFormViewState extends State<_InFormView> {
                     padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
                     sliver: SliverToBoxAdapter(
                       child: _MessagePanel(
-                        text: state.errorMessage ?? 'Der skete en fejl.',
+                        text: state.errorMessage ??
+                            AppLocalizations.of(context)!.uiSomethingWentWrong,
                         color: colors.lightSky,
                         mascot: 'assets/illustrations/kopa_heart.svg',
                       ),
@@ -137,8 +142,8 @@ class _InFormViewState extends State<_InFormView> {
                     padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
                     sliver: SliverToBoxAdapter(
                       child: _MessagePanel(
-                        text:
-                            'Ingen point endnu. Registrer kampdata for at starte holdkonkurrencen.',
+                        text: AppLocalizations.of(context)!
+                            .uiNoPointsYetRecordMatchData,
                         color: colors.lightGrass,
                         mascot: 'assets/illustrations/kopa_flag.svg',
                       ),
@@ -156,7 +161,7 @@ class _InFormViewState extends State<_InFormView> {
                     ),
                   ),
                   if (rows.length > 3)
-                    const SliverPadding(
+                    SliverPadding(
                       padding: EdgeInsets.fromLTRB(
                         Spacing.md,
                         Spacing.lg,
@@ -164,7 +169,9 @@ class _InFormViewState extends State<_InFormView> {
                         Spacing.sm,
                       ),
                       sliver: SliverToBoxAdapter(
-                        child: InFormSectionTitle(title: 'Resten af holdet'),
+                        child: InFormSectionTitle(
+                            title:
+                                AppLocalizations.of(context)!.uiRestOfTheTeam),
                       ),
                     ),
                   if (rows.length > 3)
@@ -251,12 +258,12 @@ class _LeaderboardHero extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 InFormEyebrow(
-                  label: 'Holdkonkurrencen',
+                  label: AppLocalizations.of(context)!.uiTheTeamCompetition,
                   color: colors.lightGrass,
                 ),
                 const SizedBox(height: Spacing.md),
                 Text(
-                  'Hvem er\ni form?',
+                  AppLocalizations.of(context)!.uiWhoIsNinForm,
                   style: styles.pageTitle.copyWith(
                     color: colors.dirt,
                     fontSize: 34,
@@ -267,8 +274,10 @@ class _LeaderboardHero extends StatelessWidget {
                 const SizedBox(height: Spacing.sm),
                 Text(
                   currentPlayer == null
-                      ? 'Kampdata, streaks og bonusser samlet ét sted.'
-                      : 'Du er nr. ${currentPlayer!.rank} med ${_points(currentPlayer!.total)}.',
+                      ? AppLocalizations.of(context)!
+                          .uiMatchDataStreaksAndBonusesIn
+                      : AppLocalizations.of(context)!.uiYouAreNoWith(
+                          currentPlayer!.rank, _points(currentPlayer!.total)),
                   style: styles.body.copyWith(
                     color: colors.textSecondary,
                     height: 1.25,
@@ -352,14 +361,15 @@ class _FilterBar extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Vælg position', style: styles.sectionHeader),
+              Text(AppLocalizations.of(context)!.uiChoosePosition,
+                  style: styles.sectionHeader),
               const SizedBox(height: Spacing.md),
               Wrap(
                 spacing: Spacing.sm,
                 runSpacing: Spacing.sm,
                 children: [
                   InFormPill(
-                    label: 'Alle positioner',
+                    label: AppLocalizations.of(context)!.uiAllPositions,
                     selected: position == null,
                     onTap: () => Navigator.pop(context, '__all__'),
                   ),
@@ -412,10 +422,12 @@ class _PositionPrompt extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Hvilken position spiller du?', style: styles.bodyBold),
+                Text(AppLocalizations.of(context)!.uiWhichPositionDoYouPlay,
+                    style: styles.bodyBold),
                 const SizedBox(height: Spacing.xs),
                 Text(
-                  'Din position giver pointreglerne den rigtige vægt.',
+                  AppLocalizations.of(context)!
+                      .uiYourPositionGivesThePointRules,
                   style: styles.caption,
                 ),
                 const SizedBox(height: Spacing.md),
@@ -765,4 +777,4 @@ String _number(double value) {
       : value.toStringAsFixed(1);
 }
 
-String _points(double value) => '${_number(value)} point';
+String _points(double value) => currentL10n.uiPoints(_number(value));

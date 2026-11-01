@@ -1,3 +1,4 @@
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -59,7 +60,7 @@ class _AssignFinesModalState extends State<AssignFinesModal> {
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return PageScaffold(
-      title: 'Tildel bøder',
+      title: AppLocalizations.of(context)!.uiAssignFines,
       showBackButton: false,
       backgroundColor: appColors.background,
       leading: CupertinoButton(
@@ -77,7 +78,7 @@ class _AssignFinesModalState extends State<AssignFinesModal> {
             }
           },
           child: Text(
-            'Opret',
+            AppLocalizations.of(context)!.matchTasksCreateConfirm,
             style: appTextStyles.bodyBold.copyWith(color: appColors.primary),
           ),
         ),
@@ -85,7 +86,8 @@ class _AssignFinesModalState extends State<AssignFinesModal> {
       body: SingleChildScrollView(
         child: FutureHandler<Map<String, dynamic>>(
             future: fineTypesAndSquadData,
-            noDataFoundMessage: 'Ingen bødetyper fundet.',
+            noDataFoundMessage:
+                AppLocalizations.of(context)!.uiNoFineTypesFound,
             onSuccess: (context, data) {
               var squad = data['squad'] as List<UserDetails>;
 
@@ -94,7 +96,7 @@ class _AssignFinesModalState extends State<AssignFinesModal> {
                   child: Padding(
                     padding: const EdgeInsets.all(24.0),
                     child: Text(
-                      'Ingen bødetyper fundet.',
+                      AppLocalizations.of(context)!.uiNoFineTypesFound,
                       style: appTextStyles.sectionHeader
                           .copyWith(color: appColors.textSecondary),
                     ),
@@ -230,7 +232,9 @@ class _AssignFinesModalState extends State<AssignFinesModal> {
                                                     onTap: () {},
                                                     child: CupertinoTextField(
                                                       placeholder:
-                                                          'Tilføj note (valgfri)',
+                                                          AppLocalizations.of(
+                                                                  context)!
+                                                              .uiAddNoteOptional,
                                                       minLines: 1,
                                                       maxLines: 3,
                                                       textInputAction:
@@ -331,9 +335,9 @@ class _AssignFinesModalState extends State<AssignFinesModal> {
       showCupertinoDialog(
         context: context,
         builder: (context) => CupertinoAlertDialog(
-          title: const Text('Fejl'),
-          content: const Text(
-              'Ingen bøder er tildelt. Vælg venligst mindst én spiller.'),
+          title: Text(AppLocalizations.of(context)!.matchPollErrorTitle),
+          content: Text(
+              AppLocalizations.of(context)!.uiNoFinesWereAssignedPleaseChoose),
           actions: <CupertinoDialogAction>[
             CupertinoDialogAction(
               onPressed: () => Navigator.of(context).pop(),

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:kopa/l10n/current_l10n.dart';
 import 'package:flutter/foundation.dart';
 import 'package:kopa/helpers/api_config.dart';
 import 'package:kopa/model/user_details.dart';
@@ -29,14 +30,14 @@ class AuthenticationRepository {
         final error = json.decode(response.body);
         return {
           'success': false,
-          'message': error['message'] ?? 'Login fejlede'
+          'message': error['message'] ?? currentL10n.uiLoginFailed
         };
       }
     } catch (e) {
       if (kDebugMode) print('Login error: $e');
       return {
         'success': false,
-        'message': 'Der skete en fejl under login. Prøv igen.'
+        'message': currentL10n.uiSomethingWentWrongDuringLoginTry
       };
     }
   }
@@ -63,14 +64,14 @@ class AuthenticationRepository {
         final error = json.decode(response.body);
         return {
           'success': false,
-          'message': error['message'] ?? 'Registrering fejlede'
+          'message': error['message'] ?? currentL10n.uiRegistrationFailed
         };
       }
     } catch (e) {
       if (kDebugMode) print('Registration error: $e');
       return {
         'success': false,
-        'message': 'Der skete en fejl under registering. Prøv igen.'
+        'message': currentL10n.uiSomethingWentWrongDuringRegistrationTry
       };
     }
   }

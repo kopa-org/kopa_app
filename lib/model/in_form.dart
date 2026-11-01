@@ -1,3 +1,5 @@
+import 'package:kopa/l10n/current_l10n.dart';
+
 enum InFormPeriod { rollingThreeMonths, currentSeason, allTime }
 
 extension InFormPeriodValue on InFormPeriod {
@@ -8,9 +10,9 @@ extension InFormPeriodValue on InFormPeriod {
       };
 
   String get label => switch (this) {
-        InFormPeriod.rollingThreeMonths => '3 måneder',
-        InFormPeriod.currentSeason => 'Sæson',
-        InFormPeriod.allTime => 'Alle',
+        InFormPeriod.rollingThreeMonths => currentL10n.ui3Months,
+        InFormPeriod.currentSeason => currentL10n.uiSeason2,
+        InFormPeriod.allTime => currentL10n.uiAll,
       };
 }
 
@@ -26,15 +28,15 @@ const inFormPositions = <String>[
 ];
 
 String inFormPositionLabel(String? position) => switch (position) {
-      'goalkeeper' => 'Målmand',
-      'centre_back' => 'Stopper',
-      'back_wingback' => 'Back / wingback',
-      'defensive_midfield' => 'Defensiv midtbane',
-      'midfield' => 'Midtbane',
-      'attacking_midfield' => 'Offensiv midtbane',
-      'wing' => 'Wing',
-      'striker' => 'Angriber',
-      _ => 'Alle positioner',
+      'goalkeeper' => currentL10n.uiGoalkeeper,
+      'centre_back' => currentL10n.uiCentreBack,
+      'back_wingback' => currentL10n.uiBackWingback,
+      'defensive_midfield' => currentL10n.uiDefensiveMidfield,
+      'midfield' => currentL10n.uiMidfield,
+      'attacking_midfield' => currentL10n.uiAttackingMidfield,
+      'wing' => currentL10n.uiWinger,
+      'striker' => currentL10n.uiStriker,
+      _ => currentL10n.uiAllPositions,
     };
 
 class InFormLeaderboardRow {

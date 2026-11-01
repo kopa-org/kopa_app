@@ -1,3 +1,4 @@
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/model/statistics.dart';
 import 'package:kopa/page/statistics/widgets/stat_card.dart';
@@ -27,7 +28,7 @@ class PlayerStatsSection extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
           child: Text(
-            'Mine Stats',
+            AppLocalizations.of(context)!.uiMyStats,
             style: appTextStyles.sectionHeader.copyWith(
               color: appColors.primary,
             ),
@@ -44,13 +45,13 @@ class PlayerStatsSection extends StatelessWidget {
             childAspectRatio: 1.5,
             children: [
               StatCard(
-                title: 'Kampe',
+                title: AppLocalizations.of(context)!.navMatches,
                 value: player.matchesPlayed.toString(),
                 icon: Icons.sports_soccer,
                 color: appColors.sky,
               ),
               StatCard(
-                title: 'Mål',
+                title: AppLocalizations.of(context)!.matchTimelineGoal,
                 value: player.goalsScored.toString(),
                 icon: Icons.sports_score,
                 color: appColors.success,
@@ -62,7 +63,7 @@ class PlayerStatsSection extends StatelessWidget {
                 color: appColors.grass,
               ),
               StatCard(
-                title: 'Kort (G/R)',
+                title: AppLocalizations.of(context)!.uiCardsYR,
                 value: '${player.yellowCards} / ${player.redCards}',
                 icon: Icons.style,
                 color: appColors.warning,

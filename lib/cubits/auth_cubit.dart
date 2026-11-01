@@ -1,3 +1,4 @@
+import 'package:kopa/l10n/current_l10n.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:kopa/model/user_details.dart';
@@ -85,7 +86,7 @@ class AuthCubit extends Cubit<AuthState> {
       await AppAnalytics.logLogin(success: false);
       emit(state.copyWith(
         status: AuthStatus.failure,
-        errorMessage: 'Login failed. Please check your credentials.',
+        errorMessage: currentL10n.uiLoginFailedPleaseCheckYourCredentials,
       ));
     }
   }
@@ -157,7 +158,7 @@ class AuthCubit extends Cubit<AuthState> {
         await AppAnalytics.logRegister(success: false);
         emit(state.copyWith(
           status: AuthStatus.failure,
-          errorMessage: 'Registration failed. Please try again.',
+          errorMessage: currentL10n.uiRegistrationFailedPleaseTryAgain,
         ));
       }
     } catch (e) {

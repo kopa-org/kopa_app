@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:kopa/l10n/current_l10n.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/football_pitch.dart';
@@ -237,8 +239,9 @@ class _LineupEditorPageState extends State<LineupEditorPage> {
       if (!mounted) return;
       setState(() => _saving = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Kunne ikke gemme holdopstillingen. Prøv igen.'),
+        SnackBar(
+          content:
+              Text(AppLocalizations.of(context)!.uiCouldNotSaveTheLineupTry),
         ),
       );
     }
@@ -299,7 +302,7 @@ class _LineupEditorPageState extends State<LineupEditorPage> {
     final selected = await showCupertinoModalPopup<_LineupPlayer>(
       context: context,
       builder: (context) => CupertinoActionSheet(
-        title: const Text('Vælg spiller'),
+        title: Text(AppLocalizations.of(context)!.uiChoosePlayer),
         actions: _bench
             .map(
               (player) => CupertinoActionSheetAction(
@@ -310,7 +313,7 @@ class _LineupEditorPageState extends State<LineupEditorPage> {
             .toList(),
         cancelButton: CupertinoActionSheetAction(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Annullér'),
+          child: Text(AppLocalizations.of(context)!.uiCancel),
         ),
       ),
     );
@@ -405,7 +408,7 @@ class _EditorHeader extends StatelessWidget {
           ),
           Expanded(
             child: Text(
-              'Rediger Holdopstilling',
+              AppLocalizations.of(context)!.uiEditLineup,
               textAlign: TextAlign.center,
               style: styles.h5.copyWith(fontSize: 20),
             ),
@@ -419,7 +422,7 @@ class _EditorHeader extends StatelessWidget {
             child: saving
                 ? CupertinoActivityIndicator(color: AppColors.of(context).white)
                 : Text(
-                    'Gem',
+                    AppLocalizations.of(context)!.matchTasksSave,
                     style: styles.caption2.copyWith(
                       color: colors.white,
                       fontWeight: FontWeight.w800,
@@ -519,7 +522,8 @@ class _LineupCard extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Rediger formation ($formationLabel)',
+                    AppLocalizations.of(context)!
+                        .uiEditFormation(formationLabel),
                     style: styles.body4.copyWith(
                       color: colors.primary,
                       fontWeight: FontWeight.w800,
@@ -539,7 +543,8 @@ class _LineupCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(100),
               ),
               child: Text(
-                'Flyt spiller: Slip for at placere $draggingName',
+                AppLocalizations.of(context)!
+                    .uiMovePlayerReleaseToPlace(draggingName ?? ''),
                 textAlign: TextAlign.center,
                 style: styles.caption2.copyWith(
                   color: colors.white,
@@ -645,7 +650,8 @@ class _BenchSection extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Bænken (${bench.where((player) => player.selected).length} spillere)',
+                AppLocalizations.of(context)!.uiBenchPlayers(
+                    bench.where((player) => player.selected).length),
                 style: styles.subtitle2.copyWith(fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 10),
@@ -659,7 +665,9 @@ class _BenchSection extends StatelessWidget {
                     border: Border.all(
                         color: colors.divider.withValues(alpha: 0.4)),
                   ),
-                  child: Text('Ingen spillere på bænken', style: styles.body3),
+                  child: Text(
+                      AppLocalizations.of(context)!.uiNoPlayersOnTheBench,
+                      style: styles.body3),
                 )
               else
                 SizedBox(
@@ -812,7 +820,7 @@ class _LineupDragHint extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'Hold på en spiller og træk for at bytte plads',
+              AppLocalizations.of(context)!.uiHoldAPlayerAndDragTo,
               style: styles.caption1.copyWith(
                 color: colors.dirt,
                 fontWeight: FontWeight.w700,
@@ -984,10 +992,11 @@ class _FormationSheet extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            Text('Vælg formation', style: styles.h5.copyWith(fontSize: 20)),
+            Text(AppLocalizations.of(context)!.uiChooseFormation,
+                style: styles.h5.copyWith(fontSize: 20)),
             const SizedBox(height: 4),
             Text(
-              'Vælg formationen der passer bedst til jeres næste kamp',
+              AppLocalizations.of(context)!.uiChooseTheFormationThatSuitsYour,
               style: styles.caption1.copyWith(color: colors.grey7),
             ),
             const SizedBox(height: 20),
@@ -1061,7 +1070,7 @@ class _FormationOption extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Formation $formation',
+                    AppLocalizations.of(context)!.uiFormation(formation),
                     style: styles.body4.copyWith(fontWeight: FontWeight.w800),
                   ),
                   const SizedBox(height: 2),
@@ -1139,28 +1148,28 @@ class _LineupDragData {
 String _positionShortLabel(String? position) {
   final value = position?.toLowerCase().trim() ?? '';
   return switch (value) {
-    'goalkeeper' => 'MM',
+    'goalkeeper' => currentL10n.uiGk,
     'centre_back' => 'CB',
-    'back_wingback' => 'F',
+    'back_wingback' => currentL10n.uiPositionShortDefender,
     'defensive_midfield' => 'DM',
     'midfield' => 'CM',
-    'attacking_midfield' => 'OM',
-    'wing' => 'K',
-    'striker' => 'A',
-    _ => 'SP',
+    'attacking_midfield' => currentL10n.uiAm,
+    'wing' => currentL10n.uiPositionShortWing,
+    'striker' => currentL10n.uiPositionShortForward,
+    _ => currentL10n.uiPl,
   };
 }
 
 String _formationDescription(String formation) {
   return switch (formation) {
-    '2-3-1' => 'Standard 7-mands',
-    '3-2-1' => 'Defensiv balance',
-    '2-2-2' => 'Symmetrisk kontrol',
-    '3-1-2' => 'Offensiv bredde',
-    '4-3-3' => 'Offensiv bredde',
-    '4-4-2' => 'Klassisk balance',
-    '3-5-2' => 'Midtbanekontrol',
-    '4-2-3-1' => 'Kontrolleret pres',
-    _ => 'Tilpasset opstilling',
+    '2-3-1' => currentL10n.uiStandard7ASide,
+    '3-2-1' => currentL10n.uiDefensiveBalance,
+    '2-2-2' => currentL10n.uiSymmetricControl,
+    '3-1-2' => currentL10n.uiAttackingWidth,
+    '4-3-3' => currentL10n.uiAttackingWidth,
+    '4-4-2' => currentL10n.uiClassicBalance,
+    '3-5-2' => currentL10n.uiMidfieldControl,
+    '4-2-3-1' => currentL10n.uiControlledPressing,
+    _ => currentL10n.uiCustomLineup,
   };
 }

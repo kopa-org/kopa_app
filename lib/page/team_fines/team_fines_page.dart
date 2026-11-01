@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:kopa/l10n/current_l10n.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,6 +9,7 @@ import 'package:kopa/component/button/expandable_fab.dart';
 import 'package:kopa/component/future_handler.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
+import 'package:kopa/helpers/date_helper.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/model/fine_box_details.dart';
 import 'package:kopa/model/fine_details.dart';
@@ -27,6 +29,8 @@ import 'package:kopa/theme/app_text_styles.dart';
 import 'package:kopa/theme/spacing.dart';
 import 'package:kopa/utils/app_analytics.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+
+part 'fine_box_overview_pages.dart';
 
 enum TeamOwnerFinesSegments { overview, fineTypes, personal }
 
@@ -192,13 +196,10 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
 
   Widget _buildOverview(FineBoxDetails fineBox, UserDetails user) {
     final l10n = AppLocalizations.of(context)!;
-    final total = fineBox.currentAmount + fineBox.totalOwedAmount;
+    final total = fineBox.totalAmount;
     final progress =
-        total <= 0 ? 0.0 : (fineBox.currentAmount / total).clamp(0.0, 1.0);
-    final topOffenders = _userFineSummaries(fineBox.userFineDetails)
-        .where((summary) => summary.unpaidAmount > 0)
-        .toList()
-      ..sort((a, b) => b.unpaidAmount.compareTo(a.unpaidAmount));
+        total <= 0 ? 0.0 : (fineBox.collectedAmount / total).clamp(0.0, 1.0);
+    final topOffenders = _topOffenders(fineBox);
     final recentFines = _fineRows(fineBox.userFineDetails)
       ..sort((a, b) => b.fine.createdAt.compareTo(a.fine.createdAt));
 
@@ -209,8 +210,9 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
         children: [
           _TeamHero(
             total: total,
-            collected: fineBox.currentAmount,
+            collected: fineBox.collectedAmount,
             outstanding: fineBox.totalOwedAmount,
+            inBox: fineBox.withdrawals.isEmpty ? null : fineBox.currentAmount,
             progress: progress,
           ),
           const SizedBox(height: Spacing.itemGap),
@@ -228,7 +230,11 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
             ),
           ],
           const SizedBox(height: Spacing.lg),
-          InFormSectionTitle(title: l10n.fineBoxPodiumTitle),
+          InFormSectionTitle(
+            title: l10n.fineBoxPodiumTitle,
+            action: fineBox.userFineDetails.isEmpty ? null : l10n.fineBoxSeeAll,
+            onAction: () => _openFinePlayers(user),
+          ),
           const SizedBox(height: Spacing.sm),
           if (topOffenders.isEmpty)
             _MascotMessage(
@@ -237,9 +243,21 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
               color: AppColors.of(context).lightGrass,
             )
           else
-            _FinePodium(leaders: topOffenders.take(3).toList()),
+            _FinePodium(
+              leaders: topOffenders.take(3).toList(),
+              onSelect: (summary) => _openFineHistory(
+                user,
+                title: summary.user.name,
+                userId: summary.user.id,
+              ),
+            ),
           const SizedBox(height: Spacing.lg),
-          InFormSectionTitle(title: l10n.fineBoxRecentTitle),
+          InFormSectionTitle(
+            title: l10n.fineBoxRecentTitle,
+            action: recentFines.isEmpty ? null : l10n.fineBoxSeeAll,
+            onAction: () =>
+                _openFineHistory(user, title: l10n.fineBoxAllFinesTitle),
+          ),
           const SizedBox(height: Spacing.sm),
           if (recentFines.isEmpty)
             _EmptyPanel(text: l10n.fineBoxRecentEmpty)
@@ -264,6 +282,13 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
         ],
       ),
     );
+  }
+
+  List<_UserFineSummary> _topOffenders(FineBoxDetails fineBox) {
+    return _userFineSummaries(fineBox.userFineDetails)
+        .where((summary) => summary.unpaidAmount > 0)
+        .toList()
+      ..sort((a, b) => b.unpaidAmount.compareTo(a.unpaidAmount));
   }
 
   Widget _buildFineTypes() {
@@ -331,6 +356,10 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
     );
     final allSelected = unpaidFines.isNotEmpty &&
         _selectedPersonalFineIds.length == unpaidFines.length;
+    // Managers already have the podium on the Overblik tab.
+    final podiumLeaders = user.canManageFines
+        ? const <_UserFineSummary>[]
+        : _topOffenders(fineBox).take(3).toList();
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
@@ -414,6 +443,12 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
                       ),
             ),
           ],
+          if (podiumLeaders.isNotEmpty) ...[
+            const SizedBox(height: Spacing.lg),
+            InFormSectionTitle(title: l10n.fineBoxPodiumTitle),
+            const SizedBox(height: Spacing.sm),
+            _FinePodium(leaders: podiumLeaders),
+          ],
           if (paidFines.isNotEmpty) ...[
             const SizedBox(height: Spacing.lg),
             InFormSectionTitle(title: l10n.fineBoxHistoryTitle),
@@ -428,6 +463,32 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
         ],
       ),
     );
+  }
+
+  Future<void> _openFinePlayers(UserDetails user) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => FineBoxPlayersPage(canDelete: user.canManageFines),
+      ),
+    );
+    if (mounted) await _refreshFineBox();
+  }
+
+  Future<void> _openFineHistory(
+    UserDetails user, {
+    required String title,
+    int? userId,
+  }) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => FineBoxHistoryPage(
+          title: title,
+          userId: userId,
+          canDelete: user.canManageFines,
+        ),
+      ),
+    );
+    if (mounted) await _refreshFineBox();
   }
 
   Future<void> _openAssignFines() async {
@@ -774,12 +835,14 @@ class _TeamHero extends StatelessWidget {
   final double total;
   final double collected;
   final double outstanding;
+  final double? inBox;
   final double progress;
 
   const _TeamHero({
     required this.total,
     required this.collected,
     required this.outstanding,
+    this.inBox,
     required this.progress,
   });
 
@@ -834,6 +897,14 @@ class _TeamHero extends StatelessWidget {
                 dotColor: appColors.surface,
               ),
             ),
+            if (inBox != null)
+              Expanded(
+                child: _HeroStat(
+                  label: l10n.fineBoxInBox,
+                  value: _kr(inBox!.round()),
+                  dotColor: appColors.dirt,
+                ),
+              ),
           ],
         ),
       ],
@@ -1363,8 +1434,9 @@ class _PressableTileState extends State<_PressableTile> {
 /// Classic three-step podium: second, first and third place.
 class _FinePodium extends StatelessWidget {
   final List<_UserFineSummary> leaders;
+  final ValueChanged<_UserFineSummary>? onSelect;
 
-  const _FinePodium({required this.leaders});
+  const _FinePodium({required this.leaders, this.onSelect});
 
   @override
   Widget build(BuildContext context) {
@@ -1384,6 +1456,7 @@ class _FinePodium extends StatelessWidget {
         children: [
           _PodiumColumn(
             summary: at(1),
+            onSelect: onSelect,
             place: 2,
             blockHeight: 64,
             accent: appColors.sky,
@@ -1392,6 +1465,7 @@ class _FinePodium extends StatelessWidget {
           const SizedBox(width: Spacing.sm),
           _PodiumColumn(
             summary: at(0),
+            onSelect: onSelect,
             place: 1,
             blockHeight: 92,
             accent: appColors.grass,
@@ -1400,6 +1474,7 @@ class _FinePodium extends StatelessWidget {
           const SizedBox(width: Spacing.sm),
           _PodiumColumn(
             summary: at(2),
+            onSelect: onSelect,
             place: 3,
             blockHeight: 46,
             accent: appColors.sunset,
@@ -1413,6 +1488,7 @@ class _FinePodium extends StatelessWidget {
 
 class _PodiumColumn extends StatelessWidget {
   final _UserFineSummary? summary;
+  final ValueChanged<_UserFineSummary>? onSelect;
   final int place;
   final double blockHeight;
   final Color accent;
@@ -1420,6 +1496,7 @@ class _PodiumColumn extends StatelessWidget {
 
   const _PodiumColumn({
     required this.summary,
+    required this.onSelect,
     required this.place,
     required this.blockHeight,
     required this.accent,
@@ -1435,79 +1512,85 @@ class _PodiumColumn extends StatelessWidget {
     final summary = this.summary;
 
     return Expanded(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (summary != null) ...[
-            if (leader)
-              Padding(
-                padding: const EdgeInsets.only(bottom: Spacing.xs),
-                child: Icon(
-                  Icons.emoji_events_rounded,
-                  color: appColors.sunset,
-                  size: 24,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: summary == null || onSelect == null
+            ? null
+            : () => onSelect!(summary),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (summary != null) ...[
+              if (leader)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: Spacing.xs),
+                  child: Icon(
+                    Icons.emoji_events_rounded,
+                    color: appColors.sunset,
+                    size: 24,
+                  ),
+                ),
+              Container(
+                padding: const EdgeInsets.all(3),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: accent, width: 2.5),
+                ),
+                child: InFormAvatar(
+                  name: summary.user.name,
+                  radius: leader ? 28 : 22,
+                  backgroundColor: appColors.offWhite,
+                  foregroundColor: appColors.dirt,
                 ),
               ),
-            Container(
-              padding: const EdgeInsets.all(3),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: accent, width: 2.5),
-              ),
-              child: InFormAvatar(
-                name: summary.user.name,
-                radius: leader ? 28 : 22,
-                backgroundColor: appColors.offWhite,
-                foregroundColor: appColors.dirt,
-              ),
-            ),
-            const SizedBox(height: Spacing.sm),
-            Text(
-              _firstName(summary.user.name),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: appTextStyles.bodyBold.copyWith(
-                color: appColors.dirt,
-                fontSize: leader ? 16 : 14,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              _kr(summary.unpaidAmount),
-              style: appTextStyles.caption.copyWith(
-                color: appColors.errorForeground,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const SizedBox(height: Spacing.sm),
-          ],
-          TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0, end: summary == null ? 12 : blockHeight),
-            duration: Duration(milliseconds: 700 + (3 - place) * 120),
-            curve: Curves.easeOutBack,
-            builder: (context, height, _) => Container(
-              height: math.max(0, height),
-              width: double.infinity,
-              alignment: Alignment.topCenter,
-              padding: const EdgeInsets.only(top: Spacing.sm),
-              decoration: BoxDecoration(
-                color: summary == null ? appColors.offWhite : accent,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(Spacing.borderRadiusMedium),
+              const SizedBox(height: Spacing.sm),
+              Text(
+                _firstName(summary.user.name),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: appTextStyles.bodyBold.copyWith(
+                  color: appColors.dirt,
+                  fontSize: leader ? 16 : 14,
                 ),
               ),
-              child: summary == null || height < 32
-                  ? null
-                  : Text(
-                      '$place',
-                      style: appTextStyles.h5.copyWith(
-                        color: onAccent,
-                        fontWeight: FontWeight.w800,
+              const SizedBox(height: 2),
+              Text(
+                _kr(summary.unpaidAmount),
+                style: appTextStyles.caption.copyWith(
+                  color: appColors.errorForeground,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: Spacing.sm),
+            ],
+            TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0, end: summary == null ? 12 : blockHeight),
+              duration: Duration(milliseconds: 700 + (3 - place) * 120),
+              curve: Curves.easeOutBack,
+              builder: (context, height, _) => Container(
+                height: math.max(0, height),
+                width: double.infinity,
+                alignment: Alignment.topCenter,
+                padding: const EdgeInsets.only(top: Spacing.sm),
+                decoration: BoxDecoration(
+                  color: summary == null ? appColors.offWhite : accent,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(Spacing.borderRadiusMedium),
+                  ),
+                ),
+                child: summary == null || height < 32
+                    ? null
+                    : Text(
+                        '$place',
+                        style: appTextStyles.h5.copyWith(
+                          color: onAccent,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
-                    ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -1548,8 +1631,9 @@ class _GroupedPanel extends StatelessWidget {
 
 class _RecentFineRow extends StatelessWidget {
   final _FineRowData row;
+  final VoidCallback? onDelete;
 
-  const _RecentFineRow({required this.row});
+  const _RecentFineRow({required this.row, this.onDelete});
 
   @override
   Widget build(BuildContext context) {
@@ -1592,6 +1676,17 @@ class _RecentFineRow extends StatelessWidget {
             paid: paid,
             paidLabel: l10n.fineBoxPaidBadge,
           ),
+          if (onDelete != null)
+            IconButton(
+              key: ValueKey('delete-fine-${row.fine.id}'),
+              tooltip: l10n.fineBoxDeleteFine,
+              onPressed: onDelete,
+              icon: Icon(
+                CupertinoIcons.delete,
+                color: appColors.errorForeground,
+                size: 20,
+              ),
+            ),
         ],
       ),
     );
@@ -1692,8 +1787,6 @@ class _AmountPill extends StatelessWidget {
           style: appTextStyles.bodyBold.copyWith(
             color: paid ? appColors.textSecondary : appColors.errorForeground,
             fontWeight: FontWeight.w800,
-            decoration: paid ? TextDecoration.lineThrough : null,
-            decorationColor: appColors.textSecondary,
           ),
         ),
         if (paid) ...[
@@ -1876,7 +1969,7 @@ class _DateBadge extends StatelessWidget {
           ),
           const SizedBox(height: 2),
           Text(
-            _monthName(date.month),
+            DateHelper.getShortMonthName(date),
             style: appTextStyles.caption.copyWith(
               color: appColors.textSecondary,
             ),
@@ -2250,7 +2343,7 @@ class _PaymentPanel extends StatelessWidget {
           else
             MobilePayButton(
               amount: selectedAmount,
-              message: 'Bøder - $userName',
+              message: AppLocalizations.of(context)!.uiFines(userName),
               mobilePayBoxId: mobilePayBoxId,
               buttonText: l10n.mobilePayDeposit,
               outlined: false,
@@ -2400,7 +2493,7 @@ String _kr(int amount) => '${_thousands(amount)} kr';
 String _firstName(String name) {
   final trimmed = name.trim();
   if (trimmed.isEmpty) {
-    return 'Spiller';
+    return currentL10n.matchEventPlayer;
   }
   return trimmed.split(RegExp(r'\s+')).first;
 }
@@ -2408,7 +2501,7 @@ String _firstName(String name) {
 String _fineSubline(FineDetails fine) {
   final note = fine.note?.trim();
   final date = '${fine.createdAt.day.toString().padLeft(2, '0')}. '
-      '${_monthName(fine.createdAt.month)}';
+      '${DateHelper.getShortMonthName(fine.createdAt)}';
   if (note == null || note.isEmpty) {
     return date;
   }
@@ -2422,28 +2515,10 @@ String _relativeDate(DateTime date) {
   final days = today.difference(fineDay).inDays;
   if (days <= 0) {
     final hours = math.max(1, now.difference(date).inHours);
-    return hours == 1 ? '1 time siden' : '$hours timer siden';
+    return hours == 1 ? currentL10n.ui1HourAgo : currentL10n.uiHoursAgo(hours);
   }
   if (days == 1) {
-    return 'I går';
+    return currentL10n.uiYesterday;
   }
-  return '$days dage siden';
-}
-
-String _monthName(int month) {
-  return switch (month) {
-    1 => 'Jan',
-    2 => 'Feb',
-    3 => 'Mar',
-    4 => 'Apr',
-    5 => 'Maj',
-    6 => 'Jun',
-    7 => 'Jul',
-    8 => 'Aug',
-    9 => 'Sep',
-    10 => 'Okt',
-    11 => 'Nov',
-    12 => 'Dec',
-    _ => '',
-  };
+  return currentL10n.uiDaysAgo(days);
 }

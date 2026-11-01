@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/home/home_bento_card.dart';
 import 'package:kopa/model/fine_box_details.dart';
@@ -30,12 +31,10 @@ class HomeFineBoxCard extends StatelessWidget {
     final personalAmounts = fineBox == null
         ? (0.0, 0.0)
         : _personalFineAmounts(fineBox!, currentUser);
-    final totalBalance = fineBox == null
-        ? 0.0
-        : fineBox!.currentAmount + fineBox!.totalOwedAmount;
+    final totalBalance = fineBox?.totalAmount ?? 0.0;
     final primaryAmount =
         currentUser.isTeamOwner ? totalBalance : personalAmounts.$2;
-    final collected = fineBox?.currentAmount ?? 0;
+    final collected = fineBox?.collectedAmount ?? 0;
     final target = math.max(totalBalance, 1);
     final progress = (collected / target).clamp(0.0, 1.0);
 
@@ -55,7 +54,7 @@ class HomeFineBoxCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'BØDEKASSEN',
+                        AppLocalizations.of(context)!.uiTheFineBox,
                         style: appTextStyles.label.copyWith(
                           color: palette.onSurfaceMuted,
                           fontWeight: FontWeight.w700,
@@ -86,7 +85,9 @@ class HomeFineBoxCard extends StatelessWidget {
             Row(
               children: [
                 Text(
-                  currentUser.isTeamOwner ? 'Indsamlet' : 'Samlet bøder',
+                  currentUser.isTeamOwner
+                      ? AppLocalizations.of(context)!.fineBoxCollected
+                      : AppLocalizations.of(context)!.uiTotalFines,
                   style: appTextStyles.caption2.copyWith(
                     color: palette.onSurfaceMuted,
                   ),

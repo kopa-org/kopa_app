@@ -1,3 +1,4 @@
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -26,7 +27,7 @@ class LandingPage extends StatelessWidget {
               const _LandingLogo(),
               const Spacer(flex: 2),
               Text(
-                'Saml dit hold\nét sted',
+                AppLocalizations.of(context)!.uiBringYourTeamNtogether,
                 style: styles.h3.copyWith(
                   color: colors.dirt,
                   fontWeight: FontWeight.w900,
@@ -39,8 +40,7 @@ class LandingPage extends StatelessWidget {
               ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 330),
                 child: Text(
-                  'Få fuldt overblik over dine kampe, holdopstillinger, '
-                  'bødekasse og kommunikation på holdet.',
+                  AppLocalizations.of(context)!.uiLandingIntro,
                   style: styles.body3.copyWith(
                     color: colors.textSecondary,
                     fontSize: 15,
@@ -52,12 +52,12 @@ class LandingPage extends StatelessWidget {
               ),
               const Spacer(flex: 3),
               _LandingActionButton.primary(
-                label: 'Opret konto',
+                label: AppLocalizations.of(context)!.uiCreateAccount,
                 onPressed: () => context.push(AppRouter.register),
               ),
               const SizedBox(height: 12),
               _LandingActionButton.secondary(
-                label: 'Log ind',
+                label: AppLocalizations.of(context)!.uiLogIn,
                 onPressed: () => context.push(AppRouter.login),
               ),
             ],

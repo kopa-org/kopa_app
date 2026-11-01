@@ -1,3 +1,4 @@
+import 'package:kopa/l10n/current_l10n.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
@@ -166,8 +167,9 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
   @override
   Widget build(BuildContext context) {
     if (_loadError != null || _currentUserError != null) {
-      return const ErrorMessage(
-        message: 'Der skete en fejl. Prøv venligst igen senere.',
+      return ErrorMessage(
+        message:
+            AppLocalizations.of(context)!.uiSomethingWentWrongPleaseTryAgain,
       );
     }
 
@@ -181,7 +183,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
 
     final user = _currentUser;
     if (user == null) {
-      return const Center(child: Text('Ingen bruger fundet.'));
+      return Center(child: Text(AppLocalizations.of(context)!.uiNoUserFound));
     }
 
     final l10n = AppLocalizations.of(context)!;
@@ -306,8 +308,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       bottomNavigationBar: bottomNavigationBar,
       useParentBottomNavigationBar: !widget.showBottomNavigationBar,
       floatingActionButton: externalPlayerFab,
-      overviewTitle: 'Praktisk information',
-      attendanceTitle: 'Tilmeldte spillere',
+      overviewTitle: AppLocalizations.of(context)!.uiPracticalInformation,
+      attendanceTitle: AppLocalizations.of(context)!.uiRegisteredPlayers,
       attendanceSegmentLabel: l10n.matchRsvpAttendeeCount(attendeeCount),
       timelineTitle: l10n.matchDetailsMatchEvents,
       timelineSegmentLabel: l10n.matchDetailsMatchEvents,
@@ -476,17 +478,17 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     final rows = <Widget>[
       InfoRow(
         icon: CupertinoIcons.calendar,
-        title: 'Dato',
+        title: AppLocalizations.of(context)!.uiDate,
         value: DateHelper.getFormattedDate(matchDetails.date),
       ),
       InfoRow(
         icon: CupertinoIcons.time,
-        title: 'Tidspunkt',
+        title: AppLocalizations.of(context)!.uiTime,
         value: DateHelper.getFormattedTime(matchDetails.date),
       ),
       InfoRow(
         icon: CupertinoIcons.location_solid,
-        title: 'Lokation',
+        title: AppLocalizations.of(context)!.uiLocation,
         trailing: _LocationMapsLink(
           location: matchDetails.location,
           onPressed: () => _openNavigation(matchDetails),
@@ -494,13 +496,14 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       ),
       InfoRow(
         icon: CupertinoIcons.clock,
-        title: 'Countdown',
+        title: AppLocalizations.of(context)!.uiCountdown,
         value: _countdownLabel(matchDetails),
       ),
       InfoRow(
         icon: CupertinoIcons.person_2,
-        title: 'Tilmeldinger',
-        value: '${matchDetails.registeredCount} tilmeldte',
+        title: AppLocalizations.of(context)!.uiRegistrations,
+        value: AppLocalizations.of(context)!
+            .uiRegistered(matchDetails.registeredCount),
       ),
     ];
 
@@ -521,19 +524,19 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         2,
         InfoRow(
           icon: CupertinoIcons.alarm,
-          title: 'Mødetid',
+          title: AppLocalizations.of(context)!.uiMeetingTime,
           value: DateHelper.getFormattedTime(matchDetails.meetingTime),
         ),
       );
       rows.add(
         InfoRow(
           icon: CupertinoIcons.checkmark_seal,
-          title: 'Din udtagelse',
+          title: AppLocalizations.of(context)!.uiYourSelection,
           value: matchDetails.isCurrentUserSelected == true
-              ? 'Udtaget'
+              ? AppLocalizations.of(context)!.matchTasksSelectedTag
               : matchDetails.isCurrentUserSelected == false
-                  ? 'Ikke udtaget'
-                  : 'Afventer',
+                  ? AppLocalizations.of(context)!.matchTasksNotSelected
+                  : AppLocalizations.of(context)!.uiPending,
           valueColor: matchDetails.isCurrentUserSelected == true
               ? colors.successForeground
               : colors.warningForeground,
@@ -545,7 +548,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       rows.add(
         InfoRow(
           icon: CupertinoIcons.pencil,
-          title: 'Noter',
+          title: AppLocalizations.of(context)!.uiNotes,
           value: matchDetails.notes!,
         ),
       );
@@ -567,9 +570,9 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
             .map((a) => PlayerListItem(
                   name: a.userDetails.name,
                   subtitle: a.isSelected == true
-                      ? 'Udtaget'
+                      ? AppLocalizations.of(context)!.matchTasksSelectedTag
                       : a.isSelected == false
-                          ? 'Ikke udtaget'
+                          ? AppLocalizations.of(context)!.matchTasksNotSelected
                           : a.userDetails.email,
                 ))
             .toList();
@@ -581,17 +584,17 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         key: const ValueKey('attendance-menu'),
         tabs: [
           _AttendanceMenuTab(
-            label: 'Tilmeldt',
+            label: AppLocalizations.of(context)!.matchDetailsRsvpRegistered,
             count: attending.length,
             children: attendingChildren,
           ),
           _AttendanceMenuTab(
-            label: 'Mangler svar',
+            label: AppLocalizations.of(context)!.uiNoResponse,
             count: noRsvp.length,
             children: _buildNoRsvpSection(noRsvp),
           ),
           _AttendanceMenuTab(
-            label: 'Frameldt',
+            label: AppLocalizations.of(context)!.uiDeclined,
             count: declined.length,
             children: _buildDeclinedAttendanceSection(declined),
           ),
@@ -619,7 +622,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     widgets.add(
       _AttendanceApprovalSection(
         key: const ValueKey('pending-attendance-approval'),
-        title: 'Til Rådighed (${pending.length})',
+        title: AppLocalizations.of(context)!.uiAvailable(pending.length),
         collapsible: false,
         children: pending.isEmpty
             ? const [_AttendanceApprovalEmpty()]
@@ -651,7 +654,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       widgets.add(
         _AttendanceApprovalSection(
           key: const ValueKey('handled-attendance-approval'),
-          title: 'Udtaget (${handled.length})',
+          title: AppLocalizations.of(context)!.uiSelected(handled.length),
           children: handled
               .map(
                 (attendance) => _AttendanceApprovalRow(
@@ -711,7 +714,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       const SizedBox(height: Spacing.lg),
       _AttendanceApprovalSection(
         key: const ValueKey('no-rsvp-attendance'),
-        title: 'Mangler svar (${noRsvp.length})',
+        title: AppLocalizations.of(context)!.uiNoResponse2(noRsvp.length),
         children: noRsvp
             .map(
               (member) => PlayerListItem(
@@ -736,12 +739,12 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       const SizedBox(height: Spacing.lg),
       _AttendanceApprovalSection(
         key: const ValueKey('declined-attendance'),
-        title: 'Frameldte (${declined.length})',
+        title: AppLocalizations.of(context)!.uiDeclined2(declined.length),
         children: declined
             .map(
               (attendance) => PlayerListItem(
                 name: attendance.userDetails.name,
-                subtitle: 'Frameldt',
+                subtitle: AppLocalizations.of(context)!.uiDeclined,
                 subtitleColor: colors.error,
               ),
             )
@@ -817,8 +820,9 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       CrashReporting.logWebError(error, stack);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Kunne ikke opdatere godkendelsen. Prøv igen.'),
+          SnackBar(
+            content: Text(
+                AppLocalizations.of(context)!.uiCouldNotUpdateTheApprovalTry),
           ),
         );
       }
@@ -859,8 +863,9 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       CrashReporting.logWebError(error, stack);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Kunne ikke godkende alle. Prøv igen.'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!
+                .uiCouldNotApproveEveryoneTryAgain),
           ),
         );
       }
@@ -1013,8 +1018,9 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       CrashReporting.logWebError(error, stack);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Kunne ikke ændre synligheden. Prøv igen.'),
+          SnackBar(
+            content: Text(
+                AppLocalizations.of(context)!.uiCouldNotChangeTheVisibilityTry),
           ),
         );
       }
@@ -1311,10 +1317,11 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
   String _countdownLabel(MatchDetails match) {
     final countdown = match.countdown;
     if (countdown.isNegative) {
-      return 'I gang eller afsluttet';
+      return AppLocalizations.of(context)!.uiInProgressOrFinished;
     }
 
-    return '${countdown.inDays} dage ${countdown.inHours % 24} timer';
+    return AppLocalizations.of(context)!
+        .uiDaysHours(countdown.inDays, countdown.inHours % 24);
   }
 
   Future<void> _openNavigation(MatchDetails match) async {
@@ -1556,7 +1563,7 @@ class _AttendanceApprovalRow extends StatelessWidget {
 
   static String _positionLabel(String? position) {
     final value = position?.trim();
-    if (value == null || value.isEmpty) return 'Spiller';
+    if (value == null || value.isEmpty) return currentL10n.matchEventPlayer;
     return value;
   }
 }
@@ -1583,7 +1590,7 @@ class _AttendanceSelectionActions extends StatelessWidget {
           icon: CupertinoIcons.xmark,
           color: colors.error,
           backgroundColor: colors.errorSurface,
-          semanticLabel: 'Afvis $userName',
+          semanticLabel: AppLocalizations.of(context)!.uiReject(userName),
           onPressed: onReject,
         ),
         const SizedBox(width: Spacing.sm),
@@ -1591,7 +1598,7 @@ class _AttendanceSelectionActions extends StatelessWidget {
           icon: CupertinoIcons.checkmark_alt,
           color: colors.primary,
           backgroundColor: colors.successSurface,
-          semanticLabel: 'Godkend $userName',
+          semanticLabel: AppLocalizations.of(context)!.uiApprove(userName),
           onPressed: onApprove,
         ),
       ],
@@ -1697,7 +1704,9 @@ class _AttendanceSelectionBadge extends StatelessWidget {
         isSelected ? colors.successSurface : colors.errorSurface;
     final icon =
         isSelected ? CupertinoIcons.checkmark_alt : CupertinoIcons.xmark;
-    final label = isSelected ? 'Godkendt' : 'Afvist';
+    final label = isSelected
+        ? AppLocalizations.of(context)!.uiApproved
+        : AppLocalizations.of(context)!.uiRejected;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -1728,7 +1737,8 @@ class _AttendanceSelectionBadge extends StatelessWidget {
           icon: CupertinoIcons.pencil,
           color: colors.dirt,
           backgroundColor: colors.white,
-          semanticLabel: 'Rediger valg for $userName',
+          semanticLabel:
+              AppLocalizations.of(context)!.uiEditChoiceFor(userName),
           onPressed: onEdit ?? () {},
         ),
       ],
@@ -1753,7 +1763,7 @@ class _AttendanceApprovalEmpty extends StatelessWidget {
         borderRadius: BorderRadius.circular(Spacing.borderRadiusLarge),
       ),
       child: Text(
-        'Ingen spillere afventer godkendelse.',
+        AppLocalizations.of(context)!.uiNoPlayersAreAwaitingApproval,
         style: styles.caption1.copyWith(color: colors.dirt),
         textAlign: TextAlign.center,
       ),
@@ -1802,7 +1812,7 @@ class _ApproveAllAttendancesButton extends StatelessWidget {
                 ),
                 const SizedBox(width: Spacing.sm),
                 Text(
-                  'Godkend alle',
+                  AppLocalizations.of(context)!.uiApproveAll,
                   style: styles.body1.copyWith(
                     color: AppColors.of(context).white,
                     fontWeight: FontWeight.w800,
@@ -1880,7 +1890,8 @@ class _AttendanceMenuState extends State<_AttendanceMenu> {
         if (tab.children.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: Spacing.lg),
-            child: Text('Ingen spillere her.', style: styles.body3),
+            child: Text(AppLocalizations.of(context)!.uiNoPlayersHere,
+                style: styles.body3),
           )
         else
           ...tab.children,

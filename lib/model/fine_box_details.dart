@@ -20,6 +20,14 @@ class FineBoxDetails {
       required this.createdAt,
       required this.updatedAt});
 
+  double get withdrawnAmount =>
+      withdrawals.fold(0, (sum, withdrawal) => sum + withdrawal.amount);
+
+  /// Everything paid in so far, which spending from the box does not reduce.
+  double get collectedAmount => currentAmount + withdrawnAmount;
+
+  double get totalAmount => collectedAmount + totalOwedAmount;
+
   bool get hasMobilePayBox =>
       mobilePayBoxId != null && mobilePayBoxId!.trim().isNotEmpty;
 

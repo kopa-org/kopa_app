@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:kopa/l10n/current_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/services.dart';
@@ -230,7 +231,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     return showDialog<DbuPublicClubTeam>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Vælg DBU-hold'),
+        title: Text(AppLocalizations.of(context)!.uiChooseDbuTeam),
         content: SizedBox(
           width: double.maxFinite,
           child: ListView.separated(
@@ -245,7 +246,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 subtitle: Text(
                   [
                     if (candidate.leaderNames.isNotEmpty)
-                      'Holdleder: ${candidate.leaderNames.join(', ')}',
+                      AppLocalizations.of(context)!
+                          .uiTeamLeaderNames(candidate.leaderNames.join(', ')),
                     _seasonRowLabel(candidate),
                   ].join('\n'),
                 ),
@@ -257,7 +259,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Annuller'),
+            child: Text(AppLocalizations.of(context)!.fineBoxDeleteCancel),
           ),
         ],
       ),
@@ -332,7 +334,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
             Theme.of(context).extension<AppColors>() ?? AppColors.light;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Kunne ikke hente invitationslink.'),
+            content: Text(
+                AppLocalizations.of(context)!.uiCouldNotFetchTheInviteLink),
             backgroundColor: colors.error,
           ),
         );
@@ -371,7 +374,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     await Clipboard.setData(ClipboardData(text: inviteUri.toString()));
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Link kopieret')),
+      SnackBar(content: Text(AppLocalizations.of(context)!.uiLinkCopied)),
     );
   }
 
@@ -382,7 +385,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     final teamTitle = _createdTeamTitle ?? _teamNameController.text.trim();
     await SharePlus.instance.share(
       ShareParams(
-        text: 'Join $teamTitle på Kopa: $inviteUri',
+        text: AppLocalizations.of(context)!.uiJoinOnKopa(teamTitle, inviteUri),
       ),
     );
   }
@@ -408,7 +411,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
           Theme.of(context).extension<AppColors>() ?? AppColors.light;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Kunne ikke gemme positionen. Prøv igen.'),
+          content:
+              Text(AppLocalizations.of(context)!.uiCouldNotSaveThePositionTry),
           backgroundColor: colors.error,
         ),
       );
@@ -686,22 +690,25 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   : l10n.onboardingJoinTeam)
               : switch (_createStep) {
                   0 => l10n.onboardingTitle,
-                  1 => 'Vælg din position',
+                  1 => AppLocalizations.of(context)!.onboardingPositionTitle,
                   2 => l10n.teamLogoDesignTitle,
-                  3 => 'Inviter dit hold',
-                  _ => 'Inviter dit hold',
+                  3 => AppLocalizations.of(context)!.uiInviteYourTeam,
+                  _ => AppLocalizations.of(context)!.uiInviteYourTeam,
                 };
           final subtitle = _mode == _OnboardingMode.join
               ? (showingJoinPosition
                   ? l10n.onboardingPositionDescription
                   : l10n.onboardingSearchDescription)
               : switch (_createStep) {
-                  0 =>
-                    'Opret dit fodboldhold og saml spillere, kampe og statistikker ét sted.',
-                  1 => 'Tryk på din position på banen',
+                  0 => AppLocalizations.of(context)!
+                      .uiCreateYourFootballTeamAndKeep,
+                  1 =>
+                    AppLocalizations.of(context)!.onboardingPositionDescription,
                   2 => l10n.teamLogoDesignSubtitle,
-                  3 => 'Del linket med spillerne, så de kan finde holdet.',
-                  _ => 'Del linket med spillerne, så de kan finde holdet.',
+                  3 =>
+                    AppLocalizations.of(context)!.uiShareTheLinkWithThePlayers,
+                  _ =>
+                    AppLocalizations.of(context)!.uiShareTheLinkWithThePlayers,
                 };
           final canAdvance = _mode == _OnboardingMode.create &&
               (_createStep == 3 ||
@@ -709,7 +716,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
               !actionLoading;
           final primaryLabel = _mode == _OnboardingMode.create
               ? switch (_createStep) {
-                  3 => 'Fortsæt til Kopa',
+                  3 => AppLocalizations.of(context)!.uiContinueToKopa,
                   _ => l10n.onboardingContinue,
                 }
               : l10n.onboardingContinue;
@@ -1050,7 +1057,9 @@ class _CreateTeamView extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _FieldLabel(
-                text: 'Forbund', colors: colors, textStyles: textStyles),
+                text: AppLocalizations.of(context)!.uiAssociation,
+                colors: colors,
+                textStyles: textStyles),
             const SizedBox(height: 8),
             _DbuCard(
               colors: colors,
@@ -1069,7 +1078,7 @@ class _CreateTeamView extends StatelessWidget {
               colors: colors,
               textStyles: textStyles,
               controller: teamNameController,
-              hintText: 'Dit holdnavn',
+              hintText: AppLocalizations.of(context)!.uiYourTeamName,
               onChanged: (_) => onTextChanged(),
             ),
           ],
@@ -1144,7 +1153,8 @@ class _PositionStep extends StatelessWidget {
           ),
           const SizedBox(height: 18),
           Text(
-            'Du valgte: ${selectedPosition.label} (${selectedPosition.shortLabel})',
+            AppLocalizations.of(context)!.uiYouChose(
+                selectedPosition.label, selectedPosition.shortLabel),
             textAlign: TextAlign.center,
             style: textStyles.body3.copyWith(
               color: colors.textSecondary,
@@ -1186,7 +1196,7 @@ class _SegmentedToggle extends StatelessWidget {
           _SegmentedOption(
             colors: colors,
             textStyles: textStyles,
-            label: '7-mand',
+            label: AppLocalizations.of(context)!.ui7ASide,
             selected: !usesElevenAside,
             onTap: () => onChanged(false),
           ),
@@ -1194,7 +1204,7 @@ class _SegmentedToggle extends StatelessWidget {
           _SegmentedOption(
             colors: colors,
             textStyles: textStyles,
-            label: '11-mand',
+            label: AppLocalizations.of(context)!.ui11ASide,
             selected: usesElevenAside,
             onTap: () => onChanged(true),
           ),
@@ -1420,7 +1430,7 @@ class _JoinTeamView extends StatelessWidget {
           const SizedBox(height: 12),
         ],
         Text(
-          'Søgeresultater',
+          AppLocalizations.of(context)!.uiSearchResults,
           style: textStyles.caption2.copyWith(
             color: colors.textSecondary,
             fontWeight: FontWeight.w900,
@@ -1479,10 +1489,10 @@ class _TeamSearchCard extends StatelessWidget {
     final leaderName =
         team['leader_name'] as String? ?? team['leaderName'] as String? ?? '';
     final subtitle = leaderName.trim().isNotEmpty
-        ? 'Holdleder: ${leaderName.trim()}'
+        ? AppLocalizations.of(context)!.uiTeamLeader(leaderName.trim())
         : memberCount == null
-            ? 'Holdleder: Afventer'
-            : '$memberCount medlemmer';
+            ? AppLocalizations.of(context)!.uiTeamLeaderPending
+            : AppLocalizations.of(context)!.uiMembers(memberCount);
     final series =
         team['series_name'] as String? ?? team['seriesName'] as String? ?? '';
 
@@ -1613,7 +1623,7 @@ class _InviteTeamStep extends StatelessWidget {
                 ),
                 child: inviteText == null
                     ? Text(
-                        'Invitationslinket kunne ikke hentes.',
+                        AppLocalizations.of(context)!.uiTheInviteLinkCouldNotBe,
                         style: textStyles.body3.copyWith(
                           color: colors.textSecondary,
                           fontWeight: FontWeight.w600,
@@ -1636,7 +1646,7 @@ class _InviteTeamStep extends StatelessWidget {
                             onPressed: onCopyInvite,
                             icon: const Icon(Icons.copy_rounded, size: 20),
                             color: colors.primary,
-                            tooltip: 'Kopier link',
+                            tooltip: AppLocalizations.of(context)!.uiCopyLink,
                           ),
                         ],
                       ),
@@ -1645,7 +1655,7 @@ class _InviteTeamStep extends StatelessWidget {
               FilledButton.icon(
                 onPressed: inviteUri == null ? null : onShareInvite,
                 icon: const Icon(Icons.ios_share_rounded, size: 19),
-                label: const Text('Del link'),
+                label: Text(AppLocalizations.of(context)!.uiShareLink),
                 style: FilledButton.styleFrom(
                   minimumSize: const Size.fromHeight(47),
                   backgroundColor: colors.primary,
@@ -1691,7 +1701,7 @@ class _KopaHeader extends StatelessWidget {
             onPressed: onBack,
             icon: const Icon(Icons.arrow_back),
             color: colors.textPrimary,
-            tooltip: 'Tilbage',
+            tooltip: AppLocalizations.of(context)!.uiBack,
           ),
         SvgPicture.asset(
           'assets/logos/Logo.svg',
@@ -1735,7 +1745,7 @@ class _OnboardingTitle extends StatelessWidget {
               _StepDots(colors: colors, step: step, count: totalSteps),
               const SizedBox(width: 8),
               Text(
-                'Trin ${step + 1} af $totalSteps',
+                AppLocalizations.of(context)!.uiStepOf(step + 1, totalSteps),
                 style: textStyles.caption2.copyWith(
                   color: colors.textSecondary,
                   fontWeight: FontWeight.w700,
@@ -1825,7 +1835,9 @@ class _DbuCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  hasData ? 'DBU forbundet' : 'DBU',
+                  hasData
+                      ? AppLocalizations.of(context)!.uiDbuConnected
+                      : 'DBU',
                   style: textStyles.subtitle2.copyWith(
                     color: colors.textPrimary,
                     fontWeight: FontWeight.w800,
@@ -1834,8 +1846,8 @@ class _DbuCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   hasData
-                      ? 'Holddata er importeret'
-                      : 'Log ind via DBU for at importere holddata',
+                      ? AppLocalizations.of(context)!.uiTeamDataHasBeenImported
+                      : AppLocalizations.of(context)!.uiLogInThroughDbuToImport,
                   style: textStyles.caption2.copyWith(
                     color: colors.textSecondary,
                     fontWeight: FontWeight.w600,
@@ -2126,8 +2138,10 @@ class _WaitingView extends StatelessWidget {
     final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final textStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final title = team?['title'] as String? ?? 'dit hold';
-    final displayTeam = team ?? const <String, dynamic>{'title': 'Dit hold'};
+    final title =
+        team?['title'] as String? ?? AppLocalizations.of(context)!.uiYourTeam;
+    final displayTeam = team ??
+        <String, dynamic>{'title': AppLocalizations.of(context)!.uiYourTeam2};
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -2176,7 +2190,7 @@ class _WaitingView extends StatelessWidget {
                   _StepDots(colors: colors, step: 2, count: 5),
                   const SizedBox(width: 8),
                   Text(
-                    'Trin 3 af 5',
+                    AppLocalizations.of(context)!.uiStep3Of5,
                     style: textStyles.caption2.copyWith(
                       color: colors.textSecondary,
                       fontWeight: FontWeight.w800,
@@ -2205,7 +2219,7 @@ class _WaitingView extends StatelessWidget {
               ),
               const SizedBox(height: 28),
               Text(
-                'Venter på accept',
+                AppLocalizations.of(context)!.uiWaitingForApproval,
                 textAlign: TextAlign.center,
                 style: textStyles.h5.copyWith(
                   color: colors.textPrimary,
@@ -2216,7 +2230,7 @@ class _WaitingView extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Text(
-                'Du har ansøgt om at blive en del af $title. Du får besked, når holdlederen har accepteret din anmodning.',
+                AppLocalizations.of(context)!.uiYouHaveAskedToJoinYou(title),
                 textAlign: TextAlign.center,
                 style: textStyles.body3.copyWith(
                   color: colors.textSecondary,
@@ -2232,15 +2246,14 @@ class _WaitingView extends StatelessWidget {
                 team: displayTeam,
                 actionLabel: '',
                 trailing: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: AppColors.of(context).warningSurface,
                     borderRadius: BorderRadius.circular(100),
                     border: Border.all(color: colors.warning),
                   ),
                   child: Text(
-                    'Afventer',
+                    AppLocalizations.of(context)!.uiPending,
                     style: textStyles.caption2.copyWith(
                       color: colors.warning,
                       fontWeight: FontWeight.w900,
@@ -2265,7 +2278,7 @@ class _PositionChoice {
   final double x;
   final double y;
 
-  const _PositionChoice({
+  _PositionChoice({
     required this.id,
     required this.shortLabel,
     required this.label,
@@ -2275,19 +2288,19 @@ class _PositionChoice {
   });
 }
 
-const _positionChoices = <_PositionChoice>[
+final _positionChoices = <_PositionChoice>[
   _PositionChoice(
     id: 'mv',
-    shortLabel: 'MV',
-    label: 'Målmand',
+    shortLabel: currentL10n.uiPositionShortGoalkeeper,
+    label: currentL10n.uiGoalkeeper,
     value: 'goalkeeper',
     x: 0.50,
     y: 0.90,
   ),
   _PositionChoice(
     id: 'vb',
-    shortLabel: 'VB',
-    label: 'Venstre back',
+    shortLabel: currentL10n.uiPositionShortLeftBack,
+    label: currentL10n.uiPositionLeftBack,
     value: 'back_wingback',
     x: 0.13,
     y: 0.70,
@@ -2295,7 +2308,7 @@ const _positionChoices = <_PositionChoice>[
   _PositionChoice(
     id: 'cb-left',
     shortLabel: 'CB',
-    label: 'Centerback',
+    label: currentL10n.uiPositionCentreBack,
     value: 'centre_back',
     x: 0.35,
     y: 0.73,
@@ -2303,23 +2316,23 @@ const _positionChoices = <_PositionChoice>[
   _PositionChoice(
     id: 'cb-right',
     shortLabel: 'CB',
-    label: 'Centerback',
+    label: currentL10n.uiPositionCentreBack,
     value: 'centre_back',
     x: 0.65,
     y: 0.73,
   ),
   _PositionChoice(
     id: 'hb',
-    shortLabel: 'HB',
-    label: 'Højre back',
+    shortLabel: currentL10n.uiPositionShortRightBack,
+    label: currentL10n.uiPositionRightBack,
     value: 'back_wingback',
     x: 0.87,
     y: 0.70,
   ),
   _PositionChoice(
     id: 'vm',
-    shortLabel: 'VM',
-    label: 'Venstre midtbane',
+    shortLabel: currentL10n.uiPositionShortLeftMidfield,
+    label: currentL10n.uiPositionLeftMidfield,
     value: 'midfield',
     x: 0.20,
     y: 0.50,
@@ -2327,23 +2340,23 @@ const _positionChoices = <_PositionChoice>[
   _PositionChoice(
     id: 'cm',
     shortLabel: 'CM',
-    label: 'Central midtbane',
+    label: currentL10n.uiPositionCentralMidfield,
     value: 'midfield',
     x: 0.50,
     y: 0.50,
   ),
   _PositionChoice(
     id: 'hm',
-    shortLabel: 'HM',
-    label: 'Højre midtbane',
+    shortLabel: currentL10n.uiPositionShortRightMidfield,
+    label: currentL10n.uiPositionRightMidfield,
     value: 'midfield',
     x: 0.80,
     y: 0.50,
   ),
   _PositionChoice(
     id: 'vw',
-    shortLabel: 'VW',
-    label: 'Venstre wing',
+    shortLabel: currentL10n.uiPositionShortLeftWing,
+    label: currentL10n.uiPositionLeftWing,
     value: 'wing',
     x: 0.17,
     y: 0.25,
@@ -2351,42 +2364,42 @@ const _positionChoices = <_PositionChoice>[
   _PositionChoice(
     id: 'st',
     shortLabel: 'ST',
-    label: 'Angriber',
+    label: currentL10n.uiStriker,
     value: 'striker',
     x: 0.50,
     y: 0.21,
   ),
   _PositionChoice(
     id: 'hw',
-    shortLabel: 'HW',
-    label: 'Højre wing',
+    shortLabel: currentL10n.uiPositionShortRightWing,
+    label: currentL10n.uiPositionRightWing,
     value: 'wing',
     x: 0.83,
     y: 0.25,
   ),
 ];
 
-const _sevenAsideChoices = <_PositionChoice>[
+final _sevenAsideChoices = <_PositionChoice>[
   _PositionChoice(
     id: 'mv',
-    shortLabel: 'MV',
-    label: 'Målmand',
+    shortLabel: currentL10n.uiPositionShortGoalkeeper,
+    label: currentL10n.uiGoalkeeper,
     value: 'goalkeeper',
     x: 0.50,
     y: 0.88,
   ),
   _PositionChoice(
     id: 'vb',
-    shortLabel: 'VB',
-    label: 'Venstre back',
+    shortLabel: currentL10n.uiPositionShortLeftBack,
+    label: currentL10n.uiPositionLeftBack,
     value: 'back_wingback',
     x: 0.24,
     y: 0.66,
   ),
   _PositionChoice(
     id: 'hb',
-    shortLabel: 'HB',
-    label: 'Højre back',
+    shortLabel: currentL10n.uiPositionShortRightBack,
+    label: currentL10n.uiPositionRightBack,
     value: 'back_wingback',
     x: 0.76,
     y: 0.66,
@@ -2394,15 +2407,15 @@ const _sevenAsideChoices = <_PositionChoice>[
   _PositionChoice(
     id: 'cm',
     shortLabel: 'CM',
-    label: 'Central midtbane',
+    label: currentL10n.uiPositionCentralMidfield,
     value: 'midfield',
     x: 0.50,
     y: 0.49,
   ),
   _PositionChoice(
     id: 'vw',
-    shortLabel: 'VW',
-    label: 'Venstre wing',
+    shortLabel: currentL10n.uiPositionShortLeftWing,
+    label: currentL10n.uiPositionLeftWing,
     value: 'wing',
     x: 0.25,
     y: 0.28,
@@ -2410,15 +2423,15 @@ const _sevenAsideChoices = <_PositionChoice>[
   _PositionChoice(
     id: 'st',
     shortLabel: 'ST',
-    label: 'Angriber',
+    label: currentL10n.uiStriker,
     value: 'striker',
     x: 0.50,
     y: 0.20,
   ),
   _PositionChoice(
     id: 'hw',
-    shortLabel: 'HW',
-    label: 'Højre wing',
+    shortLabel: currentL10n.uiPositionShortRightWing,
+    label: currentL10n.uiPositionRightWing,
     value: 'wing',
     x: 0.75,
     y: 0.28,

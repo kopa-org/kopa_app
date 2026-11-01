@@ -1,3 +1,4 @@
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:kopa/component/error_message.dart';
 import 'package:kopa/component/loading_indicator.dart';
@@ -31,20 +32,23 @@ class FutureHandler<T> extends StatelessWidget {
         if (snapshot.hasError) {
           if (onError != null) return onError!(context);
           return ErrorMessage(
-            message: 'Der skete en fejl. Prøv venligst igen senere.',
+            message: AppLocalizations.of(context)!
+                .uiSomethingWentWrongPleaseTryAgain,
           );
         }
 
         if (!snapshot.hasData || snapshot.data == null) {
           return Center(
-            child: Text((noDataFoundMessage ?? 'Ingen data tilgængelig')),
+            child: Text((noDataFoundMessage ??
+                AppLocalizations.of(context)!.uiNoDataAvailable)),
           );
         }
 
         final data = snapshot.data as T;
         if (!allowEmpty && data is List && data.isEmpty) {
           return Center(
-            child: Text((noDataFoundMessage ?? 'Ingen data tilgængelig')),
+            child: Text((noDataFoundMessage ??
+                AppLocalizations.of(context)!.uiNoDataAvailable)),
           );
         }
 

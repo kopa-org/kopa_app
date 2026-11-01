@@ -1,5 +1,6 @@
 import 'dart:ui' show lerpDouble;
 
+import 'package:kopa/l10n/current_l10n.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -34,14 +35,14 @@ class MatchDetailTemplate extends StatelessWidget {
   final Future<void> Function()? onRefresh;
   final MatchDetailSegment selectedSegment;
   final ValueChanged<MatchDetailSegment>? onSegmentChanged;
-  final String overviewTitle;
-  final String attendanceTitle;
-  final String timelineTitle;
-  final String overviewSegmentLabel;
-  final String attendanceSegmentLabel;
-  final String timelineSegmentLabel;
-  final String attendanceEmptyMessage;
-  final String timelineEmptyMessage;
+  final String? overviewTitle;
+  final String? attendanceTitle;
+  final String? timelineTitle;
+  final String? overviewSegmentLabel;
+  final String? attendanceSegmentLabel;
+  final String? timelineSegmentLabel;
+  final String? attendanceEmptyMessage;
+  final String? timelineEmptyMessage;
   final bool timelinePreview;
   final String timelinePreviewMessage;
   final bool showTimelineSegment;
@@ -55,7 +56,7 @@ class MatchDetailTemplate extends StatelessWidget {
   final Widget? bottomNavigationBar;
   final Widget? attendanceActionBar;
   final bool useParentBottomNavigationBar;
-  final String pageTitle;
+  final String? pageTitle;
   final bool useDarkMatchHeader;
   final bool useTrainingHeader;
   final Widget? belowHeaderAction;
@@ -75,14 +76,14 @@ class MatchDetailTemplate extends StatelessWidget {
     this.onRefresh,
     this.selectedSegment = MatchDetailSegment.overview,
     this.onSegmentChanged,
-    this.overviewTitle = 'Praktisk information',
-    this.attendanceTitle = 'Tilmeldte spillere',
-    this.timelineTitle = 'Kampforløb',
-    this.overviewSegmentLabel = 'Overblik',
-    this.attendanceSegmentLabel = 'Tilmeldte',
-    this.timelineSegmentLabel = 'Kampforløb',
-    this.attendanceEmptyMessage = 'Ingen tilmeldte spillere endnu.',
-    this.timelineEmptyMessage = 'Ingen begivenheder registreret.',
+    this.overviewTitle,
+    this.attendanceTitle,
+    this.timelineTitle,
+    this.overviewSegmentLabel,
+    this.attendanceSegmentLabel,
+    this.timelineSegmentLabel,
+    this.attendanceEmptyMessage,
+    this.timelineEmptyMessage,
     this.timelinePreview = false,
     this.timelinePreviewMessage = '',
     this.timelineInOverview = false,
@@ -96,7 +97,7 @@ class MatchDetailTemplate extends StatelessWidget {
     this.bottomNavigationBar,
     this.attendanceActionBar,
     this.useParentBottomNavigationBar = false,
-    this.pageTitle = 'Kampdetaljer',
+    this.pageTitle,
     this.useDarkMatchHeader = false,
     this.useTrainingHeader = false,
     this.belowHeaderAction,
@@ -104,6 +105,29 @@ class MatchDetailTemplate extends StatelessWidget {
   });
 
   static const double _navBarExtent = 52;
+
+  String get _overviewTitle =>
+      overviewTitle ?? currentL10n.uiPracticalInformation;
+
+  String get _timelineTitle =>
+      timelineTitle ?? currentL10n.matchEventTimelineTitle;
+
+  String get _overviewSegmentLabel =>
+      overviewSegmentLabel ?? currentL10n.fineBoxSegmentOverview;
+
+  String get _attendanceSegmentLabel =>
+      attendanceSegmentLabel ?? currentL10n.uiRegistered3;
+
+  String get _timelineSegmentLabel =>
+      timelineSegmentLabel ?? currentL10n.matchEventTimelineTitle;
+
+  String get _attendanceEmptyMessage =>
+      attendanceEmptyMessage ?? currentL10n.uiNoRegisteredPlayersYet;
+
+  String get _timelineEmptyMessage =>
+      timelineEmptyMessage ?? currentL10n.uiNoEventsRecorded2;
+
+  String get _pageTitle => pageTitle ?? currentL10n.eventDetailsMatch;
 
   bool get _usesSheetHeader => useDarkMatchHeader || useTrainingHeader;
 
@@ -143,7 +167,7 @@ class MatchDetailTemplate extends StatelessWidget {
     final colors = AppColors.of(context);
 
     return PageScaffold(
-      title: pageTitle,
+      title: _pageTitle,
       showTopBar: false,
       useTopSafeArea: !_usesSheetHeader,
       backgroundColor: _usesSheetHeader ? colors.background : null,
@@ -200,7 +224,7 @@ class MatchDetailTemplate extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _MatchDetailsHeader(title: pageTitle, action: headerAction),
+                _MatchDetailsHeader(title: _pageTitle, action: headerAction),
                 heroCard,
                 if (_showAttendanceHeader && !attendanceHeaderInBody) ...[
                   SizedBox(height: segmentSpacing),
@@ -315,7 +339,7 @@ class MatchDetailTemplate extends StatelessWidget {
                             child: Opacity(
                               opacity: 1 - collapse,
                               child: _MatchDetailsHeader(
-                                title: pageTitle,
+                                title: _pageTitle,
                                 action: headerAction,
                                 darkHeader: true,
                                 trainingHeader: useTrainingHeader,
@@ -371,15 +395,15 @@ class MatchDetailTemplate extends StatelessWidget {
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
 
     final segments = <({MatchDetailSegment segment, String label})>[
-      (segment: MatchDetailSegment.overview, label: overviewSegmentLabel),
-      (segment: MatchDetailSegment.attendance, label: attendanceSegmentLabel),
+      (segment: MatchDetailSegment.overview, label: _overviewSegmentLabel),
+      (segment: MatchDetailSegment.attendance, label: _attendanceSegmentLabel),
       if (playerPositions != null)
         (
           segment: MatchDetailSegment.lineup,
           label: AppLocalizations.of(context)!.matchDetailsLineupTab
         ),
       if (_hasTimelineSegment)
-        (segment: MatchDetailSegment.timeline, label: timelineSegmentLabel),
+        (segment: MatchDetailSegment.timeline, label: _timelineSegmentLabel),
     ];
 
     // Trainings only have two tabs, so both stay fully labelled side by side.
@@ -505,7 +529,7 @@ class MatchDetailTemplate extends StatelessWidget {
         if (usePrematchLayout) {
           final info = [
             if (infoRows.isNotEmpty) ...[
-              _PrematchSectionTitle(title: overviewTitle),
+              _PrematchSectionTitle(title: _overviewTitle),
               _PrematchInfoCard(children: infoRows),
             ],
             if (_usesSheetHeader && _showAttendanceHeader) ...[
@@ -535,17 +559,17 @@ class MatchDetailTemplate extends StatelessWidget {
         return [
           ...overviewWidgets,
           if (infoRows.isNotEmpty) ...[
-            SectionHeader(title: overviewTitle),
+            SectionHeader(title: _overviewTitle),
             ...infoRows,
           ],
           if (votingModule != null) ...[
             const SizedBox(height: Spacing.lg),
-            const SectionHeader(title: 'Afstemning'),
+            SectionHeader(title: AppLocalizations.of(context)!.uiPoll),
             votingModule!,
           ],
           if (ratingsSection != null) ...[
             const SizedBox(height: Spacing.lg),
-            const SectionHeader(title: 'Kamprating'),
+            SectionHeader(title: AppLocalizations.of(context)!.uiMatchRating),
             const SizedBox(height: Spacing.md),
             ratingsSection!,
           ],
@@ -555,7 +579,7 @@ class MatchDetailTemplate extends StatelessWidget {
       case MatchDetailSegment.attendance:
         return [
           if (attendanceList.isEmpty)
-            _EmptySegmentMessage(message: attendanceEmptyMessage)
+            _EmptySegmentMessage(message: _attendanceEmptyMessage)
           else
             ...attendanceList,
         ];
@@ -567,7 +591,7 @@ class MatchDetailTemplate extends StatelessWidget {
   List<Widget> _buildTimelineSection() {
     if (timelinePreview) {
       return [
-        _PrematchSectionTitle(title: timelineTitle),
+        _PrematchSectionTitle(title: _timelineTitle),
         _PrematchTimelinePreview(
           items: timelineItems,
           message: timelinePreviewMessage,
@@ -577,13 +601,13 @@ class MatchDetailTemplate extends StatelessWidget {
 
     return [
       if (usePrematchLayout)
-        _PrematchSectionTitle(title: timelineTitle)
+        _PrematchSectionTitle(title: _timelineTitle)
       else ...[
-        SectionHeader(title: timelineTitle),
+        SectionHeader(title: _timelineTitle),
         const SizedBox(height: Spacing.md),
       ],
       if (timelineItems.isEmpty)
-        _EmptySegmentMessage(message: timelineEmptyMessage)
+        _EmptySegmentMessage(message: _timelineEmptyMessage)
       else
         ...timelineItems,
     ];

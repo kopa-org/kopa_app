@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/component/avatar/team_avatar.dart';
 import 'package:kopa/component/avatar/team_badge_label.dart';
 import 'package:kopa/model/team_logo_design.dart';
@@ -11,6 +12,8 @@ void main() {
     for (final shape in TeamLogoShape.values) {
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Center(
             child: TeamBadgeLabel(
               teamName: 'Kopa FC',

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
@@ -12,6 +13,8 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         theme: ThemeData(
           platform: TargetPlatform.android,
           extensions: <ThemeExtension<dynamic>>[
@@ -50,6 +53,8 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         theme: ThemeData(
           platform: TargetPlatform.iOS,
           extensions: <ThemeExtension<dynamic>>[
@@ -110,6 +115,8 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         theme: ThemeData(
           platform: TargetPlatform.iOS,
           extensions: <ThemeExtension<dynamic>>[
@@ -142,6 +149,8 @@ void main() {
   testWidgets('tab scaffold removes an empty top bar', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         theme: ThemeData(
           platform: TargetPlatform.android,
           extensions: <ThemeExtension<dynamic>>[
@@ -167,6 +176,8 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         theme: ThemeData(
           platform: TargetPlatform.android,
           extensions: <ThemeExtension<dynamic>>[
@@ -197,6 +208,8 @@ void main() {
       (tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         theme: ThemeData(
           platform: TargetPlatform.android,
           extensions: <ThemeExtension<dynamic>>[

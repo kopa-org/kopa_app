@@ -72,6 +72,8 @@ void main() {
       pitchStripe: const Color(0xFFFA9371),
     );
     await tester.pumpWidget(MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: _theme(colors, TargetPlatform.android),
       home: const Scaffold(
           body: Column(children: [
@@ -109,6 +111,8 @@ void main() {
     final colors = AppColors.light.copyWith(
         background: const Color(0xFFA567CD), offWhite: const Color(0xFF009A91));
     await tester.pumpWidget(MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: _theme(colors, TargetPlatform.android),
       home: const PageScaffold(title: 'Page', body: SizedBox()),
     ));

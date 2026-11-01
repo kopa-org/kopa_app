@@ -1,3 +1,4 @@
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
@@ -42,7 +43,7 @@ class _CreateFineTypeModalState extends State<CreateFineTypeModal> {
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return PageScaffold(
-        title: 'Opret bødetype',
+        title: AppLocalizations.of(context)!.fineBoxCreateFineType,
         showBackButton: false,
         backgroundColor: appColors.background,
         leading: CupertinoButton(
@@ -59,7 +60,7 @@ class _CreateFineTypeModalState extends State<CreateFineTypeModal> {
               }
             },
             child: Text(
-              'Opret',
+              AppLocalizations.of(context)!.matchTasksCreateConfirm,
               style: appTextStyles.bodyBold.copyWith(color: appColors.primary),
             ),
           ),
@@ -78,9 +79,11 @@ class _CreateFineTypeModalState extends State<CreateFineTypeModal> {
                   header: const Text(''),
                   children: <Widget>[
                     CupertinoFormRow(
-                      prefix: Text('Titel', style: appTextStyles.bodyBold),
+                      prefix: Text(AppLocalizations.of(context)!.uiTitle,
+                          style: appTextStyles.bodyBold),
                       child: CupertinoTextFormFieldRow(
-                        placeholder: 'F.eks. "Kommet for sent"',
+                        placeholder:
+                            AppLocalizations.of(context)!.uiEGArrivedLate,
                         validator: (String? value) =>
                             validateTitleOfFineTypeInput(value),
                         keyboardType: TextInputType.name,
@@ -90,9 +93,12 @@ class _CreateFineTypeModalState extends State<CreateFineTypeModal> {
                       ),
                     ),
                     CupertinoFormRow(
-                      prefix: Text('Beløb', style: appTextStyles.bodyBold),
+                      prefix: Text(
+                          AppLocalizations.of(context)!
+                              .fineBoxWithdrawAmountHint,
+                          style: appTextStyles.bodyBold),
                       child: CupertinoTextFormFieldRow(
-                        placeholder: 'F.eks. 100',
+                        placeholder: AppLocalizations.of(context)!.uiEG100,
                         validator: (String? value) =>
                             validateDefaultAmountInput(value),
                         keyboardType: TextInputType.number,
@@ -106,7 +112,7 @@ class _CreateFineTypeModalState extends State<CreateFineTypeModal> {
 
   String? validateTitleOfFineTypeInput(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Indtast titel på bødetype';
+      return AppLocalizations.of(context)!.uiEnterATitleForTheFine;
     }
 
     return null;
@@ -114,7 +120,7 @@ class _CreateFineTypeModalState extends State<CreateFineTypeModal> {
 
   String? validateDefaultAmountInput(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Indtast standardbeløb for bødetypen';
+      return AppLocalizations.of(context)!.uiEnterTheDefaultAmountForThe;
     }
 
     return null;
@@ -131,8 +137,9 @@ class _CreateFineTypeModalState extends State<CreateFineTypeModal> {
       showCupertinoDialog(
         context: context,
         builder: (context) => CupertinoAlertDialog(
-          title: Text('Fejl'),
-          content: Text('Indtast venligst titel og standardbeløb.'),
+          title: Text(AppLocalizations.of(context)!.matchPollErrorTitle),
+          content:
+              Text(AppLocalizations.of(context)!.uiPleaseEnterATitleAndDefault),
           actions: <CupertinoDialogAction>[
             CupertinoDialogAction(
               onPressed: () {
@@ -152,9 +159,9 @@ class _CreateFineTypeModalState extends State<CreateFineTypeModal> {
       showCupertinoDialog(
         context: context,
         builder: (context) => CupertinoAlertDialog(
-          title: Text('Fejl'),
+          title: Text(AppLocalizations.of(context)!.matchPollErrorTitle),
           content: Text(
-              'Bødetype eksisterer allerede. Indtast venligst en anden titel.'),
+              AppLocalizations.of(context)!.uiTheFineTypeAlreadyExistsPlease),
           actions: <CupertinoDialogAction>[
             CupertinoDialogAction(
               onPressed: () {

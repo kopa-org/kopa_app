@@ -1,3 +1,4 @@
+import 'package:kopa/l10n/current_l10n.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/avatar/team_badge_label.dart';
@@ -134,7 +135,7 @@ class _GameResultRow extends StatelessWidget {
     return Semantics(
       key: ValueKey('match-entry-${match.id}'),
       button: true,
-      label: 'Åbn kamp: ${match.matchName}',
+      label: AppLocalizations.of(context)!.uiOpenMatch(match.matchName),
       child: Material(
         color: AppColors.transparent,
         child: Ink(
@@ -185,10 +186,10 @@ class _GameResultRow extends StatelessWidget {
                                 ),
                                 if (match.isCurrentUserRegistered) ...[
                                   const SizedBox(width: 6),
-                                  const _AttendanceBadge.registered(),
+                                  _AttendanceBadge.registered(),
                                 ] else if (currentUserDeclined) ...[
                                   const SizedBox(width: 6),
-                                  const _AttendanceBadge.declined(),
+                                  _AttendanceBadge.declined(),
                                 ],
                                 const SizedBox(width: 6),
                                 _StatusBadge(status: status),
@@ -196,14 +197,16 @@ class _GameResultRow extends StatelessWidget {
                             ),
                             const SizedBox(height: 12),
                             _GameTeamLine(
-                              name: match.homeTeam ?? 'Hjemme',
+                              name: match.homeTeam ??
+                                  AppLocalizations.of(context)!.matchScoreHome,
                               score: match.homeTeamScore,
                               isOwnTeam: ownSide.isHome,
                               ownTeamLogoDesign: ownTeamLogoDesign,
                             ),
                             const SizedBox(height: Spacing.sm),
                             _GameTeamLine(
-                              name: match.awayTeam ?? 'Ude',
+                              name: match.awayTeam ??
+                                  AppLocalizations.of(context)!.matchScoreAway,
                               score: match.awayTeamScore,
                               isOwnTeam: ownSide.isAway,
                               ownTeamLogoDesign: ownTeamLogoDesign,
@@ -343,9 +346,9 @@ class _TrainingEventRow extends StatelessWidget {
                               time: DateHelper.getFormattedTime(match.date),
                             ),
                             if (match.isCurrentUserRegistered)
-                              const _AttendanceBadge.registered()
+                              _AttendanceBadge.registered()
                             else if (isDeclined)
-                              const _AttendanceBadge.declined(),
+                              _AttendanceBadge.declined(),
                           ],
                         ),
                         const SizedBox(height: 8),
@@ -400,13 +403,13 @@ class _AttendanceBadge extends StatelessWidget {
   final IconData icon;
   final MatchOverviewChipStatus status;
 
-  const _AttendanceBadge.registered()
-      : label = 'Tilmeldt',
+  _AttendanceBadge.registered()
+      : label = currentL10n.matchDetailsRsvpRegistered,
         icon = CupertinoIcons.check_mark,
         status = MatchOverviewChipStatus.success;
 
-  const _AttendanceBadge.declined()
-      : label = 'Frameldt',
+  _AttendanceBadge.declined()
+      : label = currentL10n.uiDeclined,
         icon = CupertinoIcons.xmark,
         status = MatchOverviewChipStatus.error;
 
@@ -537,7 +540,7 @@ class _MatchStatus {
 
     if (!match.hasFinalScore) {
       return _MatchStatus(
-        label: 'Færdig',
+        label: currentL10n.uiFinished,
         chipStatus: MatchOverviewChipStatus.success,
       );
     }

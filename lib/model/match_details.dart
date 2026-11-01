@@ -1,3 +1,4 @@
+import 'package:kopa/l10n/current_l10n.dart';
 import 'package:kopa/model/match_event_details.dart';
 import 'package:kopa/model/match_poll_details.dart';
 import 'package:kopa/model/event_attendance_details.dart';
@@ -129,7 +130,7 @@ class MatchDetails {
   }
 
   String get matchName {
-    if (isTraining) return 'Training';
+    if (isTraining) return currentL10n.eventTraining;
     return '${homeTeam ?? "?"} vs ${awayTeam ?? "?"}';
   }
 

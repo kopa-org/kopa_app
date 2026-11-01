@@ -1,3 +1,5 @@
+import 'package:kopa/l10n/current_l10n.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -41,25 +43,26 @@ class _MatchPollsListView extends StatelessWidget {
         backgroundColor: AppColors.of(context).background,
         navigationBar: CupertinoNavigationBar(
           transitionBetweenRoutes: false,
-          middle: const Text('Afstemninger'),
+          middle: Text(AppLocalizations.of(context)!.uiPolls),
           leading: CupertinoButton(
             padding: EdgeInsets.zero,
             onPressed: () {
               Navigator.of(context)
                   .popUntil((route) => route.settings.name == '/');
             },
-            child: const Icon(
+            child: Icon(
               CupertinoIcons.chevron_left,
-              semanticLabel: 'Tilbage',
+              semanticLabel: AppLocalizations.of(context)!.uiBack,
             ),
           ),
           trailing: user?.isTeamOwner == true
               ? CupertinoButton(
                   padding: EdgeInsets.zero,
                   onPressed: () => _showCreateMatchPoll(context),
-                  child: const Icon(
+                  child: Icon(
                     CupertinoIcons.add,
-                    semanticLabel: 'Opret afstemning',
+                    semanticLabel:
+                        AppLocalizations.of(context)!.matchPollCreateAction,
                   ),
                 )
               : const SizedBox.shrink(),
@@ -76,7 +79,8 @@ class _MatchPollsListView extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.only(top: 50.0),
                     child: Text(
-                      state.errorMessage ?? 'Kunne ikke hente afstemninger.',
+                      state.errorMessage ??
+                          AppLocalizations.of(context)!.uiCouldNotFetchPolls,
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -84,11 +88,11 @@ class _MatchPollsListView extends StatelessWidget {
               }
 
               if (state.rows.isEmpty) {
-                return const Center(
+                return Center(
                   child: Padding(
                     padding: EdgeInsets.only(top: 50.0),
                     child: Text(
-                      'Ingen afstemninger fundet.',
+                      AppLocalizations.of(context)!.uiNoPollsFound,
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -136,10 +140,11 @@ class _MatchPollsListView extends StatelessWidget {
                       ),
                       title: Text(row.playerName),
                       subtitle: Text(
-                        '${_matchNameFor(state, matchPoll.eventId)} - d. ${DateHelper.getFormattedDate(matchPoll.createdAt)}',
+                        '${_matchNameFor(state, matchPoll.eventId)} - ${DateHelper.getFormattedDate(matchPoll.createdAt)}',
                       ),
                       additionalInfo: Text(
-                        '${matchPoll.playerOfTheMatchVotes} stemmer',
+                        AppLocalizations.of(context)!
+                            .uiVotes2(matchPoll.playerOfTheMatchVotes),
                       ),
                     );
                   }),
@@ -172,6 +177,6 @@ class _MatchPollsListView extends StatelessWidget {
         return match.matchName;
       }
     }
-    return 'Ukendt kamp';
+    return currentL10n.uiUnknownMatch;
   }
 }

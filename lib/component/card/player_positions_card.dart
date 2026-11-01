@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 
+import 'package:kopa/l10n/current_l10n.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/football_pitch.dart';
@@ -119,7 +120,7 @@ class PlayerPositionsCard extends StatelessWidget {
             children: [
               if (showTitle) ...[
                 Text(
-                  'Holdopstilling',
+                  AppLocalizations.of(context)!.uiLineup,
                   style: styles.h4,
                   textAlign: TextAlign.center,
                 ),
@@ -166,8 +167,8 @@ class PlayerPositionsCard extends StatelessWidget {
                 button: true,
                 toggled: isVisibleToPlayers,
                 label: isVisibleToPlayers
-                    ? 'Skjul holdopstilling for spillere'
-                    : 'Vis holdopstilling for spillere',
+                    ? AppLocalizations.of(context)!.uiHideLineupFromPlayers
+                    : AppLocalizations.of(context)!.uiShowLineupToPlayers,
                 child: CupertinoButton(
                   minimumSize: const Size(36, 36),
                   padding: EdgeInsets.zero,
@@ -321,13 +322,13 @@ class _BenchLegend extends StatelessWidget {
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
 
     final labels = bench.isEmpty
-        ? const ['Ingen bænk']
+        ? [AppLocalizations.of(context)!.uiNoBench]
         : bench.map((player) => player.name).toList();
 
     return Column(
       children: [
         Text(
-          'På bænken:',
+          AppLocalizations.of(context)!.uiOnTheBench,
           style: styles.caption.copyWith(color: colors.grey4),
         ),
         const SizedBox(height: 4),
@@ -571,12 +572,12 @@ class PlayerFormation {
 
   static List<FormationSlot> _buildSlots(List<int> lineCounts) {
     final slots = <FormationSlot>[
-      const FormationSlot(
+      FormationSlot(
         0.50,
         0.08,
         FormationRole.goalkeeper,
-        'MM',
-        'Målmand',
+        currentL10n.uiGk,
+        currentL10n.uiGoalkeeper,
       ),
     ];
 
@@ -615,19 +616,19 @@ class PlayerFormation {
 
   static String _fallbackLabelForRole(FormationRole role) {
     return switch (role) {
-      FormationRole.goalkeeper => 'MM',
-      FormationRole.defender => 'F',
+      FormationRole.goalkeeper => currentL10n.uiGk,
+      FormationRole.defender => currentL10n.uiPositionShortDefender,
       FormationRole.midfielder => 'M',
-      FormationRole.forward => 'A',
+      FormationRole.forward => currentL10n.uiPositionShortForward,
     };
   }
 
   static String _fallbackNameForRole(FormationRole role) {
     return switch (role) {
-      FormationRole.goalkeeper => 'Målmand',
-      FormationRole.defender => 'Forsvar',
-      FormationRole.midfielder => 'Midtbane',
-      FormationRole.forward => 'Angreb',
+      FormationRole.goalkeeper => currentL10n.uiGoalkeeper,
+      FormationRole.defender => currentL10n.uiDefence,
+      FormationRole.midfielder => currentL10n.uiMidfield,
+      FormationRole.forward => currentL10n.uiAttack,
     };
   }
 }

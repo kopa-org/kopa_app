@@ -1,3 +1,4 @@
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/match/match_events_timeline.dart';
 import 'package:kopa/component/match/match_poll_details_card.dart';
@@ -29,8 +30,8 @@ class PostMatchDetailsPage extends StatelessWidget {
   final Widget? playerPositions;
   final List<Widget> infoRows;
   final Widget? tasksSection;
-  final String attendanceSegmentLabel;
-  final String timelineLabel;
+  final String? attendanceSegmentLabel;
+  final String? timelineLabel;
 
   const PostMatchDetailsPage({
     super.key,
@@ -55,8 +56,8 @@ class PostMatchDetailsPage extends StatelessWidget {
     this.playerPositions,
     this.infoRows = const [],
     this.tasksSection,
-    this.attendanceSegmentLabel = 'Tilmeldte',
-    this.timelineLabel = 'Kampbegivenheder',
+    this.attendanceSegmentLabel,
+    this.timelineLabel,
   });
 
   @override
@@ -72,14 +73,15 @@ class PostMatchDetailsPage extends StatelessWidget {
       // Same tabs and layout as before the match, so the page feels familiar.
       usePrematchLayout: true,
       timelineBeforeInfo: true,
-      overviewTitle: 'Praktisk information',
-      attendanceTitle: 'Tilmeldte spillere',
+      overviewTitle: AppLocalizations.of(context)!.uiPracticalInformation,
+      attendanceTitle: AppLocalizations.of(context)!.uiRegisteredPlayers,
       timelineTitle: timelineLabel,
       attendanceSegmentLabel: attendanceSegmentLabel,
       timelineSegmentLabel: timelineLabel,
       showTimelineSegment: true,
       timelineInOverview: true,
-      timelineEmptyMessage: 'Ingen kampbegivenheder registreret endnu.',
+      timelineEmptyMessage:
+          AppLocalizations.of(context)!.uiNoMatchEventsRecordedYet,
       leadingOverviewWidgets: [
         if (match.matchPollDetails == null)
           PlayerOfMatchSummaryCard(

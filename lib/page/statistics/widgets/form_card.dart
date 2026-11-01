@@ -1,3 +1,4 @@
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
@@ -27,7 +28,7 @@ class FormCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Form (Seneste 5)',
+            AppLocalizations.of(context)!.uiFormLast5,
             style: appTextStyles.bodyBold.copyWith(
               color: appColors.textPrimary,
             ),

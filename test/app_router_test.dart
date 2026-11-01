@@ -1,7 +1,9 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kopa/config/app_feature_flags.dart';
 import 'package:kopa/cubits/auth_state.dart';
 import 'package:kopa/cubits/onboarding_cubit.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/model/team_details.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/navigation/app_router.dart';
@@ -13,8 +15,19 @@ void main() {
     expect(
       AppRouter.visibleMainTabLabels(
         const AppFeatureFlags(showStatistics: true, showFineBox: true),
+        lookupAppLocalizations(const Locale('da')),
       ),
       ['Hjem', 'Kampe', 'Statistik', 'Bødekasse', 'Truppen'],
+    );
+  });
+
+  test('main tab labels follow the device language', () {
+    expect(
+      AppRouter.visibleMainTabLabels(
+        const AppFeatureFlags(showStatistics: true, showFineBox: true),
+        lookupAppLocalizations(const Locale('en')),
+      ),
+      ['Home', 'Matches', 'Statistics', 'Fine box', 'Squad'],
     );
   });
 

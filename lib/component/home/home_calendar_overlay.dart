@@ -1,24 +1,11 @@
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:kopa/helpers/date_helper.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 import 'package:kopa/theme/spacing.dart';
 
-const _danishMonths = <String>[
-  'Januar',
-  'Februar',
-  'Marts',
-  'April',
-  'Maj',
-  'Juni',
-  'Juli',
-  'August',
-  'September',
-  'Oktober',
-  'November',
-  'December',
-];
-const _danishWeekdays = <String>['M', 'T', 'O', 'T', 'F', 'L', 'S'];
 const _initialPage = 1200;
 
 Future<void> showHomeCalendarOverlay({
@@ -29,7 +16,7 @@ Future<void> showHomeCalendarOverlay({
   final selectedEvent = await showGeneralDialog<MatchDetails>(
     context: context,
     barrierDismissible: true,
-    barrierLabel: 'Luk kalender',
+    barrierLabel: AppLocalizations.of(context)!.uiCloseCalendar,
     barrierColor: AppColors.of(context).black.withValues(alpha: 0.22),
     transitionDuration: const Duration(milliseconds: 360),
     pageBuilder: (dialogContext, animation, secondaryAnimation) {
@@ -133,7 +120,7 @@ class _HomeCalendarCardState extends State<HomeCalendarCard> {
               children: [
                 Expanded(
                   child: Text(
-                    '${_danishMonths[_visibleMonth.month - 1]} ${_visibleMonth.year}',
+                    '${DateHelper.getMonthName(_visibleMonth)} ${_visibleMonth.year}',
                     key: const Key('calendar-month-label'),
                     style: textStyles.subtitle1.copyWith(
                       color: colors.grass,
@@ -142,19 +129,19 @@ class _HomeCalendarCardState extends State<HomeCalendarCard> {
                   ),
                 ),
                 _MonthButton(
-                  tooltip: 'Forrige måned',
+                  tooltip: AppLocalizations.of(context)!.uiPreviousMonth,
                   icon: Icons.chevron_left_rounded,
                   onPressed: () => _changeMonth(-1),
                 ),
                 _MonthButton(
-                  tooltip: 'Næste måned',
+                  tooltip: AppLocalizations.of(context)!.uiNextMonth,
                   icon: Icons.chevron_right_rounded,
                   onPressed: () => _changeMonth(1),
                 ),
                 if (widget.onClose != null) ...[
                   const SizedBox(width: 2),
                   _MonthButton(
-                    tooltip: 'Luk kalender',
+                    tooltip: AppLocalizations.of(context)!.uiCloseCalendar,
                     icon: Icons.close_rounded,
                     filled: true,
                     onPressed: widget.onClose!,
@@ -166,17 +153,19 @@ class _HomeCalendarCardState extends State<HomeCalendarCard> {
             Row(
               children: [
                 _LegendDot(color: colors.sunset),
-                Text('Kamp',
+                Text(AppLocalizations.of(context)!.eventTypeMatch,
                     style: textStyles.label.copyWith(color: colors.grass)),
                 const SizedBox(width: 12),
                 _LegendDot(color: colors.sky),
-                Text('Træning',
+                Text(AppLocalizations.of(context)!.eventTraining,
                     style: textStyles.label.copyWith(color: colors.grass)),
               ],
             ),
             const SizedBox(height: 12),
             Row(
-              children: _danishWeekdays
+              children: AppLocalizations.of(context)!
+                  .uiWeekdayInitials
+                  .split(',')
                   .map(
                     (day) => Expanded(
                       child: Center(
@@ -352,7 +341,7 @@ class _CalendarDay extends StatelessWidget {
 
     return Semantics(
       button: onTap != null,
-      label: 'Kalenderdag ${date.day}',
+      label: AppLocalizations.of(context)!.uiCalendarDay(date.day),
       child: InkWell(
         key: Key('calendar-day-$keyDate'),
         borderRadius: BorderRadius.circular(Spacing.borderRadiusFull),

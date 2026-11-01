@@ -1,3 +1,4 @@
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
@@ -41,7 +42,7 @@ class _AddUserToTeamPageState extends State<AddUserToTeamPage> {
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return PageScaffold(
-        title: 'Tilføj spiller',
+        title: AppLocalizations.of(context)!.uiAddPlayer,
         showBackButton: false,
         backgroundColor: appColors.background,
         leading: CupertinoButton(
@@ -58,7 +59,7 @@ class _AddUserToTeamPageState extends State<AddUserToTeamPage> {
               }
             },
             child: Text(
-              'Opret',
+              AppLocalizations.of(context)!.matchTasksCreateConfirm,
               style: appTextStyles.bodyBold.copyWith(color: appColors.primary),
             ),
           ),
@@ -77,9 +78,11 @@ class _AddUserToTeamPageState extends State<AddUserToTeamPage> {
                   header: const Text(''),
                   children: <Widget>[
                     CupertinoFormRow(
-                      prefix: Text('Navn', style: appTextStyles.bodyBold),
+                      prefix: Text(AppLocalizations.of(context)!.uiName,
+                          style: appTextStyles.bodyBold),
                       child: CupertinoTextFormFieldRow(
-                        placeholder: 'F.eks. Lars Larsen',
+                        placeholder:
+                            AppLocalizations.of(context)!.uiEGLarsLarsen,
                         validator: (String? value) =>
                             validateNameOfPlayerInput(value),
                         keyboardType: TextInputType.name,
@@ -89,9 +92,12 @@ class _AddUserToTeamPageState extends State<AddUserToTeamPage> {
                       ),
                     ),
                     CupertinoFormRow(
-                      prefix: Text('E-mail', style: appTextStyles.bodyBold),
+                      prefix: Text(
+                          AppLocalizations.of(context)!.forgotPasswordEmail,
+                          style: appTextStyles.bodyBold),
                       child: CupertinoTextFormFieldRow(
-                        placeholder: 'F.eks. lars@example.com',
+                        placeholder:
+                            AppLocalizations.of(context)!.uiEGLarsExampleCom,
                         validator: (String? value) => validateEmailInput(value),
                         keyboardType: TextInputType.emailAddress,
                         controller: _emailController,
@@ -105,7 +111,7 @@ class _AddUserToTeamPageState extends State<AddUserToTeamPage> {
 
   String? validateNameOfPlayerInput(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Indtast navn på spiller';
+      return AppLocalizations.of(context)!.uiEnterThePlayerSName;
     }
 
     return null;
@@ -113,12 +119,12 @@ class _AddUserToTeamPageState extends State<AddUserToTeamPage> {
 
   String? validateEmailInput(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Indtast e-mail';
+      return AppLocalizations.of(context)!.uiEnterEmail;
     }
 
     final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
     if (!emailRegex.hasMatch(value)) {
-      return 'Indtast en gyldig e-mail';
+      return AppLocalizations.of(context)!.uiEnterAValidEmail;
     }
 
     return null;
@@ -135,8 +141,9 @@ class _AddUserToTeamPageState extends State<AddUserToTeamPage> {
       showCupertinoDialog(
         context: context,
         builder: (context) => CupertinoAlertDialog(
-          title: Text('Fejl'),
-          content: Text('Indtast venligst navn og e-mail.'),
+          title: Text(AppLocalizations.of(context)!.matchPollErrorTitle),
+          content:
+              Text(AppLocalizations.of(context)!.uiPleaseEnterNameAndEmail),
           actions: <CupertinoDialogAction>[
             CupertinoDialogAction(
               onPressed: () {
@@ -156,9 +163,9 @@ class _AddUserToTeamPageState extends State<AddUserToTeamPage> {
       showCupertinoDialog(
         context: context,
         builder: (context) => CupertinoAlertDialog(
-          title: Text('Fejl'),
-          content: Text(
-              'Spilleren eksisterer allerede i truppen. Angiv et andet navn og/eller e-mail.'),
+          title: Text(AppLocalizations.of(context)!.matchPollErrorTitle),
+          content:
+              Text(AppLocalizations.of(context)!.uiThePlayerIsAlreadyInThe),
           actions: <CupertinoDialogAction>[
             CupertinoDialogAction(
               onPressed: () {

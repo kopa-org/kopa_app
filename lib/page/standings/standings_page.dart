@@ -1,3 +1,5 @@
+import 'package:kopa/l10n/current_l10n.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/avatar/team_badge_label.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
@@ -28,12 +30,12 @@ class StandingsPage extends StatelessWidget {
     final label = _standingsLabel(standings);
 
     return PageScaffold(
-      title: 'Stilling',
+      title: AppLocalizations.of(context)!.uiStandings,
       showBackButton: true,
       body: rows.isEmpty
           ? Center(
               child: Text(
-                'Ingen stilling tilgængelig',
+                AppLocalizations.of(context)!.uiNoStandingsAvailable,
                 style: appTextStyles.body.copyWith(
                   color: appColors.textSecondary,
                 ),
@@ -63,7 +65,7 @@ class StandingsPage extends StatelessWidget {
                         ),
                         const SizedBox(height: Spacing.sm),
                         Text(
-                          '${rows.length} hold',
+                          AppLocalizations.of(context)!.uiTeams(rows.length),
                           style: appTextStyles.caption1.copyWith(
                             color: appColors.textSecondary,
                             fontWeight: FontWeight.w700,
@@ -193,7 +195,8 @@ class _StandingsHeader extends StatelessWidget {
       child: Row(
         children: [
           _HeaderCell('#', width: compact ? 24 : 32, style: style),
-          Expanded(child: Text('Hold', style: style)),
+          Expanded(
+              child: Text(AppLocalizations.of(context)!.uiTeam, style: style)),
           _HeaderCell('K', width: compact ? 24 : 34, style: style),
           _HeaderCell('V', width: compact ? 24 : 34, style: style),
           _HeaderCell('U', width: compact ? 24 : 34, style: style),
@@ -446,8 +449,8 @@ String _standingsLabel(DbuStandings? standings) {
   if (standings?.seriesName?.trim().isNotEmpty == true) {
     return standings!.seriesName!.trim();
   }
-  if (standings?.poolId == null) return 'Serie';
-  return 'Serie ${standings!.poolId}';
+  if (standings?.poolId == null) return currentL10n.uiLeague;
+  return currentL10n.uiLeague2(standings!.poolId!);
 }
 
 bool _isCurrentTeam(

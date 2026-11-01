@@ -47,7 +47,9 @@ class _TeamLogoDesignEditorState extends State<TeamLogoDesignEditor> {
     final l10n = AppLocalizations.of(context)!;
     final design = _currentDesign;
     final initials = _initials(
-      widget.teamName.isEmpty ? 'Skjold 7' : widget.teamName,
+      widget.teamName.isEmpty
+          ? AppLocalizations.of(context)!.uiShield7
+          : widget.teamName,
     );
 
     return Column(

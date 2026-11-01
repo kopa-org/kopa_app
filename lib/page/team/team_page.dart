@@ -1,3 +1,4 @@
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/future_handler.dart';
@@ -39,7 +40,7 @@ class _TeamPageState extends State<TeamPage> {
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return PageScaffold(
-      title: 'Truppen',
+      title: AppLocalizations.of(context)!.navSquad,
       showBackButton: true,
       backgroundColor: appColors.background,
       trailing: [
@@ -63,7 +64,7 @@ class _TeamPageState extends State<TeamPage> {
             }
           },
           child: Icon(
-            semanticLabel: 'Tilføj ny spiller',
+            semanticLabel: AppLocalizations.of(context)!.uiAddNewPlayer,
             CupertinoIcons.add,
             color: appColors.primary,
           ),
@@ -71,7 +72,7 @@ class _TeamPageState extends State<TeamPage> {
       ],
       body: FutureHandler<List<UserDetails>>(
         future: squad,
-        noDataFoundMessage: 'Ingen spillere fundet.',
+        noDataFoundMessage: AppLocalizations.of(context)!.teamSquadEmpty,
         onSuccess: (context, data) {
           return SingleChildScrollView(
             child: CupertinoListSection.insetGrouped(
@@ -87,7 +88,7 @@ class _TeamPageState extends State<TeamPage> {
                   ),
                   subtitle: player.isTeamOwner
                       ? Text(
-                          'Holdleder',
+                          AppLocalizations.of(context)!.onboardingTeamLeader,
                           style: appTextStyles.caption
                               .copyWith(color: appColors.primary),
                         )

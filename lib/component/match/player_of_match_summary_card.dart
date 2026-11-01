@@ -96,7 +96,9 @@ class PlayerOfMatchSummaryCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          hasWinner ? winnerName : 'Ikke valgt endnu',
+                          hasWinner
+                              ? winnerName
+                              : AppLocalizations.of(context)!.uiNotSelectedYet,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: appTextStyles.subtitle2.copyWith(
@@ -139,7 +141,7 @@ class PlayerOfMatchSummaryCard extends StatelessWidget {
                   if (hasWinner && voteCount != null) ...[
                     const SizedBox(width: Spacing.sm),
                     Text(
-                      'Stemmer: $voteCount',
+                      AppLocalizations.of(context)!.uiVotes3(voteCount!),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: appTextStyles.caption2.copyWith(

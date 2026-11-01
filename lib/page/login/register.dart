@@ -1,3 +1,4 @@
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -55,13 +56,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
         }
       } catch (e) {
         setState(() {
-          _errorMessage = 'Kunne ikke logge ind automatisk.';
+          _errorMessage =
+              AppLocalizations.of(context)!.uiCouldNotLogInAutomatically;
         });
       }
     } else {
       setState(() {
-        _errorMessage =
-            result['message'] ?? 'Registering mislykkedes. Prøv igen.';
+        _errorMessage = result['message'] ??
+            AppLocalizations.of(context)!.uiRegistrationFailedTryAgain;
       });
     }
   }
@@ -69,24 +71,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
   // --- Validators (Danish messages; English comments) ---
   String? _nameValidator(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Indtast venligst dit navn';
+      return AppLocalizations.of(context)!.uiPleaseEnterYourName;
     }
     return null;
   }
 
   String? _emailValidator(String? value) {
     final v = value?.trim() ?? '';
-    if (v.isEmpty) return 'Indtast venligst din email';
+    if (v.isEmpty) return AppLocalizations.of(context)!.uiPleaseEnterYourEmail;
     if (!v.contains('@') || !v.contains('.')) {
-      return 'Indtast venligst en gyldig email';
+      return AppLocalizations.of(context)!.uiPleaseEnterAValidEmail;
     }
     return null;
   }
 
   String? _passwordValidator(String? value) {
     final v = value ?? '';
-    if (v.isEmpty) return 'Indtast venligst en adgangskode';
-    if (v.length < 6) return 'Adgangskoden skal være mindst 6 tegn';
+    if (v.isEmpty) return AppLocalizations.of(context)!.uiPleaseEnterAPassword;
+    if (v.length < 6) {
+      return AppLocalizations.of(context)!.uiThePasswordMustBeAtLeast;
+    }
     return null;
   }
 
@@ -127,7 +131,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               const SizedBox(height: 40),
               Text(
-                'Opret bruger',
+                AppLocalizations.of(context)!.uiCreateUser,
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   fontSize: 30,
@@ -139,15 +143,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
               useCupertino
                   ? _cupertinoField(
                       controller: _nameController,
-                      placeholder: 'Navn',
+                      placeholder: AppLocalizations.of(context)!.uiName,
                       validator: _nameValidator,
                       keyboardType: TextInputType.name,
                       autofillHints: const [AutofillHints.name],
                     )
                   : TextFormField(
                       controller: _nameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Navn',
+                      decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context)!.uiName,
                         border: OutlineInputBorder(),
                       ),
                       textInputAction: TextInputAction.next,
@@ -162,7 +166,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
               useCupertino
                   ? _cupertinoField(
                       controller: _emailController,
-                      placeholder: 'E-mail',
+                      placeholder:
+                          AppLocalizations.of(context)!.forgotPasswordEmail,
                       validator: _emailValidator,
                       keyboardType: TextInputType.emailAddress,
                       autofillHints: const [
@@ -172,8 +177,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     )
                   : TextFormField(
                       controller: _emailController,
-                      decoration: const InputDecoration(
-                        labelText: 'E-mail',
+                      decoration: InputDecoration(
+                        labelText:
+                            AppLocalizations.of(context)!.forgotPasswordEmail,
                         border: OutlineInputBorder(),
                       ),
                       textInputAction: TextInputAction.next,
@@ -191,7 +197,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               useCupertino
                   ? _cupertinoField(
                       controller: _passwordController,
-                      placeholder: 'Adgangskode',
+                      placeholder: AppLocalizations.of(context)!.uiPassword,
                       validator: _passwordValidator,
                       obscureText: true,
                       autofillHints: const [AutofillHints.password],
@@ -199,8 +205,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     )
                   : TextFormField(
                       controller: _passwordController,
-                      decoration: const InputDecoration(
-                        labelText: 'Adgangskode',
+                      decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context)!.uiPassword,
                         border: OutlineInputBorder(),
                       ),
                       textInputAction: TextInputAction.done,
@@ -228,14 +234,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
               _isLoading
                   ? const LoadingIndicator()
                   : FullWidthButton(
-                      buttonText: 'Opret konto',
+                      buttonText: AppLocalizations.of(context)!.uiCreateAccount,
                       onPressed: _register,
                     ),
 
               const SizedBox(height: 20),
 
               FullWidthButton(
-                buttonText: 'Annullér',
+                buttonText: AppLocalizations.of(context)!.uiCancel,
                 onPressed: () => Navigator.of(context).pop(),
                 outlined: true,
               ),

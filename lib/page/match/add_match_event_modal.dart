@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/button/button.dart';
@@ -6,6 +8,7 @@ import 'package:kopa/model/match_event_type.dart';
 import 'package:kopa/model/match_player.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/repository/match_repository.dart';
+import 'package:kopa/utils/crash_reporting.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 import 'package:kopa/component/list_item/player_list_item.dart';
@@ -126,7 +129,7 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
     final sourceSize = customSourceSize ?? sourceBox.size;
 
     final controller = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 600));
+        vsync: this, duration: const Duration(milliseconds: 260));
 
     final scaleAnimation = TweenSequence([
       TweenSequenceItem(tween: Tween<double>(begin: 1.0, end: 1.2), weight: 30),
@@ -168,7 +171,7 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
 
   void _onStepComplete(int nextStep) {
     _pageController.animateToPage(nextStep,
-        duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+        duration: const Duration(milliseconds: 200), curve: Curves.easeInOut);
     setState(() => _currentStep = nextStep);
   }
 
@@ -283,7 +286,7 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
     required VoidCallback onComplete,
   }) {
     final controller = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 800));
+        vsync: this, duration: const Duration(milliseconds: 360));
     final List<OverlayEntry> entries = [];
 
     for (final item in items) {
@@ -435,8 +438,11 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
           parameters: {'event_type': command.type.name},
         );
       }
-      await widget.onSaved();
       if (mounted) Navigator.of(context).pop();
+      // The events are saved, so the page can catch up after the modal closes.
+      unawaited(widget.onSaved().catchError((Object error, StackTrace stack) {
+        CrashReporting.logWebError(error, stack);
+      }));
     } catch (e) {
       if (!mounted) return;
       setState(() => _isSaving = false);

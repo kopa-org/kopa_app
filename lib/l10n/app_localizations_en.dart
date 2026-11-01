@@ -985,21 +985,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get matchTasksMarkDone => 'Done';
 
   @override
-  String get matchTasksIDidIt => 'I did it';
-
-  @override
   String matchTasksConfirmTitle(String task) {
     return 'Is $task done?';
-  }
-
-  @override
-  String matchTasksConfirmRecurring(String name) {
-    return '$name moves to the back of the queue.';
-  }
-
-  @override
-  String matchTasksConfirmOneOff(String name) {
-    return 'The task is marked as done by $name.';
   }
 
   @override
@@ -1173,4 +1160,1406 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get mobilePayPaidSaveFailed =>
       'Your payment could not be saved. Please try again.';
+
+  @override
+  String get fineBoxSeeAll => 'See all';
+
+  @override
+  String get fineBoxPlayersTitle => 'All players';
+
+  @override
+  String get fineBoxAllFinesTitle => 'All fines';
+
+  @override
+  String get fineBoxInBox => 'In the box';
+
+  @override
+  String get fineBoxAllPaid => 'All paid';
+
+  @override
+  String get fineBoxDeleteFine => 'Delete fine';
+
+  @override
+  String get fineBoxDeleteCancel => 'Cancel';
+
+  @override
+  String get fineBoxDeleteFailed => 'The fine could not be deleted. Try again.';
+
+  @override
+  String fineBoxPlayerFineCount(int count) {
+    return '$count fines';
+  }
+
+  @override
+  String fineBoxDeleteFineBody(String fine, String name) {
+    return 'Delete $fine for $name? This cannot be undone.';
+  }
+
+  @override
+  String get navHome => 'Home';
+
+  @override
+  String get navMatches => 'Matches';
+
+  @override
+  String get navStatistics => 'Statistics';
+
+  @override
+  String get navSquad => 'Squad';
+
+  @override
+  String get navFineBox => 'Fine box';
+
+  @override
+  String get uiChooseDbuTeam => 'Choose DBU team';
+
+  @override
+  String get uiCancel => 'Cancel';
+
+  @override
+  String get uiCouldNotFetchTheInviteLink => 'Could not fetch the invite link.';
+
+  @override
+  String get uiLinkCopied => 'Link copied';
+
+  @override
+  String uiJoinOnKopa(Object a, Object b) {
+    return 'Join $a on Kopa: $b';
+  }
+
+  @override
+  String get uiCouldNotSaveThePositionTry =>
+      'Could not save the position. Try again.';
+
+  @override
+  String get uiInviteYourTeam => 'Invite your team';
+
+  @override
+  String get uiCreateYourFootballTeamAndKeep =>
+      'Create your football team and keep players, matches and statistics in one place.';
+
+  @override
+  String get uiShareTheLinkWithThePlayers =>
+      'Share the link with the players so they can find the team.';
+
+  @override
+  String get uiContinueToKopa => 'Continue to Kopa';
+
+  @override
+  String get uiAssociation => 'Association';
+
+  @override
+  String get uiYourTeamName => 'Your team name';
+
+  @override
+  String uiYouChose(Object a, Object b) {
+    return 'You chose: $a ($b)';
+  }
+
+  @override
+  String get ui7ASide => '7-a-side';
+
+  @override
+  String get ui11ASide => '11-a-side';
+
+  @override
+  String get uiSearchResults => 'Search results';
+
+  @override
+  String uiTeamLeader(Object a) {
+    return 'Team leader: $a';
+  }
+
+  @override
+  String get uiTeamLeaderPending => 'Team leader: Pending';
+
+  @override
+  String uiMembers(Object a) {
+    return '$a members';
+  }
+
+  @override
+  String get uiTheInviteLinkCouldNotBe =>
+      'The invite link could not be fetched.';
+
+  @override
+  String get uiCopyLink => 'Copy link';
+
+  @override
+  String get uiShareLink => 'Share link';
+
+  @override
+  String get uiBack => 'Back';
+
+  @override
+  String uiStepOf(Object a, Object b) {
+    return 'Step $a of $b';
+  }
+
+  @override
+  String get uiDbuConnected => 'DBU connected';
+
+  @override
+  String get uiTeamDataHasBeenImported => 'Team data has been imported';
+
+  @override
+  String get uiLogInThroughDbuToImport =>
+      'Log in through DBU to import team data';
+
+  @override
+  String get uiYourTeam => 'your team';
+
+  @override
+  String get uiYourTeam2 => 'Your team';
+
+  @override
+  String get uiStep3Of5 => 'Step 3 of 5';
+
+  @override
+  String get uiWaitingForApproval => 'Waiting for approval';
+
+  @override
+  String uiYouHaveAskedToJoinYou(Object a) {
+    return 'You have asked to join $a. You will be notified when the team leader has accepted your request.';
+  }
+
+  @override
+  String get uiPending => 'Pending';
+
+  @override
+  String get uiCouldNotValidateTheInvitation =>
+      'Could not validate the invitation';
+
+  @override
+  String get uiNetworkError => 'Network error';
+
+  @override
+  String get uiNotLoggedIn => 'Not logged in';
+
+  @override
+  String get uiCouldNotJoinTheTeam => 'Could not join the team';
+
+  @override
+  String get uiCouldNotFetchTheCode => 'Could not fetch the code';
+
+  @override
+  String get uiCouldNotRotateTheCode => 'Could not rotate the code';
+
+  @override
+  String get uiCouldNotCreateTheTeam => 'Could not create the team';
+
+  @override
+  String get uiCouldNotSearchForTeams => 'Could not search for teams';
+
+  @override
+  String get uiCouldNotSendTheRequest => 'Could not send the request';
+
+  @override
+  String get uiCouldNotFetchTheRequest => 'Could not fetch the request';
+
+  @override
+  String get uiCouldNotFetchTheRequests => 'Could not fetch the requests';
+
+  @override
+  String get uiCouldNotProcessTheRequest => 'Could not process the request';
+
+  @override
+  String get uiCouldNotCancelTheRequest => 'Could not cancel the request';
+
+  @override
+  String get uiInvalidInvitation => 'Invalid invitation';
+
+  @override
+  String get uiSomethingWentWrongPleaseTryAgain =>
+      'Something went wrong. Please try again later.';
+
+  @override
+  String get uiNoUserFound => 'No user found.';
+
+  @override
+  String get uiPracticalInformation => 'Practical information';
+
+  @override
+  String get uiRegisteredPlayers => 'Registered players';
+
+  @override
+  String get uiDate => 'Date';
+
+  @override
+  String get uiTime => 'Time';
+
+  @override
+  String get uiLocation => 'Location';
+
+  @override
+  String get uiCountdown => 'Countdown';
+
+  @override
+  String get uiRegistrations => 'Registrations';
+
+  @override
+  String uiRegistered(Object a) {
+    return '$a registered';
+  }
+
+  @override
+  String get uiMeetingTime => 'Meeting time';
+
+  @override
+  String get uiYourSelection => 'Your selection';
+
+  @override
+  String get uiNotes => 'Notes';
+
+  @override
+  String get uiNoResponse => 'No response';
+
+  @override
+  String get uiDeclined => 'Declined';
+
+  @override
+  String uiAvailable(Object a) {
+    return 'Available ($a)';
+  }
+
+  @override
+  String uiSelected(Object a) {
+    return 'Selected ($a)';
+  }
+
+  @override
+  String uiNoResponse2(Object a) {
+    return 'No response ($a)';
+  }
+
+  @override
+  String uiDeclined2(Object a) {
+    return 'Declined ($a)';
+  }
+
+  @override
+  String get uiCouldNotUpdateTheApprovalTry =>
+      'Could not update the approval. Try again.';
+
+  @override
+  String get uiCouldNotApproveEveryoneTryAgain =>
+      'Could not approve everyone. Try again.';
+
+  @override
+  String get uiCouldNotChangeTheVisibilityTry =>
+      'Could not change the visibility. Try again.';
+
+  @override
+  String get uiInProgressOrFinished => 'In progress or finished';
+
+  @override
+  String uiDaysHours(Object a, Object b) {
+    return '$a days $b hours';
+  }
+
+  @override
+  String uiReject(Object a) {
+    return 'Reject $a';
+  }
+
+  @override
+  String uiApprove(Object a) {
+    return 'Approve $a';
+  }
+
+  @override
+  String get uiApproved => 'Approved';
+
+  @override
+  String get uiRejected => 'Rejected';
+
+  @override
+  String uiEditChoiceFor(Object a) {
+    return 'Edit choice for $a';
+  }
+
+  @override
+  String get uiNoPlayersAreAwaitingApproval =>
+      'No players are awaiting approval.';
+
+  @override
+  String get uiApproveAll => 'Approve all';
+
+  @override
+  String get uiNoPlayersHere => 'No players here.';
+
+  @override
+  String get uiCouldNotSaveTheLineupTry =>
+      'Could not save the lineup. Try again.';
+
+  @override
+  String get uiChoosePlayer => 'Choose player';
+
+  @override
+  String get uiEditLineup => 'Edit lineup';
+
+  @override
+  String uiEditFormation(Object a) {
+    return 'Edit formation ($a)';
+  }
+
+  @override
+  String uiMovePlayerReleaseToPlace(Object a) {
+    return 'Move player: Release to place $a';
+  }
+
+  @override
+  String uiBenchPlayers(Object a) {
+    return 'Bench ($a players)';
+  }
+
+  @override
+  String get uiNoPlayersOnTheBench => 'No players on the bench';
+
+  @override
+  String get uiHoldAPlayerAndDragTo => 'Hold a player and drag to swap places';
+
+  @override
+  String get uiChooseFormation => 'Choose formation';
+
+  @override
+  String get uiChooseTheFormationThatSuitsYour =>
+      'Choose the formation that suits your next match best';
+
+  @override
+  String uiFormation(Object a) {
+    return 'Formation $a';
+  }
+
+  @override
+  String get uiGk => 'GK';
+
+  @override
+  String get uiAm => 'AM';
+
+  @override
+  String get uiPl => 'PL';
+
+  @override
+  String get uiStandard7ASide => 'Standard 7-a-side';
+
+  @override
+  String get uiDefensiveBalance => 'Defensive balance';
+
+  @override
+  String get uiSymmetricControl => 'Symmetric control';
+
+  @override
+  String get uiAttackingWidth => 'Attacking width';
+
+  @override
+  String get uiClassicBalance => 'Classic balance';
+
+  @override
+  String get uiMidfieldControl => 'Midfield control';
+
+  @override
+  String get uiControlledPressing => 'Controlled pressing';
+
+  @override
+  String get uiCustomLineup => 'Custom lineup';
+
+  @override
+  String get uiSettings => 'Settings';
+
+  @override
+  String get uiImportMatchSchedule => 'Import match schedule';
+
+  @override
+  String get uiFetchingLink => 'Fetching link...';
+
+  @override
+  String get uiShareKopa => 'Share Kopa';
+
+  @override
+  String get uiTeamTools => 'Team tools';
+
+  @override
+  String get uiApproveNewPlayers => 'Approve new players';
+
+  @override
+  String get uiSyncingStandings => 'Syncing standings...';
+
+  @override
+  String get uiSyncStandingsFromDbu => 'Sync standings from DBU';
+
+  @override
+  String get uiDefaultMeetingTime => 'Default meeting time';
+
+  @override
+  String get uiSavingMeetingTime => 'Saving meeting time...';
+
+  @override
+  String get uiSaveMeetingTime => 'Save meeting time';
+
+  @override
+  String get uiLoggingOut => 'Logging out...';
+
+  @override
+  String get uiLogOut => 'Log out';
+
+  @override
+  String get uiCouldNotLogOut => 'Could not log out.';
+
+  @override
+  String get uiYouMustBeOnATeam => 'You must be on a team to share Kopa.';
+
+  @override
+  String get uiCouldNotShareKopa => 'Could not share Kopa.';
+
+  @override
+  String get uiOnlyTheTeamLeaderCanChange =>
+      'Only the team leader can change the meeting time.';
+
+  @override
+  String uiTheDefaultMeetingTimeIsSet(Object a) {
+    return 'The default meeting time is set to $a.';
+  }
+
+  @override
+  String get uiNoDefault => 'No default';
+
+  @override
+  String uiMinBeforeKickoff(Object a) {
+    return '$a min before kickoff';
+  }
+
+  @override
+  String uiStandingsAndPoolTeamsAreSynced(Object a) {
+    return 'Standings and pool teams are synced ($a teams).';
+  }
+
+  @override
+  String uiFines(Object a) {
+    return 'Fines - $a';
+  }
+
+  @override
+  String get ui1HourAgo => '1 hour ago';
+
+  @override
+  String uiHoursAgo(Object a) {
+    return '$a hours ago';
+  }
+
+  @override
+  String get uiYesterday => 'Yesterday';
+
+  @override
+  String uiDaysAgo(Object a) {
+    return '$a days ago';
+  }
+
+  @override
+  String get uiUserNotLoggedIn => 'User not logged in';
+
+  @override
+  String get uiCouldNotFetchDashboardData => 'Could not fetch dashboard data';
+
+  @override
+  String get uiCalendar => 'Calendar';
+
+  @override
+  String get uiProfile => 'Profile';
+
+  @override
+  String get uiNoUpcomingMatch => 'No upcoming match';
+
+  @override
+  String get uiTheScheduleIsBeingUpdated => 'The schedule is being updated';
+
+  @override
+  String get uiTeam => 'Team';
+
+  @override
+  String get uiOpponent => 'Opponent';
+
+  @override
+  String get uiNoMatch => 'No match';
+
+  @override
+  String get uiNoMatchPlanned => 'No match planned';
+
+  @override
+  String get uiNoLocation => 'No location';
+
+  @override
+  String get uiMap => 'Map ›';
+
+  @override
+  String get uiLatestMatch => 'Latest match';
+
+  @override
+  String get uiStandings => 'Standings';
+
+  @override
+  String get uiStatistics => 'Statistics';
+
+  @override
+  String get uiRegistered2 => 'registered';
+
+  @override
+  String get uiANewSeasonHasStartedAnd =>
+      'A new season has started and the match schedule has been imported.';
+
+  @override
+  String get uiTheMatchScheduleHasBeenUpdated =>
+      'The match schedule has been updated.';
+
+  @override
+  String get uiStartNewSeason => 'Start new season?';
+
+  @override
+  String get uiUpdateCurrent => 'Update current';
+
+  @override
+  String get uiStartNewSeason2 => 'Start new season';
+
+  @override
+  String get uiMissingResults => 'Missing results';
+
+  @override
+  String get uiGoBack => 'Go back';
+
+  @override
+  String get uiStartAnyway => 'Start anyway';
+
+  @override
+  String get uiSpring => 'Spring';
+
+  @override
+  String get uiSummer => 'Summer';
+
+  @override
+  String get uiAutumn => 'Autumn';
+
+  @override
+  String get uiWinter => 'Winter';
+
+  @override
+  String get uiNoTeamSelected => 'No team selected.';
+
+  @override
+  String get uiTeamKeyFigures => 'Team key figures';
+
+  @override
+  String get uiTeamPointsAverage => 'Team points average';
+
+  @override
+  String get uiTeamForm => 'Team form';
+
+  @override
+  String get uiGoalsScored => 'Goals scored';
+
+  @override
+  String get uiGoalsConceded => 'Goals conceded';
+
+  @override
+  String get uiSeeTheFormTableStreaksAnd =>
+      'See the form table, streaks and points.';
+
+  @override
+  String get uiYourStats => 'Your stats';
+
+  @override
+  String get uiForThisSeason => 'For this season.';
+
+  @override
+  String get uiVotes => 'Votes';
+
+  @override
+  String get uiNoDataYet => 'No data yet.';
+
+  @override
+  String get uiSomeResultsAreLockedSeePlayer =>
+      'Some results are locked. See Player+ to unlock the full table.';
+
+  @override
+  String get uiTheSeasonSInternalCompetitionStarts =>
+      'The season\'s internal competition starts here.';
+
+  @override
+  String get uiSeasonDuels => 'Season duels';
+
+  @override
+  String get uiBestPlayer => 'Best player';
+
+  @override
+  String get uiMostGoals => 'Most goals';
+
+  @override
+  String get uiMostAssists => 'Most assists';
+
+  @override
+  String get uiMostCards => 'Most cards';
+
+  @override
+  String get uiCards => 'Cards';
+
+  @override
+  String get uiFineKing => 'Fine king';
+
+  @override
+  String get uiInternalTables => 'Internal tables';
+
+  @override
+  String get uiSeasonCompetitionsForOverallMvpGoals =>
+      'Season competitions for overall, MVP, goals, assists, cards and fines across the team.';
+
+  @override
+  String get uiLeagueComparison => 'League comparison';
+
+  @override
+  String get uiComparePlayersWithOtherTeamsIn =>
+      'Compare players with other teams in the same league once DBU data is synced.';
+
+  @override
+  String get uiHiddenPatterns => 'Hidden patterns';
+
+  @override
+  String get uiFormCurvesStreaksAndSmallInternal =>
+      'Form curves, streaks and small internal competitions based on your own match data.';
+
+  @override
+  String get uiTheTeamCompetitionBuiltAutomaticallyFrom =>
+      'The team competition built automatically from your match data — goals, assists, streaks and bonuses.';
+
+  @override
+  String get uiCloseCalendar => 'Close calendar';
+
+  @override
+  String get uiPreviousMonth => 'Previous month';
+
+  @override
+  String get uiNextMonth => 'Next month';
+
+  @override
+  String uiCalendarDay(Object a) {
+    return 'Calendar day $a';
+  }
+
+  @override
+  String get uiCouldNotFetchPointDetails => 'Could not fetch point details.';
+
+  @override
+  String get uiPointsStory => 'Points story';
+
+  @override
+  String get uiNoPointsInTheSelectedPeriod =>
+      'No points in the selected period.';
+
+  @override
+  String uiOnTheTeam(Object a) {
+    return '#$a on the team';
+  }
+
+  @override
+  String get uiStable => 'Stable';
+
+  @override
+  String get uiLatestRound => 'Latest round';
+
+  @override
+  String get uiToFirstPlace => 'To first place';
+
+  @override
+  String get uiLeading => 'Leading';
+
+  @override
+  String get uiMovement => 'Movement';
+
+  @override
+  String get uiTable => 'Table';
+
+  @override
+  String get uiSomethingWentWrong => 'Something went wrong.';
+
+  @override
+  String get uiNoPointsYetRecordMatchData =>
+      'No points yet. Record match data to start the team competition.';
+
+  @override
+  String get uiRestOfTheTeam => 'Rest of the team';
+
+  @override
+  String get uiTheTeamCompetition => 'The team competition';
+
+  @override
+  String get uiWhoIsNinForm => 'Who is\nin form?';
+
+  @override
+  String get uiMatchDataStreaksAndBonusesIn =>
+      'Match data, streaks and bonuses in one place.';
+
+  @override
+  String uiYouAreNoWith(Object a, Object b) {
+    return 'You are no. $a with $b.';
+  }
+
+  @override
+  String get uiChoosePosition => 'Choose position';
+
+  @override
+  String get uiAllPositions => 'All positions';
+
+  @override
+  String get uiWhichPositionDoYouPlay => 'Which position do you play?';
+
+  @override
+  String get uiYourPositionGivesThePointRules =>
+      'Your position gives the point rules the right weight.';
+
+  @override
+  String uiPoints(Object a) {
+    return '$a points';
+  }
+
+  @override
+  String uiPoints2(Object a) {
+    return 'points · $a';
+  }
+
+  @override
+  String get uiCouldNotLogInAutomatically => 'Could not log in automatically.';
+
+  @override
+  String get uiRegistrationFailedTryAgain => 'Registration failed. Try again.';
+
+  @override
+  String get uiPleaseEnterYourName => 'Please enter your name';
+
+  @override
+  String get uiPleaseEnterYourEmail => 'Please enter your email';
+
+  @override
+  String get uiPleaseEnterAValidEmail => 'Please enter a valid email';
+
+  @override
+  String get uiPleaseEnterAPassword => 'Please enter a password';
+
+  @override
+  String get uiThePasswordMustBeAtLeast =>
+      'The password must be at least 6 characters';
+
+  @override
+  String get uiCreateUser => 'Create user';
+
+  @override
+  String get uiName => 'Name';
+
+  @override
+  String get uiPassword => 'Password';
+
+  @override
+  String get uiCreateAccount => 'Create account';
+
+  @override
+  String get uiHomeTeam => 'Home team';
+
+  @override
+  String get uiEGSNderjyske => 'E.g. Sønderjyske';
+
+  @override
+  String get uiAwayTeam => 'Away team';
+
+  @override
+  String get uiEGAgf => 'E.g. AGF';
+
+  @override
+  String get uiEGSydbankPark => 'E.g. Sydbank Park';
+
+  @override
+  String get uiOptionalComments => 'Optional comments';
+
+  @override
+  String get uiFillInBothTeamsAndThe =>
+      'Fill in both teams and the location, and choose a date.';
+
+  @override
+  String get uiTheFirstAndSecondTeamCannot =>
+      'The first and second team cannot be the same.';
+
+  @override
+  String get uiAddPlayer => 'Add player';
+
+  @override
+  String get uiEGLarsLarsen => 'E.g. Lars Larsen';
+
+  @override
+  String get uiEGLarsExampleCom => 'E.g. lars@example.com';
+
+  @override
+  String get uiEnterThePlayerSName => 'Enter the player\'s name';
+
+  @override
+  String get uiEnterEmail => 'Enter email';
+
+  @override
+  String get uiEnterAValidEmail => 'Enter a valid email';
+
+  @override
+  String get uiPleaseEnterNameAndEmail => 'Please enter name and email.';
+
+  @override
+  String get uiThePlayerIsAlreadyInThe =>
+      'The player is already in the squad. Enter another name and/or email.';
+
+  @override
+  String get uiNoStandingsAvailable => 'No standings available';
+
+  @override
+  String uiTeams(Object a) {
+    return '$a teams';
+  }
+
+  @override
+  String get uiLeague => 'League';
+
+  @override
+  String uiLeague2(Object a) {
+    return 'League $a';
+  }
+
+  @override
+  String get uiTheSeasonSInternalLeague => 'The season\'s internal league';
+
+  @override
+  String get uiYourOverallRanking => 'Your overall ranking';
+
+  @override
+  String get uiMvpCardsAndFines => 'MVP, cards and fines';
+
+  @override
+  String get uiTheSeasonDuel => 'The season duel';
+
+  @override
+  String get ui84Points => '84 points';
+
+  @override
+  String get ui79Points => '79 points';
+
+  @override
+  String get uiYou => 'You?';
+
+  @override
+  String get uiPoints3 => '? points';
+
+  @override
+  String get uiSeeTheCompetitions => 'See the competitions';
+
+  @override
+  String get uiOverallPlayerOfTheMatchGoals =>
+      'Overall, player of the match, goals, assists, cards and fines in one internal season battle.';
+
+  @override
+  String get uiTitle => 'Title';
+
+  @override
+  String get uiEGArrivedLate => 'E.g. \"Arrived late\"';
+
+  @override
+  String get uiEG100 => 'E.g. 100';
+
+  @override
+  String get uiEnterATitleForTheFine => 'Enter a title for the fine type';
+
+  @override
+  String get uiEnterTheDefaultAmountForThe =>
+      'Enter the default amount for the fine type';
+
+  @override
+  String get uiPleaseEnterATitleAndDefault =>
+      'Please enter a title and default amount.';
+
+  @override
+  String get uiTheFineTypeAlreadyExistsPlease =>
+      'The fine type already exists. Please enter another title.';
+
+  @override
+  String get uiRegistrationFailed => 'Registration failed';
+
+  @override
+  String get uiYouHaveJoinedTheTeam => 'You have joined the team!';
+
+  @override
+  String get uiBecomePartOf => 'Become part of';
+
+  @override
+  String get uiPleaseEnterYourPassword => 'Please enter your password';
+
+  @override
+  String get uiPasswordMustBeAtLeast6 =>
+      'Password must be at least 6 characters';
+
+  @override
+  String get uiCreateAccount2 => 'CREATE ACCOUNT';
+
+  @override
+  String get uiLoginFailed => 'Login failed';
+
+  @override
+  String get uiLogIn => 'Log in';
+
+  @override
+  String get uiLogIn2 => 'LOG IN';
+
+  @override
+  String get uiDonTHaveAnAccountSign => 'Don\'t have an account? Sign up here';
+
+  @override
+  String get uiNo => 'No. -';
+
+  @override
+  String get uiMatchHistory => 'Match history';
+
+  @override
+  String get uiNoMatchesFound => 'No matches found.';
+
+  @override
+  String uiSeason(Object a) {
+    return 'Season $a';
+  }
+
+  @override
+  String get uiLineup => 'Lineup';
+
+  @override
+  String get uiHideLineupFromPlayers => 'Hide lineup from players';
+
+  @override
+  String get uiShowLineupToPlayers => 'Show lineup to players';
+
+  @override
+  String get uiNoBench => 'No bench';
+
+  @override
+  String get uiOnTheBench => 'On the bench:';
+
+  @override
+  String get uiGoalkeeper => 'Goalkeeper';
+
+  @override
+  String get uiDefence => 'Defence';
+
+  @override
+  String get uiMidfield => 'Midfield';
+
+  @override
+  String get uiAttack => 'Attack';
+
+  @override
+  String get uiNoEventsRecorded => 'No events recorded';
+
+  @override
+  String get uiYellowCards => 'Yellow cards';
+
+  @override
+  String get uiRedCards => 'Red cards';
+
+  @override
+  String get uiRegistered3 => 'Registered';
+
+  @override
+  String get uiNoRegisteredPlayersYet => 'No registered players yet.';
+
+  @override
+  String get uiNoEventsRecorded2 => 'No events recorded.';
+
+  @override
+  String get uiPoll => 'Poll';
+
+  @override
+  String get uiMatchRating => 'Match rating';
+
+  @override
+  String get uiMatchEvents => 'Match events';
+
+  @override
+  String get uiNoMatchEventsRecordedYet => 'No match events recorded yet.';
+
+  @override
+  String get ui3Months => '3 months';
+
+  @override
+  String get uiSeason2 => 'Season';
+
+  @override
+  String get uiAll => 'All';
+
+  @override
+  String get uiCentreBack => 'Centre back';
+
+  @override
+  String get uiBackWingback => 'Back / wingback';
+
+  @override
+  String get uiDefensiveMidfield => 'Defensive midfield';
+
+  @override
+  String get uiAttackingMidfield => 'Attacking midfield';
+
+  @override
+  String get uiWinger => 'Winger';
+
+  @override
+  String get uiStriker => 'Striker';
+
+  @override
+  String get uiStillToBePaid => 'Still to be paid';
+
+  @override
+  String get uiSelectedAmountToDeposit => 'Selected amount to deposit';
+
+  @override
+  String get uiFineType => 'Fine type';
+
+  @override
+  String get uiPleaseChooseAFineToPay => 'Please choose a fine to pay.';
+
+  @override
+  String get uiAmountToDeposit => 'Amount to deposit';
+
+  @override
+  String get uiPleaseEnterAnAmountGreaterThan =>
+      'Please enter an amount greater than 0 kr.';
+
+  @override
+  String get uiCouldNotFetchTheDbuImport =>
+      'Could not fetch the DBU import logic from the server.';
+
+  @override
+  String get uiDbuLogin => 'DBU login';
+
+  @override
+  String get uiSyncStandings => 'Sync standings';
+
+  @override
+  String get uiLoading => 'Loading';
+
+  @override
+  String get uiNoStatisticsAvailable => 'No statistics available';
+
+  @override
+  String get uiCouldNotProcessTheRequest2 => 'Could not process the request.';
+
+  @override
+  String get uiTeamRequests => 'Team requests';
+
+  @override
+  String uiAwaitingApproval(Object a) {
+    return 'Awaiting approval ($a)';
+  }
+
+  @override
+  String get uiNewRequest => 'New request';
+
+  @override
+  String uiRequested(Object a, Object b) {
+    return 'Requested $a/$b';
+  }
+
+  @override
+  String get uiAssignFines => 'Assign fines';
+
+  @override
+  String get uiNoFineTypesFound => 'No fine types found.';
+
+  @override
+  String get uiAddNoteOptional => 'Add note (optional)';
+
+  @override
+  String get uiNoFinesWereAssignedPleaseChoose =>
+      'No fines were assigned. Please choose at least one player.';
+
+  @override
+  String get uiPolls => 'Polls';
+
+  @override
+  String get uiCouldNotFetchPolls => 'Could not fetch polls.';
+
+  @override
+  String get uiNoPollsFound => 'No polls found.';
+
+  @override
+  String uiVotes2(Object a) {
+    return '$a votes';
+  }
+
+  @override
+  String get uiUnknownMatch => 'Unknown match';
+
+  @override
+  String get uiTeamStats => 'Team stats';
+
+  @override
+  String get uiWon => 'Won';
+
+  @override
+  String get uiDrawn => 'Drawn';
+
+  @override
+  String get uiLost => 'Lost';
+
+  @override
+  String get uiGoalDifference => 'Goal difference';
+
+  @override
+  String get uiCouldNotCreateThePoll => 'Could not create the poll.';
+
+  @override
+  String get uiCastAtLeastOneVoteTo =>
+      'Cast at least one vote to save the poll.';
+
+  @override
+  String get uiCouldNotSaveThePoll => 'Could not save the poll.';
+
+  @override
+  String get uiThereAreNoMatchesToCreate =>
+      'There are no matches to create a poll for.';
+
+  @override
+  String get uiChooseAValidMatch => 'Choose a valid match.';
+
+  @override
+  String get uiAPollAlreadyExistsForThe =>
+      'A poll already exists for the match. Choose another match.';
+
+  @override
+  String get uiCastAtLeastOneVoteTo2 =>
+      'Cast at least one vote to create a poll.';
+
+  @override
+  String get uiKopaCouldNotStart => 'Kopa could not start.';
+
+  @override
+  String uiOpenMatch(Object a) {
+    return 'Open match: $a';
+  }
+
+  @override
+  String get uiFinished => 'Finished';
+
+  @override
+  String get uiBringYourTeamNtogether => 'Bring your team\ntogether';
+
+  @override
+  String get uiMyStats => 'My stats';
+
+  @override
+  String get uiCardsYR => 'Cards (Y/R)';
+
+  @override
+  String get uiShowFullTable => 'SHOW FULL TABLE';
+
+  @override
+  String get uiTheFineBox => 'THE FINE BOX';
+
+  @override
+  String get uiTotalFines => 'Total fines';
+
+  @override
+  String get uiNoRanking => 'No ranking';
+
+  @override
+  String get uiSomethingWentWrongDuringLoginTry =>
+      'Something went wrong during login. Try again.';
+
+  @override
+  String get uiSomethingWentWrongDuringRegistrationTry =>
+      'Something went wrong during registration. Try again.';
+
+  @override
+  String get uiAddNewPlayer => 'Add new player';
+
+  @override
+  String get uiCouldNotFetchSeasons => 'Could not fetch seasons';
+
+  @override
+  String get uiCouldNotStartANewSeason => 'Could not start a new season';
+
+  @override
+  String get uiUpdateRequired => 'Update required';
+
+  @override
+  String get uiANewVersionOfKopaIs =>
+      'A new version of Kopa is available. Please update to continue.';
+
+  @override
+  String get uiUpdateNow => 'Update now';
+
+  @override
+  String get uiMatchSchedule => 'Match schedule';
+
+  @override
+  String get uiNoDataAvailable => 'No data available';
+
+  @override
+  String get uiWin => 'Win';
+
+  @override
+  String get uiDraw => 'Draw';
+
+  @override
+  String get uiLoss => 'Loss';
+
+  @override
+  String get uiLoginFailedPleaseCheckYourCredentials =>
+      'Login failed. Please check your credentials.';
+
+  @override
+  String get uiRegistrationFailedPleaseTryAgain =>
+      'Registration failed. Please try again.';
+
+  @override
+  String get uiOutstandingFines => 'Outstanding fines';
+
+  @override
+  String get uiTrainingAttendance => 'Training attendance';
+
+  @override
+  String get uiNotSelectedYet => 'Not selected yet';
+
+  @override
+  String uiVotes3(Object a) {
+    return 'Votes: $a';
+  }
+
+  @override
+  String get uiCouldNotFetchTheMatchSchedule =>
+      'Could not fetch the match schedule.';
+
+  @override
+  String get uiFormLast5 => 'Form (last 5)';
+
+  @override
+  String get uiNotAssigned => 'Not assigned';
+
+  @override
+  String get uiCouldNotFetchInForm => 'Could not fetch In-form.';
+
+  @override
+  String uiTeamBadge(Object a) {
+    return '$a team badge';
+  }
+
+  @override
+  String get uiShield7 => 'Shield 7';
+
+  @override
+  String uiTeamLeaderNames(Object a) {
+    return 'Team leader: $a';
+  }
+
+  @override
+  String get uiLandingIntro =>
+      'Get a full overview of your matches, lineups, fine box and team communication.';
+
+  @override
+  String get uiNewSeasonBody =>
+      'There is already an active season. You can update the current match schedule or start a new season before importing the new DBU schedule. If results are missing from the active season, Kopa warns you before the season starts.';
+
+  @override
+  String uiMissingResultsBody(Object a, Object b) {
+    return 'Results are missing for $a $b in the active season. You can still start a new season, but the old matches will be locked to the finished season without full results.';
+  }
+
+  @override
+  String uiOneEvent(Object a) {
+    return '$a event';
+  }
+
+  @override
+  String uiManyEvents(Object a) {
+    return '$a events';
+  }
+
+  @override
+  String uiOneMatch(Object a) {
+    return '$a match';
+  }
+
+  @override
+  String uiManyMatches(Object a) {
+    return '$a matches';
+  }
+
+  @override
+  String get uiMatchSingular => 'match';
+
+  @override
+  String get uiMatchPlural => 'matches';
+
+  @override
+  String get uiWeekdayInitials => 'M,T,W,T,F,S,S';
+
+  @override
+  String get uiPositionLeftBack => 'Left back';
+
+  @override
+  String get uiPositionCentreBack => 'Centre back';
+
+  @override
+  String get uiPositionRightBack => 'Right back';
+
+  @override
+  String get uiPositionLeftMidfield => 'Left midfield';
+
+  @override
+  String get uiPositionCentralMidfield => 'Central midfield';
+
+  @override
+  String get uiPositionRightMidfield => 'Right midfield';
+
+  @override
+  String get uiPositionLeftWing => 'Left wing';
+
+  @override
+  String get uiPositionRightWing => 'Right wing';
+
+  @override
+  String get uiPositionShortGoalkeeper => 'GK';
+
+  @override
+  String get uiPositionShortLeftBack => 'LB';
+
+  @override
+  String get uiPositionShortRightBack => 'RB';
+
+  @override
+  String get uiPositionShortLeftMidfield => 'LM';
+
+  @override
+  String get uiPositionShortRightMidfield => 'RM';
+
+  @override
+  String get uiPositionShortLeftWing => 'LW';
+
+  @override
+  String get uiPositionShortRightWing => 'RW';
+
+  @override
+  String get uiPositionShortDefender => 'D';
+
+  @override
+  String get uiPositionShortWing => 'W';
+
+  @override
+  String get uiPositionShortForward => 'F';
+
+  @override
+  String get uiPointsLabel => 'points';
+
+  @override
+  String get uiPlayerPlusIntro =>
+      'Who becomes the team\'s best player, who wins player of the match most often, and who ends up on top of the fun tables? Use this page as an overview of the Player+ universe.';
+
+  @override
+  String uiStartupFailedWithError(Object a) {
+    return 'Kopa could not start.\n$a';
+  }
 }

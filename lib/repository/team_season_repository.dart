@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:kopa/l10n/current_l10n.dart';
 import 'package:http/http.dart' as http;
 import 'package:kopa/helpers/api_config.dart';
 import 'package:kopa/model/season_details.dart';
@@ -15,7 +16,7 @@ class TeamSeasonRepository {
 
     if (response.statusCode != 200) {
       throw Exception(
-        _decodedError(response, 'Kunne ikke hente sæsoner').message,
+        _decodedError(response, currentL10n.uiCouldNotFetchSeasons).message,
       );
     }
 
@@ -62,8 +63,9 @@ class TeamSeasonRepository {
 
   static _SeasonApiError _decodedError(
     http.Response response, [
-    String fallback = 'Kunne ikke starte ny sæson',
+    String? fallback,
   ]) {
+    fallback ??= currentL10n.uiCouldNotStartANewSeason;
     try {
       final decoded = jsonDecode(response.body);
       final error = decoded['error']?.toString();

@@ -1,3 +1,4 @@
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/avatar/team_badge_label.dart';
 import 'package:kopa/component/card/match_hero_card.dart';
@@ -69,11 +70,14 @@ class HomeLatestResultCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 TeamBadgeLabel(
-                  teamName: match?.homeTeam ?? 'Hjemme',
-                  teamId: stableTeamSeed(match?.homeTeam ?? 'Hjemme'),
+                  teamName: match?.homeTeam ??
+                      AppLocalizations.of(context)!.matchScoreHome,
+                  teamId: stableTeamSeed(match?.homeTeam ??
+                      AppLocalizations.of(context)!.matchScoreHome),
                   logoDesign: ownTeamName != null &&
                           teamNamesMatch(
-                            match?.homeTeam ?? 'Hjemme',
+                            match?.homeTeam ??
+                                AppLocalizations.of(context)!.matchScoreHome,
                             ownTeamName,
                           )
                       ? ownTeamLogo
@@ -99,11 +103,14 @@ class HomeLatestResultCard extends StatelessWidget {
                   ),
                 ),
                 TeamBadgeLabel(
-                  teamName: match?.awayTeam ?? 'Ude',
-                  teamId: stableTeamSeed(match?.awayTeam ?? 'Ude'),
+                  teamName: match?.awayTeam ??
+                      AppLocalizations.of(context)!.matchScoreAway,
+                  teamId: stableTeamSeed(match?.awayTeam ??
+                      AppLocalizations.of(context)!.matchScoreAway),
                   logoDesign: ownTeamName != null &&
                           teamNamesMatch(
-                            match?.awayTeam ?? 'Ude',
+                            match?.awayTeam ??
+                                AppLocalizations.of(context)!.matchScoreAway,
                             ownTeamName,
                           )
                       ? ownTeamLogo
@@ -133,7 +140,7 @@ class HomeLatestResultCard extends StatelessWidget {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Kamphistorik',
+                  AppLocalizations.of(context)!.uiMatchHistory,
                   style: appTextStyles.label.copyWith(
                     color: appColors.grey5,
                     fontWeight: FontWeight.w700,
@@ -145,7 +152,7 @@ class HomeLatestResultCard extends StatelessWidget {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Ingen hændelser registreret',
+                    AppLocalizations.of(context)!.uiNoEventsRecorded,
                     style: appTextStyles.caption2.copyWith(
                       color: appColors.grey5,
                     ),
@@ -157,7 +164,7 @@ class HomeLatestResultCard extends StatelessWidget {
                     Expanded(
                       child: _LatestResultEventSummary(
                         icon: Icons.sports_soccer,
-                        label: 'Mål',
+                        label: AppLocalizations.of(context)!.matchTimelineGoal,
                         count: goalCount,
                         color: appColors.primary,
                       ),
@@ -166,7 +173,7 @@ class HomeLatestResultCard extends StatelessWidget {
                     Expanded(
                       child: _LatestResultEventSummary(
                         icon: Icons.crop_portrait,
-                        label: 'Gule kort',
+                        label: AppLocalizations.of(context)!.uiYellowCards,
                         count: yellowCardCount,
                         color: appColors.warning,
                       ),
@@ -175,7 +182,7 @@ class HomeLatestResultCard extends StatelessWidget {
                     Expanded(
                       child: _LatestResultEventSummary(
                         icon: Icons.crop_portrait,
-                        label: 'Røde kort',
+                        label: AppLocalizations.of(context)!.uiRedCards,
                         count: redCardCount,
                         color: appColors.error,
                       ),

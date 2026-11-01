@@ -99,9 +99,12 @@ class MatchHeroCard extends StatelessWidget {
                       SizedBox(
                         width: 100,
                         child: TeamBadgeLabel(
-                          teamName: match.homeTeam ?? 'Hjemme',
-                          teamId: stableTeamSeed(match.homeTeam ?? 'Hjemme'),
-                          logoDesign: _logoForTeam(match.homeTeam ?? 'Hjemme'),
+                          teamName: match.homeTeam ??
+                              AppLocalizations.of(context)!.matchScoreHome,
+                          teamId: stableTeamSeed(match.homeTeam ??
+                              AppLocalizations.of(context)!.matchScoreHome),
+                          logoDesign: _logoForTeam(match.homeTeam ??
+                              AppLocalizations.of(context)!.matchScoreHome),
                           heroTag: heroTag == null
                               ? null
                               : logoHeroTag(heroTag!, TeamSide.home),
@@ -139,9 +142,12 @@ class MatchHeroCard extends StatelessWidget {
                       SizedBox(
                         width: 100,
                         child: TeamBadgeLabel(
-                          teamName: match.awayTeam ?? 'Ude',
-                          teamId: stableTeamSeed(match.awayTeam ?? 'Ude'),
-                          logoDesign: _logoForTeam(match.awayTeam ?? 'Ude'),
+                          teamName: match.awayTeam ??
+                              AppLocalizations.of(context)!.matchScoreAway,
+                          teamId: stableTeamSeed(match.awayTeam ??
+                              AppLocalizations.of(context)!.matchScoreAway),
+                          logoDesign: _logoForTeam(match.awayTeam ??
+                              AppLocalizations.of(context)!.matchScoreAway),
                           heroTag: heroTag == null
                               ? null
                               : logoHeroTag(heroTag!, TeamSide.away),

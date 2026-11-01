@@ -1,3 +1,5 @@
+import 'package:kopa/l10n/current_l10n.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/card/player_plus_stat_tile.dart';
 import 'package:kopa/component/home/home_bento_card.dart';
@@ -30,7 +32,7 @@ class HomeStatisticsStrip extends StatelessWidget {
         color: appColors.grey2,
         padding: const EdgeInsets.all(Spacing.lg),
         child: Text(
-          'Ingen statistik tilgængelig',
+          AppLocalizations.of(context)!.uiNoStatisticsAvailable,
           style: appTextStyles.caption1.copyWith(color: appColors.grey5),
         ),
       );
@@ -38,7 +40,7 @@ class HomeStatisticsStrip extends StatelessWidget {
 
     final tiles = [
       PlayerPlusStatTileData(
-        title: 'Mål',
+        title: AppLocalizations.of(context)!.matchTimelineGoal,
         backgroundColor: appColors.surface,
         value: stats.player.goalsScored.toString(),
         rank: _rankFor(stats.leaderboards.topScorers),
@@ -56,7 +58,7 @@ class HomeStatisticsStrip extends StatelessWidget {
         accentColor: appColors.success,
       ),
       PlayerPlusStatTileData(
-        title: 'Kampe',
+        title: AppLocalizations.of(context)!.navMatches,
         backgroundColor: appColors.surface,
         value: stats.player.matchesPlayed.toString(),
         rank: _rankFor(stats.leaderboards.matchesPlayed),
@@ -65,7 +67,7 @@ class HomeStatisticsStrip extends StatelessWidget {
         accentColor: appColors.sunset,
       ),
       PlayerPlusStatTileData(
-        title: 'Stemmer',
+        title: AppLocalizations.of(context)!.uiVotes,
         backgroundColor: appColors.surface,
         value: _currentLeaderboardValue(stats.leaderboards.mostVotes),
         rank: _rankFor(stats.leaderboards.mostVotes),
@@ -135,7 +137,7 @@ class HomeStatisticsStrip extends StatelessWidget {
             userId: row.userId,
             userName: row.userName,
             value: '${row.points}',
-            suffix: 'point',
+            suffix: currentL10n.uiPointsLabel,
           ),
         )
         .toList();

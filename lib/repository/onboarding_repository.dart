@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:kopa/l10n/current_l10n.dart';
 import 'package:flutter/foundation.dart';
 import 'package:kopa/helpers/api_config.dart';
 import 'package:kopa/model/team_logo_design.dart';
@@ -15,11 +16,14 @@ class OnboardingRepository {
       if (response.statusCode == 200) {
         return json.decode(response.body);
       } else {
-        return {'valid': false, 'error': 'Kunne ikke validere invitation'};
+        return {
+          'valid': false,
+          'error': currentL10n.uiCouldNotValidateTheInvitation
+        };
       }
     } catch (e) {
       if (kDebugMode) print('Validate token error: $e');
-      return {'valid': false, 'error': 'Netværksfejl'};
+      return {'valid': false, 'error': currentL10n.uiNetworkError};
     }
   }
 
@@ -27,7 +31,7 @@ class OnboardingRepository {
       {bool isTeamLeader = false}) async {
     final userToken = await SecureStorageService.getToken();
     if (userToken == null) {
-      return {'success': false, 'error': 'Ikke logget ind'};
+      return {'success': false, 'error': currentL10n.uiNotLoggedIn};
     }
 
     final url = Uri.parse('${ApiConfig.baseUrl}/team/join');
@@ -47,12 +51,12 @@ class OnboardingRepository {
         final error = json.decode(response.body);
         return {
           'success': false,
-          'error': error['error'] ?? 'Kunne ikke tilmelde holdet'
+          'error': error['error'] ?? currentL10n.uiCouldNotJoinTheTeam
         };
       }
     } catch (e) {
       if (kDebugMode) print('Join team error: $e');
-      return {'success': false, 'error': 'Netværksfejl'};
+      return {'success': false, 'error': currentL10n.uiNetworkError};
     }
   }
 
@@ -67,10 +71,10 @@ class OnboardingRepository {
       if (response.statusCode == 200) {
         return json.decode(response.body);
       } else {
-        return {'error': 'Kunne ikke hente kode'};
+        return {'error': currentL10n.uiCouldNotFetchTheCode};
       }
     } catch (e) {
-      return {'error': 'Netværksfejl'};
+      return {'error': currentL10n.uiNetworkError};
     }
   }
 
@@ -86,10 +90,10 @@ class OnboardingRepository {
       if (response.statusCode == 200) {
         return json.decode(response.body);
       } else {
-        return {'error': 'Kunne ikke rotere kode'};
+        return {'error': currentL10n.uiCouldNotRotateTheCode};
       }
     } catch (e) {
-      return {'error': 'Netværksfejl'};
+      return {'error': currentL10n.uiNetworkError};
     }
   }
 
@@ -111,11 +115,11 @@ class OnboardingRepository {
       }
       return {
         'success': false,
-        'error': body['error'] ?? 'Netværksfejl',
+        'error': body['error'] ?? currentL10n.uiNetworkError,
       };
     } catch (e) {
       if (kDebugMode) print('Update team logo error: $e');
-      return {'success': false, 'error': 'Netværksfejl'};
+      return {'success': false, 'error': currentL10n.uiNetworkError};
     }
   }
 
@@ -129,7 +133,7 @@ class OnboardingRepository {
   }) async {
     final userToken = await SecureStorageService.getToken();
     if (userToken == null) {
-      return {'success': false, 'error': 'Ikke logget ind'};
+      return {'success': false, 'error': currentL10n.uiNotLoggedIn};
     }
 
     final url = Uri.parse('${ApiConfig.baseUrl}/teams');
@@ -158,11 +162,11 @@ class OnboardingRepository {
       }
       return {
         'success': false,
-        'error': body['error'] ?? 'Kunne ikke oprette holdet'
+        'error': body['error'] ?? currentL10n.uiCouldNotCreateTheTeam
       };
     } catch (e) {
       if (kDebugMode) print('Create team error: $e');
-      return {'success': false, 'error': 'Netværksfejl'};
+      return {'success': false, 'error': currentL10n.uiNetworkError};
     }
   }
 
@@ -193,9 +197,9 @@ class OnboardingRepository {
       if (response.statusCode == 200) {
         return json.decode(response.body);
       }
-      return {'teams': [], 'error': 'Kunne ikke søge efter hold'};
+      return {'teams': [], 'error': currentL10n.uiCouldNotSearchForTeams};
     } catch (e) {
-      return {'teams': [], 'error': 'Netværksfejl'};
+      return {'teams': [], 'error': currentL10n.uiNetworkError};
     }
   }
 
@@ -203,7 +207,7 @@ class OnboardingRepository {
       {bool isTeamLeader = false}) async {
     final userToken = await SecureStorageService.getToken();
     if (userToken == null) {
-      return {'success': false, 'error': 'Ikke logget ind'};
+      return {'success': false, 'error': currentL10n.uiNotLoggedIn};
     }
 
     final url = Uri.parse('${ApiConfig.baseUrl}/teams/$teamId/join_requests');
@@ -224,17 +228,17 @@ class OnboardingRepository {
       }
       return {
         'success': false,
-        'error': body['error'] ?? 'Kunne ikke sende anmodning'
+        'error': body['error'] ?? currentL10n.uiCouldNotSendTheRequest
       };
     } catch (e) {
-      return {'success': false, 'error': 'Netværksfejl'};
+      return {'success': false, 'error': currentL10n.uiNetworkError};
     }
   }
 
   Future<Map<String, dynamic>> getCurrentJoinRequest() async {
     final userToken = await SecureStorageService.getToken();
     if (userToken == null) {
-      return {'success': false, 'error': 'Ikke logget ind'};
+      return {'success': false, 'error': currentL10n.uiNotLoggedIn};
     }
 
     final url = Uri.parse('${ApiConfig.baseUrl}/team_join_requests/current');
@@ -251,17 +255,17 @@ class OnboardingRepository {
       }
       return {
         'success': false,
-        'error': body['error'] ?? 'Kunne ikke hente anmodning'
+        'error': body['error'] ?? currentL10n.uiCouldNotFetchTheRequest
       };
     } catch (e) {
-      return {'success': false, 'error': 'Netværksfejl'};
+      return {'success': false, 'error': currentL10n.uiNetworkError};
     }
   }
 
   Future<Map<String, dynamic>> listJoinRequests(int teamId) async {
     final userToken = await SecureStorageService.getToken();
     if (userToken == null) {
-      return {'success': false, 'error': 'Ikke logget ind'};
+      return {'success': false, 'error': currentL10n.uiNotLoggedIn};
     }
 
     final url = Uri.parse('${ApiConfig.baseUrl}/teams/$teamId/join_requests');
@@ -278,10 +282,10 @@ class OnboardingRepository {
       }
       return {
         'success': false,
-        'error': body['error'] ?? 'Kunne ikke hente anmodninger'
+        'error': body['error'] ?? currentL10n.uiCouldNotFetchTheRequests
       };
     } catch (e) {
-      return {'success': false, 'error': 'Netværksfejl'};
+      return {'success': false, 'error': currentL10n.uiNetworkError};
     }
   }
 
@@ -299,7 +303,7 @@ class OnboardingRepository {
   ) async {
     final userToken = await SecureStorageService.getToken();
     if (userToken == null) {
-      return {'success': false, 'error': 'Ikke logget ind'};
+      return {'success': false, 'error': currentL10n.uiNotLoggedIn};
     }
 
     final url =
@@ -317,17 +321,17 @@ class OnboardingRepository {
       }
       return {
         'success': false,
-        'error': body['error'] ?? 'Kunne ikke behandle anmodning'
+        'error': body['error'] ?? currentL10n.uiCouldNotProcessTheRequest
       };
     } catch (e) {
-      return {'success': false, 'error': 'Netværksfejl'};
+      return {'success': false, 'error': currentL10n.uiNetworkError};
     }
   }
 
   Future<Map<String, dynamic>> cancelJoinRequest(int requestId) async {
     final userToken = await SecureStorageService.getToken();
     if (userToken == null) {
-      return {'success': false, 'error': 'Ikke logget ind'};
+      return {'success': false, 'error': currentL10n.uiNotLoggedIn};
     }
 
     final url = Uri.parse('${ApiConfig.baseUrl}/team_join_requests/$requestId');
@@ -344,10 +348,10 @@ class OnboardingRepository {
       }
       return {
         'success': false,
-        'error': body['error'] ?? 'Kunne ikke annullere anmodning'
+        'error': body['error'] ?? currentL10n.uiCouldNotCancelTheRequest
       };
     } catch (e) {
-      return {'success': false, 'error': 'Netværksfejl'};
+      return {'success': false, 'error': currentL10n.uiNetworkError};
     }
   }
 }

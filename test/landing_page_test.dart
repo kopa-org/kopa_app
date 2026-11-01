@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/navigation/app_router.dart';
 import 'package:kopa/pages/landing_page.dart';
 import 'package:kopa/theme/app_theme.dart';
@@ -27,6 +28,8 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp.router(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         theme: AppTheme.lightTheme,
         routerConfig: router,
       ),

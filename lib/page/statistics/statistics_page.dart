@@ -1,3 +1,5 @@
+import 'package:kopa/l10n/current_l10n.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -36,9 +38,9 @@ class _StatisticsPageState extends State<StatisticsPage> {
     }
 
     return PageScaffold.tab(
-      title: 'Statistik',
+      title: AppLocalizations.of(context)!.navStatistics,
       body: teamId == null
-          ? const Center(child: Text('Ingen hold valgt.'))
+          ? Center(child: Text(AppLocalizations.of(context)!.uiNoTeamSelected))
           : FutureHandler<_StatisticsPageData>(
               future: _statisticsFuture!,
               onSuccess: (context, data) => _StatisticsView(
@@ -105,18 +107,18 @@ class _StatisticsView extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
             child: _SectionCard(
-              title: 'Holdets nøgletal',
+              title: AppLocalizations.of(context)!.uiTeamKeyFigures,
               child: Column(
                 children: [
                   _MetricRow(
-                    label: 'Holdets pointsnit',
+                    label: AppLocalizations.of(context)!.uiTeamPointsAverage,
                     value: stats.teamMetrics.teamAveragePoints
                             ?.toStringAsFixed(1) ??
                         '-',
                   ),
                   const SizedBox(height: 12),
                   _MetricRow(
-                    label: 'Holdets form',
+                    label: AppLocalizations.of(context)!.uiTeamForm,
                     value: stats.teamMetrics.teamForm.isEmpty
                         ? '-'
                         : stats.teamMetrics.teamForm
@@ -129,12 +131,12 @@ class _StatisticsView extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   _MetricRow(
-                    label: 'Mål scoret',
+                    label: AppLocalizations.of(context)!.uiGoalsScored,
                     value: '${stats.teamMetrics.goalsScored}',
                   ),
                   const SizedBox(height: 12),
                   _MetricRow(
-                    label: 'Mål lukket ind',
+                    label: AppLocalizations.of(context)!.uiGoalsConceded,
                     value: '${stats.teamMetrics.goalsConceded}',
                   ),
                 ],
@@ -191,7 +193,7 @@ class _InFormCallout extends StatelessWidget {
                     Text('In-form', style: styles.sectionHeader),
                     const SizedBox(height: 3),
                     Text(
-                      'Se formranglisten, streaks og point.',
+                      AppLocalizations.of(context)!.uiSeeTheFormTableStreaksAnd,
                       style: styles.caption,
                     ),
                   ],
@@ -230,12 +232,12 @@ class _PlayerPlusStatsSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Dine Stats',
+            AppLocalizations.of(context)!.uiYourStats,
             style: styles.pageTitle.copyWith(color: appColors.dirt),
           ),
           const SizedBox(height: 6),
           Text(
-            'For denne season.',
+            AppLocalizations.of(context)!.uiForThisSeason,
             style: styles.body.copyWith(color: appColors.textSecondary),
           ),
           if (!hasPlayerPlus) ...[
@@ -271,7 +273,7 @@ class _PlayerPlusStatsSection extends StatelessWidget {
   List<_PlayerPlusTileData> _buildTiles(AppColors appColors) {
     return [
       _leaderboardTile(
-        title: 'Mål',
+        title: currentL10n.matchTimelineGoal,
         value: stats.player.goalsScored.toString(),
         rows: stats.leaderboards.topScorers,
         icon: Icons.sports_score,
@@ -285,14 +287,14 @@ class _PlayerPlusStatsSection extends StatelessWidget {
         accentColor: appColors.success,
       ),
       _leaderboardTile(
-        title: 'Kampe',
+        title: currentL10n.navMatches,
         value: stats.player.matchesPlayed.toString(),
         rows: stats.leaderboards.matchesPlayed,
         icon: Icons.sports_soccer,
         accentColor: appColors.sunset,
       ),
       _leaderboardTile(
-        title: 'Stemmer',
+        title: currentL10n.uiVotes,
         value: _currentLeaderboardValue(stats.leaderboards.mostVotes),
         rows: stats.leaderboards.mostVotes,
         icon: Icons.how_to_vote,
@@ -335,7 +337,7 @@ class _PlayerPlusStatsSection extends StatelessWidget {
             userId: row.userId,
             userName: row.userName,
             value: '${row.points}',
-            suffix: 'point',
+            suffix: currentL10n.uiPointsLabel,
           ),
         )
         .toList();
@@ -529,7 +531,8 @@ class _LeaderboardSheet extends StatelessWidget {
               Expanded(
                 child: tile.rows.isEmpty
                     ? Center(
-                        child: Text('Ingen data endnu.', style: styles.body),
+                        child: Text(AppLocalizations.of(context)!.uiNoDataYet,
+                            style: styles.body),
                       )
                     : ListView.separated(
                         controller: scrollController,
@@ -656,7 +659,7 @@ class _PlayerPlusLockedCallout extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'Nogle resultater er låst. Se Player+ for at låse hele ranglisten op.',
+                  AppLocalizations.of(context)!.uiSomeResultsAreLockedSeePlayer,
                   style: styles.caption.copyWith(
                     color: appColors.textPrimary,
                     fontWeight: FontWeight.w600,

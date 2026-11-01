@@ -137,6 +137,16 @@ class FinesRepository {
     return true;
   }
 
+  static Future<void> deleteUserFine(int userFineId) async {
+    final url = Uri.parse('${ApiConfig.baseUrl}/fine/users/$userFineId');
+
+    final response = await _apiClient.delete(url);
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete fine');
+    }
+  }
+
   static Future<void> deleteFineType(int fineTypeId) async {
     final url = Uri.parse('${ApiConfig.baseUrl}/fine/type/$fineTypeId');
 

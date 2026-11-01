@@ -1,3 +1,4 @@
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/card/kopa_card.dart';
 import 'package:kopa/component/chip/status_chip.dart';
@@ -68,7 +69,7 @@ class TaskCard extends StatelessWidget {
                 ),
               ] else
                 Text(
-                  'Ikke tildelt',
+                  AppLocalizations.of(context)!.uiNotAssigned,
                   style: appTextStyles.caption.copyWith(
                     fontStyle: FontStyle.italic,
                   ),

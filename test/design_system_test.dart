@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/component/button/button.dart';
 import 'package:kopa/component/card/kopa_card.dart';
 import 'package:kopa/theme/app_colors.dart';
@@ -22,6 +23,8 @@ void main() {
     Future<void> show({bool enabled = true, bool loading = false}) =>
         tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             theme: AppTheme.lightTheme,
             home: Scaffold(
                 body: MediaQuery(
@@ -58,6 +61,8 @@ void main() {
   testWidgets('solid action colors can use the grass token', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         theme: AppTheme.lightTheme,
         home: Scaffold(
           body: Button(
@@ -79,6 +84,8 @@ void main() {
       (tester) async {
     var taps = 0;
     await tester.pumpWidget(MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: AppTheme.lightTheme,
       home: Scaffold(
           body: KopaCard(onTap: () => taps++, child: const Text('Team'))),

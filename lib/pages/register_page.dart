@@ -1,3 +1,4 @@
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
@@ -67,7 +68,8 @@ class _RegisterPageState extends State<RegisterPage> {
             if (state.status == AuthStatus.failure) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(state.errorMessage ?? 'Registration failed'),
+                  content: Text(state.errorMessage ??
+                      AppLocalizations.of(context)!.uiRegistrationFailed),
                   backgroundColor: appColors.error,
                 ),
               );
@@ -90,7 +92,8 @@ class _RegisterPageState extends State<RegisterPage> {
             } else if (state.status == OnboardingStatus.success) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Du er nu tilmeldt holdet!'),
+                  content: Text(
+                      AppLocalizations.of(context)!.uiYouHaveJoinedTheTeam),
                   backgroundColor: AppColors.of(context).success,
                 ),
               );
@@ -103,8 +106,8 @@ class _RegisterPageState extends State<RegisterPage> {
             } else if (state.status == OnboardingStatus.failure) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content:
-                      Text(state.errorMessage ?? 'Kunne ikke tilmelde holdet'),
+                  content: Text(state.errorMessage ??
+                      AppLocalizations.of(context)!.uiCouldNotJoinTheTeam),
                   backgroundColor: appColors.error,
                 ),
               );
@@ -149,7 +152,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             return Column(
                               children: [
                                 Text(
-                                  'Bliv en del af',
+                                  AppLocalizations.of(context)!.uiBecomePartOf,
                                   style: appTextStyles.body,
                                   textAlign: TextAlign.center,
                                 ),
@@ -165,7 +168,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             );
                           }
                           return Text(
-                            'Opret bruger',
+                            AppLocalizations.of(context)!.uiCreateUser,
                             style: appTextStyles.sectionHeader,
                           );
                         },
@@ -174,7 +177,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       TextFormField(
                         controller: _nameController,
                         decoration: InputDecoration(
-                          labelText: 'Navn',
+                          labelText: AppLocalizations.of(context)!.uiName,
                           border: const OutlineInputBorder(),
                           prefixIcon:
                               Icon(Icons.person, color: appColors.grass),
@@ -182,7 +185,8 @@ class _RegisterPageState extends State<RegisterPage> {
                         keyboardType: TextInputType.name,
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'Please enter your name';
+                            return AppLocalizations.of(context)!
+                                .uiPleaseEnterYourName;
                           }
                           return null;
                         },
@@ -198,7 +202,8 @@ class _RegisterPageState extends State<RegisterPage> {
                         keyboardType: TextInputType.emailAddress,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter your email';
+                            return AppLocalizations.of(context)!
+                                .uiPleaseEnterYourEmail;
                           }
                           return null;
                         },
@@ -207,17 +212,19 @@ class _RegisterPageState extends State<RegisterPage> {
                       TextFormField(
                         controller: _passwordController,
                         decoration: InputDecoration(
-                          labelText: 'Adgangskode',
+                          labelText: AppLocalizations.of(context)!.uiPassword,
                           border: const OutlineInputBorder(),
                           prefixIcon: Icon(Icons.lock, color: appColors.grass),
                         ),
                         obscureText: true,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter your password';
+                            return AppLocalizations.of(context)!
+                                .uiPleaseEnterYourPassword;
                           }
                           if (value.length < 6) {
-                            return 'Password must be at least 6 characters';
+                            return AppLocalizations.of(context)!
+                                .uiPasswordMustBeAtLeast6;
                           }
                           return null;
                         },
@@ -239,7 +246,8 @@ class _RegisterPageState extends State<RegisterPage> {
                         child: state.status == AuthStatus.loading
                             ? CircularProgressIndicator(
                                 color: AppColors.of(context).white)
-                            : const Text('OPRET KONTO'),
+                            : Text(
+                                AppLocalizations.of(context)!.uiCreateAccount2),
                       ),
                     ],
                   ),

@@ -49,7 +49,7 @@ class _MatchProgrammePageState extends State<MatchProgrammePage> {
     return BlocProvider(
       create: (_) => MatchProgrammeCubit()..loadMatches(),
       child: PageScaffold.tab(
-        title: 'Kampprogram',
+        title: AppLocalizations.of(context)!.uiMatchSchedule,
         floatingActionButton: FutureHandler<UserDetails>(
           future: currentUser,
           loadingIndicator: const SizedBox.shrink(),
@@ -180,8 +180,9 @@ class _MatchListState extends State<_MatchList> {
     return BlocBuilder<MatchProgrammeCubit, MatchProgrammeState>(
       builder: (context, state) {
         if (state.status == MatchProgrammeStatus.failure) {
-          return const ErrorMessage(
-            message: 'Der skete en fejl. Prøv venligst igen senere.',
+          return ErrorMessage(
+            message: AppLocalizations.of(context)!
+                .uiSomethingWentWrongPleaseTryAgain,
           );
         }
 
@@ -199,7 +200,8 @@ class _MatchListState extends State<_MatchList> {
 
   Widget _buildMatchList(BuildContext context, List<MatchDetails> matches) {
     if (matches.isEmpty) {
-      return const Center(child: Text('Ingen kampe fundet.'));
+      return Center(
+          child: Text(AppLocalizations.of(context)!.uiNoMatchesFound));
     }
 
     final ownTeamName =

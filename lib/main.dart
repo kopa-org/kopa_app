@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:kopa/l10n/current_l10n.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -419,8 +420,8 @@ class _SplashErrorApp extends StatelessWidget {
             padding: const EdgeInsets.all(24),
             child: Text(
               kReleaseMode
-                  ? 'Kopa kunne ikke starte.'
-                  : 'Kopa kunne ikke starte.\n$error',
+                  ? currentL10n.uiKopaCouldNotStart
+                  : currentL10n.uiStartupFailedWithError(error ?? ''),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: AppColors.of(context).primary,

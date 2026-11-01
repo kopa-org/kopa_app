@@ -387,27 +387,10 @@
   },
   "matchTasksOneOffBadge": "This match only",
   "matchTasksMarkDone": "Done",
-  "matchTasksIDidIt": "I did it",
   "matchTasksConfirmTitle": "Is {task} done?",
   "@matchTasksConfirmTitle": {
     "placeholders": {
       "task": {
-        "type": "String"
-      }
-    }
-  },
-  "matchTasksConfirmRecurring": "{name} moves to the back of the queue.",
-  "@matchTasksConfirmRecurring": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "matchTasksConfirmOneOff": "The task is marked as done by {name}.",
-  "@matchTasksConfirmOneOff": {
-    "placeholders": {
-      "name": {
         "type": "String"
       }
     }
@@ -503,5 +486,783 @@
   "mobilePayPaidBody": "We can't see MobilePay payments in Kopa. If you say yes, the selected fines are marked as paid.",
   "mobilePayPaidYes": "Yes",
   "mobilePayPaidNo": "No",
-  "mobilePayPaidSaveFailed": "Your payment could not be saved. Please try again."
+  "mobilePayPaidSaveFailed": "Your payment could not be saved. Please try again.",
+  "fineBoxSeeAll": "See all",
+  "fineBoxPlayersTitle": "All players",
+  "fineBoxAllFinesTitle": "All fines",
+  "fineBoxInBox": "In the box",
+  "fineBoxAllPaid": "All paid",
+  "fineBoxDeleteFine": "Delete fine",
+  "fineBoxDeleteCancel": "Cancel",
+  "fineBoxDeleteFailed": "The fine could not be deleted. Try again.",
+  "fineBoxPlayerFineCount": "{count} fines",
+  "@fineBoxPlayerFineCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "fineBoxDeleteFineBody": "Delete {fine} for {name}? This cannot be undone.",
+  "@fineBoxDeleteFineBody": {
+    "placeholders": {
+      "fine": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "navHome": "Home",
+  "navMatches": "Matches",
+  "navStatistics": "Statistics",
+  "navSquad": "Squad",
+  "navFineBox": "Fine box",
+  "uiChooseDbuTeam": "Choose DBU team",
+  "uiCancel": "Cancel",
+  "uiCouldNotFetchTheInviteLink": "Could not fetch the invite link.",
+  "uiLinkCopied": "Link copied",
+  "uiJoinOnKopa": "Join {a} on Kopa: {b}",
+  "@uiJoinOnKopa": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      },
+      "b": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiCouldNotSaveThePositionTry": "Could not save the position. Try again.",
+  "uiInviteYourTeam": "Invite your team",
+  "uiCreateYourFootballTeamAndKeep": "Create your football team and keep players, matches and statistics in one place.",
+  "uiShareTheLinkWithThePlayers": "Share the link with the players so they can find the team.",
+  "uiContinueToKopa": "Continue to Kopa",
+  "uiAssociation": "Association",
+  "uiYourTeamName": "Your team name",
+  "uiYouChose": "You chose: {a} ({b})",
+  "@uiYouChose": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      },
+      "b": {
+        "type": "Object"
+      }
+    }
+  },
+  "ui7ASide": "7-a-side",
+  "ui11ASide": "11-a-side",
+  "uiSearchResults": "Search results",
+  "uiTeamLeader": "Team leader: {a}",
+  "@uiTeamLeader": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiTeamLeaderPending": "Team leader: Pending",
+  "uiMembers": "{a} members",
+  "@uiMembers": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiTheInviteLinkCouldNotBe": "The invite link could not be fetched.",
+  "uiCopyLink": "Copy link",
+  "uiShareLink": "Share link",
+  "uiBack": "Back",
+  "uiStepOf": "Step {a} of {b}",
+  "@uiStepOf": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      },
+      "b": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiDbuConnected": "DBU connected",
+  "uiTeamDataHasBeenImported": "Team data has been imported",
+  "uiLogInThroughDbuToImport": "Log in through DBU to import team data",
+  "uiYourTeam": "your team",
+  "uiYourTeam2": "Your team",
+  "uiStep3Of5": "Step 3 of 5",
+  "uiWaitingForApproval": "Waiting for approval",
+  "uiYouHaveAskedToJoinYou": "You have asked to join {a}. You will be notified when the team leader has accepted your request.",
+  "@uiYouHaveAskedToJoinYou": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiPending": "Pending",
+  "uiCouldNotValidateTheInvitation": "Could not validate the invitation",
+  "uiNetworkError": "Network error",
+  "uiNotLoggedIn": "Not logged in",
+  "uiCouldNotJoinTheTeam": "Could not join the team",
+  "uiCouldNotFetchTheCode": "Could not fetch the code",
+  "uiCouldNotRotateTheCode": "Could not rotate the code",
+  "uiCouldNotCreateTheTeam": "Could not create the team",
+  "uiCouldNotSearchForTeams": "Could not search for teams",
+  "uiCouldNotSendTheRequest": "Could not send the request",
+  "uiCouldNotFetchTheRequest": "Could not fetch the request",
+  "uiCouldNotFetchTheRequests": "Could not fetch the requests",
+  "uiCouldNotProcessTheRequest": "Could not process the request",
+  "uiCouldNotCancelTheRequest": "Could not cancel the request",
+  "uiInvalidInvitation": "Invalid invitation",
+  "uiSomethingWentWrongPleaseTryAgain": "Something went wrong. Please try again later.",
+  "uiNoUserFound": "No user found.",
+  "uiPracticalInformation": "Practical information",
+  "uiRegisteredPlayers": "Registered players",
+  "uiDate": "Date",
+  "uiTime": "Time",
+  "uiLocation": "Location",
+  "uiCountdown": "Countdown",
+  "uiRegistrations": "Registrations",
+  "uiRegistered": "{a} registered",
+  "@uiRegistered": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiMeetingTime": "Meeting time",
+  "uiYourSelection": "Your selection",
+  "uiNotes": "Notes",
+  "uiNoResponse": "No response",
+  "uiDeclined": "Declined",
+  "uiAvailable": "Available ({a})",
+  "@uiAvailable": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSelected": "Selected ({a})",
+  "@uiSelected": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiNoResponse2": "No response ({a})",
+  "@uiNoResponse2": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiDeclined2": "Declined ({a})",
+  "@uiDeclined2": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiCouldNotUpdateTheApprovalTry": "Could not update the approval. Try again.",
+  "uiCouldNotApproveEveryoneTryAgain": "Could not approve everyone. Try again.",
+  "uiCouldNotChangeTheVisibilityTry": "Could not change the visibility. Try again.",
+  "uiInProgressOrFinished": "In progress or finished",
+  "uiDaysHours": "{a} days {b} hours",
+  "@uiDaysHours": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      },
+      "b": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiReject": "Reject {a}",
+  "@uiReject": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiApprove": "Approve {a}",
+  "@uiApprove": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiApproved": "Approved",
+  "uiRejected": "Rejected",
+  "uiEditChoiceFor": "Edit choice for {a}",
+  "@uiEditChoiceFor": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiNoPlayersAreAwaitingApproval": "No players are awaiting approval.",
+  "uiApproveAll": "Approve all",
+  "uiNoPlayersHere": "No players here.",
+  "uiCouldNotSaveTheLineupTry": "Could not save the lineup. Try again.",
+  "uiChoosePlayer": "Choose player",
+  "uiEditLineup": "Edit lineup",
+  "uiEditFormation": "Edit formation ({a})",
+  "@uiEditFormation": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiMovePlayerReleaseToPlace": "Move player: Release to place {a}",
+  "@uiMovePlayerReleaseToPlace": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiBenchPlayers": "Bench ({a} players)",
+  "@uiBenchPlayers": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiNoPlayersOnTheBench": "No players on the bench",
+  "uiHoldAPlayerAndDragTo": "Hold a player and drag to swap places",
+  "uiChooseFormation": "Choose formation",
+  "uiChooseTheFormationThatSuitsYour": "Choose the formation that suits your next match best",
+  "uiFormation": "Formation {a}",
+  "@uiFormation": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiGk": "GK",
+  "uiAm": "AM",
+  "uiPl": "PL",
+  "uiStandard7ASide": "Standard 7-a-side",
+  "uiDefensiveBalance": "Defensive balance",
+  "uiSymmetricControl": "Symmetric control",
+  "uiAttackingWidth": "Attacking width",
+  "uiClassicBalance": "Classic balance",
+  "uiMidfieldControl": "Midfield control",
+  "uiControlledPressing": "Controlled pressing",
+  "uiCustomLineup": "Custom lineup",
+  "uiSettings": "Settings",
+  "uiImportMatchSchedule": "Import match schedule",
+  "uiFetchingLink": "Fetching link...",
+  "uiShareKopa": "Share Kopa",
+  "uiTeamTools": "Team tools",
+  "uiApproveNewPlayers": "Approve new players",
+  "uiSyncingStandings": "Syncing standings...",
+  "uiSyncStandingsFromDbu": "Sync standings from DBU",
+  "uiDefaultMeetingTime": "Default meeting time",
+  "uiSavingMeetingTime": "Saving meeting time...",
+  "uiSaveMeetingTime": "Save meeting time",
+  "uiLoggingOut": "Logging out...",
+  "uiLogOut": "Log out",
+  "uiCouldNotLogOut": "Could not log out.",
+  "uiYouMustBeOnATeam": "You must be on a team to share Kopa.",
+  "uiCouldNotShareKopa": "Could not share Kopa.",
+  "uiOnlyTheTeamLeaderCanChange": "Only the team leader can change the meeting time.",
+  "uiTheDefaultMeetingTimeIsSet": "The default meeting time is set to {a}.",
+  "@uiTheDefaultMeetingTimeIsSet": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiNoDefault": "No default",
+  "uiMinBeforeKickoff": "{a} min before kickoff",
+  "@uiMinBeforeKickoff": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiStandingsAndPoolTeamsAreSynced": "Standings and pool teams are synced ({a} teams).",
+  "@uiStandingsAndPoolTeamsAreSynced": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiFines": "Fines - {a}",
+  "@uiFines": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "ui1HourAgo": "1 hour ago",
+  "uiHoursAgo": "{a} hours ago",
+  "@uiHoursAgo": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiYesterday": "Yesterday",
+  "uiDaysAgo": "{a} days ago",
+  "@uiDaysAgo": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiUserNotLoggedIn": "User not logged in",
+  "uiCouldNotFetchDashboardData": "Could not fetch dashboard data",
+  "uiCalendar": "Calendar",
+  "uiProfile": "Profile",
+  "uiNoUpcomingMatch": "No upcoming match",
+  "uiTheScheduleIsBeingUpdated": "The schedule is being updated",
+  "uiTeam": "Team",
+  "uiOpponent": "Opponent",
+  "uiNoMatch": "No match",
+  "uiNoMatchPlanned": "No match planned",
+  "uiNoLocation": "No location",
+  "uiMap": "Map ›",
+  "uiLatestMatch": "Latest match",
+  "uiStandings": "Standings",
+  "uiStatistics": "Statistics",
+  "uiRegistered2": "registered",
+  "uiANewSeasonHasStartedAnd": "A new season has started and the match schedule has been imported.",
+  "uiTheMatchScheduleHasBeenUpdated": "The match schedule has been updated.",
+  "uiStartNewSeason": "Start new season?",
+  "uiUpdateCurrent": "Update current",
+  "uiStartNewSeason2": "Start new season",
+  "uiMissingResults": "Missing results",
+  "uiGoBack": "Go back",
+  "uiStartAnyway": "Start anyway",
+  "uiSpring": "Spring",
+  "uiSummer": "Summer",
+  "uiAutumn": "Autumn",
+  "uiWinter": "Winter",
+  "uiNoTeamSelected": "No team selected.",
+  "uiTeamKeyFigures": "Team key figures",
+  "uiTeamPointsAverage": "Team points average",
+  "uiTeamForm": "Team form",
+  "uiGoalsScored": "Goals scored",
+  "uiGoalsConceded": "Goals conceded",
+  "uiSeeTheFormTableStreaksAnd": "See the form table, streaks and points.",
+  "uiYourStats": "Your stats",
+  "uiForThisSeason": "For this season.",
+  "uiVotes": "Votes",
+  "uiNoDataYet": "No data yet.",
+  "uiSomeResultsAreLockedSeePlayer": "Some results are locked. See Player+ to unlock the full table.",
+  "uiTheSeasonSInternalCompetitionStarts": "The season's internal competition starts here.",
+  "uiSeasonDuels": "Season duels",
+  "uiBestPlayer": "Best player",
+  "uiMostGoals": "Most goals",
+  "uiMostAssists": "Most assists",
+  "uiMostCards": "Most cards",
+  "uiCards": "Cards",
+  "uiFineKing": "Fine king",
+  "uiInternalTables": "Internal tables",
+  "uiSeasonCompetitionsForOverallMvpGoals": "Season competitions for overall, MVP, goals, assists, cards and fines across the team.",
+  "uiLeagueComparison": "League comparison",
+  "uiComparePlayersWithOtherTeamsIn": "Compare players with other teams in the same league once DBU data is synced.",
+  "uiHiddenPatterns": "Hidden patterns",
+  "uiFormCurvesStreaksAndSmallInternal": "Form curves, streaks and small internal competitions based on your own match data.",
+  "uiTheTeamCompetitionBuiltAutomaticallyFrom": "The team competition built automatically from your match data — goals, assists, streaks and bonuses.",
+  "uiCloseCalendar": "Close calendar",
+  "uiPreviousMonth": "Previous month",
+  "uiNextMonth": "Next month",
+  "uiCalendarDay": "Calendar day {a}",
+  "@uiCalendarDay": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiCouldNotFetchPointDetails": "Could not fetch point details.",
+  "uiPointsStory": "Points story",
+  "uiNoPointsInTheSelectedPeriod": "No points in the selected period.",
+  "uiOnTheTeam": "#{a} on the team",
+  "@uiOnTheTeam": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiStable": "Stable",
+  "uiLatestRound": "Latest round",
+  "uiToFirstPlace": "To first place",
+  "uiLeading": "Leading",
+  "uiMovement": "Movement",
+  "uiTable": "Table",
+  "uiSomethingWentWrong": "Something went wrong.",
+  "uiNoPointsYetRecordMatchData": "No points yet. Record match data to start the team competition.",
+  "uiRestOfTheTeam": "Rest of the team",
+  "uiTheTeamCompetition": "The team competition",
+  "uiWhoIsNinForm": "Who is\nin form?",
+  "uiMatchDataStreaksAndBonusesIn": "Match data, streaks and bonuses in one place.",
+  "uiYouAreNoWith": "You are no. {a} with {b}.",
+  "@uiYouAreNoWith": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      },
+      "b": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiChoosePosition": "Choose position",
+  "uiAllPositions": "All positions",
+  "uiWhichPositionDoYouPlay": "Which position do you play?",
+  "uiYourPositionGivesThePointRules": "Your position gives the point rules the right weight.",
+  "uiPoints": "{a} points",
+  "@uiPoints": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiPoints2": "points · {a}",
+  "@uiPoints2": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiCouldNotLogInAutomatically": "Could not log in automatically.",
+  "uiRegistrationFailedTryAgain": "Registration failed. Try again.",
+  "uiPleaseEnterYourName": "Please enter your name",
+  "uiPleaseEnterYourEmail": "Please enter your email",
+  "uiPleaseEnterAValidEmail": "Please enter a valid email",
+  "uiPleaseEnterAPassword": "Please enter a password",
+  "uiThePasswordMustBeAtLeast": "The password must be at least 6 characters",
+  "uiCreateUser": "Create user",
+  "uiName": "Name",
+  "uiPassword": "Password",
+  "uiCreateAccount": "Create account",
+  "uiHomeTeam": "Home team",
+  "uiEGSNderjyske": "E.g. Sønderjyske",
+  "uiAwayTeam": "Away team",
+  "uiEGAgf": "E.g. AGF",
+  "uiEGSydbankPark": "E.g. Sydbank Park",
+  "uiOptionalComments": "Optional comments",
+  "uiFillInBothTeamsAndThe": "Fill in both teams and the location, and choose a date.",
+  "uiTheFirstAndSecondTeamCannot": "The first and second team cannot be the same.",
+  "uiAddPlayer": "Add player",
+  "uiEGLarsLarsen": "E.g. Lars Larsen",
+  "uiEGLarsExampleCom": "E.g. lars@example.com",
+  "uiEnterThePlayerSName": "Enter the player's name",
+  "uiEnterEmail": "Enter email",
+  "uiEnterAValidEmail": "Enter a valid email",
+  "uiPleaseEnterNameAndEmail": "Please enter name and email.",
+  "uiThePlayerIsAlreadyInThe": "The player is already in the squad. Enter another name and/or email.",
+  "uiNoStandingsAvailable": "No standings available",
+  "uiTeams": "{a} teams",
+  "@uiTeams": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiLeague": "League",
+  "uiLeague2": "League {a}",
+  "@uiLeague2": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiTheSeasonSInternalLeague": "The season's internal league",
+  "uiYourOverallRanking": "Your overall ranking",
+  "uiMvpCardsAndFines": "MVP, cards and fines",
+  "uiTheSeasonDuel": "The season duel",
+  "ui84Points": "84 points",
+  "ui79Points": "79 points",
+  "uiYou": "You?",
+  "uiPoints3": "? points",
+  "uiSeeTheCompetitions": "See the competitions",
+  "uiOverallPlayerOfTheMatchGoals": "Overall, player of the match, goals, assists, cards and fines in one internal season battle.",
+  "uiTitle": "Title",
+  "uiEGArrivedLate": "E.g. \"Arrived late\"",
+  "uiEG100": "E.g. 100",
+  "uiEnterATitleForTheFine": "Enter a title for the fine type",
+  "uiEnterTheDefaultAmountForThe": "Enter the default amount for the fine type",
+  "uiPleaseEnterATitleAndDefault": "Please enter a title and default amount.",
+  "uiTheFineTypeAlreadyExistsPlease": "The fine type already exists. Please enter another title.",
+  "uiRegistrationFailed": "Registration failed",
+  "uiYouHaveJoinedTheTeam": "You have joined the team!",
+  "uiBecomePartOf": "Become part of",
+  "uiPleaseEnterYourPassword": "Please enter your password",
+  "uiPasswordMustBeAtLeast6": "Password must be at least 6 characters",
+  "uiCreateAccount2": "CREATE ACCOUNT",
+  "uiLoginFailed": "Login failed",
+  "uiLogIn": "Log in",
+  "uiLogIn2": "LOG IN",
+  "uiDonTHaveAnAccountSign": "Don't have an account? Sign up here",
+  "uiNo": "No. -",
+  "uiMatchHistory": "Match history",
+  "uiNoMatchesFound": "No matches found.",
+  "uiSeason": "Season {a}",
+  "@uiSeason": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiLineup": "Lineup",
+  "uiHideLineupFromPlayers": "Hide lineup from players",
+  "uiShowLineupToPlayers": "Show lineup to players",
+  "uiNoBench": "No bench",
+  "uiOnTheBench": "On the bench:",
+  "uiGoalkeeper": "Goalkeeper",
+  "uiDefence": "Defence",
+  "uiMidfield": "Midfield",
+  "uiAttack": "Attack",
+  "uiNoEventsRecorded": "No events recorded",
+  "uiYellowCards": "Yellow cards",
+  "uiRedCards": "Red cards",
+  "uiRegistered3": "Registered",
+  "uiNoRegisteredPlayersYet": "No registered players yet.",
+  "uiNoEventsRecorded2": "No events recorded.",
+  "uiPoll": "Poll",
+  "uiMatchRating": "Match rating",
+  "uiMatchEvents": "Match events",
+  "uiNoMatchEventsRecordedYet": "No match events recorded yet.",
+  "ui3Months": "3 months",
+  "uiSeason2": "Season",
+  "uiAll": "All",
+  "uiCentreBack": "Centre back",
+  "uiBackWingback": "Back / wingback",
+  "uiDefensiveMidfield": "Defensive midfield",
+  "uiAttackingMidfield": "Attacking midfield",
+  "uiWinger": "Winger",
+  "uiStriker": "Striker",
+  "uiStillToBePaid": "Still to be paid",
+  "uiSelectedAmountToDeposit": "Selected amount to deposit",
+  "uiFineType": "Fine type",
+  "uiPleaseChooseAFineToPay": "Please choose a fine to pay.",
+  "uiAmountToDeposit": "Amount to deposit",
+  "uiPleaseEnterAnAmountGreaterThan": "Please enter an amount greater than 0 kr.",
+  "uiCouldNotFetchTheDbuImport": "Could not fetch the DBU import logic from the server.",
+  "uiDbuLogin": "DBU login",
+  "uiSyncStandings": "Sync standings",
+  "uiLoading": "Loading",
+  "uiNoStatisticsAvailable": "No statistics available",
+  "uiCouldNotProcessTheRequest2": "Could not process the request.",
+  "uiTeamRequests": "Team requests",
+  "uiAwaitingApproval": "Awaiting approval ({a})",
+  "@uiAwaitingApproval": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiNewRequest": "New request",
+  "uiRequested": "Requested {a}/{b}",
+  "@uiRequested": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      },
+      "b": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiAssignFines": "Assign fines",
+  "uiNoFineTypesFound": "No fine types found.",
+  "uiAddNoteOptional": "Add note (optional)",
+  "uiNoFinesWereAssignedPleaseChoose": "No fines were assigned. Please choose at least one player.",
+  "uiPolls": "Polls",
+  "uiCouldNotFetchPolls": "Could not fetch polls.",
+  "uiNoPollsFound": "No polls found.",
+  "uiVotes2": "{a} votes",
+  "@uiVotes2": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiUnknownMatch": "Unknown match",
+  "uiTeamStats": "Team stats",
+  "uiWon": "Won",
+  "uiDrawn": "Drawn",
+  "uiLost": "Lost",
+  "uiGoalDifference": "Goal difference",
+  "uiCouldNotCreateThePoll": "Could not create the poll.",
+  "uiCastAtLeastOneVoteTo": "Cast at least one vote to save the poll.",
+  "uiCouldNotSaveThePoll": "Could not save the poll.",
+  "uiThereAreNoMatchesToCreate": "There are no matches to create a poll for.",
+  "uiChooseAValidMatch": "Choose a valid match.",
+  "uiAPollAlreadyExistsForThe": "A poll already exists for the match. Choose another match.",
+  "uiCastAtLeastOneVoteTo2": "Cast at least one vote to create a poll.",
+  "uiKopaCouldNotStart": "Kopa could not start.",
+  "uiOpenMatch": "Open match: {a}",
+  "@uiOpenMatch": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiFinished": "Finished",
+  "uiBringYourTeamNtogether": "Bring your team\ntogether",
+  "uiMyStats": "My stats",
+  "uiCardsYR": "Cards (Y/R)",
+  "uiShowFullTable": "SHOW FULL TABLE",
+  "uiTheFineBox": "THE FINE BOX",
+  "uiTotalFines": "Total fines",
+  "uiNoRanking": "No ranking",
+  "uiSomethingWentWrongDuringLoginTry": "Something went wrong during login. Try again.",
+  "uiSomethingWentWrongDuringRegistrationTry": "Something went wrong during registration. Try again.",
+  "uiAddNewPlayer": "Add new player",
+  "uiCouldNotFetchSeasons": "Could not fetch seasons",
+  "uiCouldNotStartANewSeason": "Could not start a new season",
+  "uiUpdateRequired": "Update required",
+  "uiANewVersionOfKopaIs": "A new version of Kopa is available. Please update to continue.",
+  "uiUpdateNow": "Update now",
+  "uiMatchSchedule": "Match schedule",
+  "uiNoDataAvailable": "No data available",
+  "uiWin": "Win",
+  "uiDraw": "Draw",
+  "uiLoss": "Loss",
+  "uiLoginFailedPleaseCheckYourCredentials": "Login failed. Please check your credentials.",
+  "uiRegistrationFailedPleaseTryAgain": "Registration failed. Please try again.",
+  "uiOutstandingFines": "Outstanding fines",
+  "uiTrainingAttendance": "Training attendance",
+  "uiNotSelectedYet": "Not selected yet",
+  "uiVotes3": "Votes: {a}",
+  "@uiVotes3": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiCouldNotFetchTheMatchSchedule": "Could not fetch the match schedule.",
+  "uiFormLast5": "Form (last 5)",
+  "uiNotAssigned": "Not assigned",
+  "uiCouldNotFetchInForm": "Could not fetch In-form.",
+  "uiTeamBadge": "{a} team badge",
+  "@uiTeamBadge": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiShield7": "Shield 7",
+  "uiTeamLeaderNames": "Team leader: {a}",
+  "@uiTeamLeaderNames": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiLandingIntro": "Get a full overview of your matches, lineups, fine box and team communication.",
+  "uiNewSeasonBody": "There is already an active season. You can update the current match schedule or start a new season before importing the new DBU schedule. If results are missing from the active season, Kopa warns you before the season starts.",
+  "uiMissingResultsBody": "Results are missing for {a} {b} in the active season. You can still start a new season, but the old matches will be locked to the finished season without full results.",
+  "@uiMissingResultsBody": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      },
+      "b": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiOneEvent": "{a} event",
+  "@uiOneEvent": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiManyEvents": "{a} events",
+  "@uiManyEvents": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiOneMatch": "{a} match",
+  "@uiOneMatch": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiManyMatches": "{a} matches",
+  "@uiManyMatches": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiMatchSingular": "match",
+  "uiMatchPlural": "matches",
+  "uiWeekdayInitials": "M,T,W,T,F,S,S",
+  "uiPositionLeftBack": "Left back",
+  "uiPositionCentreBack": "Centre back",
+  "uiPositionRightBack": "Right back",
+  "uiPositionLeftMidfield": "Left midfield",
+  "uiPositionCentralMidfield": "Central midfield",
+  "uiPositionRightMidfield": "Right midfield",
+  "uiPositionLeftWing": "Left wing",
+  "uiPositionRightWing": "Right wing",
+  "uiPositionShortGoalkeeper": "GK",
+  "uiPositionShortLeftBack": "LB",
+  "uiPositionShortRightBack": "RB",
+  "uiPositionShortLeftMidfield": "LM",
+  "uiPositionShortRightMidfield": "RM",
+  "uiPositionShortLeftWing": "LW",
+  "uiPositionShortRightWing": "RW",
+  "uiPositionShortDefender": "D",
+  "uiPositionShortWing": "W",
+  "uiPositionShortForward": "F",
+  "uiPointsLabel": "points",
+  "uiPlayerPlusIntro": "Who becomes the team's best player, who wins player of the match most often, and who ends up on top of the fun tables? Use this page as an overview of the Player+ universe.",
+  "uiStartupFailedWithError": "Kopa could not start.\n{a}",
+  "@uiStartupFailedWithError": {
+    "placeholders": {
+      "a": {
+        "type": "Object"
+      }
+    }
+  }
 }

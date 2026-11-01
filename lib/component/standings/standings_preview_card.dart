@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/component/avatar/team_badge_label.dart';
 import 'package:kopa/model/dbu_standings.dart';
 import 'package:kopa/model/team_logo_design.dart';
@@ -64,7 +65,7 @@ class StandingsPreviewCard extends StatelessWidget {
                         padding:
                             const EdgeInsets.symmetric(vertical: Spacing.lg),
                         child: Text(
-                          'Ingen stilling tilgængelig',
+                          AppLocalizations.of(context)!.uiNoStandingsAvailable,
                           style: appTextStyles.caption1.copyWith(
                             color: palette.onSurfaceMuted,
                           ),
@@ -102,7 +103,7 @@ class StandingsPreviewCard extends StatelessWidget {
                       ),
                       alignment: Alignment.center,
                       child: Text(
-                        'VIS FULD TABEL',
+                        AppLocalizations.of(context)!.uiShowFullTable,
                         style: appTextStyles.label.copyWith(
                           color: palette.onSurfaceMuted,
                           fontWeight: FontWeight.w900,
@@ -168,7 +169,8 @@ class _PreviewTableHeader extends StatelessWidget {
       children: [
         SizedBox(width: 28, child: Text('#', style: style)),
         const SizedBox(width: 28),
-        Expanded(child: Text('Hold', style: style)),
+        Expanded(
+            child: Text(AppLocalizations.of(context)!.uiTeam, style: style)),
         SizedBox(
           width: 30,
           child: Text('K', style: style, textAlign: TextAlign.center),

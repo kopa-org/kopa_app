@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kopa/navigation/app_router.dart';
@@ -41,7 +42,7 @@ class PlayerPlusTeaserSection extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'Sæsonens interne liga',
+                  AppLocalizations.of(context)!.uiTheSeasonSInternalLeague,
                   style: appTextStyles.sectionHeader.copyWith(
                     color: appColors.primary,
                   ),
@@ -60,7 +61,7 @@ class PlayerPlusTeaserSection extends StatelessWidget {
                 child: _MiniTeaserCard(
                   title: 'Top 5',
                   value: '#?',
-                  label: 'Din overall placering',
+                  label: AppLocalizations.of(context)!.uiYourOverallRanking,
                   color: appColors.sunset,
                   onTap: () => context.push(AppRouter.playerPlus),
                 ),
@@ -70,7 +71,7 @@ class PlayerPlusTeaserSection extends StatelessWidget {
                 child: _MiniTeaserCard(
                   title: 'Form',
                   value: '??%',
-                  label: 'MVP, kort og bøder',
+                  label: AppLocalizations.of(context)!.uiMvpCardsAndFines,
                   color: appColors.sky,
                   onTap: () => context.push(AppRouter.playerPlus),
                 ),
@@ -114,28 +115,34 @@ class _HeroTeaserCard extends StatelessWidget {
                   Icon(Icons.emoji_events, color: appColors.grass),
                   const SizedBox(width: 8),
                   Text(
-                    'Sæsonduellen',
+                    AppLocalizations.of(context)!.uiTheSeasonDuel,
                     style: appTextStyles.bodyBold.copyWith(
                       color: appColors.black,
                     ),
                   ),
-                  const Spacer(),
+                  Spacer(),
                   Icon(Icons.arrow_forward, color: appColors.grass),
                 ],
               ),
-              const SizedBox(height: 14),
+              SizedBox(height: 14),
               ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: Stack(
                   children: [
                     Column(
-                      children: const [
+                      children: [
                         _BlurredRankRow(
-                            rank: '1', name: 'Mathias', stat: '84 point'),
+                            rank: '1',
+                            name: 'Mathias',
+                            stat: AppLocalizations.of(context)!.ui84Points),
                         _BlurredRankRow(
-                            rank: '2', name: 'Jonas', stat: '79 point'),
+                            rank: '2',
+                            name: 'Jonas',
+                            stat: AppLocalizations.of(context)!.ui79Points),
                         _BlurredRankRow(
-                            rank: '3', name: 'Dig?', stat: '? point'),
+                            rank: '3',
+                            name: AppLocalizations.of(context)!.uiYou,
+                            stat: AppLocalizations.of(context)!.uiPoints3),
                       ],
                     ),
                     Positioned.fill(
@@ -156,7 +163,8 @@ class _HeroTeaserCard extends StatelessWidget {
                               borderRadius: BorderRadius.circular(999),
                             ),
                             child: Text(
-                              'Se konkurrencerne',
+                              AppLocalizations.of(context)!
+                                  .uiSeeTheCompetitions,
                               style: appTextStyles.caption.copyWith(
                                 color: AppColors.of(context).white,
                                 fontWeight: FontWeight.w700,
@@ -171,7 +179,7 @@ class _HeroTeaserCard extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                'Overall, kampens spiller, mål, assists, kort og bøder i én intern sæsonkamp.',
+                AppLocalizations.of(context)!.uiOverallPlayerOfTheMatchGoals,
                 style: appTextStyles.caption.copyWith(
                   color: appColors.dirt,
                   height: 1.3,

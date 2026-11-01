@@ -25,6 +25,7 @@ class MatchPollDetailsCard extends StatelessWidget {
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
     final winnerId = poll.playerOfTheMatchDetails?.id ??
         -(poll.playerOfTheMatchExternalPlayerDetails?.id ?? 0);
+    final winners = poll.winningVotes;
     final votes = [...poll.matchPollUserVotesDetails]
       ..sort((a, b) => b.numberOfVotes.compareTo(a.numberOfVotes));
 
@@ -92,7 +93,7 @@ class MatchPollDetailsCard extends StatelessWidget {
                   userName: poll.winnerName,
                   votes: poll.playerOfTheMatchVotes,
                 ),
-                winnerId: winnerId,
+                isWinner: true,
               ),
             ),
           for (final vote in votes)
@@ -110,7 +111,7 @@ class MatchPollDetailsCard extends StatelessWidget {
                           : l10n.matchPollUnknownPlayer),
                   votes: vote.numberOfVotes,
                 ),
-                winnerId: winnerId,
+                isWinner: winners.contains(vote),
               ),
             ),
         ],
@@ -133,11 +134,11 @@ class _MatchPollRowData {
 
 class _MatchPollVoteRow extends StatelessWidget {
   final _MatchPollRowData row;
-  final int winnerId;
+  final bool isWinner;
 
   const _MatchPollVoteRow({
     required this.row,
-    required this.winnerId,
+    required this.isWinner,
   });
 
   @override
@@ -145,7 +146,6 @@ class _MatchPollVoteRow extends StatelessWidget {
     final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final styles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final isWinner = row.userId == winnerId;
 
     return Container(
       padding: const EdgeInsets.symmetric(

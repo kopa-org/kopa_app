@@ -1,3 +1,5 @@
+import 'package:kopa/l10n/current_l10n.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -132,7 +134,7 @@ class _PlayerHero extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'Nr. -',
+                      AppLocalizations.of(context)!.uiNo,
                       style: styles.body3.copyWith(
                         color: appColors.textSecondary,
                       ),
@@ -149,7 +151,7 @@ class _PlayerHero extends StatelessWidget {
 
   String _metaPosition(String? position) {
     final value = position?.trim();
-    if (value == null || value.isEmpty) return 'Spiller';
+    if (value == null || value.isEmpty) return currentL10n.matchEventPlayer;
     return value[0].toUpperCase() + value.substring(1);
   }
 }
@@ -209,7 +211,7 @@ class _StatsRow extends StatelessWidget {
         Expanded(
           child: _StatTile(
             icon: Icons.show_chart,
-            label: 'Kampe',
+            label: AppLocalizations.of(context)!.navMatches,
             value: '${summary.matchesPlayed}',
           ),
         ),
@@ -217,7 +219,7 @@ class _StatsRow extends StatelessWidget {
         Expanded(
           child: _StatTile(
             icon: Icons.flag_outlined,
-            label: 'Mål',
+            label: AppLocalizations.of(context)!.matchTimelineGoal,
             value: '${summary.goalsScored}',
           ),
         ),
@@ -303,7 +305,7 @@ class _MatchHistoryHeader extends StatelessWidget {
     final styles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return Text(
-      'Kamphistorik',
+      AppLocalizations.of(context)!.uiMatchHistory,
       style: styles.h5.copyWith(
         color: appColors.dirt,
         fontWeight: FontWeight.w800,
@@ -332,7 +334,7 @@ class _MatchHistoryCard extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         decoration: _cardDecoration(appColors),
         child: Text(
-          'Ingen kampe fundet.',
+          AppLocalizations.of(context)!.uiNoMatchesFound,
           style: styles.body3.copyWith(color: appColors.textSecondary),
         ),
       );
@@ -375,7 +377,7 @@ class _MatchHistoryCard extends StatelessWidget {
   String _seasonLabel(PlayerMatchHistoryItem match) {
     final season = match.seasonName?.trim();
     if (season != null && season.isNotEmpty) return season;
-    return 'Sæson ${match.date.year}';
+    return currentL10n.uiSeason(match.date.year);
   }
 
   BoxDecoration _cardDecoration(AppColors appColors) {
@@ -439,7 +441,10 @@ class _SeasonDivider extends StatelessWidget {
           ),
           const SizedBox(width: Spacing.sm),
           Text(
-            '${group.matches.length} ${group.matches.length == 1 ? 'kamp' : 'kampe'}',
+            group.matches.length == 1
+                ? AppLocalizations.of(context)!.uiOneMatch(group.matches.length)
+                : AppLocalizations.of(context)!
+                    .uiManyMatches(group.matches.length),
             style: styles.caption3.copyWith(
               color: appColors.textSecondary,
               fontWeight: FontWeight.w700,

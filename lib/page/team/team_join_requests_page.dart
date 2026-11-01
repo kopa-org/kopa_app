@@ -1,3 +1,4 @@
+import 'package:kopa/l10n/current_l10n.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -78,7 +79,8 @@ class _TeamJoinRequestsPageState extends State<TeamJoinRequestsPage> {
 
     setState(() {
       _savingRequestIds.remove(request.id);
-      _errorMessage = result['error'] ?? 'Kunne ikke behandle anmodning.';
+      _errorMessage = result['error'] ??
+          AppLocalizations.of(context)!.uiCouldNotProcessTheRequest2;
     });
   }
 
@@ -89,7 +91,7 @@ class _TeamJoinRequestsPageState extends State<TeamJoinRequestsPage> {
     final styles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return PageScaffold(
-      title: 'Holdanmodninger',
+      title: AppLocalizations.of(context)!.uiTeamRequests,
       showBackButton: true,
       backgroundColor: colors.background,
       body: SafeArea(
@@ -110,7 +112,8 @@ class _TeamJoinRequestsPageState extends State<TeamJoinRequestsPage> {
                 ),
                 children: [
                   Text(
-                    'Afventer godkendelse (${requests.length})',
+                    AppLocalizations.of(context)!
+                        .uiAwaitingApproval(requests.length),
                     style: styles.subtitle2.copyWith(
                       color: colors.dirt,
                       fontWeight: FontWeight.w800,
@@ -137,8 +140,9 @@ class _TeamJoinRequestsPageState extends State<TeamJoinRequestsPage> {
                           ),
                     )
                   else if (requests.isEmpty)
-                    const _EmptyJoinRequests(
-                      message: 'Ingen spillere afventer godkendelse.',
+                    _EmptyJoinRequests(
+                      message: AppLocalizations.of(context)!
+                          .uiNoPlayersAreAwaitingApproval,
                     )
                   else
                     for (final request in requests)
@@ -251,7 +255,8 @@ class _JoinRequestRow extends StatelessWidget {
                   icon: CupertinoIcons.xmark,
                   color: colors.error,
                   backgroundColor: AppColors.of(context).errorSurface,
-                  semanticLabel: 'Afvis ${request.userName}',
+                  semanticLabel:
+                      AppLocalizations.of(context)!.uiReject(request.userName),
                   onPressed: onReject,
                 ),
                 const SizedBox(width: Spacing.sm),
@@ -259,7 +264,8 @@ class _JoinRequestRow extends StatelessWidget {
                   icon: CupertinoIcons.checkmark_alt,
                   color: colors.primary,
                   backgroundColor: AppColors.of(context).successSurface,
-                  semanticLabel: 'Godkend ${request.userName}',
+                  semanticLabel:
+                      AppLocalizations.of(context)!.uiApprove(request.userName),
                   onPressed: onApprove,
                 ),
               ],
@@ -270,11 +276,11 @@ class _JoinRequestRow extends StatelessWidget {
   }
 
   String _requestedAtLabel(DateTime? insertedAt) {
-    if (insertedAt == null) return 'Ny anmodning';
+    if (insertedAt == null) return currentL10n.uiNewRequest;
     final local = insertedAt.toLocal();
     final day = local.day.toString().padLeft(2, '0');
     final month = local.month.toString().padLeft(2, '0');
-    return 'Anmodet $day/$month';
+    return currentL10n.uiRequested(day, month);
   }
 }
 

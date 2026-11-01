@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/model/dbu_standings.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/page/standings/standings_page.dart';
@@ -11,6 +12,8 @@ void main() {
       (tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         theme: ThemeData(
           extensions: <ThemeExtension<dynamic>>[
             AppColors.light,

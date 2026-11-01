@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/config/app_feature_flags.dart';
 import 'package:kopa/cubits/feature_flags_cubit.dart';
 import 'package:kopa/page/update_required/update_required_gate.dart';
@@ -21,6 +22,8 @@ void main() {
       BlocProvider.value(
         value: cubit,
         child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           theme: AppTheme.lightTheme,
           home: const UpdateRequiredGate(
             child: Text('App content'),

@@ -1,3 +1,5 @@
+import 'package:kopa/helpers/date_helper.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/model/in_form.dart';
@@ -53,7 +55,7 @@ class _InFormPlayerPageState extends State<InFormPlayerPage> {
           }
           if (snapshot.hasError || !snapshot.hasData) {
             return _PlayerMessage(
-              text: 'Kunne ikke hente pointdetaljer.',
+              text: AppLocalizations.of(context)!.uiCouldNotFetchPointDetails,
               color: colors.lightSky,
             );
           }
@@ -81,7 +83,7 @@ class _InFormPlayerPageState extends State<InFormPlayerPage> {
                       _PlayerMetrics(row: widget.row),
                       const SizedBox(height: Spacing.lg),
                       InFormSectionTitle(
-                        title: 'Pointfortælling',
+                        title: AppLocalizations.of(context)!.uiPointsStory,
                         action: widget.period.label,
                       ),
                       const SizedBox(height: Spacing.sm),
@@ -92,7 +94,8 @@ class _InFormPlayerPageState extends State<InFormPlayerPage> {
               if (groups.isEmpty)
                 SliverToBoxAdapter(
                   child: _PlayerMessage(
-                    text: 'Ingen point i den valgte periode.',
+                    text: AppLocalizations.of(context)!
+                        .uiNoPointsInTheSelectedPeriod,
                     color: colors.lightGrass,
                   ),
                 )
@@ -168,7 +171,8 @@ class _PlayerHero extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           InFormEyebrow(
-                            label: '#${row.rank} på holdet',
+                            label: AppLocalizations.of(context)!
+                                .uiOnTheTeam(row.rank),
                             color: colors.lightGrass,
                           ),
                           const SizedBox(height: Spacing.sm),
@@ -198,7 +202,8 @@ class _PlayerHero extends StatelessWidget {
                 ),
                 const SizedBox(height: Spacing.xs),
                 Text(
-                  'point · ${inFormPositionLabel(row.position)}',
+                  AppLocalizations.of(context)!
+                      .uiPoints2(inFormPositionLabel(row.position)),
                   style: styles.body.copyWith(color: colors.textSecondary),
                 ),
               ],
@@ -219,27 +224,29 @@ class _PlayerMetrics extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final movement = row.rankChange == 0
-        ? 'Stabil'
+        ? AppLocalizations.of(context)!.uiStable
         : '${row.rankChange > 0 ? '+' : '-'}${row.rankChange.abs()}';
 
     return Row(
       children: [
         InFormMetric(
-          label: 'Seneste runde',
+          label: AppLocalizations.of(context)!.uiLatestRound,
           value: _signed(row.latestRound),
           color: colors.lightGrass,
           icon: Icons.bolt,
         ),
         const SizedBox(width: Spacing.sm),
         InFormMetric(
-          label: 'Til førsteplads',
-          value: row.rank == 1 ? 'Fører' : '-${_number(row.pointsToFirst)}',
+          label: AppLocalizations.of(context)!.uiToFirstPlace,
+          value: row.rank == 1
+              ? AppLocalizations.of(context)!.uiLeading
+              : '-${_number(row.pointsToFirst)}',
           color: colors.lightSky,
           icon: Icons.flag_outlined,
         ),
         const SizedBox(width: Spacing.sm),
         InFormMetric(
-          label: 'Bevægelse',
+          label: AppLocalizations.of(context)!.uiMovement,
           value: movement,
           color: colors.sunset.withValues(alpha: .3),
           icon: row.rankChange >= 0 ? Icons.trending_up : Icons.trending_down,
@@ -289,7 +296,11 @@ class _ScoreDay extends StatelessWidget {
                   children: [
                     Text(_dateLabel(date), style: styles.bodyBold),
                     Text(
-                      '${entries.length} ${entries.length == 1 ? 'hændelse' : 'hændelser'}',
+                      entries.length == 1
+                          ? AppLocalizations.of(context)!
+                              .uiOneEvent(entries.length)
+                          : AppLocalizations.of(context)!
+                              .uiManyEvents(entries.length),
                       style: styles.caption,
                     ),
                   ],
@@ -467,23 +478,7 @@ bool _isBonus(String rule) {
       rule.contains('utility');
 }
 
-String _dateLabel(DateTime date) {
-  const months = [
-    'januar',
-    'februar',
-    'marts',
-    'april',
-    'maj',
-    'juni',
-    'juli',
-    'august',
-    'september',
-    'oktober',
-    'november',
-    'december',
-  ];
-  return '${date.day}. ${months[date.month - 1]} ${date.year}';
-}
+String _dateLabel(DateTime date) => DateHelper.getFormattedLongDate(date);
 
 String _number(double value) {
   return value == value.roundToDouble()

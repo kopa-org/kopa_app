@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:go_router/go_router.dart';
@@ -211,7 +212,7 @@ class _DbuWebviewPageState extends State<DbuWebviewPage> {
       setState(() {
         _isLoadingScraper = false;
         _isScraping = false;
-        _loadError = 'Kunne ikke hente DBU-importlogik fra serveren.';
+        _loadError = AppLocalizations.of(context)!.uiCouldNotFetchTheDbuImport;
       });
     }
   }
@@ -223,8 +224,10 @@ class _DbuWebviewPageState extends State<DbuWebviewPage> {
       appBar: AppBar(
         backgroundColor: AppColors.of(context).background,
         title: Text(switch (widget.operation) {
-          DbuWebviewOperation.fullImport => 'DBU Login',
-          DbuWebviewOperation.standings => 'Synkroniser stilling',
+          DbuWebviewOperation.fullImport =>
+            AppLocalizations.of(context)!.uiDbuLogin,
+          DbuWebviewOperation.standings =>
+            AppLocalizations.of(context)!.uiSyncStandings,
         }),
         leading: IconButton(
           icon: const Icon(Icons.close),
@@ -269,14 +272,14 @@ class _BlockingLoader extends StatelessWidget {
             color: colors.surface,
             elevation: 8,
             borderRadius: BorderRadius.circular(16),
-            child: const Padding(
+            child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 28, vertical: 22),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   CircularProgressIndicator(),
                   SizedBox(height: 16),
-                  Text('Loading'),
+                  Text(AppLocalizations.of(context)!.uiLoading),
                 ],
               ),
             ),

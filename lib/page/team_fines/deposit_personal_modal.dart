@@ -1,3 +1,4 @@
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/button/mobile_pay_button.dart';
@@ -82,7 +83,7 @@ class _DepositPersonalModalState extends State<DepositPersonalModal> {
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return PageScaffold(
-      title: 'Indbetal',
+      title: AppLocalizations.of(context)!.fineBoxDeposit,
       showBackButton: false,
       backgroundColor: appColors.background,
       leading: CupertinoButton(
@@ -99,7 +100,7 @@ class _DepositPersonalModalState extends State<DepositPersonalModal> {
             }
           },
           child: Text(
-            'Gem',
+            AppLocalizations.of(context)!.matchTasksSave,
             style: appTextStyles.bodyBold.copyWith(color: appColors.primary),
           ),
         ),
@@ -108,7 +109,7 @@ class _DepositPersonalModalState extends State<DepositPersonalModal> {
         child: Column(
           children: [
             _buildBalanceCard(
-              title: 'Mangler at blive betalt',
+              title: AppLocalizations.of(context)!.uiStillToBePaid,
               amount: fineDetailsListNotPaid
                   .fold(0, (sum, fd) => sum + fd.owedAmount)
                   .toString(),
@@ -116,7 +117,7 @@ class _DepositPersonalModalState extends State<DepositPersonalModal> {
               appTextStyles: appTextStyles,
             ),
             _buildBalanceCard(
-              title: 'Valgt beløb til indbetaling',
+              title: AppLocalizations.of(context)!.uiSelectedAmountToDeposit,
               amount: selectedAmountToDeposit.toString(),
               appColors: appColors,
               appTextStyles: appTextStyles,
@@ -141,9 +142,12 @@ class _DepositPersonalModalState extends State<DepositPersonalModal> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                          child:
-                              Text('Bødetype', style: appTextStyles.bodyBold)),
-                      Text('Beløb', style: appTextStyles.bodyBold),
+                          child: Text(AppLocalizations.of(context)!.uiFineType,
+                              style: appTextStyles.bodyBold)),
+                      Text(
+                          AppLocalizations.of(context)!
+                              .fineBoxWithdrawAmountHint,
+                          style: appTextStyles.bodyBold),
                       const SizedBox(width: 10),
                       CustomCheckbox(
                           value: selectAllFines, onChanged: toggleSelectAll),
@@ -202,7 +206,8 @@ class _DepositPersonalModalState extends State<DepositPersonalModal> {
                   children: [
                     MobilePayButton(
                       amount: selectedAmountToDeposit,
-                      message: 'Bøder - ${widget.userDetails.name}',
+                      message: AppLocalizations.of(context)!
+                          .uiFines(widget.userDetails.name),
                     ),
                   ],
                 )),
@@ -257,8 +262,8 @@ class _DepositPersonalModalState extends State<DepositPersonalModal> {
       showCupertinoDialog(
         context: context,
         builder: (context) => CupertinoAlertDialog(
-          title: Text('Fejl'),
-          content: Text('Vælg venligst en bøde at indbetale.'),
+          title: Text(AppLocalizations.of(context)!.matchPollErrorTitle),
+          content: Text(AppLocalizations.of(context)!.uiPleaseChooseAFineToPay),
           actions: <CupertinoDialogAction>[
             CupertinoDialogAction(
               onPressed: () {

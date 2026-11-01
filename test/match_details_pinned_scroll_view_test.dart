@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/component/match/match_details_pinned_scroll_view.dart';
 
 void main() {
@@ -66,6 +67,8 @@ Widget _app({
   ValueChanged<double>? onCollapse,
 }) =>
     MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: ThemeData(platform: platform),
       home: Scaffold(
         body: MatchDetailsPinnedScrollView(

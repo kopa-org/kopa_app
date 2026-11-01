@@ -1,3 +1,4 @@
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/model/statistics.dart';
 import 'package:kopa/page/statistics/widgets/stat_card.dart';
@@ -28,7 +29,7 @@ class ClubStatsSection extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(24, 32, 24, 16),
           child: Text(
-            'Holdets Stats',
+            AppLocalizations.of(context)!.uiTeamStats,
             style: appTextStyles.sectionHeader.copyWith(
               color: appColors.dirt,
             ),
@@ -49,17 +50,17 @@ class ClubStatsSection extends StatelessWidget {
             childAspectRatio: 1.0,
             children: [
               MiniStatCard(
-                title: 'Vundne',
+                title: AppLocalizations.of(context)!.uiWon,
                 value: club.wins.toString(),
                 color: appColors.success,
               ),
               MiniStatCard(
-                title: 'Uafgjorte',
+                title: AppLocalizations.of(context)!.uiDrawn,
                 value: club.draws.toString(),
                 color: appColors.warning,
               ),
               MiniStatCard(
-                title: 'Tabte',
+                title: AppLocalizations.of(context)!.uiLost,
                 value: club.losses.toString(),
                 color: appColors.error,
               ),
@@ -77,13 +78,13 @@ class ClubStatsSection extends StatelessWidget {
             childAspectRatio: 1.5,
             children: [
               StatCard(
-                title: 'Målscorer',
+                title: AppLocalizations.of(context)!.matchEventScorer,
                 value: '${club.goalsFor} - ${club.goalsAgainst}',
                 icon: Icons.sports_baseball,
                 color: appColors.sky,
               ),
               StatCard(
-                title: 'Målforskel',
+                title: AppLocalizations.of(context)!.uiGoalDifference,
                 value: '${goalDiff > 0 ? "+" : ""}$goalDiff',
                 icon: Icons.leaderboard,
                 color: appColors.sunset,

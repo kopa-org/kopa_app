@@ -1,3 +1,4 @@
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
@@ -69,7 +70,7 @@ class UpdateRequiredPage extends StatelessWidget {
                               height: constraints.maxHeight < 700 ? 28 : 36,
                             ),
                             Text(
-                              'Opdatering påkrævet',
+                              AppLocalizations.of(context)!.uiUpdateRequired,
                               textAlign: TextAlign.center,
                               style: styles.h4.copyWith(
                                 color: colors.dirt,
@@ -79,7 +80,8 @@ class UpdateRequiredPage extends StatelessWidget {
                             ),
                             const SizedBox(height: Spacing.md),
                             Text(
-                              'En ny version af Kopa er tilgængelig. Opdater venligst for at fortsætte din holdoplevelse.',
+                              AppLocalizations.of(context)!
+                                  .uiANewVersionOfKopaIs,
                               textAlign: TextAlign.center,
                               style: styles.body4.copyWith(
                                 color: colors.grey5,
@@ -95,7 +97,7 @@ class UpdateRequiredPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 40),
                   _UpdateActionButton(
-                    label: 'Opdater nu',
+                    label: AppLocalizations.of(context)!.uiUpdateNow,
                     backgroundColor: colors.primary,
                     foregroundColor: colors.white,
                     shadowColor: colors.primary.withValues(alpha: 0.20),

@@ -1,3 +1,4 @@
+import 'package:kopa/l10n/current_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
@@ -19,9 +20,9 @@ enum MatchResultStatus {
   }
 
   String get label => switch (this) {
-        MatchResultStatus.win => 'Sejr',
-        MatchResultStatus.draw => 'Uafgjort',
-        MatchResultStatus.loss => 'Tabt',
+        MatchResultStatus.win => currentL10n.uiWin,
+        MatchResultStatus.draw => currentL10n.uiDraw,
+        MatchResultStatus.loss => currentL10n.uiLoss,
       };
 }
 

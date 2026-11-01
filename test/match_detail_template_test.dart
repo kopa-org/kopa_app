@@ -213,6 +213,8 @@ void main() {
   testWidgets('tabs honor reduced motion immediately', (tester) async {
     var selected = MatchDetailSegment.overview;
     await tester.pumpWidget(MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       builder: (context, child) => MediaQuery(
           data: MediaQuery.of(context).copyWith(disableAnimations: true),
           child: child!),
@@ -240,7 +242,9 @@ void main() {
   testWidgets('attendance segment does not render duplicate section header',
       (tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: MatchDetailTemplate(
           selectedSegment: MatchDetailSegment.attendance,
           heroCard: SizedBox(height: 1),
@@ -259,6 +263,8 @@ void main() {
   testWidgets('match details header scrolls with page content', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: MatchDetailTemplate(
           useDarkMatchHeader: true,
           heroCard: const SizedBox(height: 220, child: Text('Hero')),
@@ -297,6 +303,8 @@ void main() {
       (tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: MatchDetailTemplate(
           selectedSegment: MatchDetailSegment.attendance,
           heroCard: const SizedBox(height: 1),
@@ -344,6 +352,8 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         theme: ThemeData(
           extensions: <ThemeExtension<dynamic>>[
             AppColors.light,
@@ -393,6 +403,8 @@ void main() {
       (tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         theme: ThemeData(
           extensions: <ThemeExtension<dynamic>>[
             AppColors.light,
@@ -444,6 +456,8 @@ void main() {
       (tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         theme: ThemeData(
           extensions: <ThemeExtension<dynamic>>[
             AppColors.light,
@@ -525,6 +539,8 @@ void main() {
       (tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: MatchDetailTemplate(
           heroCard: const SizedBox(height: 1),
           useDarkMatchHeader: true,
@@ -552,6 +568,8 @@ void main() {
     Widget buildTemplate(
         {MatchDetailSegment selectedSegment = MatchDetailSegment.overview}) {
       return MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: MatchDetailTemplate(
           selectedSegment: selectedSegment,
           onSegmentChanged: (_) {},
@@ -617,6 +635,8 @@ void main() {
       (tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: MatchDetailTemplate(
           heroCard: const SizedBox(
             key: ValueKey('match-details-hero'),
@@ -658,6 +678,8 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: MatchDetailTemplate(
           selectedSegment: MatchDetailSegment.attendance,
           useDarkMatchHeader: true,
@@ -683,6 +705,8 @@ void main() {
       (tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         theme: ThemeData(platform: TargetPlatform.iOS),
         home: MatchDetailTemplate(
           heroCard: const SizedBox(height: 1),

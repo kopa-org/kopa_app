@@ -162,7 +162,12 @@ class PageScaffold extends StatelessWidget {
                             ? _defaultMaterialBackButton(context)
                             : null),
                     automaticallyImplyLeading: showBackButton,
-                    actions: trailing ?? [],
+                    // Text actions have no padding, so keep them off the edge.
+                    actions: [
+                      ...?trailing,
+                      if (trailing?.isNotEmpty ?? false)
+                        const SizedBox(width: 16),
+                    ],
                   )
                 : null,
             body: SafeArea(

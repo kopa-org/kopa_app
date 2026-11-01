@@ -13,9 +13,9 @@ import 'package:kopa/theme/spacing.dart';
 ///
 /// Recurring tasks come from the team settings and rotate through a queue;
 /// one-off tasks only belong to this match. The team leader is not always at
-/// the match, so anybody on the team can add one-off tasks, change who is
-/// responsible and tick tasks off. Only setting up the recurring tasks is
-/// left to the leader.
+/// the match, so anybody on the team can add one-off tasks and change who is
+/// responsible. Only the responsible player ticks a task off, and only setting
+/// up the recurring tasks is left to the leader.
 class MatchTasksSection extends StatefulWidget {
   final int matchId;
   final int currentUserId;
@@ -68,24 +68,12 @@ class _MatchTasksSectionState extends State<MatchTasksSection> {
     }
   }
 
-  /// [asCurrentUser] registers the current user as the one who did it;
-  /// otherwise the responsible player gets the credit.
-  Future<void> _complete(MatchTask task, {required bool asCurrentUser}) async {
+  Future<void> _complete(MatchTask task) async {
     final l10n = AppLocalizations.of(context)!;
-    final doer = asCurrentUser || widget.currentUserId == task.assigneeId
-        ? null
-        : task.assigneeName;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(l10n.matchTasksConfirmTitle(task.name)),
-        content: doer == null
-            ? null
-            : Text(
-                task.isRecurring
-                    ? l10n.matchTasksConfirmRecurring(doer)
-                    : l10n.matchTasksConfirmOneOff(doer),
-              ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -101,34 +89,18 @@ class _MatchTasksSectionState extends State<MatchTasksSection> {
     );
     if (confirmed != true) return;
 
-    await _run(() => MatchTasksRepository.complete(
-          widget.matchId,
-          task.id,
-          completedByUserId: asCurrentUser ? widget.currentUserId : null,
-        ));
+    await _run(() => MatchTasksRepository.complete(widget.matchId, task.id));
   }
 
   Future<void> _openTask(MatchTask task) async {
-    final action = await showModalBottomSheet<_TaskSheetResult>(
+    await showModalBottomSheet<void>(
       context: context,
       backgroundColor: AppColors.transparent,
       isScrollControlled: true,
       useSafeArea: true,
-      builder: (_) => _TaskSheet(
-        matchId: widget.matchId,
-        task: task,
-        isMine: task.assigneeId == widget.currentUserId,
-      ),
+      builder: (_) => _TaskSheet(matchId: widget.matchId, task: task),
     );
-    if (!mounted) return;
-
-    switch (action) {
-      case _TaskSheetResult.completedByMe:
-        await _complete(task, asCurrentUser: true);
-      case _TaskSheetResult.changed:
-      case null:
-        await _load();
-    }
+    if (mounted) await _load();
   }
 
   Future<void> _addOneOff() async {
@@ -224,10 +196,8 @@ class _MatchTasksSectionState extends State<MatchTasksSection> {
                     task: tasks[i],
                     isBusy: _isBusy,
                     onOpen: () => _openTask(tasks[i]),
-                    // Whoever ticks it off, the responsible player gets the
-                    // credit; "Jeg har gjort det" in the sheet is for taking
-                    // it over.
-                    onComplete: () => _complete(tasks[i], asCurrentUser: false),
+                    isMine: tasks[i].assigneeId == widget.currentUserId,
+                    onComplete: () => _complete(tasks[i]),
                   ),
                 ],
                 if (tasks.isNotEmpty) _divider(colors),
@@ -281,12 +251,14 @@ class _TaskRow extends StatelessWidget {
   final MatchTask task;
   final bool isBusy;
   final VoidCallback onOpen;
+  final bool isMine;
   final VoidCallback onComplete;
 
   const _TaskRow({
     required this.task,
     required this.isBusy,
     required this.onOpen,
+    required this.isMine,
     required this.onComplete,
   });
 
@@ -298,7 +270,7 @@ class _TaskRow extends StatelessWidget {
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
 
     final hasAssignee = task.assigneeName != null;
-    final canTickOff = !task.isCompleted && hasAssignee;
+    final canTickOff = !task.isCompleted && isMine;
 
     String? detail;
     var detailColor = colors.grey5;
@@ -516,19 +488,15 @@ String _firstName(String name) {
   return parts.isEmpty || parts.first.isEmpty ? name : parts.first;
 }
 
-enum _TaskSheetResult { changed, completedByMe }
-
 /// Details of one task at this match: who is responsible and, for recurring
 /// tasks, the queue. Tap a player to hand them the task.
 class _TaskSheet extends StatefulWidget {
   final int matchId;
   final MatchTask task;
-  final bool isMine;
 
   const _TaskSheet({
     required this.matchId,
     required this.task,
-    required this.isMine,
   });
 
   @override
@@ -538,7 +506,6 @@ class _TaskSheet extends StatefulWidget {
 class _TaskSheetState extends State<_TaskSheet> {
   List<TaskQueuePlayer>? _players;
   bool _isBusy = false;
-  bool _changed = false;
 
   MatchTask get _task => widget.task;
 
@@ -564,12 +531,12 @@ class _TaskSheetState extends State<_TaskSheet> {
     try {
       await MatchTasksRepository.assign(
           widget.matchId, _task.id, player.userId);
-      _changed = true;
-      await _load();
+      if (mounted) Navigator.of(context).pop();
     } catch (_) {
-      if (mounted) _showError(context);
-    } finally {
-      if (mounted) setState(() => _isBusy = false);
+      if (mounted) {
+        _showError(context);
+        setState(() => _isBusy = false);
+      }
     }
   }
 
@@ -596,18 +563,13 @@ class _TaskSheetState extends State<_TaskSheet> {
     setState(() => _isBusy = true);
     try {
       await MatchTasksRepository.deleteTask(_task.id);
-      if (mounted) Navigator.of(context).pop(_TaskSheetResult.changed);
+      if (mounted) Navigator.of(context).pop();
     } catch (_) {
       if (mounted) {
         _showError(context);
         setState(() => _isBusy = false);
       }
     }
-  }
-
-  void _close([_TaskSheetResult? result]) {
-    Navigator.of(context)
-        .pop(result ?? (_changed ? _TaskSheetResult.changed : null));
   }
 
   @override
@@ -619,127 +581,96 @@ class _TaskSheetState extends State<_TaskSheet> {
     final players = _players;
     final canPick = !_task.isCompleted;
 
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) _close();
-      },
-      child: DraggableScrollableSheet(
-        initialChildSize: 0.75,
-        minChildSize: 0.4,
-        maxChildSize: 0.95,
-        expand: false,
-        builder: (context, scrollController) => Container(
-          decoration: BoxDecoration(
-            color: colors.background,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: Container(
-                  margin: const EdgeInsets.only(top: Spacing.sm),
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: colors.grey4.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
+    return DraggableScrollableSheet(
+      initialChildSize: 0.75,
+      minChildSize: 0.4,
+      maxChildSize: 0.95,
+      expand: false,
+      builder: (context, scrollController) => Container(
+        decoration: BoxDecoration(
+          color: colors.background,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(top: Spacing.sm),
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: colors.grey4.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                  Spacing.md, Spacing.md, Spacing.sm, Spacing.xs),
+              child: Row(
+                children: [
+                  _TaskIcon(task: _task),
+                  const SizedBox(width: Spacing.itemGap),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(_task.name, style: styles.h5),
+                        Text(
+                          _task.isRecurring
+                              ? l10n.matchTasksQueueTitle
+                              : l10n.matchTasksOneOffBadge,
+                          style: styles.body3.copyWith(color: colors.grey5),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (!_task.isRecurring)
+                    IconButton(
+                      key: const ValueKey('match-task-delete'),
+                      tooltip: l10n.matchTasksDelete,
+                      onPressed: _isBusy ? null : _deleteOneOff,
+                      icon: Icon(CupertinoIcons.delete,
+                          color: colors.errorForeground),
+                    ),
+                  IconButton(
+                    tooltip:
+                        MaterialLocalizations.of(context).closeButtonTooltip,
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(CupertinoIcons.xmark),
+                  ),
+                ],
+              ),
+            ),
+            if (canPick)
               Padding(
                 padding: const EdgeInsets.fromLTRB(
-                    Spacing.md, Spacing.md, Spacing.sm, Spacing.xs),
-                child: Row(
-                  children: [
-                    _TaskIcon(task: _task),
-                    const SizedBox(width: Spacing.itemGap),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(_task.name, style: styles.h5),
-                          Text(
-                            _task.isRecurring
-                                ? l10n.matchTasksQueueTitle
-                                : l10n.matchTasksOneOffBadge,
-                            style: styles.body3.copyWith(color: colors.grey5),
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (!_task.isRecurring)
-                      IconButton(
-                        key: const ValueKey('match-task-delete'),
-                        tooltip: l10n.matchTasksDelete,
-                        onPressed: _isBusy ? null : _deleteOneOff,
-                        icon: Icon(CupertinoIcons.delete,
-                            color: colors.errorForeground),
-                      ),
-                    IconButton(
-                      tooltip:
-                          MaterialLocalizations.of(context).closeButtonTooltip,
-                      onPressed: () => _close(),
-                      icon: const Icon(CupertinoIcons.xmark),
-                    ),
-                  ],
+                    Spacing.md, Spacing.xs, Spacing.md, Spacing.sm),
+                child: Text(
+                  l10n.matchTasksChangeResponsible,
+                  style: styles.body3.copyWith(color: colors.grey5),
                 ),
               ),
-              if (canPick)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                      Spacing.md, Spacing.xs, Spacing.md, Spacing.sm),
-                  child: Text(
-                    l10n.matchTasksChangeResponsible,
-                    style: styles.body3.copyWith(color: colors.grey5),
-                  ),
-                ),
-              Expanded(
-                child: players == null
-                    ? const Center(child: CupertinoActivityIndicator())
-                    : ListView.separated(
-                        controller: scrollController,
-                        padding: const EdgeInsets.fromLTRB(
-                            Spacing.md, Spacing.xs, Spacing.md, Spacing.lg),
-                        itemCount: players.length,
-                        separatorBuilder: (_, __) =>
-                            const SizedBox(height: Spacing.xs + 2),
-                        itemBuilder: (context, index) => _PlayerRow(
-                          player: players[index],
-                          showPosition: _task.isRecurring,
-                          enabled: canPick && !_isBusy,
-                          onTap: () => _assign(players[index]),
-                        ),
-                      ),
-              ),
-              if (!_task.isCompleted && !widget.isMine)
-                SafeArea(
-                  top: false,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                        Spacing.md, Spacing.sm, Spacing.md, Spacing.md),
-                    child: OutlinedButton.icon(
-                      key: const ValueKey('match-task-i-did-it'),
-                      onPressed: _isBusy
-                          ? null
-                          : () => _close(_TaskSheetResult.completedByMe),
-                      icon: const Icon(CupertinoIcons.hand_thumbsup, size: 18),
-                      label: Text(l10n.matchTasksIDidIt),
-                      style: OutlinedButton.styleFrom(
-                        minimumSize: const Size.fromHeight(48),
-                        foregroundColor: colors.textPrimary,
-                        side: BorderSide(color: colors.grey4),
-                        shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(Spacing.borderRadiusMedium),
-                        ),
+            Expanded(
+              child: players == null
+                  ? const Center(child: CupertinoActivityIndicator())
+                  : ListView.separated(
+                      controller: scrollController,
+                      padding: const EdgeInsets.fromLTRB(
+                          Spacing.md, Spacing.xs, Spacing.md, Spacing.lg),
+                      itemCount: players.length,
+                      separatorBuilder: (_, __) =>
+                          const SizedBox(height: Spacing.xs + 2),
+                      itemBuilder: (context, index) => _PlayerRow(
+                        player: players[index],
+                        showPosition: _task.isRecurring,
+                        enabled: canPick && !_isBusy,
+                        onTap: () => _assign(players[index]),
                       ),
                     ),
-                  ),
-                ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

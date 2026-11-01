@@ -1,3 +1,4 @@
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
@@ -37,7 +38,7 @@ class FinesCard extends StatelessWidget {
                   color: AppColors.of(context).white, size: 28),
               const SizedBox(height: 8),
               Text(
-                'Udestående Bøder',
+                AppLocalizations.of(context)!.uiOutstandingFines,
                 style: appTextStyles.bodyBold.copyWith(
                   color: AppColors.of(context).white,
                 ),

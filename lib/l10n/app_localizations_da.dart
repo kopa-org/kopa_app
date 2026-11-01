@@ -982,21 +982,8 @@ class AppLocalizationsDa extends AppLocalizations {
   String get matchTasksMarkDone => 'Udført';
 
   @override
-  String get matchTasksIDidIt => 'Jeg har gjort det';
-
-  @override
   String matchTasksConfirmTitle(String task) {
     return 'Er $task klaret?';
-  }
-
-  @override
-  String matchTasksConfirmRecurring(String name) {
-    return '$name rykker bagerst i køen.';
-  }
-
-  @override
-  String matchTasksConfirmOneOff(String name) {
-    return 'Opgaven markeres som udført af $name.';
   }
 
   @override
@@ -1169,4 +1156,1409 @@ class AppLocalizationsDa extends AppLocalizations {
   @override
   String get mobilePayPaidSaveFailed =>
       'Din betaling kunne ikke gemmes. Prøv igen.';
+
+  @override
+  String get fineBoxSeeAll => 'Se alle';
+
+  @override
+  String get fineBoxPlayersTitle => 'Alle spillere';
+
+  @override
+  String get fineBoxAllFinesTitle => 'Alle bøder';
+
+  @override
+  String get fineBoxInBox => 'I kassen';
+
+  @override
+  String get fineBoxAllPaid => 'Alt betalt';
+
+  @override
+  String get fineBoxDeleteFine => 'Slet bøde';
+
+  @override
+  String get fineBoxDeleteCancel => 'Annuller';
+
+  @override
+  String get fineBoxDeleteFailed => 'Bøden kunne ikke slettes. Prøv igen.';
+
+  @override
+  String fineBoxPlayerFineCount(int count) {
+    return '$count bøder';
+  }
+
+  @override
+  String fineBoxDeleteFineBody(String fine, String name) {
+    return 'Vil du slette $fine til $name? Det kan ikke fortrydes.';
+  }
+
+  @override
+  String get navHome => 'Hjem';
+
+  @override
+  String get navMatches => 'Kampe';
+
+  @override
+  String get navStatistics => 'Statistik';
+
+  @override
+  String get navSquad => 'Truppen';
+
+  @override
+  String get navFineBox => 'Bødekasse';
+
+  @override
+  String get uiChooseDbuTeam => 'Vælg DBU-hold';
+
+  @override
+  String get uiCancel => 'Annullér';
+
+  @override
+  String get uiCouldNotFetchTheInviteLink =>
+      'Kunne ikke hente invitationslink.';
+
+  @override
+  String get uiLinkCopied => 'Link kopieret';
+
+  @override
+  String uiJoinOnKopa(Object a, Object b) {
+    return 'Join $a på Kopa: $b';
+  }
+
+  @override
+  String get uiCouldNotSaveThePositionTry =>
+      'Kunne ikke gemme positionen. Prøv igen.';
+
+  @override
+  String get uiInviteYourTeam => 'Inviter dit hold';
+
+  @override
+  String get uiCreateYourFootballTeamAndKeep =>
+      'Opret dit fodboldhold og saml spillere, kampe og statistikker ét sted.';
+
+  @override
+  String get uiShareTheLinkWithThePlayers =>
+      'Del linket med spillerne, så de kan finde holdet.';
+
+  @override
+  String get uiContinueToKopa => 'Fortsæt til Kopa';
+
+  @override
+  String get uiAssociation => 'Forbund';
+
+  @override
+  String get uiYourTeamName => 'Dit holdnavn';
+
+  @override
+  String uiYouChose(Object a, Object b) {
+    return 'Du valgte: $a ($b)';
+  }
+
+  @override
+  String get ui7ASide => '7-mand';
+
+  @override
+  String get ui11ASide => '11-mand';
+
+  @override
+  String get uiSearchResults => 'Søgeresultater';
+
+  @override
+  String uiTeamLeader(Object a) {
+    return 'Holdleder: $a';
+  }
+
+  @override
+  String get uiTeamLeaderPending => 'Holdleder: Afventer';
+
+  @override
+  String uiMembers(Object a) {
+    return '$a medlemmer';
+  }
+
+  @override
+  String get uiTheInviteLinkCouldNotBe =>
+      'Invitationslinket kunne ikke hentes.';
+
+  @override
+  String get uiCopyLink => 'Kopier link';
+
+  @override
+  String get uiShareLink => 'Del link';
+
+  @override
+  String get uiBack => 'Tilbage';
+
+  @override
+  String uiStepOf(Object a, Object b) {
+    return 'Trin $a af $b';
+  }
+
+  @override
+  String get uiDbuConnected => 'DBU forbundet';
+
+  @override
+  String get uiTeamDataHasBeenImported => 'Holddata er importeret';
+
+  @override
+  String get uiLogInThroughDbuToImport =>
+      'Log ind via DBU for at importere holddata';
+
+  @override
+  String get uiYourTeam => 'dit hold';
+
+  @override
+  String get uiYourTeam2 => 'Dit hold';
+
+  @override
+  String get uiStep3Of5 => 'Trin 3 af 5';
+
+  @override
+  String get uiWaitingForApproval => 'Venter på accept';
+
+  @override
+  String uiYouHaveAskedToJoinYou(Object a) {
+    return 'Du har ansøgt om at blive en del af $a. Du får besked, når holdlederen har accepteret din anmodning.';
+  }
+
+  @override
+  String get uiPending => 'Afventer';
+
+  @override
+  String get uiCouldNotValidateTheInvitation =>
+      'Kunne ikke validere invitation';
+
+  @override
+  String get uiNetworkError => 'Netværksfejl';
+
+  @override
+  String get uiNotLoggedIn => 'Ikke logget ind';
+
+  @override
+  String get uiCouldNotJoinTheTeam => 'Kunne ikke tilmelde holdet';
+
+  @override
+  String get uiCouldNotFetchTheCode => 'Kunne ikke hente kode';
+
+  @override
+  String get uiCouldNotRotateTheCode => 'Kunne ikke rotere kode';
+
+  @override
+  String get uiCouldNotCreateTheTeam => 'Kunne ikke oprette holdet';
+
+  @override
+  String get uiCouldNotSearchForTeams => 'Kunne ikke søge efter hold';
+
+  @override
+  String get uiCouldNotSendTheRequest => 'Kunne ikke sende anmodning';
+
+  @override
+  String get uiCouldNotFetchTheRequest => 'Kunne ikke hente anmodning';
+
+  @override
+  String get uiCouldNotFetchTheRequests => 'Kunne ikke hente anmodninger';
+
+  @override
+  String get uiCouldNotProcessTheRequest => 'Kunne ikke behandle anmodning';
+
+  @override
+  String get uiCouldNotCancelTheRequest => 'Kunne ikke annullere anmodning';
+
+  @override
+  String get uiInvalidInvitation => 'Ugyldig invitation';
+
+  @override
+  String get uiSomethingWentWrongPleaseTryAgain =>
+      'Der skete en fejl. Prøv venligst igen senere.';
+
+  @override
+  String get uiNoUserFound => 'Ingen bruger fundet.';
+
+  @override
+  String get uiPracticalInformation => 'Praktisk information';
+
+  @override
+  String get uiRegisteredPlayers => 'Tilmeldte spillere';
+
+  @override
+  String get uiDate => 'Dato';
+
+  @override
+  String get uiTime => 'Tidspunkt';
+
+  @override
+  String get uiLocation => 'Lokation';
+
+  @override
+  String get uiCountdown => 'Countdown';
+
+  @override
+  String get uiRegistrations => 'Tilmeldinger';
+
+  @override
+  String uiRegistered(Object a) {
+    return '$a tilmeldte';
+  }
+
+  @override
+  String get uiMeetingTime => 'Mødetid';
+
+  @override
+  String get uiYourSelection => 'Din udtagelse';
+
+  @override
+  String get uiNotes => 'Noter';
+
+  @override
+  String get uiNoResponse => 'Mangler svar';
+
+  @override
+  String get uiDeclined => 'Frameldt';
+
+  @override
+  String uiAvailable(Object a) {
+    return 'Til Rådighed ($a)';
+  }
+
+  @override
+  String uiSelected(Object a) {
+    return 'Udtaget ($a)';
+  }
+
+  @override
+  String uiNoResponse2(Object a) {
+    return 'Mangler svar ($a)';
+  }
+
+  @override
+  String uiDeclined2(Object a) {
+    return 'Frameldte ($a)';
+  }
+
+  @override
+  String get uiCouldNotUpdateTheApprovalTry =>
+      'Kunne ikke opdatere godkendelsen. Prøv igen.';
+
+  @override
+  String get uiCouldNotApproveEveryoneTryAgain =>
+      'Kunne ikke godkende alle. Prøv igen.';
+
+  @override
+  String get uiCouldNotChangeTheVisibilityTry =>
+      'Kunne ikke ændre synligheden. Prøv igen.';
+
+  @override
+  String get uiInProgressOrFinished => 'I gang eller afsluttet';
+
+  @override
+  String uiDaysHours(Object a, Object b) {
+    return '$a dage $b timer';
+  }
+
+  @override
+  String uiReject(Object a) {
+    return 'Afvis $a';
+  }
+
+  @override
+  String uiApprove(Object a) {
+    return 'Godkend $a';
+  }
+
+  @override
+  String get uiApproved => 'Godkendt';
+
+  @override
+  String get uiRejected => 'Afvist';
+
+  @override
+  String uiEditChoiceFor(Object a) {
+    return 'Rediger valg for $a';
+  }
+
+  @override
+  String get uiNoPlayersAreAwaitingApproval =>
+      'Ingen spillere afventer godkendelse.';
+
+  @override
+  String get uiApproveAll => 'Godkend alle';
+
+  @override
+  String get uiNoPlayersHere => 'Ingen spillere her.';
+
+  @override
+  String get uiCouldNotSaveTheLineupTry =>
+      'Kunne ikke gemme holdopstillingen. Prøv igen.';
+
+  @override
+  String get uiChoosePlayer => 'Vælg spiller';
+
+  @override
+  String get uiEditLineup => 'Rediger Holdopstilling';
+
+  @override
+  String uiEditFormation(Object a) {
+    return 'Rediger formation ($a)';
+  }
+
+  @override
+  String uiMovePlayerReleaseToPlace(Object a) {
+    return 'Flyt spiller: Slip for at placere $a';
+  }
+
+  @override
+  String uiBenchPlayers(Object a) {
+    return 'Bænken ($a spillere)';
+  }
+
+  @override
+  String get uiNoPlayersOnTheBench => 'Ingen spillere på bænken';
+
+  @override
+  String get uiHoldAPlayerAndDragTo =>
+      'Hold på en spiller og træk for at bytte plads';
+
+  @override
+  String get uiChooseFormation => 'Vælg formation';
+
+  @override
+  String get uiChooseTheFormationThatSuitsYour =>
+      'Vælg formationen der passer bedst til jeres næste kamp';
+
+  @override
+  String uiFormation(Object a) {
+    return 'Formation $a';
+  }
+
+  @override
+  String get uiGk => 'MM';
+
+  @override
+  String get uiAm => 'OM';
+
+  @override
+  String get uiPl => 'SP';
+
+  @override
+  String get uiStandard7ASide => 'Standard 7-mands';
+
+  @override
+  String get uiDefensiveBalance => 'Defensiv balance';
+
+  @override
+  String get uiSymmetricControl => 'Symmetrisk kontrol';
+
+  @override
+  String get uiAttackingWidth => 'Offensiv bredde';
+
+  @override
+  String get uiClassicBalance => 'Klassisk balance';
+
+  @override
+  String get uiMidfieldControl => 'Midtbanekontrol';
+
+  @override
+  String get uiControlledPressing => 'Kontrolleret pres';
+
+  @override
+  String get uiCustomLineup => 'Tilpasset opstilling';
+
+  @override
+  String get uiSettings => 'Indstillinger';
+
+  @override
+  String get uiImportMatchSchedule => 'Importér kampprogram';
+
+  @override
+  String get uiFetchingLink => 'Henter link...';
+
+  @override
+  String get uiShareKopa => 'Del Kopa';
+
+  @override
+  String get uiTeamTools => 'Holdværktøjer';
+
+  @override
+  String get uiApproveNewPlayers => 'Godkend nye spillere';
+
+  @override
+  String get uiSyncingStandings => 'Synkroniserer stilling...';
+
+  @override
+  String get uiSyncStandingsFromDbu => 'Synkroniser stilling fra DBU';
+
+  @override
+  String get uiDefaultMeetingTime => 'Standard mødetid';
+
+  @override
+  String get uiSavingMeetingTime => 'Gemmer mødetid...';
+
+  @override
+  String get uiSaveMeetingTime => 'Gem mødetid';
+
+  @override
+  String get uiLoggingOut => 'Logger ud...';
+
+  @override
+  String get uiLogOut => 'Log ud';
+
+  @override
+  String get uiCouldNotLogOut => 'Kunne ikke logge ud.';
+
+  @override
+  String get uiYouMustBeOnATeam => 'Du skal være på et hold for at dele Kopa.';
+
+  @override
+  String get uiCouldNotShareKopa => 'Kunne ikke dele Kopa.';
+
+  @override
+  String get uiOnlyTheTeamLeaderCanChange =>
+      'Kun holdlederen kan ændre mødetid.';
+
+  @override
+  String uiTheDefaultMeetingTimeIsSet(Object a) {
+    return 'Standard mødetid er sat til $a.';
+  }
+
+  @override
+  String get uiNoDefault => 'Ingen standard';
+
+  @override
+  String uiMinBeforeKickoff(Object a) {
+    return '$a min før kampstart';
+  }
+
+  @override
+  String uiStandingsAndPoolTeamsAreSynced(Object a) {
+    return 'Stilling og puljehold er synkroniseret ($a hold).';
+  }
+
+  @override
+  String uiFines(Object a) {
+    return 'Bøder - $a';
+  }
+
+  @override
+  String get ui1HourAgo => '1 time siden';
+
+  @override
+  String uiHoursAgo(Object a) {
+    return '$a timer siden';
+  }
+
+  @override
+  String get uiYesterday => 'I går';
+
+  @override
+  String uiDaysAgo(Object a) {
+    return '$a dage siden';
+  }
+
+  @override
+  String get uiUserNotLoggedIn => 'Bruger ikke logget ind';
+
+  @override
+  String get uiCouldNotFetchDashboardData => 'Kunne ikke hente dashboard data';
+
+  @override
+  String get uiCalendar => 'Kalender';
+
+  @override
+  String get uiProfile => 'Profil';
+
+  @override
+  String get uiNoUpcomingMatch => 'Ingen kommende kamp';
+
+  @override
+  String get uiTheScheduleIsBeingUpdated => 'Planen opdateres';
+
+  @override
+  String get uiTeam => 'Hold';
+
+  @override
+  String get uiOpponent => 'Modstander';
+
+  @override
+  String get uiNoMatch => 'Ingen kamp';
+
+  @override
+  String get uiNoMatchPlanned => 'Ingen kamp planlagt';
+
+  @override
+  String get uiNoLocation => 'Ingen lokation';
+
+  @override
+  String get uiMap => 'Kort ›';
+
+  @override
+  String get uiLatestMatch => 'Seneste kamp';
+
+  @override
+  String get uiStandings => 'Stilling';
+
+  @override
+  String get uiStatistics => 'Statistikker';
+
+  @override
+  String get uiRegistered2 => 'tilmeldt';
+
+  @override
+  String get uiANewSeasonHasStartedAnd =>
+      'Ny sæson er startet, og kampprogrammet er importeret.';
+
+  @override
+  String get uiTheMatchScheduleHasBeenUpdated => 'Kampprogrammet er opdateret.';
+
+  @override
+  String get uiStartNewSeason => 'Start ny sæson?';
+
+  @override
+  String get uiUpdateCurrent => 'Opdater nuværende';
+
+  @override
+  String get uiStartNewSeason2 => 'Start ny sæson';
+
+  @override
+  String get uiMissingResults => 'Mangler resultater';
+
+  @override
+  String get uiGoBack => 'Gå tilbage';
+
+  @override
+  String get uiStartAnyway => 'Start alligevel';
+
+  @override
+  String get uiSpring => 'Forår';
+
+  @override
+  String get uiSummer => 'Sommer';
+
+  @override
+  String get uiAutumn => 'Efterår';
+
+  @override
+  String get uiWinter => 'Vinter';
+
+  @override
+  String get uiNoTeamSelected => 'Ingen hold valgt.';
+
+  @override
+  String get uiTeamKeyFigures => 'Holdets nøgletal';
+
+  @override
+  String get uiTeamPointsAverage => 'Holdets pointsnit';
+
+  @override
+  String get uiTeamForm => 'Holdets form';
+
+  @override
+  String get uiGoalsScored => 'Mål scoret';
+
+  @override
+  String get uiGoalsConceded => 'Mål lukket ind';
+
+  @override
+  String get uiSeeTheFormTableStreaksAnd =>
+      'Se formranglisten, streaks og point.';
+
+  @override
+  String get uiYourStats => 'Dine Stats';
+
+  @override
+  String get uiForThisSeason => 'For denne season.';
+
+  @override
+  String get uiVotes => 'Stemmer';
+
+  @override
+  String get uiNoDataYet => 'Ingen data endnu.';
+
+  @override
+  String get uiSomeResultsAreLockedSeePlayer =>
+      'Nogle resultater er låst. Se Player+ for at låse hele ranglisten op.';
+
+  @override
+  String get uiTheSeasonSInternalCompetitionStarts =>
+      'Sæsonens interne konkurrence starter her.';
+
+  @override
+  String get uiSeasonDuels => 'Sæsondueller';
+
+  @override
+  String get uiBestPlayer => 'Bedste spiller';
+
+  @override
+  String get uiMostGoals => 'Flest mål';
+
+  @override
+  String get uiMostAssists => 'Flest assists';
+
+  @override
+  String get uiMostCards => 'Flest kort';
+
+  @override
+  String get uiCards => 'Kort';
+
+  @override
+  String get uiFineKing => 'Bødekongen';
+
+  @override
+  String get uiInternalTables => 'Interne ranglister';
+
+  @override
+  String get uiSeasonCompetitionsForOverallMvpGoals =>
+      'Sæsonkonkurrencer for overall, MVP, mål, assists, kort og bøder på tværs af holdet.';
+
+  @override
+  String get uiLeagueComparison => 'Serie-sammenligning';
+
+  @override
+  String get uiComparePlayersWithOtherTeamsIn =>
+      'Sammenlign spillere mod andre hold i samme række, når DBU data er synkroniseret.';
+
+  @override
+  String get uiHiddenPatterns => 'Skjulte mønstre';
+
+  @override
+  String get uiFormCurvesStreaksAndSmallInternal =>
+      'Formkurver, streaks og små interne konkurrencer baseret på jeres egne kampdata.';
+
+  @override
+  String get uiTheTeamCompetitionBuiltAutomaticallyFrom =>
+      'Holdkonkurrencen bygget automatisk ud fra jeres kampdata — mål, assists, streaks og bonusser.';
+
+  @override
+  String get uiCloseCalendar => 'Luk kalender';
+
+  @override
+  String get uiPreviousMonth => 'Forrige måned';
+
+  @override
+  String get uiNextMonth => 'Næste måned';
+
+  @override
+  String uiCalendarDay(Object a) {
+    return 'Kalenderdag $a';
+  }
+
+  @override
+  String get uiCouldNotFetchPointDetails => 'Kunne ikke hente pointdetaljer.';
+
+  @override
+  String get uiPointsStory => 'Pointfortælling';
+
+  @override
+  String get uiNoPointsInTheSelectedPeriod =>
+      'Ingen point i den valgte periode.';
+
+  @override
+  String uiOnTheTeam(Object a) {
+    return '#$a på holdet';
+  }
+
+  @override
+  String get uiStable => 'Stabil';
+
+  @override
+  String get uiLatestRound => 'Seneste runde';
+
+  @override
+  String get uiToFirstPlace => 'Til førsteplads';
+
+  @override
+  String get uiLeading => 'Fører';
+
+  @override
+  String get uiMovement => 'Bevægelse';
+
+  @override
+  String get uiTable => 'Rangliste';
+
+  @override
+  String get uiSomethingWentWrong => 'Der skete en fejl.';
+
+  @override
+  String get uiNoPointsYetRecordMatchData =>
+      'Ingen point endnu. Registrer kampdata for at starte holdkonkurrencen.';
+
+  @override
+  String get uiRestOfTheTeam => 'Resten af holdet';
+
+  @override
+  String get uiTheTeamCompetition => 'Holdkonkurrencen';
+
+  @override
+  String get uiWhoIsNinForm => 'Hvem er\ni form?';
+
+  @override
+  String get uiMatchDataStreaksAndBonusesIn =>
+      'Kampdata, streaks og bonusser samlet ét sted.';
+
+  @override
+  String uiYouAreNoWith(Object a, Object b) {
+    return 'Du er nr. $a med $b.';
+  }
+
+  @override
+  String get uiChoosePosition => 'Vælg position';
+
+  @override
+  String get uiAllPositions => 'Alle positioner';
+
+  @override
+  String get uiWhichPositionDoYouPlay => 'Hvilken position spiller du?';
+
+  @override
+  String get uiYourPositionGivesThePointRules =>
+      'Din position giver pointreglerne den rigtige vægt.';
+
+  @override
+  String uiPoints(Object a) {
+    return '$a point';
+  }
+
+  @override
+  String uiPoints2(Object a) {
+    return 'point · $a';
+  }
+
+  @override
+  String get uiCouldNotLogInAutomatically => 'Kunne ikke logge ind automatisk.';
+
+  @override
+  String get uiRegistrationFailedTryAgain =>
+      'Registering mislykkedes. Prøv igen.';
+
+  @override
+  String get uiPleaseEnterYourName => 'Indtast venligst dit navn';
+
+  @override
+  String get uiPleaseEnterYourEmail => 'Indtast venligst din email';
+
+  @override
+  String get uiPleaseEnterAValidEmail => 'Indtast venligst en gyldig email';
+
+  @override
+  String get uiPleaseEnterAPassword => 'Indtast venligst en adgangskode';
+
+  @override
+  String get uiThePasswordMustBeAtLeast =>
+      'Adgangskoden skal være mindst 6 tegn';
+
+  @override
+  String get uiCreateUser => 'Opret bruger';
+
+  @override
+  String get uiName => 'Navn';
+
+  @override
+  String get uiPassword => 'Adgangskode';
+
+  @override
+  String get uiCreateAccount => 'Opret konto';
+
+  @override
+  String get uiHomeTeam => 'Hjemmehold';
+
+  @override
+  String get uiEGSNderjyske => 'Fx Sønderjyske';
+
+  @override
+  String get uiAwayTeam => 'Udehold';
+
+  @override
+  String get uiEGAgf => 'Fx AGF';
+
+  @override
+  String get uiEGSydbankPark => 'Fx Sydbank Park';
+
+  @override
+  String get uiOptionalComments => 'Evt. kommentarer';
+
+  @override
+  String get uiFillInBothTeamsAndThe =>
+      'Udfyld begge hold, lokation og vælg dato.';
+
+  @override
+  String get uiTheFirstAndSecondTeamCannot =>
+      'Første og andet hold må ikke være ens.';
+
+  @override
+  String get uiAddPlayer => 'Tilføj spiller';
+
+  @override
+  String get uiEGLarsLarsen => 'F.eks. Lars Larsen';
+
+  @override
+  String get uiEGLarsExampleCom => 'F.eks. lars@example.com';
+
+  @override
+  String get uiEnterThePlayerSName => 'Indtast navn på spiller';
+
+  @override
+  String get uiEnterEmail => 'Indtast e-mail';
+
+  @override
+  String get uiEnterAValidEmail => 'Indtast en gyldig e-mail';
+
+  @override
+  String get uiPleaseEnterNameAndEmail => 'Indtast venligst navn og e-mail.';
+
+  @override
+  String get uiThePlayerIsAlreadyInThe =>
+      'Spilleren eksisterer allerede i truppen. Angiv et andet navn og/eller e-mail.';
+
+  @override
+  String get uiNoStandingsAvailable => 'Ingen stilling tilgængelig';
+
+  @override
+  String uiTeams(Object a) {
+    return '$a hold';
+  }
+
+  @override
+  String get uiLeague => 'Serie';
+
+  @override
+  String uiLeague2(Object a) {
+    return 'Serie $a';
+  }
+
+  @override
+  String get uiTheSeasonSInternalLeague => 'Sæsonens interne liga';
+
+  @override
+  String get uiYourOverallRanking => 'Din overall placering';
+
+  @override
+  String get uiMvpCardsAndFines => 'MVP, kort og bøder';
+
+  @override
+  String get uiTheSeasonDuel => 'Sæsonduellen';
+
+  @override
+  String get ui84Points => '84 point';
+
+  @override
+  String get ui79Points => '79 point';
+
+  @override
+  String get uiYou => 'Dig?';
+
+  @override
+  String get uiPoints3 => '? point';
+
+  @override
+  String get uiSeeTheCompetitions => 'Se konkurrencerne';
+
+  @override
+  String get uiOverallPlayerOfTheMatchGoals =>
+      'Overall, kampens spiller, mål, assists, kort og bøder i én intern sæsonkamp.';
+
+  @override
+  String get uiTitle => 'Titel';
+
+  @override
+  String get uiEGArrivedLate => 'F.eks. \"Kommet for sent\"';
+
+  @override
+  String get uiEG100 => 'F.eks. 100';
+
+  @override
+  String get uiEnterATitleForTheFine => 'Indtast titel på bødetype';
+
+  @override
+  String get uiEnterTheDefaultAmountForThe =>
+      'Indtast standardbeløb for bødetypen';
+
+  @override
+  String get uiPleaseEnterATitleAndDefault =>
+      'Indtast venligst titel og standardbeløb.';
+
+  @override
+  String get uiTheFineTypeAlreadyExistsPlease =>
+      'Bødetype eksisterer allerede. Indtast venligst en anden titel.';
+
+  @override
+  String get uiRegistrationFailed => 'Registrering mislykkedes';
+
+  @override
+  String get uiYouHaveJoinedTheTeam => 'Du er nu tilmeldt holdet!';
+
+  @override
+  String get uiBecomePartOf => 'Bliv en del af';
+
+  @override
+  String get uiPleaseEnterYourPassword => 'Indtast venligst din adgangskode';
+
+  @override
+  String get uiPasswordMustBeAtLeast6 => 'Adgangskoden skal være mindst 6 tegn';
+
+  @override
+  String get uiCreateAccount2 => 'OPRET KONTO';
+
+  @override
+  String get uiLoginFailed => 'Login mislykkedes';
+
+  @override
+  String get uiLogIn => 'Log ind';
+
+  @override
+  String get uiLogIn2 => 'LOG IND';
+
+  @override
+  String get uiDonTHaveAnAccountSign =>
+      'Har du ikke en bruger? Tilmeld dig her';
+
+  @override
+  String get uiNo => 'Nr. -';
+
+  @override
+  String get uiMatchHistory => 'Kamphistorik';
+
+  @override
+  String get uiNoMatchesFound => 'Ingen kampe fundet.';
+
+  @override
+  String uiSeason(Object a) {
+    return 'Sæson $a';
+  }
+
+  @override
+  String get uiLineup => 'Holdopstilling';
+
+  @override
+  String get uiHideLineupFromPlayers => 'Skjul holdopstilling for spillere';
+
+  @override
+  String get uiShowLineupToPlayers => 'Vis holdopstilling for spillere';
+
+  @override
+  String get uiNoBench => 'Ingen bænk';
+
+  @override
+  String get uiOnTheBench => 'På bænken:';
+
+  @override
+  String get uiGoalkeeper => 'Målmand';
+
+  @override
+  String get uiDefence => 'Forsvar';
+
+  @override
+  String get uiMidfield => 'Midtbane';
+
+  @override
+  String get uiAttack => 'Angreb';
+
+  @override
+  String get uiNoEventsRecorded => 'Ingen hændelser registreret';
+
+  @override
+  String get uiYellowCards => 'Gule kort';
+
+  @override
+  String get uiRedCards => 'Røde kort';
+
+  @override
+  String get uiRegistered3 => 'Tilmeldte';
+
+  @override
+  String get uiNoRegisteredPlayersYet => 'Ingen tilmeldte spillere endnu.';
+
+  @override
+  String get uiNoEventsRecorded2 => 'Ingen begivenheder registreret.';
+
+  @override
+  String get uiPoll => 'Afstemning';
+
+  @override
+  String get uiMatchRating => 'Kamprating';
+
+  @override
+  String get uiMatchEvents => 'Kampbegivenheder';
+
+  @override
+  String get uiNoMatchEventsRecordedYet =>
+      'Ingen kampbegivenheder registreret endnu.';
+
+  @override
+  String get ui3Months => '3 måneder';
+
+  @override
+  String get uiSeason2 => 'Sæson';
+
+  @override
+  String get uiAll => 'Alle';
+
+  @override
+  String get uiCentreBack => 'Stopper';
+
+  @override
+  String get uiBackWingback => 'Back / wingback';
+
+  @override
+  String get uiDefensiveMidfield => 'Defensiv midtbane';
+
+  @override
+  String get uiAttackingMidfield => 'Offensiv midtbane';
+
+  @override
+  String get uiWinger => 'Wing';
+
+  @override
+  String get uiStriker => 'Angriber';
+
+  @override
+  String get uiStillToBePaid => 'Mangler at blive betalt';
+
+  @override
+  String get uiSelectedAmountToDeposit => 'Valgt beløb til indbetaling';
+
+  @override
+  String get uiFineType => 'Bødetype';
+
+  @override
+  String get uiPleaseChooseAFineToPay => 'Vælg venligst en bøde at indbetale.';
+
+  @override
+  String get uiAmountToDeposit => 'Beløb til indbetaling';
+
+  @override
+  String get uiPleaseEnterAnAmountGreaterThan =>
+      'Indtast venligst et beløb større end 0 kr.';
+
+  @override
+  String get uiCouldNotFetchTheDbuImport =>
+      'Kunne ikke hente DBU-importlogik fra serveren.';
+
+  @override
+  String get uiDbuLogin => 'DBU Login';
+
+  @override
+  String get uiSyncStandings => 'Synkroniser stilling';
+
+  @override
+  String get uiLoading => 'Indlæser';
+
+  @override
+  String get uiNoStatisticsAvailable => 'Ingen statistik tilgængelig';
+
+  @override
+  String get uiCouldNotProcessTheRequest2 => 'Kunne ikke behandle anmodning.';
+
+  @override
+  String get uiTeamRequests => 'Holdanmodninger';
+
+  @override
+  String uiAwaitingApproval(Object a) {
+    return 'Afventer godkendelse ($a)';
+  }
+
+  @override
+  String get uiNewRequest => 'Ny anmodning';
+
+  @override
+  String uiRequested(Object a, Object b) {
+    return 'Anmodet $a/$b';
+  }
+
+  @override
+  String get uiAssignFines => 'Tildel bøder';
+
+  @override
+  String get uiNoFineTypesFound => 'Ingen bødetyper fundet.';
+
+  @override
+  String get uiAddNoteOptional => 'Tilføj note (valgfri)';
+
+  @override
+  String get uiNoFinesWereAssignedPleaseChoose =>
+      'Ingen bøder er tildelt. Vælg venligst mindst én spiller.';
+
+  @override
+  String get uiPolls => 'Afstemninger';
+
+  @override
+  String get uiCouldNotFetchPolls => 'Kunne ikke hente afstemninger.';
+
+  @override
+  String get uiNoPollsFound => 'Ingen afstemninger fundet.';
+
+  @override
+  String uiVotes2(Object a) {
+    return '$a stemmer';
+  }
+
+  @override
+  String get uiUnknownMatch => 'Ukendt kamp';
+
+  @override
+  String get uiTeamStats => 'Holdets Stats';
+
+  @override
+  String get uiWon => 'Vundne';
+
+  @override
+  String get uiDrawn => 'Uafgjorte';
+
+  @override
+  String get uiLost => 'Tabte';
+
+  @override
+  String get uiGoalDifference => 'Målforskel';
+
+  @override
+  String get uiCouldNotCreateThePoll => 'Kunne ikke oprette afstemningen.';
+
+  @override
+  String get uiCastAtLeastOneVoteTo =>
+      'Afgiv mindst én stemme for at gemme afstemningen.';
+
+  @override
+  String get uiCouldNotSaveThePoll => 'Kunne ikke gemme afstemningen.';
+
+  @override
+  String get uiThereAreNoMatchesToCreate =>
+      'Der er ingen kampe at oprette en afstemning for.';
+
+  @override
+  String get uiChooseAValidMatch => 'Vælg en gyldig kamp.';
+
+  @override
+  String get uiAPollAlreadyExistsForThe =>
+      'Afstemning til kampen eksisterer allerede. Vælg en anden kamp.';
+
+  @override
+  String get uiCastAtLeastOneVoteTo2 =>
+      'Afgiv mindst én stemme for at oprette en afstemning.';
+
+  @override
+  String get uiKopaCouldNotStart => 'Kopa kunne ikke starte.';
+
+  @override
+  String uiOpenMatch(Object a) {
+    return 'Åbn kamp: $a';
+  }
+
+  @override
+  String get uiFinished => 'Færdig';
+
+  @override
+  String get uiBringYourTeamNtogether => 'Saml dit hold\nét sted';
+
+  @override
+  String get uiMyStats => 'Mine Stats';
+
+  @override
+  String get uiCardsYR => 'Kort (G/R)';
+
+  @override
+  String get uiShowFullTable => 'VIS FULD TABEL';
+
+  @override
+  String get uiTheFineBox => 'BØDEKASSEN';
+
+  @override
+  String get uiTotalFines => 'Samlet bøder';
+
+  @override
+  String get uiNoRanking => 'Ingen placering';
+
+  @override
+  String get uiSomethingWentWrongDuringLoginTry =>
+      'Der skete en fejl under login. Prøv igen.';
+
+  @override
+  String get uiSomethingWentWrongDuringRegistrationTry =>
+      'Der skete en fejl under registering. Prøv igen.';
+
+  @override
+  String get uiAddNewPlayer => 'Tilføj ny spiller';
+
+  @override
+  String get uiCouldNotFetchSeasons => 'Kunne ikke hente sæsoner';
+
+  @override
+  String get uiCouldNotStartANewSeason => 'Kunne ikke starte ny sæson';
+
+  @override
+  String get uiUpdateRequired => 'Opdatering påkrævet';
+
+  @override
+  String get uiANewVersionOfKopaIs =>
+      'En ny version af Kopa er tilgængelig. Opdater venligst for at fortsætte din holdoplevelse.';
+
+  @override
+  String get uiUpdateNow => 'Opdater nu';
+
+  @override
+  String get uiMatchSchedule => 'Kampprogram';
+
+  @override
+  String get uiNoDataAvailable => 'Ingen data tilgængelig';
+
+  @override
+  String get uiWin => 'Sejr';
+
+  @override
+  String get uiDraw => 'Uafgjort';
+
+  @override
+  String get uiLoss => 'Tabt';
+
+  @override
+  String get uiLoginFailedPleaseCheckYourCredentials =>
+      'Login mislykkedes. Tjek dine oplysninger.';
+
+  @override
+  String get uiRegistrationFailedPleaseTryAgain =>
+      'Registrering mislykkedes. Prøv igen.';
+
+  @override
+  String get uiOutstandingFines => 'Udestående Bøder';
+
+  @override
+  String get uiTrainingAttendance => 'Træningsfremmøde';
+
+  @override
+  String get uiNotSelectedYet => 'Ikke valgt endnu';
+
+  @override
+  String uiVotes3(Object a) {
+    return 'Stemmer: $a';
+  }
+
+  @override
+  String get uiCouldNotFetchTheMatchSchedule =>
+      'Kunne ikke hente kampprogrammet.';
+
+  @override
+  String get uiFormLast5 => 'Form (Seneste 5)';
+
+  @override
+  String get uiNotAssigned => 'Ikke tildelt';
+
+  @override
+  String get uiCouldNotFetchInForm => 'Kunne ikke hente In-form.';
+
+  @override
+  String uiTeamBadge(Object a) {
+    return '$a holdmærke';
+  }
+
+  @override
+  String get uiShield7 => 'Skjold 7';
+
+  @override
+  String uiTeamLeaderNames(Object a) {
+    return 'Holdleder: $a';
+  }
+
+  @override
+  String get uiLandingIntro =>
+      'Få fuldt overblik over dine kampe, holdopstillinger, bødekasse og kommunikation på holdet.';
+
+  @override
+  String get uiNewSeasonBody =>
+      'Der er allerede en aktiv sæson. Du kan opdatere det nuværende kampprogram, eller starte en ny sæson før den nye DBU-plan importeres. Hvis der mangler resultater fra den aktive sæson, advarer Kopa dig før sæsonen startes.';
+
+  @override
+  String uiMissingResultsBody(Object a, Object b) {
+    return 'Der mangler resultater på $a $b i den aktive sæson. Du kan stadig starte en ny sæson, men de gamle kampe vil være låst til den afsluttede sæson uden fulde resultater.';
+  }
+
+  @override
+  String uiOneEvent(Object a) {
+    return '$a hændelse';
+  }
+
+  @override
+  String uiManyEvents(Object a) {
+    return '$a hændelser';
+  }
+
+  @override
+  String uiOneMatch(Object a) {
+    return '$a kamp';
+  }
+
+  @override
+  String uiManyMatches(Object a) {
+    return '$a kampe';
+  }
+
+  @override
+  String get uiMatchSingular => 'kamp';
+
+  @override
+  String get uiMatchPlural => 'kampe';
+
+  @override
+  String get uiWeekdayInitials => 'M,T,O,T,F,L,S';
+
+  @override
+  String get uiPositionLeftBack => 'Venstre back';
+
+  @override
+  String get uiPositionCentreBack => 'Centerback';
+
+  @override
+  String get uiPositionRightBack => 'Højre back';
+
+  @override
+  String get uiPositionLeftMidfield => 'Venstre midtbane';
+
+  @override
+  String get uiPositionCentralMidfield => 'Central midtbane';
+
+  @override
+  String get uiPositionRightMidfield => 'Højre midtbane';
+
+  @override
+  String get uiPositionLeftWing => 'Venstre wing';
+
+  @override
+  String get uiPositionRightWing => 'Højre wing';
+
+  @override
+  String get uiPositionShortGoalkeeper => 'MV';
+
+  @override
+  String get uiPositionShortLeftBack => 'VB';
+
+  @override
+  String get uiPositionShortRightBack => 'HB';
+
+  @override
+  String get uiPositionShortLeftMidfield => 'VM';
+
+  @override
+  String get uiPositionShortRightMidfield => 'HM';
+
+  @override
+  String get uiPositionShortLeftWing => 'VW';
+
+  @override
+  String get uiPositionShortRightWing => 'HW';
+
+  @override
+  String get uiPositionShortDefender => 'F';
+
+  @override
+  String get uiPositionShortWing => 'K';
+
+  @override
+  String get uiPositionShortForward => 'A';
+
+  @override
+  String get uiPointsLabel => 'point';
+
+  @override
+  String get uiPlayerPlusIntro =>
+      'Hvem bliver holdets bedste spiller, hvem tager flest kampens spiller, og hvem ender øverst i de sjove lister? Brug siden som overblik over Player+ universet.';
+
+  @override
+  String uiStartupFailedWithError(Object a) {
+    return 'Kopa kunne ikke starte.\n$a';
+  }
 }

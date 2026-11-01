@@ -1,3 +1,4 @@
+import 'package:kopa/l10n/current_l10n.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopa/model/team_logo_design.dart';
@@ -140,7 +141,7 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     } else {
       emit(state.copyWith(
         status: OnboardingStatus.failure,
-        errorMessage: result['error'] ?? 'Ugyldig invitation',
+        errorMessage: result['error'] ?? currentL10n.uiInvalidInvitation,
       ));
     }
   }
@@ -201,7 +202,7 @@ class OnboardingCubit extends Cubit<OnboardingState> {
 
     emit(state.copyWith(
       status: OnboardingStatus.failure,
-      errorMessage: result['error'] ?? 'Netværksfejl',
+      errorMessage: result['error'] ?? currentL10n.uiNetworkError,
     ));
     return false;
   }
@@ -262,7 +263,7 @@ class OnboardingCubit extends Cubit<OnboardingState> {
 
     emit(state.copyWith(
       status: OnboardingStatus.failure,
-      errorMessage: result['error'] ?? 'Kunne ikke oprette holdet',
+      errorMessage: result['error'] ?? currentL10n.uiCouldNotCreateTheTeam,
     ));
     return false;
   }
@@ -328,7 +329,7 @@ class OnboardingCubit extends Cubit<OnboardingState> {
 
     emit(state.copyWith(
       status: OnboardingStatus.failure,
-      errorMessage: result['error'] ?? 'Kunne ikke sende anmodning',
+      errorMessage: result['error'] ?? currentL10n.uiCouldNotSendTheRequest,
     ));
     return false;
   }
@@ -373,7 +374,7 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     } else {
       emit(state.copyWith(
         status: OnboardingStatus.failure,
-        errorMessage: result['error'] ?? 'Kunne ikke annullere anmodning',
+        errorMessage: result['error'] ?? currentL10n.uiCouldNotCancelTheRequest,
       ));
     }
   }

@@ -1880,29 +1880,11 @@ abstract class AppLocalizations {
   /// **'Done'**
   String get matchTasksMarkDone;
 
-  /// No description provided for @matchTasksIDidIt.
-  ///
-  /// In en, this message translates to:
-  /// **'I did it'**
-  String get matchTasksIDidIt;
-
   /// No description provided for @matchTasksConfirmTitle.
   ///
   /// In en, this message translates to:
   /// **'Is {task} done?'**
   String matchTasksConfirmTitle(String task);
-
-  /// No description provided for @matchTasksConfirmRecurring.
-  ///
-  /// In en, this message translates to:
-  /// **'{name} moves to the back of the queue.'**
-  String matchTasksConfirmRecurring(String name);
-
-  /// No description provided for @matchTasksConfirmOneOff.
-  ///
-  /// In en, this message translates to:
-  /// **'The task is marked as done by {name}.'**
-  String matchTasksConfirmOneOff(String name);
 
   /// No description provided for @matchTasksCompletedBy.
   ///
@@ -2203,6 +2185,2514 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your payment could not be saved. Please try again.'**
   String get mobilePayPaidSaveFailed;
+
+  /// No description provided for @fineBoxSeeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get fineBoxSeeAll;
+
+  /// No description provided for @fineBoxPlayersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'All players'**
+  String get fineBoxPlayersTitle;
+
+  /// No description provided for @fineBoxAllFinesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'All fines'**
+  String get fineBoxAllFinesTitle;
+
+  /// No description provided for @fineBoxInBox.
+  ///
+  /// In en, this message translates to:
+  /// **'In the box'**
+  String get fineBoxInBox;
+
+  /// No description provided for @fineBoxAllPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'All paid'**
+  String get fineBoxAllPaid;
+
+  /// No description provided for @fineBoxDeleteFine.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete fine'**
+  String get fineBoxDeleteFine;
+
+  /// No description provided for @fineBoxDeleteCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get fineBoxDeleteCancel;
+
+  /// No description provided for @fineBoxDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The fine could not be deleted. Try again.'**
+  String get fineBoxDeleteFailed;
+
+  /// No description provided for @fineBoxPlayerFineCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} fines'**
+  String fineBoxPlayerFineCount(int count);
+
+  /// No description provided for @fineBoxDeleteFineBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {fine} for {name}? This cannot be undone.'**
+  String fineBoxDeleteFineBody(String fine, String name);
+
+  /// No description provided for @navHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get navHome;
+
+  /// No description provided for @navMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'Matches'**
+  String get navMatches;
+
+  /// No description provided for @navStatistics.
+  ///
+  /// In en, this message translates to:
+  /// **'Statistics'**
+  String get navStatistics;
+
+  /// No description provided for @navSquad.
+  ///
+  /// In en, this message translates to:
+  /// **'Squad'**
+  String get navSquad;
+
+  /// No description provided for @navFineBox.
+  ///
+  /// In en, this message translates to:
+  /// **'Fine box'**
+  String get navFineBox;
+
+  /// No description provided for @uiChooseDbuTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose DBU team'**
+  String get uiChooseDbuTeam;
+
+  /// No description provided for @uiCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get uiCancel;
+
+  /// No description provided for @uiCouldNotFetchTheInviteLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not fetch the invite link.'**
+  String get uiCouldNotFetchTheInviteLink;
+
+  /// No description provided for @uiLinkCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied'**
+  String get uiLinkCopied;
+
+  /// No description provided for @uiJoinOnKopa.
+  ///
+  /// In en, this message translates to:
+  /// **'Join {a} on Kopa: {b}'**
+  String uiJoinOnKopa(Object a, Object b);
+
+  /// No description provided for @uiCouldNotSaveThePositionTry.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the position. Try again.'**
+  String get uiCouldNotSaveThePositionTry;
+
+  /// No description provided for @uiInviteYourTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite your team'**
+  String get uiInviteYourTeam;
+
+  /// No description provided for @uiCreateYourFootballTeamAndKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your football team and keep players, matches and statistics in one place.'**
+  String get uiCreateYourFootballTeamAndKeep;
+
+  /// No description provided for @uiShareTheLinkWithThePlayers.
+  ///
+  /// In en, this message translates to:
+  /// **'Share the link with the players so they can find the team.'**
+  String get uiShareTheLinkWithThePlayers;
+
+  /// No description provided for @uiContinueToKopa.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue to Kopa'**
+  String get uiContinueToKopa;
+
+  /// No description provided for @uiAssociation.
+  ///
+  /// In en, this message translates to:
+  /// **'Association'**
+  String get uiAssociation;
+
+  /// No description provided for @uiYourTeamName.
+  ///
+  /// In en, this message translates to:
+  /// **'Your team name'**
+  String get uiYourTeamName;
+
+  /// No description provided for @uiYouChose.
+  ///
+  /// In en, this message translates to:
+  /// **'You chose: {a} ({b})'**
+  String uiYouChose(Object a, Object b);
+
+  /// No description provided for @ui7ASide.
+  ///
+  /// In en, this message translates to:
+  /// **'7-a-side'**
+  String get ui7ASide;
+
+  /// No description provided for @ui11ASide.
+  ///
+  /// In en, this message translates to:
+  /// **'11-a-side'**
+  String get ui11ASide;
+
+  /// No description provided for @uiSearchResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Search results'**
+  String get uiSearchResults;
+
+  /// No description provided for @uiTeamLeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Team leader: {a}'**
+  String uiTeamLeader(Object a);
+
+  /// No description provided for @uiTeamLeaderPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Team leader: Pending'**
+  String get uiTeamLeaderPending;
+
+  /// No description provided for @uiMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'{a} members'**
+  String uiMembers(Object a);
+
+  /// No description provided for @uiTheInviteLinkCouldNotBe.
+  ///
+  /// In en, this message translates to:
+  /// **'The invite link could not be fetched.'**
+  String get uiTheInviteLinkCouldNotBe;
+
+  /// No description provided for @uiCopyLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy link'**
+  String get uiCopyLink;
+
+  /// No description provided for @uiShareLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Share link'**
+  String get uiShareLink;
+
+  /// No description provided for @uiBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get uiBack;
+
+  /// No description provided for @uiStepOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {a} of {b}'**
+  String uiStepOf(Object a, Object b);
+
+  /// No description provided for @uiDbuConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'DBU connected'**
+  String get uiDbuConnected;
+
+  /// No description provided for @uiTeamDataHasBeenImported.
+  ///
+  /// In en, this message translates to:
+  /// **'Team data has been imported'**
+  String get uiTeamDataHasBeenImported;
+
+  /// No description provided for @uiLogInThroughDbuToImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in through DBU to import team data'**
+  String get uiLogInThroughDbuToImport;
+
+  /// No description provided for @uiYourTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'your team'**
+  String get uiYourTeam;
+
+  /// No description provided for @uiYourTeam2.
+  ///
+  /// In en, this message translates to:
+  /// **'Your team'**
+  String get uiYourTeam2;
+
+  /// No description provided for @uiStep3Of5.
+  ///
+  /// In en, this message translates to:
+  /// **'Step 3 of 5'**
+  String get uiStep3Of5;
+
+  /// No description provided for @uiWaitingForApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for approval'**
+  String get uiWaitingForApproval;
+
+  /// No description provided for @uiYouHaveAskedToJoinYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You have asked to join {a}. You will be notified when the team leader has accepted your request.'**
+  String uiYouHaveAskedToJoinYou(Object a);
+
+  /// No description provided for @uiPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get uiPending;
+
+  /// No description provided for @uiCouldNotValidateTheInvitation.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not validate the invitation'**
+  String get uiCouldNotValidateTheInvitation;
+
+  /// No description provided for @uiNetworkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Network error'**
+  String get uiNetworkError;
+
+  /// No description provided for @uiNotLoggedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Not logged in'**
+  String get uiNotLoggedIn;
+
+  /// No description provided for @uiCouldNotJoinTheTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not join the team'**
+  String get uiCouldNotJoinTheTeam;
+
+  /// No description provided for @uiCouldNotFetchTheCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not fetch the code'**
+  String get uiCouldNotFetchTheCode;
+
+  /// No description provided for @uiCouldNotRotateTheCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not rotate the code'**
+  String get uiCouldNotRotateTheCode;
+
+  /// No description provided for @uiCouldNotCreateTheTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create the team'**
+  String get uiCouldNotCreateTheTeam;
+
+  /// No description provided for @uiCouldNotSearchForTeams.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not search for teams'**
+  String get uiCouldNotSearchForTeams;
+
+  /// No description provided for @uiCouldNotSendTheRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not send the request'**
+  String get uiCouldNotSendTheRequest;
+
+  /// No description provided for @uiCouldNotFetchTheRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not fetch the request'**
+  String get uiCouldNotFetchTheRequest;
+
+  /// No description provided for @uiCouldNotFetchTheRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not fetch the requests'**
+  String get uiCouldNotFetchTheRequests;
+
+  /// No description provided for @uiCouldNotProcessTheRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not process the request'**
+  String get uiCouldNotProcessTheRequest;
+
+  /// No description provided for @uiCouldNotCancelTheRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not cancel the request'**
+  String get uiCouldNotCancelTheRequest;
+
+  /// No description provided for @uiInvalidInvitation.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid invitation'**
+  String get uiInvalidInvitation;
+
+  /// No description provided for @uiSomethingWentWrongPleaseTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again later.'**
+  String get uiSomethingWentWrongPleaseTryAgain;
+
+  /// No description provided for @uiNoUserFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No user found.'**
+  String get uiNoUserFound;
+
+  /// No description provided for @uiPracticalInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Practical information'**
+  String get uiPracticalInformation;
+
+  /// No description provided for @uiRegisteredPlayers.
+  ///
+  /// In en, this message translates to:
+  /// **'Registered players'**
+  String get uiRegisteredPlayers;
+
+  /// No description provided for @uiDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get uiDate;
+
+  /// No description provided for @uiTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get uiTime;
+
+  /// No description provided for @uiLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get uiLocation;
+
+  /// No description provided for @uiCountdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Countdown'**
+  String get uiCountdown;
+
+  /// No description provided for @uiRegistrations.
+  ///
+  /// In en, this message translates to:
+  /// **'Registrations'**
+  String get uiRegistrations;
+
+  /// No description provided for @uiRegistered.
+  ///
+  /// In en, this message translates to:
+  /// **'{a} registered'**
+  String uiRegistered(Object a);
+
+  /// No description provided for @uiMeetingTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting time'**
+  String get uiMeetingTime;
+
+  /// No description provided for @uiYourSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Your selection'**
+  String get uiYourSelection;
+
+  /// No description provided for @uiNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get uiNotes;
+
+  /// No description provided for @uiNoResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'No response'**
+  String get uiNoResponse;
+
+  /// No description provided for @uiDeclined.
+  ///
+  /// In en, this message translates to:
+  /// **'Declined'**
+  String get uiDeclined;
+
+  /// No description provided for @uiAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Available ({a})'**
+  String uiAvailable(Object a);
+
+  /// No description provided for @uiSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected ({a})'**
+  String uiSelected(Object a);
+
+  /// No description provided for @uiNoResponse2.
+  ///
+  /// In en, this message translates to:
+  /// **'No response ({a})'**
+  String uiNoResponse2(Object a);
+
+  /// No description provided for @uiDeclined2.
+  ///
+  /// In en, this message translates to:
+  /// **'Declined ({a})'**
+  String uiDeclined2(Object a);
+
+  /// No description provided for @uiCouldNotUpdateTheApprovalTry.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update the approval. Try again.'**
+  String get uiCouldNotUpdateTheApprovalTry;
+
+  /// No description provided for @uiCouldNotApproveEveryoneTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not approve everyone. Try again.'**
+  String get uiCouldNotApproveEveryoneTryAgain;
+
+  /// No description provided for @uiCouldNotChangeTheVisibilityTry.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not change the visibility. Try again.'**
+  String get uiCouldNotChangeTheVisibilityTry;
+
+  /// No description provided for @uiInProgressOrFinished.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress or finished'**
+  String get uiInProgressOrFinished;
+
+  /// No description provided for @uiDaysHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{a} days {b} hours'**
+  String uiDaysHours(Object a, Object b);
+
+  /// No description provided for @uiReject.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject {a}'**
+  String uiReject(Object a);
+
+  /// No description provided for @uiApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve {a}'**
+  String uiApprove(Object a);
+
+  /// No description provided for @uiApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get uiApproved;
+
+  /// No description provided for @uiRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get uiRejected;
+
+  /// No description provided for @uiEditChoiceFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit choice for {a}'**
+  String uiEditChoiceFor(Object a);
+
+  /// No description provided for @uiNoPlayersAreAwaitingApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'No players are awaiting approval.'**
+  String get uiNoPlayersAreAwaitingApproval;
+
+  /// No description provided for @uiApproveAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve all'**
+  String get uiApproveAll;
+
+  /// No description provided for @uiNoPlayersHere.
+  ///
+  /// In en, this message translates to:
+  /// **'No players here.'**
+  String get uiNoPlayersHere;
+
+  /// No description provided for @uiCouldNotSaveTheLineupTry.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the lineup. Try again.'**
+  String get uiCouldNotSaveTheLineupTry;
+
+  /// No description provided for @uiChoosePlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose player'**
+  String get uiChoosePlayer;
+
+  /// No description provided for @uiEditLineup.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit lineup'**
+  String get uiEditLineup;
+
+  /// No description provided for @uiEditFormation.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit formation ({a})'**
+  String uiEditFormation(Object a);
+
+  /// No description provided for @uiMovePlayerReleaseToPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Move player: Release to place {a}'**
+  String uiMovePlayerReleaseToPlace(Object a);
+
+  /// No description provided for @uiBenchPlayers.
+  ///
+  /// In en, this message translates to:
+  /// **'Bench ({a} players)'**
+  String uiBenchPlayers(Object a);
+
+  /// No description provided for @uiNoPlayersOnTheBench.
+  ///
+  /// In en, this message translates to:
+  /// **'No players on the bench'**
+  String get uiNoPlayersOnTheBench;
+
+  /// No description provided for @uiHoldAPlayerAndDragTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold a player and drag to swap places'**
+  String get uiHoldAPlayerAndDragTo;
+
+  /// No description provided for @uiChooseFormation.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose formation'**
+  String get uiChooseFormation;
+
+  /// No description provided for @uiChooseTheFormationThatSuitsYour.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the formation that suits your next match best'**
+  String get uiChooseTheFormationThatSuitsYour;
+
+  /// No description provided for @uiFormation.
+  ///
+  /// In en, this message translates to:
+  /// **'Formation {a}'**
+  String uiFormation(Object a);
+
+  /// No description provided for @uiGk.
+  ///
+  /// In en, this message translates to:
+  /// **'GK'**
+  String get uiGk;
+
+  /// No description provided for @uiAm.
+  ///
+  /// In en, this message translates to:
+  /// **'AM'**
+  String get uiAm;
+
+  /// No description provided for @uiPl.
+  ///
+  /// In en, this message translates to:
+  /// **'PL'**
+  String get uiPl;
+
+  /// No description provided for @uiStandard7ASide.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard 7-a-side'**
+  String get uiStandard7ASide;
+
+  /// No description provided for @uiDefensiveBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Defensive balance'**
+  String get uiDefensiveBalance;
+
+  /// No description provided for @uiSymmetricControl.
+  ///
+  /// In en, this message translates to:
+  /// **'Symmetric control'**
+  String get uiSymmetricControl;
+
+  /// No description provided for @uiAttackingWidth.
+  ///
+  /// In en, this message translates to:
+  /// **'Attacking width'**
+  String get uiAttackingWidth;
+
+  /// No description provided for @uiClassicBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Classic balance'**
+  String get uiClassicBalance;
+
+  /// No description provided for @uiMidfieldControl.
+  ///
+  /// In en, this message translates to:
+  /// **'Midfield control'**
+  String get uiMidfieldControl;
+
+  /// No description provided for @uiControlledPressing.
+  ///
+  /// In en, this message translates to:
+  /// **'Controlled pressing'**
+  String get uiControlledPressing;
+
+  /// No description provided for @uiCustomLineup.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom lineup'**
+  String get uiCustomLineup;
+
+  /// No description provided for @uiSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get uiSettings;
+
+  /// No description provided for @uiImportMatchSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Import match schedule'**
+  String get uiImportMatchSchedule;
+
+  /// No description provided for @uiFetchingLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching link...'**
+  String get uiFetchingLink;
+
+  /// No description provided for @uiShareKopa.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Kopa'**
+  String get uiShareKopa;
+
+  /// No description provided for @uiTeamTools.
+  ///
+  /// In en, this message translates to:
+  /// **'Team tools'**
+  String get uiTeamTools;
+
+  /// No description provided for @uiApproveNewPlayers.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve new players'**
+  String get uiApproveNewPlayers;
+
+  /// No description provided for @uiSyncingStandings.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing standings...'**
+  String get uiSyncingStandings;
+
+  /// No description provided for @uiSyncStandingsFromDbu.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync standings from DBU'**
+  String get uiSyncStandingsFromDbu;
+
+  /// No description provided for @uiDefaultMeetingTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Default meeting time'**
+  String get uiDefaultMeetingTime;
+
+  /// No description provided for @uiSavingMeetingTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving meeting time...'**
+  String get uiSavingMeetingTime;
+
+  /// No description provided for @uiSaveMeetingTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Save meeting time'**
+  String get uiSaveMeetingTime;
+
+  /// No description provided for @uiLoggingOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Logging out...'**
+  String get uiLoggingOut;
+
+  /// No description provided for @uiLogOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Log out'**
+  String get uiLogOut;
+
+  /// No description provided for @uiCouldNotLogOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not log out.'**
+  String get uiCouldNotLogOut;
+
+  /// No description provided for @uiYouMustBeOnATeam.
+  ///
+  /// In en, this message translates to:
+  /// **'You must be on a team to share Kopa.'**
+  String get uiYouMustBeOnATeam;
+
+  /// No description provided for @uiCouldNotShareKopa.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not share Kopa.'**
+  String get uiCouldNotShareKopa;
+
+  /// No description provided for @uiOnlyTheTeamLeaderCanChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the team leader can change the meeting time.'**
+  String get uiOnlyTheTeamLeaderCanChange;
+
+  /// No description provided for @uiTheDefaultMeetingTimeIsSet.
+  ///
+  /// In en, this message translates to:
+  /// **'The default meeting time is set to {a}.'**
+  String uiTheDefaultMeetingTimeIsSet(Object a);
+
+  /// No description provided for @uiNoDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'No default'**
+  String get uiNoDefault;
+
+  /// No description provided for @uiMinBeforeKickoff.
+  ///
+  /// In en, this message translates to:
+  /// **'{a} min before kickoff'**
+  String uiMinBeforeKickoff(Object a);
+
+  /// No description provided for @uiStandingsAndPoolTeamsAreSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Standings and pool teams are synced ({a} teams).'**
+  String uiStandingsAndPoolTeamsAreSynced(Object a);
+
+  /// No description provided for @uiFines.
+  ///
+  /// In en, this message translates to:
+  /// **'Fines - {a}'**
+  String uiFines(Object a);
+
+  /// No description provided for @ui1HourAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'1 hour ago'**
+  String get ui1HourAgo;
+
+  /// No description provided for @uiHoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{a} hours ago'**
+  String uiHoursAgo(Object a);
+
+  /// No description provided for @uiYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get uiYesterday;
+
+  /// No description provided for @uiDaysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{a} days ago'**
+  String uiDaysAgo(Object a);
+
+  /// No description provided for @uiUserNotLoggedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'User not logged in'**
+  String get uiUserNotLoggedIn;
+
+  /// No description provided for @uiCouldNotFetchDashboardData.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not fetch dashboard data'**
+  String get uiCouldNotFetchDashboardData;
+
+  /// No description provided for @uiCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get uiCalendar;
+
+  /// No description provided for @uiProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get uiProfile;
+
+  /// No description provided for @uiNoUpcomingMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No upcoming match'**
+  String get uiNoUpcomingMatch;
+
+  /// No description provided for @uiTheScheduleIsBeingUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'The schedule is being updated'**
+  String get uiTheScheduleIsBeingUpdated;
+
+  /// No description provided for @uiTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Team'**
+  String get uiTeam;
+
+  /// No description provided for @uiOpponent.
+  ///
+  /// In en, this message translates to:
+  /// **'Opponent'**
+  String get uiOpponent;
+
+  /// No description provided for @uiNoMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No match'**
+  String get uiNoMatch;
+
+  /// No description provided for @uiNoMatchPlanned.
+  ///
+  /// In en, this message translates to:
+  /// **'No match planned'**
+  String get uiNoMatchPlanned;
+
+  /// No description provided for @uiNoLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'No location'**
+  String get uiNoLocation;
+
+  /// No description provided for @uiMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Map ›'**
+  String get uiMap;
+
+  /// No description provided for @uiLatestMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest match'**
+  String get uiLatestMatch;
+
+  /// No description provided for @uiStandings.
+  ///
+  /// In en, this message translates to:
+  /// **'Standings'**
+  String get uiStandings;
+
+  /// No description provided for @uiStatistics.
+  ///
+  /// In en, this message translates to:
+  /// **'Statistics'**
+  String get uiStatistics;
+
+  /// No description provided for @uiRegistered2.
+  ///
+  /// In en, this message translates to:
+  /// **'registered'**
+  String get uiRegistered2;
+
+  /// No description provided for @uiANewSeasonHasStartedAnd.
+  ///
+  /// In en, this message translates to:
+  /// **'A new season has started and the match schedule has been imported.'**
+  String get uiANewSeasonHasStartedAnd;
+
+  /// No description provided for @uiTheMatchScheduleHasBeenUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'The match schedule has been updated.'**
+  String get uiTheMatchScheduleHasBeenUpdated;
+
+  /// No description provided for @uiStartNewSeason.
+  ///
+  /// In en, this message translates to:
+  /// **'Start new season?'**
+  String get uiStartNewSeason;
+
+  /// No description provided for @uiUpdateCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Update current'**
+  String get uiUpdateCurrent;
+
+  /// No description provided for @uiStartNewSeason2.
+  ///
+  /// In en, this message translates to:
+  /// **'Start new season'**
+  String get uiStartNewSeason2;
+
+  /// No description provided for @uiMissingResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing results'**
+  String get uiMissingResults;
+
+  /// No description provided for @uiGoBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Go back'**
+  String get uiGoBack;
+
+  /// No description provided for @uiStartAnyway.
+  ///
+  /// In en, this message translates to:
+  /// **'Start anyway'**
+  String get uiStartAnyway;
+
+  /// No description provided for @uiSpring.
+  ///
+  /// In en, this message translates to:
+  /// **'Spring'**
+  String get uiSpring;
+
+  /// No description provided for @uiSummer.
+  ///
+  /// In en, this message translates to:
+  /// **'Summer'**
+  String get uiSummer;
+
+  /// No description provided for @uiAutumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Autumn'**
+  String get uiAutumn;
+
+  /// No description provided for @uiWinter.
+  ///
+  /// In en, this message translates to:
+  /// **'Winter'**
+  String get uiWinter;
+
+  /// No description provided for @uiNoTeamSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'No team selected.'**
+  String get uiNoTeamSelected;
+
+  /// No description provided for @uiTeamKeyFigures.
+  ///
+  /// In en, this message translates to:
+  /// **'Team key figures'**
+  String get uiTeamKeyFigures;
+
+  /// No description provided for @uiTeamPointsAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Team points average'**
+  String get uiTeamPointsAverage;
+
+  /// No description provided for @uiTeamForm.
+  ///
+  /// In en, this message translates to:
+  /// **'Team form'**
+  String get uiTeamForm;
+
+  /// No description provided for @uiGoalsScored.
+  ///
+  /// In en, this message translates to:
+  /// **'Goals scored'**
+  String get uiGoalsScored;
+
+  /// No description provided for @uiGoalsConceded.
+  ///
+  /// In en, this message translates to:
+  /// **'Goals conceded'**
+  String get uiGoalsConceded;
+
+  /// No description provided for @uiSeeTheFormTableStreaksAnd.
+  ///
+  /// In en, this message translates to:
+  /// **'See the form table, streaks and points.'**
+  String get uiSeeTheFormTableStreaksAnd;
+
+  /// No description provided for @uiYourStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Your stats'**
+  String get uiYourStats;
+
+  /// No description provided for @uiForThisSeason.
+  ///
+  /// In en, this message translates to:
+  /// **'For this season.'**
+  String get uiForThisSeason;
+
+  /// No description provided for @uiVotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Votes'**
+  String get uiVotes;
+
+  /// No description provided for @uiNoDataYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No data yet.'**
+  String get uiNoDataYet;
+
+  /// No description provided for @uiSomeResultsAreLockedSeePlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Some results are locked. See Player+ to unlock the full table.'**
+  String get uiSomeResultsAreLockedSeePlayer;
+
+  /// No description provided for @uiTheSeasonSInternalCompetitionStarts.
+  ///
+  /// In en, this message translates to:
+  /// **'The season\'s internal competition starts here.'**
+  String get uiTheSeasonSInternalCompetitionStarts;
+
+  /// No description provided for @uiSeasonDuels.
+  ///
+  /// In en, this message translates to:
+  /// **'Season duels'**
+  String get uiSeasonDuels;
+
+  /// No description provided for @uiBestPlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Best player'**
+  String get uiBestPlayer;
+
+  /// No description provided for @uiMostGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Most goals'**
+  String get uiMostGoals;
+
+  /// No description provided for @uiMostAssists.
+  ///
+  /// In en, this message translates to:
+  /// **'Most assists'**
+  String get uiMostAssists;
+
+  /// No description provided for @uiMostCards.
+  ///
+  /// In en, this message translates to:
+  /// **'Most cards'**
+  String get uiMostCards;
+
+  /// No description provided for @uiCards.
+  ///
+  /// In en, this message translates to:
+  /// **'Cards'**
+  String get uiCards;
+
+  /// No description provided for @uiFineKing.
+  ///
+  /// In en, this message translates to:
+  /// **'Fine king'**
+  String get uiFineKing;
+
+  /// No description provided for @uiInternalTables.
+  ///
+  /// In en, this message translates to:
+  /// **'Internal tables'**
+  String get uiInternalTables;
+
+  /// No description provided for @uiSeasonCompetitionsForOverallMvpGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Season competitions for overall, MVP, goals, assists, cards and fines across the team.'**
+  String get uiSeasonCompetitionsForOverallMvpGoals;
+
+  /// No description provided for @uiLeagueComparison.
+  ///
+  /// In en, this message translates to:
+  /// **'League comparison'**
+  String get uiLeagueComparison;
+
+  /// No description provided for @uiComparePlayersWithOtherTeamsIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare players with other teams in the same league once DBU data is synced.'**
+  String get uiComparePlayersWithOtherTeamsIn;
+
+  /// No description provided for @uiHiddenPatterns.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden patterns'**
+  String get uiHiddenPatterns;
+
+  /// No description provided for @uiFormCurvesStreaksAndSmallInternal.
+  ///
+  /// In en, this message translates to:
+  /// **'Form curves, streaks and small internal competitions based on your own match data.'**
+  String get uiFormCurvesStreaksAndSmallInternal;
+
+  /// No description provided for @uiTheTeamCompetitionBuiltAutomaticallyFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'The team competition built automatically from your match data — goals, assists, streaks and bonuses.'**
+  String get uiTheTeamCompetitionBuiltAutomaticallyFrom;
+
+  /// No description provided for @uiCloseCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Close calendar'**
+  String get uiCloseCalendar;
+
+  /// No description provided for @uiPreviousMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous month'**
+  String get uiPreviousMonth;
+
+  /// No description provided for @uiNextMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Next month'**
+  String get uiNextMonth;
+
+  /// No description provided for @uiCalendarDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar day {a}'**
+  String uiCalendarDay(Object a);
+
+  /// No description provided for @uiCouldNotFetchPointDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not fetch point details.'**
+  String get uiCouldNotFetchPointDetails;
+
+  /// No description provided for @uiPointsStory.
+  ///
+  /// In en, this message translates to:
+  /// **'Points story'**
+  String get uiPointsStory;
+
+  /// No description provided for @uiNoPointsInTheSelectedPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'No points in the selected period.'**
+  String get uiNoPointsInTheSelectedPeriod;
+
+  /// No description provided for @uiOnTheTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'#{a} on the team'**
+  String uiOnTheTeam(Object a);
+
+  /// No description provided for @uiStable.
+  ///
+  /// In en, this message translates to:
+  /// **'Stable'**
+  String get uiStable;
+
+  /// No description provided for @uiLatestRound.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest round'**
+  String get uiLatestRound;
+
+  /// No description provided for @uiToFirstPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'To first place'**
+  String get uiToFirstPlace;
+
+  /// No description provided for @uiLeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Leading'**
+  String get uiLeading;
+
+  /// No description provided for @uiMovement.
+  ///
+  /// In en, this message translates to:
+  /// **'Movement'**
+  String get uiMovement;
+
+  /// No description provided for @uiTable.
+  ///
+  /// In en, this message translates to:
+  /// **'Table'**
+  String get uiTable;
+
+  /// No description provided for @uiSomethingWentWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong.'**
+  String get uiSomethingWentWrong;
+
+  /// No description provided for @uiNoPointsYetRecordMatchData.
+  ///
+  /// In en, this message translates to:
+  /// **'No points yet. Record match data to start the team competition.'**
+  String get uiNoPointsYetRecordMatchData;
+
+  /// No description provided for @uiRestOfTheTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Rest of the team'**
+  String get uiRestOfTheTeam;
+
+  /// No description provided for @uiTheTeamCompetition.
+  ///
+  /// In en, this message translates to:
+  /// **'The team competition'**
+  String get uiTheTeamCompetition;
+
+  /// No description provided for @uiWhoIsNinForm.
+  ///
+  /// In en, this message translates to:
+  /// **'Who is\nin form?'**
+  String get uiWhoIsNinForm;
+
+  /// No description provided for @uiMatchDataStreaksAndBonusesIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Match data, streaks and bonuses in one place.'**
+  String get uiMatchDataStreaksAndBonusesIn;
+
+  /// No description provided for @uiYouAreNoWith.
+  ///
+  /// In en, this message translates to:
+  /// **'You are no. {a} with {b}.'**
+  String uiYouAreNoWith(Object a, Object b);
+
+  /// No description provided for @uiChoosePosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose position'**
+  String get uiChoosePosition;
+
+  /// No description provided for @uiAllPositions.
+  ///
+  /// In en, this message translates to:
+  /// **'All positions'**
+  String get uiAllPositions;
+
+  /// No description provided for @uiWhichPositionDoYouPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Which position do you play?'**
+  String get uiWhichPositionDoYouPlay;
+
+  /// No description provided for @uiYourPositionGivesThePointRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Your position gives the point rules the right weight.'**
+  String get uiYourPositionGivesThePointRules;
+
+  /// No description provided for @uiPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'{a} points'**
+  String uiPoints(Object a);
+
+  /// No description provided for @uiPoints2.
+  ///
+  /// In en, this message translates to:
+  /// **'points · {a}'**
+  String uiPoints2(Object a);
+
+  /// No description provided for @uiCouldNotLogInAutomatically.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not log in automatically.'**
+  String get uiCouldNotLogInAutomatically;
+
+  /// No description provided for @uiRegistrationFailedTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration failed. Try again.'**
+  String get uiRegistrationFailedTryAgain;
+
+  /// No description provided for @uiPleaseEnterYourName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your name'**
+  String get uiPleaseEnterYourName;
+
+  /// No description provided for @uiPleaseEnterYourEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your email'**
+  String get uiPleaseEnterYourEmail;
+
+  /// No description provided for @uiPleaseEnterAValidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid email'**
+  String get uiPleaseEnterAValidEmail;
+
+  /// No description provided for @uiPleaseEnterAPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a password'**
+  String get uiPleaseEnterAPassword;
+
+  /// No description provided for @uiThePasswordMustBeAtLeast.
+  ///
+  /// In en, this message translates to:
+  /// **'The password must be at least 6 characters'**
+  String get uiThePasswordMustBeAtLeast;
+
+  /// No description provided for @uiCreateUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Create user'**
+  String get uiCreateUser;
+
+  /// No description provided for @uiName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get uiName;
+
+  /// No description provided for @uiPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get uiPassword;
+
+  /// No description provided for @uiCreateAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get uiCreateAccount;
+
+  /// No description provided for @uiHomeTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Home team'**
+  String get uiHomeTeam;
+
+  /// No description provided for @uiEGSNderjyske.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g. Sønderjyske'**
+  String get uiEGSNderjyske;
+
+  /// No description provided for @uiAwayTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Away team'**
+  String get uiAwayTeam;
+
+  /// No description provided for @uiEGAgf.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g. AGF'**
+  String get uiEGAgf;
+
+  /// No description provided for @uiEGSydbankPark.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g. Sydbank Park'**
+  String get uiEGSydbankPark;
+
+  /// No description provided for @uiOptionalComments.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional comments'**
+  String get uiOptionalComments;
+
+  /// No description provided for @uiFillInBothTeamsAndThe.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill in both teams and the location, and choose a date.'**
+  String get uiFillInBothTeamsAndThe;
+
+  /// No description provided for @uiTheFirstAndSecondTeamCannot.
+  ///
+  /// In en, this message translates to:
+  /// **'The first and second team cannot be the same.'**
+  String get uiTheFirstAndSecondTeamCannot;
+
+  /// No description provided for @uiAddPlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Add player'**
+  String get uiAddPlayer;
+
+  /// No description provided for @uiEGLarsLarsen.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g. Lars Larsen'**
+  String get uiEGLarsLarsen;
+
+  /// No description provided for @uiEGLarsExampleCom.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g. lars@example.com'**
+  String get uiEGLarsExampleCom;
+
+  /// No description provided for @uiEnterThePlayerSName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the player\'s name'**
+  String get uiEnterThePlayerSName;
+
+  /// No description provided for @uiEnterEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter email'**
+  String get uiEnterEmail;
+
+  /// No description provided for @uiEnterAValidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email'**
+  String get uiEnterAValidEmail;
+
+  /// No description provided for @uiPleaseEnterNameAndEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter name and email.'**
+  String get uiPleaseEnterNameAndEmail;
+
+  /// No description provided for @uiThePlayerIsAlreadyInThe.
+  ///
+  /// In en, this message translates to:
+  /// **'The player is already in the squad. Enter another name and/or email.'**
+  String get uiThePlayerIsAlreadyInThe;
+
+  /// No description provided for @uiNoStandingsAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No standings available'**
+  String get uiNoStandingsAvailable;
+
+  /// No description provided for @uiTeams.
+  ///
+  /// In en, this message translates to:
+  /// **'{a} teams'**
+  String uiTeams(Object a);
+
+  /// No description provided for @uiLeague.
+  ///
+  /// In en, this message translates to:
+  /// **'League'**
+  String get uiLeague;
+
+  /// No description provided for @uiLeague2.
+  ///
+  /// In en, this message translates to:
+  /// **'League {a}'**
+  String uiLeague2(Object a);
+
+  /// No description provided for @uiTheSeasonSInternalLeague.
+  ///
+  /// In en, this message translates to:
+  /// **'The season\'s internal league'**
+  String get uiTheSeasonSInternalLeague;
+
+  /// No description provided for @uiYourOverallRanking.
+  ///
+  /// In en, this message translates to:
+  /// **'Your overall ranking'**
+  String get uiYourOverallRanking;
+
+  /// No description provided for @uiMvpCardsAndFines.
+  ///
+  /// In en, this message translates to:
+  /// **'MVP, cards and fines'**
+  String get uiMvpCardsAndFines;
+
+  /// No description provided for @uiTheSeasonDuel.
+  ///
+  /// In en, this message translates to:
+  /// **'The season duel'**
+  String get uiTheSeasonDuel;
+
+  /// No description provided for @ui84Points.
+  ///
+  /// In en, this message translates to:
+  /// **'84 points'**
+  String get ui84Points;
+
+  /// No description provided for @ui79Points.
+  ///
+  /// In en, this message translates to:
+  /// **'79 points'**
+  String get ui79Points;
+
+  /// No description provided for @uiYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You?'**
+  String get uiYou;
+
+  /// No description provided for @uiPoints3.
+  ///
+  /// In en, this message translates to:
+  /// **'? points'**
+  String get uiPoints3;
+
+  /// No description provided for @uiSeeTheCompetitions.
+  ///
+  /// In en, this message translates to:
+  /// **'See the competitions'**
+  String get uiSeeTheCompetitions;
+
+  /// No description provided for @uiOverallPlayerOfTheMatchGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Overall, player of the match, goals, assists, cards and fines in one internal season battle.'**
+  String get uiOverallPlayerOfTheMatchGoals;
+
+  /// No description provided for @uiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get uiTitle;
+
+  /// No description provided for @uiEGArrivedLate.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g. \"Arrived late\"'**
+  String get uiEGArrivedLate;
+
+  /// No description provided for @uiEG100.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g. 100'**
+  String get uiEG100;
+
+  /// No description provided for @uiEnterATitleForTheFine.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a title for the fine type'**
+  String get uiEnterATitleForTheFine;
+
+  /// No description provided for @uiEnterTheDefaultAmountForThe.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the default amount for the fine type'**
+  String get uiEnterTheDefaultAmountForThe;
+
+  /// No description provided for @uiPleaseEnterATitleAndDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a title and default amount.'**
+  String get uiPleaseEnterATitleAndDefault;
+
+  /// No description provided for @uiTheFineTypeAlreadyExistsPlease.
+  ///
+  /// In en, this message translates to:
+  /// **'The fine type already exists. Please enter another title.'**
+  String get uiTheFineTypeAlreadyExistsPlease;
+
+  /// No description provided for @uiRegistrationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration failed'**
+  String get uiRegistrationFailed;
+
+  /// No description provided for @uiYouHaveJoinedTheTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'You have joined the team!'**
+  String get uiYouHaveJoinedTheTeam;
+
+  /// No description provided for @uiBecomePartOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Become part of'**
+  String get uiBecomePartOf;
+
+  /// No description provided for @uiPleaseEnterYourPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your password'**
+  String get uiPleaseEnterYourPassword;
+
+  /// No description provided for @uiPasswordMustBeAtLeast6.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters'**
+  String get uiPasswordMustBeAtLeast6;
+
+  /// No description provided for @uiCreateAccount2.
+  ///
+  /// In en, this message translates to:
+  /// **'CREATE ACCOUNT'**
+  String get uiCreateAccount2;
+
+  /// No description provided for @uiLoginFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Login failed'**
+  String get uiLoginFailed;
+
+  /// No description provided for @uiLogIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in'**
+  String get uiLogIn;
+
+  /// No description provided for @uiLogIn2.
+  ///
+  /// In en, this message translates to:
+  /// **'LOG IN'**
+  String get uiLogIn2;
+
+  /// No description provided for @uiDonTHaveAnAccountSign.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t have an account? Sign up here'**
+  String get uiDonTHaveAnAccountSign;
+
+  /// No description provided for @uiNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No. -'**
+  String get uiNo;
+
+  /// No description provided for @uiMatchHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Match history'**
+  String get uiMatchHistory;
+
+  /// No description provided for @uiNoMatchesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No matches found.'**
+  String get uiNoMatchesFound;
+
+  /// No description provided for @uiSeason.
+  ///
+  /// In en, this message translates to:
+  /// **'Season {a}'**
+  String uiSeason(Object a);
+
+  /// No description provided for @uiLineup.
+  ///
+  /// In en, this message translates to:
+  /// **'Lineup'**
+  String get uiLineup;
+
+  /// No description provided for @uiHideLineupFromPlayers.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide lineup from players'**
+  String get uiHideLineupFromPlayers;
+
+  /// No description provided for @uiShowLineupToPlayers.
+  ///
+  /// In en, this message translates to:
+  /// **'Show lineup to players'**
+  String get uiShowLineupToPlayers;
+
+  /// No description provided for @uiNoBench.
+  ///
+  /// In en, this message translates to:
+  /// **'No bench'**
+  String get uiNoBench;
+
+  /// No description provided for @uiOnTheBench.
+  ///
+  /// In en, this message translates to:
+  /// **'On the bench:'**
+  String get uiOnTheBench;
+
+  /// No description provided for @uiGoalkeeper.
+  ///
+  /// In en, this message translates to:
+  /// **'Goalkeeper'**
+  String get uiGoalkeeper;
+
+  /// No description provided for @uiDefence.
+  ///
+  /// In en, this message translates to:
+  /// **'Defence'**
+  String get uiDefence;
+
+  /// No description provided for @uiMidfield.
+  ///
+  /// In en, this message translates to:
+  /// **'Midfield'**
+  String get uiMidfield;
+
+  /// No description provided for @uiAttack.
+  ///
+  /// In en, this message translates to:
+  /// **'Attack'**
+  String get uiAttack;
+
+  /// No description provided for @uiNoEventsRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'No events recorded'**
+  String get uiNoEventsRecorded;
+
+  /// No description provided for @uiYellowCards.
+  ///
+  /// In en, this message translates to:
+  /// **'Yellow cards'**
+  String get uiYellowCards;
+
+  /// No description provided for @uiRedCards.
+  ///
+  /// In en, this message translates to:
+  /// **'Red cards'**
+  String get uiRedCards;
+
+  /// No description provided for @uiRegistered3.
+  ///
+  /// In en, this message translates to:
+  /// **'Registered'**
+  String get uiRegistered3;
+
+  /// No description provided for @uiNoRegisteredPlayersYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No registered players yet.'**
+  String get uiNoRegisteredPlayersYet;
+
+  /// No description provided for @uiNoEventsRecorded2.
+  ///
+  /// In en, this message translates to:
+  /// **'No events recorded.'**
+  String get uiNoEventsRecorded2;
+
+  /// No description provided for @uiPoll.
+  ///
+  /// In en, this message translates to:
+  /// **'Poll'**
+  String get uiPoll;
+
+  /// No description provided for @uiMatchRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Match rating'**
+  String get uiMatchRating;
+
+  /// No description provided for @uiMatchEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'Match events'**
+  String get uiMatchEvents;
+
+  /// No description provided for @uiNoMatchEventsRecordedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No match events recorded yet.'**
+  String get uiNoMatchEventsRecordedYet;
+
+  /// No description provided for @ui3Months.
+  ///
+  /// In en, this message translates to:
+  /// **'3 months'**
+  String get ui3Months;
+
+  /// No description provided for @uiSeason2.
+  ///
+  /// In en, this message translates to:
+  /// **'Season'**
+  String get uiSeason2;
+
+  /// No description provided for @uiAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get uiAll;
+
+  /// No description provided for @uiCentreBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Centre back'**
+  String get uiCentreBack;
+
+  /// No description provided for @uiBackWingback.
+  ///
+  /// In en, this message translates to:
+  /// **'Back / wingback'**
+  String get uiBackWingback;
+
+  /// No description provided for @uiDefensiveMidfield.
+  ///
+  /// In en, this message translates to:
+  /// **'Defensive midfield'**
+  String get uiDefensiveMidfield;
+
+  /// No description provided for @uiAttackingMidfield.
+  ///
+  /// In en, this message translates to:
+  /// **'Attacking midfield'**
+  String get uiAttackingMidfield;
+
+  /// No description provided for @uiWinger.
+  ///
+  /// In en, this message translates to:
+  /// **'Winger'**
+  String get uiWinger;
+
+  /// No description provided for @uiStriker.
+  ///
+  /// In en, this message translates to:
+  /// **'Striker'**
+  String get uiStriker;
+
+  /// No description provided for @uiStillToBePaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Still to be paid'**
+  String get uiStillToBePaid;
+
+  /// No description provided for @uiSelectedAmountToDeposit.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected amount to deposit'**
+  String get uiSelectedAmountToDeposit;
+
+  /// No description provided for @uiFineType.
+  ///
+  /// In en, this message translates to:
+  /// **'Fine type'**
+  String get uiFineType;
+
+  /// No description provided for @uiPleaseChooseAFineToPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Please choose a fine to pay.'**
+  String get uiPleaseChooseAFineToPay;
+
+  /// No description provided for @uiAmountToDeposit.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount to deposit'**
+  String get uiAmountToDeposit;
+
+  /// No description provided for @uiPleaseEnterAnAmountGreaterThan.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter an amount greater than 0 kr.'**
+  String get uiPleaseEnterAnAmountGreaterThan;
+
+  /// No description provided for @uiCouldNotFetchTheDbuImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not fetch the DBU import logic from the server.'**
+  String get uiCouldNotFetchTheDbuImport;
+
+  /// No description provided for @uiDbuLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'DBU login'**
+  String get uiDbuLogin;
+
+  /// No description provided for @uiSyncStandings.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync standings'**
+  String get uiSyncStandings;
+
+  /// No description provided for @uiLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading'**
+  String get uiLoading;
+
+  /// No description provided for @uiNoStatisticsAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No statistics available'**
+  String get uiNoStatisticsAvailable;
+
+  /// No description provided for @uiCouldNotProcessTheRequest2.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not process the request.'**
+  String get uiCouldNotProcessTheRequest2;
+
+  /// No description provided for @uiTeamRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Team requests'**
+  String get uiTeamRequests;
+
+  /// No description provided for @uiAwaitingApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting approval ({a})'**
+  String uiAwaitingApproval(Object a);
+
+  /// No description provided for @uiNewRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'New request'**
+  String get uiNewRequest;
+
+  /// No description provided for @uiRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested {a}/{b}'**
+  String uiRequested(Object a, Object b);
+
+  /// No description provided for @uiAssignFines.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign fines'**
+  String get uiAssignFines;
+
+  /// No description provided for @uiNoFineTypesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No fine types found.'**
+  String get uiNoFineTypesFound;
+
+  /// No description provided for @uiAddNoteOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Add note (optional)'**
+  String get uiAddNoteOptional;
+
+  /// No description provided for @uiNoFinesWereAssignedPleaseChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'No fines were assigned. Please choose at least one player.'**
+  String get uiNoFinesWereAssignedPleaseChoose;
+
+  /// No description provided for @uiPolls.
+  ///
+  /// In en, this message translates to:
+  /// **'Polls'**
+  String get uiPolls;
+
+  /// No description provided for @uiCouldNotFetchPolls.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not fetch polls.'**
+  String get uiCouldNotFetchPolls;
+
+  /// No description provided for @uiNoPollsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No polls found.'**
+  String get uiNoPollsFound;
+
+  /// No description provided for @uiVotes2.
+  ///
+  /// In en, this message translates to:
+  /// **'{a} votes'**
+  String uiVotes2(Object a);
+
+  /// No description provided for @uiUnknownMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown match'**
+  String get uiUnknownMatch;
+
+  /// No description provided for @uiTeamStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Team stats'**
+  String get uiTeamStats;
+
+  /// No description provided for @uiWon.
+  ///
+  /// In en, this message translates to:
+  /// **'Won'**
+  String get uiWon;
+
+  /// No description provided for @uiDrawn.
+  ///
+  /// In en, this message translates to:
+  /// **'Drawn'**
+  String get uiDrawn;
+
+  /// No description provided for @uiLost.
+  ///
+  /// In en, this message translates to:
+  /// **'Lost'**
+  String get uiLost;
+
+  /// No description provided for @uiGoalDifference.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal difference'**
+  String get uiGoalDifference;
+
+  /// No description provided for @uiCouldNotCreateThePoll.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create the poll.'**
+  String get uiCouldNotCreateThePoll;
+
+  /// No description provided for @uiCastAtLeastOneVoteTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Cast at least one vote to save the poll.'**
+  String get uiCastAtLeastOneVoteTo;
+
+  /// No description provided for @uiCouldNotSaveThePoll.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the poll.'**
+  String get uiCouldNotSaveThePoll;
+
+  /// No description provided for @uiThereAreNoMatchesToCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'There are no matches to create a poll for.'**
+  String get uiThereAreNoMatchesToCreate;
+
+  /// No description provided for @uiChooseAValidMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a valid match.'**
+  String get uiChooseAValidMatch;
+
+  /// No description provided for @uiAPollAlreadyExistsForThe.
+  ///
+  /// In en, this message translates to:
+  /// **'A poll already exists for the match. Choose another match.'**
+  String get uiAPollAlreadyExistsForThe;
+
+  /// No description provided for @uiCastAtLeastOneVoteTo2.
+  ///
+  /// In en, this message translates to:
+  /// **'Cast at least one vote to create a poll.'**
+  String get uiCastAtLeastOneVoteTo2;
+
+  /// No description provided for @uiKopaCouldNotStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Kopa could not start.'**
+  String get uiKopaCouldNotStart;
+
+  /// No description provided for @uiOpenMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Open match: {a}'**
+  String uiOpenMatch(Object a);
+
+  /// No description provided for @uiFinished.
+  ///
+  /// In en, this message translates to:
+  /// **'Finished'**
+  String get uiFinished;
+
+  /// No description provided for @uiBringYourTeamNtogether.
+  ///
+  /// In en, this message translates to:
+  /// **'Bring your team\ntogether'**
+  String get uiBringYourTeamNtogether;
+
+  /// No description provided for @uiMyStats.
+  ///
+  /// In en, this message translates to:
+  /// **'My stats'**
+  String get uiMyStats;
+
+  /// No description provided for @uiCardsYR.
+  ///
+  /// In en, this message translates to:
+  /// **'Cards (Y/R)'**
+  String get uiCardsYR;
+
+  /// No description provided for @uiShowFullTable.
+  ///
+  /// In en, this message translates to:
+  /// **'SHOW FULL TABLE'**
+  String get uiShowFullTable;
+
+  /// No description provided for @uiTheFineBox.
+  ///
+  /// In en, this message translates to:
+  /// **'THE FINE BOX'**
+  String get uiTheFineBox;
+
+  /// No description provided for @uiTotalFines.
+  ///
+  /// In en, this message translates to:
+  /// **'Total fines'**
+  String get uiTotalFines;
+
+  /// No description provided for @uiNoRanking.
+  ///
+  /// In en, this message translates to:
+  /// **'No ranking'**
+  String get uiNoRanking;
+
+  /// No description provided for @uiSomethingWentWrongDuringLoginTry.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong during login. Try again.'**
+  String get uiSomethingWentWrongDuringLoginTry;
+
+  /// No description provided for @uiSomethingWentWrongDuringRegistrationTry.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong during registration. Try again.'**
+  String get uiSomethingWentWrongDuringRegistrationTry;
+
+  /// No description provided for @uiAddNewPlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Add new player'**
+  String get uiAddNewPlayer;
+
+  /// No description provided for @uiCouldNotFetchSeasons.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not fetch seasons'**
+  String get uiCouldNotFetchSeasons;
+
+  /// No description provided for @uiCouldNotStartANewSeason.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not start a new season'**
+  String get uiCouldNotStartANewSeason;
+
+  /// No description provided for @uiUpdateRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Update required'**
+  String get uiUpdateRequired;
+
+  /// No description provided for @uiANewVersionOfKopaIs.
+  ///
+  /// In en, this message translates to:
+  /// **'A new version of Kopa is available. Please update to continue.'**
+  String get uiANewVersionOfKopaIs;
+
+  /// No description provided for @uiUpdateNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Update now'**
+  String get uiUpdateNow;
+
+  /// No description provided for @uiMatchSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Match schedule'**
+  String get uiMatchSchedule;
+
+  /// No description provided for @uiNoDataAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No data available'**
+  String get uiNoDataAvailable;
+
+  /// No description provided for @uiWin.
+  ///
+  /// In en, this message translates to:
+  /// **'Win'**
+  String get uiWin;
+
+  /// No description provided for @uiDraw.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw'**
+  String get uiDraw;
+
+  /// No description provided for @uiLoss.
+  ///
+  /// In en, this message translates to:
+  /// **'Loss'**
+  String get uiLoss;
+
+  /// No description provided for @uiLoginFailedPleaseCheckYourCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Login failed. Please check your credentials.'**
+  String get uiLoginFailedPleaseCheckYourCredentials;
+
+  /// No description provided for @uiRegistrationFailedPleaseTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration failed. Please try again.'**
+  String get uiRegistrationFailedPleaseTryAgain;
+
+  /// No description provided for @uiOutstandingFines.
+  ///
+  /// In en, this message translates to:
+  /// **'Outstanding fines'**
+  String get uiOutstandingFines;
+
+  /// No description provided for @uiTrainingAttendance.
+  ///
+  /// In en, this message translates to:
+  /// **'Training attendance'**
+  String get uiTrainingAttendance;
+
+  /// No description provided for @uiNotSelectedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not selected yet'**
+  String get uiNotSelectedYet;
+
+  /// No description provided for @uiVotes3.
+  ///
+  /// In en, this message translates to:
+  /// **'Votes: {a}'**
+  String uiVotes3(Object a);
+
+  /// No description provided for @uiCouldNotFetchTheMatchSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not fetch the match schedule.'**
+  String get uiCouldNotFetchTheMatchSchedule;
+
+  /// No description provided for @uiFormLast5.
+  ///
+  /// In en, this message translates to:
+  /// **'Form (last 5)'**
+  String get uiFormLast5;
+
+  /// No description provided for @uiNotAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Not assigned'**
+  String get uiNotAssigned;
+
+  /// No description provided for @uiCouldNotFetchInForm.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not fetch In-form.'**
+  String get uiCouldNotFetchInForm;
+
+  /// No description provided for @uiTeamBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'{a} team badge'**
+  String uiTeamBadge(Object a);
+
+  /// No description provided for @uiShield7.
+  ///
+  /// In en, this message translates to:
+  /// **'Shield 7'**
+  String get uiShield7;
+
+  /// No description provided for @uiTeamLeaderNames.
+  ///
+  /// In en, this message translates to:
+  /// **'Team leader: {a}'**
+  String uiTeamLeaderNames(Object a);
+
+  /// No description provided for @uiLandingIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Get a full overview of your matches, lineups, fine box and team communication.'**
+  String get uiLandingIntro;
+
+  /// No description provided for @uiNewSeasonBody.
+  ///
+  /// In en, this message translates to:
+  /// **'There is already an active season. You can update the current match schedule or start a new season before importing the new DBU schedule. If results are missing from the active season, Kopa warns you before the season starts.'**
+  String get uiNewSeasonBody;
+
+  /// No description provided for @uiMissingResultsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Results are missing for {a} {b} in the active season. You can still start a new season, but the old matches will be locked to the finished season without full results.'**
+  String uiMissingResultsBody(Object a, Object b);
+
+  /// No description provided for @uiOneEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'{a} event'**
+  String uiOneEvent(Object a);
+
+  /// No description provided for @uiManyEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'{a} events'**
+  String uiManyEvents(Object a);
+
+  /// No description provided for @uiOneMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'{a} match'**
+  String uiOneMatch(Object a);
+
+  /// No description provided for @uiManyMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'{a} matches'**
+  String uiManyMatches(Object a);
+
+  /// No description provided for @uiMatchSingular.
+  ///
+  /// In en, this message translates to:
+  /// **'match'**
+  String get uiMatchSingular;
+
+  /// No description provided for @uiMatchPlural.
+  ///
+  /// In en, this message translates to:
+  /// **'matches'**
+  String get uiMatchPlural;
+
+  /// No description provided for @uiWeekdayInitials.
+  ///
+  /// In en, this message translates to:
+  /// **'M,T,W,T,F,S,S'**
+  String get uiWeekdayInitials;
+
+  /// No description provided for @uiPositionLeftBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Left back'**
+  String get uiPositionLeftBack;
+
+  /// No description provided for @uiPositionCentreBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Centre back'**
+  String get uiPositionCentreBack;
+
+  /// No description provided for @uiPositionRightBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Right back'**
+  String get uiPositionRightBack;
+
+  /// No description provided for @uiPositionLeftMidfield.
+  ///
+  /// In en, this message translates to:
+  /// **'Left midfield'**
+  String get uiPositionLeftMidfield;
+
+  /// No description provided for @uiPositionCentralMidfield.
+  ///
+  /// In en, this message translates to:
+  /// **'Central midfield'**
+  String get uiPositionCentralMidfield;
+
+  /// No description provided for @uiPositionRightMidfield.
+  ///
+  /// In en, this message translates to:
+  /// **'Right midfield'**
+  String get uiPositionRightMidfield;
+
+  /// No description provided for @uiPositionLeftWing.
+  ///
+  /// In en, this message translates to:
+  /// **'Left wing'**
+  String get uiPositionLeftWing;
+
+  /// No description provided for @uiPositionRightWing.
+  ///
+  /// In en, this message translates to:
+  /// **'Right wing'**
+  String get uiPositionRightWing;
+
+  /// No description provided for @uiPositionShortGoalkeeper.
+  ///
+  /// In en, this message translates to:
+  /// **'GK'**
+  String get uiPositionShortGoalkeeper;
+
+  /// No description provided for @uiPositionShortLeftBack.
+  ///
+  /// In en, this message translates to:
+  /// **'LB'**
+  String get uiPositionShortLeftBack;
+
+  /// No description provided for @uiPositionShortRightBack.
+  ///
+  /// In en, this message translates to:
+  /// **'RB'**
+  String get uiPositionShortRightBack;
+
+  /// No description provided for @uiPositionShortLeftMidfield.
+  ///
+  /// In en, this message translates to:
+  /// **'LM'**
+  String get uiPositionShortLeftMidfield;
+
+  /// No description provided for @uiPositionShortRightMidfield.
+  ///
+  /// In en, this message translates to:
+  /// **'RM'**
+  String get uiPositionShortRightMidfield;
+
+  /// No description provided for @uiPositionShortLeftWing.
+  ///
+  /// In en, this message translates to:
+  /// **'LW'**
+  String get uiPositionShortLeftWing;
+
+  /// No description provided for @uiPositionShortRightWing.
+  ///
+  /// In en, this message translates to:
+  /// **'RW'**
+  String get uiPositionShortRightWing;
+
+  /// No description provided for @uiPositionShortDefender.
+  ///
+  /// In en, this message translates to:
+  /// **'D'**
+  String get uiPositionShortDefender;
+
+  /// No description provided for @uiPositionShortWing.
+  ///
+  /// In en, this message translates to:
+  /// **'W'**
+  String get uiPositionShortWing;
+
+  /// No description provided for @uiPositionShortForward.
+  ///
+  /// In en, this message translates to:
+  /// **'F'**
+  String get uiPositionShortForward;
+
+  /// No description provided for @uiPointsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'points'**
+  String get uiPointsLabel;
+
+  /// No description provided for @uiPlayerPlusIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Who becomes the team\'s best player, who wins player of the match most often, and who ends up on top of the fun tables? Use this page as an overview of the Player+ universe.'**
+  String get uiPlayerPlusIntro;
+
+  /// No description provided for @uiStartupFailedWithError.
+  ///
+  /// In en, this message translates to:
+  /// **'Kopa could not start.\n{a}'**
+  String uiStartupFailedWithError(Object a);
 }
 
 class _AppLocalizationsDelegate

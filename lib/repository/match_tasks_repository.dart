@@ -48,19 +48,10 @@ class MatchTasksRepository {
     }
   }
 
-  /// [completedByUserId] is only honoured for team leaders; players always
-  /// complete the task as themselves.
-  static Future<void> complete(
-    int matchId,
-    int taskId, {
-    int? completedByUserId,
-  }) async {
+  static Future<void> complete(int matchId, int taskId) async {
     final response = await _apiClient.postJson(
       _matchTaskUrl(matchId, '/$taskId/complete'),
-      body: {
-        if (completedByUserId != null)
-          'completed_by_user_id': completedByUserId,
-      },
+      body: {},
     );
     if (response.statusCode != 200) {
       throw Exception('Failed to complete task');

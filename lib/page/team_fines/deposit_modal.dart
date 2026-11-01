@@ -1,3 +1,4 @@
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/button/mobile_pay_button.dart';
@@ -42,7 +43,7 @@ class _DepositModalState extends State<DepositModal> {
         theme.extension<AppTextStyles>() ?? AppTextStyles.light;
 
     return PageScaffold(
-      title: 'Indbetal',
+      title: AppLocalizations.of(context)!.fineBoxDeposit,
       showBackButton: false,
       backgroundColor: appColors.background,
       leading: CupertinoButton(
@@ -60,7 +61,7 @@ class _DepositModalState extends State<DepositModal> {
             }
           },
           child: Text(
-            'Gem',
+            AppLocalizations.of(context)!.matchTasksSave,
             style: appTextStyles.bodyBold.copyWith(color: appColors.primary),
           ),
         ),
@@ -89,7 +90,7 @@ class _DepositModalState extends State<DepositModal> {
                         Text('123', style: appTextStyles.sectionHeader),
                         const SizedBox(height: 5),
                         Text(
-                          'Mangler at blive betalt',
+                          AppLocalizations.of(context)!.uiStillToBePaid,
                           style: appTextStyles.caption
                               .copyWith(fontWeight: FontWeight.w600),
                         ),
@@ -112,10 +113,11 @@ class _DepositModalState extends State<DepositModal> {
               ),
               child: Column(
                 children: [
-                  Text('Beløb til indbetaling', style: appTextStyles.bodyBold),
+                  Text(AppLocalizations.of(context)!.uiAmountToDeposit,
+                      style: appTextStyles.bodyBold),
                   const SizedBox(height: 16),
                   CupertinoTextField(
-                    placeholder: 'F.eks. 100',
+                    placeholder: AppLocalizations.of(context)!.uiEG100,
                     controller: _depositController,
                     keyboardType: TextInputType.number,
                     padding: const EdgeInsets.all(12),
@@ -136,7 +138,7 @@ class _DepositModalState extends State<DepositModal> {
                       children: [
                         MobilePayButton(
                           amount: int.tryParse(_depositController.text),
-                          message: 'Bødekassen',
+                          message: AppLocalizations.of(context)!.fineBoxTitle,
                           mobilePayBoxId: widget.mobilePayBoxId,
                         ),
                       ],
@@ -155,8 +157,9 @@ class _DepositModalState extends State<DepositModal> {
       showCupertinoDialog(
         context: context,
         builder: (context) => CupertinoAlertDialog(
-          title: const Text('Fejl'),
-          content: const Text('Indtast venligst et beløb større end 0 kr.'),
+          title: Text(AppLocalizations.of(context)!.matchPollErrorTitle),
+          content: Text(
+              AppLocalizations.of(context)!.uiPleaseEnterAnAmountGreaterThan),
           actions: <CupertinoDialogAction>[
             CupertinoDialogAction(
               onPressed: () => Navigator.of(context).pop(),

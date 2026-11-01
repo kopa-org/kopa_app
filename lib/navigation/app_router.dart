@@ -1,3 +1,4 @@
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -345,9 +346,12 @@ abstract final class AppRouter {
   }
 
   @visibleForTesting
-  static List<String> visibleMainTabLabels(AppFeatureFlags featureFlags) {
+  static List<String> visibleMainTabLabels(
+    AppFeatureFlags featureFlags,
+    AppLocalizations l10n,
+  ) {
     return _visibleMainTabs(featureFlags)
-        .map((tab) => tab.label)
+        .map((tab) => tab.label(l10n))
         .toList(growable: false);
   }
 }
@@ -366,6 +370,7 @@ class _MainTabNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     if (theme.platform == TargetPlatform.iOS) {
       return GlassTabBar.bottom(
@@ -383,7 +388,7 @@ class _MainTabNavigationBar extends StatelessWidget {
             GlassTab(
               icon: Icon(tab.cupertinoIcon),
               activeIcon: Icon(tab.activeCupertinoIcon),
-              label: tab.label,
+              label: tab.label(l10n),
             ),
         ],
       );
@@ -413,6 +418,7 @@ class _TransparentAndroidNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final selectedColor = AppColors.of(context).white;
     final selectedBackground = AppColors.of(context).dirt;
     final unselectedColor = theme.unselectedWidgetColor;
@@ -462,7 +468,7 @@ class _TransparentAndroidNavigationBar extends StatelessWidget {
                             BlendMode.srcIn,
                           ),
                         ),
-                  text: tabs[i].label,
+                  text: tabs[i].label(l10n),
                 ),
             ],
           ),
@@ -539,13 +545,13 @@ enum _MainTab {
     };
   }
 
-  String get label {
+  String label(AppLocalizations l10n) {
     return switch (this) {
-      _MainTab.home => 'Hjem',
-      _MainTab.matches => 'Kampe',
-      _MainTab.statistics => 'Statistik',
-      _MainTab.squad => 'Truppen',
-      _MainTab.fineBox => 'Bødekasse',
+      _MainTab.home => l10n.navHome,
+      _MainTab.matches => l10n.navMatches,
+      _MainTab.statistics => l10n.navStatistics,
+      _MainTab.squad => l10n.navSquad,
+      _MainTab.fineBox => l10n.navFineBox,
     };
   }
 

@@ -1,3 +1,4 @@
+import 'package:kopa/l10n/current_l10n.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopa/cubits/match_programme_state.dart';
 import 'package:kopa/model/event_type.dart';
@@ -30,7 +31,7 @@ class MatchProgrammeCubit extends Cubit<MatchProgrammeState> {
     } catch (e) {
       emit(state.copyWith(
         status: MatchProgrammeStatus.failure,
-        errorMessage: 'Kunne ikke hente kampprogrammet.',
+        errorMessage: currentL10n.uiCouldNotFetchTheMatchSchedule,
       ));
     }
   }
@@ -91,7 +92,7 @@ class MatchProgrammeCubit extends Cubit<MatchProgrammeState> {
     } catch (e) {
       emit(state.copyWith(
         status: MatchProgrammeStatus.loaded,
-        errorMessage: 'Kunne ikke oprette kampen.',
+        errorMessage: currentL10n.eventCreateMatchFailed,
       ));
       return false;
     }

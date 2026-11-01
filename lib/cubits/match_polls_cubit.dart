@@ -1,3 +1,4 @@
+import 'package:kopa/l10n/current_l10n.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopa/cubits/match_polls_state.dart';
 import 'package:kopa/model/match_details.dart';
@@ -66,7 +67,7 @@ class MatchPollsCubit extends Cubit<MatchPollsState> {
     } catch (e) {
       emit(state.copyWith(
         status: MatchPollsStatus.failure,
-        errorMessage: 'Kunne ikke hente afstemninger.',
+        errorMessage: currentL10n.uiCouldNotFetchPolls,
       ));
     }
   }
@@ -103,7 +104,7 @@ class MatchPollsCubit extends Cubit<MatchPollsState> {
     } catch (e) {
       emit(state.copyWith(
         status: MatchPollsStatus.loaded,
-        formErrorMessage: 'Kunne ikke oprette afstemningen.',
+        formErrorMessage: currentL10n.uiCouldNotCreateThePoll,
       ));
       return null;
     }
@@ -115,7 +116,7 @@ class MatchPollsCubit extends Cubit<MatchPollsState> {
   }) async {
     if (userVotes.isEmpty) {
       emit(state.copyWith(
-        formErrorMessage: 'Afgiv mindst én stemme for at gemme afstemningen.',
+        formErrorMessage: currentL10n.uiCastAtLeastOneVoteTo,
       ));
       return null;
     }
@@ -157,7 +158,7 @@ class MatchPollsCubit extends Cubit<MatchPollsState> {
     } catch (e) {
       emit(state.copyWith(
         status: MatchPollsStatus.loaded,
-        formErrorMessage: 'Kunne ikke gemme afstemningen.',
+        formErrorMessage: currentL10n.uiCouldNotSaveThePoll,
       ));
       return null;
     }
@@ -169,21 +170,21 @@ class MatchPollsCubit extends Cubit<MatchPollsState> {
 
   String? _validateCreate(int selectedMatchIndex, List<UserVote> userVotes) {
     if (state.matches.isEmpty) {
-      return 'Der er ingen kampe at oprette en afstemning for.';
+      return currentL10n.uiThereAreNoMatchesToCreate;
     }
 
     if (selectedMatchIndex < 0 || selectedMatchIndex >= state.matches.length) {
-      return 'Vælg en gyldig kamp.';
+      return currentL10n.uiChooseAValidMatch;
     }
 
     final matchId = state.matches[selectedMatchIndex].id;
     final exists = state.matchPolls.any((poll) => poll.eventId == matchId);
     if (exists) {
-      return 'Afstemning til kampen eksisterer allerede. Vælg en anden kamp.';
+      return currentL10n.uiAPollAlreadyExistsForThe;
     }
 
     if (userVotes.isEmpty) {
-      return 'Afgiv mindst én stemme for at oprette en afstemning.';
+      return currentL10n.uiCastAtLeastOneVoteTo2;
     }
 
     return null;

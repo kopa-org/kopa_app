@@ -1,3 +1,4 @@
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/avatar/app_avatar.dart';
@@ -63,7 +64,7 @@ class MatchPollRowItem extends StatelessWidget {
                 ),
                 if (isUserPlayerOfTheMatch)
                   Text(
-                    'Kampens spiller',
+                    AppLocalizations.of(context)!.matchPollTitle,
                     style: appTextStyles.caption.copyWith(
                       color: appColors.primary,
                       fontWeight: FontWeight.w600,

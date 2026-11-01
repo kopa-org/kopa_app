@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/component/home/home_carousel_indicator.dart';
 import 'package:kopa/theme/app_theme.dart';
 
@@ -116,6 +117,8 @@ void main() {
 Widget _app(PageController controller,
         {required int count, required double width}) =>
     MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: AppTheme.lightTheme,
       home: Scaffold(
         body: Center(

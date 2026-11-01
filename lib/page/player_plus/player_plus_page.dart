@@ -1,3 +1,4 @@
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
@@ -59,13 +60,14 @@ class _PlayerPlusPageState extends State<PlayerPlusPage> {
                 ),
                 const SizedBox(height: 18),
                 Text(
-                  'Sæsonens interne konkurrence starter her.',
+                  AppLocalizations.of(context)!
+                      .uiTheSeasonSInternalCompetitionStarts,
                   style: appTextStyles.pageTitle
                       .copyWith(color: appColors.black, height: 1.05),
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Hvem bliver holdets bedste spiller, hvem tager flest kampens spiller, og hvem ender øverst i de sjove lister? Brug siden som overblik over Player+ universet.',
+                  AppLocalizations.of(context)!.uiPlayerPlusIntro,
                   style: appTextStyles.body
                       .copyWith(color: appColors.dirt, height: 1.35),
                 ),
@@ -76,7 +78,7 @@ class _PlayerPlusPageState extends State<PlayerPlusPage> {
           _InFormCard(onTap: () => context.push(AppRouter.playerPlusInForm)),
           const SizedBox(height: 20),
           Text(
-            'Sæsondueller',
+            AppLocalizations.of(context)!.uiSeasonDuels,
             style:
                 appTextStyles.sectionHeader.copyWith(color: appColors.primary),
           ),
@@ -85,38 +87,38 @@ class _PlayerPlusPageState extends State<PlayerPlusPage> {
             competitions: [
               _CompetitionPreview(
                 icon: Icons.workspace_premium,
-                title: 'Bedste spiller',
+                title: AppLocalizations.of(context)!.uiBestPlayer,
                 metric: 'Overall',
                 color: appColors.grass,
               ),
               _CompetitionPreview(
                 icon: Icons.star,
-                title: 'Kampens spiller',
+                title: AppLocalizations.of(context)!.matchPollTitle,
                 metric: 'MVP',
                 color: appColors.sunset,
               ),
               _CompetitionPreview(
                 icon: Icons.sports_score,
-                title: 'Flest mål',
-                metric: 'Mål',
+                title: AppLocalizations.of(context)!.uiMostGoals,
+                metric: AppLocalizations.of(context)!.matchTimelineGoal,
                 color: appColors.success,
               ),
               _CompetitionPreview(
                 icon: Icons.handshake,
-                title: 'Flest assists',
+                title: AppLocalizations.of(context)!.uiMostAssists,
                 metric: 'Assists',
                 color: appColors.sky,
               ),
               _CompetitionPreview(
                 icon: Icons.style,
-                title: 'Flest kort',
-                metric: 'Kort',
+                title: AppLocalizations.of(context)!.uiMostCards,
+                metric: AppLocalizations.of(context)!.uiCards,
                 color: appColors.warning,
               ),
               _CompetitionPreview(
                 icon: Icons.payments,
-                title: 'Bødekongen',
-                metric: 'Bøder',
+                title: AppLocalizations.of(context)!.uiFineKing,
+                metric: AppLocalizations.of(context)!.fineBoxStatFines,
                 color: appColors.error,
               ),
             ],
@@ -124,23 +126,23 @@ class _PlayerPlusPageState extends State<PlayerPlusPage> {
           const SizedBox(height: 20),
           _FeaturePreviewCard(
             icon: Icons.emoji_events,
-            title: 'Interne ranglister',
-            body:
-                'Sæsonkonkurrencer for overall, MVP, mål, assists, kort og bøder på tværs af holdet.',
+            title: AppLocalizations.of(context)!.uiInternalTables,
+            body: AppLocalizations.of(context)!
+                .uiSeasonCompetitionsForOverallMvpGoals,
             color: appColors.sunset,
           ),
           _FeaturePreviewCard(
             icon: Icons.groups,
-            title: 'Serie-sammenligning',
+            title: AppLocalizations.of(context)!.uiLeagueComparison,
             body:
-                'Sammenlign spillere mod andre hold i samme række, når DBU data er synkroniseret.',
+                AppLocalizations.of(context)!.uiComparePlayersWithOtherTeamsIn,
             color: appColors.sky,
           ),
           _FeaturePreviewCard(
             icon: Icons.auto_graph,
-            title: 'Skjulte mønstre',
-            body:
-                'Formkurver, streaks og små interne konkurrencer baseret på jeres egne kampdata.',
+            title: AppLocalizations.of(context)!.uiHiddenPatterns,
+            body: AppLocalizations.of(context)!
+                .uiFormCurvesStreaksAndSmallInternal,
             color: appColors.grass,
           ),
         ],
@@ -193,7 +195,8 @@ class _InFormCard extends StatelessWidget {
                     Text('In-Form', style: appTextStyles.bodyBold),
                     const SizedBox(height: 4),
                     Text(
-                      'Holdkonkurrencen bygget automatisk ud fra jeres kampdata — mål, assists, streaks og bonusser.',
+                      AppLocalizations.of(context)!
+                          .uiTheTeamCompetitionBuiltAutomaticallyFrom,
                       style: appTextStyles.caption.copyWith(height: 1.35),
                     ),
                   ],

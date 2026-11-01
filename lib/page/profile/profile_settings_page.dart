@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:kopa/l10n/current_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -70,7 +71,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
     final l10n = AppLocalizations.of(context)!;
 
     return PageScaffold(
-      title: 'Settings',
+      title: AppLocalizations.of(context)!.uiSettings,
       showBackButton: true,
       backgroundColor: appColors.background,
       body: SingleChildScrollView(
@@ -88,19 +89,22 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
               ),
             FullWidthButton(
               outlined: true,
-              buttonText: 'Importér kampprogram',
+              buttonText: AppLocalizations.of(context)!.uiImportMatchSchedule,
               loading: _isLoading,
               onPressed: _isLoading ? () {} : _importCalendar,
             ),
             const SizedBox(height: 16),
             FullWidthButton(
-              buttonText: _isSharingKopa ? 'Henter link...' : 'Del Kopa',
+              buttonText: _isSharingKopa
+                  ? AppLocalizations.of(context)!.uiFetchingLink
+                  : AppLocalizations.of(context)!.uiShareKopa,
               outlined: true,
               loading: _isSharingKopa,
               onPressed: _isSharingKopa ? () {} : _shareKopa,
             ),
             const SizedBox(height: 24),
-            Text('Holdværktøjer', style: appTextStyles.sectionHeader),
+            Text(AppLocalizations.of(context)!.uiTeamTools,
+                style: appTextStyles.sectionHeader),
             const SizedBox(height: 12),
             if (currentUser?.isTeamOwner == true) ...[
               FullWidthButton(
@@ -111,15 +115,15 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
               ),
               const SizedBox(height: 16),
               FullWidthButton(
-                buttonText: 'Godkend nye spillere',
+                buttonText: AppLocalizations.of(context)!.uiApproveNewPlayers,
                 outlined: true,
                 onPressed: () => context.push(AppRouter.teamJoinRequests),
               ),
               const SizedBox(height: 16),
               FullWidthButton(
                 buttonText: _activeDbuSync == DbuWebviewOperation.standings
-                    ? 'Synkroniserer stilling...'
-                    : 'Synkroniser stilling fra DBU',
+                    ? AppLocalizations.of(context)!.uiSyncingStandings
+                    : AppLocalizations.of(context)!.uiSyncStandingsFromDbu,
                 outlined: true,
                 loading: _activeDbuSync != null,
                 onPressed: _activeDbuSync == null ? _syncDbu : () {},
@@ -130,8 +134,8 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                         .contains(_selectedMeetingOffsetMinutes)
                     ? _selectedMeetingOffsetMinutes
                     : null,
-                decoration: const InputDecoration(
-                  labelText: 'Standard mødetid',
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.uiDefaultMeetingTime,
                   border: OutlineInputBorder(),
                 ),
                 items: _meetingOffsetOptions
@@ -151,8 +155,8 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
               const SizedBox(height: 8),
               FullWidthButton(
                 buttonText: _isSavingMeetingOffset
-                    ? 'Gemmer mødetid...'
-                    : 'Gem mødetid',
+                    ? AppLocalizations.of(context)!.uiSavingMeetingTime
+                    : AppLocalizations.of(context)!.uiSaveMeetingTime,
                 loading: _isSavingMeetingOffset,
                 onPressed: _isSavingMeetingOffset ? () {} : _saveMeetingOffset,
               ),
@@ -231,7 +235,9 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
             ),
             const SizedBox(height: 24),
             FullWidthButton(
-              buttonText: _isLoading ? 'Logger ud...' : 'Log ud',
+              buttonText: _isLoading
+                  ? AppLocalizations.of(context)!.uiLoggingOut
+                  : AppLocalizations.of(context)!.uiLogOut,
               outlined: true,
               loading: _isLoading,
               onPressed: _isLoading
@@ -248,7 +254,8 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                         if (!mounted) return;
                         setState(() {
                           _isLoading = false;
-                          _errorMessage = 'Kunne ikke logge ud.';
+                          _errorMessage =
+                              AppLocalizations.of(context)!.uiCouldNotLogOut;
                         });
                       }
                     },
@@ -294,8 +301,8 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
     final currentUser = context.read<AuthCubit>().state.user;
     final team = currentUser?.teamDetails;
     if (team == null) {
-      setState(
-          () => _errorMessage = 'Du skal være på et hold for at dele Kopa.');
+      setState(() =>
+          _errorMessage = AppLocalizations.of(context)!.uiYouMustBeOnATeam);
       return;
     }
 
@@ -312,7 +319,8 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
       if (token == null) {
         setState(() {
           _isSharingKopa = false;
-          _errorMessage = 'Kunne ikke hente invitationslink.';
+          _errorMessage =
+              AppLocalizations.of(context)!.uiCouldNotFetchTheInviteLink;
         });
         return;
       }
@@ -329,7 +337,8 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
 
       await SharePlus.instance.share(
         ShareParams(
-          text: 'Join ${team.title} på Kopa: $inviteUri',
+          text:
+              AppLocalizations.of(context)!.uiJoinOnKopa(team.title, inviteUri),
         ),
       );
       if (!mounted) return;
@@ -338,7 +347,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
       if (!mounted) return;
       setState(() {
         _isSharingKopa = false;
-        _errorMessage = 'Kunne ikke dele Kopa.';
+        _errorMessage = AppLocalizations.of(context)!.uiCouldNotShareKopa;
       });
     }
   }
@@ -348,7 +357,8 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
     final teamId = currentUser?.teamDetails?.id;
 
     if (currentUser?.isTeamOwner != true || teamId == null) {
-      setState(() => _errorMessage = 'Kun holdlederen kan ændre mødetid.');
+      setState(() => _errorMessage =
+          AppLocalizations.of(context)!.uiOnlyTheTeamLeaderCanChange);
       return;
     }
 
@@ -369,7 +379,9 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
 
       final label = _meetingOffsetLabel(_selectedMeetingOffsetMinutes);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Standard mødetid er sat til $label.')),
+        SnackBar(
+            content: Text(AppLocalizations.of(context)!
+                .uiTheDefaultMeetingTimeIsSet(label))),
       );
       setState(() => _isSavingMeetingOffset = false);
     } catch (error) {
@@ -444,10 +456,10 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
 
   static String _meetingOffsetLabel(int? minutes) {
     if (minutes == null || minutes == 0) {
-      return 'Ingen standard';
+      return currentL10n.uiNoDefault;
     }
 
-    return '$minutes min før kampstart';
+    return currentL10n.uiMinBeforeKickoff(minutes);
   }
 
   Future<void> _syncDbu() async {
@@ -492,7 +504,8 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
 
       if (!mounted) return;
       final count = (scrapedData['standings'] as List<dynamic>? ?? []).length;
-      final label = 'Stilling og puljehold er synkroniseret ($count hold).';
+      final label =
+          AppLocalizations.of(context)!.uiStandingsAndPoolTeamsAreSynced(count);
 
       AppAnalytics.logEvent(
         'dbu_pool_sync_completed',

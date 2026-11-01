@@ -44,8 +44,28 @@ class MatchPollDetails {
     );
   }
 
-  String get winnerName =>
-      playerOfTheMatchDetails?.name ??
-      playerOfTheMatchExternalPlayerDetails?.name ??
-      '';
+  /// Every vote row sharing the highest count, so a tie has several winners.
+  List<MatchPollUserVotesDetails> get winningVotes {
+    if (matchPollUserVotesDetails.isEmpty) return const [];
+    final highest = matchPollUserVotesDetails
+        .map((vote) => vote.numberOfVotes)
+        .reduce((a, b) => a > b ? a : b);
+    if (highest <= 0) return const [];
+    return matchPollUserVotesDetails
+        .where((vote) => vote.numberOfVotes == highest)
+        .toList();
+  }
+
+  String get winnerName {
+    final names = winningVotes
+        .map((vote) => vote.userName ?? vote.externalPlayerName)
+        .whereType<String>()
+        .toList();
+    if (names.length > 1 && names.length == winningVotes.length) {
+      return names.join(' & ');
+    }
+    return playerOfTheMatchDetails?.name ??
+        playerOfTheMatchExternalPlayerDetails?.name ??
+        '';
+  }
 }

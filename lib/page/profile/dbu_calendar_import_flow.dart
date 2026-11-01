@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:kopa/l10n/current_l10n.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kopa/navigation/app_router.dart';
@@ -62,8 +64,8 @@ class DbuCalendarImportFlow {
     await UsersRepository.syncDbuMatchProgram(resultData);
 
     return mode == _CalendarImportMode.startNewSeason
-        ? 'Ny sæson er startet, og kampprogrammet er importeret.'
-        : 'Kampprogrammet er opdateret.';
+        ? currentL10n.uiANewSeasonHasStartedAnd
+        : currentL10n.uiTheMatchScheduleHasBeenUpdated;
   }
 
   static Future<_CalendarImportMode?> _chooseImportMode(
@@ -83,25 +85,22 @@ class DbuCalendarImportFlow {
     final startNewSeason = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Start ny sæson?'),
-        content: const Text(
-          'Der er allerede en aktiv sæson. Du kan opdatere det nuværende '
-          'kampprogram, eller starte en ny sæson før den nye DBU-plan '
-          'importeres. Hvis der mangler resultater fra den aktive sæson, '
-          'advarer Kopa dig før sæsonen startes.',
+        title: Text(AppLocalizations.of(context)!.uiStartNewSeason),
+        content: Text(
+          AppLocalizations.of(context)!.uiNewSeasonBody,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(null),
-            child: const Text('Annuller'),
+            child: Text(AppLocalizations.of(context)!.fineBoxDeleteCancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Opdater nuværende'),
+            child: Text(AppLocalizations.of(context)!.uiUpdateCurrent),
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Start ny sæson'),
+            child: Text(AppLocalizations.of(context)!.uiStartNewSeason2),
           ),
         ],
       ),
@@ -154,25 +153,25 @@ class DbuCalendarImportFlow {
     UnsettledMatchesWarning warning,
   ) {
     final count = warning.unsettledMatchesCount;
-    final matchLabel = count == 1 ? 'kamp' : 'kampe';
+    final matchLabel = count == 1
+        ? AppLocalizations.of(context)!.uiMatchSingular
+        : AppLocalizations.of(context)!.uiMatchPlural;
 
     return showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Mangler resultater'),
+        title: Text(AppLocalizations.of(context)!.uiMissingResults),
         content: Text(
-          'Der mangler resultater på $count $matchLabel i den aktive sæson. '
-          'Du kan stadig starte en ny sæson, men de gamle kampe vil være '
-          'låst til den afsluttede sæson uden fulde resultater.',
+          AppLocalizations.of(context)!.uiMissingResultsBody(count, matchLabel),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Gå tilbage'),
+            child: Text(AppLocalizations.of(context)!.uiGoBack),
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Start alligevel'),
+            child: Text(AppLocalizations.of(context)!.uiStartAnyway),
           ),
         ],
       ),
@@ -256,7 +255,7 @@ class DbuCalendarImportFlow {
     return showDialog<DbuPublicClubTeam>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Vælg DBU-hold'),
+        title: Text(AppLocalizations.of(context)!.uiChooseDbuTeam),
         content: SizedBox(
           width: double.maxFinite,
           child: ListView.separated(
@@ -271,7 +270,8 @@ class DbuCalendarImportFlow {
                 subtitle: Text(
                   [
                     if (candidate.leaderNames.isNotEmpty)
-                      'Holdleder: ${candidate.leaderNames.join(', ')}',
+                      AppLocalizations.of(context)!
+                          .uiTeamLeaderNames(candidate.leaderNames.join(', ')),
                     _seasonRowLabel(candidate),
                   ].join('\n'),
                 ),
@@ -283,7 +283,7 @@ class DbuCalendarImportFlow {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Annuller'),
+            child: Text(AppLocalizations.of(context)!.fineBoxDeleteCancel),
           ),
         ],
       ),
@@ -306,9 +306,9 @@ class DbuCalendarImportFlow {
   }
 
   static String _seasonLabel(int month) {
-    if (month >= 3 && month <= 5) return 'Forår';
-    if (month >= 6 && month <= 8) return 'Sommer';
-    if (month >= 9 && month <= 11) return 'Efterår';
-    return 'Vinter';
+    if (month >= 3 && month <= 5) return currentL10n.uiSpring;
+    if (month >= 6 && month <= 8) return currentL10n.uiSummer;
+    if (month >= 9 && month <= 11) return currentL10n.uiAutumn;
+    return currentL10n.uiWinter;
   }
 }

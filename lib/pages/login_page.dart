@@ -50,7 +50,8 @@ class _LoginPageState extends State<LoginPage> {
         if (state.status == AuthStatus.failure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(state.errorMessage ?? 'Login failed'),
+              content: Text(state.errorMessage ??
+                  AppLocalizations.of(context)!.uiLoginFailed),
               backgroundColor: appColors.error,
             ),
           );
@@ -74,7 +75,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 48),
                     Text(
-                      'Log ind',
+                      AppLocalizations.of(context)!.uiLogIn,
                       style: appTextStyles.sectionHeader,
                     ),
                     const SizedBox(height: 24),
@@ -88,7 +89,8 @@ class _LoginPageState extends State<LoginPage> {
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter your email';
+                          return AppLocalizations.of(context)!
+                              .uiPleaseEnterYourEmail;
                         }
                         return null;
                       },
@@ -97,14 +99,15 @@ class _LoginPageState extends State<LoginPage> {
                     TextFormField(
                       controller: _passwordController,
                       decoration: InputDecoration(
-                        labelText: 'Adgangskode',
+                        labelText: AppLocalizations.of(context)!.uiPassword,
                         border: const OutlineInputBorder(),
                         prefixIcon: Icon(Icons.lock, color: appColors.grass),
                       ),
                       obscureText: true,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter your password';
+                          return AppLocalizations.of(context)!
+                              .uiPleaseEnterYourPassword;
                         }
                         return null;
                       },
@@ -126,7 +129,7 @@ class _LoginPageState extends State<LoginPage> {
                       child: state.status == AuthStatus.loading
                           ? CircularProgressIndicator(
                               color: AppColors.of(context).white)
-                          : const Text('LOG IND'),
+                          : Text(AppLocalizations.of(context)!.uiLogIn2),
                     ),
                     const SizedBox(height: 16),
                     TextButton(
@@ -134,7 +137,7 @@ class _LoginPageState extends State<LoginPage> {
                         context.push('/register');
                       },
                       child: Text(
-                        'Har du ikke en bruger? Tilmeld dig her',
+                        AppLocalizations.of(context)!.uiDonTHaveAnAccountSign,
                         style: appTextStyles.body.copyWith(
                           color: appColors.primary,
                           decoration: TextDecoration.underline,

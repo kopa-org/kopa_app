@@ -1,5 +1,7 @@
 import 'dart:ui';
 
+import 'package:kopa/l10n/current_l10n.dart';
+import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
@@ -37,7 +39,8 @@ class PlayerPlusStatTileData {
     this.backgroundColor,
   });
 
-  String get rankLabel => rank == null ? 'Ingen placering' : '#$rank på holdet';
+  String get rankLabel =>
+      rank == null ? currentL10n.uiNoRanking : currentL10n.uiOnTheTeam(rank!);
 }
 
 class PlayerPlusStatTile extends StatelessWidget {
@@ -276,7 +279,8 @@ class _PlayerPlusLeaderboardSheet extends StatelessWidget {
               Expanded(
                 child: data.rows.isEmpty
                     ? Center(
-                        child: Text('Ingen data endnu.', style: styles.body))
+                        child: Text(AppLocalizations.of(context)!.uiNoDataYet,
+                            style: styles.body))
                     : ListView.separated(
                         controller: scrollController,
                         padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),

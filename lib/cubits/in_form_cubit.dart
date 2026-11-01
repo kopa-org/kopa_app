@@ -1,3 +1,4 @@
+import 'package:kopa/l10n/current_l10n.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopa/cubits/in_form_state.dart';
 import 'package:kopa/model/in_form.dart';
@@ -38,7 +39,7 @@ class InFormCubit extends Cubit<InFormState> {
     } catch (_) {
       emit(state.copyWith(
         status: InFormStatus.failure,
-        errorMessage: 'Kunne ikke hente In-form.',
+        errorMessage: currentL10n.uiCouldNotFetchInForm,
       ));
     }
   }
