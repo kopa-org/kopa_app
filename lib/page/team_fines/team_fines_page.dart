@@ -19,6 +19,7 @@ import 'package:kopa/page/team_fines/assign_fines_modal.dart';
 import 'package:kopa/page/team_fines/create_fine_type_modal.dart';
 import 'package:kopa/page/team_fines/deposit_modal.dart';
 import 'package:kopa/page/team_fines/mobile_pay_setup_modal.dart';
+import 'package:kopa/page/team_fines/withdraw_modal.dart';
 import 'package:kopa/repository/fines_repository.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
@@ -98,7 +99,7 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
     final body = FutureHandler<UserDetails>(
       future: currentUserData,
       onSuccess: (context, user) {
-        final segment = user.isTeamOwner
+        final segment = user.canManageFines
             ? _selectedSegment
             : TeamOwnerFinesSegments.personal;
 
@@ -119,7 +120,7 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
                       showBackButton: widget.showBackButton,
                     ),
                   ),
-                  if (user.isTeamOwner)
+                  if (user.canManageFines)
                     SliverToBoxAdapter(
                       child: _SegmentTabs(
                         selectedSegment: _selectedSegment,
@@ -215,7 +216,7 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
           _QuickActions(
             onGiveFine: _openAssignFines,
             onDeposit: () => _openTeamDeposit(fineBox),
-            onFineTypes: () => _selectSegment(TeamOwnerFinesSegments.fineTypes),
+            onWithdraw: () => _openWithdraw(fineBox),
           ),
           if (user.isTeamOwner || !fineBox.hasMobilePayBox) ...[
             const SizedBox(height: Spacing.itemGap),
@@ -248,6 +249,17 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
                   .map((row) => _RecentFineRow(row: row))
                   .toList(),
             ),
+          if (fineBox.withdrawals.isNotEmpty) ...[
+            const SizedBox(height: Spacing.lg),
+            InFormSectionTitle(title: l10n.fineBoxWithdrawalsTitle),
+            const SizedBox(height: Spacing.sm),
+            _GroupedPanel(
+              children: fineBox.withdrawals
+                  .take(5)
+                  .map((withdrawal) => _WithdrawalRow(withdrawal: withdrawal))
+                  .toList(),
+            ),
+          ],
         ],
       ),
     );
@@ -436,6 +448,19 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
     }
   }
 
+  Future<void> _openWithdraw(FineBoxDetails fineBox) async {
+    AppAnalytics.logEvent('fine_withdraw_started');
+    final result = await showCupertinoModalBottomSheet(
+      expand: false,
+      context: context,
+      builder: (context) => WithdrawModal(currentAmount: fineBox.currentAmount),
+    );
+
+    if (result == true) {
+      await _refreshFineBox();
+    }
+  }
+
   Widget? _buildCreateFineTypeFab() {
     if (_selectedSegment != TeamOwnerFinesSegments.fineTypes) return null;
 
@@ -444,7 +469,7 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
       loadingIndicator: const SizedBox.shrink(),
       onError: (_) => const SizedBox.shrink(),
       onSuccess: (context, user) {
-        if (!user.isTeamOwner) return const SizedBox.shrink();
+        if (!user.canManageFines) return const SizedBox.shrink();
 
         final l10n = AppLocalizations.of(context)!;
         final colors = AppColors.of(context);
@@ -1116,12 +1141,12 @@ class _HeroStat extends StatelessWidget {
 class _QuickActions extends StatelessWidget {
   final VoidCallback onGiveFine;
   final VoidCallback onDeposit;
-  final VoidCallback onFineTypes;
+  final VoidCallback onWithdraw;
 
   const _QuickActions({
     required this.onGiveFine,
     required this.onDeposit,
-    required this.onFineTypes,
+    required this.onWithdraw,
   });
 
   @override
@@ -1194,9 +1219,10 @@ class _QuickActions extends StatelessWidget {
           ),
           const SizedBox(width: Spacing.sm),
           _SquareAction(
-            icon: CupertinoIcons.list_bullet,
-            label: l10n.fineBoxSegmentFineTypes,
-            onTap: onFineTypes,
+            key: const ValueKey('fine-box-withdraw'),
+            icon: CupertinoIcons.arrow_up_circle,
+            label: l10n.fineBoxWithdraw,
+            onTap: onWithdraw,
           ),
         ],
       ),
@@ -1210,6 +1236,7 @@ class _SquareAction extends StatelessWidget {
   final VoidCallback onTap;
 
   const _SquareAction({
+    super.key,
     required this.icon,
     required this.label,
     required this.onTap,
@@ -1534,6 +1561,75 @@ class _RecentFineRow extends StatelessWidget {
             amount: row.fine.owedAmount,
             paid: paid,
             paidLabel: l10n.fineBoxPaidBadge,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WithdrawalRow extends StatelessWidget {
+  final FineBoxWithdrawal withdrawal;
+
+  const _WithdrawalRow({required this.withdrawal});
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors = AppColors.of(context);
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final l10n = AppLocalizations.of(context)!;
+    final details = [
+      withdrawal.userName ?? l10n.fineBoxWithdrawalUnknownUser,
+      _relativeDate(withdrawal.createdAt),
+    ].join(' · ');
+
+    return Padding(
+      padding: Spacing.listItemPadding,
+      child: Row(
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: appColors.offWhite,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              CupertinoIcons.arrow_up_circle,
+              color: appColors.dirt,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: Spacing.itemGap),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  withdrawal.note ?? l10n.fineBoxWithdrawalNoNote,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: appTextStyles.bodyBold.copyWith(fontSize: 15),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  details,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: appTextStyles.caption
+                      .copyWith(color: appColors.textSecondary),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: Spacing.sm),
+          Text(
+            '-${_kr(withdrawal.amount.round())}',
+            style: appTextStyles.caption.copyWith(
+              color: appColors.dirt,
+              fontWeight: FontWeight.w800,
+            ),
           ),
         ],
       ),

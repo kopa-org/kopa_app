@@ -54,8 +54,9 @@ class _MatchProgrammePageState extends State<MatchProgrammePage> {
           future: currentUser,
           loadingIndicator: const SizedBox.shrink(),
           onError: (_) => const SizedBox.shrink(),
+          // Everybody on the team can add matches and trainings.
           onSuccess: (context, user) {
-            if (!user.isTeamOwner) return const SizedBox.shrink();
+            if (user.teamDetails == null) return const SizedBox.shrink();
             final l10n = AppLocalizations.of(context)!;
 
             // Arc of icon actions, styled like the match details FAB.

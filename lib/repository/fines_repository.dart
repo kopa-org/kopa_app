@@ -98,6 +98,27 @@ class FinesRepository {
     return true;
   }
 
+  /// Records that the current user took [amount] kr. out of the fine box.
+  static Future<void> withdrawFromFineBox(int amount, {String? note}) async {
+    final url = Uri.parse('${ApiConfig.baseUrl}/fine/fine_box/withdraw');
+
+    final response = await _apiClient.postJson(
+      url,
+      body: {'amount': amount, if (note != null) 'note': note},
+    );
+
+    if (response.statusCode == 201) {
+      return;
+    }
+
+    if (response.statusCode == 422 &&
+        jsonDecode(response.body)['error'] == 'insufficient_funds') {
+      throw InsufficientFundsException();
+    }
+
+    throw Exception('Failed to withdraw from fine box');
+  }
+
   static Future<bool> createFineType(String title, String defaultAmount) async {
     final url = Uri.parse('${ApiConfig.baseUrl}/fine/type');
 
@@ -134,3 +155,5 @@ class FinesRepository {
 }
 
 class FineTypeInUseException implements Exception {}
+
+class InsufficientFundsException implements Exception {}

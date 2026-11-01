@@ -1117,4 +1117,53 @@ class AppLocalizationsEn extends AppLocalizations {
   String teamTasksPlayers(int count) {
     return '$count players in the queue';
   }
+
+  @override
+  String get teamRoleFineAdmin => 'Fine admin';
+
+  @override
+  String get teamRoleMakeFineAdmin => 'Make fine admin';
+
+  @override
+  String get teamRoleRemoveFineAdmin => 'Remove as fine admin';
+
+  @override
+  String get fineBoxWithdraw => 'Withdraw';
+
+  @override
+  String get fineBoxWithdrawTitle => 'Withdraw from the fine box';
+
+  @override
+  String fineBoxWithdrawIntro(int amount) {
+    return 'Record how much you took from the box. There is $amount kr. in the box now.';
+  }
+
+  @override
+  String get fineBoxWithdrawAmountHint => 'Amount';
+
+  @override
+  String get fineBoxWithdrawNoteHint => 'What was the money for? (optional)';
+
+  @override
+  String get fineBoxWithdrawSave => 'Record withdrawal';
+
+  @override
+  String get fineBoxWithdrawInvalidAmount => 'Enter an amount above 0 kr.';
+
+  @override
+  String get fineBoxWithdrawTooMuch =>
+      'There is not that much money in the box.';
+
+  @override
+  String get fineBoxWithdrawFailed =>
+      'Could not record the withdrawal. Try again.';
+
+  @override
+  String get fineBoxWithdrawalsTitle => 'Withdrawals';
+
+  @override
+  String get fineBoxWithdrawalNoNote => 'Withdrawal';
+
+  @override
+  String get fineBoxWithdrawalUnknownUser => 'Former player';
 }

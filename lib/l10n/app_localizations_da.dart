@@ -1113,4 +1113,53 @@ class AppLocalizationsDa extends AppLocalizations {
   String teamTasksPlayers(int count) {
     return '$count spillere i køen';
   }
+
+  @override
+  String get teamRoleFineAdmin => 'Bødeansvarlig';
+
+  @override
+  String get teamRoleMakeFineAdmin => 'Gør til bødeansvarlig';
+
+  @override
+  String get teamRoleRemoveFineAdmin => 'Fjern som bødeansvarlig';
+
+  @override
+  String get fineBoxWithdraw => 'Hæv';
+
+  @override
+  String get fineBoxWithdrawTitle => 'Hæv fra bødekassen';
+
+  @override
+  String fineBoxWithdrawIntro(int amount) {
+    return 'Registrér hvor meget du har taget fra kassen. Der er $amount kr. i kassen nu.';
+  }
+
+  @override
+  String get fineBoxWithdrawAmountHint => 'Beløb';
+
+  @override
+  String get fineBoxWithdrawNoteHint => 'Hvad gik pengene til? (valgfrit)';
+
+  @override
+  String get fineBoxWithdrawSave => 'Registrér hævning';
+
+  @override
+  String get fineBoxWithdrawInvalidAmount =>
+      'Indtast et beløb større end 0 kr.';
+
+  @override
+  String get fineBoxWithdrawTooMuch => 'Der er ikke så mange penge i kassen.';
+
+  @override
+  String get fineBoxWithdrawFailed =>
+      'Kunne ikke registrere hævningen. Prøv igen.';
+
+  @override
+  String get fineBoxWithdrawalsTitle => 'Hævet fra kassen';
+
+  @override
+  String get fineBoxWithdrawalNoNote => 'Hævning';
+
+  @override
+  String get fineBoxWithdrawalUnknownUser => 'Tidligere spiller';
 }

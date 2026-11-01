@@ -21,6 +21,10 @@ class TeamMembersCubit extends Cubit<TeamMembersState> {
       {required int teamId,
       required int userId,
       required bool isTeamLeader}) _updateRole;
+  final Future<UserDetails> Function(
+      {required int teamId,
+      required int userId,
+      required bool isFineAdmin}) _updateFineAdmin;
 
   TeamMembersCubit(
       {Future<List<UserDetails>> Function()? loadMembers,
@@ -28,9 +32,15 @@ class TeamMembersCubit extends Cubit<TeamMembersState> {
               {required int teamId,
               required int userId,
               required bool isTeamLeader})?
-          updateRole})
+          updateRole,
+      Future<UserDetails> Function(
+              {required int teamId,
+              required int userId,
+              required bool isFineAdmin})?
+          updateFineAdmin})
       : _loadMembers = loadMembers ?? UsersRepository.getSquad,
         _updateRole = updateRole ?? UsersRepository.updateTeamRole,
+        _updateFineAdmin = updateFineAdmin ?? UsersRepository.updateFineAdmin,
         super(const TeamMembersState());
 
   Future<void> load() async {
@@ -46,14 +56,29 @@ class TeamMembersCubit extends Cubit<TeamMembersState> {
   }
 
   Future<UserDetails?> changeRole(
-      {required int teamId,
-      required int userId,
-      required bool isTeamLeader}) async {
+          {required int teamId,
+          required int userId,
+          required bool isTeamLeader}) =>
+      _saveMember(
+          userId,
+          () => _updateRole(
+              teamId: teamId, userId: userId, isTeamLeader: isTeamLeader));
+
+  Future<UserDetails?> changeFineAdmin(
+          {required int teamId,
+          required int userId,
+          required bool isFineAdmin}) =>
+      _saveMember(
+          userId,
+          () => _updateFineAdmin(
+              teamId: teamId, userId: userId, isFineAdmin: isFineAdmin));
+
+  Future<UserDetails?> _saveMember(
+      int userId, Future<UserDetails> Function() save) async {
     if (state.savingUserId != null) return null;
     emit(TeamMembersState(members: state.members, savingUserId: userId));
     try {
-      final updated = await _updateRole(
-          teamId: teamId, userId: userId, isTeamLeader: isTeamLeader);
+      final updated = await save();
       if (!isClosed) {
         emit(TeamMembersState(members: [
           for (final member in state.members)

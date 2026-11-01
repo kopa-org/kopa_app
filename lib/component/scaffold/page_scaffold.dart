@@ -133,7 +133,14 @@ class PageScaffold extends StatelessWidget {
                     if (floatingActionButton != null)
                       Positioned(
                         right: 16,
-                        bottom: floatingActionButtonBottomInset,
+                        // Pushed pages can sit under the main tab bar or the
+                        // home indicator, so clear the reported bottom inset
+                        // like the Material scaffold does. Tab scaffolds
+                        // already pass an inset that clears the bar.
+                        bottom: floatingActionButtonBottomInset +
+                            (_isTabScaffold
+                                ? 0
+                                : MediaQuery.paddingOf(context).bottom),
                         child: floatingActionButton!,
                       ),
                   ],

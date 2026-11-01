@@ -18,20 +18,32 @@ class TeamRoleButton extends StatelessWidget {
     final members = context.read<TeamMembersCubit>();
     final teamId = auth.state.user?.teamDetails?.id;
     if (teamId == null) return;
-    final role = await showCupertinoModalPopup<bool>(
+    // Only leaders hand out the fine admin role; a leader editing themselves
+    // may still step down to player.
+    final canManageTeam = auth.state.user?.canManageTeam == true;
+    final choice = await showCupertinoModalPopup<_RoleChoice>(
       context: context,
       builder: (context) => CupertinoActionSheet(
         title: Text(player.name),
         message: Text(l10n.teamRoleEdit),
         actions: [
           CupertinoActionSheetAction(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => Navigator.pop(context, _RoleChoice.leader),
             child: Text(l10n.onboardingTeamLeader),
           ),
           CupertinoActionSheetAction(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => Navigator.pop(context, _RoleChoice.player),
             child: Text(l10n.onboardingPlayer),
           ),
+          if (canManageTeam)
+            CupertinoActionSheetAction(
+              key: const ValueKey('team-role-fine-admin'),
+              isDestructiveAction: player.isFineAdmin,
+              onPressed: () => Navigator.pop(context, _RoleChoice.fineAdmin),
+              child: Text(player.isFineAdmin
+                  ? l10n.teamRoleRemoveFineAdmin
+                  : l10n.teamRoleMakeFineAdmin),
+            ),
         ],
         cancelButton: CupertinoActionSheetAction(
           onPressed: () => Navigator.pop(context),
@@ -39,10 +51,20 @@ class TeamRoleButton extends StatelessWidget {
         ),
       ),
     );
-    if (role == null || role == player.isTeamOwner || !context.mounted) return;
+    if (choice == null || !context.mounted) return;
     try {
-      await members.changeRole(
-          teamId: teamId, userId: player.id, isTeamLeader: role);
+      switch (choice) {
+        case _RoleChoice.fineAdmin:
+          await members.changeFineAdmin(
+              teamId: teamId,
+              userId: player.id,
+              isFineAdmin: !player.isFineAdmin);
+        case _RoleChoice.leader || _RoleChoice.player:
+          final isLeader = choice == _RoleChoice.leader;
+          if (isLeader == player.isTeamOwner) return;
+          await members.changeRole(
+              teamId: teamId, userId: player.id, isTeamLeader: isLeader);
+      }
     } catch (error) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -78,3 +100,5 @@ class TeamRoleButton extends StatelessWidget {
     );
   }
 }
+
+enum _RoleChoice { leader, player, fineAdmin }

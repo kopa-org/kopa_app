@@ -44,6 +44,22 @@ class UsersRepository {
     return UserDetails.fromJson(jsonDecode(response.body)['user']);
   }
 
+  static Future<UserDetails> updateFineAdmin({
+    required int teamId,
+    required int userId,
+    required bool isFineAdmin,
+  }) async {
+    final response = await _apiClient.patchJson(
+      Uri.parse(
+          '${ApiConfig.baseUrl}/teams/$teamId/members/$userId/fine_admin'),
+      body: {'is_fine_admin': isFineAdmin},
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update fine admin');
+    }
+    return UserDetails.fromJson(jsonDecode(response.body)['user']);
+  }
+
   static Future<int> createPlayer(String name, String email) async {
     final url = Uri.parse('${ApiConfig.baseUrl}/user');
 

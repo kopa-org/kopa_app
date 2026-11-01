@@ -473,5 +473,27 @@
         "type": "int"
       }
     }
+  },
+  "teamRoleFineAdmin": "Bødeansvarlig",
+  "teamRoleMakeFineAdmin": "Gør til bødeansvarlig",
+  "teamRoleRemoveFineAdmin": "Fjern som bødeansvarlig",
+  "fineBoxWithdraw": "Hæv",
+  "fineBoxWithdrawTitle": "Hæv fra bødekassen",
+  "fineBoxWithdrawIntro": "Registrér hvor meget du har taget fra kassen. Der er {amount} kr. i kassen nu.",
+  "fineBoxWithdrawAmountHint": "Beløb",
+  "fineBoxWithdrawNoteHint": "Hvad gik pengene til? (valgfrit)",
+  "fineBoxWithdrawSave": "Registrér hævning",
+  "fineBoxWithdrawInvalidAmount": "Indtast et beløb større end 0 kr.",
+  "fineBoxWithdrawTooMuch": "Der er ikke så mange penge i kassen.",
+  "fineBoxWithdrawFailed": "Kunne ikke registrere hævningen. Prøv igen.",
+  "fineBoxWithdrawalsTitle": "Hævet fra kassen",
+  "fineBoxWithdrawalNoNote": "Hævning",
+  "fineBoxWithdrawalUnknownUser": "Tidligere spiller",
+  "@fineBoxWithdrawIntro": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
   }
 }

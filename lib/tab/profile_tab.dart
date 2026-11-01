@@ -48,8 +48,10 @@ class _SquadTabView extends StatelessWidget {
         if (current == null) return;
         for (final member in state.members) {
           if (member.id == current.id &&
-              member.isTeamOwner != current.isTeamOwner) {
-            auth.updateUser(current.withTeamRole(member.isTeamOwner));
+              (member.isTeamOwner != current.isTeamOwner ||
+                  member.isFineAdmin != current.isFineAdmin)) {
+            auth.updateUser(current.withTeamRole(member.isTeamOwner,
+                isFineAdmin: member.isFineAdmin));
             break;
           }
         }
@@ -226,8 +228,10 @@ class _RosterRow extends StatelessWidget {
     final appColors = theme.extension<AppColors>() ?? AppColors.light;
     final styles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
     final l10n = AppLocalizations.of(context)!;
-    final role =
+    final teamRole =
         player.isTeamOwner ? l10n.onboardingTeamLeader : l10n.onboardingPlayer;
+    final role =
+        player.isFineAdmin ? '$teamRole · ${l10n.teamRoleFineAdmin}' : teamRole;
     final position = player.position?.trim();
 
     return Material(

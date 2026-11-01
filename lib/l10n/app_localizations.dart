@@ -2107,6 +2107,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} players in the queue'**
   String teamTasksPlayers(int count);
+
+  /// No description provided for @teamRoleFineAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Fine admin'**
+  String get teamRoleFineAdmin;
+
+  /// No description provided for @teamRoleMakeFineAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Make fine admin'**
+  String get teamRoleMakeFineAdmin;
+
+  /// No description provided for @teamRoleRemoveFineAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove as fine admin'**
+  String get teamRoleRemoveFineAdmin;
+
+  /// No description provided for @fineBoxWithdraw.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw'**
+  String get fineBoxWithdraw;
+
+  /// No description provided for @fineBoxWithdrawTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw from the fine box'**
+  String get fineBoxWithdrawTitle;
+
+  /// No description provided for @fineBoxWithdrawIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Record how much you took from the box. There is {amount} kr. in the box now.'**
+  String fineBoxWithdrawIntro(int amount);
+
+  /// No description provided for @fineBoxWithdrawAmountHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get fineBoxWithdrawAmountHint;
+
+  /// No description provided for @fineBoxWithdrawNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What was the money for? (optional)'**
+  String get fineBoxWithdrawNoteHint;
+
+  /// No description provided for @fineBoxWithdrawSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Record withdrawal'**
+  String get fineBoxWithdrawSave;
+
+  /// No description provided for @fineBoxWithdrawInvalidAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an amount above 0 kr.'**
+  String get fineBoxWithdrawInvalidAmount;
+
+  /// No description provided for @fineBoxWithdrawTooMuch.
+  ///
+  /// In en, this message translates to:
+  /// **'There is not that much money in the box.'**
+  String get fineBoxWithdrawTooMuch;
+
+  /// No description provided for @fineBoxWithdrawFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not record the withdrawal. Try again.'**
+  String get fineBoxWithdrawFailed;
+
+  /// No description provided for @fineBoxWithdrawalsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdrawals'**
+  String get fineBoxWithdrawalsTitle;
+
+  /// No description provided for @fineBoxWithdrawalNoNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdrawal'**
+  String get fineBoxWithdrawalNoNote;
+
+  /// No description provided for @fineBoxWithdrawalUnknownUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Former player'**
+  String get fineBoxWithdrawalUnknownUser;
 }
 
 class _AppLocalizationsDelegate

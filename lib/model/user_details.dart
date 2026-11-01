@@ -5,6 +5,7 @@ class UserDetails {
   final String name;
   final String email;
   final bool isTeamOwner;
+  final bool isFineAdmin;
   final bool isAdmin;
   final int roleId;
   final DateTime? dateOfBirth;
@@ -19,6 +20,7 @@ class UserDetails {
       required this.name,
       required this.email,
       required this.isTeamOwner,
+      this.isFineAdmin = false,
       this.isAdmin = false,
       required this.roleId,
       this.dateOfBirth,
@@ -34,6 +36,7 @@ class UserDetails {
       name: json['name'],
       email: json['email'],
       isTeamOwner: json['is_team_owner'],
+      isFineAdmin: json['is_fine_admin'] ?? false,
       isAdmin: json['is_admin'] ?? false,
       roleId: json['role_id'],
       dateOfBirth: json['date_of_birth'] == null
@@ -51,11 +54,13 @@ class UserDetails {
     );
   }
 
-  UserDetails withTeamRole(bool isTeamLeader) => UserDetails(
+  UserDetails withTeamRole(bool isTeamLeader, {bool? isFineAdmin}) =>
+      UserDetails(
         id: id,
         name: name,
         email: email,
         isTeamOwner: isTeamLeader,
+        isFineAdmin: isFineAdmin ?? this.isFineAdmin,
         isAdmin: isAdmin,
         roleId: roleId,
         dateOfBirth: dateOfBirth,
@@ -67,6 +72,10 @@ class UserDetails {
       );
 
   bool get canManageTeam => isTeamOwner || isAdmin;
+
+  /// Fine admins give fines, manage fine types and record withdrawals. Team
+  /// leaders can always do the same.
+  bool get canManageFines => isFineAdmin || canManageTeam;
 }
 
 class UserOnboardingState {

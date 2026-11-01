@@ -112,6 +112,57 @@ void main() {
     expect(cubit.state.savingUserId, isNull);
     await tester.pumpWidget(const SizedBox.shrink());
   });
+  testWidgets('leader makes a player fine admin from their profile',
+      (tester) async {
+    final auth = AuthCubit(authRepository: _Auth())..updateUser(_user(1, true));
+    final calls = <bool>[];
+    final cubit = TeamMembersCubit(
+        loadMembers: () async => [_user(1, true), _user(2, false)],
+        updateFineAdmin: (
+            {required teamId, required userId, required isFineAdmin}) async {
+          expect((teamId, userId), (10, 2));
+          calls.add(isFineAdmin);
+          return _user(userId, false, fineAdmin: isFineAdmin);
+        });
+    addTearDown(auth.close);
+    await cubit.load();
+    await _pump(tester, auth, cubit);
+    await _openProfile(tester, 2);
+    await tester.tap(find.byTooltip('Skift rolle på holdet'));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100),
+        EnginePhase.sendSemanticsUpdate, const Duration(seconds: 5));
+    await tester.tap(find.text('Gør til bødeansvarlig'));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100),
+        EnginePhase.sendSemanticsUpdate, const Duration(seconds: 5));
+    expect(calls, [true]);
+    expect(cubit.state.members.last.isFineAdmin, isTrue);
+    expect(cubit.state.members.last.canManageFines, isTrue);
+
+    // The sheet now offers to take the role away again.
+    await tester.tap(find.byTooltip('Skift rolle på holdet'));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100),
+        EnginePhase.sendSemanticsUpdate, const Duration(seconds: 5));
+    await tester.tap(find.text('Fjern som bødeansvarlig'));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100),
+        EnginePhase.sendSemanticsUpdate, const Duration(seconds: 5));
+    expect(calls, [true, false]);
+    expect(cubit.state.members.last.isFineAdmin, isFalse);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('players cannot hand out the fine admin role', (tester) async {
+    final auth = AuthCubit(authRepository: _Auth())
+      ..updateUser(_user(1, false, fineAdmin: true));
+    final cubit = TeamMembersCubit(
+        loadMembers: () async => [_user(1, false, fineAdmin: true)]);
+    addTearDown(auth.close);
+    await cubit.load();
+    await _pump(tester, auth, cubit);
+    expect(find.text('Spiller · Bødeansvarlig'), findsOneWidget);
+    await _openProfile(tester, 1);
+    expect(find.byTooltip('Skift rolle på holdet'), findsNothing);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
 }
 
 Future<void> _openProfile(WidgetTester tester, int id) async {
@@ -136,11 +187,12 @@ Future<void> _pump(
       EnginePhase.sendSemanticsUpdate, const Duration(seconds: 5));
 }
 
-UserDetails _user(int id, bool leader) => UserDetails(
+UserDetails _user(int id, bool leader, {bool fineAdmin = false}) => UserDetails(
     id: id,
     name: 'Member $id',
     email: 'member$id@example.com',
     isTeamOwner: leader,
+    isFineAdmin: fineAdmin,
     roleId: 2,
     createdAt: DateTime(2026),
     updatedAt: DateTime(2026),

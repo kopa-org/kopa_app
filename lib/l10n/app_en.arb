@@ -473,5 +473,27 @@
         "type": "int"
       }
     }
+  },
+  "teamRoleFineAdmin": "Fine admin",
+  "teamRoleMakeFineAdmin": "Make fine admin",
+  "teamRoleRemoveFineAdmin": "Remove as fine admin",
+  "fineBoxWithdraw": "Withdraw",
+  "fineBoxWithdrawTitle": "Withdraw from the fine box",
+  "fineBoxWithdrawIntro": "Record how much you took from the box. There is {amount} kr. in the box now.",
+  "fineBoxWithdrawAmountHint": "Amount",
+  "fineBoxWithdrawNoteHint": "What was the money for? (optional)",
+  "fineBoxWithdrawSave": "Record withdrawal",
+  "fineBoxWithdrawInvalidAmount": "Enter an amount above 0 kr.",
+  "fineBoxWithdrawTooMuch": "There is not that much money in the box.",
+  "fineBoxWithdrawFailed": "Could not record the withdrawal. Try again.",
+  "fineBoxWithdrawalsTitle": "Withdrawals",
+  "fineBoxWithdrawalNoNote": "Withdrawal",
+  "fineBoxWithdrawalUnknownUser": "Former player",
+  "@fineBoxWithdrawIntro": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
   }
 }
