@@ -6,6 +6,7 @@ import 'package:kopa/component/button/mobile_pay_button.dart';
 import 'package:kopa/helpers/mobile_pay_box_link.dart';
 import 'package:kopa/helpers/url_opener.dart';
 import 'package:kopa/l10n/app_localizations.dart';
+import 'package:kopa/page/team_fines/mobile_pay_paid_dialog.dart';
 import 'package:kopa/page/team_fines/mobile_pay_setup_modal.dart';
 
 const _id = '518aff76-4902-4482-ae1d-967fde993155';
@@ -70,6 +71,45 @@ void main() {
     expect(await UrlOpener.openMobilePay(mobilePayBoxId: _url), isTrue);
     expect(launches, ['mobilepay://box/$_id/pay-in', _url]);
   });
+
+  testWidgets('reports only a successful redirect', (tester) async {
+    var opened = 0;
+    Widget button() => _app(MobilePayButton(
+          mobilePayBoxId: _id,
+          onOpened: () => opened++,
+        ));
+    await tester.pumpWidget(button());
+    await tester.tap(find.text('Go to MobilePay Box'));
+    await tester.pumpAndSettle();
+    expect(opened, 1);
+
+    appInstalled = false;
+    webAvailable = false;
+    await tester.tap(find.text('Go to MobilePay Box'));
+    await tester.pumpAndSettle();
+    expect(opened, 1);
+  });
+
+  for (final (answer, paid) in [('Yes', true), ('No', false)]) {
+    testWidgets('paid dialog returns $paid for $answer', (tester) async {
+      bool? result;
+      await tester.pumpWidget(_app(Builder(
+        builder: (context) => TextButton(
+          onPressed: () async {
+            result = await showMobilePayPaidDialog(context, 150);
+          },
+          child: const Text('Ask'),
+        ),
+      )));
+      await tester.tap(find.text('Ask'));
+      await tester.pumpAndSettle();
+      expect(find.text('Have you paid 150 kr?'), findsOneWidget);
+      await tester.tap(find.text(answer));
+      await tester.pumpAndSettle();
+      expect(result, paid);
+      expect(find.text('Have you paid 150 kr?'), findsNothing);
+    });
+  }
 
   testWidgets('payment failure is visible instead of silently discarded',
       (tester) async {

@@ -2173,6 +2173,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Former player'**
   String get fineBoxWithdrawalUnknownUser;
+
+  /// No description provided for @mobilePayPaidTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Have you paid {amount} kr?'**
+  String mobilePayPaidTitle(int amount);
+
+  /// No description provided for @mobilePayPaidBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We can\'t see MobilePay payments in Kopa. If you say yes, the selected fines are marked as paid.'**
+  String get mobilePayPaidBody;
+
+  /// No description provided for @mobilePayPaidYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get mobilePayPaidYes;
+
+  /// No description provided for @mobilePayPaidNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get mobilePayPaidNo;
+
+  /// No description provided for @mobilePayPaidSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your payment could not be saved. Please try again.'**
+  String get mobilePayPaidSaveFailed;
 }
 
 class _AppLocalizationsDelegate

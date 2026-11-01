@@ -491,5 +491,17 @@
         "type": "int"
       }
     }
-  }
+  },
+  "mobilePayPaidTitle": "Have you paid {amount} kr?",
+  "@mobilePayPaidTitle": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "mobilePayPaidBody": "We can't see MobilePay payments in Kopa. If you say yes, the selected fines are marked as paid.",
+  "mobilePayPaidYes": "Yes",
+  "mobilePayPaidNo": "No",
+  "mobilePayPaidSaveFailed": "Your payment could not be saved. Please try again."
 }

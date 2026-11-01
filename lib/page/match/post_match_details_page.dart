@@ -71,7 +71,7 @@ class PostMatchDetailsPage extends StatelessWidget {
       belowHeaderAction: belowHeaderAction,
       // Same tabs and layout as before the match, so the page feels familiar.
       usePrematchLayout: true,
-      overviewWidgetsBeforeInfo: true,
+      timelineBeforeInfo: true,
       overviewTitle: 'Praktisk information',
       attendanceTitle: 'Tilmeldte spillere',
       timelineTitle: timelineLabel,
@@ -80,7 +80,7 @@ class PostMatchDetailsPage extends StatelessWidget {
       showTimelineSegment: true,
       timelineInOverview: true,
       timelineEmptyMessage: 'Ingen kampbegivenheder registreret endnu.',
-      overviewWidgets: [
+      leadingOverviewWidgets: [
         if (match.matchPollDetails == null)
           PlayerOfMatchSummaryCard(
             playerName: null,
@@ -91,8 +91,12 @@ class PostMatchDetailsPage extends StatelessWidget {
             poll: match.matchPollDetails!,
             onEdit: onEditMatchPoll,
           ),
-        if (infoRows.isNotEmpty) const SizedBox(height: Spacing.lg),
-        if (tasksSection != null) tasksSection!,
+      ],
+      overviewWidgets: [
+        if (tasksSection != null) ...[
+          const SizedBox(height: Spacing.lg),
+          tasksSection!,
+        ],
       ],
       infoRows: infoRows,
       votingModule: null,

@@ -1,9 +1,12 @@
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:kopa/component/card/kopa_card.dart';
-import 'package:kopa/component/match/match_details_sheet_scroll_view.dart';
+import 'package:kopa/component/card/match_hero_card.dart';
+import 'package:kopa/component/match/match_details_pinned_scroll_view.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/component/section_header/section_header.dart';
 import 'package:kopa/l10n/app_localizations.dart';
@@ -44,7 +47,8 @@ class MatchDetailTemplate extends StatelessWidget {
   final bool showTimelineSegment;
   final bool timelineInOverview;
   final bool usePrematchLayout;
-  final bool overviewWidgetsBeforeInfo;
+  final List<Widget> leadingOverviewWidgets;
+  final bool timelineBeforeInfo;
   final Widget? attendanceHeader;
   final bool attendanceHeaderInBody;
   final Widget? stickyActionBar;
@@ -84,7 +88,8 @@ class MatchDetailTemplate extends StatelessWidget {
     this.timelineInOverview = false,
     this.showTimelineSegment = true,
     this.usePrematchLayout = false,
-    this.overviewWidgetsBeforeInfo = false,
+    this.leadingOverviewWidgets = const [],
+    this.timelineBeforeInfo = false,
     this.attendanceHeader,
     this.attendanceHeaderInBody = false,
     this.stickyActionBar,
@@ -98,7 +103,36 @@ class MatchDetailTemplate extends StatelessWidget {
     this.floatingActionButton,
   });
 
+  static const double _navBarExtent = 52;
+
   bool get _usesSheetHeader => useDarkMatchHeader || useTrainingHeader;
+
+  /// Heights follow the text scale because the team names sit in the hero.
+  double _heroExtent(BuildContext context, double collapse) {
+    final labelHeight = MediaQuery.textScalerOf(context).scale(18);
+    return lerpDouble(84 + labelHeight, 36 + labelHeight, collapse)!;
+  }
+
+  double _navExtent(double collapse) => lerpDouble(_navBarExtent, 0, collapse)!;
+
+  double _cardPadding(double collapse) => lerpDouble(8, 4, collapse)!;
+
+  double _segmentTopGap(double collapse) => lerpDouble(8, 4, collapse)!;
+
+  double _segmentTrackPadding(double collapse) => lerpDouble(4, 2, collapse)!;
+
+  double _segmentButtonExtent(double collapse) => lerpDouble(44, 36, collapse)!;
+
+  double _segmentExtent(double collapse) =>
+      _segmentButtonExtent(collapse) + 2 * _segmentTrackPadding(collapse);
+
+  double _headerExtent(BuildContext context, double collapse) =>
+      MediaQuery.paddingOf(context).top +
+      _navExtent(collapse) +
+      2 * _cardPadding(collapse) +
+      _heroExtent(context, collapse) +
+      _segmentTopGap(collapse) +
+      _segmentExtent(collapse);
 
   Color _headerColor(BuildContext context) => useTrainingHeader
       ? AppColors.of(context).lightSky65
@@ -111,7 +145,8 @@ class MatchDetailTemplate extends StatelessWidget {
     return PageScaffold(
       title: pageTitle,
       showTopBar: false,
-      backgroundColor: _usesSheetHeader ? _headerColor(context) : null,
+      useTopSafeArea: !_usesSheetHeader,
+      backgroundColor: _usesSheetHeader ? colors.background : null,
       systemOverlayStyle: _usesSheetHeader
           ? SystemUiOverlayStyle(
               statusBarColor: _headerColor(context),
@@ -219,47 +254,11 @@ class MatchDetailTemplate extends StatelessWidget {
     required double segmentSpacing,
     required double bottomPadding,
   }) {
-    return MatchDetailsSheetScrollView(
+    return MatchDetailsPinnedScrollView(
       onRefresh: onRefresh,
-      headerBackgroundColor: _headerColor(context),
-      header: ColoredBox(
-        key: const ValueKey('match-details-dark-header'),
-        color: _headerColor(context),
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _MatchDetailsHeader(
-                title: pageTitle,
-                action: headerAction,
-                darkHeader: true,
-                trainingHeader: useTrainingHeader,
-              ),
-              const SizedBox(height: 12),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: heroCard,
-              ),
-              if (_showAttendanceHeader && !attendanceHeaderInBody) ...[
-                SizedBox(height: segmentSpacing),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: attendanceHeader!,
-                ),
-              ],
-              SizedBox(height: segmentSpacing),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: _buildSegmentedControl(
-                  context,
-                  darkHeader: true,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+      expandedHeaderExtent: _headerExtent(context, 0),
+      collapsedHeaderExtent: _headerExtent(context, 1),
+      header: _buildPinnedHeader,
       body: Padding(
         padding: EdgeInsets.fromLTRB(16, segmentSpacing, 16, bottomPadding),
         child: Column(
@@ -269,7 +268,7 @@ class MatchDetailTemplate extends StatelessWidget {
               belowHeaderAction!,
               const SizedBox(height: Spacing.md),
             ],
-            if (_showAttendanceHeader && attendanceHeaderInBody) ...[
+            if (_showAttendanceHeader && !usePrematchLayout) ...[
               attendanceHeader!,
               const SizedBox(height: Spacing.md),
             ],
@@ -280,9 +279,93 @@ class MatchDetailTemplate extends StatelessWidget {
     );
   }
 
+  Widget _buildPinnedHeader(BuildContext context, double collapse) {
+    final colors = AppColors.of(context);
+    final navHidden = collapse == 1;
+
+    return ColoredBox(
+      color: colors.background,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(
+              bottom: Radius.circular(Spacing.borderRadiusLargeIncreased),
+            ),
+            child: ColoredBox(
+              key: const ValueKey('match-details-dark-header'),
+              color: _headerColor(context),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // The green reaches behind the phone's status bar.
+                  SizedBox(height: MediaQuery.paddingOf(context).top),
+                  // The navigation row slides out while scrolling.
+                  SizedBox(
+                    height: _navExtent(collapse),
+                    child: ClipRect(
+                      child: OverflowBox(
+                        minHeight: _navBarExtent,
+                        maxHeight: _navBarExtent,
+                        alignment: Alignment.bottomCenter,
+                        child: IgnorePointer(
+                          ignoring: navHidden,
+                          child: ExcludeSemantics(
+                            excluding: navHidden,
+                            child: Opacity(
+                              opacity: 1 - collapse,
+                              child: _MatchDetailsHeader(
+                                title: pageTitle,
+                                action: headerAction,
+                                darkHeader: true,
+                                trainingHeader: useTrainingHeader,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      vertical: _cardPadding(collapse),
+                    ),
+                    child: SizedBox(
+                      height: _heroExtent(context, collapse),
+                      child: ClipRect(
+                        child: OverflowBox(
+                          minHeight: 0,
+                          maxHeight: double.infinity,
+                          child: MatchHeroCollapse(
+                            value: collapse,
+                            child: heroCard,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(height: _segmentTopGap(collapse)),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: _buildSegmentedControl(
+              context,
+              darkHeader: true,
+              collapse: collapse,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildSegmentedControl(
     BuildContext context, {
     bool darkHeader = false,
+    double collapse = 0,
   }) {
     final styles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
@@ -319,6 +402,7 @@ class MatchDetailTemplate extends StatelessWidget {
                     textStyle: styles.body3,
                     darkHeader: darkHeader,
                     trainingHeader: useTrainingHeader,
+                    height: _segmentButtonExtent(collapse),
                     onPressed: () =>
                         onSegmentChanged?.call(segments[index].segment),
                   ),
@@ -367,6 +451,7 @@ class MatchDetailTemplate extends StatelessWidget {
                     textStyle: styles.body3,
                     darkHeader: darkHeader,
                     trainingHeader: useTrainingHeader,
+                    height: _segmentButtonExtent(collapse),
                     onPressed: () =>
                         onSegmentChanged?.call(segments[index].segment),
                   ),
@@ -378,9 +463,9 @@ class MatchDetailTemplate extends StatelessWidget {
     if (darkHeader) {
       return Container(
         key: const ValueKey('match-details-dark-segment-control'),
-        padding: const EdgeInsets.all(4),
+        padding: EdgeInsets.all(_segmentTrackPadding(collapse)),
         decoration: BoxDecoration(
-          color: _headerColor(context),
+          color: AppColors.of(context).background,
           borderRadius: BorderRadius.circular(12),
         ),
         child: row,
@@ -423,16 +508,27 @@ class MatchDetailTemplate extends StatelessWidget {
               _PrematchSectionTitle(title: overviewTitle),
               _PrematchInfoCard(children: infoRows),
             ],
+            if (_usesSheetHeader && _showAttendanceHeader) ...[
+              const SizedBox(height: Spacing.md),
+              attendanceHeader!,
+              const SizedBox(height: Spacing.md),
+            ],
           ];
-          final overview = overviewWidgetsBeforeInfo
-              ? [...overviewWidgets, ...info]
-              : [...info, ...overviewWidgets];
-          return [
-            ...overview,
+          final timeline = [
             if (timelineInOverview && showTimelineSegment) ...[
               const SizedBox(height: 20),
               ..._buildTimelineSection(),
             ],
+          ];
+          return [
+            ...leadingOverviewWidgets,
+            if (timelineBeforeInfo) ...[
+              ...timeline,
+              const SizedBox(height: 20),
+            ],
+            ...info,
+            ...overviewWidgets,
+            if (!timelineBeforeInfo) ...timeline,
           ];
         }
 
@@ -504,6 +600,7 @@ class _MatchDetailSegmentButton extends StatelessWidget {
   final TextStyle textStyle;
   final bool darkHeader;
   final bool trainingHeader;
+  final double height;
   final VoidCallback onPressed;
 
   const _MatchDetailSegmentButton({
@@ -517,6 +614,7 @@ class _MatchDetailSegmentButton extends StatelessWidget {
     required this.textStyle,
     required this.darkHeader,
     required this.trainingHeader,
+    this.height = 44,
     required this.onPressed,
   });
 
@@ -550,7 +648,7 @@ class _MatchDetailSegmentButton extends StatelessWidget {
         excludeSemantics: true,
         onTap: onPressed,
         child: SizedBox(
-          height: 44,
+          height: height,
           child: Material(
             color: AppColors.transparent,
             child: InkWell(
@@ -609,7 +707,7 @@ class _MatchDetailSegmentButton extends StatelessWidget {
           builder: (context, expansion, child) => SizedBox(
             width:
                 collapsedWidth + (expandedWidth - collapsedWidth) * expansion,
-            height: 44,
+            height: height,
             child: Material(
               color: AppColors.transparent,
               child: InkWell(
@@ -720,7 +818,7 @@ class _MatchDetailsHeader extends StatelessWidget {
     if (darkHeader) {
       return Padding(
         key: const ValueKey('match-details-scroll-header'),
-        padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Row(
           children: [
             backButton,

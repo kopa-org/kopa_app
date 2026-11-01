@@ -17,7 +17,6 @@ import 'package:kopa/page/match/match_details_page.dart';
 import 'package:kopa/repositories/auth_repository.dart';
 import 'package:kopa/theme/app_theme.dart';
 import 'package:kopa/theme/app_colors.dart';
-import 'package:kopa/component/match/match_details_sheet_scroll_view.dart';
 
 void main() {
   for (final (platform, variant) in [
@@ -125,7 +124,8 @@ void main() {
         );
         expect(rsvpCard.top, greaterThan(darkHeader.bottom));
         expect(status.top, greaterThanOrEqualTo(rsvpCard.top));
-        expect(initialPracticalRect!.top, greaterThan(status.bottom));
+        expect(status.top, greaterThan(initialPracticalRect!.bottom));
+        expect(status.center.dx, closeTo(rsvpCard.center.dx, 0.01));
       }
 
       matchResponse.complete(_match(variant, location: 'Fetched stadium'));
@@ -149,7 +149,6 @@ void main() {
       expect(find.byKey(const ValueKey('match-external-player-fab')),
           findsNothing);
       if (variant == 'training') {
-        expect(find.byType(MatchDetailsSheetScrollView), findsOneWidget);
         expect(
             tester
                 .widget<ColoredBox>(
@@ -159,27 +158,9 @@ void main() {
         final track = tester.widget<Container>(
             find.byKey(const ValueKey('match-details-dark-segment-control')));
         expect((track.decoration! as BoxDecoration).color,
-            AppColors.light.lightSky65);
+            AppColors.light.background);
         expect(find.byKey(const ValueKey('match-details-segment-timeline')),
             findsNothing);
-        final sheet = find.byKey(const ValueKey('match-details-body-sheet'));
-        final originalSheetTop = tester.getRect(sheet).top;
-        await tester.drag(
-            find.byKey(const ValueKey('match-details-sheet-scroll')),
-            const Offset(0, -100));
-        await tester.pumpAndSettle();
-        expect(tester.getRect(sheet).top, lessThan(originalSheetTop));
-        expect(
-            tester
-                .widget<Opacity>(
-                    find.byKey(const ValueKey('match-details-header-fade')))
-                .opacity,
-            lessThan(1));
-        tester
-            .state<ScrollableState>(find.byType(Scrollable).first)
-            .position
-            .jumpTo(0);
-        await tester.pumpAndSettle();
         await tester.tap(
             find.byKey(const ValueKey('match-details-segment-attendance')));
         await tester.pumpAndSettle();

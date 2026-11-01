@@ -491,5 +491,17 @@
         "type": "int"
       }
     }
-  }
+  },
+  "mobilePayPaidTitle": "Har du betalt {amount} kr.?",
+  "@mobilePayPaidTitle": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "mobilePayPaidBody": "Vi kan ikke se MobilePay-betalinger i Kopa. Svarer du ja, bliver de valgte bøder markeret som betalt.",
+  "mobilePayPaidYes": "Ja",
+  "mobilePayPaidNo": "Nej",
+  "mobilePayPaidSaveFailed": "Din betaling kunne ikke gemmes. Prøv igen."
 }

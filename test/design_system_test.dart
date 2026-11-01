@@ -96,6 +96,8 @@ void main() {
       (colors.successForeground, colors.successSurface),
       (colors.warningForeground, colors.warningSurface),
       (colors.errorForeground, colors.errorSurface),
+      (colors.dirt, colors.errorTint),
+      (colors.errorForeground, colors.errorTint),
       (colors.infoForeground, colors.infoSurface),
     ];
     for (final (foreground, background) in pairs) {

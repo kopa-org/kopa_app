@@ -1154,4 +1154,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fineBoxWithdrawalUnknownUser => 'Former player';
+
+  @override
+  String mobilePayPaidTitle(int amount) {
+    return 'Have you paid $amount kr?';
+  }
+
+  @override
+  String get mobilePayPaidBody =>
+      'We can\'t see MobilePay payments in Kopa. If you say yes, the selected fines are marked as paid.';
+
+  @override
+  String get mobilePayPaidYes => 'Yes';
+
+  @override
+  String get mobilePayPaidNo => 'No';
+
+  @override
+  String get mobilePayPaidSaveFailed =>
+      'Your payment could not be saved. Please try again.';
 }

@@ -11,6 +11,7 @@ class AttendanceResponseDropdown extends StatelessWidget {
   final VoidCallback onAccept;
   final VoidCallback onDecline;
   final Key? statusKey;
+  final AlignmentGeometry alignment;
 
   const AttendanceResponseDropdown({
     super.key,
@@ -20,6 +21,7 @@ class AttendanceResponseDropdown extends StatelessWidget {
     required this.onAccept,
     required this.onDecline,
     this.statusKey,
+    this.alignment = Alignment.centerLeft,
   });
 
   @override
@@ -55,7 +57,7 @@ class AttendanceResponseDropdown extends StatelessWidget {
     }
 
     return Align(
-      alignment: Alignment.centerLeft,
+      alignment: alignment,
       child: Semantics(
         button: true,
         label: l10n.homeAttendanceChange,

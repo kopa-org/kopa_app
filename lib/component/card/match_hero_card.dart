@@ -1,3 +1,5 @@
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/material.dart';
 import 'package:kopa/component/avatar/team_badge_label.dart';
 import 'package:kopa/component/card/kopa_card.dart';
@@ -8,6 +10,26 @@ import 'package:kopa/model/team_logo_design.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 import 'package:kopa/theme/spacing.dart';
+
+/// Tells a [MatchHeroCard] how far its pinned header has collapsed, from 0
+/// (expanded) to 1 (fully pinned).
+class MatchHeroCollapse extends InheritedWidget {
+  final double value;
+
+  const MatchHeroCollapse({
+    super.key,
+    required this.value,
+    required super.child,
+  });
+
+  static double of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<MatchHeroCollapse>()?.value ??
+      0;
+
+  @override
+  bool updateShouldNotify(MatchHeroCollapse oldWidget) =>
+      value != oldWidget.value;
+}
 
 class MatchHeroCard extends StatelessWidget {
   final MatchDetails match;
@@ -43,6 +65,11 @@ class MatchHeroCard extends StatelessWidget {
     final hasScore = match.hasFinalScore;
     final useDarkHeader = darkHeader && !match.isTraining;
     final heroTextColor = appColors.dirt;
+    final collapse = MatchHeroCollapse.of(context);
+    final badgeRadius = lerpDouble(23, 12, collapse)!;
+    final badgePadding = lerpDouble(5, 2, collapse)!;
+    final labelFontSize = lerpDouble(12, 11, collapse)!;
+    final centerTextScale = lerpDouble(1, 0.72, collapse)!;
 
     final cardContent = KopaCard(
       onTap: onTap,
@@ -54,13 +81,17 @@ class MatchHeroCard extends StatelessWidget {
               ? appColors.lightSky65
               : null,
       child: match.isTraining
-          ? _TrainingHeroContent(match: match, title: l10n.eventTraining)
+          ? _TrainingHeroContent(
+              match: match,
+              title: l10n.eventTraining,
+              collapse: collapse,
+            )
           : Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(
+                  padding: EdgeInsets.symmetric(
                     horizontal: 20,
-                    vertical: 20,
+                    vertical: lerpDouble(12, 2, collapse)!,
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -74,11 +105,13 @@ class MatchHeroCard extends StatelessWidget {
                           heroTag: heroTag == null
                               ? null
                               : logoHeroTag(heroTag!, TeamSide.home),
-                          radius: 23,
+                          radius: badgeRadius,
+                          badgePadding: badgePadding,
                           labelMaxLines: 1,
                           labelStyle: appTextStyles.caption.copyWith(
                             color: heroTextColor,
                             fontWeight: FontWeight.w800,
+                            fontSize: labelFontSize,
                           ),
                         ),
                       ),
@@ -86,6 +119,7 @@ class MatchHeroCard extends StatelessWidget {
                         _FinalScorePill(
                           match: match,
                           textColor: heroTextColor,
+                          textScale: centerTextScale,
                         )
                       else
                         Padding(
@@ -97,6 +131,8 @@ class MatchHeroCard extends StatelessWidget {
                             style: appTextStyles.h5.copyWith(
                               color: heroTextColor,
                               fontWeight: FontWeight.w900,
+                              fontSize:
+                                  appTextStyles.h5.fontSize! * centerTextScale,
                             ),
                           ),
                         ),
@@ -109,11 +145,13 @@ class MatchHeroCard extends StatelessWidget {
                           heroTag: heroTag == null
                               ? null
                               : logoHeroTag(heroTag!, TeamSide.away),
-                          radius: 23,
+                          radius: badgeRadius,
+                          badgePadding: badgePadding,
                           labelMaxLines: 1,
                           labelStyle: appTextStyles.caption.copyWith(
                             color: heroTextColor,
                             fontWeight: FontWeight.w800,
+                            fontSize: labelFontSize,
                           ),
                         ),
                       ),
@@ -173,8 +211,13 @@ class MatchHeroCard extends StatelessWidget {
 class _TrainingHeroContent extends StatelessWidget {
   final MatchDetails match;
   final String title;
+  final double collapse;
 
-  const _TrainingHeroContent({required this.match, required this.title});
+  const _TrainingHeroContent({
+    required this.match,
+    required this.title,
+    required this.collapse,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -182,14 +225,22 @@ class _TrainingHeroContent extends StatelessWidget {
         Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final circleSize = lerpDouble(52, 36, collapse)!;
+    final details = [
+      if (match.category?.trim().isNotEmpty ?? false) match.category!.trim(),
+      '${DateHelper.getFormattedTime(match.date)} · ${match.location}',
+    ];
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      padding: EdgeInsets.symmetric(
+        horizontal: 24,
+        vertical: lerpDouble(8, 2, collapse)!,
+      ),
       child: Row(
         children: [
           Container(
-            width: 52,
-            height: 52,
+            width: circleSize,
+            height: circleSize,
             decoration: BoxDecoration(
               color: appColors.lightSky95,
               shape: BoxShape.circle,
@@ -197,13 +248,14 @@ class _TrainingHeroContent extends StatelessWidget {
             child: Icon(
               Icons.fitness_center,
               color: appColors.sky,
-              size: 28,
+              size: circleSize * 0.54,
             ),
           ),
           const SizedBox(width: Spacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   title,
@@ -212,23 +264,31 @@ class _TrainingHeroContent extends StatelessWidget {
                     fontWeight: FontWeight.w900,
                   ),
                 ),
-                if (match.category?.trim().isNotEmpty ?? false) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    match.category!.trim(),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: appTextStyles.body3.copyWith(
-                      color: appColors.grey5,
+                // Only the title stays once the header is pinned.
+                ClipRect(
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    heightFactor: 1 - collapse,
+                    child: Opacity(
+                      opacity: 1 - collapse,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          for (final detail in details) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              detail,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: appTextStyles.body3.copyWith(
+                                color: appColors.grey5,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
                   ),
-                ],
-                const SizedBox(height: 4),
-                Text(
-                  '${DateHelper.getFormattedTime(match.date)} · ${match.location}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: appTextStyles.body3.copyWith(color: appColors.grey5),
                 ),
               ],
             ),
@@ -242,8 +302,13 @@ class _TrainingHeroContent extends StatelessWidget {
 class _FinalScorePill extends StatelessWidget {
   final MatchDetails match;
   final Color textColor;
+  final double textScale;
 
-  const _FinalScorePill({required this.match, required this.textColor});
+  const _FinalScorePill({
+    required this.match,
+    required this.textColor,
+    required this.textScale,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -258,6 +323,7 @@ class _FinalScorePill extends StatelessWidget {
           style: appTextStyles.h3.copyWith(
             color: textColor,
             fontWeight: FontWeight.w900,
+            fontSize: appTextStyles.h3.fontSize! * textScale,
           ),
         ),
       ],

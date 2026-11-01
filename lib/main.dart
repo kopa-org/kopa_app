@@ -12,6 +12,7 @@ import 'package:kopa/cubits/auth_state.dart';
 import 'package:kopa/cubits/feature_flags_cubit.dart';
 import 'package:kopa/navigation/app_router.dart';
 import 'package:kopa/navigation/router_refresh_notifier.dart';
+import 'package:kopa/navigation/notification_destination.dart';
 import 'package:kopa/page/update_required/update_required_gate.dart';
 import 'package:kopa/page/maintenance/maintenance_gate.dart';
 import 'package:kopa/repositories/auth_repository.dart';
@@ -295,20 +296,10 @@ class _KopaAppState extends State<KopaApp> {
   }
 
   void _handleNotificationTap(Map<String, dynamic> data) {
-    String? targetLocation;
-
-    if (data['type'] == 'team_join_request') {
-      targetLocation = AppRouter.teamJoinRequests;
-    } else if (data['type'] == 'match_calendar_changed' ||
-        data['type'] == 'match_lineup_revealed') {
-      final matchId = int.tryParse(
-        (data['match_id'] ?? data['event_id'] ?? '').toString(),
-      );
-      if (matchId == null) return;
-
-      targetLocation = AppRouter.matchDetailsPath(matchId);
-    }
-
+    final targetLocation = notificationDestination(
+      data,
+      currentTeamId: widget.authCubit.state.user?.teamDetails?.id,
+    );
     if (targetLocation == null) return;
     _pushNotificationRoute(targetLocation);
   }

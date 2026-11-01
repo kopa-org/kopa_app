@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'dart:ui' show SemanticsAction;
 
 import 'package:flutter/material.dart';
@@ -272,11 +273,24 @@ void main() {
     final header = find.byKey(const ValueKey('match-details-scroll-header'));
     final initialTop = tester.getTopLeft(header).dy;
 
-    await tester.drag(find.byKey(const ValueKey('match-details-sheet-scroll')),
-        const Offset(0, -180));
+    await tester.drag(find.byKey(const ValueKey('match-details-scroll')),
+        const Offset(0, -320));
     await tester.pumpAndSettle();
 
+    // Navigation scrolls away while the match card and tabs stay pinned.
+    expect(find.byIcon(CupertinoIcons.back).hitTestable(), findsNothing);
     expect(tester.getTopLeft(header).dy, lessThan(initialTop));
+    expect(find.text('Row 0').hitTestable(), findsNothing);
+    expect(
+        tester
+            .getSize(find.byKey(const ValueKey('match-details-dark-header')))
+            .height,
+        lessThan(190));
+    expect(
+        find
+            .byKey(const ValueKey('match-details-segment-overview'))
+            .hitTestable(),
+        findsOneWidget);
   });
 
   testWidgets('attendance action is fixed and absent from the header',
@@ -419,7 +433,7 @@ void main() {
     expect(contentBackground.color, AppColors.light.background);
     expect(
       (segmentControl.decoration! as BoxDecoration).color,
-      AppColors.light.lightGrass,
+      AppColors.light.background,
     );
     expect(overviewDecoration.color, AppColors.light.surface);
     expect(find.text('Existing body content'), findsOneWidget);
@@ -507,6 +521,29 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('prematch overview reads information, tasks, events teaser',
+      (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MatchDetailTemplate(
+          heroCard: const SizedBox(height: 1),
+          useDarkMatchHeader: true,
+          usePrematchLayout: true,
+          timelineInOverview: true,
+          timelinePreview: true,
+          timelinePreviewMessage: 'Events teaser',
+          infoRows: const [Text('Information')],
+          overviewWidgets: const [Text('Tasks')],
+        ),
+      ),
+    );
+
+    final tops = ['Information', 'Tasks', 'Events teaser']
+        .map((text) => tester.getTopLeft(find.text(text)).dy)
+        .toList();
+    expect(tops, [...tops]..sort());
+  });
+
   testWidgets('prematch events segment shows a disabled timeline preview',
       (tester) async {
     const message =
@@ -576,7 +613,7 @@ void main() {
     expect(find.byType(TimelineItem), findsOneWidget);
   });
 
-  testWidgets('prematch response content sits between the hero and top bar',
+  testWidgets('prematch response content sits below the pinned tabs',
       (tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -615,7 +652,7 @@ void main() {
     );
     expect(
       tester.getTopLeft(responseStatus).dy,
-      lessThan(tester.getTopLeft(attendanceSegment).dy),
+      greaterThan(tester.getBottomLeft(attendanceSegment).dy),
     );
     expect(tester.getSize(navigation).height, 72);
 

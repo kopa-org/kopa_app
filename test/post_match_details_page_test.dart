@@ -126,6 +126,7 @@ void main() {
           attendanceList: const [Text('Attending player')],
           onAddEvent: _noop,
           infoRows: const [Text('Kopa Stadion info')],
+          tasksSection: const Text('Tasks content'),
           playerPositions: const Text('Lineup content'),
           selectedSegment: selected,
           onSegmentChanged: (value) => setState(() => selected = value),
@@ -144,6 +145,15 @@ void main() {
     expect(find.text('Kopa Stadion info'), findsOneWidget);
     expect(find.byType(MatchEventsTimeline), findsOneWidget);
     expect(find.text('Mål: Scorer'), findsOneWidget);
+
+    // Overblik reads MOTM, events, information and then tasks.
+    final tops = [
+      find.byType(PlayerOfMatchSummaryCard),
+      find.byType(MatchEventsTimeline),
+      find.text('Kopa Stadion info'),
+      find.text('Tasks content'),
+    ].map((finder) => tester.getTopLeft(finder).dy).toList();
+    expect(tops, [...tops]..sort());
 
     await tester
         .tap(find.byKey(const ValueKey('match-details-segment-attendance')));

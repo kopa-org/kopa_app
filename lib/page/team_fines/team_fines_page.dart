@@ -18,6 +18,7 @@ import 'package:kopa/page/in_form/in_form_ui.dart';
 import 'package:kopa/page/team_fines/assign_fines_modal.dart';
 import 'package:kopa/page/team_fines/create_fine_type_modal.dart';
 import 'package:kopa/page/team_fines/deposit_modal.dart';
+import 'package:kopa/page/team_fines/mobile_pay_paid_dialog.dart';
 import 'package:kopa/page/team_fines/mobile_pay_setup_modal.dart';
 import 'package:kopa/page/team_fines/withdraw_modal.dart';
 import 'package:kopa/repository/fines_repository.dart';
@@ -397,6 +398,13 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
               isTeamOwner: user.isTeamOwner,
               onSetupMobilePay: () =>
                   _openMobilePaySetup(fineBox.mobilePayBoxId),
+              onMobilePayOpened: selectedFines.isEmpty
+                  ? null
+                  : () => _confirmMobilePayment(
+                        fineBox.id,
+                        selectedFines,
+                        selectedAmount,
+                      ),
               onCashPaid: selectedFines.isEmpty
                   ? null
                   : () => _markSelectedPersonalFinesPaid(
@@ -554,6 +562,33 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
           ..addAll(unpaidFines.map((fine) => fine.id));
       }
     });
+  }
+
+  // MobilePay Box has no payment callback, so the player confirms it here.
+  Future<void> _confirmMobilePayment(
+    int fineBoxId,
+    List<FineDetails> selectedFines,
+    int selectedAmount,
+  ) async {
+    final paid = await showMobilePayPaidDialog(context, selectedAmount);
+    AppAnalytics.logEvent(
+      'fine_mobile_pay_answered',
+      parameters: {'paid': paid.toString()},
+    );
+    if (!paid || !mounted) return;
+
+    final saveFailedMessage =
+        AppLocalizations.of(context)!.mobilePayPaidSaveFailed;
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await _markSelectedPersonalFinesPaid(
+        fineBoxId,
+        selectedFines,
+        selectedAmount,
+      );
+    } catch (_) {
+      messenger.showSnackBar(SnackBar(content: Text(saveFailedMessage)));
+    }
   }
 
   Future<void> _markSelectedPersonalFinesPaid(
@@ -734,7 +769,7 @@ class _SegmentTabs extends StatelessWidget {
   }
 }
 
-/// Grass-coloured hero showing the full kitty with an animated count-up.
+/// Light grass hero showing the full kitty with an animated count-up.
 class _TeamHero extends StatelessWidget {
   final double total;
   final double collected;
@@ -756,33 +791,31 @@ class _TeamHero extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return _HeroShell(
-      color: appColors.grass,
+      color: appColors.lightGrass,
       mascot: _thumbMascot,
-      mascotColor: appColors.lightGrass,
+      mascotColor: appColors.grass,
       header: [
         InFormEyebrow(
           label: l10n.fineBoxHeroEyebrow,
-          color: appColors.lightGrass,
+          color: appColors.surface,
         ),
         const SizedBox(height: Spacing.md),
         _CountUpAmount(
           amount: total,
-          color: appColors.white,
-          unitColor: appColors.lightGrass,
+          color: appColors.dirt,
+          unitColor: appColors.dirt,
         ),
         const SizedBox(height: Spacing.xs),
         Text(
           l10n.fineBoxPaidPercent((progress * 100).round()),
-          style: appTextStyles.body3.copyWith(
-            color: appColors.white.withValues(alpha: .86),
-          ),
+          style: appTextStyles.body3.copyWith(color: appColors.dirt),
         ),
       ],
       footer: [
         _AnimatedProgressBar(
           value: progress,
-          trackColor: appColors.white.withValues(alpha: .2),
-          fillColor: appColors.lightGrass,
+          trackColor: appColors.surface.withValues(alpha: .7),
+          fillColor: appColors.grass,
         ),
         const SizedBox(height: Spacing.md),
         Row(
@@ -791,14 +824,14 @@ class _TeamHero extends StatelessWidget {
               child: _HeroStat(
                 label: l10n.fineBoxCollected,
                 value: _kr(collected.round()),
-                dotColor: appColors.lightGrass,
+                dotColor: appColors.grass,
               ),
             ),
             Expanded(
               child: _HeroStat(
                 label: l10n.fineBoxOutstanding,
                 value: _kr(outstanding.round()),
-                dotColor: appColors.white.withValues(alpha: .35),
+                dotColor: appColors.surface,
               ),
             ),
           ],
@@ -808,7 +841,7 @@ class _TeamHero extends StatelessWidget {
   }
 }
 
-/// Jord-coloured hero for players who still owe the team.
+/// Red-tinted hero for players who still owe the team.
 class _PersonalDebtHero extends StatelessWidget {
   final int amount;
   final int unpaidCount;
@@ -823,9 +856,9 @@ class _PersonalDebtHero extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return _HeroShell(
-      color: appColors.dirt,
+      color: appColors.errorTint,
       mascot: _flagMascot,
-      mascotColor: appColors.lightGrass,
+      mascotColor: appColors.error,
       header: [
         Wrap(
           spacing: Spacing.sm,
@@ -833,26 +866,25 @@ class _PersonalDebtHero extends StatelessWidget {
           children: [
             InFormEyebrow(
               label: l10n.fineBoxPersonalEyebrow,
-              color: appColors.lightGrass,
+              color: appColors.surface,
             ),
             InFormEyebrow(
               label: l10n.fineBoxUnpaidCount(unpaidCount),
-              color: appColors.sunset,
+              color: appColors.errorForeground,
+              textColor: appColors.white,
             ),
           ],
         ),
         const SizedBox(height: Spacing.md),
         _CountUpAmount(
           amount: amount.toDouble(),
-          color: appColors.white,
-          unitColor: appColors.sunset,
+          color: appColors.dirt,
+          unitColor: appColors.errorForeground,
         ),
         const SizedBox(height: Spacing.xs),
         Text(
           l10n.fineBoxPersonalOwed,
-          style: appTextStyles.body3.copyWith(
-            color: appColors.white.withValues(alpha: .86),
-          ),
+          style: appTextStyles.body3.copyWith(color: appColors.dirt),
         ),
       ],
     );
@@ -1118,15 +1150,13 @@ class _HeroStat extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: appTextStyles.caption.copyWith(
-                  color: appColors.white.withValues(alpha: .86),
-                ),
+                style: appTextStyles.caption.copyWith(color: appColors.dirt),
               ),
               const SizedBox(height: 4),
               Text(
                 value,
                 style: appTextStyles.subtitle1.copyWith(
-                  color: appColors.white,
+                  color: appColors.dirt,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -2155,6 +2185,7 @@ class _PaymentPanel extends StatelessWidget {
   final String? mobilePayBoxId;
   final bool isTeamOwner;
   final VoidCallback? onSetupMobilePay;
+  final VoidCallback? onMobilePayOpened;
   final VoidCallback? onCashPaid;
 
   const _PaymentPanel({
@@ -2164,6 +2195,7 @@ class _PaymentPanel extends StatelessWidget {
     required this.mobilePayBoxId,
     required this.isTeamOwner,
     required this.onSetupMobilePay,
+    required this.onMobilePayOpened,
     required this.onCashPaid,
   });
 
@@ -2223,6 +2255,7 @@ class _PaymentPanel extends StatelessWidget {
               buttonText: l10n.mobilePayDeposit,
               outlined: false,
               width: double.infinity,
+              onOpened: onMobilePayOpened,
             ),
           const SizedBox(height: Spacing.sm),
           Center(

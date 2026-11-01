@@ -158,6 +158,9 @@ class AppColors extends ThemeExtension<AppColors> {
   Color get warningSurface => const Color(0xFFFFE9CA);
   Color get errorForeground => const Color(0xFFB51B10);
   Color get errorSurface => const Color(0xFFFFEDEA);
+  // Same 12% red as the rank chip on the In-form statistics tile.
+  Color get errorTint =>
+      Color.alphaBlend(error.withValues(alpha: .12), surface);
   Color get infoForeground => const Color(0xFF1257B5);
   Color get infoSurface => lightSky55;
 

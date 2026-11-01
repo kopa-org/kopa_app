@@ -13,6 +13,7 @@ import 'package:kopa/page/match/match_details_page.dart';
 import 'package:kopa/page/match/match_programme.dart';
 import 'package:kopa/page/player_plus/player_plus_page.dart';
 import 'package:kopa/page/profile/dbu_webview_page.dart';
+import 'package:kopa/page/profile/profile_settings_page.dart';
 import 'package:kopa/page/team/team_join_requests_page.dart';
 import 'package:kopa/page/team_fines/team_fines_page.dart';
 import 'package:kopa/page/statistics/statistics_page.dart';
@@ -44,6 +45,7 @@ abstract final class AppRouter {
   static const playerPlus = '/player-plus';
   static const playerPlusInForm = '/player-plus/in-form';
   static const profile = '/profile';
+  static const profileSettings = '/profile/settings';
   static const fineBox = '/fine-box';
   static const dbuWebview = '/dbu-webview';
   static const teamJoinRequests = '/team-join-requests';
@@ -121,6 +123,10 @@ abstract final class AppRouter {
         GoRoute(
           path: teamJoinRequests,
           builder: (context, state) => const TeamJoinRequestsPage(),
+        ),
+        GoRoute(
+          path: profileSettings,
+          builder: (context, state) => const ProfileSettingsPage(),
         ),
         GoRoute(
           path: '$matchDetails/:matchId',

@@ -12,6 +12,9 @@ class MobilePayButton extends StatelessWidget {
   final bool outlined;
   final double? width;
 
+  /// Runs once MobilePay has been opened.
+  final VoidCallback? onOpened;
+
   const MobilePayButton({
     super.key,
     this.amount,
@@ -20,6 +23,7 @@ class MobilePayButton extends StatelessWidget {
     this.buttonText,
     this.outlined = true,
     this.width,
+    this.onOpened,
   });
 
   @override
@@ -36,7 +40,9 @@ class MobilePayButton extends StatelessWidget {
             message: message,
             mobilePayBoxId: mobilePayBoxId,
           );
-          if (!opened && context.mounted) {
+          if (opened) {
+            onOpened?.call();
+          } else if (context.mounted) {
             final invalidBox = mobilePayBoxId?.trim().isNotEmpty == true &&
                 MobilePayBoxLink.boxId(mobilePayBoxId!) == null;
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(

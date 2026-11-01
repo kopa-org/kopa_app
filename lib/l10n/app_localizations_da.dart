@@ -1150,4 +1150,23 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String get fineBoxWithdrawalUnknownUser => 'Tidligere spiller';
+
+  @override
+  String mobilePayPaidTitle(int amount) {
+    return 'Har du betalt $amount kr.?';
+  }
+
+  @override
+  String get mobilePayPaidBody =>
+      'Vi kan ikke se MobilePay-betalinger i Kopa. Svarer du ja, bliver de valgte bøder markeret som betalt.';
+
+  @override
+  String get mobilePayPaidYes => 'Ja';
+
+  @override
+  String get mobilePayPaidNo => 'Nej';
+
+  @override
+  String get mobilePayPaidSaveFailed =>
+      'Din betaling kunne ikke gemmes. Prøv igen.';
 }

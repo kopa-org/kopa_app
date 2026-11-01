@@ -91,6 +91,7 @@ class MatchRsvpCard extends StatelessWidget {
               onAccept: onAccept,
               onDecline: onDecline,
               statusKey: const ValueKey('match-details-rsvp-status'),
+              alignment: Alignment.center,
             ),
         ],
       ),
