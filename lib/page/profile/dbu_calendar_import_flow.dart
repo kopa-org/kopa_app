@@ -5,6 +5,7 @@ import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kopa/navigation/app_router.dart';
+import 'package:kopa/page/profile/dbu_next_season_dialog.dart';
 import 'package:kopa/repository/team_dbu_repository.dart';
 import 'package:kopa/repository/team_season_repository.dart';
 import 'package:kopa/repository/users_repository.dart';
@@ -22,22 +23,46 @@ class DbuCalendarImportFlow {
       return null;
     }
 
-    AppAnalytics.logEvent(
-      'dbu_webview_opened',
-      parameters: {
-        'start_new_season': mode == _CalendarImportMode.startNewSeason,
-      },
-    );
-    final result = await context.push<String>(AppRouter.dbuWebview);
-    if (!context.mounted || result == null) {
-      return null;
+    Map<String, dynamic>? resultData;
+
+    // Starting a new season: first try to find the next DBU pool from the one
+    // the team just played (e.g. autumn league -> VinterBOLD), skipping the
+    // Mit DBU webview when we find it.
+    if (mode == _CalendarImportMode.startNewSeason && teamId != null) {
+      final suggestion = await DbuNextSeasonDialog.show(
+        context,
+        teamId: teamId,
+      );
+      if (!context.mounted || suggestion.action == DbuNextSeasonAction.cancel) {
+        return null;
+      }
+
+      final candidate = suggestion.candidate;
+      if (suggestion.action == DbuNextSeasonAction.useCandidate &&
+          candidate != null) {
+        AppAnalytics.logEvent('dbu_next_season_used');
+        resultData = candidate.toImportContext();
+      }
     }
 
-    var resultData = _decodeResult(result);
-    if (resultData['dbuTeamId'] == null || resultData['dbuPoolId'] == null) {
-      resultData = await _resolvePublicFallback(context, resultData);
-      if (!context.mounted || resultData.isEmpty) {
+    if (resultData == null) {
+      AppAnalytics.logEvent(
+        'dbu_webview_opened',
+        parameters: {
+          'start_new_season': mode == _CalendarImportMode.startNewSeason,
+        },
+      );
+      final result = await context.push<String>(AppRouter.dbuWebview);
+      if (!context.mounted || result == null) {
         return null;
+      }
+
+      resultData = _decodeResult(result);
+      if (resultData['dbuTeamId'] == null || resultData['dbuPoolId'] == null) {
+        resultData = await _resolvePublicFallback(context, resultData);
+        if (!context.mounted || resultData.isEmpty) {
+          return null;
+        }
       }
     }
 

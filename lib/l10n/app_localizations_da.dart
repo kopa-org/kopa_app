@@ -2561,4 +2561,22 @@ class AppLocalizationsDa extends AppLocalizations {
   String uiStartupFailedWithError(Object a) {
     return 'Kopa kunne ikke starte.\n$a';
   }
+
+  @override
+  String get uiFindingNextSeason => 'Finder holdets næste sæson på DBU…';
+
+  @override
+  String get uiNextSeasonFoundTitle => 'Næste sæson fundet';
+
+  @override
+  String get uiNextSeasonFoundBody =>
+      'Vi har fundet holdets næste turnering på DBU ud fra den sæson, I lige har spillet. Vælg den for at starte den nye sæson og importere kampprogrammet.';
+
+  @override
+  String uiNextSeasonMatches(int count, String date) {
+    return '$count kampe · første kamp $date';
+  }
+
+  @override
+  String get uiFindOnDbuMyself => 'Find den selv på DBU';
 }

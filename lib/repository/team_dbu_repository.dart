@@ -31,6 +31,31 @@ abstract final class TeamDbuRepository {
     throw Exception(decoded['error'] ?? 'Kunne ikke finde DBU-holdet.');
   }
 
+  /// Suggests the DBU pool to import for a new season, based on the pool the
+  /// team just played. Returns an empty list when nothing could be found, so
+  /// callers can fall back to the manual DBU import.
+  static Future<List<DbuNextSeasonCandidate>> findNextSeason(int teamId) async {
+    try {
+      final response = await _apiClient.get(
+        Uri.parse('${ApiConfig.baseUrl}/teams/$teamId/dbu/next_season'),
+      );
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        return const [];
+      }
+
+      final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+      final candidates = decoded['candidates'];
+      if (candidates is! List<dynamic>) return const [];
+
+      return candidates
+          .whereType<Map<String, dynamic>>()
+          .map(DbuNextSeasonCandidate.fromJson)
+          .toList(growable: false);
+    } catch (_) {
+      return const [];
+    }
+  }
+
   static Future<DbuStandings?> getStandings(int teamId) async {
     final response = await _apiClient.get(
       Uri.parse('${ApiConfig.baseUrl}/teams/$teamId/dbu/standings'),
@@ -181,4 +206,46 @@ int? _intFromJson(dynamic value) {
   if (value is int) return value;
   if (value is String) return int.tryParse(value);
   return null;
+}
+
+class DbuNextSeasonCandidate {
+  final int dbuTeamId;
+  final int dbuPoolId;
+  final String teamName;
+  final String seriesName;
+  final String poolLabel;
+  final int upcomingMatchCount;
+  final DateTime? firstUpcomingMatchOn;
+
+  const DbuNextSeasonCandidate({
+    required this.dbuTeamId,
+    required this.dbuPoolId,
+    required this.teamName,
+    required this.seriesName,
+    required this.poolLabel,
+    required this.upcomingMatchCount,
+    required this.firstUpcomingMatchOn,
+  });
+
+  factory DbuNextSeasonCandidate.fromJson(Map<String, dynamic> json) {
+    return DbuNextSeasonCandidate(
+      dbuTeamId: _intFromJson(json['dbuTeamId']) ?? 0,
+      dbuPoolId: _intFromJson(json['dbuPoolId']) ?? 0,
+      teamName: json['teamName']?.toString() ?? '',
+      seriesName: json['seriesName']?.toString() ?? '',
+      poolLabel: json['poolLabel']?.toString() ?? '',
+      upcomingMatchCount: _intFromJson(json['upcomingMatchCount']) ?? 0,
+      firstUpcomingMatchOn:
+          DateTime.tryParse(json['firstUpcomingMatchOn']?.toString() ?? ''),
+    );
+  }
+
+  /// The DBU context the calendar import expects. Deliberately leaves out the
+  /// team label and club name so the Kopa team keeps its current name.
+  Map<String, dynamic> toImportContext() => {
+        'dbuTeamId': dbuTeamId,
+        'dbuPoolId': dbuPoolId,
+        'seriesName': seriesName,
+        'poolLabel': poolLabel,
+      };
 }

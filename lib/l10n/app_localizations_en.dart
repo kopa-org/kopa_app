@@ -2562,4 +2562,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String uiStartupFailedWithError(Object a) {
     return 'Kopa could not start.\n$a';
   }
+
+  @override
+  String get uiFindingNextSeason =>
+      'Looking for the team\'s next season on DBU…';
+
+  @override
+  String get uiNextSeasonFoundTitle => 'Next season found';
+
+  @override
+  String get uiNextSeasonFoundBody =>
+      'We found the team\'s next tournament on DBU, based on the season you just played. Choose it to start the new season and import its match schedule.';
+
+  @override
+  String uiNextSeasonMatches(int count, String date) {
+    return '$count matches · first match $date';
+  }
+
+  @override
+  String get uiFindOnDbuMyself => 'Find it on DBU myself';
 }

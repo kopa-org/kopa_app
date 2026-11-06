@@ -921,5 +921,10 @@
   "uiPositionShortForward": "A",
   "uiPointsLabel": "point",
   "uiPlayerPlusIntro": "Hvem bliver holdets bedste spiller, hvem tager flest kampens spiller, og hvem ender øverst i de sjove lister? Brug siden som overblik over Player+ universet.",
-  "uiStartupFailedWithError": "Kopa kunne ikke starte.\n{a}"
+  "uiStartupFailedWithError": "Kopa kunne ikke starte.\n{a}",
+  "uiFindingNextSeason": "Finder holdets næste sæson på DBU…",
+  "uiNextSeasonFoundTitle": "Næste sæson fundet",
+  "uiNextSeasonFoundBody": "Vi har fundet holdets næste turnering på DBU ud fra den sæson, I lige har spillet. Vælg den for at starte den nye sæson og importere kampprogrammet.",
+  "uiNextSeasonMatches": "{count} kampe · første kamp {date}",
+  "uiFindOnDbuMyself": "Find den selv på DBU"
 }

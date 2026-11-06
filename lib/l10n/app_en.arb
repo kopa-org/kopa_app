@@ -1264,5 +1264,20 @@
         "type": "Object"
       }
     }
-  }
+  },
+  "uiFindingNextSeason": "Looking for the team's next season on DBU…",
+  "uiNextSeasonFoundTitle": "Next season found",
+  "uiNextSeasonFoundBody": "We found the team's next tournament on DBU, based on the season you just played. Choose it to start the new season and import its match schedule.",
+  "uiNextSeasonMatches": "{count} matches · first match {date}",
+  "@uiNextSeasonMatches": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "uiFindOnDbuMyself": "Find it on DBU myself"
 }

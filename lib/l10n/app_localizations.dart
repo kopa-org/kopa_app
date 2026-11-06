@@ -4693,6 +4693,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Kopa could not start.\n{a}'**
   String uiStartupFailedWithError(Object a);
+
+  /// No description provided for @uiFindingNextSeason.
+  ///
+  /// In en, this message translates to:
+  /// **'Looking for the team\'s next season on DBU…'**
+  String get uiFindingNextSeason;
+
+  /// No description provided for @uiNextSeasonFoundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Next season found'**
+  String get uiNextSeasonFoundTitle;
+
+  /// No description provided for @uiNextSeasonFoundBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We found the team\'s next tournament on DBU, based on the season you just played. Choose it to start the new season and import its match schedule.'**
+  String get uiNextSeasonFoundBody;
+
+  /// No description provided for @uiNextSeasonMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} matches · first match {date}'**
+  String uiNextSeasonMatches(int count, String date);
+
+  /// No description provided for @uiFindOnDbuMyself.
+  ///
+  /// In en, this message translates to:
+  /// **'Find it on DBU myself'**
+  String get uiFindOnDbuMyself;
 }
 
 class _AppLocalizationsDelegate
