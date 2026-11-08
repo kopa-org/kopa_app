@@ -4723,6 +4723,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Find it on DBU myself'**
   String get uiFindOnDbuMyself;
+
+  /// No description provided for @matchSeasonPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose season'**
+  String get matchSeasonPickerTitle;
+
+  /// No description provided for @matchSeasonActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get matchSeasonActive;
+
+  /// No description provided for @matchSeasonPreviousSeasons.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous seasons'**
+  String get matchSeasonPreviousSeasons;
+
+  /// No description provided for @matchSeasonFinished.
+  ///
+  /// In en, this message translates to:
+  /// **'Finished season'**
+  String get matchSeasonFinished;
+
+  /// No description provided for @matchSeasonViewingRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing matches from {range}'**
+  String matchSeasonViewingRange(String range);
+
+  /// No description provided for @matchSeasonBackToCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to current'**
+  String get matchSeasonBackToCurrent;
+
+  /// No description provided for @matchSeasonStartedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Started {date}'**
+  String matchSeasonStartedOn(String date);
+
+  /// No description provided for @matchSeasonSelectorLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Season {name}. Change season'**
+  String matchSeasonSelectorLabel(String name);
+
+  /// No description provided for @matchSeasonClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get matchSeasonClose;
+
+  /// No description provided for @matchSeasonNoMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'No matches in this season.'**
+  String get matchSeasonNoMatches;
+
+  /// No description provided for @matchSeasonSummaryMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'Matches'**
+  String get matchSeasonSummaryMatches;
+
+  /// No description provided for @matchSeasonSummaryWon.
+  ///
+  /// In en, this message translates to:
+  /// **'Won'**
+  String get matchSeasonSummaryWon;
+
+  /// No description provided for @matchSeasonSummaryDrawn.
+  ///
+  /// In en, this message translates to:
+  /// **'Drawn'**
+  String get matchSeasonSummaryDrawn;
+
+  /// No description provided for @matchSeasonSummaryLost.
+  ///
+  /// In en, this message translates to:
+  /// **'Lost'**
+  String get matchSeasonSummaryLost;
+
+  /// No description provided for @resultLetterWin.
+  ///
+  /// In en, this message translates to:
+  /// **'W'**
+  String get resultLetterWin;
+
+  /// No description provided for @resultLetterDraw.
+  ///
+  /// In en, this message translates to:
+  /// **'D'**
+  String get resultLetterDraw;
+
+  /// No description provided for @resultLetterLoss.
+  ///
+  /// In en, this message translates to:
+  /// **'L'**
+  String get resultLetterLoss;
+
+  /// No description provided for @statisticsInFormTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'In-form'**
+  String get statisticsInFormTitle;
+
+  /// No description provided for @statisticsAssists.
+  ///
+  /// In en, this message translates to:
+  /// **'Assists'**
+  String get statisticsAssists;
+
+  /// No description provided for @statisticsFormTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Form'**
+  String get statisticsFormTitle;
+
+  /// No description provided for @statisticsFormHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Last {count} · newest on the right'**
+  String statisticsFormHint(int count);
+
+  /// No description provided for @statisticsNoFormYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No matches played yet.'**
+  String get statisticsNoFormYet;
 }
 
 class _AppLocalizationsDelegate

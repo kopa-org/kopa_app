@@ -6,6 +6,7 @@ import 'package:kopa/component/error_message.dart';
 import 'package:kopa/component/future_handler.dart';
 import 'package:kopa/component/loading_indicator.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
+import 'package:kopa/component/scaffold/tab_page_header.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/match_programme_cubit.dart';
 import 'package:kopa/cubits/match_programme_state.dart';
@@ -14,6 +15,7 @@ import 'package:kopa/model/user_details.dart';
 import 'package:kopa/model/event_type.dart';
 import 'package:kopa/page/match/create_match_page.dart';
 import 'package:kopa/page/match/match_details_page.dart';
+import 'package:kopa/component/season/season_selector.dart';
 import 'package:kopa/state/match_programme_refresh_notifier.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/spacing.dart';
@@ -46,8 +48,13 @@ class _MatchProgrammePageState extends State<MatchProgrammePage> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final teamId = context.read<AuthCubit>().state.user?.teamDetails?.id;
     return BlocProvider(
-      create: (_) => MatchProgrammeCubit()..loadMatches(),
+      create: (_) {
+        final cubit = MatchProgrammeCubit()..loadMatches();
+        if (teamId != null) cubit.loadSeasons(teamId);
+        return cubit;
+      },
       child: PageScaffold.tab(
         title: AppLocalizations.of(context)!.uiMatchSchedule,
         floatingActionButton: FutureHandler<UserDetails>(
@@ -58,6 +65,12 @@ class _MatchProgrammePageState extends State<MatchProgrammePage> {
           onSuccess: (context, user) {
             if (user.teamDetails == null) return const SizedBox.shrink();
             final l10n = AppLocalizations.of(context)!;
+
+            // Finished seasons are read-only, so hide the create actions.
+            final isViewingPastSeason = context.select(
+              (MatchProgrammeCubit cubit) => cubit.state.isViewingPastSeason,
+            );
+            if (isViewingPastSeason) return const SizedBox.shrink();
 
             // Arc of icon actions, styled like the match details FAB.
             return ExpandableFab(
@@ -146,10 +159,14 @@ class _MatchProgrammeRefreshListenerState
   }
 
   void _refreshMatchesAfterChange() {
-    context.read<MatchProgrammeCubit>().loadMatches(
-          showLoading: false,
-          forceRefresh: true,
-        );
+    final cubit = context.read<MatchProgrammeCubit>();
+    cubit.loadMatches(
+      showLoading: false,
+      forceRefresh: true,
+    );
+    // A change elsewhere may have started a new season.
+    final teamId = context.read<AuthCubit>().state.user?.teamDetails?.id;
+    if (teamId != null) cubit.loadSeasons(teamId);
   }
 
   @override
@@ -168,6 +185,7 @@ class _MatchListState extends State<_MatchList> {
   final _listViewKey = GlobalKey();
   final Map<int, GlobalKey> _matchKeys = {};
   bool _hasScheduledInitialScroll = false;
+  int? _scrolledSeasonId;
 
   @override
   void dispose() {
@@ -179,31 +197,45 @@ class _MatchListState extends State<_MatchList> {
   Widget build(BuildContext context) {
     return BlocBuilder<MatchProgrammeCubit, MatchProgrammeState>(
       builder: (context, state) {
-        if (state.status == MatchProgrammeStatus.failure) {
-          return ErrorMessage(
-            message: AppLocalizations.of(context)!
-                .uiSomethingWentWrongPleaseTryAgain,
-          );
-        }
-
-        if (state.isLoading) {
-          return const LoadingIndicator();
-        }
-
-        _syncMatchKeys(state.matches);
-        _scheduleInitialScroll(state.matches);
-
-        return _buildMatchList(context, state.matches);
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _MatchProgrammeHeader(state: state),
+            Expanded(child: _buildContent(context, state)),
+          ],
+        );
       },
     );
   }
 
-  Widget _buildMatchList(BuildContext context, List<MatchDetails> matches) {
-    if (matches.isEmpty) {
-      return Center(
-          child: Text(AppLocalizations.of(context)!.uiNoMatchesFound));
+  Widget _buildContent(BuildContext context, MatchProgrammeState state) {
+    if (state.status == MatchProgrammeStatus.failure) {
+      return ErrorMessage(
+        message:
+            AppLocalizations.of(context)!.uiSomethingWentWrongPleaseTryAgain,
+      );
     }
 
+    if (state.isLoading) {
+      return const LoadingIndicator();
+    }
+
+    // Each season opens at its start, then (for the active season) scrolls to
+    // the latest played match.
+    if (_scrolledSeasonId != state.selectedSeasonId) {
+      _scrolledSeasonId = state.selectedSeasonId;
+      _hasScheduledInitialScroll = false;
+    }
+    _syncMatchKeys(state.matches);
+    if (!state.isViewingPastSeason) _scheduleInitialScroll(state.matches);
+
+    return _buildMatchList(context, state);
+  }
+
+  Widget _buildMatchList(BuildContext context, MatchProgrammeState state) {
+    final matches = state.matches;
+    final pastSeason = state.isViewingPastSeason ? state.selectedSeason : null;
+    final l10n = AppLocalizations.of(context)!;
     final ownTeamName =
         context.read<AuthCubit>().state.user?.teamDetails?.title;
     final ownTeamLogoDesign =
@@ -212,23 +244,47 @@ class _MatchListState extends State<_MatchList> {
     final canManageTeam =
         context.read<AuthCubit>().state.user?.canManageTeam ?? false;
 
+    if (matches.isEmpty && pastSeason == null) {
+      return Center(child: Text(l10n.uiNoMatchesFound));
+    }
+
     return ListView(
       key: _listViewKey,
       controller: _scrollController,
       padding: Spacing.screenPadding.copyWith(
+        top: Spacing.sm,
         bottom:
             Spacing.screenPadding.bottom + mainTabBottomContentPadding(context),
       ),
       children: [
-        AllGamesCard(
-          matches: matches,
-          ownTeamName: ownTeamName,
-          ownTeamLogoDesign: ownTeamLogoDesign,
-          currentUserId: currentUserId,
-          canManageTeam: canManageTeam,
-          matchItemKeys: _matchKeys,
-          onMatchTap: (match) => _openMatch(context, match),
-        ),
+        if (pastSeason != null) ...[
+          PastSeasonBanner(
+            season: pastSeason,
+            onBackToCurrent: () =>
+                context.read<MatchProgrammeCubit>().showActiveSeason(),
+          ),
+          const SizedBox(height: Spacing.sm),
+          SeasonResultSummary(matches: matches, ownTeamName: ownTeamName),
+          const SizedBox(height: Spacing.itemGap),
+        ],
+        if (matches.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: Spacing.xl),
+            child: Text(
+              l10n.matchSeasonNoMatches,
+              textAlign: TextAlign.center,
+            ),
+          )
+        else
+          AllGamesCard(
+            matches: matches,
+            ownTeamName: ownTeamName,
+            ownTeamLogoDesign: ownTeamLogoDesign,
+            currentUserId: currentUserId,
+            canManageTeam: canManageTeam,
+            matchItemKeys: _matchKeys,
+            onMatchTap: (match) => _openMatch(context, match),
+          ),
       ],
     );
   }
@@ -332,5 +388,46 @@ class _MatchListState extends State<_MatchList> {
             forceRefresh: true,
           );
     }
+  }
+}
+
+/// Page title with the season selector underneath.
+class _MatchProgrammeHeader extends StatelessWidget {
+  final MatchProgrammeState state;
+
+  const _MatchProgrammeHeader({required this.state});
+
+  @override
+  Widget build(BuildContext context) {
+    final season = state.selectedSeason;
+    final canChangeSeason = state.seasons.length > 1;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        Spacing.md,
+        Spacing.sm,
+        Spacing.md,
+        Spacing.sm,
+      ),
+      child: TabPageHeader(
+        title: AppLocalizations.of(context)!.uiMatchSchedule,
+        bottom: season == null
+            ? null
+            : SeasonSelectorButton(
+                season: season,
+                onTap: canChangeSeason ? () => _pickSeason(context) : null,
+              ),
+      ),
+    );
+  }
+
+  Future<void> _pickSeason(BuildContext context) async {
+    final cubit = context.read<MatchProgrammeCubit>();
+    final picked = await showSeasonPicker(
+      context,
+      seasons: cubit.state.seasons,
+      selected: cubit.state.selectedSeason,
+    );
+    if (picked != null) await cubit.selectSeason(picked);
   }
 }

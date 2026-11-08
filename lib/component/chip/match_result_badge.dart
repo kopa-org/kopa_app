@@ -19,11 +19,72 @@ enum MatchResultStatus {
         : MatchResultStatus.loss;
   }
 
+  /// Maps the API's form values (1 win, 0 draw, -1 loss).
+  static MatchResultStatus fromForm(int value) {
+    if (value > 0) return MatchResultStatus.win;
+    if (value == 0) return MatchResultStatus.draw;
+    return MatchResultStatus.loss;
+  }
+
   String get label => switch (this) {
         MatchResultStatus.win => currentL10n.uiWin,
         MatchResultStatus.draw => currentL10n.uiDraw,
         MatchResultStatus.loss => currentL10n.uiLoss,
       };
+
+  /// One-letter form of [label], such as "V" / "U" / "T" in Danish.
+  String get letter => switch (this) {
+        MatchResultStatus.win => currentL10n.resultLetterWin,
+        MatchResultStatus.draw => currentL10n.resultLetterDraw,
+        MatchResultStatus.loss => currentL10n.resultLetterLoss,
+      };
+}
+
+/// Filled circle with the result's letter, e.g. a green "V" for a win.
+/// Screen readers announce the full word.
+class ResultLetterBadge extends StatelessWidget {
+  final MatchResultStatus result;
+  final double size;
+
+  const ResultLetterBadge({
+    required this.result,
+    this.size = 24,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors =
+        Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final background = switch (result) {
+      MatchResultStatus.win => appColors.success,
+      MatchResultStatus.draw => appColors.warning,
+      MatchResultStatus.loss => appColors.error,
+    };
+
+    return Semantics(
+      container: true,
+      label: result.label,
+      excludeSemantics: true,
+      child: Container(
+        width: size,
+        height: size,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(color: background, shape: BoxShape.circle),
+        child: Text(
+          result.letter,
+          style: appTextStyles.bodyBold.copyWith(
+            color: appColors.white,
+            fontSize: size * 0.4,
+            fontWeight: FontWeight.w800,
+            height: 1,
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 enum MatchOverviewChipStatus { success, warning, error, info, neutral }

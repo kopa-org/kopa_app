@@ -6,8 +6,14 @@ import 'package:kopa/services/api_client.dart';
 class StatisticsRepository {
   static final _apiClient = ApiClient.shared;
 
-  static Future<StatisticsResponse> getStatistics(int teamId) async {
-    final url = Uri.parse('${ApiConfig.baseUrl}/statistics/$teamId');
+  /// Statistics for the team's active season, or for [seasonId].
+  static Future<StatisticsResponse> getStatistics(
+    int teamId, {
+    int? seasonId,
+  }) async {
+    final url = Uri.parse('${ApiConfig.baseUrl}/statistics/$teamId').replace(
+      queryParameters: seasonId == null ? null : {'season_id': '$seasonId'},
+    );
     final response = await _apiClient.get(url);
 
     if (response.statusCode == 200) {

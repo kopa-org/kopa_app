@@ -2581,4 +2581,78 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get uiFindOnDbuMyself => 'Find it on DBU myself';
+
+  @override
+  String get matchSeasonPickerTitle => 'Choose season';
+
+  @override
+  String get matchSeasonActive => 'Active';
+
+  @override
+  String get matchSeasonPreviousSeasons => 'Previous seasons';
+
+  @override
+  String get matchSeasonFinished => 'Finished season';
+
+  @override
+  String matchSeasonViewingRange(String range) {
+    return 'Showing matches from $range';
+  }
+
+  @override
+  String get matchSeasonBackToCurrent => 'Back to current';
+
+  @override
+  String matchSeasonStartedOn(String date) {
+    return 'Started $date';
+  }
+
+  @override
+  String matchSeasonSelectorLabel(String name) {
+    return 'Season $name. Change season';
+  }
+
+  @override
+  String get matchSeasonClose => 'Close';
+
+  @override
+  String get matchSeasonNoMatches => 'No matches in this season.';
+
+  @override
+  String get matchSeasonSummaryMatches => 'Matches';
+
+  @override
+  String get matchSeasonSummaryWon => 'Won';
+
+  @override
+  String get matchSeasonSummaryDrawn => 'Drawn';
+
+  @override
+  String get matchSeasonSummaryLost => 'Lost';
+
+  @override
+  String get resultLetterWin => 'W';
+
+  @override
+  String get resultLetterDraw => 'D';
+
+  @override
+  String get resultLetterLoss => 'L';
+
+  @override
+  String get statisticsInFormTitle => 'In-form';
+
+  @override
+  String get statisticsAssists => 'Assists';
+
+  @override
+  String get statisticsFormTitle => 'Form';
+
+  @override
+  String statisticsFormHint(int count) {
+    return 'Last $count · newest on the right';
+  }
+
+  @override
+  String get statisticsNoFormYet => 'No matches played yet.';
 }

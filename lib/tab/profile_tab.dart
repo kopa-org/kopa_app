@@ -6,6 +6,7 @@ import 'package:kopa/cubits/team_members_cubit.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
+import 'package:kopa/component/scaffold/tab_page_header.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/page/profile/player_profile_page.dart';
 import 'package:kopa/theme/app_colors.dart';
@@ -57,68 +58,50 @@ class _SquadTabView extends StatelessWidget {
         }
       }, builder: (context, state) {
         final cubit = context.read<TeamMembersCubit>();
+        final hasRoster =
+            !state.loading && !state.loadFailed && state.members.isNotEmpty;
         return RefreshIndicator(
           onRefresh: () async {
             if (state.savingUserId == null) await cubit.load();
           },
-          child: state.loading
-              ? const Center(child: CupertinoActivityIndicator())
-              : state.loadFailed
-                  ? ListView(children: [
-                      TextButton(
-                          onPressed: cubit.load,
-                          child: Text(l10n.teamSquadLoadFailed)),
-                    ])
-                  : state.members.isEmpty
-                      ? ListView(children: [
-                          Padding(
-                              padding: const EdgeInsets.all(24),
-                              child: Text(l10n.teamSquadEmpty)),
-                        ])
-                      : _SquadRosterView(squad: state.members),
+          // One list for every state so the title always stays in place.
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: EdgeInsets.fromLTRB(
+              Spacing.md,
+              Spacing.sm,
+              Spacing.md,
+              Spacing.md + mainTabBottomContentPadding(context),
+            ),
+            children: [
+              TabPageHeader(
+                title: l10n.teamSquadTitle,
+                subtitle: hasRoster
+                    ? l10n.teamSquadCount(state.members.length)
+                    : null,
+              ),
+              const SizedBox(height: 20),
+              if (state.loading)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: Spacing.xxl),
+                  child: CupertinoActivityIndicator(),
+                )
+              else if (state.loadFailed)
+                TextButton(
+                  onPressed: cubit.load,
+                  child: Text(l10n.teamSquadLoadFailed),
+                )
+              else if (state.members.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: Spacing.xs),
+                  child: Text(l10n.teamSquadEmpty),
+                )
+              else
+                _RosterCard(squad: sortSquadByPlayerRole(state.members)),
+            ],
+          ),
         );
       }),
-    );
-  }
-}
-
-class _SquadRosterView extends StatelessWidget {
-  final List<UserDetails> squad;
-
-  const _SquadRosterView({required this.squad});
-
-  @override
-  Widget build(BuildContext context) {
-    final sortedSquad = sortSquadByPlayerRole(squad);
-    final theme = Theme.of(context);
-    final appColors = theme.extension<AppColors>() ?? AppColors.light;
-    final styles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
-    final bottomContentPadding = mainTabBottomContentPadding(context);
-
-    return ListView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: EdgeInsets.fromLTRB(
-        Spacing.md,
-        Spacing.md,
-        Spacing.md,
-        Spacing.md + bottomContentPadding,
-      ),
-      children: [
-        Text(
-          AppLocalizations.of(context)!.teamSquadTitle,
-          style: styles.h4.copyWith(
-            color: appColors.dirt,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          AppLocalizations.of(context)!.teamSquadCount(squad.length),
-          style: styles.body3.copyWith(color: appColors.textSecondary),
-        ),
-        const SizedBox(height: 20),
-        _RosterCard(squad: sortedSquad),
-      ],
     );
   }
 }

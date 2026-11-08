@@ -14,8 +14,8 @@ class MatchRepository {
   static Future<List<MatchDetails>>? _summaryRequest;
   static List<MatchDetails>? _summaryCache;
 
-  static Future<List<MatchDetails>> getMatches() async {
-    final url = Uri.parse('${ApiConfig.baseUrl}/match');
+  static Future<List<MatchDetails>> getMatches({int? seasonId}) async {
+    final url = _withSeason(Uri.parse('${ApiConfig.baseUrl}/match'), seasonId);
     final response = await _apiClient.get(url);
 
     if (response.statusCode == 200) {
@@ -30,9 +30,16 @@ class MatchRepository {
     }
   }
 
+  /// Lists the team's events for the active season, or for [seasonId].
+  ///
+  /// Only the active season is cached; past seasons are fetched on demand so
+  /// they never replace the cache other tabs rely on.
   static Future<List<MatchDetails>> getMatchSummaries({
     bool forceRefresh = false,
+    int? seasonId,
   }) {
+    if (seasonId != null) return _fetchMatchSummaries(seasonId: seasonId);
+
     final inFlight = _summaryRequest;
     if (inFlight != null) return inFlight;
 
@@ -56,8 +63,18 @@ class MatchRepository {
     _summaryCache = null;
   }
 
-  static Future<List<MatchDetails>> _fetchMatchSummaries() async {
-    final url = Uri.parse('${ApiConfig.baseUrl}/match/summaries');
+  static Uri _withSeason(Uri url, int? seasonId) {
+    if (seasonId == null) return url;
+    return url.replace(queryParameters: {'season_id': '$seasonId'});
+  }
+
+  static Future<List<MatchDetails>> _fetchMatchSummaries({
+    int? seasonId,
+  }) async {
+    final url = _withSeason(
+      Uri.parse('${ApiConfig.baseUrl}/match/summaries'),
+      seasonId,
+    );
     final response = await _apiClient.get(url);
 
     if (response.statusCode == 200) {
@@ -71,7 +88,7 @@ class MatchRepository {
       // Keep the app usable while the client and API are on different
       // releases. The summary endpoint is an optimization; the existing
       // match endpoint remains the compatible source of truth.
-      return getMatches();
+      return getMatches(seasonId: seasonId);
     }
   }
 

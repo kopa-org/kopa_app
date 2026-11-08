@@ -50,6 +50,26 @@ class AllGamesCard extends StatelessWidget {
   }
 }
 
+/// Results from the own team's point of view for every match with a final
+/// score, using the same own-team detection as [AllGamesCard].
+List<MatchResultStatus> ownTeamResults(
+  List<MatchDetails> matches,
+  String? ownTeamName,
+) {
+  final sortedMatches = matches.toList()
+    ..sort((a, b) => a.date.compareTo(b.date));
+  final resolvedOwnTeamName = _inferOwnTeamName(sortedMatches, ownTeamName);
+
+  return [
+    for (final match in sortedMatches)
+      if (match.hasMatchBeenPlayed)
+        _MatchStatus.from(
+          match,
+          _OwnTeamSide.from(match, resolvedOwnTeamName),
+        ).result!,
+  ];
+}
+
 class _MatchList extends StatelessWidget {
   final List<MatchDetails> matches;
   final ValueChanged<MatchDetails> onMatchTap;

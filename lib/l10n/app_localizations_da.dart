@@ -1761,10 +1761,10 @@ class AppLocalizationsDa extends AppLocalizations {
       'Se formranglisten, streaks og point.';
 
   @override
-  String get uiYourStats => 'Dine Stats';
+  String get uiYourStats => 'Dine stats';
 
   @override
-  String get uiForThisSeason => 'For denne season.';
+  String get uiForThisSeason => 'For denne sæson.';
 
   @override
   String get uiVotes => 'Stemmer';
@@ -2293,7 +2293,7 @@ class AppLocalizationsDa extends AppLocalizations {
   String get uiUnknownMatch => 'Ukendt kamp';
 
   @override
-  String get uiTeamStats => 'Holdets Stats';
+  String get uiTeamStats => 'Holdets stats';
 
   @override
   String get uiWon => 'Vundne';
@@ -2579,4 +2579,78 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String get uiFindOnDbuMyself => 'Find den selv på DBU';
+
+  @override
+  String get matchSeasonPickerTitle => 'Vælg sæson';
+
+  @override
+  String get matchSeasonActive => 'Aktiv';
+
+  @override
+  String get matchSeasonPreviousSeasons => 'Tidligere sæsoner';
+
+  @override
+  String get matchSeasonFinished => 'Afsluttet sæson';
+
+  @override
+  String matchSeasonViewingRange(String range) {
+    return 'Du ser kampe fra $range';
+  }
+
+  @override
+  String get matchSeasonBackToCurrent => 'Til nuværende';
+
+  @override
+  String matchSeasonStartedOn(String date) {
+    return 'Startet $date';
+  }
+
+  @override
+  String matchSeasonSelectorLabel(String name) {
+    return 'Sæson $name. Skift sæson';
+  }
+
+  @override
+  String get matchSeasonClose => 'Luk';
+
+  @override
+  String get matchSeasonNoMatches => 'Ingen kampe i denne sæson.';
+
+  @override
+  String get matchSeasonSummaryMatches => 'Kampe';
+
+  @override
+  String get matchSeasonSummaryWon => 'Vundet';
+
+  @override
+  String get matchSeasonSummaryDrawn => 'Uafgjort';
+
+  @override
+  String get matchSeasonSummaryLost => 'Tabt';
+
+  @override
+  String get resultLetterWin => 'V';
+
+  @override
+  String get resultLetterDraw => 'U';
+
+  @override
+  String get resultLetterLoss => 'T';
+
+  @override
+  String get statisticsInFormTitle => 'In-form';
+
+  @override
+  String get statisticsAssists => 'Assists';
+
+  @override
+  String get statisticsFormTitle => 'Form';
+
+  @override
+  String statisticsFormHint(int count) {
+    return 'Seneste $count · nyeste til højre';
+  }
+
+  @override
+  String get statisticsNoFormYet => 'Ingen spillede kampe endnu.';
 }

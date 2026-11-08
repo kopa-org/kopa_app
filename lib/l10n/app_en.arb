@@ -1279,5 +1279,55 @@
       }
     }
   },
-  "uiFindOnDbuMyself": "Find it on DBU myself"
+  "uiFindOnDbuMyself": "Find it on DBU myself",
+  "matchSeasonPickerTitle": "Choose season",
+  "matchSeasonActive": "Active",
+  "matchSeasonPreviousSeasons": "Previous seasons",
+  "matchSeasonFinished": "Finished season",
+  "matchSeasonViewingRange": "Showing matches from {range}",
+  "@matchSeasonViewingRange": {
+    "placeholders": {
+      "range": {
+        "type": "String"
+      }
+    }
+  },
+  "matchSeasonBackToCurrent": "Back to current",
+  "matchSeasonStartedOn": "Started {date}",
+  "@matchSeasonStartedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "matchSeasonSelectorLabel": "Season {name}. Change season",
+  "@matchSeasonSelectorLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "matchSeasonClose": "Close",
+  "matchSeasonNoMatches": "No matches in this season.",
+  "matchSeasonSummaryMatches": "Matches",
+  "matchSeasonSummaryWon": "Won",
+  "matchSeasonSummaryDrawn": "Drawn",
+  "matchSeasonSummaryLost": "Lost",
+  "resultLetterWin": "W",
+  "resultLetterDraw": "D",
+  "resultLetterLoss": "L",
+  "statisticsInFormTitle": "In-form",
+  "statisticsAssists": "Assists",
+  "statisticsFormTitle": "Form",
+  "statisticsFormHint": "Last {count} · newest on the right",
+  "@statisticsFormHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statisticsNoFormYet": "No matches played yet."
 }
