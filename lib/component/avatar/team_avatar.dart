@@ -70,7 +70,7 @@ class TeamAvatar extends StatelessWidget {
               dimension: radius * 2,
               child: Center(
                 child: Text(
-                  _initials(teamName),
+                  teamInitials(teamName),
                   style: appTextStyles.buttonTiny.copyWith(
                     color: AppColors.of(context).white,
                     fontSize: radius * 0.72,
@@ -292,11 +292,25 @@ int _stableSeed(String value) {
   return hash;
 }
 
-String _initials(String name) {
-  final words = name.trim().split(RegExp(r'\s+'));
-  return words
+/// First letter of the first word plus the team number when there is one
+/// ("Skjold 7" and "Skjold (7)" -> "S7"); otherwise the first letters of the
+/// first two words. Brackets and other symbols are ignored.
+String teamInitials(String name) {
+  final words = name
+      .trim()
+      .split(RegExp(r'\s+'))
+      .map((word) =>
+          word.replaceAll(RegExp(r'[^\p{L}\p{N}]', unicode: true), ''))
       .where((word) => word.isNotEmpty)
-      .take(2)
-      .map((word) => word[0].toUpperCase())
-      .join();
+      .toList();
+  if (words.isEmpty) return '';
+
+  final first = words.first[0].toUpperCase();
+  final number = words.skip(1).lastWhere(
+        (word) => RegExp(r'^\d+$').hasMatch(word),
+        orElse: () => '',
+      );
+  if (number.isNotEmpty) return '$first$number';
+  if (words.length == 1) return first;
+  return '$first${words[1][0].toUpperCase()}';
 }

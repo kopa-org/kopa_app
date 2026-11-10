@@ -68,6 +68,7 @@ class HomeLatestResultCard extends StatelessWidget {
             const SizedBox(height: Spacing.lg),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 TeamBadgeLabel(
                   teamName: match?.homeTeam ??
@@ -90,16 +91,23 @@ class HomeLatestResultCard extends StatelessWidget {
                         ),
                   width: 86,
                   radius: 22,
+                  labelMaxLines: 2,
                   labelStyle: appTextStyles.caption.copyWith(
                     color: appColors.dirt,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                Text(
-                  score,
-                  style: appTextStyles.h2.copyWith(
-                    color: appColors.dirt,
-                    fontSize: 42,
+                // Centred on the badges (2 * (radius 22 + padding 5)).
+                SizedBox(
+                  height: 54,
+                  child: Center(
+                    child: Text(
+                      score,
+                      style: appTextStyles.h2.copyWith(
+                        color: appColors.dirt,
+                        fontSize: 42,
+                      ),
+                    ),
                   ),
                 ),
                 TeamBadgeLabel(
@@ -123,6 +131,7 @@ class HomeLatestResultCard extends StatelessWidget {
                         ),
                   width: 86,
                   radius: 22,
+                  labelMaxLines: 2,
                   labelStyle: appTextStyles.caption.copyWith(
                     color: appColors.dirt,
                     fontWeight: FontWeight.w800,

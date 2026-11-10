@@ -1,5 +1,6 @@
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:kopa/component/card/match_hero_card.dart';
 import 'package:kopa/component/match/match_events_timeline.dart';
 import 'package:kopa/component/match/match_poll_details_card.dart';
 import 'package:kopa/component/match/player_of_match_summary_card.dart';
@@ -68,6 +69,7 @@ class PostMatchDetailsPage extends StatelessWidget {
       selectedSegment: selectedSegment,
       onSegmentChanged: onSegmentChanged,
       heroCard: heroCard,
+      heroLabelLines: MatchHeroCard.teamLabelLines(context, match),
       headerAction: headerAction,
       belowHeaderAction: belowHeaderAction,
       // Same tabs and layout as before the match, so the page feels familiar.

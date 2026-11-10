@@ -295,6 +295,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
       selectedSegment: _selectedSegment,
       onSegmentChanged: _selectSegment,
       heroCard: heroCard,
+      heroLabelLines: MatchHeroCard.teamLabelLines(context, matchDetails),
       headerAction: headerAction,
       usePrematchLayout: true,
       attendanceHeaderInBody: true,

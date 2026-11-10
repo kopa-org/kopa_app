@@ -788,8 +788,10 @@ class _HeroTeamPanel extends StatelessWidget {
                           Padding(
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 8.0),
+                            // Top-aligned so a wrapped name does not push
+                            // its badge out of line with the other one.
                             child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Expanded(
                                   child: Center(
@@ -809,6 +811,7 @@ class _HeroTeamPanel extends StatelessWidget {
                                             ),
                                       width: 86,
                                       radius: 22,
+                                      labelMaxLines: 2,
                                       labelStyle:
                                           appTextStyles.caption.copyWith(
                                         color: heroHeaderTextColor,
@@ -819,12 +822,16 @@ class _HeroTeamPanel extends StatelessWidget {
                                 ),
                                 SizedBox(
                                   width: 54,
-                                  child: Text(
-                                    'VS',
-                                    textAlign: TextAlign.center,
-                                    style: appTextStyles.h5.copyWith(
-                                      color: heroHeaderTextColor,
-                                      fontWeight: FontWeight.w800,
+                                  // Badge diameter: 2 * (radius 22 + padding 5).
+                                  height: 54,
+                                  child: Center(
+                                    child: Text(
+                                      'VS',
+                                      textAlign: TextAlign.center,
+                                      style: appTextStyles.h5.copyWith(
+                                        color: heroHeaderTextColor,
+                                        fontWeight: FontWeight.w800,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -846,6 +853,7 @@ class _HeroTeamPanel extends StatelessWidget {
                                             ),
                                       width: 86,
                                       radius: 22,
+                                      labelMaxLines: 2,
                                       labelStyle:
                                           appTextStyles.caption.copyWith(
                                         color: heroHeaderTextColor,

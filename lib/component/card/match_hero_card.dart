@@ -55,6 +55,37 @@ class MatchHeroCard extends StatelessWidget {
     this.darkHeader = false,
   });
 
+  /// Width of each team column in the hero.
+  static const double teamLabelWidth = 100;
+
+  /// How many lines the team names need when expanded: 2 if either name is
+  /// too long for one line, else 1. Names wrap instead of being cut with "…".
+  static int teamLabelLines(BuildContext context, MatchDetails match) {
+    if (match.isTraining) return 1;
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final style = appTextStyles.caption.copyWith(
+      fontWeight: FontWeight.w800,
+      fontSize: 12,
+    );
+    final textScaler = MediaQuery.textScalerOf(context);
+    final textDirection = Directionality.of(context);
+
+    for (final name in [match.homeTeam, match.awayTeam]) {
+      if (name == null || name.isEmpty) continue;
+      final painter = TextPainter(
+        text: TextSpan(text: name, style: style),
+        textDirection: textDirection,
+        textScaler: textScaler,
+        maxLines: 1,
+      )..layout(maxWidth: teamLabelWidth);
+      final exceeds = painter.didExceedMaxLines;
+      painter.dispose();
+      if (exceeds) return 2;
+    }
+    return 1;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -70,6 +101,8 @@ class MatchHeroCard extends StatelessWidget {
     final badgePadding = lerpDouble(5, 2, collapse)!;
     final labelFontSize = lerpDouble(12, 11, collapse)!;
     final centerTextScale = lerpDouble(1, 0.72, collapse)!;
+    // Wrap long names while expanded; the pinned header only has one line.
+    final labelMaxLines = collapse < 0.5 ? 2 : 1;
 
     final cardContent = KopaCard(
       onTap: onTap,
@@ -95,9 +128,11 @@ class MatchHeroCard extends StatelessWidget {
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    // Top-aligned so a wrapped name keeps the badges in line.
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SizedBox(
-                        width: 100,
+                        width: teamLabelWidth,
                         child: TeamBadgeLabel(
                           teamName: match.homeTeam ??
                               AppLocalizations.of(context)!.matchScoreHome,
@@ -110,7 +145,7 @@ class MatchHeroCard extends StatelessWidget {
                               : logoHeroTag(heroTag!, TeamSide.home),
                           radius: badgeRadius,
                           badgePadding: badgePadding,
-                          labelMaxLines: 1,
+                          labelMaxLines: labelMaxLines,
                           labelStyle: appTextStyles.caption.copyWith(
                             color: heroTextColor,
                             fontWeight: FontWeight.w800,
@@ -118,29 +153,33 @@ class MatchHeroCard extends StatelessWidget {
                           ),
                         ),
                       ),
-                      if (hasScore)
-                        _FinalScorePill(
-                          match: match,
-                          textColor: heroTextColor,
-                          textScale: centerTextScale,
-                        )
-                      else
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: Spacing.md,
-                          ),
-                          child: Text(
-                            'VS',
-                            style: appTextStyles.h5.copyWith(
-                              color: heroTextColor,
-                              fontWeight: FontWeight.w900,
-                              fontSize:
-                                  appTextStyles.h5.fontSize! * centerTextScale,
-                            ),
-                          ),
-                        ),
                       SizedBox(
-                        width: 100,
+                        height: 2 * (badgeRadius + badgePadding),
+                        child: Center(
+                          child: hasScore
+                              ? _FinalScorePill(
+                                  match: match,
+                                  textColor: heroTextColor,
+                                  textScale: centerTextScale,
+                                )
+                              : Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: Spacing.md,
+                                  ),
+                                  child: Text(
+                                    'VS',
+                                    style: appTextStyles.h5.copyWith(
+                                      color: heroTextColor,
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: appTextStyles.h5.fontSize! *
+                                          centerTextScale,
+                                    ),
+                                  ),
+                                ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: teamLabelWidth,
                         child: TeamBadgeLabel(
                           teamName: match.awayTeam ??
                               AppLocalizations.of(context)!.matchScoreAway,
@@ -153,7 +192,7 @@ class MatchHeroCard extends StatelessWidget {
                               : logoHeroTag(heroTag!, TeamSide.away),
                           radius: badgeRadius,
                           badgePadding: badgePadding,
-                          labelMaxLines: 1,
+                          labelMaxLines: labelMaxLines,
                           labelStyle: appTextStyles.caption.copyWith(
                             color: heroTextColor,
                             fontWeight: FontWeight.w800,

@@ -62,6 +62,10 @@ class MatchDetailTemplate extends StatelessWidget {
   final Widget? belowHeaderAction;
   final Widget? floatingActionButton;
 
+  /// Lines the hero's team names take when expanded; see
+  /// [MatchHeroCard.teamLabelLines].
+  final int heroLabelLines;
+
   const MatchDetailTemplate({
     super.key,
     required this.heroCard,
@@ -102,6 +106,7 @@ class MatchDetailTemplate extends StatelessWidget {
     this.useTrainingHeader = false,
     this.belowHeaderAction,
     this.floatingActionButton,
+    this.heroLabelLines = 1,
   });
 
   static const double _navBarExtent = 52;
@@ -133,8 +138,9 @@ class MatchDetailTemplate extends StatelessWidget {
 
   /// Heights follow the text scale because the team names sit in the hero.
   double _heroExtent(BuildContext context, double collapse) {
-    final labelHeight = MediaQuery.textScalerOf(context).scale(18);
-    return lerpDouble(84 + labelHeight, 36 + labelHeight, collapse)!;
+    final lineHeight = MediaQuery.textScalerOf(context).scale(18);
+    final expandedLabelHeight = lineHeight * heroLabelLines;
+    return lerpDouble(84 + expandedLabelHeight, 36 + lineHeight, collapse)!;
   }
 
   double _navExtent(double collapse) => lerpDouble(_navBarExtent, 0, collapse)!;
