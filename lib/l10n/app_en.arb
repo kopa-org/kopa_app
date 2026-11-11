@@ -1329,5 +1329,59 @@
       }
     }
   },
-  "statisticsNoFormYet": "No matches played yet."
+  "statisticsNoFormYet": "No matches played yet.",
+  "inFormCategoryOffensive": "Offensive",
+  "inFormCategoryDefensive": "Defensive",
+  "inFormCategoryTeamResult": "Team result",
+  "inFormCategoryDiscipline": "Discipline",
+  "inFormCategoryParticipation": "Participation & honours",
+  "inFormCategoryBonus": "Streaks & bonuses",
+  "inFormCategoryOffensiveDescription": "Goals, assists and other attacking actions.",
+  "inFormCategoryDefensiveDescription": "Clean sheets, goals conceded and penalty saves.",
+  "inFormCategoryTeamResultDescription": "Points for how the team did as a whole.",
+  "inFormCategoryDisciplineDescription": "Cards and other disciplinary incidents.",
+  "inFormCategoryParticipationDescription": "Playing, man of the match votes and awards.",
+  "inFormCategoryBonusDescription": "Extra points for streaks, form runs and monthly or season awards.",
+  "inFormColumnPlayer": "Player",
+  "inFormColumnLatest": "Latest",
+  "inFormColumnToFirst": "To #1",
+  "inFormColumnTotal": "Pts",
+  "inFormPointsSystem": "Points system",
+  "inFormPointsSystemIntro": "Your points depend on the position you played. Defenders earn more for clean sheets, attackers for goals and assists.",
+  "inFormPointsSystemExtras": "On top of this come streaks and form bonuses, plus monthly and season awards.",
+  "inFormMatches": "Matches",
+  "inFormGoals": "Goals",
+  "inFormAssists": "Assists",
+  "inFormCards": "Cards",
+  "inFormMotm": "MOTM",
+  "inFormAverage": "Avg.",
+  "inFormBonuses": "Bonuses",
+  "inFormHome": "Home",
+  "inFormAway": "Away",
+  "inFormUnknownOpponent": "Unknown opponent",
+  "inFormPlayedAs": "Played as {position}",
+  "@inFormPlayedAs": {
+    "placeholders": {
+      "position": {
+        "type": "String"
+      }
+    }
+  },
+  "inFormPositionChanged": "changed for this match",
+  "inFormEditMatch": "Edit match data",
+  "inFormChangePosition": "Change position",
+  "inFormMatchPosition": "Position in this match",
+  "inFormMatchPositionHint": "Played a different position than usual? Pick it here so your points match.",
+  "inFormUseProfilePosition": "Normal position",
+  "inFormMatchDataPoints": "Data points",
+  "inFormMatchDataPointsHint": "Things the match timeline can't show. The decisive goal is worked out automatically, so only change it if it's wrong.",
+  "inFormOwnGoals": "Own goals",
+  "inFormPenaltiesMissed": "Missed penalties",
+  "inFormPenaltiesSaved": "Saved penalties",
+  "inFormDecisiveGoals": "Decisive goals",
+  "inFormSave": "Save",
+  "inFormSaveFailed": "Could not save. Please try again.",
+  "inFormSaved": "Saved – points updated",
+  "inFormSeeHowPointsWork": "How points work",
+  "inFormPointsSystemLoadFailed": "Could not fetch the points system."
 }

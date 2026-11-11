@@ -2655,4 +2655,158 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get statisticsNoFormYet => 'No matches played yet.';
+
+  @override
+  String get inFormCategoryOffensive => 'Offensive';
+
+  @override
+  String get inFormCategoryDefensive => 'Defensive';
+
+  @override
+  String get inFormCategoryTeamResult => 'Team result';
+
+  @override
+  String get inFormCategoryDiscipline => 'Discipline';
+
+  @override
+  String get inFormCategoryParticipation => 'Participation & honours';
+
+  @override
+  String get inFormCategoryBonus => 'Streaks & bonuses';
+
+  @override
+  String get inFormCategoryOffensiveDescription =>
+      'Goals, assists and other attacking actions.';
+
+  @override
+  String get inFormCategoryDefensiveDescription =>
+      'Clean sheets, goals conceded and penalty saves.';
+
+  @override
+  String get inFormCategoryTeamResultDescription =>
+      'Points for how the team did as a whole.';
+
+  @override
+  String get inFormCategoryDisciplineDescription =>
+      'Cards and other disciplinary incidents.';
+
+  @override
+  String get inFormCategoryParticipationDescription =>
+      'Playing, man of the match votes and awards.';
+
+  @override
+  String get inFormCategoryBonusDescription =>
+      'Extra points for streaks, form runs and monthly or season awards.';
+
+  @override
+  String get inFormColumnPlayer => 'Player';
+
+  @override
+  String get inFormColumnLatest => 'Latest';
+
+  @override
+  String get inFormColumnToFirst => 'To #1';
+
+  @override
+  String get inFormColumnTotal => 'Pts';
+
+  @override
+  String get inFormPointsSystem => 'Points system';
+
+  @override
+  String get inFormPointsSystemIntro =>
+      'Your points depend on the position you played. Defenders earn more for clean sheets, attackers for goals and assists.';
+
+  @override
+  String get inFormPointsSystemExtras =>
+      'On top of this come streaks and form bonuses, plus monthly and season awards.';
+
+  @override
+  String get inFormMatches => 'Matches';
+
+  @override
+  String get inFormGoals => 'Goals';
+
+  @override
+  String get inFormAssists => 'Assists';
+
+  @override
+  String get inFormCards => 'Cards';
+
+  @override
+  String get inFormMotm => 'MOTM';
+
+  @override
+  String get inFormAverage => 'Avg.';
+
+  @override
+  String get inFormBonuses => 'Bonuses';
+
+  @override
+  String get inFormHome => 'Home';
+
+  @override
+  String get inFormAway => 'Away';
+
+  @override
+  String get inFormUnknownOpponent => 'Unknown opponent';
+
+  @override
+  String inFormPlayedAs(String position) {
+    return 'Played as $position';
+  }
+
+  @override
+  String get inFormPositionChanged => 'changed for this match';
+
+  @override
+  String get inFormEditMatch => 'Edit match data';
+
+  @override
+  String get inFormChangePosition => 'Change position';
+
+  @override
+  String get inFormMatchPosition => 'Position in this match';
+
+  @override
+  String get inFormMatchPositionHint =>
+      'Played a different position than usual? Pick it here so your points match.';
+
+  @override
+  String get inFormUseProfilePosition => 'Normal position';
+
+  @override
+  String get inFormMatchDataPoints => 'Data points';
+
+  @override
+  String get inFormMatchDataPointsHint =>
+      'Things the match timeline can\'t show. The decisive goal is worked out automatically, so only change it if it\'s wrong.';
+
+  @override
+  String get inFormOwnGoals => 'Own goals';
+
+  @override
+  String get inFormPenaltiesMissed => 'Missed penalties';
+
+  @override
+  String get inFormPenaltiesSaved => 'Saved penalties';
+
+  @override
+  String get inFormDecisiveGoals => 'Decisive goals';
+
+  @override
+  String get inFormSave => 'Save';
+
+  @override
+  String get inFormSaveFailed => 'Could not save. Please try again.';
+
+  @override
+  String get inFormSaved => 'Saved – points updated';
+
+  @override
+  String get inFormSeeHowPointsWork => 'How points work';
+
+  @override
+  String get inFormPointsSystemLoadFailed =>
+      'Could not fetch the points system.';
 }

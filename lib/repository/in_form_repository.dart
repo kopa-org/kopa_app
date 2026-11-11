@@ -32,6 +32,27 @@ class InFormRepository {
     return InFormPlayerBreakdown.fromJson(json['in_form_player']);
   }
 
+  static Future<InFormPointsSystem> getPointsSystem() async {
+    final json = await _get('/player_plus/in_form/points_system', const {});
+    return InFormPointsSystem.fromJson(json['in_form_points_system']);
+  }
+
+  /// Registers per-match in-form data for a player. Pass `null` for a field
+  /// to clear its override and fall back to the derived value.
+  static Future<void> updateMatchPerformance({
+    required int eventId,
+    required int playerId,
+    required Map<String, Object?> changes,
+  }) async {
+    final uri = Uri.parse(
+      '${ApiConfig.baseUrl}/player_plus/in_form/matches/$eventId/players/$playerId',
+    );
+    final response = await _apiClient.patchJson(uri, body: changes);
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception('In-form update failed (${response.statusCode})');
+    }
+  }
+
   static Future<Map<String, dynamic>> _get(
     String path,
     Map<String, String> query,

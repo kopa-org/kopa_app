@@ -315,3 +315,63 @@ String initialsFor(String value) {
   if (parts.length == 1) return parts.first.substring(0, 1).toUpperCase();
   return '${parts.first[0]}${parts.last[0]}'.toUpperCase();
 }
+
+/// Formats a point value without a trailing ".0" for whole numbers.
+String inFormNumber(double value) {
+  return value == value.roundToDouble()
+      ? '${value.toInt()}'
+      : value.toStringAsFixed(1);
+}
+
+/// Like [inFormNumber], with an explicit "+" for positive values.
+String inFormSigned(double value) {
+  final prefix = value > 0 ? '+' : '';
+  return '$prefix${inFormNumber(value)}';
+}
+
+/// Rank movement since the previous round: ▲2 (up), ▼2 (down) or – (same).
+class InFormMovement extends StatelessWidget {
+  final int change;
+  final double fontSize;
+
+  const InFormMovement({super.key, required this.change, this.fontSize = 12});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final styles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    if (change == 0) {
+      return Text(
+        '–',
+        style: styles.caption.copyWith(
+          color: colors.textSecondary,
+          fontSize: fontSize,
+          fontWeight: FontWeight.w700,
+        ),
+      );
+    }
+
+    final up = change > 0;
+    final color = up ? colors.grass : colors.error;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          up ? Icons.arrow_drop_up : Icons.arrow_drop_down,
+          color: color,
+          size: fontSize + 8,
+        ),
+        Text(
+          '${change.abs()}',
+          style: styles.caption.copyWith(
+            color: color,
+            fontSize: fontSize,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ],
+    );
+  }
+}

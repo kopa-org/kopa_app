@@ -2653,4 +2653,157 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String get statisticsNoFormYet => 'Ingen spillede kampe endnu.';
+
+  @override
+  String get inFormCategoryOffensive => 'Offensiv';
+
+  @override
+  String get inFormCategoryDefensive => 'Defensiv';
+
+  @override
+  String get inFormCategoryTeamResult => 'Holdresultat';
+
+  @override
+  String get inFormCategoryDiscipline => 'Disciplin';
+
+  @override
+  String get inFormCategoryParticipation => 'Deltagelse og hæder';
+
+  @override
+  String get inFormCategoryBonus => 'Streaks og bonusser';
+
+  @override
+  String get inFormCategoryOffensiveDescription =>
+      'Mål, assists og andre offensive aktioner.';
+
+  @override
+  String get inFormCategoryDefensiveDescription =>
+      'Clean sheets, mål imod og reddede straffespark.';
+
+  @override
+  String get inFormCategoryTeamResultDescription =>
+      'Point for holdets samlede præstation.';
+
+  @override
+  String get inFormCategoryDisciplineDescription =>
+      'Kort og andre disciplinære hændelser.';
+
+  @override
+  String get inFormCategoryParticipationDescription =>
+      'Spillede kampe, stemmer og kåringer som kampens spiller.';
+
+  @override
+  String get inFormCategoryBonusDescription =>
+      'Ekstra point for streaks, formperioder og måneds- eller sæsonpriser.';
+
+  @override
+  String get inFormColumnPlayer => 'Spiller';
+
+  @override
+  String get inFormColumnLatest => 'Seneste';
+
+  @override
+  String get inFormColumnToFirst => 'Til nr. 1';
+
+  @override
+  String get inFormColumnTotal => 'Point';
+
+  @override
+  String get inFormPointsSystem => 'Pointsystem';
+
+  @override
+  String get inFormPointsSystemIntro =>
+      'Dine point afhænger af den position, du spillede. Forsvarsspillere får mest for clean sheets, angribere for mål og assists.';
+
+  @override
+  String get inFormPointsSystemExtras =>
+      'Oveni kommer streaks og formbonusser samt måneds- og sæsonpriser.';
+
+  @override
+  String get inFormMatches => 'Kampe';
+
+  @override
+  String get inFormGoals => 'Mål';
+
+  @override
+  String get inFormAssists => 'Assists';
+
+  @override
+  String get inFormCards => 'Kort';
+
+  @override
+  String get inFormMotm => 'MOTM';
+
+  @override
+  String get inFormAverage => 'Snit';
+
+  @override
+  String get inFormBonuses => 'Bonusser';
+
+  @override
+  String get inFormHome => 'Hjemme';
+
+  @override
+  String get inFormAway => 'Ude';
+
+  @override
+  String get inFormUnknownOpponent => 'Ukendt modstander';
+
+  @override
+  String inFormPlayedAs(String position) {
+    return 'Spillede som $position';
+  }
+
+  @override
+  String get inFormPositionChanged => 'ændret for denne kamp';
+
+  @override
+  String get inFormEditMatch => 'Ret kampdata';
+
+  @override
+  String get inFormChangePosition => 'Skift position';
+
+  @override
+  String get inFormMatchPosition => 'Position i kampen';
+
+  @override
+  String get inFormMatchPositionHint =>
+      'Spillede du en anden position end normalt? Vælg den her, så dine point passer.';
+
+  @override
+  String get inFormUseProfilePosition => 'Normal position';
+
+  @override
+  String get inFormMatchDataPoints => 'Datapunkter';
+
+  @override
+  String get inFormMatchDataPointsHint =>
+      'Det, som kampforløbet ikke kan vise. Afgørende mål beregnes automatisk, så ret det kun, hvis det er forkert.';
+
+  @override
+  String get inFormOwnGoals => 'Selvmål';
+
+  @override
+  String get inFormPenaltiesMissed => 'Brændte straffespark';
+
+  @override
+  String get inFormPenaltiesSaved => 'Reddede straffespark';
+
+  @override
+  String get inFormDecisiveGoals => 'Afgørende mål';
+
+  @override
+  String get inFormSave => 'Gem';
+
+  @override
+  String get inFormSaveFailed => 'Kunne ikke gemme. Prøv igen.';
+
+  @override
+  String get inFormSaved => 'Gemt – pointene er opdateret';
+
+  @override
+  String get inFormSeeHowPointsWork => 'Sådan får du point';
+
+  @override
+  String get inFormPointsSystemLoadFailed => 'Kunne ikke hente pointsystemet.';
 }

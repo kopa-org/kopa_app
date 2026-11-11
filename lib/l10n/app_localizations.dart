@@ -4855,6 +4855,288 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No matches played yet.'**
   String get statisticsNoFormYet;
+
+  /// No description provided for @inFormCategoryOffensive.
+  ///
+  /// In en, this message translates to:
+  /// **'Offensive'**
+  String get inFormCategoryOffensive;
+
+  /// No description provided for @inFormCategoryDefensive.
+  ///
+  /// In en, this message translates to:
+  /// **'Defensive'**
+  String get inFormCategoryDefensive;
+
+  /// No description provided for @inFormCategoryTeamResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Team result'**
+  String get inFormCategoryTeamResult;
+
+  /// No description provided for @inFormCategoryDiscipline.
+  ///
+  /// In en, this message translates to:
+  /// **'Discipline'**
+  String get inFormCategoryDiscipline;
+
+  /// No description provided for @inFormCategoryParticipation.
+  ///
+  /// In en, this message translates to:
+  /// **'Participation & honours'**
+  String get inFormCategoryParticipation;
+
+  /// No description provided for @inFormCategoryBonus.
+  ///
+  /// In en, this message translates to:
+  /// **'Streaks & bonuses'**
+  String get inFormCategoryBonus;
+
+  /// No description provided for @inFormCategoryOffensiveDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Goals, assists and other attacking actions.'**
+  String get inFormCategoryOffensiveDescription;
+
+  /// No description provided for @inFormCategoryDefensiveDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Clean sheets, goals conceded and penalty saves.'**
+  String get inFormCategoryDefensiveDescription;
+
+  /// No description provided for @inFormCategoryTeamResultDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Points for how the team did as a whole.'**
+  String get inFormCategoryTeamResultDescription;
+
+  /// No description provided for @inFormCategoryDisciplineDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Cards and other disciplinary incidents.'**
+  String get inFormCategoryDisciplineDescription;
+
+  /// No description provided for @inFormCategoryParticipationDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Playing, man of the match votes and awards.'**
+  String get inFormCategoryParticipationDescription;
+
+  /// No description provided for @inFormCategoryBonusDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra points for streaks, form runs and monthly or season awards.'**
+  String get inFormCategoryBonusDescription;
+
+  /// No description provided for @inFormColumnPlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Player'**
+  String get inFormColumnPlayer;
+
+  /// No description provided for @inFormColumnLatest.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest'**
+  String get inFormColumnLatest;
+
+  /// No description provided for @inFormColumnToFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'To #1'**
+  String get inFormColumnToFirst;
+
+  /// No description provided for @inFormColumnTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Pts'**
+  String get inFormColumnTotal;
+
+  /// No description provided for @inFormPointsSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'Points system'**
+  String get inFormPointsSystem;
+
+  /// No description provided for @inFormPointsSystemIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Your points depend on the position you played. Defenders earn more for clean sheets, attackers for goals and assists.'**
+  String get inFormPointsSystemIntro;
+
+  /// No description provided for @inFormPointsSystemExtras.
+  ///
+  /// In en, this message translates to:
+  /// **'On top of this come streaks and form bonuses, plus monthly and season awards.'**
+  String get inFormPointsSystemExtras;
+
+  /// No description provided for @inFormMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'Matches'**
+  String get inFormMatches;
+
+  /// No description provided for @inFormGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Goals'**
+  String get inFormGoals;
+
+  /// No description provided for @inFormAssists.
+  ///
+  /// In en, this message translates to:
+  /// **'Assists'**
+  String get inFormAssists;
+
+  /// No description provided for @inFormCards.
+  ///
+  /// In en, this message translates to:
+  /// **'Cards'**
+  String get inFormCards;
+
+  /// No description provided for @inFormMotm.
+  ///
+  /// In en, this message translates to:
+  /// **'MOTM'**
+  String get inFormMotm;
+
+  /// No description provided for @inFormAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg.'**
+  String get inFormAverage;
+
+  /// No description provided for @inFormBonuses.
+  ///
+  /// In en, this message translates to:
+  /// **'Bonuses'**
+  String get inFormBonuses;
+
+  /// No description provided for @inFormHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get inFormHome;
+
+  /// No description provided for @inFormAway.
+  ///
+  /// In en, this message translates to:
+  /// **'Away'**
+  String get inFormAway;
+
+  /// No description provided for @inFormUnknownOpponent.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown opponent'**
+  String get inFormUnknownOpponent;
+
+  /// No description provided for @inFormPlayedAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Played as {position}'**
+  String inFormPlayedAs(String position);
+
+  /// No description provided for @inFormPositionChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'changed for this match'**
+  String get inFormPositionChanged;
+
+  /// No description provided for @inFormEditMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit match data'**
+  String get inFormEditMatch;
+
+  /// No description provided for @inFormChangePosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Change position'**
+  String get inFormChangePosition;
+
+  /// No description provided for @inFormMatchPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Position in this match'**
+  String get inFormMatchPosition;
+
+  /// No description provided for @inFormMatchPositionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Played a different position than usual? Pick it here so your points match.'**
+  String get inFormMatchPositionHint;
+
+  /// No description provided for @inFormUseProfilePosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal position'**
+  String get inFormUseProfilePosition;
+
+  /// No description provided for @inFormMatchDataPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Data points'**
+  String get inFormMatchDataPoints;
+
+  /// No description provided for @inFormMatchDataPointsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Things the match timeline can\'t show. The decisive goal is worked out automatically, so only change it if it\'s wrong.'**
+  String get inFormMatchDataPointsHint;
+
+  /// No description provided for @inFormOwnGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Own goals'**
+  String get inFormOwnGoals;
+
+  /// No description provided for @inFormPenaltiesMissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Missed penalties'**
+  String get inFormPenaltiesMissed;
+
+  /// No description provided for @inFormPenaltiesSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved penalties'**
+  String get inFormPenaltiesSaved;
+
+  /// No description provided for @inFormDecisiveGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Decisive goals'**
+  String get inFormDecisiveGoals;
+
+  /// No description provided for @inFormSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get inFormSave;
+
+  /// No description provided for @inFormSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save. Please try again.'**
+  String get inFormSaveFailed;
+
+  /// No description provided for @inFormSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved – points updated'**
+  String get inFormSaved;
+
+  /// No description provided for @inFormSeeHowPointsWork.
+  ///
+  /// In en, this message translates to:
+  /// **'How points work'**
+  String get inFormSeeHowPointsWork;
+
+  /// No description provided for @inFormPointsSystemLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not fetch the points system.'**
+  String get inFormPointsSystemLoadFailed;
 }
 
 class _AppLocalizationsDelegate
