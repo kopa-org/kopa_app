@@ -9,7 +9,7 @@ class AppFeatureFlags extends Equatable {
   final int? currentBuildNumber;
 
   const AppFeatureFlags({
-    this.showStatistics = true, // TODO: temporarily hardcoded on
+    this.showStatistics = false,
     this.showFineBox = false,
     this.maintenanceMode = false,
     this.updateRequired = false,
@@ -29,9 +29,8 @@ class AppFeatureFlags extends Equatable {
         currentBuildNumber < minimumRequiredBuildNumber;
 
     return AppFeatureFlags(
-      showStatistics:
-          true, // TODO: temporarily hardcoded on (was json['statistics'] == true)
-      showFineBox: true,
+      showStatistics: json['statistics'] == true,
+      showFineBox: json['fine_box'] == true,
       maintenanceMode: json['maintenance'] == true,
       updateRequired: serverRequiresUpdate || buildRequiresUpdate,
       minimumRequiredBuildNumber: minimumRequiredBuildNumber,
