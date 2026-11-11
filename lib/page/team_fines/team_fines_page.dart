@@ -1540,8 +1540,6 @@ class _PodiumColumn extends StatelessWidget {
                 child: InFormAvatar(
                   name: summary.user.name,
                   radius: leader ? 28 : 22,
-                  backgroundColor: appColors.offWhite,
-                  foregroundColor: appColors.dirt,
                 ),
               ),
               const SizedBox(height: Spacing.sm),

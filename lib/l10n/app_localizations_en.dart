@@ -3504,4 +3504,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsSeasonCreateMatchSubtitle => 'Friendlies and cup matches';
+
+  @override
+  String homeProfilePendingRequests(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count players waiting for approval',
+      one: '1 player waiting for approval',
+    );
+    return 'Profile, $_temp0';
+  }
 }

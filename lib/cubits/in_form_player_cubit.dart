@@ -36,6 +36,7 @@ typedef InFormPlayerLoader = Future<InFormPlayerBreakdown> Function({
   required int teamId,
   required int playerId,
   required InFormPeriod period,
+  int? seasonId,
 });
 
 typedef InFormMatchUpdater = Future<void> Function({
@@ -51,6 +52,9 @@ class InFormPlayerCubit extends Cubit<InFormPlayerState> {
   final int teamId;
   final int playerId;
   final InFormPeriod period;
+
+  /// A specific season for [InFormPeriod.currentSeason]; null = active.
+  final int? seasonId;
   final InFormPlayerLoader _loader;
   final InFormMatchUpdater _updater;
 
@@ -58,6 +62,7 @@ class InFormPlayerCubit extends Cubit<InFormPlayerState> {
     required this.teamId,
     required this.playerId,
     required this.period,
+    this.seasonId,
     InFormPlayerLoader? loader,
     InFormMatchUpdater? updater,
   })  : _loader = loader ?? InFormRepository.getPlayerBreakdown,
@@ -73,6 +78,7 @@ class InFormPlayerCubit extends Cubit<InFormPlayerState> {
         teamId: teamId,
         playerId: playerId,
         period: period,
+        seasonId: seasonId,
       );
       if (isClosed) return;
       // Open the most recent match by default, like a match feed.

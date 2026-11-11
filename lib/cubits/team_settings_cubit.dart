@@ -114,13 +114,8 @@ class TeamSettingsCubit extends Cubit<TeamSettingsState> {
         maxSignups: team?.maxSignups,
       );
 
-  static Future<int> _defaultCountJoinRequests(int teamId) async {
-    final result = await OnboardingRepository().listJoinRequests(teamId);
-    if (result['success'] != true) {
-      throw Exception(result['error'] ?? 'Could not load join requests.');
-    }
-    return (result['join_requests'] as List<dynamic>? ?? []).length;
-  }
+  static Future<int> _defaultCountJoinRequests(int teamId) =>
+      OnboardingRepository().countPendingJoinRequests(teamId);
 
   Future<void> loadPendingJoinRequests() async {
     final id = teamId;

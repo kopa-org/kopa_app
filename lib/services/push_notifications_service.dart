@@ -34,6 +34,12 @@ class PushNotificationsService {
   bool _initialized = false;
   Future<void>? _syncInFlight;
   void Function(Map<String, dynamic> data)? _notificationTapHandler;
+  final StreamController<Map<String, dynamic>> _messageDataController =
+      StreamController<Map<String, dynamic>>.broadcast();
+
+  /// Data of every push that reaches the running app (shown in the foreground
+  /// or tapped), so state such as badges can refresh without a reload.
+  Stream<Map<String, dynamic>> get messageData => _messageDataController.stream;
   Map<String, dynamic>? _pendingNotificationTap;
 
   void setNotificationTapHandler(void Function(Map<String, dynamic>) handler) {
@@ -180,6 +186,7 @@ class PushNotificationsService {
   }
 
   Future<void> _handleForegroundMessage(RemoteMessage message) async {
+    _messageDataController.add(message.data);
     final notification = message.notification;
     if (notification == null) {
       return;
@@ -205,6 +212,7 @@ class PushNotificationsService {
 
   void _handleMessageTap(RemoteMessage message) {
     debugPrint('Notification tap payload: ${message.data}');
+    _messageDataController.add(message.data);
     _emitNotificationTap(message.data);
   }
 

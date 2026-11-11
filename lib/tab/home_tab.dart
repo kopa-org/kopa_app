@@ -38,6 +38,7 @@ import 'package:kopa/page/match/match_score_sheet.dart';
 import 'package:kopa/page/profile/profile_settings_page.dart';
 import 'package:kopa/page/wrapped/season_wrapped_page.dart';
 import 'package:kopa/repository/match_repository.dart';
+import 'package:kopa/services/push_notifications_service.dart';
 import 'package:kopa/state/match_programme_refresh_notifier.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
@@ -57,7 +58,12 @@ class HomeTab extends StatelessWidget {
       create: (context) {
         final teamId =
             context.read<AuthCubit>().state.user?.teamDetails?.id ?? 0;
-        return HomeCubit()..fetchDashboardData(teamId);
+        return HomeCubit(
+          canApproveJoinRequests: () =>
+              context.read<AuthCubit>().state.user?.isTeamOwner == true,
+          pushMessages: PushNotificationsService.instance.messageData,
+          watchAppLifecycle: true,
+        )..fetchDashboardData(teamId);
       },
       child: const _HomeTabView(),
     );
@@ -202,8 +208,15 @@ class _HomeTabViewState extends State<_HomeTabView> {
                     Padding(
                       padding: const EdgeInsets.only(right: Spacing.md),
                       child: _HomeHeaderActionButton(
-                        tooltip: AppLocalizations.of(context)!.uiProfile,
+                        key: const ValueKey('home-profile-button'),
+                        tooltip: state.pendingJoinRequests > 0
+                            ? AppLocalizations.of(context)!
+                                .homeProfilePendingRequests(
+                                state.pendingJoinRequests,
+                              )
+                            : AppLocalizations.of(context)!.uiProfile,
                         icon: Icons.account_circle_outlined,
+                        badgeCount: state.pendingJoinRequests,
                         onPressed: () => _openProfileSettings(context),
                       ),
                     ),
@@ -527,10 +540,15 @@ class _HomeHeaderActionButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onPressed;
 
+  /// Shows an orange count badge when above zero.
+  final int badgeCount;
+
   const _HomeHeaderActionButton({
+    super.key,
     required this.tooltip,
     required this.icon,
     required this.onPressed,
+    this.badgeCount = 0,
   });
 
   @override
@@ -547,9 +565,19 @@ class _HomeHeaderActionButton extends StatelessWidget {
         padding: EdgeInsets.zero,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
-      icon: Icon(
-        icon,
-        color: appColors.dirt,
+      icon: Badge(
+        isLabelVisible: badgeCount > 0,
+        backgroundColor: appColors.sunset,
+        textColor: appColors.dirt,
+        label: Text(
+          badgeCount > 9 ? '9+' : '$badgeCount',
+          key: const ValueKey('home-profile-badge'),
+          style: const TextStyle(fontWeight: FontWeight.w800),
+        ),
+        child: Icon(
+          icon,
+          color: appColors.dirt,
+        ),
       ),
     );
   }
@@ -1729,13 +1757,19 @@ void _openFineBox(BuildContext context) {
   context.go(AppRouter.fineBox);
 }
 
-void _openProfileSettings(BuildContext context) {
+Future<void> _openProfileSettings(BuildContext context) async {
   AppAnalytics.logEvent('profile_settings_opened');
-  Navigator.of(context).push(
+  final home = context.read<HomeCubit>();
+  await Navigator.of(context).push(
     MaterialWithModalsPageRoute(
       builder: (context) => const ProfileSettingsPage(),
     ),
   );
+  // Requests may have been approved in settings.
+  final teamId = context.mounted
+      ? context.read<AuthCubit>().state.user?.teamDetails?.id
+      : null;
+  if (teamId != null) await home.loadPendingJoinRequests(teamId);
 }
 
 void _openStatistics(BuildContext context) {

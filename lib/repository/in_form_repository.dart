@@ -11,11 +11,13 @@ class InFormRepository {
     required int teamId,
     required InFormPeriod period,
     String? position,
+    int? seasonId,
   }) async {
     final json = await _get('/player_plus/in_form/leaderboard', {
       'team_id': '$teamId',
       'period': period.wire,
       if (position != null) 'position': position,
+      if (seasonId != null) 'season_id': '$seasonId',
     });
     return InFormLeaderboard.fromJson(json['in_form_leaderboard']);
   }
@@ -24,10 +26,12 @@ class InFormRepository {
     required int teamId,
     required int playerId,
     required InFormPeriod period,
+    int? seasonId,
   }) async {
     final json = await _get('/player_plus/in_form/player/$playerId', {
       'team_id': '$teamId',
       'period': period.wire,
+      if (seasonId != null) 'season_id': '$seasonId',
     });
     return InFormPlayerBreakdown.fromJson(json['in_form_player']);
   }

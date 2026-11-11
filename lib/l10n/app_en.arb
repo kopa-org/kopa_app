@@ -1913,5 +1913,13 @@
   },
   "settingsSeasonOtherSources": "Other sources",
   "settingsSeasonCreateMatch": "Create match manually",
-  "settingsSeasonCreateMatchSubtitle": "Friendlies and cup matches"
+  "settingsSeasonCreateMatchSubtitle": "Friendlies and cup matches",
+  "homeProfilePendingRequests": "Profile, {count, plural, =1{1 player waiting for approval} other{{count} players waiting for approval}}",
+  "@homeProfilePendingRequests": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

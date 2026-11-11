@@ -31,6 +31,9 @@ class HomeState extends Equatable {
   final bool? hasSeenSeasonWrapped;
   final bool isLoadingSeasonWrapped;
 
+  /// Players waiting for the team owner to approve their join request.
+  final int pendingJoinRequests;
+
   const HomeState({
     this.status = HomeStatus.initial,
     this.nextMatch,
@@ -46,6 +49,7 @@ class HomeState extends Equatable {
     this.seasonWrapped,
     this.hasSeenSeasonWrapped,
     this.isLoadingSeasonWrapped = false,
+    this.pendingJoinRequests = 0,
   });
 
   HomeState copyWith({
@@ -63,6 +67,7 @@ class HomeState extends Equatable {
     Object? seasonWrapped = _unset,
     Object? hasSeenSeasonWrapped = _unset,
     bool? isLoadingSeasonWrapped,
+    int? pendingJoinRequests,
   }) {
     return HomeState(
       status: status ?? this.status,
@@ -95,6 +100,7 @@ class HomeState extends Equatable {
           : hasSeenSeasonWrapped as bool?,
       isLoadingSeasonWrapped:
           isLoadingSeasonWrapped ?? this.isLoadingSeasonWrapped,
+      pendingJoinRequests: pendingJoinRequests ?? this.pendingJoinRequests,
     );
   }
 
@@ -114,5 +120,6 @@ class HomeState extends Equatable {
         seasonWrapped,
         hasSeenSeasonWrapped,
         isLoadingSeasonWrapped,
+        pendingJoinRequests,
       ];
 }

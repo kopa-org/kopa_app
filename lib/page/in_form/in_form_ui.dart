@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:kopa/component/avatar/app_avatar.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 import 'package:kopa/theme/spacing.dart';
@@ -85,35 +86,16 @@ class InFormEyebrow extends StatelessWidget {
 class InFormAvatar extends StatelessWidget {
   final String name;
   final double radius;
-  final Color? backgroundColor;
-  final Color? foregroundColor;
 
   const InFormAvatar({
     super.key,
     required this.name,
     this.radius = 22,
-    this.backgroundColor,
-    this.foregroundColor,
   });
 
   @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final styles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    return CircleAvatar(
-      radius: radius,
-      backgroundColor: backgroundColor ?? colors.offWhite,
-      child: Text(
-        initialsFor(name),
-        style: styles.bodyBold.copyWith(
-          color: foregroundColor ?? colors.grass,
-          fontSize: radius * .8,
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) =>
+      AppAvatar(initials: initialsFor(name), radius: radius);
 }
 
 class InFormMascot extends StatelessWidget {

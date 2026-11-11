@@ -85,9 +85,11 @@ void main() {
     final card = find.descendant(
         of: find.byType(KopaCard), matching: find.byType(Material));
     expect(tester.widget<Material>(card).color, colors.surface);
+    // Player avatars are "Banegrøn": white initials on pitch green.
     expect(
         tester.widget<CircleAvatar>(find.byType(CircleAvatar)).backgroundColor,
-        colors.white);
+        colors.pitch);
+    expect(tester.widget<Text>(find.text('AB')).style?.color, colors.white);
     final pitch = find.descendant(
         of: find.byType(FootballPitch), matching: find.byType(Container));
     expect((tester.widget<Container>(pitch).decoration! as BoxDecoration).color,

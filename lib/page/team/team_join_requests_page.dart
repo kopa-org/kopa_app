@@ -1,3 +1,4 @@
+import 'package:kopa/component/avatar/app_avatar.dart';
 import 'package:kopa/l10n/current_l10n.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
@@ -290,34 +291,7 @@ class _JoinRequestAvatar extends StatelessWidget {
   const _JoinRequestAvatar({required this.name});
 
   @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final styles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    return Container(
-      width: 38,
-      height: 38,
-      decoration: BoxDecoration(
-        color: colors.offWhite,
-        borderRadius: BorderRadius.circular(19),
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        _initials(name),
-        style: styles.body3.copyWith(
-          color: colors.grass,
-          fontWeight: FontWeight.w800,
-        ),
-      ),
-    );
-  }
-
-  String _initials(String name) {
-    final parts = name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty);
-    final initials = parts.take(2).map((part) => part[0].toUpperCase()).join();
-    return initials.isEmpty ? '?' : initials;
-  }
+  Widget build(BuildContext context) => AppAvatar.forName(name, radius: 19);
 }
 
 class _JoinRequestActionButton extends StatelessWidget {

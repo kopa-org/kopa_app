@@ -58,6 +58,7 @@ void main() {
           required int teamId,
           required int playerId,
           required InFormPeriod period,
+          int? seasonId,
         }) async {
           loads++;
           return InFormPlayerBreakdown.fromJson(_breakdownJson());
@@ -96,6 +97,7 @@ void main() {
           required int teamId,
           required int playerId,
           required InFormPeriod period,
+          int? seasonId,
         }) async {
           loads++;
           return InFormPlayerBreakdown.fromJson(_breakdownJson());

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopa/cubits/home_state.dart';
 import 'package:kopa/model/fine_box_details.dart';
@@ -9,13 +10,75 @@ import 'package:kopa/model/season_wrapped.dart';
 import 'package:kopa/model/statistics.dart';
 import 'package:kopa/repository/fines_repository.dart';
 import 'package:kopa/repository/match_repository.dart';
+import 'package:kopa/repository/onboarding_repository.dart';
 import 'package:kopa/repository/statistics_repository.dart';
 import 'package:kopa/repository/season_wrapped_repository.dart';
 import 'package:kopa/repository/team_dbu_repository.dart';
 import 'package:kopa/services/secure_storage_service.dart';
 
 class HomeCubit extends Cubit<HomeState> {
-  HomeCubit() : super(const HomeState());
+  /// Whether the signed-in user can approve join requests (team owner).
+  final bool Function() _canApproveJoinRequests;
+  final Future<int> Function(int teamId) _countJoinRequests;
+  StreamSubscription<Map<String, dynamic>>? _pushSubscription;
+  AppLifecycleListener? _lifecycleListener;
+  int? _teamId;
+
+  /// [pushMessages] is the data of incoming push notifications: a join
+  /// request push refreshes the badge right away. [watchAppLifecycle] also
+  /// refreshes it whenever the app returns to the foreground.
+  HomeCubit({
+    bool Function()? canApproveJoinRequests,
+    Future<int> Function(int teamId)? countJoinRequests,
+    Stream<Map<String, dynamic>>? pushMessages,
+    bool watchAppLifecycle = false,
+  })  : _canApproveJoinRequests = canApproveJoinRequests ?? (() => false),
+        _countJoinRequests = countJoinRequests ??
+            ((teamId) =>
+                OnboardingRepository().countPendingJoinRequests(teamId)),
+        super(const HomeState()) {
+    _pushSubscription = pushMessages?.listen(_onPushMessage);
+    if (watchAppLifecycle) {
+      _lifecycleListener = AppLifecycleListener(onResume: _refreshBadge);
+    }
+  }
+
+  void _onPushMessage(Map<String, dynamic> data) {
+    if (data['type'] != 'team_join_request') return;
+    final teamId = int.tryParse('${data['team_id'] ?? ''}');
+    if (teamId != null && _teamId != null && teamId != _teamId) return;
+    _refreshBadge();
+  }
+
+  void _refreshBadge() {
+    final teamId = _teamId;
+    if (teamId != null) unawaited(loadPendingJoinRequests(teamId));
+  }
+
+  @override
+  Future<void> close() async {
+    await _pushSubscription?.cancel();
+    _lifecycleListener?.dispose();
+    return super.close();
+  }
+
+  /// Refreshes the orange badge on the profile button. Only team owners see
+  /// join requests; everyone else always has zero.
+  Future<void> loadPendingJoinRequests(int teamId) async {
+    _teamId = teamId;
+    if (!_canApproveJoinRequests()) {
+      if (state.pendingJoinRequests != 0) {
+        emit(state.copyWith(pendingJoinRequests: 0));
+      }
+      return;
+    }
+    try {
+      final count = await _countJoinRequests(teamId);
+      if (!isClosed) emit(state.copyWith(pendingJoinRequests: count));
+    } catch (_) {
+      // The badge is a hint; keep the last known count when offline.
+    }
+  }
 
   Future<void> fetchDashboardData(
     int teamId, {
@@ -25,6 +88,7 @@ class HomeCubit extends Cubit<HomeState> {
     if (showLoading || state.status == HomeStatus.initial) {
       emit(state.copyWith(status: HomeStatus.loading));
     }
+    unawaited(loadPendingJoinRequests(teamId));
     try {
       final results = await Future.wait([
         MatchRepository.getMatchSummaries(

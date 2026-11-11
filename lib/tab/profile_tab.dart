@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kopa/component/avatar/app_avatar.dart';
 import 'package:kopa/cubits/team_members_cubit.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/l10n/app_localizations.dart';
@@ -297,35 +298,6 @@ class _RosterAvatar extends StatelessWidget {
   const _RosterAvatar({required this.player});
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final appColors = theme.extension<AppColors>() ?? AppColors.light;
-    final styles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    return Container(
-      width: 44,
-      height: 44,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: appColors.lightGrass65,
-        shape: BoxShape.circle,
-      ),
-      child: Text(
-        _initials(player.name),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        textAlign: TextAlign.center,
-        style: styles.body3.copyWith(
-          color: appColors.primary,
-          fontWeight: FontWeight.w800,
-        ),
-      ),
-    );
-  }
-
-  String _initials(String name) {
-    final parts = name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty);
-    final initials = parts.take(2).map((p) => p[0].toUpperCase()).join();
-    return initials.isEmpty ? '?' : initials;
-  }
+  Widget build(BuildContext context) =>
+      AppAvatar.forName(player.name, radius: 22);
 }

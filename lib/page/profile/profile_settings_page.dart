@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kopa/component/avatar/app_avatar.dart';
 import 'package:kopa/component/avatar/team_avatar.dart';
 import 'package:kopa/component/button/full_width_button.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
@@ -408,22 +409,7 @@ class _IdentityCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Container(
-                width: 56,
-                height: 56,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: colors.lightGrass65,
-                  shape: BoxShape.circle,
-                ),
-                child: Text(
-                  _initials(user.name),
-                  style: styles.subtitle1.copyWith(
-                    color: colors.primary,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
+              AppAvatar.forName(user.name, radius: 28),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
@@ -514,12 +500,6 @@ class _IdentityCard extends StatelessWidget {
     final value = position?.trim();
     if (value == null || value.isEmpty) return null;
     return inFormPositions.contains(value) ? inFormPositionLabel(value) : value;
-  }
-
-  static String _initials(String name) {
-    final parts = name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty);
-    final initials = parts.take(2).map((p) => p[0].toUpperCase()).join();
-    return initials.isEmpty ? '?' : initials;
   }
 }
 

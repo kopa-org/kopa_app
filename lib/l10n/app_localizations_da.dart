@@ -3513,4 +3513,15 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String get settingsSeasonCreateMatchSubtitle => 'Træningskampe og pokalkampe';
+
+  @override
+  String homeProfilePendingRequests(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count spillere venter på godkendelse',
+      one: '1 spiller venter på godkendelse',
+    );
+    return 'Profil, $_temp0';
+  }
 }

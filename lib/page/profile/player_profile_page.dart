@@ -1,3 +1,4 @@
+import 'package:kopa/component/avatar/app_avatar.dart';
 import 'package:kopa/l10n/current_l10n.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
@@ -100,7 +101,7 @@ class _PlayerHero extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _PlayerAvatar(name: profile.player.name, size: 64, fontSize: 22),
+          _PlayerAvatar(name: profile.player.name, size: 64),
           const SizedBox(width: Spacing.md),
           Expanded(
             child: Column(
@@ -159,44 +160,12 @@ class _PlayerHero extends StatelessWidget {
 class _PlayerAvatar extends StatelessWidget {
   final String name;
   final double size;
-  final double fontSize;
 
-  const _PlayerAvatar({
-    required this.name,
-    required this.size,
-    required this.fontSize,
-  });
+  const _PlayerAvatar({required this.name, required this.size});
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final appColors = theme.extension<AppColors>() ?? AppColors.light;
-    final styles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    return Container(
-      width: size,
-      height: size,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: appColors.lightGrass65,
-        shape: BoxShape.circle,
-      ),
-      child: Text(
-        _initials(name),
-        style: styles.h5.copyWith(
-          color: appColors.primary,
-          fontSize: fontSize,
-          fontWeight: FontWeight.w800,
-        ),
-      ),
-    );
-  }
-
-  String _initials(String name) {
-    final parts = name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty);
-    final initials = parts.take(2).map((p) => p[0].toUpperCase()).join();
-    return initials.isEmpty ? '?' : initials;
-  }
+  Widget build(BuildContext context) =>
+      AppAvatar.forName(name, radius: size / 2);
 }
 
 class _StatsRow extends StatelessWidget {

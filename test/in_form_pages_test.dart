@@ -86,6 +86,7 @@ void main() {
         required int teamId,
         required int playerId,
         required InFormPeriod period,
+        int? seasonId,
       }) async =>
           // Round-trip so nested maps have the same types as API responses.
           InFormPlayerBreakdown.fromJson(

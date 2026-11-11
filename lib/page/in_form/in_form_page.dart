@@ -3,6 +3,7 @@ import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
+import 'package:kopa/component/season/season_selector.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/in_form_cubit.dart';
 import 'package:kopa/cubits/in_form_state.dart';
@@ -119,6 +120,25 @@ class _InFormViewState extends State<_InFormView> {
                           onPositionChanged:
                               context.read<InFormCubit>().selectPosition,
                         ),
+                        if (state.period == InFormPeriod.currentSeason &&
+                            state.selectedSeason != null) ...[
+                          const SizedBox(height: Spacing.sm),
+                          SeasonSelectorButton(
+                            key: const ValueKey('in-form-season-selector'),
+                            season: state.selectedSeason!,
+                            onTap: state.seasons.length > 1
+                                ? () => _pickSeason(context)
+                                : null,
+                          ),
+                        ],
+                        if (state.isViewingPastSeason) ...[
+                          const SizedBox(height: Spacing.md),
+                          PastSeasonBanner(
+                            season: state.selectedSeason!,
+                            onBackToCurrent: () =>
+                                context.read<InFormCubit>().showActiveSeason(),
+                          ),
+                        ],
                         const SizedBox(height: Spacing.lg),
                       ],
                     ),
@@ -176,14 +196,31 @@ class _InFormViewState extends State<_InFormView> {
     );
   }
 
+  Future<void> _pickSeason(BuildContext context) async {
+    final cubit = context.read<InFormCubit>();
+    final picked = await showSeasonPicker(
+      context,
+      seasons: cubit.state.seasons,
+      selected: cubit.state.selectedSeason,
+    );
+    if (picked != null) await cubit.selectSeason(picked);
+  }
+
   void _openPlayer(InFormLeaderboardRow row) {
     final cubit = context.read<InFormCubit>();
+    final state = cubit.state;
+    final season = state.selectedSeason;
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => InFormPlayerPage(
           teamId: widget.teamId!,
           row: row,
-          period: cubit.state.period,
+          period: state.period,
+          seasonId: state.requestSeasonId,
+          periodLabel:
+              state.period == InFormPeriod.currentSeason && season != null
+                  ? season.name
+                  : null,
           // Match edits change everyone's totals, so refresh the table.
           onScoresChanged: () => cubit.load(widget.teamId!),
         ),

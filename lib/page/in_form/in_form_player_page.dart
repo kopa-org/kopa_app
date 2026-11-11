@@ -16,6 +16,12 @@ class InFormPlayerPage extends StatelessWidget {
   final InFormLeaderboardRow row;
   final InFormPeriod period;
 
+  /// A finished season to show (period "Sæson"); null = the active season.
+  final int? seasonId;
+
+  /// Shown next to "Kampe"; defaults to the period's name.
+  final String? periodLabel;
+
   /// Called after match data was changed, so the league table can refresh.
   final VoidCallback? onScoresChanged;
 
@@ -27,6 +33,8 @@ class InFormPlayerPage extends StatelessWidget {
     required this.teamId,
     required this.row,
     required this.period,
+    this.seasonId,
+    this.periodLabel,
     this.onScoresChanged,
     this.loader,
   });
@@ -38,11 +46,12 @@ class InFormPlayerPage extends StatelessWidget {
         teamId: teamId,
         playerId: row.userId,
         period: period,
+        seasonId: seasonId,
         loader: loader,
       )..load(),
       child: _InFormPlayerView(
         row: row,
-        period: period,
+        periodLabel: periodLabel ?? period.label,
         onScoresChanged: onScoresChanged,
       ),
     );
@@ -51,12 +60,12 @@ class InFormPlayerPage extends StatelessWidget {
 
 class _InFormPlayerView extends StatelessWidget {
   final InFormLeaderboardRow row;
-  final InFormPeriod period;
+  final String periodLabel;
   final VoidCallback? onScoresChanged;
 
   const _InFormPlayerView({
     required this.row,
-    required this.period,
+    required this.periodLabel,
     required this.onScoresChanged,
   });
 
@@ -108,7 +117,7 @@ class _InFormPlayerView extends StatelessWidget {
                         const SizedBox(height: Spacing.lg),
                         InFormSectionTitle(
                           title: l10n.inFormMatches,
-                          action: period.label,
+                          action: periodLabel,
                         ),
                         const SizedBox(height: Spacing.sm),
                       ],
@@ -253,7 +262,6 @@ class _PlayerHero extends StatelessWidget {
                     InFormAvatar(
                       name: row.userName,
                       radius: 28,
-                      foregroundColor: colors.grass,
                     ),
                     const SizedBox(width: Spacing.md),
                     Expanded(

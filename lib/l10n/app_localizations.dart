@@ -6211,6 +6211,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Friendlies and cup matches'**
   String get settingsSeasonCreateMatchSubtitle;
+
+  /// No description provided for @homeProfilePendingRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile, {count, plural, =1{1 player waiting for approval} other{{count} players waiting for approval}}'**
+  String homeProfilePendingRequests(int count);
 }
 
 class _AppLocalizationsDelegate

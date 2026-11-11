@@ -262,6 +262,15 @@ class OnboardingRepository {
     }
   }
 
+  /// Number of pending join requests for [teamId] (team owners only).
+  Future<int> countPendingJoinRequests(int teamId) async {
+    final result = await listJoinRequests(teamId);
+    if (result['success'] != true) {
+      throw Exception(result['error'] ?? 'Could not load join requests.');
+    }
+    return (result['join_requests'] as List<dynamic>? ?? []).length;
+  }
+
   Future<Map<String, dynamic>> listJoinRequests(int teamId) async {
     final userToken = await SecureStorageService.getToken();
     if (userToken == null) {

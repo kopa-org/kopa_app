@@ -177,8 +177,6 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
 
   void _syncAndConfirm({required bool thenSave}) {
     final List<(GlobalKey, Widget)> itemsToFly = [];
-    final appColors =
-        Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final appTextStyles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
 
@@ -207,7 +205,6 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
             child: AppAvatar(
           initials: _getInitials(_draft.primaryPlayer!.name),
           radius: 15,
-          backgroundColor: appColors.surface,
         ))
       ));
     }
@@ -218,7 +215,6 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
             child: AppAvatar(
           initials: _getInitials(_draft.secondaryPlayer!.name),
           radius: 15,
-          backgroundColor: appColors.surface,
         ))
       ));
     }
@@ -607,7 +603,6 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
             ? AppAvatar(
                 initials: initials,
                 radius: 17,
-                backgroundColor: appColors.surface,
               )
             : Text('-',
                 style: appTextStyles.bodyBold.copyWith(
@@ -768,7 +763,6 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
                     child: AppAvatar(
                       initials: initials,
                       radius: 20,
-                      backgroundColor: appColors.offWhite,
                     ),
                     onComplete: () {
                       setState(() => _draft.primaryPlayer = player);
@@ -817,7 +811,6 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
                     child: AppAvatar(
                       initials: initials,
                       radius: 20,
-                      backgroundColor: appColors.offWhite,
                     ),
                     onComplete: () {
                       setState(() => _draft.secondaryPlayer = player);
@@ -847,7 +840,6 @@ class _AddMatchEventScreenState extends State<_AddMatchEventScreen>
         child: PlayerListItem(
           key: itemKey,
           name: player.name,
-          avatarBackgroundColor: appColors.offWhite,
           onTap: onTap,
         ),
       ),
