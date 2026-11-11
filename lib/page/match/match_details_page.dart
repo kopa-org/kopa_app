@@ -537,7 +537,11 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
               ? AppLocalizations.of(context)!.matchTasksSelectedTag
               : matchDetails.isCurrentUserSelected == false
                   ? AppLocalizations.of(context)!.matchTasksNotSelected
-                  : AppLocalizations.of(context)!.uiPending,
+                  : _waitlistLabel(
+                        matchDetails,
+                        context.read<AuthCubit>().state.user?.id,
+                      ) ??
+                      AppLocalizations.of(context)!.uiPending,
           valueColor: matchDetails.isCurrentUserSelected == true
               ? colors.successForeground
               : colors.warningForeground,
@@ -558,6 +562,13 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     return rows;
   }
 
+  String? _waitlistLabel(MatchDetails match, int? userId) {
+    if (userId == null) return null;
+    final position = match.waitlistPosition(userId);
+    if (position == null) return null;
+    return AppLocalizations.of(context)!.matchWaitlistPosition(position);
+  }
+
   List<Widget> _buildAttendanceList(
       MatchDetails match, List<UserDetails> squad, UserDetails user) {
     final attending = match.attendingAttendanceDetails;
@@ -574,7 +585,8 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
                       ? AppLocalizations.of(context)!.matchTasksSelectedTag
                       : a.isSelected == false
                           ? AppLocalizations.of(context)!.matchTasksNotSelected
-                          : a.userDetails.email,
+                          : _waitlistLabel(match, a.userDetails.id) ??
+                              a.userDetails.email,
                 ))
             .toList();
     final external = match.externalPlayerDetailsList ?? const [];

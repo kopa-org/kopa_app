@@ -1740,5 +1740,178 @@
   },
   "fineBoxMarkPaidFailed": "The fine could not be marked as paid. Try again.",
   "homeNextTraining": "Next training",
-  "wrappedAssistsLeaders": "Most assists"
+  "wrappedAssistsLeaders": "Most assists",
+  "settingsSectionMatches": "Matches",
+  "settingsSectionSeason": "Season & DBU",
+  "settingsSectionTeam": "Team",
+  "settingsSectionMe": "Me",
+  "settingsInvitePlayers": "Invite players",
+  "settingsPendingBannerTitle": "{count, plural, =1{1 player is waiting} other{{count} players are waiting}}",
+  "@settingsPendingBannerTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsPendingBannerBody": "Approve them so they can sign up for matches.",
+  "settingsJoinRequestsNone": "No one is waiting right now",
+  "settingsJoinRequestsPending": "{count, plural, =1{1 waiting for approval} other{{count} waiting for approval}}",
+  "@settingsJoinRequestsPending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsTeamLogoTitle": "Team logo",
+  "settingsTeamLogoSubtitle": "Shape, colour and initials",
+  "settingsMatchDayTitle": "Signup & match day",
+  "settingsMatchDayIntro": "How matches work for the whole team.",
+  "settingsSignupQuestion": "Who makes the squad?",
+  "settingsRsvpFirstComeDescription": "Players who sign up are included automatically.",
+  "settingsRsvpLeaderDescription": "Players sign up as available, and the team leader picks the squad from them.",
+  "settingsMeetingTimeSection": "Meeting time",
+  "settingsMeetingTimeLabel": "Meet before kickoff",
+  "settingsMeetingNone": "None",
+  "settingsMeetingMinutes": "{minutes} min",
+  "@settingsMeetingMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsMeetingPreview": "Kickoff {kickoff} → meet at {meeting}",
+  "@settingsMeetingPreview": {
+    "placeholders": {
+      "kickoff": {
+        "type": "String"
+      },
+      "meeting": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsMeetingPreviewNone": "No default. You set the meeting time on each match.",
+  "settingsMeetingSummary": "Meet {minutes} min before",
+  "@settingsMeetingSummary": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsTasksSection": "Match day tasks",
+  "settingsTasksSubtitle": "Recurring tasks that rotate between players",
+  "settingsAutosaveHint": "Changes are saved automatically",
+  "settingsSaving": "Saving...",
+  "settingsSaved": "Saved",
+  "settingsSaveFailed": "Could not save. Try again.",
+  "settingsSeasonSubtitle": "Match schedule and standings from DBU",
+  "settingsSeasonIntro": "Fetch your team's matches and the pool standings from DBU.",
+  "settingsSeasonScheduleTitle": "Match schedule",
+  "settingsSeasonScheduleBody": "Import matches or start a new season.",
+  "settingsSeasonImportAction": "Import",
+  "settingsSeasonStandingsTitle": "Standings",
+  "settingsSeasonStandingsBody": "Update the standings and teams in your pool.",
+  "settingsSeasonSyncAction": "Sync",
+  "settingsSeasonDbuHint": "You log in through DBU Kampklar, and Kopa fetches your team's data.",
+  "settingsSignupLimitSection": "Squad spots",
+  "settingsSignupLimitToggle": "Limit signups",
+  "settingsSignupLimitLabel": "Spots per match",
+  "settingsSignupLimitHelpOn": "When {count} have signed up, the rest go on a waitlist and move up automatically if someone drops out.",
+  "@settingsSignupLimitHelpOn": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsSignupLimitHelpOff": "Everyone who signs up is included.",
+  "settingsSignupLimitDecrease": "Fewer spots",
+  "settingsSignupLimitIncrease": "More spots",
+  "settingsSignupLimitSummary": "max {count}",
+  "@settingsSignupLimitSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "matchWaitlistPosition": "Waitlist #{position}",
+  "@matchWaitlistPosition": {
+    "placeholders": {
+      "position": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsSeasonCurrentLabel": "Current season",
+  "settingsSeasonNone": "No active season",
+  "settingsSeasonPoolTeams": "{count} teams",
+  "@settingsSeasonPoolTeams": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsSeasonStatMatches": "matches",
+  "settingsSeasonStatPlayed": "played",
+  "settingsSeasonStatPosition": "place",
+  "settingsSeasonPositionValue": "#{position}",
+  "@settingsSeasonPositionValue": {
+    "placeholders": {
+      "position": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsSeasonFetchSection": "Fetch from DBU",
+  "settingsSeasonScheduleMeta": "{count, plural, =1{1 match this season} other{{count} matches this season}}",
+  "@settingsSeasonScheduleMeta": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsSeasonScheduleEmpty": "Not imported yet",
+  "settingsSeasonStandingsUpdated": "Updated {date}",
+  "@settingsSeasonStandingsUpdated": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSeasonStandingsNever": "Not fetched yet",
+  "settingsSeasonChangeSection": "Season change",
+  "settingsSeasonNextTitle": "Start next season",
+  "settingsSeasonNextReady": "{label} is ready on DBU with {count} matches.",
+  "@settingsSeasonNextReady": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsSeasonNextWaiting": "DBU has not published the next season yet. You can still start it manually.",
+  "settingsSeasonNextUnknown": "Import the new season's match schedule once DBU has published it.",
+  "settingsSeasonNextButton": "Start new season",
+  "settingsSeasonNextReadyButton": "Start {label}",
+  "@settingsSeasonNextReadyButton": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSeasonOtherSources": "Other sources",
+  "settingsSeasonCreateMatch": "Create match manually",
+  "settingsSeasonCreateMatchSubtitle": "Friendlies and cup matches"
 }

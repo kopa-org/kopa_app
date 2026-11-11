@@ -3249,4 +3249,268 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String get wrappedAssistsLeaders => 'Flest oplæg';
+
+  @override
+  String get settingsSectionMatches => 'Kampe';
+
+  @override
+  String get settingsSectionSeason => 'Sæson & DBU';
+
+  @override
+  String get settingsSectionTeam => 'Hold';
+
+  @override
+  String get settingsSectionMe => 'Mig';
+
+  @override
+  String get settingsInvitePlayers => 'Inviter spillere';
+
+  @override
+  String settingsPendingBannerTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count spillere venter',
+      one: '1 spiller venter',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsPendingBannerBody =>
+      'Godkend dem, så de kan melde sig til kampe.';
+
+  @override
+  String get settingsJoinRequestsNone => 'Ingen venter lige nu';
+
+  @override
+  String settingsJoinRequestsPending(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count venter på godkendelse',
+      one: '1 venter på godkendelse',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsTeamLogoTitle => 'Holdlogo';
+
+  @override
+  String get settingsTeamLogoSubtitle => 'Form, farve og initialer';
+
+  @override
+  String get settingsMatchDayTitle => 'Tilmelding & kampdag';
+
+  @override
+  String get settingsMatchDayIntro => 'Sådan fungerer kampene for hele holdet.';
+
+  @override
+  String get settingsSignupQuestion => 'Hvem kommer med til kampen?';
+
+  @override
+  String get settingsRsvpFirstComeDescription =>
+      'Spillere der melder sig til, kommer automatisk med.';
+
+  @override
+  String get settingsRsvpLeaderDescription =>
+      'Spillerne melder sig klar, og holdlederen udvælger truppen blandt dem.';
+
+  @override
+  String get settingsMeetingTimeSection => 'Mødetid';
+
+  @override
+  String get settingsMeetingTimeLabel => 'Mød op før kampstart';
+
+  @override
+  String get settingsMeetingNone => 'Ingen';
+
+  @override
+  String settingsMeetingMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String settingsMeetingPreview(String kickoff, String meeting) {
+    return 'Kampstart kl. $kickoff → mødetid kl. $meeting';
+  }
+
+  @override
+  String get settingsMeetingPreviewNone =>
+      'Ingen standard. Du sætter mødetiden på hver kamp.';
+
+  @override
+  String settingsMeetingSummary(int minutes) {
+    return 'Mødetid $minutes min før';
+  }
+
+  @override
+  String get settingsTasksSection => 'Opgaver på kampdagen';
+
+  @override
+  String get settingsTasksSubtitle => 'Faste opgaver der går på omgang';
+
+  @override
+  String get settingsAutosaveHint => 'Ændringer gemmes automatisk';
+
+  @override
+  String get settingsSaving => 'Gemmer...';
+
+  @override
+  String get settingsSaved => 'Gemt';
+
+  @override
+  String get settingsSaveFailed => 'Kunne ikke gemme. Prøv igen.';
+
+  @override
+  String get settingsSeasonSubtitle => 'Kampprogram og stilling fra DBU';
+
+  @override
+  String get settingsSeasonIntro =>
+      'Hent holdets kampe og puljens stilling fra DBU.';
+
+  @override
+  String get settingsSeasonScheduleTitle => 'Kampprogram';
+
+  @override
+  String get settingsSeasonScheduleBody =>
+      'Importér kampe eller start en ny sæson.';
+
+  @override
+  String get settingsSeasonImportAction => 'Importér';
+
+  @override
+  String get settingsSeasonStandingsTitle => 'Stilling';
+
+  @override
+  String get settingsSeasonStandingsBody =>
+      'Opdatér stillingen og holdene i puljen.';
+
+  @override
+  String get settingsSeasonSyncAction => 'Synkronisér';
+
+  @override
+  String get settingsSeasonDbuHint =>
+      'Du logger ind via DBU Kampklar, og Kopa henter dit holds data.';
+
+  @override
+  String get settingsSignupLimitSection => 'Pladser';
+
+  @override
+  String get settingsSignupLimitToggle => 'Begræns antal tilmeldte';
+
+  @override
+  String get settingsSignupLimitLabel => 'Pladser pr. kamp';
+
+  @override
+  String settingsSignupLimitHelpOn(int count) {
+    return 'Når $count har meldt sig til, kommer resten på venteliste og rykker automatisk op, hvis nogen melder fra.';
+  }
+
+  @override
+  String get settingsSignupLimitHelpOff =>
+      'Alle der melder sig til, kommer med.';
+
+  @override
+  String get settingsSignupLimitDecrease => 'Færre pladser';
+
+  @override
+  String get settingsSignupLimitIncrease => 'Flere pladser';
+
+  @override
+  String settingsSignupLimitSummary(int count) {
+    return 'maks $count';
+  }
+
+  @override
+  String matchWaitlistPosition(int position) {
+    return 'Venteliste #$position';
+  }
+
+  @override
+  String get settingsSeasonCurrentLabel => 'Aktuel sæson';
+
+  @override
+  String get settingsSeasonNone => 'Ingen aktiv sæson';
+
+  @override
+  String settingsSeasonPoolTeams(int count) {
+    return '$count hold';
+  }
+
+  @override
+  String get settingsSeasonStatMatches => 'kampe';
+
+  @override
+  String get settingsSeasonStatPlayed => 'spillet';
+
+  @override
+  String get settingsSeasonStatPosition => 'plads';
+
+  @override
+  String settingsSeasonPositionValue(int position) {
+    return '$position.';
+  }
+
+  @override
+  String get settingsSeasonFetchSection => 'Hent fra DBU';
+
+  @override
+  String settingsSeasonScheduleMeta(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count kampe i sæsonen',
+      one: '1 kamp i sæsonen',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsSeasonScheduleEmpty => 'Ikke importeret endnu';
+
+  @override
+  String settingsSeasonStandingsUpdated(String date) {
+    return 'Opdateret $date';
+  }
+
+  @override
+  String get settingsSeasonStandingsNever => 'Ikke hentet endnu';
+
+  @override
+  String get settingsSeasonChangeSection => 'Sæsonskifte';
+
+  @override
+  String get settingsSeasonNextTitle => 'Start næste sæson';
+
+  @override
+  String settingsSeasonNextReady(String label, int count) {
+    return '$label er klar på DBU med $count kampe.';
+  }
+
+  @override
+  String get settingsSeasonNextWaiting =>
+      'DBU har ikke offentliggjort næste sæson endnu. Du kan stadig starte den manuelt.';
+
+  @override
+  String get settingsSeasonNextUnknown =>
+      'Importér den nye sæsons kampprogram, når DBU har offentliggjort det.';
+
+  @override
+  String get settingsSeasonNextButton => 'Start ny sæson';
+
+  @override
+  String settingsSeasonNextReadyButton(String label) {
+    return 'Start $label';
+  }
+
+  @override
+  String get settingsSeasonOtherSources => 'Andre kilder';
+
+  @override
+  String get settingsSeasonCreateMatch => 'Opret kamp manuelt';
+
+  @override
+  String get settingsSeasonCreateMatchSubtitle => 'Træningskampe og pokalkampe';
 }

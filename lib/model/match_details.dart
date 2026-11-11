@@ -36,6 +36,9 @@ class MatchDetails {
   final int unavailableCount;
   final int teamPlayerCount;
   final String rsvpSelectionMode;
+
+  /// Signup limit; only set for first-come-first-served teams with a limit.
+  final int? maxSignups;
   final String formation;
   final bool lineupVisible;
   final double? latitude;
@@ -68,6 +71,7 @@ class MatchDetails {
     this.unavailableCount = 0,
     this.teamPlayerCount = 7,
     this.rsvpSelectionMode = firstComeFirstServed,
+    this.maxSignups,
     this.formation = '2-3-1',
     this.lineupVisible = false,
     this.latitude,
@@ -105,6 +109,7 @@ class MatchDetails {
       teamPlayerCount: json['team_player_count'] ?? 7,
       rsvpSelectionMode:
           json['rsvp_selection_mode'] as String? ?? firstComeFirstServed,
+      maxSignups: json['max_signups'] as int?,
       formation: json['formation'] ?? '2-3-1',
       lineupVisible: json['lineup_visible'] ?? false,
       latitude: (json['latitude'] as num?)?.toDouble(),
@@ -144,6 +149,10 @@ class MatchDetails {
 
   bool get usesTeamLeaderSelection => rsvpSelectionMode == teamLeaderSelection;
 
+  /// Attending players who are not selected are on a waitlist and move up
+  /// automatically when a spot frees.
+  bool get usesWaitlist => !usesTeamLeaderSelection && maxSignups != null;
+
   bool get hasMatchBeenPlayed => isMatch && hasFinalScore;
 
   bool shouldPromptForResultAt(DateTime now) {
@@ -162,6 +171,25 @@ class MatchDetails {
     return (attendanceDetailsList ?? [])
         .where((attendance) => attendance.isAttending)
         .toList();
+  }
+
+  /// Attending players waiting for a spot, earliest signup first (the order
+  /// the server promotes them in). Empty when the team has no signup limit.
+  List<EventAttendanceDetails> get waitlist {
+    if (!usesWaitlist) return const [];
+    return attendingAttendanceDetails
+        .where((attendance) => attendance.isSelected == null)
+        .toList()
+      ..sort((a, b) {
+        final byTime = a.updatedAt.compareTo(b.updatedAt);
+        return byTime != 0 ? byTime : a.id.compareTo(b.id);
+      });
+  }
+
+  /// 1-based waitlist position for [userId], or null when not waiting.
+  int? waitlistPosition(int userId) {
+    final index = waitlist.indexWhere((a) => a.userDetails.id == userId);
+    return index < 0 ? null : index + 1;
   }
 
   List<EventAttendanceDetails> get declinedAttendanceDetails {

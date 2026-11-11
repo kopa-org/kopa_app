@@ -247,4 +247,83 @@ void main() {
       ),
     );
   });
+
+  testWidgets('pushed Android page keeps its FAB above the tab bar',
+      (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        theme: ThemeData(
+          platform: TargetPlatform.android,
+          extensions: <ThemeExtension<dynamic>>[
+            AppColors.light,
+            AppTextStyles.light,
+          ],
+        ),
+        home: Scaffold(
+          extendBody: true,
+          // Like a tab branch navigator: pushed pages render under the bar.
+          body: Navigator(
+            onGenerateRoute: (_) => MaterialPageRoute(
+              builder: (_) => PageScaffold(
+                title: 'Kampopgaver',
+                showBackButton: true,
+                floatingActionButton: FloatingActionButton(
+                  key: const ValueKey('pushed-fab'),
+                  onPressed: () {},
+                  child: const Icon(Icons.add),
+                ),
+                body: const SizedBox.expand(),
+              ),
+            ),
+          ),
+          bottomNavigationBar: const SizedBox(
+            key: ValueKey('tab-navigation-bar'),
+            height: 100,
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      tester.getRect(find.byKey(const ValueKey('pushed-fab'))).bottom,
+      lessThanOrEqualTo(
+        tester.getRect(find.byKey(const ValueKey('tab-navigation-bar'))).top,
+      ),
+    );
+  });
+
+  testWidgets('full-screen Android page keeps the default FAB position',
+      (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        theme: ThemeData(
+          platform: TargetPlatform.android,
+          extensions: <ThemeExtension<dynamic>>[
+            AppColors.light,
+            AppTextStyles.light,
+          ],
+        ),
+        home: PageScaffold(
+          title: 'Kampopgaver',
+          floatingActionButton: FloatingActionButton(
+            key: const ValueKey('plain-fab'),
+            onPressed: () {},
+            child: const Icon(Icons.add),
+          ),
+          body: const SizedBox.expand(),
+        ),
+      ),
+    );
+
+    final screen = tester.getRect(find.byType(MaterialApp));
+    expect(
+      screen.bottom -
+          tester.getRect(find.byKey(const ValueKey('plain-fab'))).bottom,
+      kFloatingActionButtonMargin,
+    );
+  });
 }

@@ -5797,6 +5797,420 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Most assists'**
   String get wrappedAssistsLeaders;
+
+  /// No description provided for @settingsSectionMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'Matches'**
+  String get settingsSectionMatches;
+
+  /// No description provided for @settingsSectionSeason.
+  ///
+  /// In en, this message translates to:
+  /// **'Season & DBU'**
+  String get settingsSectionSeason;
+
+  /// No description provided for @settingsSectionTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Team'**
+  String get settingsSectionTeam;
+
+  /// No description provided for @settingsSectionMe.
+  ///
+  /// In en, this message translates to:
+  /// **'Me'**
+  String get settingsSectionMe;
+
+  /// No description provided for @settingsInvitePlayers.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite players'**
+  String get settingsInvitePlayers;
+
+  /// No description provided for @settingsPendingBannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 player is waiting} other{{count} players are waiting}}'**
+  String settingsPendingBannerTitle(int count);
+
+  /// No description provided for @settingsPendingBannerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve them so they can sign up for matches.'**
+  String get settingsPendingBannerBody;
+
+  /// No description provided for @settingsJoinRequestsNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No one is waiting right now'**
+  String get settingsJoinRequestsNone;
+
+  /// No description provided for @settingsJoinRequestsPending.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 waiting for approval} other{{count} waiting for approval}}'**
+  String settingsJoinRequestsPending(int count);
+
+  /// No description provided for @settingsTeamLogoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Team logo'**
+  String get settingsTeamLogoTitle;
+
+  /// No description provided for @settingsTeamLogoSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shape, colour and initials'**
+  String get settingsTeamLogoSubtitle;
+
+  /// No description provided for @settingsMatchDayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Signup & match day'**
+  String get settingsMatchDayTitle;
+
+  /// No description provided for @settingsMatchDayIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'How matches work for the whole team.'**
+  String get settingsMatchDayIntro;
+
+  /// No description provided for @settingsSignupQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Who makes the squad?'**
+  String get settingsSignupQuestion;
+
+  /// No description provided for @settingsRsvpFirstComeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Players who sign up are included automatically.'**
+  String get settingsRsvpFirstComeDescription;
+
+  /// No description provided for @settingsRsvpLeaderDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Players sign up as available, and the team leader picks the squad from them.'**
+  String get settingsRsvpLeaderDescription;
+
+  /// No description provided for @settingsMeetingTimeSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting time'**
+  String get settingsMeetingTimeSection;
+
+  /// No description provided for @settingsMeetingTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Meet before kickoff'**
+  String get settingsMeetingTimeLabel;
+
+  /// No description provided for @settingsMeetingNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get settingsMeetingNone;
+
+  /// No description provided for @settingsMeetingMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String settingsMeetingMinutes(int minutes);
+
+  /// No description provided for @settingsMeetingPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Kickoff {kickoff} → meet at {meeting}'**
+  String settingsMeetingPreview(String kickoff, String meeting);
+
+  /// No description provided for @settingsMeetingPreviewNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No default. You set the meeting time on each match.'**
+  String get settingsMeetingPreviewNone;
+
+  /// No description provided for @settingsMeetingSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Meet {minutes} min before'**
+  String settingsMeetingSummary(int minutes);
+
+  /// No description provided for @settingsTasksSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Match day tasks'**
+  String get settingsTasksSection;
+
+  /// No description provided for @settingsTasksSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring tasks that rotate between players'**
+  String get settingsTasksSubtitle;
+
+  /// No description provided for @settingsAutosaveHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes are saved automatically'**
+  String get settingsAutosaveHint;
+
+  /// No description provided for @settingsSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving...'**
+  String get settingsSaving;
+
+  /// No description provided for @settingsSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get settingsSaved;
+
+  /// No description provided for @settingsSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save. Try again.'**
+  String get settingsSaveFailed;
+
+  /// No description provided for @settingsSeasonSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Match schedule and standings from DBU'**
+  String get settingsSeasonSubtitle;
+
+  /// No description provided for @settingsSeasonIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch your team\'s matches and the pool standings from DBU.'**
+  String get settingsSeasonIntro;
+
+  /// No description provided for @settingsSeasonScheduleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Match schedule'**
+  String get settingsSeasonScheduleTitle;
+
+  /// No description provided for @settingsSeasonScheduleBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Import matches or start a new season.'**
+  String get settingsSeasonScheduleBody;
+
+  /// No description provided for @settingsSeasonImportAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get settingsSeasonImportAction;
+
+  /// No description provided for @settingsSeasonStandingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Standings'**
+  String get settingsSeasonStandingsTitle;
+
+  /// No description provided for @settingsSeasonStandingsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Update the standings and teams in your pool.'**
+  String get settingsSeasonStandingsBody;
+
+  /// No description provided for @settingsSeasonSyncAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync'**
+  String get settingsSeasonSyncAction;
+
+  /// No description provided for @settingsSeasonDbuHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You log in through DBU Kampklar, and Kopa fetches your team\'s data.'**
+  String get settingsSeasonDbuHint;
+
+  /// No description provided for @settingsSignupLimitSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Squad spots'**
+  String get settingsSignupLimitSection;
+
+  /// No description provided for @settingsSignupLimitToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Limit signups'**
+  String get settingsSignupLimitToggle;
+
+  /// No description provided for @settingsSignupLimitLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Spots per match'**
+  String get settingsSignupLimitLabel;
+
+  /// No description provided for @settingsSignupLimitHelpOn.
+  ///
+  /// In en, this message translates to:
+  /// **'When {count} have signed up, the rest go on a waitlist and move up automatically if someone drops out.'**
+  String settingsSignupLimitHelpOn(int count);
+
+  /// No description provided for @settingsSignupLimitHelpOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone who signs up is included.'**
+  String get settingsSignupLimitHelpOff;
+
+  /// No description provided for @settingsSignupLimitDecrease.
+  ///
+  /// In en, this message translates to:
+  /// **'Fewer spots'**
+  String get settingsSignupLimitDecrease;
+
+  /// No description provided for @settingsSignupLimitIncrease.
+  ///
+  /// In en, this message translates to:
+  /// **'More spots'**
+  String get settingsSignupLimitIncrease;
+
+  /// No description provided for @settingsSignupLimitSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'max {count}'**
+  String settingsSignupLimitSummary(int count);
+
+  /// No description provided for @matchWaitlistPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Waitlist #{position}'**
+  String matchWaitlistPosition(int position);
+
+  /// No description provided for @settingsSeasonCurrentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Current season'**
+  String get settingsSeasonCurrentLabel;
+
+  /// No description provided for @settingsSeasonNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No active season'**
+  String get settingsSeasonNone;
+
+  /// No description provided for @settingsSeasonPoolTeams.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} teams'**
+  String settingsSeasonPoolTeams(int count);
+
+  /// No description provided for @settingsSeasonStatMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'matches'**
+  String get settingsSeasonStatMatches;
+
+  /// No description provided for @settingsSeasonStatPlayed.
+  ///
+  /// In en, this message translates to:
+  /// **'played'**
+  String get settingsSeasonStatPlayed;
+
+  /// No description provided for @settingsSeasonStatPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'place'**
+  String get settingsSeasonStatPosition;
+
+  /// No description provided for @settingsSeasonPositionValue.
+  ///
+  /// In en, this message translates to:
+  /// **'#{position}'**
+  String settingsSeasonPositionValue(int position);
+
+  /// No description provided for @settingsSeasonFetchSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch from DBU'**
+  String get settingsSeasonFetchSection;
+
+  /// No description provided for @settingsSeasonScheduleMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 match this season} other{{count} matches this season}}'**
+  String settingsSeasonScheduleMeta(int count);
+
+  /// No description provided for @settingsSeasonScheduleEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Not imported yet'**
+  String get settingsSeasonScheduleEmpty;
+
+  /// No description provided for @settingsSeasonStandingsUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated {date}'**
+  String settingsSeasonStandingsUpdated(String date);
+
+  /// No description provided for @settingsSeasonStandingsNever.
+  ///
+  /// In en, this message translates to:
+  /// **'Not fetched yet'**
+  String get settingsSeasonStandingsNever;
+
+  /// No description provided for @settingsSeasonChangeSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Season change'**
+  String get settingsSeasonChangeSection;
+
+  /// No description provided for @settingsSeasonNextTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start next season'**
+  String get settingsSeasonNextTitle;
+
+  /// No description provided for @settingsSeasonNextReady.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} is ready on DBU with {count} matches.'**
+  String settingsSeasonNextReady(String label, int count);
+
+  /// No description provided for @settingsSeasonNextWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'DBU has not published the next season yet. You can still start it manually.'**
+  String get settingsSeasonNextWaiting;
+
+  /// No description provided for @settingsSeasonNextUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Import the new season\'s match schedule once DBU has published it.'**
+  String get settingsSeasonNextUnknown;
+
+  /// No description provided for @settingsSeasonNextButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Start new season'**
+  String get settingsSeasonNextButton;
+
+  /// No description provided for @settingsSeasonNextReadyButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Start {label}'**
+  String settingsSeasonNextReadyButton(String label);
+
+  /// No description provided for @settingsSeasonOtherSources.
+  ///
+  /// In en, this message translates to:
+  /// **'Other sources'**
+  String get settingsSeasonOtherSources;
+
+  /// No description provided for @settingsSeasonCreateMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Create match manually'**
+  String get settingsSeasonCreateMatch;
+
+  /// No description provided for @settingsSeasonCreateMatchSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Friendlies and cup matches'**
+  String get settingsSeasonCreateMatchSubtitle;
 }
 
 class _AppLocalizationsDelegate

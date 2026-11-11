@@ -91,6 +91,7 @@ abstract final class TeamDbuRepository {
         'currentTeamId': decoded['dbu_team_id'],
         'seriesName': decoded['series_name'],
         'poolTeams': decoded['pool_teams'],
+        'syncedAt': decoded['synced_at'],
       });
     }
 

@@ -3240,4 +3240,268 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get wrappedAssistsLeaders => 'Most assists';
+
+  @override
+  String get settingsSectionMatches => 'Matches';
+
+  @override
+  String get settingsSectionSeason => 'Season & DBU';
+
+  @override
+  String get settingsSectionTeam => 'Team';
+
+  @override
+  String get settingsSectionMe => 'Me';
+
+  @override
+  String get settingsInvitePlayers => 'Invite players';
+
+  @override
+  String settingsPendingBannerTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count players are waiting',
+      one: '1 player is waiting',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsPendingBannerBody =>
+      'Approve them so they can sign up for matches.';
+
+  @override
+  String get settingsJoinRequestsNone => 'No one is waiting right now';
+
+  @override
+  String settingsJoinRequestsPending(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count waiting for approval',
+      one: '1 waiting for approval',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsTeamLogoTitle => 'Team logo';
+
+  @override
+  String get settingsTeamLogoSubtitle => 'Shape, colour and initials';
+
+  @override
+  String get settingsMatchDayTitle => 'Signup & match day';
+
+  @override
+  String get settingsMatchDayIntro => 'How matches work for the whole team.';
+
+  @override
+  String get settingsSignupQuestion => 'Who makes the squad?';
+
+  @override
+  String get settingsRsvpFirstComeDescription =>
+      'Players who sign up are included automatically.';
+
+  @override
+  String get settingsRsvpLeaderDescription =>
+      'Players sign up as available, and the team leader picks the squad from them.';
+
+  @override
+  String get settingsMeetingTimeSection => 'Meeting time';
+
+  @override
+  String get settingsMeetingTimeLabel => 'Meet before kickoff';
+
+  @override
+  String get settingsMeetingNone => 'None';
+
+  @override
+  String settingsMeetingMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String settingsMeetingPreview(String kickoff, String meeting) {
+    return 'Kickoff $kickoff → meet at $meeting';
+  }
+
+  @override
+  String get settingsMeetingPreviewNone =>
+      'No default. You set the meeting time on each match.';
+
+  @override
+  String settingsMeetingSummary(int minutes) {
+    return 'Meet $minutes min before';
+  }
+
+  @override
+  String get settingsTasksSection => 'Match day tasks';
+
+  @override
+  String get settingsTasksSubtitle =>
+      'Recurring tasks that rotate between players';
+
+  @override
+  String get settingsAutosaveHint => 'Changes are saved automatically';
+
+  @override
+  String get settingsSaving => 'Saving...';
+
+  @override
+  String get settingsSaved => 'Saved';
+
+  @override
+  String get settingsSaveFailed => 'Could not save. Try again.';
+
+  @override
+  String get settingsSeasonSubtitle => 'Match schedule and standings from DBU';
+
+  @override
+  String get settingsSeasonIntro =>
+      'Fetch your team\'s matches and the pool standings from DBU.';
+
+  @override
+  String get settingsSeasonScheduleTitle => 'Match schedule';
+
+  @override
+  String get settingsSeasonScheduleBody =>
+      'Import matches or start a new season.';
+
+  @override
+  String get settingsSeasonImportAction => 'Import';
+
+  @override
+  String get settingsSeasonStandingsTitle => 'Standings';
+
+  @override
+  String get settingsSeasonStandingsBody =>
+      'Update the standings and teams in your pool.';
+
+  @override
+  String get settingsSeasonSyncAction => 'Sync';
+
+  @override
+  String get settingsSeasonDbuHint =>
+      'You log in through DBU Kampklar, and Kopa fetches your team\'s data.';
+
+  @override
+  String get settingsSignupLimitSection => 'Squad spots';
+
+  @override
+  String get settingsSignupLimitToggle => 'Limit signups';
+
+  @override
+  String get settingsSignupLimitLabel => 'Spots per match';
+
+  @override
+  String settingsSignupLimitHelpOn(int count) {
+    return 'When $count have signed up, the rest go on a waitlist and move up automatically if someone drops out.';
+  }
+
+  @override
+  String get settingsSignupLimitHelpOff => 'Everyone who signs up is included.';
+
+  @override
+  String get settingsSignupLimitDecrease => 'Fewer spots';
+
+  @override
+  String get settingsSignupLimitIncrease => 'More spots';
+
+  @override
+  String settingsSignupLimitSummary(int count) {
+    return 'max $count';
+  }
+
+  @override
+  String matchWaitlistPosition(int position) {
+    return 'Waitlist #$position';
+  }
+
+  @override
+  String get settingsSeasonCurrentLabel => 'Current season';
+
+  @override
+  String get settingsSeasonNone => 'No active season';
+
+  @override
+  String settingsSeasonPoolTeams(int count) {
+    return '$count teams';
+  }
+
+  @override
+  String get settingsSeasonStatMatches => 'matches';
+
+  @override
+  String get settingsSeasonStatPlayed => 'played';
+
+  @override
+  String get settingsSeasonStatPosition => 'place';
+
+  @override
+  String settingsSeasonPositionValue(int position) {
+    return '#$position';
+  }
+
+  @override
+  String get settingsSeasonFetchSection => 'Fetch from DBU';
+
+  @override
+  String settingsSeasonScheduleMeta(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count matches this season',
+      one: '1 match this season',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsSeasonScheduleEmpty => 'Not imported yet';
+
+  @override
+  String settingsSeasonStandingsUpdated(String date) {
+    return 'Updated $date';
+  }
+
+  @override
+  String get settingsSeasonStandingsNever => 'Not fetched yet';
+
+  @override
+  String get settingsSeasonChangeSection => 'Season change';
+
+  @override
+  String get settingsSeasonNextTitle => 'Start next season';
+
+  @override
+  String settingsSeasonNextReady(String label, int count) {
+    return '$label is ready on DBU with $count matches.';
+  }
+
+  @override
+  String get settingsSeasonNextWaiting =>
+      'DBU has not published the next season yet. You can still start it manually.';
+
+  @override
+  String get settingsSeasonNextUnknown =>
+      'Import the new season\'s match schedule once DBU has published it.';
+
+  @override
+  String get settingsSeasonNextButton => 'Start new season';
+
+  @override
+  String settingsSeasonNextReadyButton(String label) {
+    return 'Start $label';
+  }
+
+  @override
+  String get settingsSeasonOtherSources => 'Other sources';
+
+  @override
+  String get settingsSeasonCreateMatch => 'Create match manually';
+
+  @override
+  String get settingsSeasonCreateMatchSubtitle => 'Friendlies and cup matches';
 }

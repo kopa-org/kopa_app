@@ -17,6 +17,7 @@ String? notificationDestination(
       return AppRouter.teamJoinRequests;
     case 'match_calendar_changed':
     case 'match_lineup_revealed':
+    case 'waitlist_promoted':
       final matchId = int.tryParse(
         (data['match_id'] ?? data['event_id'] ?? '').toString(),
       );

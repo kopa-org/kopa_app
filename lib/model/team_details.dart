@@ -9,6 +9,9 @@ class TeamDetails {
   final String title;
   final int playerCount;
   final int? defaultMeetingOffsetMinutes;
+
+  /// Signup limit for first-come-first-served teams; null means no limit.
+  final int? maxSignups;
   final String rsvpSelectionMode;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -19,6 +22,7 @@ class TeamDetails {
     this.playerCount = 7,
     this.logoDesign = TeamLogoDesign.defaultDesign,
     this.defaultMeetingOffsetMinutes,
+    this.maxSignups,
     this.rsvpSelectionMode = firstComeFirstServed,
     required this.createdAt,
     required this.updatedAt,
@@ -31,6 +35,7 @@ class TeamDetails {
       playerCount: json['player_count'] ?? 7,
       logoDesign: TeamLogoDesign.fromJson(json),
       defaultMeetingOffsetMinutes: json['default_meeting_offset_minutes'],
+      maxSignups: json['max_signups'] as int?,
       rsvpSelectionMode:
           json['rsvp_selection_mode'] as String? ?? firstComeFirstServed,
       createdAt: DateTime.parse(json['created_at']),

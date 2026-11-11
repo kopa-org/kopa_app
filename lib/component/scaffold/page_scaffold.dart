@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -84,15 +86,26 @@ class PageScaffold extends StatelessWidget {
     final shouldShowTopBar = showTopBar && _hasTopBarContent;
     // The root tab scaffold uses extendBody, so its Android nav bar overlays
     // nested tab scaffolds. Lift their FAB by the reported bar height.
-    final androidFloatingActionButton =
-        !_isTabScaffold || isIOS || floatingActionButton == null
-            ? floatingActionButton
-            : Padding(
-                padding: EdgeInsets.only(
-                  bottom: mainTabBottomContentPadding(context),
-                ),
-                child: floatingActionButton,
-              );
+    // Pushed pages inside a tab branch also sit under that bar. Material's
+    // Scaffold only clears the system inset (viewPadding), so add whatever
+    // extra bottom obstruction the shell reports through padding.
+    final pushedPageObstruction = math.max(
+      0.0,
+      MediaQuery.paddingOf(context).bottom -
+          MediaQuery.viewPaddingOf(context).bottom,
+    );
+    final androidFloatingActionButton = isIOS ||
+            floatingActionButton == null ||
+            (!_isTabScaffold && pushedPageObstruction == 0)
+        ? floatingActionButton
+        : Padding(
+            padding: EdgeInsets.only(
+              bottom: _isTabScaffold
+                  ? mainTabBottomContentPadding(context)
+                  : pushedPageObstruction,
+            ),
+            child: floatingActionButton,
+          );
 
     final page = isIOS
         ? CupertinoPageScaffold(

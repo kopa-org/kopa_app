@@ -99,6 +99,7 @@ class UsersRepository {
   static Future<TeamDetails> updateTeamSettings({
     required int teamId,
     required int? defaultMeetingOffsetMinutes,
+    required int? maxSignups,
     String? rsvpSelectionMode,
   }) async {
     final url = Uri.parse('${ApiConfig.baseUrl}/teams/$teamId/settings');
@@ -107,6 +108,7 @@ class UsersRepository {
       url,
       body: {
         'default_meeting_offset_minutes': defaultMeetingOffsetMinutes,
+        'max_signups': maxSignups,
         if (rsvpSelectionMode != null) 'rsvp_selection_mode': rsvpSelectionMode,
       },
     );

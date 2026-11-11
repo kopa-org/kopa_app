@@ -4,12 +4,26 @@ class DbuStandings {
   final String? seriesName;
   final List<DbuStandingRow> rows;
 
+  /// When this standings snapshot was fetched from DBU.
+  final DateTime? syncedAt;
+
   const DbuStandings({
     this.poolId,
     this.currentTeamId,
     this.seriesName,
     this.rows = const [],
+    this.syncedAt,
   });
+
+  /// The team's own row, when it is in the pool.
+  DbuStandingRow? get currentTeamRow {
+    final id = currentTeamId;
+    if (id == null) return null;
+    for (final row in rows) {
+      if (row.dbuTeamId == id) return row;
+    }
+    return null;
+  }
 
   factory DbuStandings.fromJson(Map<String, dynamic>? json) {
     if (json == null) return const DbuStandings();
@@ -25,6 +39,8 @@ class DbuStandings {
     return DbuStandings(
       poolId: json['poolId'],
       currentTeamId: json['currentTeamId'],
+      syncedAt:
+          DateTime.tryParse(json['syncedAt']?.toString() ?? '')?.toLocal(),
       seriesName:
           _decodeHtmlEntities(json['seriesName'] ?? json['series_name']),
       rows: (json['rows'] as List<dynamic>? ?? [])
