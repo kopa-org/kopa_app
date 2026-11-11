@@ -53,6 +53,23 @@ class SecureStorageService {
     await _storage.write(key: _lineupDragHintSeenKey, value: 'true');
   }
 
+  /// Whether this device has opened the Season Wrapped for a team's season,
+  /// so the home screen moves on to the season-over state.
+  static Future<bool> hasSeenSeasonWrapped(int teamId, int seasonId) async {
+    final value = await _storage.read(key: _seasonWrappedKey(teamId, seasonId));
+    return value == 'true';
+  }
+
+  static Future<void> setSeasonWrappedSeen(int teamId, int seasonId) async {
+    await _storage.write(
+      key: _seasonWrappedKey(teamId, seasonId),
+      value: 'true',
+    );
+  }
+
+  static String _seasonWrappedKey(int teamId, int seasonId) =>
+      'seasonWrappedSeen_${teamId}_$seasonId';
+
   static Future<bool> hasAuthenticatedBefore() async {
     final value = await _storage.read(key: _hasAuthenticatedBeforeKey);
     return value == 'true';

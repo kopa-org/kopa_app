@@ -1,8 +1,10 @@
 import 'package:equatable/equatable.dart';
 import 'package:kopa/model/fine_box_details.dart';
 import 'package:kopa/model/match_details.dart';
+import 'package:kopa/model/season_wrapped.dart';
 import 'package:kopa/model/statistics.dart';
 import 'package:kopa/model/dbu_standings.dart';
+import 'package:kopa/repository/team_dbu_repository.dart';
 
 enum HomeStatus { initial, loading, loaded, failure }
 
@@ -19,6 +21,16 @@ class HomeState extends Equatable {
   final String? errorMessage;
   final bool isRegisteringForNextMatch;
 
+  /// Whether the next DBU season is published. Only loaded once nothing is
+  /// left on the schedule, so the home screen can show the season-over state.
+  final DbuSeasonOutlook? seasonOutlook;
+  final bool isCheckingSeasonOutlook;
+
+  /// The ended season's Wrapped story, and whether this device has opened it.
+  final SeasonWrapped? seasonWrapped;
+  final bool? hasSeenSeasonWrapped;
+  final bool isLoadingSeasonWrapped;
+
   const HomeState({
     this.status = HomeStatus.initial,
     this.nextMatch,
@@ -29,6 +41,11 @@ class HomeState extends Equatable {
     this.dbuStandings,
     this.errorMessage,
     this.isRegisteringForNextMatch = false,
+    this.seasonOutlook,
+    this.isCheckingSeasonOutlook = false,
+    this.seasonWrapped,
+    this.hasSeenSeasonWrapped,
+    this.isLoadingSeasonWrapped = false,
   });
 
   HomeState copyWith({
@@ -41,6 +58,11 @@ class HomeState extends Equatable {
     Object? dbuStandings = _unset,
     Object? errorMessage = _unset,
     bool? isRegisteringForNextMatch,
+    Object? seasonOutlook = _unset,
+    bool? isCheckingSeasonOutlook,
+    Object? seasonWrapped = _unset,
+    Object? hasSeenSeasonWrapped = _unset,
+    bool? isLoadingSeasonWrapped,
   }) {
     return HomeState(
       status: status ?? this.status,
@@ -60,6 +82,19 @@ class HomeState extends Equatable {
           errorMessage == _unset ? this.errorMessage : errorMessage as String?,
       isRegisteringForNextMatch:
           isRegisteringForNextMatch ?? this.isRegisteringForNextMatch,
+      seasonOutlook: seasonOutlook == _unset
+          ? this.seasonOutlook
+          : seasonOutlook as DbuSeasonOutlook?,
+      isCheckingSeasonOutlook:
+          isCheckingSeasonOutlook ?? this.isCheckingSeasonOutlook,
+      seasonWrapped: seasonWrapped == _unset
+          ? this.seasonWrapped
+          : seasonWrapped as SeasonWrapped?,
+      hasSeenSeasonWrapped: hasSeenSeasonWrapped == _unset
+          ? this.hasSeenSeasonWrapped
+          : hasSeenSeasonWrapped as bool?,
+      isLoadingSeasonWrapped:
+          isLoadingSeasonWrapped ?? this.isLoadingSeasonWrapped,
     );
   }
 
@@ -74,5 +109,10 @@ class HomeState extends Equatable {
         dbuStandings,
         errorMessage,
         isRegisteringForNextMatch,
+        seasonOutlook,
+        isCheckingSeasonOutlook,
+        seasonWrapped,
+        hasSeenSeasonWrapped,
+        isLoadingSeasonWrapped,
       ];
 }

@@ -14,6 +14,9 @@ import 'package:kopa/component/home/home_carousel_indicator.dart';
 import 'package:kopa/component/home/home_fine_box_card.dart';
 import 'package:kopa/component/home/home_statistics_strip.dart';
 import 'package:kopa/component/home/latest_result_card.dart';
+import 'package:kopa/component/home/missing_result_hero.dart';
+import 'package:kopa/component/home/season_over_hero.dart';
+import 'package:kopa/component/home/season_wrapped_teaser.dart';
 import 'package:kopa/component/match/match_result_reminder.dart';
 import 'package:kopa/component/match/attendance_response_dropdown.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
@@ -33,6 +36,7 @@ import 'package:kopa/navigation/app_router.dart';
 import 'package:kopa/page/match/match_details_page.dart';
 import 'package:kopa/page/match/match_score_sheet.dart';
 import 'package:kopa/page/profile/profile_settings_page.dart';
+import 'package:kopa/page/wrapped/season_wrapped_page.dart';
 import 'package:kopa/repository/match_repository.dart';
 import 'package:kopa/state/match_programme_refresh_notifier.dart';
 import 'package:kopa/theme/app_colors.dart';
@@ -206,11 +210,28 @@ class _HomeTabViewState extends State<_HomeTabView> {
                   ],
                 ),
                 SliverToBoxAdapter(
-                  child: _HeroMatchCarousel(
-                    matches: upcomingMatches,
-                    fallbackMatch: nextMatch,
-                    currentUser: currentUser,
-                  ),
+                  // No match left: the season is over. Trainings often keep
+                  // going, so the next one sits in a compact card below.
+                  child: !upcomingMatches.any((match) => match.isMatch)
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _SeasonEndHero(
+                              state: state,
+                              currentUser: currentUser,
+                            ),
+                            if (nextMatch != null && nextMatch.isTraining)
+                              _NextTrainingCard(
+                                training: nextMatch,
+                                currentUser: currentUser,
+                              ),
+                          ],
+                        )
+                      : _HeroMatchCarousel(
+                          matches: upcomingMatches,
+                          fallbackMatch: nextMatch,
+                          currentUser: currentUser,
+                        ),
                 ),
                 SliverToBoxAdapter(
                   child: Padding(
@@ -241,6 +262,201 @@ class _HomeTabViewState extends State<_HomeTabView> {
       ),
     );
   }
+}
+
+/// What home shows once nothing is left on the schedule, in order: enter the
+/// missing result, then the season's Wrapped, then the season-over/import.
+class _SeasonEndHero extends StatelessWidget {
+  final HomeState state;
+  final UserDetails currentUser;
+
+  const _SeasonEndHero({required this.state, required this.currentUser});
+
+  @override
+  Widget build(BuildContext context) {
+    final teamId = currentUser.teamDetails?.id ?? 0;
+    final missing = matchesMissingResult(state.matches, DateTime.now());
+    if (missing.isNotEmpty) {
+      return MissingResultHero(
+        match: missing.first,
+        otherMissing: missing.length - 1,
+        canEnterResult: currentUser.canManageTeam,
+        onEnterResult: () {
+          AppAnalytics.logEvent('season_end_result_entry_opened');
+          _enterHomeMatchResult(context, missing.first);
+        },
+      );
+    }
+
+    final wrapped = state.seasonWrapped;
+    if (wrapped == null && state.isLoadingSeasonWrapped) {
+      return const SizedBox(
+        height: 240,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    final hasWrapped = wrapped != null && wrapped.available;
+    void openWrapped() {
+      context.read<HomeCubit>().markSeasonWrappedSeen(teamId);
+      SeasonWrappedPage.open(
+        context,
+        wrapped: wrapped!,
+        teamId: teamId,
+        currentUserId: currentUser.id,
+        canCustomize: currentUser.canManageTeam,
+      ).then((_) {
+        // A team leader may have changed the categories inside the story.
+        if (context.mounted && currentUser.canManageTeam) {
+          context.read<HomeCubit>().loadSeasonWrapped(teamId);
+        }
+      });
+    }
+
+    if (hasWrapped && state.hasSeenSeasonWrapped == false) {
+      return SeasonWrappedTeaser(
+        onOpen: openWrapped,
+        onSkip: () {
+          AppAnalytics.logEvent('season_wrapped_skipped');
+          context.read<HomeCubit>().markSeasonWrappedSeen(teamId);
+        },
+      );
+    }
+
+    return SeasonOverHero(
+      matches: state.matches,
+      currentUser: currentUser,
+      outlook: state.seasonOutlook,
+      isChecking: state.isCheckingSeasonOutlook,
+      onOpenWrapped: hasWrapped ? openWrapped : null,
+    );
+  }
+}
+
+/// The next training while the season-end hero has the top spot: when, where
+/// and the usual yes/no, so players can still sign up from home.
+class _NextTrainingCard extends StatelessWidget {
+  final MatchDetails training;
+  final UserDetails currentUser;
+
+  const _NextTrainingCard({required this.training, required this.currentUser});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final textStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final l10n = AppLocalizations.of(context)!;
+    final category = training.category?.trim() ?? '';
+    final details = [
+      '${_matchDate(training.date)} · ${_matchTime(training.date)}',
+      if (training.location.isNotEmpty) training.location,
+    ].join(' · ');
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        Spacing.md,
+        Spacing.lg,
+        Spacing.md,
+        0,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          HomeBentoSectionTitle(title: l10n.homeNextTraining),
+          const SizedBox(height: Spacing.sm),
+          HomeBentoCard(
+            padding: EdgeInsets.zero,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                InkWell(
+                  key: const ValueKey('home_next_training'),
+                  onTap: () => _openMatch(context, training, 'home_training'),
+                  borderRadius: BorderRadius.circular(
+                    HomeBentoCard.cardRadius,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      Spacing.md,
+                      Spacing.md,
+                      Spacing.md,
+                      Spacing.xs,
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: colors.lightSky95,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.fitness_center,
+                            color: colors.sky,
+                            size: 22,
+                          ),
+                        ),
+                        const SizedBox(width: Spacing.itemGap),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                category.isEmpty
+                                    ? l10n.eventTraining
+                                    : category,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: textStyles.subtitle2.copyWith(
+                                  color: colors.dirt,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                details,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: textStyles.body3.copyWith(
+                                  color: colors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(Icons.chevron_right, color: colors.grey4),
+                      ],
+                    ),
+                  ),
+                ),
+                HomeMatchResponseCard(
+                  match: training,
+                  currentUser: currentUser,
+                ),
+                const SizedBox(height: Spacing.xs),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Played matches (kickoff plus two hours ago) still missing a final score,
+/// most recent first. The Season Wrapped waits for these.
+@visibleForTesting
+List<MatchDetails> matchesMissingResult(
+  List<MatchDetails> matches,
+  DateTime now,
+) {
+  final cutoff = now.subtract(const Duration(hours: 2));
+  return matches
+      .where((m) => m.isMatch && !m.hasFinalScore && m.date.isBefore(cutoff))
+      .toList()
+    ..sort((a, b) => b.date.compareTo(a.date));
 }
 
 class _HeroSection extends StatelessWidget {

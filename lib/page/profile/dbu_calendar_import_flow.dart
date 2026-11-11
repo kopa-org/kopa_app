@@ -14,21 +14,40 @@ import 'package:kopa/utils/app_analytics.dart';
 enum _CalendarImportMode { updateActiveSeason, startNewSeason }
 
 class DbuCalendarImportFlow {
+  /// Imports a DBU match schedule, optionally as a new Kopa season.
+  ///
+  /// The season-over screen passes [startNewSeason] to skip the "new season
+  /// or update?" question, plus either the [candidate] it already found on
+  /// DBU (imported directly) or [skipSuggestion] when the manager overrides
+  /// the detection and wants to pick the season on Mit DBU themselves.
   static Future<String?> run(
     BuildContext context, {
     required int? teamId,
+    bool startNewSeason = false,
+    DbuNextSeasonCandidate? candidate,
+    bool skipSuggestion = false,
   }) async {
-    final mode = await _chooseImportMode(context, teamId);
+    final mode = await _chooseImportMode(
+      context,
+      teamId,
+      preferNewSeason: startNewSeason,
+    );
     if (!context.mounted || mode == null) {
       return null;
     }
 
-    Map<String, dynamic>? resultData;
+    Map<String, dynamic>? resultData = candidate?.toImportContext();
+    if (candidate != null) {
+      AppAnalytics.logEvent('dbu_next_season_used');
+    }
 
     // Starting a new season: first try to find the next DBU pool from the one
     // the team just played (e.g. autumn league -> VinterBOLD), skipping the
     // Mit DBU webview when we find it.
-    if (mode == _CalendarImportMode.startNewSeason && teamId != null) {
+    if (resultData == null &&
+        !skipSuggestion &&
+        mode == _CalendarImportMode.startNewSeason &&
+        teamId != null) {
       final suggestion = await DbuNextSeasonDialog.show(
         context,
         teamId: teamId,
@@ -37,11 +56,11 @@ class DbuCalendarImportFlow {
         return null;
       }
 
-      final candidate = suggestion.candidate;
+      final suggested = suggestion.candidate;
       if (suggestion.action == DbuNextSeasonAction.useCandidate &&
-          candidate != null) {
+          suggested != null) {
         AppAnalytics.logEvent('dbu_next_season_used');
-        resultData = candidate.toImportContext();
+        resultData = suggested.toImportContext();
       }
     }
 
@@ -95,8 +114,9 @@ class DbuCalendarImportFlow {
 
   static Future<_CalendarImportMode?> _chooseImportMode(
     BuildContext context,
-    int? teamId,
-  ) async {
+    int? teamId, {
+    bool preferNewSeason = false,
+  }) async {
     if (teamId == null) {
       return _CalendarImportMode.updateActiveSeason;
     }
@@ -105,6 +125,9 @@ class DbuCalendarImportFlow {
     final hasActiveSeason = seasons.any((season) => season.isActive);
     if (!hasActiveSeason || !context.mounted) {
       return _CalendarImportMode.updateActiveSeason;
+    }
+    if (preferNewSeason) {
+      return _CalendarImportMode.startNewSeason;
     }
 
     final startNewSeason = await showDialog<bool>(

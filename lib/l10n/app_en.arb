@@ -1383,5 +1383,362 @@
   "inFormSaveFailed": "Could not save. Please try again.",
   "inFormSaved": "Saved – points updated",
   "inFormSeeHowPointsWork": "How points work",
-  "inFormPointsSystemLoadFailed": "Could not fetch the points system."
+  "inFormPointsSystemLoadFailed": "Could not fetch the points system.",
+  "seasonOverEyebrow": "Season over",
+  "seasonOverTitle": "Good game, everyone!",
+  "seasonEmptyEyebrow": "No matches yet",
+  "seasonEmptyTitle": "Ready for kick-off",
+  "seasonRecapTitle": "The season in numbers",
+  "seasonRecapMatches": "Matches",
+  "seasonRecapRecord": "W-D-L",
+  "seasonRecapGoals": "Goals",
+  "seasonChecking": "Looking for the next season on DBU…",
+  "seasonWaitingTitle": "Waiting for the next season",
+  "seasonWaitingBody": "DBU hasn't published your next tournament yet. We check every day and let you know as soon as it's ready.",
+  "seasonLastChecked": "Last checked {time}",
+  "@seasonLastChecked": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "seasonCheckAgain": "Check again",
+  "seasonImportAnyway": "I know it's there, import anyway",
+  "seasonReadyBadge": "New season ready",
+  "seasonReadyTitle": "Your next season is on DBU",
+  "seasonReadyMatches": "{count, plural, =0{First match {date}} =1{1 match · first {date}} other{{count} matches · first {date}}}",
+  "@seasonReadyMatches": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "seasonStartNew": "Start new season",
+  "seasonNotThisOne": "Not the right one? Find it on DBU",
+  "seasonManualTitle": "Ready for a new season?",
+  "seasonManualBody": "Import the match schedule from DBU to start the next season.",
+  "wrappedMissingResultEyebrow": "The season is almost over",
+  "wrappedMissingResultTitle": "One result is missing",
+  "wrappedMissingResultBody": "Enter the result of the last match, then we can wrap up your season.",
+  "wrappedMissingResultMore": "{count, plural, =1{1 more match is missing a result} other{{count} more matches are missing a result}}",
+  "@wrappedMissingResultMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "wrappedEnterResult": "Enter result",
+  "wrappedMissingResultPlayerHint": "The team leader enters the result, then your Season Wrapped is ready.",
+  "wrappedTeaserEyebrow": "Season Wrapped",
+  "wrappedTeaserTitle": "Your season is wrapped",
+  "wrappedTeaserBody": "Top scorer, man of the match and your own season.",
+  "wrappedTeaserCta": "Watch your Wrapped",
+  "wrappedSkip": "Skip – go to the next season",
+  "wrappedWatchAgain": "Watch your Season Wrapped again",
+  "wrappedProgress": "Season Wrapped · {current}/{total}",
+  "@wrappedProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "wrappedClose": "Close",
+  "wrappedCustomize": "Customize Wrapped",
+  "wrappedPrevious": "Previous slide",
+  "wrappedNext": "Next slide",
+  "wrappedIntroTitle": "Your season,\nwrapped\nup.",
+  "wrappedIntroBody": "{matches, plural, =1{1 match} other{{matches} matches}}. {goals} goals. One team. Let's look back.",
+  "@wrappedIntroBody": {
+    "placeholders": {
+      "matches": {
+        "type": "int"
+      },
+      "goals": {
+        "type": "int"
+      }
+    }
+  },
+  "wrappedTapToContinue": "Tap to continue →",
+  "wrappedTeamEyebrow": "The team in numbers",
+  "wrappedTeamWinsLabel": "wins\nin {played} matches",
+  "@wrappedTeamWinsLabel": {
+    "placeholders": {
+      "played": {
+        "type": "int"
+      }
+    }
+  },
+  "wrappedTeamDrawsLosses": "{draws} draws · {losses} losses",
+  "@wrappedTeamDrawsLosses": {
+    "placeholders": {
+      "draws": {
+        "type": "int"
+      },
+      "losses": {
+        "type": "int"
+      }
+    }
+  },
+  "wrappedGoalsFor": "goals scored",
+  "wrappedGoalsAgainst": "goals conceded",
+  "wrappedLastFive": "Last matches",
+  "wrappedFormWin": "W",
+  "wrappedFormDraw": "D",
+  "wrappedFormLoss": "L",
+  "wrappedBestStreak": "Best run: {count} wins in a row.",
+  "@wrappedBestStreak": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "wrappedYouEyebrow": "Your season, {name}",
+  "@wrappedYouEyebrow": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "wrappedMatchesPlayed": "matches played",
+  "wrappedGoals": "goals",
+  "wrappedAssists": "assists",
+  "wrappedTraining": "training",
+  "wrappedYouTopAttendance": "Nobody played more matches than you.",
+  "wrappedYouMoreMatches": "{count, plural, =1{Only one player played more matches than you.} other{Only {count} players played more matches than you.}}",
+  "@wrappedYouMoreMatches": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "wrappedFormEyebrow": "Kopa form",
+  "wrappedFormYouFinished": "You finished",
+  "wrappedFormOfPlayers": "of {count}\nplayers",
+  "@wrappedFormOfPlayers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "wrappedFormWinner": "{name} won Kopa form",
+  "@wrappedFormWinner": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "wrappedYouSuffix": "(you)",
+  "wrappedGoalsEyebrow": "Top scorer",
+  "wrappedGoalsLine": "{goals} goals · {percent}% of the team's goals",
+  "@wrappedGoalsLine": {
+    "placeholders": {
+      "goals": {
+        "type": "int"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "wrappedAssistsEyebrow": "Assist king",
+  "wrappedAssistsLine": "{count} assists for teammates",
+  "@wrappedAssistsLine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "wrappedDuoTitle": "Duo of the season",
+  "wrappedDuoGoals": "{count} goals together",
+  "@wrappedDuoGoals": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "wrappedMotmEyebrow": "Man of the match",
+  "wrappedMotmLine": "{count, plural, =1{voted best once by the team} other{voted best {count} times by the team}}",
+  "@wrappedMotmLine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "wrappedSeasonMatches": "The season's {count} matches",
+  "@wrappedSeasonMatches": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "wrappedIronEyebrow": "Iron man",
+  "wrappedIronAll": "Played every single match.",
+  "wrappedIronMost": "Played the most matches.",
+  "wrappedFinesEyebrow": "Fine king",
+  "wrappedFinesLine": "into the fine box this season",
+  "wrappedFinesTotal": "The team collected {amount} in total.",
+  "@wrappedFinesTotal": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "wrappedCardsEyebrow": "Card king",
+  "wrappedCardsLine": "{yellow} yellow · {red} red",
+  "@wrappedCardsLine": {
+    "placeholders": {
+      "yellow": {
+        "type": "int"
+      },
+      "red": {
+        "type": "int"
+      }
+    }
+  },
+  "wrappedCardsFooter": "The referee's best friend.",
+  "wrappedLanternEyebrow": "The red lantern",
+  "wrappedLanternLine": "no. {rank} of {count} in Kopa form",
+  "@wrappedLanternLine": {
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "wrappedLanternFooter": "Someone has to keep the lantern lit. Next season is a new chance.",
+  "wrappedOutroTitle": "Awards of the season",
+  "wrappedOutroYou": "Your season",
+  "wrappedOutroYouLine": "{goals} goals · {assists} assists",
+  "@wrappedOutroYouLine": {
+    "placeholders": {
+      "goals": {
+        "type": "int"
+      },
+      "assists": {
+        "type": "int"
+      }
+    }
+  },
+  "wrappedShare": "Share your Wrapped",
+  "wrappedShareText": "Our season in Kopa",
+  "wrappedContinue": "On to the next season",
+  "wrappedSettingsTitle": "What goes in the Wrapped?",
+  "wrappedSettingsBody": "We found the categories your team has data for. Switch off the ones you don't want.",
+  "wrappedSettingsSave": "Save",
+  "wrappedSettingsError": "Couldn't save. Try again.",
+  "wrappedSettingsNoData": "Not enough data this season",
+  "wrappedDetailForm": "{count} players with Kopa form points",
+  "@wrappedDetailForm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "wrappedDetailGoals": "{count} goals recorded",
+  "@wrappedDetailGoals": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "wrappedDetailAssists": "{count} assists recorded",
+  "@wrappedDetailAssists": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "wrappedDetailMotm": "Votes in {count} matches",
+  "@wrappedDetailMotm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "wrappedDetailIron": "Most matches: {count}",
+  "@wrappedDetailIron": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "wrappedDetailFines": "{amount} in fines",
+  "@wrappedDetailFines": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "wrappedDetailCards": "{count} cards recorded",
+  "@wrappedDetailCards": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "wrappedDetailLantern": "Fun award · last in Kopa form",
+  "fineBoxMarkPaid": "Mark as paid",
+  "fineBoxMarkPaidBody": "Mark {fine} for {name} as paid? The amount goes into the fine box.",
+  "@fineBoxMarkPaidBody": {
+    "placeholders": {
+      "fine": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "fineBoxMarkAllPaid": "Mark all as paid ({amount})",
+  "@fineBoxMarkAllPaid": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "fineBoxMarkAllPaidBody": "Mark all of {name}'s unpaid fines ({amount}) as paid? The amount goes into the fine box.",
+  "@fineBoxMarkAllPaidBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "fineBoxMarkPaidFailed": "The fine could not be marked as paid. Try again.",
+  "homeNextTraining": "Next training",
+  "wrappedAssistsLeaders": "Most assists"
 }

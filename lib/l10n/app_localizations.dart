@@ -5137,6 +5137,666 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not fetch the points system.'**
   String get inFormPointsSystemLoadFailed;
+
+  /// No description provided for @seasonOverEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Season over'**
+  String get seasonOverEyebrow;
+
+  /// No description provided for @seasonOverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Good game, everyone!'**
+  String get seasonOverTitle;
+
+  /// No description provided for @seasonEmptyEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'No matches yet'**
+  String get seasonEmptyEyebrow;
+
+  /// No description provided for @seasonEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready for kick-off'**
+  String get seasonEmptyTitle;
+
+  /// No description provided for @seasonRecapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The season in numbers'**
+  String get seasonRecapTitle;
+
+  /// No description provided for @seasonRecapMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'Matches'**
+  String get seasonRecapMatches;
+
+  /// No description provided for @seasonRecapRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'W-D-L'**
+  String get seasonRecapRecord;
+
+  /// No description provided for @seasonRecapGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Goals'**
+  String get seasonRecapGoals;
+
+  /// No description provided for @seasonChecking.
+  ///
+  /// In en, this message translates to:
+  /// **'Looking for the next season on DBU…'**
+  String get seasonChecking;
+
+  /// No description provided for @seasonWaitingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the next season'**
+  String get seasonWaitingTitle;
+
+  /// No description provided for @seasonWaitingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'DBU hasn\'t published your next tournament yet. We check every day and let you know as soon as it\'s ready.'**
+  String get seasonWaitingBody;
+
+  /// No description provided for @seasonLastChecked.
+  ///
+  /// In en, this message translates to:
+  /// **'Last checked {time}'**
+  String seasonLastChecked(String time);
+
+  /// No description provided for @seasonCheckAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Check again'**
+  String get seasonCheckAgain;
+
+  /// No description provided for @seasonImportAnyway.
+  ///
+  /// In en, this message translates to:
+  /// **'I know it\'s there, import anyway'**
+  String get seasonImportAnyway;
+
+  /// No description provided for @seasonReadyBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'New season ready'**
+  String get seasonReadyBadge;
+
+  /// No description provided for @seasonReadyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your next season is on DBU'**
+  String get seasonReadyTitle;
+
+  /// No description provided for @seasonReadyMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{First match {date}} =1{1 match · first {date}} other{{count} matches · first {date}}}'**
+  String seasonReadyMatches(int count, String date);
+
+  /// No description provided for @seasonStartNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Start new season'**
+  String get seasonStartNew;
+
+  /// No description provided for @seasonNotThisOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Not the right one? Find it on DBU'**
+  String get seasonNotThisOne;
+
+  /// No description provided for @seasonManualTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready for a new season?'**
+  String get seasonManualTitle;
+
+  /// No description provided for @seasonManualBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Import the match schedule from DBU to start the next season.'**
+  String get seasonManualBody;
+
+  /// No description provided for @wrappedMissingResultEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'The season is almost over'**
+  String get wrappedMissingResultEyebrow;
+
+  /// No description provided for @wrappedMissingResultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'One result is missing'**
+  String get wrappedMissingResultTitle;
+
+  /// No description provided for @wrappedMissingResultBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the result of the last match, then we can wrap up your season.'**
+  String get wrappedMissingResultBody;
+
+  /// No description provided for @wrappedMissingResultMore.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 more match is missing a result} other{{count} more matches are missing a result}}'**
+  String wrappedMissingResultMore(int count);
+
+  /// No description provided for @wrappedEnterResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter result'**
+  String get wrappedEnterResult;
+
+  /// No description provided for @wrappedMissingResultPlayerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The team leader enters the result, then your Season Wrapped is ready.'**
+  String get wrappedMissingResultPlayerHint;
+
+  /// No description provided for @wrappedTeaserEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Season Wrapped'**
+  String get wrappedTeaserEyebrow;
+
+  /// No description provided for @wrappedTeaserTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your season is wrapped'**
+  String get wrappedTeaserTitle;
+
+  /// No description provided for @wrappedTeaserBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Top scorer, man of the match and your own season.'**
+  String get wrappedTeaserBody;
+
+  /// No description provided for @wrappedTeaserCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch your Wrapped'**
+  String get wrappedTeaserCta;
+
+  /// No description provided for @wrappedSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip – go to the next season'**
+  String get wrappedSkip;
+
+  /// No description provided for @wrappedWatchAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch your Season Wrapped again'**
+  String get wrappedWatchAgain;
+
+  /// No description provided for @wrappedProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Season Wrapped · {current}/{total}'**
+  String wrappedProgress(int current, int total);
+
+  /// No description provided for @wrappedClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get wrappedClose;
+
+  /// No description provided for @wrappedCustomize.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize Wrapped'**
+  String get wrappedCustomize;
+
+  /// No description provided for @wrappedPrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous slide'**
+  String get wrappedPrevious;
+
+  /// No description provided for @wrappedNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next slide'**
+  String get wrappedNext;
+
+  /// No description provided for @wrappedIntroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your season,\nwrapped\nup.'**
+  String get wrappedIntroTitle;
+
+  /// No description provided for @wrappedIntroBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{matches, plural, =1{1 match} other{{matches} matches}}. {goals} goals. One team. Let\'s look back.'**
+  String wrappedIntroBody(int matches, int goals);
+
+  /// No description provided for @wrappedTapToContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to continue →'**
+  String get wrappedTapToContinue;
+
+  /// No description provided for @wrappedTeamEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'The team in numbers'**
+  String get wrappedTeamEyebrow;
+
+  /// No description provided for @wrappedTeamWinsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'wins\nin {played} matches'**
+  String wrappedTeamWinsLabel(int played);
+
+  /// No description provided for @wrappedTeamDrawsLosses.
+  ///
+  /// In en, this message translates to:
+  /// **'{draws} draws · {losses} losses'**
+  String wrappedTeamDrawsLosses(int draws, int losses);
+
+  /// No description provided for @wrappedGoalsFor.
+  ///
+  /// In en, this message translates to:
+  /// **'goals scored'**
+  String get wrappedGoalsFor;
+
+  /// No description provided for @wrappedGoalsAgainst.
+  ///
+  /// In en, this message translates to:
+  /// **'goals conceded'**
+  String get wrappedGoalsAgainst;
+
+  /// No description provided for @wrappedLastFive.
+  ///
+  /// In en, this message translates to:
+  /// **'Last matches'**
+  String get wrappedLastFive;
+
+  /// No description provided for @wrappedFormWin.
+  ///
+  /// In en, this message translates to:
+  /// **'W'**
+  String get wrappedFormWin;
+
+  /// No description provided for @wrappedFormDraw.
+  ///
+  /// In en, this message translates to:
+  /// **'D'**
+  String get wrappedFormDraw;
+
+  /// No description provided for @wrappedFormLoss.
+  ///
+  /// In en, this message translates to:
+  /// **'L'**
+  String get wrappedFormLoss;
+
+  /// No description provided for @wrappedBestStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Best run: {count} wins in a row.'**
+  String wrappedBestStreak(int count);
+
+  /// No description provided for @wrappedYouEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Your season, {name}'**
+  String wrappedYouEyebrow(String name);
+
+  /// No description provided for @wrappedMatchesPlayed.
+  ///
+  /// In en, this message translates to:
+  /// **'matches played'**
+  String get wrappedMatchesPlayed;
+
+  /// No description provided for @wrappedGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'goals'**
+  String get wrappedGoals;
+
+  /// No description provided for @wrappedAssists.
+  ///
+  /// In en, this message translates to:
+  /// **'assists'**
+  String get wrappedAssists;
+
+  /// No description provided for @wrappedTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'training'**
+  String get wrappedTraining;
+
+  /// No description provided for @wrappedYouTopAttendance.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody played more matches than you.'**
+  String get wrappedYouTopAttendance;
+
+  /// No description provided for @wrappedYouMoreMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Only one player played more matches than you.} other{Only {count} players played more matches than you.}}'**
+  String wrappedYouMoreMatches(int count);
+
+  /// No description provided for @wrappedFormEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Kopa form'**
+  String get wrappedFormEyebrow;
+
+  /// No description provided for @wrappedFormYouFinished.
+  ///
+  /// In en, this message translates to:
+  /// **'You finished'**
+  String get wrappedFormYouFinished;
+
+  /// No description provided for @wrappedFormOfPlayers.
+  ///
+  /// In en, this message translates to:
+  /// **'of {count}\nplayers'**
+  String wrappedFormOfPlayers(int count);
+
+  /// No description provided for @wrappedFormWinner.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} won Kopa form'**
+  String wrappedFormWinner(String name);
+
+  /// No description provided for @wrappedYouSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'(you)'**
+  String get wrappedYouSuffix;
+
+  /// No description provided for @wrappedGoalsEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Top scorer'**
+  String get wrappedGoalsEyebrow;
+
+  /// No description provided for @wrappedGoalsLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{goals} goals · {percent}% of the team\'s goals'**
+  String wrappedGoalsLine(int goals, int percent);
+
+  /// No description provided for @wrappedAssistsEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Assist king'**
+  String get wrappedAssistsEyebrow;
+
+  /// No description provided for @wrappedAssistsLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} assists for teammates'**
+  String wrappedAssistsLine(int count);
+
+  /// No description provided for @wrappedDuoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Duo of the season'**
+  String get wrappedDuoTitle;
+
+  /// No description provided for @wrappedDuoGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} goals together'**
+  String wrappedDuoGoals(int count);
+
+  /// No description provided for @wrappedMotmEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Man of the match'**
+  String get wrappedMotmEyebrow;
+
+  /// No description provided for @wrappedMotmLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{voted best once by the team} other{voted best {count} times by the team}}'**
+  String wrappedMotmLine(int count);
+
+  /// No description provided for @wrappedSeasonMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'The season\'s {count} matches'**
+  String wrappedSeasonMatches(int count);
+
+  /// No description provided for @wrappedIronEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Iron man'**
+  String get wrappedIronEyebrow;
+
+  /// No description provided for @wrappedIronAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Played every single match.'**
+  String get wrappedIronAll;
+
+  /// No description provided for @wrappedIronMost.
+  ///
+  /// In en, this message translates to:
+  /// **'Played the most matches.'**
+  String get wrappedIronMost;
+
+  /// No description provided for @wrappedFinesEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Fine king'**
+  String get wrappedFinesEyebrow;
+
+  /// No description provided for @wrappedFinesLine.
+  ///
+  /// In en, this message translates to:
+  /// **'into the fine box this season'**
+  String get wrappedFinesLine;
+
+  /// No description provided for @wrappedFinesTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'The team collected {amount} in total.'**
+  String wrappedFinesTotal(String amount);
+
+  /// No description provided for @wrappedCardsEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Card king'**
+  String get wrappedCardsEyebrow;
+
+  /// No description provided for @wrappedCardsLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{yellow} yellow · {red} red'**
+  String wrappedCardsLine(int yellow, int red);
+
+  /// No description provided for @wrappedCardsFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'The referee\'s best friend.'**
+  String get wrappedCardsFooter;
+
+  /// No description provided for @wrappedLanternEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'The red lantern'**
+  String get wrappedLanternEyebrow;
+
+  /// No description provided for @wrappedLanternLine.
+  ///
+  /// In en, this message translates to:
+  /// **'no. {rank} of {count} in Kopa form'**
+  String wrappedLanternLine(int rank, int count);
+
+  /// No description provided for @wrappedLanternFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Someone has to keep the lantern lit. Next season is a new chance.'**
+  String get wrappedLanternFooter;
+
+  /// No description provided for @wrappedOutroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Awards of the season'**
+  String get wrappedOutroTitle;
+
+  /// No description provided for @wrappedOutroYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Your season'**
+  String get wrappedOutroYou;
+
+  /// No description provided for @wrappedOutroYouLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{goals} goals · {assists} assists'**
+  String wrappedOutroYouLine(int goals, int assists);
+
+  /// No description provided for @wrappedShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share your Wrapped'**
+  String get wrappedShare;
+
+  /// No description provided for @wrappedShareText.
+  ///
+  /// In en, this message translates to:
+  /// **'Our season in Kopa'**
+  String get wrappedShareText;
+
+  /// No description provided for @wrappedContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'On to the next season'**
+  String get wrappedContinue;
+
+  /// No description provided for @wrappedSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What goes in the Wrapped?'**
+  String get wrappedSettingsTitle;
+
+  /// No description provided for @wrappedSettingsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We found the categories your team has data for. Switch off the ones you don\'t want.'**
+  String get wrappedSettingsBody;
+
+  /// No description provided for @wrappedSettingsSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get wrappedSettingsSave;
+
+  /// No description provided for @wrappedSettingsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save. Try again.'**
+  String get wrappedSettingsError;
+
+  /// No description provided for @wrappedSettingsNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough data this season'**
+  String get wrappedSettingsNoData;
+
+  /// No description provided for @wrappedDetailForm.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} players with Kopa form points'**
+  String wrappedDetailForm(int count);
+
+  /// No description provided for @wrappedDetailGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} goals recorded'**
+  String wrappedDetailGoals(int count);
+
+  /// No description provided for @wrappedDetailAssists.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} assists recorded'**
+  String wrappedDetailAssists(int count);
+
+  /// No description provided for @wrappedDetailMotm.
+  ///
+  /// In en, this message translates to:
+  /// **'Votes in {count} matches'**
+  String wrappedDetailMotm(int count);
+
+  /// No description provided for @wrappedDetailIron.
+  ///
+  /// In en, this message translates to:
+  /// **'Most matches: {count}'**
+  String wrappedDetailIron(int count);
+
+  /// No description provided for @wrappedDetailFines.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} in fines'**
+  String wrappedDetailFines(String amount);
+
+  /// No description provided for @wrappedDetailCards.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} cards recorded'**
+  String wrappedDetailCards(int count);
+
+  /// No description provided for @wrappedDetailLantern.
+  ///
+  /// In en, this message translates to:
+  /// **'Fun award · last in Kopa form'**
+  String get wrappedDetailLantern;
+
+  /// No description provided for @fineBoxMarkPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as paid'**
+  String get fineBoxMarkPaid;
+
+  /// No description provided for @fineBoxMarkPaidBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark {fine} for {name} as paid? The amount goes into the fine box.'**
+  String fineBoxMarkPaidBody(String fine, String name);
+
+  /// No description provided for @fineBoxMarkAllPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all as paid ({amount})'**
+  String fineBoxMarkAllPaid(String amount);
+
+  /// No description provided for @fineBoxMarkAllPaidBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all of {name}\'s unpaid fines ({amount}) as paid? The amount goes into the fine box.'**
+  String fineBoxMarkAllPaidBody(String name, String amount);
+
+  /// No description provided for @fineBoxMarkPaidFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The fine could not be marked as paid. Try again.'**
+  String get fineBoxMarkPaidFailed;
+
+  /// No description provided for @homeNextTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Next training'**
+  String get homeNextTraining;
+
+  /// No description provided for @wrappedAssistsLeaders.
+  ///
+  /// In en, this message translates to:
+  /// **'Most assists'**
+  String get wrappedAssistsLeaders;
 }
 
 class _AppLocalizationsDelegate

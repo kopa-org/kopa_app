@@ -2806,4 +2806,447 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String get inFormPointsSystemLoadFailed => 'Kunne ikke hente pointsystemet.';
+
+  @override
+  String get seasonOverEyebrow => 'Sæsonen er slut';
+
+  @override
+  String get seasonOverTitle => 'Tak for kampen!';
+
+  @override
+  String get seasonEmptyEyebrow => 'Ingen kampe endnu';
+
+  @override
+  String get seasonEmptyTitle => 'Klar til kickoff';
+
+  @override
+  String get seasonRecapTitle => 'Sæsonen i tal';
+
+  @override
+  String get seasonRecapMatches => 'Kampe';
+
+  @override
+  String get seasonRecapRecord => 'V-U-T';
+
+  @override
+  String get seasonRecapGoals => 'Mål';
+
+  @override
+  String get seasonChecking => 'Kigger efter næste sæson på DBU…';
+
+  @override
+  String get seasonWaitingTitle => 'Venter på næste sæson';
+
+  @override
+  String get seasonWaitingBody =>
+      'DBU har endnu ikke offentliggjort jeres næste turnering. Vi tjekker hver dag og giver besked, så snart den er klar.';
+
+  @override
+  String seasonLastChecked(String time) {
+    return 'Sidst tjekket $time';
+  }
+
+  @override
+  String get seasonCheckAgain => 'Tjek igen';
+
+  @override
+  String get seasonImportAnyway => 'Jeg ved, den er der – importér alligevel';
+
+  @override
+  String get seasonReadyBadge => 'Ny sæson klar';
+
+  @override
+  String get seasonReadyTitle => 'Jeres næste sæson er på DBU';
+
+  @override
+  String seasonReadyMatches(int count, String date) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count kampe · første $date',
+      one: '1 kamp · første $date',
+      zero: 'Første kamp $date',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get seasonStartNew => 'Start ny sæson';
+
+  @override
+  String get seasonNotThisOne => 'Ikke den rigtige? Find den på DBU';
+
+  @override
+  String get seasonManualTitle => 'Klar til en ny sæson?';
+
+  @override
+  String get seasonManualBody =>
+      'Importér kampprogrammet fra DBU for at starte næste sæson.';
+
+  @override
+  String get wrappedMissingResultEyebrow => 'Sæsonen er næsten slut';
+
+  @override
+  String get wrappedMissingResultTitle => 'Der mangler et resultat';
+
+  @override
+  String get wrappedMissingResultBody =>
+      'Indtast resultatet af sidste kamp, så kan vi pakke jeres sæson ind.';
+
+  @override
+  String wrappedMissingResultMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count kampe mere mangler resultat',
+      one: '1 kamp mere mangler resultat',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get wrappedEnterResult => 'Indtast resultat';
+
+  @override
+  String get wrappedMissingResultPlayerHint =>
+      'Holdlederen indtaster resultatet, så er jeres Season Wrapped klar.';
+
+  @override
+  String get wrappedTeaserEyebrow => 'Season Wrapped';
+
+  @override
+  String get wrappedTeaserTitle => 'Jeres sæson er pakket ind';
+
+  @override
+  String get wrappedTeaserBody =>
+      'Målkongen, kampens spiller og din egen sæson.';
+
+  @override
+  String get wrappedTeaserCta => 'Se jeres Wrapped';
+
+  @override
+  String get wrappedSkip => 'Spring over – gå til næste sæson';
+
+  @override
+  String get wrappedWatchAgain => 'Se jeres Season Wrapped igen';
+
+  @override
+  String wrappedProgress(int current, int total) {
+    return 'Season Wrapped · $current/$total';
+  }
+
+  @override
+  String get wrappedClose => 'Luk';
+
+  @override
+  String get wrappedCustomize => 'Tilpas Wrapped';
+
+  @override
+  String get wrappedPrevious => 'Forrige slide';
+
+  @override
+  String get wrappedNext => 'Næste slide';
+
+  @override
+  String get wrappedIntroTitle => 'Sæsonen,\npakket\nind.';
+
+  @override
+  String wrappedIntroBody(int matches, int goals) {
+    String _temp0 = intl.Intl.pluralLogic(
+      matches,
+      locale: localeName,
+      other: '$matches kampe',
+      one: '1 kamp',
+    );
+    return '$_temp0. $goals mål. Et hold. Lad os se tilbage.';
+  }
+
+  @override
+  String get wrappedTapToContinue => 'Tryk for at fortsætte →';
+
+  @override
+  String get wrappedTeamEyebrow => 'Holdet i tal';
+
+  @override
+  String wrappedTeamWinsLabel(int played) {
+    return 'sejre\ni $played kampe';
+  }
+
+  @override
+  String wrappedTeamDrawsLosses(int draws, int losses) {
+    return '$draws uafgjorte · $losses nederlag';
+  }
+
+  @override
+  String get wrappedGoalsFor => 'mål scoret';
+
+  @override
+  String get wrappedGoalsAgainst => 'mål imod';
+
+  @override
+  String get wrappedLastFive => 'Sidste kampe';
+
+  @override
+  String get wrappedFormWin => 'V';
+
+  @override
+  String get wrappedFormDraw => 'U';
+
+  @override
+  String get wrappedFormLoss => 'T';
+
+  @override
+  String wrappedBestStreak(int count) {
+    return 'Bedste stime: $count sejre i træk.';
+  }
+
+  @override
+  String wrappedYouEyebrow(String name) {
+    return 'Din sæson, $name';
+  }
+
+  @override
+  String get wrappedMatchesPlayed => 'kampe spillet';
+
+  @override
+  String get wrappedGoals => 'mål';
+
+  @override
+  String get wrappedAssists => 'assists';
+
+  @override
+  String get wrappedTraining => 'træning';
+
+  @override
+  String get wrappedYouTopAttendance => 'Ingen var med i flere kampe end dig.';
+
+  @override
+  String wrappedYouMoreMatches(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Kun $count spillere var med i flere kampe end dig.',
+      one: 'Kun én spiller var med i flere kampe end dig.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get wrappedFormEyebrow => 'Kopa-form';
+
+  @override
+  String get wrappedFormYouFinished => 'Du sluttede som';
+
+  @override
+  String wrappedFormOfPlayers(int count) {
+    return 'af $count\nspillere';
+  }
+
+  @override
+  String wrappedFormWinner(String name) {
+    return '$name vandt Kopa-form';
+  }
+
+  @override
+  String get wrappedYouSuffix => '(dig)';
+
+  @override
+  String get wrappedGoalsEyebrow => 'Målkongen';
+
+  @override
+  String wrappedGoalsLine(int goals, int percent) {
+    return '$goals mål · $percent% af holdets mål';
+  }
+
+  @override
+  String get wrappedAssistsEyebrow => 'Assistkongen';
+
+  @override
+  String wrappedAssistsLine(int count) {
+    return '$count oplæg til holdkammeraterne';
+  }
+
+  @override
+  String get wrappedDuoTitle => 'Sæsonens makkerpar';
+
+  @override
+  String wrappedDuoGoals(int count) {
+    return '$count mål sammen';
+  }
+
+  @override
+  String get wrappedMotmEyebrow => 'Kampens spiller';
+
+  @override
+  String wrappedMotmLine(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'kåret $count gange af holdet',
+      one: 'kåret 1 gang af holdet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String wrappedSeasonMatches(int count) {
+    return 'Sæsonens $count kampe';
+  }
+
+  @override
+  String get wrappedIronEyebrow => 'Jernmanden';
+
+  @override
+  String get wrappedIronAll => 'Med i hver eneste kamp.';
+
+  @override
+  String get wrappedIronMost => 'Med i flest kampe.';
+
+  @override
+  String get wrappedFinesEyebrow => 'Bødekongen';
+
+  @override
+  String get wrappedFinesLine => 'i bødekassen denne sæson';
+
+  @override
+  String wrappedFinesTotal(String amount) {
+    return 'Holdet samlede $amount ind i alt.';
+  }
+
+  @override
+  String get wrappedCardsEyebrow => 'Kortkongen';
+
+  @override
+  String wrappedCardsLine(int yellow, int red) {
+    String _temp0 = intl.Intl.pluralLogic(
+      yellow,
+      locale: localeName,
+      other: '$yellow gule',
+      one: '1 gult',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      red,
+      locale: localeName,
+      other: '$red røde',
+      one: '1 rødt',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
+  String get wrappedCardsFooter => 'Dommerens bedste ven.';
+
+  @override
+  String get wrappedLanternEyebrow => 'Den røde lanterne';
+
+  @override
+  String wrappedLanternLine(int rank, int count) {
+    return 'nr. $rank af $count i Kopa-form';
+  }
+
+  @override
+  String get wrappedLanternFooter =>
+      'Nogen skal holde lanternen tændt. Næste sæson er en ny chance.';
+
+  @override
+  String get wrappedOutroTitle => 'Sæsonens priser';
+
+  @override
+  String get wrappedOutroYou => 'Din sæson';
+
+  @override
+  String wrappedOutroYouLine(int goals, int assists) {
+    return '$goals mål · $assists assists';
+  }
+
+  @override
+  String get wrappedShare => 'Del jeres Wrapped';
+
+  @override
+  String get wrappedShareText => 'Vores sæson i Kopa';
+
+  @override
+  String get wrappedContinue => 'Videre til næste sæson';
+
+  @override
+  String get wrappedSettingsTitle => 'Hvad skal med i Wrapped?';
+
+  @override
+  String get wrappedSettingsBody =>
+      'Vi har fundet de kategorier, holdet har data til. Slå dem fra, I ikke vil have med.';
+
+  @override
+  String get wrappedSettingsSave => 'Gem';
+
+  @override
+  String get wrappedSettingsError => 'Kunne ikke gemme. Prøv igen.';
+
+  @override
+  String get wrappedSettingsNoData => 'Ikke nok data i denne sæson';
+
+  @override
+  String wrappedDetailForm(int count) {
+    return '$count spillere med Kopa-form-point';
+  }
+
+  @override
+  String wrappedDetailGoals(int count) {
+    return '$count mål registreret';
+  }
+
+  @override
+  String wrappedDetailAssists(int count) {
+    return '$count assists registreret';
+  }
+
+  @override
+  String wrappedDetailMotm(int count) {
+    return 'Der er stemt i $count kampe';
+  }
+
+  @override
+  String wrappedDetailIron(int count) {
+    return 'Flest kampe: $count';
+  }
+
+  @override
+  String wrappedDetailFines(String amount) {
+    return '$amount i bøder';
+  }
+
+  @override
+  String wrappedDetailCards(int count) {
+    return '$count kort registreret';
+  }
+
+  @override
+  String get wrappedDetailLantern => 'Sjov pris · sidst i Kopa-form';
+
+  @override
+  String get fineBoxMarkPaid => 'Markér som betalt';
+
+  @override
+  String fineBoxMarkPaidBody(String fine, String name) {
+    return 'Markér $fine for $name som betalt? Beløbet lægges i bødekassen.';
+  }
+
+  @override
+  String fineBoxMarkAllPaid(String amount) {
+    return 'Markér alle som betalt ($amount)';
+  }
+
+  @override
+  String fineBoxMarkAllPaidBody(String name, String amount) {
+    return 'Markér alle ${name}s ubetalte bøder ($amount) som betalt? Beløbet lægges i bødekassen.';
+  }
+
+  @override
+  String get fineBoxMarkPaidFailed =>
+      'Bøden kunne ikke markeres som betalt. Prøv igen.';
+
+  @override
+  String get homeNextTraining => 'Næste træning';
+
+  @override
+  String get wrappedAssistsLeaders => 'Flest oplæg';
 }

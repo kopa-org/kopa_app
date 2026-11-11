@@ -56,6 +56,25 @@ abstract final class TeamDbuRepository {
     }
   }
 
+  /// Whether the team's next DBU season is published yet. Used by the home
+  /// screen once the current season has no matches left. [refresh] asks the
+  /// backend to re-check DBU (it rate limits this itself).
+  static Future<DbuSeasonOutlook> getSeasonOutlook(
+    int teamId, {
+    bool refresh = false,
+  }) async {
+    final uri =
+        Uri.parse('${ApiConfig.baseUrl}/teams/$teamId/dbu/season_outlook')
+            .replace(queryParameters: refresh ? {'refresh': 'true'} : null);
+    final response = await _apiClient.get(uri);
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception('Season outlook failed (${response.statusCode})');
+    }
+    return DbuSeasonOutlook.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
+  }
+
   static Future<DbuStandings?> getStandings(int teamId) async {
     final response = await _apiClient.get(
       Uri.parse('${ApiConfig.baseUrl}/teams/$teamId/dbu/standings'),
@@ -214,6 +233,7 @@ class DbuNextSeasonCandidate {
   final String teamName;
   final String seriesName;
   final String poolLabel;
+  final String seasonLabel;
   final int upcomingMatchCount;
   final DateTime? firstUpcomingMatchOn;
 
@@ -223,6 +243,7 @@ class DbuNextSeasonCandidate {
     required this.teamName,
     required this.seriesName,
     required this.poolLabel,
+    this.seasonLabel = '',
     required this.upcomingMatchCount,
     required this.firstUpcomingMatchOn,
   });
@@ -234,6 +255,7 @@ class DbuNextSeasonCandidate {
       teamName: json['teamName']?.toString() ?? '',
       seriesName: json['seriesName']?.toString() ?? '',
       poolLabel: json['poolLabel']?.toString() ?? '',
+      seasonLabel: json['seasonLabel']?.toString() ?? '',
       upcomingMatchCount: _intFromJson(json['upcomingMatchCount']) ?? 0,
       firstUpcomingMatchOn:
           DateTime.tryParse(json['firstUpcomingMatchOn']?.toString() ?? ''),
@@ -242,10 +264,60 @@ class DbuNextSeasonCandidate {
 
   /// The DBU context the calendar import expects. Deliberately leaves out the
   /// team label and club name so the Kopa team keeps its current name.
+  /// Includes the DBU season label (e.g. "Forår 2027") when known, so the new
+  /// Kopa season is named after it rather than after today's date.
   Map<String, dynamic> toImportContext() => {
         'dbuTeamId': dbuTeamId,
         'dbuPoolId': dbuPoolId,
         'seriesName': seriesName,
         'poolLabel': poolLabel,
+        if (seasonLabel.isNotEmpty) 'season': seasonLabel,
       };
+}
+
+enum DbuSeasonOutlookStatus {
+  /// The next season is published on DBU and can be imported.
+  ready,
+
+  /// Nothing published yet (or DBU could not be reached).
+  waiting,
+
+  /// No DBU link or lookups disabled: only a manual import is possible.
+  unavailable,
+}
+
+class DbuSeasonOutlook {
+  final DbuSeasonOutlookStatus status;
+  final List<DbuNextSeasonCandidate> candidates;
+  final DateTime? checkedAt;
+
+  const DbuSeasonOutlook({
+    required this.status,
+    this.candidates = const [],
+    this.checkedAt,
+  });
+
+  DbuNextSeasonCandidate? get bestCandidate =>
+      candidates.isEmpty ? null : candidates.first;
+
+  factory DbuSeasonOutlook.fromJson(Map<String, dynamic> json) {
+    final candidates = json['candidates'] is List<dynamic>
+        ? (json['candidates'] as List<dynamic>)
+            .whereType<Map<String, dynamic>>()
+            .map(DbuNextSeasonCandidate.fromJson)
+            .toList(growable: false)
+        : const <DbuNextSeasonCandidate>[];
+    final status = switch (json['status']) {
+      'ready' when candidates.isNotEmpty => DbuSeasonOutlookStatus.ready,
+      'unavailable' => DbuSeasonOutlookStatus.unavailable,
+      _ => DbuSeasonOutlookStatus.waiting,
+    };
+
+    return DbuSeasonOutlook(
+      status: status,
+      candidates: candidates,
+      checkedAt:
+          DateTime.tryParse(json['checked_at']?.toString() ?? '')?.toLocal(),
+    );
+  }
 }

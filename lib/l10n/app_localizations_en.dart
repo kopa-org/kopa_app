@@ -2809,4 +2809,435 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get inFormPointsSystemLoadFailed =>
       'Could not fetch the points system.';
+
+  @override
+  String get seasonOverEyebrow => 'Season over';
+
+  @override
+  String get seasonOverTitle => 'Good game, everyone!';
+
+  @override
+  String get seasonEmptyEyebrow => 'No matches yet';
+
+  @override
+  String get seasonEmptyTitle => 'Ready for kick-off';
+
+  @override
+  String get seasonRecapTitle => 'The season in numbers';
+
+  @override
+  String get seasonRecapMatches => 'Matches';
+
+  @override
+  String get seasonRecapRecord => 'W-D-L';
+
+  @override
+  String get seasonRecapGoals => 'Goals';
+
+  @override
+  String get seasonChecking => 'Looking for the next season on DBU…';
+
+  @override
+  String get seasonWaitingTitle => 'Waiting for the next season';
+
+  @override
+  String get seasonWaitingBody =>
+      'DBU hasn\'t published your next tournament yet. We check every day and let you know as soon as it\'s ready.';
+
+  @override
+  String seasonLastChecked(String time) {
+    return 'Last checked $time';
+  }
+
+  @override
+  String get seasonCheckAgain => 'Check again';
+
+  @override
+  String get seasonImportAnyway => 'I know it\'s there, import anyway';
+
+  @override
+  String get seasonReadyBadge => 'New season ready';
+
+  @override
+  String get seasonReadyTitle => 'Your next season is on DBU';
+
+  @override
+  String seasonReadyMatches(int count, String date) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count matches · first $date',
+      one: '1 match · first $date',
+      zero: 'First match $date',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get seasonStartNew => 'Start new season';
+
+  @override
+  String get seasonNotThisOne => 'Not the right one? Find it on DBU';
+
+  @override
+  String get seasonManualTitle => 'Ready for a new season?';
+
+  @override
+  String get seasonManualBody =>
+      'Import the match schedule from DBU to start the next season.';
+
+  @override
+  String get wrappedMissingResultEyebrow => 'The season is almost over';
+
+  @override
+  String get wrappedMissingResultTitle => 'One result is missing';
+
+  @override
+  String get wrappedMissingResultBody =>
+      'Enter the result of the last match, then we can wrap up your season.';
+
+  @override
+  String wrappedMissingResultMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count more matches are missing a result',
+      one: '1 more match is missing a result',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get wrappedEnterResult => 'Enter result';
+
+  @override
+  String get wrappedMissingResultPlayerHint =>
+      'The team leader enters the result, then your Season Wrapped is ready.';
+
+  @override
+  String get wrappedTeaserEyebrow => 'Season Wrapped';
+
+  @override
+  String get wrappedTeaserTitle => 'Your season is wrapped';
+
+  @override
+  String get wrappedTeaserBody =>
+      'Top scorer, man of the match and your own season.';
+
+  @override
+  String get wrappedTeaserCta => 'Watch your Wrapped';
+
+  @override
+  String get wrappedSkip => 'Skip – go to the next season';
+
+  @override
+  String get wrappedWatchAgain => 'Watch your Season Wrapped again';
+
+  @override
+  String wrappedProgress(int current, int total) {
+    return 'Season Wrapped · $current/$total';
+  }
+
+  @override
+  String get wrappedClose => 'Close';
+
+  @override
+  String get wrappedCustomize => 'Customize Wrapped';
+
+  @override
+  String get wrappedPrevious => 'Previous slide';
+
+  @override
+  String get wrappedNext => 'Next slide';
+
+  @override
+  String get wrappedIntroTitle => 'Your season,\nwrapped\nup.';
+
+  @override
+  String wrappedIntroBody(int matches, int goals) {
+    String _temp0 = intl.Intl.pluralLogic(
+      matches,
+      locale: localeName,
+      other: '$matches matches',
+      one: '1 match',
+    );
+    return '$_temp0. $goals goals. One team. Let\'s look back.';
+  }
+
+  @override
+  String get wrappedTapToContinue => 'Tap to continue →';
+
+  @override
+  String get wrappedTeamEyebrow => 'The team in numbers';
+
+  @override
+  String wrappedTeamWinsLabel(int played) {
+    return 'wins\nin $played matches';
+  }
+
+  @override
+  String wrappedTeamDrawsLosses(int draws, int losses) {
+    return '$draws draws · $losses losses';
+  }
+
+  @override
+  String get wrappedGoalsFor => 'goals scored';
+
+  @override
+  String get wrappedGoalsAgainst => 'goals conceded';
+
+  @override
+  String get wrappedLastFive => 'Last matches';
+
+  @override
+  String get wrappedFormWin => 'W';
+
+  @override
+  String get wrappedFormDraw => 'D';
+
+  @override
+  String get wrappedFormLoss => 'L';
+
+  @override
+  String wrappedBestStreak(int count) {
+    return 'Best run: $count wins in a row.';
+  }
+
+  @override
+  String wrappedYouEyebrow(String name) {
+    return 'Your season, $name';
+  }
+
+  @override
+  String get wrappedMatchesPlayed => 'matches played';
+
+  @override
+  String get wrappedGoals => 'goals';
+
+  @override
+  String get wrappedAssists => 'assists';
+
+  @override
+  String get wrappedTraining => 'training';
+
+  @override
+  String get wrappedYouTopAttendance => 'Nobody played more matches than you.';
+
+  @override
+  String wrappedYouMoreMatches(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Only $count players played more matches than you.',
+      one: 'Only one player played more matches than you.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get wrappedFormEyebrow => 'Kopa form';
+
+  @override
+  String get wrappedFormYouFinished => 'You finished';
+
+  @override
+  String wrappedFormOfPlayers(int count) {
+    return 'of $count\nplayers';
+  }
+
+  @override
+  String wrappedFormWinner(String name) {
+    return '$name won Kopa form';
+  }
+
+  @override
+  String get wrappedYouSuffix => '(you)';
+
+  @override
+  String get wrappedGoalsEyebrow => 'Top scorer';
+
+  @override
+  String wrappedGoalsLine(int goals, int percent) {
+    return '$goals goals · $percent% of the team\'s goals';
+  }
+
+  @override
+  String get wrappedAssistsEyebrow => 'Assist king';
+
+  @override
+  String wrappedAssistsLine(int count) {
+    return '$count assists for teammates';
+  }
+
+  @override
+  String get wrappedDuoTitle => 'Duo of the season';
+
+  @override
+  String wrappedDuoGoals(int count) {
+    return '$count goals together';
+  }
+
+  @override
+  String get wrappedMotmEyebrow => 'Man of the match';
+
+  @override
+  String wrappedMotmLine(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'voted best $count times by the team',
+      one: 'voted best once by the team',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String wrappedSeasonMatches(int count) {
+    return 'The season\'s $count matches';
+  }
+
+  @override
+  String get wrappedIronEyebrow => 'Iron man';
+
+  @override
+  String get wrappedIronAll => 'Played every single match.';
+
+  @override
+  String get wrappedIronMost => 'Played the most matches.';
+
+  @override
+  String get wrappedFinesEyebrow => 'Fine king';
+
+  @override
+  String get wrappedFinesLine => 'into the fine box this season';
+
+  @override
+  String wrappedFinesTotal(String amount) {
+    return 'The team collected $amount in total.';
+  }
+
+  @override
+  String get wrappedCardsEyebrow => 'Card king';
+
+  @override
+  String wrappedCardsLine(int yellow, int red) {
+    return '$yellow yellow · $red red';
+  }
+
+  @override
+  String get wrappedCardsFooter => 'The referee\'s best friend.';
+
+  @override
+  String get wrappedLanternEyebrow => 'The red lantern';
+
+  @override
+  String wrappedLanternLine(int rank, int count) {
+    return 'no. $rank of $count in Kopa form';
+  }
+
+  @override
+  String get wrappedLanternFooter =>
+      'Someone has to keep the lantern lit. Next season is a new chance.';
+
+  @override
+  String get wrappedOutroTitle => 'Awards of the season';
+
+  @override
+  String get wrappedOutroYou => 'Your season';
+
+  @override
+  String wrappedOutroYouLine(int goals, int assists) {
+    return '$goals goals · $assists assists';
+  }
+
+  @override
+  String get wrappedShare => 'Share your Wrapped';
+
+  @override
+  String get wrappedShareText => 'Our season in Kopa';
+
+  @override
+  String get wrappedContinue => 'On to the next season';
+
+  @override
+  String get wrappedSettingsTitle => 'What goes in the Wrapped?';
+
+  @override
+  String get wrappedSettingsBody =>
+      'We found the categories your team has data for. Switch off the ones you don\'t want.';
+
+  @override
+  String get wrappedSettingsSave => 'Save';
+
+  @override
+  String get wrappedSettingsError => 'Couldn\'t save. Try again.';
+
+  @override
+  String get wrappedSettingsNoData => 'Not enough data this season';
+
+  @override
+  String wrappedDetailForm(int count) {
+    return '$count players with Kopa form points';
+  }
+
+  @override
+  String wrappedDetailGoals(int count) {
+    return '$count goals recorded';
+  }
+
+  @override
+  String wrappedDetailAssists(int count) {
+    return '$count assists recorded';
+  }
+
+  @override
+  String wrappedDetailMotm(int count) {
+    return 'Votes in $count matches';
+  }
+
+  @override
+  String wrappedDetailIron(int count) {
+    return 'Most matches: $count';
+  }
+
+  @override
+  String wrappedDetailFines(String amount) {
+    return '$amount in fines';
+  }
+
+  @override
+  String wrappedDetailCards(int count) {
+    return '$count cards recorded';
+  }
+
+  @override
+  String get wrappedDetailLantern => 'Fun award · last in Kopa form';
+
+  @override
+  String get fineBoxMarkPaid => 'Mark as paid';
+
+  @override
+  String fineBoxMarkPaidBody(String fine, String name) {
+    return 'Mark $fine for $name as paid? The amount goes into the fine box.';
+  }
+
+  @override
+  String fineBoxMarkAllPaid(String amount) {
+    return 'Mark all as paid ($amount)';
+  }
+
+  @override
+  String fineBoxMarkAllPaidBody(String name, String amount) {
+    return 'Mark all of $name\'s unpaid fines ($amount) as paid? The amount goes into the fine box.';
+  }
+
+  @override
+  String get fineBoxMarkPaidFailed =>
+      'The fine could not be marked as paid. Try again.';
+
+  @override
+  String get homeNextTraining => 'Next training';
+
+  @override
+  String get wrappedAssistsLeaders => 'Most assists';
 }

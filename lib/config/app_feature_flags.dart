@@ -29,7 +29,8 @@ class AppFeatureFlags extends Equatable {
         currentBuildNumber < minimumRequiredBuildNumber;
 
     return AppFeatureFlags(
-      showStatistics: true, // TODO: temporarily hardcoded on (was json['statistics'] == true)
+      showStatistics:
+          true, // TODO: temporarily hardcoded on (was json['statistics'] == true)
       showFineBox: true,
       maintenanceMode: json['maintenance'] == true,
       updateRequired: serverRequiresUpdate || buildRequiresUpdate,

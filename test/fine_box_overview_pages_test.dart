@@ -78,6 +78,77 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('fine admins mark another player\'s fine as paid',
+      (tester) async {
+    final marked = <List<int>>[];
+    var loads = 0;
+    await tester.pumpWidget(_app(FineBoxHistoryPage(
+      title: 'Alle bøder',
+      canDelete: true,
+      loadFineBox: () async {
+        loads++;
+        return _fineBox();
+      },
+      markPaid: (ids) async => marked.add(ids),
+    )));
+    await tester.pumpAndSettle();
+
+    // Only unpaid fines can be marked, and "mark all" is per player only.
+    expect(find.byKey(const ValueKey('mark-paid-fine-2')), findsNothing);
+    expect(find.byKey(const ValueKey('mark-all-fines-paid')), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('mark-paid-fine-1')));
+    await tester.pumpAndSettle();
+    expect(
+      find.text(
+          'Markér For sent for Anna som betalt? Beløbet lægges i bødekassen.'),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('Markér som betalt').last);
+    await tester.pumpAndSettle();
+
+    expect(marked, [
+      [1]
+    ]);
+    expect(loads, 2);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a player\'s history marks all their unpaid fines paid',
+      (tester) async {
+    final marked = <List<int>>[];
+    final fineBox = FineBoxDetails(
+      id: 1,
+      currentAmount: 0,
+      totalOwedAmount: 75,
+      createdAt: _now,
+      updatedAt: _now,
+      withdrawals: const [],
+      userFineDetails: [
+        _userFines(1, 'Anna', [
+          _fine(1, 'For sent', 25, paid: false),
+          _fine(3, 'Trøje', 50, paid: false),
+          _fine(4, 'Glemt', 10, paid: true),
+        ]),
+      ],
+    );
+    await tester.pumpWidget(_app(FineBoxHistoryPage(
+      title: 'Anna',
+      userId: 1,
+      canDelete: true,
+      loadFineBox: () async => fineBox,
+      markPaid: (ids) async => marked.add(ids),
+    )));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('mark-all-fines-paid')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Markér som betalt').last);
+    await tester.pumpAndSettle();
+
+    expect(marked.single..sort(), [1, 3]);
+  });
+
   testWidgets('players without management rights cannot delete',
       (tester) async {
     await tester.pumpWidget(_app(FineBoxHistoryPage(
@@ -87,6 +158,7 @@ void main() {
     )));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('delete-fine-1')), findsNothing);
+    expect(find.byKey(const ValueKey('mark-paid-fine-1')), findsNothing);
   });
 }
 

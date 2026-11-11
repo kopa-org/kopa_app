@@ -279,3 +279,37 @@ class AppColors extends ThemeExtension<AppColors> {
     );
   }
 }
+
+/// Fixed brand colours (kopa_brand) of the Season Wrapped story and its
+/// entry points. The story is a branded moment, so it ignores the app theme;
+/// the deeper shades keep small text readable.
+abstract final class WrappedPalette {
+  static const jord = Color(0xFF2D1000);
+  static const graes = Color(0xFF00943C);
+  static const lysGraes = Color(0xFF9FFDCC);
+  static const himmel = Color(0xFF1975F2);
+  static const lysHimmel = Color(0xFFA0EAFF);
+  static const sol = Color(0xFFFFFF00);
+  static const solnedgang = Color(0xFFFF9F1A);
+  static const offWhite = Color(0xFFF1F3F2);
+  static const deepHimmel = Color(0xFF1257B5);
+  static const deepGraes = Color(0xFF00702D);
+  static const cream = Color(0xFFFFF0DB);
+  static const night = Color(0xFF1E0A00);
+  static const lanternRed = Color(0xFFE5372B);
+
+  /// Losses in the form row: the app's red (AppColors.error).
+  static const loss = Color(0xFFED2415);
+  static const lanternGlow = Color(0x99E5372B);
+  static const lanternGlowEnd = Color(0x00E5372B);
+  static const lanternLight = Color(0xFFFFD0CC);
+  static const lanternLabel = Color(0xFFFF8A80);
+  static const muted = Color(0xFF3F4A46);
+  static const textSecondary = Color(0xFF454B45);
+  static const lightSkyText = Color(0xFFD1F5FF);
+  static const mintText = Color(0xFFE7FFF2);
+  static const warningText = Color(0xFFA85F00);
+  static const inactive = Color(0xFFC9D2CD);
+  static const white = Color(0xFFFFFFFF);
+  static const black = Color(0xFF000000);
+}

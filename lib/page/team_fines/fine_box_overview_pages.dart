@@ -5,12 +5,14 @@ class FineBoxPlayersPage extends StatefulWidget {
   final bool canDelete;
   final Future<FineBoxDetails> Function() loadFineBox;
   final Future<void> Function(int fineId) deleteFine;
+  final Future<void> Function(List<int> fineIds) markPaid;
 
   const FineBoxPlayersPage({
     super.key,
     required this.canDelete,
     this.loadFineBox = FinesRepository.getFineBox,
     this.deleteFine = FinesRepository.deleteUserFine,
+    this.markPaid = FinesRepository.markUserFinesPaid,
   });
 
   @override
@@ -29,6 +31,7 @@ class _FineBoxPlayersPageState extends State<FineBoxPlayersPage> {
           canDelete: widget.canDelete,
           loadFineBox: widget.loadFineBox,
           deleteFine: widget.deleteFine,
+          markPaid: widget.markPaid,
         ),
       ),
     );
@@ -155,6 +158,9 @@ class FineBoxHistoryPage extends StatefulWidget {
   final Future<FineBoxDetails> Function() loadFineBox;
   final Future<void> Function(int fineId) deleteFine;
 
+  /// Marks fines as paid on the player's behalf (fine admins only).
+  final Future<void> Function(List<int> fineIds) markPaid;
+
   const FineBoxHistoryPage({
     super.key,
     required this.title,
@@ -162,6 +168,7 @@ class FineBoxHistoryPage extends StatefulWidget {
     required this.canDelete,
     this.loadFineBox = FinesRepository.getFineBox,
     this.deleteFine = FinesRepository.deleteUserFine,
+    this.markPaid = FinesRepository.markUserFinesPaid,
   });
 
   @override
@@ -214,6 +221,57 @@ class _FineBoxHistoryPageState extends State<FineBoxHistoryPage> {
     }
   }
 
+  /// Marks [rows] as paid after confirmation: one fine, or all of a player's.
+  Future<void> _markPaid(List<_FineRowData> rows) async {
+    if (rows.isEmpty) return;
+    final l10n = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
+    final amount = _kr(rows.fold(0, (sum, row) => sum + row.fine.owedAmount));
+    final confirmed = await showCupertinoDialog<bool>(
+      context: context,
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(l10n.fineBoxMarkPaid),
+        content: Text(
+          rows.length == 1
+              ? l10n.fineBoxMarkPaidBody(
+                  rows.first.fine.fineTypeDetails.title,
+                  rows.first.user.name,
+                )
+              : l10n.fineBoxMarkAllPaidBody(rows.first.user.name, amount),
+        ),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.fineBoxDeleteCancel),
+          ),
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(l10n.fineBoxMarkPaid),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    try {
+      await widget.markPaid(rows.map((row) => row.fine.id).toList());
+      AppAnalytics.logEvent(
+        'fine_marked_paid_by_admin',
+        parameters: {'fine_count': rows.length},
+      );
+      if (mounted) {
+        setState(() {
+          _fineBox = widget.loadFineBox();
+        });
+      }
+    } catch (_) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.fineBoxMarkPaidFailed)),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -231,6 +289,10 @@ class _FineBoxHistoryPageState extends State<FineBoxHistoryPage> {
               )
               .toList()
             ..sort((a, b) => b.fine.createdAt.compareTo(a.fine.createdAt));
+          final unpaid = rows.where((row) => !row.fine.hasBeenPaid).toList();
+          // "Mark all" only on one player's own history.
+          final canMarkAll =
+              widget.canDelete && widget.userId != null && unpaid.length > 1;
 
           return ListView(
             padding: const EdgeInsets.all(Spacing.md),
@@ -247,9 +309,24 @@ class _FineBoxHistoryPageState extends State<FineBoxHistoryPage> {
                         onDelete: widget.canDelete && !row.fine.hasBeenPaid
                             ? () => _delete(row)
                             : null,
+                        onMarkPaid: widget.canDelete && !row.fine.hasBeenPaid
+                            ? () => _markPaid([row])
+                            : null,
                       ),
                   ],
                 ),
+              if (canMarkAll) ...[
+                const SizedBox(height: Spacing.md),
+                FullWidthButton(
+                  key: const ValueKey('mark-all-fines-paid'),
+                  icon: CupertinoIcons.checkmark_circle,
+                  buttonText: l10n.fineBoxMarkAllPaid(
+                    _kr(unpaid.fold(
+                        0, (sum, row) => sum + row.fine.owedAmount)),
+                  ),
+                  onPressed: () => _markPaid(unpaid),
+                ),
+              ],
             ],
           );
         },

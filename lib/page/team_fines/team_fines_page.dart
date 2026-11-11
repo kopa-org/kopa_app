@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopa/component/button/mobile_pay_button.dart';
 import 'package:kopa/component/button/expandable_fab.dart';
+import 'package:kopa/component/button/full_width_button.dart';
 import 'package:kopa/component/future_handler.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
@@ -1632,8 +1633,9 @@ class _GroupedPanel extends StatelessWidget {
 class _RecentFineRow extends StatelessWidget {
   final _FineRowData row;
   final VoidCallback? onDelete;
+  final VoidCallback? onMarkPaid;
 
-  const _RecentFineRow({required this.row, this.onDelete});
+  const _RecentFineRow({required this.row, this.onDelete, this.onMarkPaid});
 
   @override
   Widget build(BuildContext context) {
@@ -1676,6 +1678,17 @@ class _RecentFineRow extends StatelessWidget {
             paid: paid,
             paidLabel: l10n.fineBoxPaidBadge,
           ),
+          if (onMarkPaid != null)
+            IconButton(
+              key: ValueKey('mark-paid-fine-${row.fine.id}'),
+              tooltip: l10n.fineBoxMarkPaid,
+              onPressed: onMarkPaid,
+              icon: Icon(
+                CupertinoIcons.checkmark_circle,
+                color: appColors.successForeground,
+                size: 22,
+              ),
+            ),
           if (onDelete != null)
             IconButton(
               key: ValueKey('delete-fine-${row.fine.id}'),

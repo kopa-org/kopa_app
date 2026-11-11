@@ -147,6 +147,21 @@ class FinesRepository {
     }
   }
 
+  /// Marks other players' fines as paid (fine admins only); the amounts go
+  /// into the fine box.
+  static Future<void> markUserFinesPaid(List<int> userFineIds) async {
+    final url = Uri.parse('${ApiConfig.baseUrl}/fine/users/mark_paid');
+
+    final response = await _apiClient.postJson(
+      url,
+      body: {'user_fine_ids': userFineIds},
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to mark fines as paid');
+    }
+  }
+
   static Future<void> deleteFineType(int fineTypeId) async {
     final url = Uri.parse('${ApiConfig.baseUrl}/fine/type/$fineTypeId');
 
