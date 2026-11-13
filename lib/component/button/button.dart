@@ -37,12 +37,14 @@ class Button extends StatelessWidget {
     final styles = theme.extension<AppTextStyles>() ?? AppTextStyles.light;
     final role = outlined ? ButtonVariant.secondary : variant;
     final foreground = foregroundColor ??
-        (role == ButtonVariant.destructive
-            ? colors.errorForeground
-            : colors.dirt);
+        switch (role) {
+          ButtonVariant.primary => colors.white,
+          ButtonVariant.destructive => colors.errorForeground,
+          _ => colors.dirt,
+        };
     final background = backgroundColor ??
         switch (role) {
-          ButtonVariant.primary => colors.lightGrass,
+          ButtonVariant.primary => colors.grass,
           ButtonVariant.secondary => colors.surface,
           ButtonVariant.tertiary => AppColors.transparent,
           ButtonVariant.destructive => colors.errorSurface,

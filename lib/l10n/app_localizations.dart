@@ -758,18 +758,6 @@ abstract class AppLocalizations {
   /// **'Type match result'**
   String get matchResultReminderTitle;
 
-  /// No description provided for @matchResultReminderMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'It has been 30 minutes since kick-off. Enter the final result so the match is marked as played.'**
-  String get matchResultReminderMessage;
-
-  /// No description provided for @matchResultReminderAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Type match result'**
-  String get matchResultReminderAction;
-
   /// No description provided for @commonCancel.
   ///
   /// In en, this message translates to:

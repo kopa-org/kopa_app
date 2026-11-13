@@ -33,8 +33,8 @@ class AppTheme {
       borderSide: BorderSide.none,
     );
     final primaryButton = FilledButton.styleFrom(
-      backgroundColor: colors.lightGrass,
-      foregroundColor: colors.dirt,
+      backgroundColor: colors.grass,
+      foregroundColor: colors.white,
       disabledBackgroundColor: colors.offWhite,
       disabledForegroundColor: colors.textSecondary,
       minimumSize: const Size(48, 48),
@@ -97,6 +97,7 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: primaryButton.copyWith(
           backgroundColor: WidgetStatePropertyAll(colors.surface),
+          foregroundColor: WidgetStatePropertyAll(colors.dirt),
           side: const WidgetStatePropertyAll(BorderSide.none),
         ),
       ),
@@ -160,8 +161,8 @@ class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: colors.lightGrass,
-        foregroundColor: colors.dirt,
+        backgroundColor: colors.grass,
+        foregroundColor: colors.white,
         elevation: 2,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),

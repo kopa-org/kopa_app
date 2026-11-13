@@ -1,3 +1,4 @@
+import 'package:kopa/page/in_form/in_form_ui.dart';
 import 'package:kopa/l10n/current_l10n.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -136,7 +137,7 @@ class HomeStatisticsStrip extends StatelessWidget {
           (row) => PlayerPlusStatRankingRow(
             userId: row.userId,
             userName: row.userName,
-            value: '${row.points}',
+            value: inFormNumber(row.total),
             suffix: currentL10n.uiPointsLabel,
           ),
         )
@@ -183,7 +184,7 @@ class HomeStatisticsStrip extends StatelessWidget {
 
     for (final row in stats.inFormRows) {
       if (row.userId == currentUser.id || row.userName == stats.player.name) {
-        return '${row.points}';
+        return inFormNumber(row.total);
       }
     }
     return '-';

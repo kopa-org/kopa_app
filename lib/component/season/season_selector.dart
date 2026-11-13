@@ -414,8 +414,8 @@ class PastSeasonBanner extends StatelessWidget {
             key: const ValueKey('match-season-back-to-current'),
             onPressed: onBackToCurrent,
             style: FilledButton.styleFrom(
-              backgroundColor: colors.lightGrass,
-              foregroundColor: colors.dirt,
+              backgroundColor: colors.grass,
+              foregroundColor: colors.white,
               minimumSize: const Size(0, 44),
               padding: const EdgeInsets.symmetric(horizontal: 14),
               shape: const StadiumBorder(),

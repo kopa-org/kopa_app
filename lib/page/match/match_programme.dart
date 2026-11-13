@@ -15,6 +15,8 @@ import 'package:kopa/model/user_details.dart';
 import 'package:kopa/model/event_type.dart';
 import 'package:kopa/page/match/create_match_page.dart';
 import 'package:kopa/page/match/match_details_page.dart';
+import 'package:kopa/page/match/match_score_sheet.dart';
+import 'package:kopa/repository/match_repository.dart';
 import 'package:kopa/component/season/season_selector.dart';
 import 'package:kopa/state/match_programme_refresh_notifier.dart';
 import 'package:kopa/theme/app_colors.dart';
@@ -284,6 +286,7 @@ class _MatchListState extends State<_MatchList> {
             canManageTeam: canManageTeam,
             matchItemKeys: _matchKeys,
             onMatchTap: (match) => _openMatch(context, match),
+            onEnterResult: (match) => _enterResult(context, match),
           ),
       ],
     );
@@ -362,6 +365,31 @@ class _MatchListState extends State<_MatchList> {
     }
 
     return null;
+  }
+
+  /// Opens the score sheet straight from the overdue-result reminder, so a
+  /// leader can enter the result without opening the match first.
+  Future<void> _enterResult(BuildContext context, MatchDetails match) async {
+    AppAnalytics.logEvent(
+      'match_result_entry_opened',
+      parameters: {'source': 'match_programme_reminder'},
+    );
+    final score = await showMatchScoreSheet(
+      context: context,
+      homeTeam: match.homeTeam,
+      awayTeam: match.awayTeam,
+      homeScore: match.homeTeamScore,
+      awayScore: match.awayTeamScore,
+      onSave: (home, away) =>
+          MatchRepository.updateMatchScore(match.id, home, away),
+    );
+    if (score == null || !context.mounted) return;
+
+    AppAnalytics.logEvent('match_score_updated');
+    await context.read<MatchProgrammeCubit>().loadMatches(
+          showLoading: false,
+          forceRefresh: true,
+        );
   }
 
   Future<void> _openMatch(

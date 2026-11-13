@@ -141,8 +141,10 @@ void main() {
     );
   });
 
-  testWidgets('shows overdue result reminder for team managers',
+  testWidgets('overdue result reminder opens result entry directly',
       (tester) async {
+    MatchDetails? resultMatch;
+    MatchDetails? openedMatch;
     await tester.binding.setSurfaceSize(const Size(390, 844));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
@@ -168,7 +170,8 @@ void main() {
           body: AllGamesCard(
             matches: [overdueMatch],
             canManageTeam: true,
-            onMatchTap: (_) {},
+            onMatchTap: (match) => openedMatch = match,
+            onEnterResult: (match) => resultMatch = match,
           ),
         ),
       ),
@@ -204,8 +207,10 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('match-result-reminder')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Indtast kampens resultat'), findsOneWidget);
-    expect(find.text('Indtast resultat'), findsOneWidget);
+    // The reminder goes straight to result entry: no dialog, no match page.
+    expect(resultMatch?.id, 9);
+    expect(openedMatch, isNull);
+    expect(find.byType(AlertDialog), findsNothing);
   });
 
   testWidgets('uses shared title-case typography for match status chips',

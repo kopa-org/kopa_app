@@ -15,6 +15,10 @@ import 'package:kopa/theme/spacing.dart';
 class AllGamesCard extends StatelessWidget {
   final List<MatchDetails> matches;
   final ValueChanged<MatchDetails> onMatchTap;
+
+  /// Opens result entry straight from the overdue-result reminder. Falls back
+  /// to [onMatchTap] when not set.
+  final ValueChanged<MatchDetails>? onEnterResult;
   final Map<int, GlobalKey>? matchItemKeys;
   final String? ownTeamName;
   final TeamLogoDesign? ownTeamLogoDesign;
@@ -24,6 +28,7 @@ class AllGamesCard extends StatelessWidget {
   const AllGamesCard({
     required this.matches,
     required this.onMatchTap,
+    this.onEnterResult,
     this.matchItemKeys,
     this.ownTeamName,
     this.ownTeamLogoDesign,
@@ -41,6 +46,7 @@ class AllGamesCard extends StatelessWidget {
     return _MatchList(
       matches: sortedMatches,
       onMatchTap: onMatchTap,
+      onEnterResult: onEnterResult ?? onMatchTap,
       matchItemKeys: matchItemKeys,
       ownTeamName: resolvedOwnTeamName,
       ownTeamLogoDesign: ownTeamLogoDesign,
@@ -73,6 +79,7 @@ List<MatchResultStatus> ownTeamResults(
 class _MatchList extends StatelessWidget {
   final List<MatchDetails> matches;
   final ValueChanged<MatchDetails> onMatchTap;
+  final ValueChanged<MatchDetails> onEnterResult;
   final Map<int, GlobalKey>? matchItemKeys;
   final String? ownTeamName;
   final TeamLogoDesign? ownTeamLogoDesign;
@@ -82,6 +89,7 @@ class _MatchList extends StatelessWidget {
   const _MatchList({
     required this.matches,
     required this.onMatchTap,
+    required this.onEnterResult,
     this.matchItemKeys,
     this.ownTeamName,
     this.ownTeamLogoDesign,
@@ -97,6 +105,7 @@ class _MatchList extends StatelessWidget {
         final row = _GameResultRow(
           match: entry.$2,
           onTap: () => onMatchTap(entry.$2),
+          onEnterResult: () => onEnterResult(entry.$2),
           ownTeamName: ownTeamName,
           ownTeamLogoDesign: ownTeamLogoDesign,
           currentUserId: currentUserId,
@@ -119,6 +128,7 @@ class _MatchList extends StatelessWidget {
 class _GameResultRow extends StatelessWidget {
   final MatchDetails match;
   final VoidCallback onTap;
+  final VoidCallback onEnterResult;
   final String? ownTeamName;
   final TeamLogoDesign? ownTeamLogoDesign;
   final int? currentUserId;
@@ -127,6 +137,7 @@ class _GameResultRow extends StatelessWidget {
   const _GameResultRow({
     required this.match,
     required this.onTap,
+    required this.onEnterResult,
     required this.ownTeamName,
     required this.ownTeamLogoDesign,
     required this.currentUserId,
@@ -244,7 +255,7 @@ class _GameResultRow extends StatelessWidget {
                     child: MatchResultReminderButton(
                       match: match,
                       backgroundColor: appColors.sunset,
-                      onPressed: () => _showResultReminder(context),
+                      onPressed: onEnterResult,
                     ),
                   ),
                 Positioned(
@@ -266,13 +277,6 @@ class _GameResultRow extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-
-  Future<void> _showResultReminder(BuildContext context) async {
-    await showMatchResultReminderDialog(
-      context,
-      onEnterResult: onTap,
     );
   }
 

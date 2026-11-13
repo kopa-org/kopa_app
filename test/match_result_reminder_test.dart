@@ -56,45 +56,6 @@ void main() {
 
     expect(find.byIcon(Icons.info_outline), findsNothing);
   });
-
-  testWidgets('dialog offers to enter the match result', (tester) async {
-    var entered = false;
-
-    await tester.pumpWidget(_app(
-      Builder(
-        builder: (context) => ElevatedButton(
-          onPressed: () => showMatchResultReminderDialog(
-            context,
-            onEnterResult: () => entered = true,
-          ),
-          child: const Text('Open reminder'),
-        ),
-      ),
-    ));
-
-    await tester.tap(find.text('Open reminder'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Indtast kampens resultat'), findsOneWidget);
-    expect(find.text('Indtast resultat'), findsOneWidget);
-    final dialogCircle = tester.widget<Container>(
-      find
-          .ancestor(
-            of: find.byIcon(Icons.info_outline),
-            matching: find.byType(Container),
-          )
-          .first,
-    );
-    expect(
-      (dialogCircle.decoration! as BoxDecoration).color,
-      AppColors.light.sunset,
-    );
-
-    await tester.tap(find.text('Indtast resultat'));
-    await tester.pumpAndSettle();
-
-    expect(entered, isTrue);
-  });
 }
 
 Widget _app(Widget child) {

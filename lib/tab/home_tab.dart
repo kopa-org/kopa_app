@@ -12,6 +12,7 @@ import 'package:kopa/component/home/home_bento_card.dart';
 import 'package:kopa/component/home/home_calendar_overlay.dart';
 import 'package:kopa/component/home/home_carousel_indicator.dart';
 import 'package:kopa/component/home/home_fine_box_card.dart';
+import 'package:kopa/component/home/home_pitch_markings.dart';
 import 'package:kopa/component/home/home_statistics_strip.dart';
 import 'package:kopa/component/home/latest_result_card.dart';
 import 'package:kopa/component/home/missing_result_hero.dart';
@@ -121,8 +122,12 @@ class _HomeTabViewState extends State<_HomeTabView> {
       title: 'Kopa',
       backgroundColor: appColors.background,
       showTopBar: false,
+      // The SliverAppBar pads for the status bar itself, so the mint match
+      // band can reach behind it like the match details header.
+      useTopSafeArea: false,
       body: RefreshIndicator(
         color: appColors.primary,
+        edgeOffset: MediaQuery.paddingOf(context).top,
         onRefresh: () async {
           await context
               .read<HomeCubit>()
@@ -166,11 +171,25 @@ class _HomeTabViewState extends State<_HomeTabView> {
               );
             }
 
+            // Upcoming matches get the hero carousel in a mint band that
+            // starts behind the status bar; the season-end heroes do not.
+            final showMatchBand = upcomingMatches.any((match) => match.isMatch);
+
             return CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
                 SliverAppBar(
-                  backgroundColor: appColors.background,
+                  backgroundColor: showMatchBand
+                      ? appColors.lightGrass
+                      : appColors.background,
+                  flexibleSpace: showMatchBand
+                      ? CustomPaint(
+                          painter: HomePitchMarkingsPainter(
+                            color: _pitchMarkingColor(appColors),
+                          ),
+                          child: const SizedBox.expand(),
+                        )
+                      : null,
                   foregroundColor: appColors.grass,
                   elevation: 0,
                   scrolledUnderElevation: 0,
@@ -225,7 +244,7 @@ class _HomeTabViewState extends State<_HomeTabView> {
                 SliverToBoxAdapter(
                   // No match left: the season is over. Trainings often keep
                   // going, so the next one sits in a compact card below.
-                  child: !upcomingMatches.any((match) => match.isMatch)
+                  child: !showMatchBand
                       ? Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
@@ -472,6 +491,58 @@ List<MatchDetails> matchesMissingResult(
     ..sort((a, b) => b.date.compareTo(a.date));
 }
 
+Color _pitchMarkingColor(AppColors colors) =>
+    colors.grass.withValues(alpha: 0.32);
+
+/// The mint band under the home app bar. It holds the countdown and reaches
+/// [overlap] further down, behind the top of the hero card, which the next
+/// sibling in the column paints over it.
+class _HomeMatchBand extends StatelessWidget {
+  static const double overlap = 52;
+  static const double radius = 28;
+
+  final Widget child;
+
+  const _HomeMatchBand({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    // The app bar above paints the first part of the corner arc.
+    final topOffset = MediaQuery.paddingOf(context).top + kToolbarHeight;
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: -overlap,
+          child: ClipRRect(
+            borderRadius: const BorderRadius.vertical(
+              bottom: Radius.circular(radius),
+            ),
+            child: ColoredBox(
+              key: const ValueKey('home-match-band'),
+              color: colors.lightGrass,
+              child: CustomPaint(
+                painter: HomePitchMarkingsPainter(
+                  color: _pitchMarkingColor(colors),
+                  topOffset: topOffset,
+                  drawMidfield: true,
+                ),
+                child: const SizedBox.expand(),
+              ),
+            ),
+          ),
+        ),
+        child,
+      ],
+    );
+  }
+}
+
 class _HeroSection extends StatelessWidget {
   final MatchDetails? nextMatch;
 
@@ -492,6 +563,7 @@ class _HeroSection extends StatelessWidget {
             ? l10n.homeTrainingCountdownLabel
             : l10n.homeMatchCountdownLabel;
 
+    // Transparent: the mint band behind it comes from _HomeMatchBand.
     return Container(
       padding: const EdgeInsets.fromLTRB(
         Spacing.md,
@@ -499,7 +571,6 @@ class _HeroSection extends StatelessWidget {
         Spacing.md,
         Spacing.lg,
       ),
-      decoration: BoxDecoration(color: appColors.background),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -782,8 +853,10 @@ class _HeroMatchCarouselState extends State<_HeroMatchCarousel> {
       color: AppColors.transparent,
       child: Column(
         children: [
-          _HeroSection(
-            nextMatch: pages[_currentIndex],
+          _HomeMatchBand(
+            child: _HeroSection(
+              nextMatch: pages[_currentIndex],
+            ),
           ),
           AnimatedSize(
             duration: const Duration(milliseconds: 260),
@@ -970,9 +1043,10 @@ class _HeroTeamPanel extends StatelessWidget {
                 borderRadius: heroRadius,
                 boxShadow: [
                   BoxShadow(
-                    color: appColors.black.withValues(alpha: 0.06),
-                    blurRadius: 18,
-                    offset: const Offset(0, 8),
+                    // Tinted green so the shadow stays clean on the mint.
+                    color: appColors.pitch.withValues(alpha: 0.10),
+                    blurRadius: 24,
+                    offset: const Offset(0, 10),
                   ),
                 ],
               ),
@@ -991,12 +1065,13 @@ class _HeroTeamPanel extends StatelessWidget {
                             Spacing.md,
                             14,
                             Spacing.md,
-                            28,
+                            12,
                           ),
+                    // Matches sit on the mint band, so their teams stay on
+                    // the white card; trainings keep their sky block.
                     decoration: BoxDecoration(
-                      color: isTraining
-                          ? appColors.lightSky65
-                          : appColors.lightGrass,
+                      color:
+                          isTraining ? appColors.lightSky65 : appColors.white,
                       borderRadius: heroRadius,
                     ),
                     child: Column(
@@ -1017,7 +1092,7 @@ class _HeroTeamPanel extends StatelessWidget {
                                 match: match,
                                 backgroundColor: appColors.sunset,
                                 onPressed: () =>
-                                    _openMatchResultReminder(context, match),
+                                    _enterHomeMatchResult(context, match),
                               ),
                           ],
                         ),
@@ -1659,16 +1734,6 @@ List<MatchDetails> _upcomingMatches(HomeState state) {
 List<MatchDetails> _playedMatches(HomeState state) {
   return state.matches.where((match) => match.hasMatchBeenPlayed).toList()
     ..sort((a, b) => a.date.compareTo(b.date));
-}
-
-Future<void> _openMatchResultReminder(
-  BuildContext context,
-  MatchDetails match,
-) async {
-  await showMatchResultReminderDialog(
-    context,
-    onEnterResult: () => _enterHomeMatchResult(context, match),
-  );
 }
 
 Future<void> _enterHomeMatchResult(

@@ -105,7 +105,7 @@ StatisticsResponse _stats() {
       lastFiveMatchesForm: const [3, 3, 1, 0, 3],
     ),
     inFormRows: [
-      InFormRow(userId: 1, userName: 'Test User', points: 14),
+      InFormRow(userId: 1, userName: 'Test User', total: 14),
     ],
     leaderboards: Leaderboards(
       topScorers: [currentRow],

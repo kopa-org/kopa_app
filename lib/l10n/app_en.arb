@@ -109,8 +109,6 @@
   "matchEnterResult": "Enter",
   "matchScoreDialogTitle": "Enter result",
   "matchResultReminderTitle": "Type match result",
-  "matchResultReminderMessage": "It has been 30 minutes since kick-off. Enter the final result so the match is marked as played.",
-  "matchResultReminderAction": "Type match result",
   "commonCancel": "Cancel",
   "maintenanceMessage": "Kopa is under maintenance and will be back soon.",
   "commonDelete": "Delete",

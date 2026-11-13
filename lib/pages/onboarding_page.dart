@@ -2106,8 +2106,8 @@ class _BottomActionBar extends StatelessWidget {
   ButtonStyle get _buttonStyle {
     return FilledButton.styleFrom(
       minimumSize: const Size.fromHeight(48),
-      backgroundColor: isPositionStep ? colors.grass : colors.lightGrass,
-      foregroundColor: isPositionStep ? colors.white : colors.dirt,
+      backgroundColor: colors.grass,
+      foregroundColor: colors.white,
       disabledBackgroundColor: colors.offWhite,
       disabledForegroundColor: colors.textSecondary,
       textStyle: textStyles.button,

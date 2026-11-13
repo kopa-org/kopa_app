@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/model/match_details.dart';
 import 'package:kopa/theme/app_colors.dart';
-import 'package:kopa/theme/app_text_styles.dart';
 
 class MatchResultReminderButton extends StatefulWidget {
   final MatchDetails match;
@@ -101,62 +100,5 @@ class _MatchResultReminderButtonState extends State<MatchResultReminderButton> {
         ),
       ),
     );
-  }
-}
-
-Future<void> showMatchResultReminderDialog(
-  BuildContext context, {
-  required FutureOr<void> Function() onEnterResult,
-}) async {
-  final l10n = AppLocalizations.of(context)!;
-  final enterResult = await showDialog<bool>(
-    context: context,
-    builder: (dialogContext) {
-      final colors =
-          Theme.of(dialogContext).extension<AppColors>() ?? AppColors.light;
-      final styles = Theme.of(dialogContext).extension<AppTextStyles>() ??
-          AppTextStyles.light;
-
-      return AlertDialog(
-        icon: Container(
-          width: 34,
-          height: 34,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: colors.sunset,
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            Icons.info_outline,
-            color: colors.sun,
-            size: 25,
-          ),
-        ),
-        title: Text(l10n.matchResultReminderTitle),
-        content: Text(
-          l10n.matchResultReminderMessage,
-          style: styles.body3.copyWith(color: colors.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(l10n.commonCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            style: FilledButton.styleFrom(
-              backgroundColor: colors.lightGrass,
-              foregroundColor: colors.dirt,
-              elevation: 0,
-            ),
-            child: Text(l10n.matchResultReminderAction),
-          ),
-        ],
-      );
-    },
-  );
-
-  if (enterResult == true && context.mounted) {
-    await onEnterResult();
   }
 }

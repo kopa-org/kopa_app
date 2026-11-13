@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kopa/page/in_form/in_form_ui.dart';
 import 'package:kopa/component/card/kopa_card.dart';
 import 'package:kopa/component/card/player_plus_stat_tile.dart';
 import 'package:kopa/component/error_message.dart';
@@ -144,7 +145,7 @@ class _StatisticsContent extends StatelessWidget {
         _InFormCallout(
           rank: inFormIndex == -1 ? null : inFormIndex + 1,
           points:
-              inFormIndex == -1 ? null : stats.inFormRows[inFormIndex].points,
+              inFormIndex == -1 ? null : stats.inFormRows[inFormIndex].total,
           onTap: () => context.push(AppRouter.playerPlusInForm),
         ),
         const SizedBox(height: Spacing.sm),
@@ -172,7 +173,7 @@ class _StatisticsContent extends StatelessWidget {
 /// Shortcut to the In-form table, showing the player's own placing.
 class _InFormCallout extends StatelessWidget {
   final int? rank;
-  final int? points;
+  final double? points;
   final VoidCallback onTap;
 
   const _InFormCallout({
@@ -221,7 +222,7 @@ class _InFormCallout extends StatelessWidget {
                   Text(
                     l10n.uiYouAreNoWith(
                       rank,
-                      '${points ?? 0} ${l10n.uiPointsLabel}',
+                      '${inFormNumber(points ?? 0)} ${l10n.uiPointsLabel}',
                     ),
                     style: styles.body4.copyWith(
                       color: colors.dirt,

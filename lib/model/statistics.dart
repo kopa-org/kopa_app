@@ -85,22 +85,27 @@ class LeaderboardRow {
   }
 }
 
+/// A player's In-form total for the season, from the same score cache as the
+/// Player+ In-form leaderboard. Rows arrive ranked, highest total first.
 class InFormRow {
   final int userId;
   final String userName;
-  final int points;
+
+  /// Exact In-form points; can have halves (e.g. 1.5 per match played).
+  final double total;
 
   InFormRow({
     required this.userId,
     required this.userName,
-    required this.points,
+    required this.total,
   });
 
   factory InFormRow.fromJson(Map<String, dynamic> json) {
     return InFormRow(
       userId: json['user_id'] ?? 0,
       userName: json['user_name'] ?? 'Ukendt',
-      points: json['points'] ?? 0,
+      // Older backends only send the rounded `points`.
+      total: ((json['total'] ?? json['points'] ?? 0) as num).toDouble(),
     );
   }
 }
