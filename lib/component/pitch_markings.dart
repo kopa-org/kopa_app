@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
-/// Faint pitch markings on the home match band: a corner arc growing from
-/// the top-right of the screen, and the halfway line with the centre circle
-/// at the bottom, where the hero card covers most of them.
+/// Faint pitch markings on the mint match bands (home and match details): a
+/// corner arc growing from the top-right of the screen, and optionally the
+/// halfway line with the centre circle at the bottom, where the hero card
+/// covers most of them.
 ///
 /// The home band is painted in two pieces, the app bar and the countdown
 /// below it. Give each piece its distance from the top of the screen as
 /// [topOffset] so the arc continues across the seam.
-class HomePitchMarkingsPainter extends CustomPainter {
+class PitchMarkingsPainter extends CustomPainter {
   final Color color;
   final double topOffset;
   final bool drawMidfield;
@@ -20,7 +21,7 @@ class HomePitchMarkingsPainter extends CustomPainter {
   static const double centreCircleRadius = 50;
   static const double strokeWidth = 2.5;
 
-  const HomePitchMarkingsPainter({
+  const PitchMarkingsPainter({
     required this.color,
     this.topOffset = 0,
     this.drawMidfield = false,
@@ -55,7 +56,7 @@ class HomePitchMarkingsPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(HomePitchMarkingsPainter oldDelegate) =>
+  bool shouldRepaint(PitchMarkingsPainter oldDelegate) =>
       color != oldDelegate.color ||
       topOffset != oldDelegate.topOffset ||
       drawMidfield != oldDelegate.drawMidfield;

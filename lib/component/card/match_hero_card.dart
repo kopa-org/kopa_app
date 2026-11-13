@@ -108,8 +108,10 @@ class MatchHeroCard extends StatelessWidget {
       onTap: onTap,
       padding: EdgeInsets.zero,
       borderRadius: Spacing.borderRadiusLargeIncreased,
+      // On match details the template draws the white card behind the hero,
+      // so it keeps its shape while the pinned header collapses.
       color: useDarkHeader
-          ? appColors.lightGrass
+          ? AppColors.transparent
           : match.isTraining
               ? appColors.lightSky65
               : null,
@@ -123,7 +125,8 @@ class MatchHeroCard extends StatelessWidget {
               children: [
                 Padding(
                   padding: EdgeInsets.symmetric(
-                    horizontal: 20,
+                    // The match details card is inset from the screen edges.
+                    horizontal: useDarkHeader ? 12 : 20,
                     vertical: lerpDouble(12, 2, collapse)!,
                   ),
                   child: Row(

@@ -12,7 +12,7 @@ import 'package:kopa/component/home/home_bento_card.dart';
 import 'package:kopa/component/home/home_calendar_overlay.dart';
 import 'package:kopa/component/home/home_carousel_indicator.dart';
 import 'package:kopa/component/home/home_fine_box_card.dart';
-import 'package:kopa/component/home/home_pitch_markings.dart';
+import 'package:kopa/component/pitch_markings.dart';
 import 'package:kopa/component/home/home_statistics_strip.dart';
 import 'package:kopa/component/home/latest_result_card.dart';
 import 'package:kopa/component/home/missing_result_hero.dart';
@@ -184,7 +184,7 @@ class _HomeTabViewState extends State<_HomeTabView> {
                       : appColors.background,
                   flexibleSpace: showMatchBand
                       ? CustomPaint(
-                          painter: HomePitchMarkingsPainter(
+                          painter: PitchMarkingsPainter(
                             color: _pitchMarkingColor(appColors),
                           ),
                           child: const SizedBox.expand(),
@@ -527,7 +527,7 @@ class _HomeMatchBand extends StatelessWidget {
               key: const ValueKey('home-match-band'),
               color: colors.lightGrass,
               child: CustomPaint(
-                painter: HomePitchMarkingsPainter(
+                painter: PitchMarkingsPainter(
                   color: _pitchMarkingColor(colors),
                   topOffset: topOffset,
                   drawMidfield: true,

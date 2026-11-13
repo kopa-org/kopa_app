@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:kopa/component/card/kopa_card.dart';
 import 'package:kopa/component/card/match_hero_card.dart';
+import 'package:kopa/component/pitch_markings.dart';
 import 'package:kopa/component/match/match_details_pinned_scroll_view.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/component/section_header/section_header.dart';
@@ -309,75 +310,145 @@ class MatchDetailTemplate extends StatelessWidget {
     );
   }
 
+  /// How far the match band reaches down behind the white hero card.
+  double _bandOverlap(double collapse) => lerpDouble(44, 18, collapse)!;
+
   Widget _buildPinnedHeader(BuildContext context, double collapse) {
     final colors = AppColors.of(context);
     final navHidden = collapse == 1;
+    final topInset = MediaQuery.paddingOf(context).top;
+    final heroExtent = _heroExtent(context, collapse);
+    // Trainings keep their sky header with the hero on it; matches put the
+    // teams on a white card over a mint band, like the home hero.
+    final useMatchBand = !useTrainingHeader;
+
+    final navigation = SizedBox(
+      height: _navExtent(collapse),
+      child: ClipRect(
+        child: OverflowBox(
+          minHeight: _navBarExtent,
+          maxHeight: _navBarExtent,
+          alignment: Alignment.bottomCenter,
+          child: IgnorePointer(
+            ignoring: navHidden,
+            child: ExcludeSemantics(
+              excluding: navHidden,
+              child: Opacity(
+                opacity: 1 - collapse,
+                child: _MatchDetailsHeader(
+                  title: _pageTitle,
+                  action: headerAction,
+                  darkHeader: true,
+                  trainingHeader: useTrainingHeader,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Widget hero = SizedBox(
+      height: heroExtent,
+      child: ClipRect(
+        child: OverflowBox(
+          minHeight: 0,
+          maxHeight: double.infinity,
+          child: MatchHeroCollapse(
+            value: collapse,
+            child: heroCard,
+          ),
+        ),
+      ),
+    );
+
+    if (useMatchBand) {
+      const cardRadius = BorderRadius.all(
+        Radius.circular(Spacing.borderRadiusLargeIncreased),
+      );
+      // The white card is drawn here at the exact collapsing height, outside
+      // the clip, so its corners and shadow stay whole while it shrinks.
+      hero = Padding(
+        padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+        child: DecoratedBox(
+          key: const ValueKey('match-details-hero-surface'),
+          decoration: BoxDecoration(
+            color: colors.surface,
+            borderRadius: cardRadius,
+            boxShadow: [
+              BoxShadow(
+                // Tinted green so the shadow stays clean on the mint.
+                color: colors.pitch.withValues(alpha: 0.10),
+                blurRadius: lerpDouble(24, 12, collapse)!,
+                offset: Offset(0, lerpDouble(10, 4, collapse)!),
+              ),
+            ],
+          ),
+          child: ClipRRect(borderRadius: cardRadius, child: hero),
+        ),
+      );
+    }
+
+    final headerContent = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // The header colour reaches behind the phone's status bar.
+        SizedBox(height: topInset),
+        // The navigation row slides out while scrolling.
+        navigation,
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: _cardPadding(collapse)),
+          child: hero,
+        ),
+      ],
+    );
 
     return ColoredBox(
       color: colors.background,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(
-              bottom: Radius.circular(Spacing.borderRadiusLargeIncreased),
-            ),
-            child: ColoredBox(
-              key: const ValueKey('match-details-dark-header'),
-              color: _headerColor(context),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // The green reaches behind the phone's status bar.
-                  SizedBox(height: MediaQuery.paddingOf(context).top),
-                  // The navigation row slides out while scrolling.
-                  SizedBox(
-                    height: _navExtent(collapse),
-                    child: ClipRect(
-                      child: OverflowBox(
-                        minHeight: _navBarExtent,
-                        maxHeight: _navBarExtent,
-                        alignment: Alignment.bottomCenter,
-                        child: IgnorePointer(
-                          ignoring: navHidden,
-                          child: ExcludeSemantics(
-                            excluding: navHidden,
-                            child: Opacity(
-                              opacity: 1 - collapse,
-                              child: _MatchDetailsHeader(
-                                title: _pageTitle,
-                                action: headerAction,
-                                darkHeader: true,
-                                trainingHeader: useTrainingHeader,
-                              ),
-                            ),
-                          ),
+          if (useMatchBand)
+            Stack(
+              children: [
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: topInset +
+                      _navExtent(collapse) +
+                      _cardPadding(collapse) +
+                      _bandOverlap(collapse),
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      bottom: Radius.circular(28),
+                    ),
+                    child: ColoredBox(
+                      key: const ValueKey('match-details-dark-header'),
+                      color: _headerColor(context),
+                      child: CustomPaint(
+                        painter: PitchMarkingsPainter(
+                          color: colors.grass.withValues(alpha: 0.32),
                         ),
+                        child: const SizedBox.expand(),
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      vertical: _cardPadding(collapse),
-                    ),
-                    child: SizedBox(
-                      height: _heroExtent(context, collapse),
-                      child: ClipRect(
-                        child: OverflowBox(
-                          minHeight: 0,
-                          maxHeight: double.infinity,
-                          child: MatchHeroCollapse(
-                            value: collapse,
-                            child: heroCard,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
+                headerContent,
+              ],
+            )
+          else
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                bottom: Radius.circular(Spacing.borderRadiusLargeIncreased),
+              ),
+              child: ColoredBox(
+                key: const ValueKey('match-details-dark-header'),
+                color: _headerColor(context),
+                child: headerContent,
               ),
             ),
-          ),
           SizedBox(height: _segmentTopGap(collapse)),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
