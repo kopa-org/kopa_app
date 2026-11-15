@@ -1177,5 +1177,8 @@
   "appExitConfirmTitle": "Luk Kopa?",
   "appExitConfirmMessage": "Vil du lukke appen?",
   "appExitConfirmExit": "Luk appen",
-  "appExitConfirmStay": "Bliv"
+  "appExitConfirmStay": "Bliv",
+  "settingsSectionPrivacy": "Privatliv",
+  "settingsAnalyticsTitle": "Del brugsdata",
+  "settingsAnalyticsSubtitle": "Hjælper os med at forbedre Kopa. Dit navn og din e-mail deles aldrig"
 }

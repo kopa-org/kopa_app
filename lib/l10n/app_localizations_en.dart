@@ -3520,4 +3520,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appExitConfirmStay => 'Stay';
+
+  @override
+  String get settingsSectionPrivacy => 'Privacy';
+
+  @override
+  String get settingsAnalyticsTitle => 'Share usage data';
+
+  @override
+  String get settingsAnalyticsSubtitle =>
+      'Helps us improve Kopa. Your name and email are never shared';
 }

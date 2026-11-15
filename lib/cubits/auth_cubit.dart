@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:kopa/l10n/current_l10n.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
@@ -138,6 +140,7 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   void updateUser(UserDetails user) {
+    unawaited(AppAnalytics.setCurrentUser(user));
     emit(state.copyWith(status: AuthStatus.authenticated, user: user));
   }
 

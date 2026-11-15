@@ -7,6 +7,7 @@ import 'package:kopa/component/avatar/team_avatar.dart';
 import 'package:kopa/component/button/full_width_button.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/component/settings/settings_list.dart';
+import 'package:kopa/cubits/analytics_preference_cubit.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/onboarding_cubit.dart';
 import 'package:kopa/cubits/team_settings_cubit.dart';
@@ -24,6 +25,7 @@ import 'package:kopa/repository/users_repository.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 import 'package:kopa/theme/spacing.dart';
+import 'package:kopa/utils/app_analytics.dart';
 import 'package:share_plus/share_plus.dart';
 
 /// Profile & settings hub. Settings are grouped by category; each row shows
@@ -40,18 +42,25 @@ class ProfileSettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<TeamSettingsCubit>(
-      create: (context) {
-        final user = context.read<AuthCubit>().state.user;
-        final cubit = createSettingsCubit?.call(context) ??
-            TeamSettingsCubit(
-              teamId: user?.teamDetails?.id,
-              team: user?.teamDetails,
-              onTeamSaved: (_) => context.read<AuthCubit>().init(),
-            );
-        if (user?.isTeamOwner == true) cubit.loadPendingJoinRequests();
-        return cubit;
-      },
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<TeamSettingsCubit>(
+          create: (context) {
+            final user = context.read<AuthCubit>().state.user;
+            final cubit = createSettingsCubit?.call(context) ??
+                TeamSettingsCubit(
+                  teamId: user?.teamDetails?.id,
+                  team: user?.teamDetails,
+                  onTeamSaved: (_) => context.read<AuthCubit>().init(),
+                );
+            if (user?.isTeamOwner == true) cubit.loadPendingJoinRequests();
+            return cubit;
+          },
+        ),
+        BlocProvider<AnalyticsPreferenceCubit>(
+          create: (_) => AnalyticsPreferenceCubit()..load(),
+        ),
+      ],
       child: _ProfileSettingsView(
         updatePosition: updatePosition ?? UsersRepository.updatePosition,
       ),
@@ -216,6 +225,34 @@ class _ProfileSettingsViewState extends State<_ProfileSettingsView> {
               ],
             ),
           ],
+          const SizedBox(height: Spacing.lg),
+          SettingsSection(
+            title: l10n.settingsSectionPrivacy,
+            children: [
+              BlocBuilder<AnalyticsPreferenceCubit, bool?>(
+                builder: (context, enabled) {
+                  final cubit = context.read<AnalyticsPreferenceCubit>();
+                  return SettingsRow(
+                    key: const ValueKey('profile-settings-analytics'),
+                    icon: Icons.insights_rounded,
+                    tone: SettingsTone.neutral,
+                    title: l10n.settingsAnalyticsTitle,
+                    subtitle: l10n.settingsAnalyticsSubtitle,
+                    showChevron: false,
+                    onTap: enabled == null
+                        ? null
+                        : () => cubit.setEnabled(!enabled),
+                    trailing: Switch.adaptive(
+                      key: const ValueKey('profile-settings-analytics-toggle'),
+                      value: enabled ?? true,
+                      activeTrackColor: colors.primary,
+                      onChanged: enabled == null ? null : cubit.setEnabled,
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
           const SizedBox(height: Spacing.xl),
           SizedBox(
             height: 52,
@@ -346,8 +383,15 @@ class _ProfileSettingsViewState extends State<_ProfileSettingsView> {
         'team_title': team.title,
       });
 
-      await SharePlus.instance.share(
+      final shareResult = await SharePlus.instance.share(
         ShareParams(text: l10n.uiJoinOnKopa(team.title, inviteUri)),
+      );
+      AppAnalytics.logEvent(
+        'team_invite_shared',
+        parameters: {
+          'source': 'settings',
+          'status': shareResult.status.name,
+        },
       );
       if (!mounted) return;
       setState(() => _isSharing = false);

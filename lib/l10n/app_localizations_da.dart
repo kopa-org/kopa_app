@@ -3529,4 +3529,14 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String get appExitConfirmStay => 'Bliv';
+
+  @override
+  String get settingsSectionPrivacy => 'Privatliv';
+
+  @override
+  String get settingsAnalyticsTitle => 'Del brugsdata';
+
+  @override
+  String get settingsAnalyticsSubtitle =>
+      'Hjælper os med at forbedre Kopa. Dit navn og din e-mail deles aldrig';
 }

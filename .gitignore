@@ -12,6 +12,9 @@
 .env.*
 !.env.example
 !.env.*.example
+# Bundled into release builds, so it must only hold public values
+# (API URL, PostHog project token). Never put secrets here.
+!.env.deploy
 
 # IntelliJ related
 *.iml

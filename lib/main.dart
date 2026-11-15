@@ -179,9 +179,11 @@ class _KopaBootstrapAppState extends State<KopaBootstrapApp> {
             initialLocation: widget.initialLocation,
           );
 
-          return defaultTargetPlatform == TargetPlatform.iOS
-              ? LiquidGlassWidgets.wrap(child: app)
-              : app;
+          return AppAnalytics.wrapApp(
+            defaultTargetPlatform == TargetPlatform.iOS
+                ? LiquidGlassWidgets.wrap(child: app)
+                : app,
+          );
         }
 
         if (snapshot.hasError) {

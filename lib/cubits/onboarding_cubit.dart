@@ -160,10 +160,7 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     if (result['success'] == true) {
       AppAnalytics.logEvent(
         'team_joined',
-        parameters: AppAnalytics.teamContextParameters(
-          teamId: state.teamId,
-          teamName: state.teamTitle,
-        ),
+        parameters: AppAnalytics.teamContextParameters(teamId: state.teamId),
       );
       emit(state.copyWith(status: OnboardingStatus.success, inviteToken: null));
       return true;
@@ -246,10 +243,7 @@ class OnboardingCubit extends Cubit<OnboardingState> {
       AppAnalytics.logEvent(
         'team_created',
         parameters: {
-          ...AppAnalytics.teamContextParameters(
-            teamId: teamId,
-            teamName: teamTitle,
-          ),
+          ...AppAnalytics.teamContextParameters(teamId: teamId),
           'has_dbu_context': dbuContext == null ? 0 : 1,
         },
       );
@@ -313,10 +307,7 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     if (result['success'] == true) {
       AppAnalytics.logEvent(
         'team_join_requested',
-        parameters: AppAnalytics.teamContextParameters(
-          teamId: teamId,
-          teamName: teamName,
-        ),
+        parameters: AppAnalytics.teamContextParameters(teamId: teamId),
       );
       final request = result['join_request'] as Map<String, dynamic>?;
       emit(state.copyWith(

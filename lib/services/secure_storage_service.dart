@@ -9,6 +9,7 @@ class SecureStorageService {
   );
   static const _lineupDragHintSeenKey = 'lineupDragHintSeen';
   static const _hasAuthenticatedBeforeKey = 'hasAuthenticatedBefore';
+  static const _analyticsEnabledKey = 'analyticsEnabled';
 
   // ------------------------
   // Token methods
@@ -43,6 +44,16 @@ class SecureStorageService {
   // ------------------------
   // Local app preferences
   // ------------------------
+
+  /// Product analytics is on unless the user turned it off on this device.
+  static Future<bool> isAnalyticsEnabled() async {
+    final value = await _storage.read(key: _analyticsEnabledKey);
+    return value != 'false';
+  }
+
+  static Future<void> setAnalyticsEnabled(bool enabled) async {
+    await _storage.write(key: _analyticsEnabledKey, value: enabled.toString());
+  }
 
   static Future<bool> hasSeenLineupDragHint() async {
     final value = await _storage.read(key: _lineupDragHintSeenKey);

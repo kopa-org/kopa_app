@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:kopa/utils/app_analytics.dart';
 import 'package:kopa/l10n/current_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/avatar/team_avatar.dart';
@@ -373,6 +374,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
     if (inviteUri == null) return;
 
     await Clipboard.setData(ClipboardData(text: inviteUri.toString()));
+    AppAnalytics.logEvent('team_invite_copied', parameters: {
+      'source': 'onboarding',
+    });
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(AppLocalizations.of(context)!.uiLinkCopied)),
@@ -384,11 +388,15 @@ class _OnboardingPageState extends State<OnboardingPage> {
     if (inviteUri == null) return;
 
     final teamTitle = _createdTeamTitle ?? _teamNameController.text.trim();
-    await SharePlus.instance.share(
+    final shareResult = await SharePlus.instance.share(
       ShareParams(
         text: AppLocalizations.of(context)!.uiJoinOnKopa(teamTitle, inviteUri),
       ),
     );
+    AppAnalytics.logEvent('team_invite_shared', parameters: {
+      'source': 'onboarding',
+      'status': shareResult.status.name,
+    });
   }
 
   Future<void> _requestJoin(Map<String, dynamic> team) async {

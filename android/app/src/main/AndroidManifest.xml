@@ -5,6 +5,10 @@
         android:label="kopa"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <!-- PostHog is set up from Dart (AppAnalytics.initialize). -->
+        <meta-data
+            android:name="com.posthog.posthog.AUTO_INIT"
+            android:value="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

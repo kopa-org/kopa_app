@@ -139,6 +139,7 @@ class SettingsRow extends StatelessWidget {
   final String? subtitle;
   final Widget? trailing;
   final bool loading;
+  final bool showChevron;
   final VoidCallback? onTap;
 
   const SettingsRow({
@@ -149,6 +150,7 @@ class SettingsRow extends StatelessWidget {
     this.subtitle,
     this.trailing,
     this.loading = false,
+    this.showChevron = true,
     this.onTap,
   });
 
@@ -203,15 +205,17 @@ class SettingsRow extends StatelessWidget {
                   const SizedBox(width: Spacing.sm),
                   trailing!,
                 ],
-                const SizedBox(width: Spacing.sm),
-                if (loading)
-                  const CupertinoActivityIndicator()
-                else
+                if (loading) ...[
+                  const SizedBox(width: Spacing.sm),
+                  const CupertinoActivityIndicator(),
+                ] else if (showChevron) ...[
+                  const SizedBox(width: Spacing.sm),
                   Icon(
                     CupertinoIcons.chevron_right,
                     size: 18,
                     color: colors.textSecondary,
                   ),
+                ],
               ],
             ),
           ),

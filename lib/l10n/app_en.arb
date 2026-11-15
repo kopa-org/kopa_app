@@ -1923,5 +1923,8 @@
   "appExitConfirmTitle": "Close Kopa?",
   "appExitConfirmMessage": "Do you want to close the app?",
   "appExitConfirmExit": "Close app",
-  "appExitConfirmStay": "Stay"
+  "appExitConfirmStay": "Stay",
+  "settingsSectionPrivacy": "Privacy",
+  "settingsAnalyticsTitle": "Share usage data",
+  "settingsAnalyticsSubtitle": "Helps us improve Kopa. Your name and email are never shared"
 }

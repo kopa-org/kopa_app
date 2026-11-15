@@ -6229,6 +6229,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Stay'**
   String get appExitConfirmStay;
+
+  /// No description provided for @settingsSectionPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy'**
+  String get settingsSectionPrivacy;
+
+  /// No description provided for @settingsAnalyticsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share usage data'**
+  String get settingsAnalyticsTitle;
+
+  /// No description provided for @settingsAnalyticsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Helps us improve Kopa. Your name and email are never shared'**
+  String get settingsAnalyticsSubtitle;
 }
 
 class _AppLocalizationsDelegate

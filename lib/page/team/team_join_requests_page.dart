@@ -10,6 +10,7 @@ import 'package:kopa/repository/onboarding_repository.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 import 'package:kopa/theme/spacing.dart';
+import 'package:kopa/utils/app_analytics.dart';
 
 class TeamJoinRequestsPage extends StatefulWidget {
   const TeamJoinRequestsPage({super.key});
@@ -71,6 +72,10 @@ class _TeamJoinRequestsPageState extends State<TeamJoinRequestsPage> {
     if (!mounted) return;
 
     if (result['success'] == true) {
+      AppAnalytics.logEvent(
+        'team_join_request_resolved',
+        parameters: {'decision': approve ? 'approved' : 'rejected'},
+      );
       setState(() {
         _savingRequestIds.remove(request.id);
         _requestsFuture = _loadRequests();
