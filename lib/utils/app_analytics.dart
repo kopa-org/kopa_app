@@ -113,7 +113,14 @@ abstract final class AppAnalytics {
     }
 
     if (user == null) {
-      await _guard(_posthog.reset);
+      // Only forget an identified user (logout or expired session). Resetting
+      // an anonymous device would mint a new anonymous id on every logged-out
+      // cold start and split install/open events from the rest of the visit.
+      await _guard(() async {
+        if (_isIdentifiedDistinctId(await _posthog.getDistinctId())) {
+          await _posthog.reset();
+        }
+      });
       return;
     }
 
@@ -179,6 +186,12 @@ abstract final class AppAnalytics {
 
   static Future<void> logRegister({required bool success}) {
     return logEvent(success ? 'register_success' : 'register_failure');
+  }
+
+  /// Identified users use their numeric Kopa id as distinct id; anonymous
+  /// devices use a PostHog-generated UUID.
+  static bool _isIdentifiedDistinctId(String distinctId) {
+    return int.tryParse(distinctId) != null;
   }
 
   static bool _envFlag(String key) {
