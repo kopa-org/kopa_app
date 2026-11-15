@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:kopa/l10n/current_l10n.dart';
 import 'package:flutter/material.dart';
+import 'package:kopa/component/avatar/team_avatar.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -2438,14 +2439,11 @@ final _sevenAsideChoices = <_PositionChoice>[
   ),
 ];
 
+/// Same initials as the team badges ("Skjold (7)" -> "S7"), or "?" when the
+/// name has no letters or digits yet.
 String _initials(String name) {
-  final parts = name
-      .trim()
-      .split(RegExp(r'\s+'))
-      .where((part) => part.isNotEmpty)
-      .toList();
-  if (parts.isEmpty) return '?';
-  return parts.take(2).map((part) => part[0].toUpperCase()).join();
+  final initials = teamInitials(name);
+  return initials.isEmpty ? '?' : initials;
 }
 
 Color _teamAccentColor(String seed, AppColors appColors) {

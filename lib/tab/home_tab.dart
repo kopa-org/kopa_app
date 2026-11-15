@@ -179,17 +179,12 @@ class _HomeTabViewState extends State<_HomeTabView> {
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
                 SliverAppBar(
+                  // With a match band the app bar is see-through: the band
+                  // paints the mint behind it as one parallax layer.
                   backgroundColor: showMatchBand
-                      ? appColors.lightGrass
+                      ? AppColors.transparent
                       : appColors.background,
-                  flexibleSpace: showMatchBand
-                      ? CustomPaint(
-                          painter: PitchMarkingsPainter(
-                            color: _pitchMarkingColor(appColors),
-                          ),
-                          child: const SizedBox.expand(),
-                        )
-                      : null,
+                  surfaceTintColor: AppColors.transparent,
                   foregroundColor: appColors.grass,
                   elevation: 0,
                   scrolledUnderElevation: 0,
@@ -241,45 +236,47 @@ class _HomeTabViewState extends State<_HomeTabView> {
                     ),
                   ],
                 ),
+                // Hero and bento share one sliver so the bento grid paints
+                // over the parallax band as it lags behind the scroll (the
+                // viewport paints earlier slivers on top of later ones).
                 SliverToBoxAdapter(
-                  // No match left: the season is over. Trainings often keep
-                  // going, so the next one sits in a compact card below.
-                  child: !showMatchBand
-                      ? Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            _SeasonEndHero(
-                              state: state,
-                              currentUser: currentUser,
-                            ),
-                            if (nextMatch != null && nextMatch.isTraining)
-                              _NextTrainingCard(
-                                training: nextMatch,
-                                currentUser: currentUser,
-                              ),
-                          ],
-                        )
-                      : _HeroMatchCarousel(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // No match left: the season is over. Trainings often
+                      // keep going, so the next one sits in a compact card.
+                      if (!showMatchBand) ...[
+                        _SeasonEndHero(
+                          state: state,
+                          currentUser: currentUser,
+                        ),
+                        if (nextMatch != null && nextMatch.isTraining)
+                          _NextTrainingCard(
+                            training: nextMatch,
+                            currentUser: currentUser,
+                          ),
+                      ] else
+                        _HeroMatchCarousel(
                           matches: upcomingMatches,
                           fallbackMatch: nextMatch,
                           currentUser: currentUser,
                         ),
-                ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      Spacing.md,
-                      Spacing.md,
-                      Spacing.md,
-                      0,
-                    ),
-                    child: _BentoGrid(
-                      currentUser: currentUser,
-                      latestMatch: latestMatch,
-                      standings: state.dbuStandings,
-                      statistics: state.statistics,
-                      fineBox: state.fineBox,
-                    ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          Spacing.md,
+                          Spacing.md,
+                          Spacing.md,
+                          0,
+                        ),
+                        child: _BentoGrid(
+                          currentUser: currentUser,
+                          latestMatch: latestMatch,
+                          standings: state.dbuStandings,
+                          statistics: state.statistics,
+                          fineBox: state.fineBox,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 SliverToBoxAdapter(
@@ -494,12 +491,17 @@ List<MatchDetails> matchesMissingResult(
 Color _pitchMarkingColor(AppColors colors) =>
     colors.grass.withValues(alpha: 0.32);
 
-/// The mint band under the home app bar. It holds the countdown and reaches
-/// [overlap] further down, behind the top of the hero card, which the next
-/// sibling in the column paints over it.
+/// The mint band behind the home app bar and countdown. It reaches up behind
+/// the transparent app bar and [overlap] further down, behind the top of the
+/// hero card, which the next sibling in the column paints over it. It scrolls
+/// slower than the content (parallax) so the hero panel slides up over it.
 class _HomeMatchBand extends StatelessWidget {
   static const double overlap = 52;
   static const double radius = 28;
+
+  /// Share of the scroll distance the band lags behind the content, so the
+  /// hero panel and bento grid slide up over it.
+  static const double parallaxFactor = 0.5;
 
   final Widget child;
 
@@ -508,33 +510,58 @@ class _HomeMatchBand extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    // The app bar above paints the first part of the corner arc.
-    final topOffset = MediaQuery.paddingOf(context).top + kToolbarHeight;
+    final media = MediaQuery.of(context);
+    // The band reaches up behind the transparent app bar and status bar, and
+    // a screen further so a pull-down overscroll never shows a gap above it.
+    final appBarHeight = media.padding.top + kToolbarHeight;
+    final overscrollReserve = media.size.height;
+    final position = Scrollable.maybeOf(context)?.position;
+    final parallax = media.disableAnimations ? 0.0 : parallaxFactor;
+
+    final band = ClipRRect(
+      borderRadius: const BorderRadius.vertical(
+        bottom: Radius.circular(radius),
+      ),
+      child: ColoredBox(
+        key: const ValueKey('home-match-band'),
+        color: colors.lightGrass,
+        child: CustomPaint(
+          painter: PitchMarkingsPainter(
+            color: _pitchMarkingColor(colors),
+            // The penalty area is anchored to the top of the screen.
+            topOffset: -overscrollReserve,
+            drawMidfield: true,
+            drawPenaltyArea: true,
+          ),
+          child: const SizedBox.expand(),
+        ),
+      ),
+    );
 
     return Stack(
       clipBehavior: Clip.none,
       children: [
         Positioned(
-          top: 0,
+          top: -(appBarHeight + overscrollReserve),
           left: 0,
           right: 0,
           bottom: -overlap,
-          child: ClipRRect(
-            borderRadius: const BorderRadius.vertical(
-              bottom: Radius.circular(radius),
-            ),
-            child: ColoredBox(
-              key: const ValueKey('home-match-band'),
-              color: colors.lightGrass,
-              child: CustomPaint(
-                painter: PitchMarkingsPainter(
-                  color: _pitchMarkingColor(colors),
-                  topOffset: topOffset,
-                  drawMidfield: true,
-                ),
-                child: const SizedBox.expand(),
-              ),
-            ),
+          child: IgnorePointer(
+            child: position == null || parallax == 0
+                ? band
+                : ListenableBuilder(
+                    listenable: position,
+                    builder: (context, child) {
+                      final offset = position.hasPixels
+                          ? math.max(0.0, position.pixels)
+                          : 0.0;
+                      return Transform.translate(
+                        offset: Offset(0, offset * parallax),
+                        child: child,
+                      );
+                    },
+                    child: band,
+                  ),
           ),
         ),
         child,
@@ -1020,9 +1047,16 @@ class _HeroTeamPanel extends StatelessWidget {
       builder: (context, constraints) {
         final pinDetailsToBottom =
             match != null && constraints.hasBoundedHeight;
+        // Once the result reminder is due, the whole card asks the owner
+        // for the result instead of opening the match, so it gets entered.
+        final promptForResult = match != null &&
+            currentUser.isTeamOwner &&
+            match.shouldPromptForResultAt(DateTime.now());
         final openDetails = match == null
             ? null
-            : () => _openMatch(context, match, 'home_hero');
+            : promptForResult
+                ? () => _enterHomeMatchResult(context, match)
+                : () => _openMatch(context, match, 'home_hero');
 
         return Material(
           type: MaterialType.transparency,

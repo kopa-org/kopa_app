@@ -1173,5 +1173,9 @@
   "settingsSeasonOtherSources": "Andre kilder",
   "settingsSeasonCreateMatch": "Opret kamp manuelt",
   "settingsSeasonCreateMatchSubtitle": "Træningskampe og pokalkampe",
-  "homeProfilePendingRequests": "Profil, {count, plural, =1{1 spiller venter på godkendelse} other{{count} spillere venter på godkendelse}}"
+  "homeProfilePendingRequests": "Profil, {count, plural, =1{1 spiller venter på godkendelse} other{{count} spillere venter på godkendelse}}",
+  "appExitConfirmTitle": "Luk Kopa?",
+  "appExitConfirmMessage": "Vil du lukke appen?",
+  "appExitConfirmExit": "Luk appen",
+  "appExitConfirmStay": "Bliv"
 }

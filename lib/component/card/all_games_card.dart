@@ -162,11 +162,17 @@ class _GameResultRow extends StatelessWidget {
     final status = _MatchStatus.from(match, ownSide);
     final currentUserDeclined = _currentUserDeclined(match, currentUserId);
     final borderRadius = BorderRadius.circular(Spacing.borderRadiusSmall);
+    // Once the result reminder is due, tapping anywhere on the card asks for
+    // the result instead of opening the match, so it gets entered.
+    final promptForResult =
+        canManageTeam && match.shouldPromptForResultAt(DateTime.now());
 
     return Semantics(
       key: ValueKey('match-entry-${match.id}'),
       button: true,
-      label: AppLocalizations.of(context)!.uiOpenMatch(match.matchName),
+      label: promptForResult
+          ? AppLocalizations.of(context)!.matchResultReminderTitle
+          : AppLocalizations.of(context)!.uiOpenMatch(match.matchName),
       child: Material(
         color: AppColors.transparent,
         child: Ink(
@@ -182,7 +188,7 @@ class _GameResultRow extends StatelessWidget {
             ],
           ),
           child: InkWell(
-            onTap: onTap,
+            onTap: promptForResult ? onEnterResult : onTap,
             borderRadius: borderRadius,
             child: Stack(
               children: [

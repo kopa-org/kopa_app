@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kopa/component/avatar/team_avatar.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/model/team_logo_design.dart';
 import 'package:kopa/theme/app_colors.dart';
@@ -424,12 +425,9 @@ ShapeBorder _logoShape(TeamLogoShape shape, bool selected, Color white) {
   };
 }
 
+/// Same initials as the team badges ("Skjold (7)" -> "S7"), or "?" when the
+/// name has no letters or digits yet.
 String _initials(String name) {
-  final parts = name
-      .trim()
-      .split(RegExp(r'\s+'))
-      .where((part) => part.isNotEmpty)
-      .toList();
-  if (parts.isEmpty) return '?';
-  return parts.take(2).map((part) => part[0].toUpperCase()).join();
+  final initials = teamInitials(name);
+  return initials.isEmpty ? '?' : initials;
 }

@@ -2,6 +2,7 @@ import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:kopa/component/dialog/exit_app_confirmation.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
@@ -204,6 +205,11 @@ abstract final class AppRouter {
                   'tab_name': tabs[index].analyticsName,
                 },
               );
+              // The fine box tab is preloaded, so it can't log its own
+              // screen view on first build; log it when it is opened.
+              if (tabs[index] == _MainTab.fineBox && !isCurrentTab) {
+                TeamFinesPage.logOpened();
+              }
               if (isCurrentTab) {
                 branchNavigatorKeys[index]
                     .currentState
@@ -230,10 +236,17 @@ abstract final class AppRouter {
             for (int i = 0; i < visibleMainTabs.length; i++)
               StatefulShellBranch(
                 navigatorKey: branchNavigatorKeys[i],
+                // Build every tab in the background once the shell is up,
+                // so its data is loaded before the user first opens it.
+                preload: true,
                 routes: [
                   GoRoute(
                     path: visibleMainTabs[i].path,
-                    builder: (context, state) => visibleMainTabs[i].page,
+                    // A back gesture on a tab's root page asks before
+                    // closing the app.
+                    builder: (context, state) => ExitAppConfirmationScope(
+                      child: visibleMainTabs[i].page,
+                    ),
                   ),
                 ],
               ),

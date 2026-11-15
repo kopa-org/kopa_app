@@ -3517,4 +3517,16 @@ class AppLocalizationsDa extends AppLocalizations {
     );
     return 'Profil, $_temp0';
   }
+
+  @override
+  String get appExitConfirmTitle => 'Luk Kopa?';
+
+  @override
+  String get appExitConfirmMessage => 'Vil du lukke appen?';
+
+  @override
+  String get appExitConfirmExit => 'Luk appen';
+
+  @override
+  String get appExitConfirmStay => 'Bliv';
 }

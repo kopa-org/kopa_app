@@ -3508,4 +3508,16 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return 'Profile, $_temp0';
   }
+
+  @override
+  String get appExitConfirmTitle => 'Close Kopa?';
+
+  @override
+  String get appExitConfirmMessage => 'Do you want to close the app?';
+
+  @override
+  String get appExitConfirmExit => 'Close app';
+
+  @override
+  String get appExitConfirmStay => 'Stay';
 }

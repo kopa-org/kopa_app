@@ -6205,6 +6205,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Profile, {count, plural, =1{1 player waiting for approval} other{{count} players waiting for approval}}'**
   String homeProfilePendingRequests(int count);
+
+  /// No description provided for @appExitConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Close Kopa?'**
+  String get appExitConfirmTitle;
+
+  /// No description provided for @appExitConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you want to close the app?'**
+  String get appExitConfirmMessage;
+
+  /// No description provided for @appExitConfirmExit.
+  ///
+  /// In en, this message translates to:
+  /// **'Close app'**
+  String get appExitConfirmExit;
+
+  /// No description provided for @appExitConfirmStay.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay'**
+  String get appExitConfirmStay;
 }
 
 class _AppLocalizationsDelegate

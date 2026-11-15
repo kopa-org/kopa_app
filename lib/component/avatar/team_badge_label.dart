@@ -17,9 +17,16 @@ int stableTeamSeed(String name) {
   return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
 }
 
+/// Whether two names are the same team, ignoring case, brackets and other
+/// symbols, and spacing: "Skjold (7)" matches "Skjold 7" from DBU.
 bool teamNamesMatch(String first, String second) {
-  return first.trim().toLowerCase() == second.trim().toLowerCase();
+  return _normalizedTeamName(first) == _normalizedTeamName(second);
 }
+
+String _normalizedTeamName(String name) => name
+    .toLowerCase()
+    .replaceAll(RegExp(r'[^\p{L}\p{N}]+', unicode: true), ' ')
+    .trim();
 
 enum TeamBadgeLabelLayout { vertical, horizontal }
 

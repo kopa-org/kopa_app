@@ -44,6 +44,13 @@ class TeamFinesPage extends StatefulWidget {
 
   const TeamFinesPage({super.key, this.showBackButton = true});
 
+  /// Logs that the fine box was opened. As a pushed page it logs this itself;
+  /// as the preloaded main tab, the tab bar calls it when the tab is selected.
+  static void logOpened() {
+    AppAnalytics.logScreenView('team_fines');
+    AppAnalytics.logEvent('fine_box_opened');
+  }
+
   @override
   State<TeamFinesPage> createState() => _TeamFinesPageState();
 }
@@ -59,8 +66,7 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
   @override
   void initState() {
     super.initState();
-    AppAnalytics.logScreenView('team_fines');
-    AppAnalytics.logEvent('fine_box_opened');
+    if (widget.showBackButton) TeamFinesPage.logOpened();
     fineBoxDetails = FinesRepository.getFineBox();
     fineTypeDetails = FinesRepository.getFineTypes();
     final user = context.read<AuthCubit>().state.user;

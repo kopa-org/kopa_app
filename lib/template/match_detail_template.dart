@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:kopa/l10n/current_l10n.dart';
@@ -180,7 +181,11 @@ class MatchDetailTemplate extends StatelessWidget {
       backgroundColor: _usesSheetHeader ? colors.background : null,
       systemOverlayStyle: _usesSheetHeader
           ? SystemUiOverlayStyle(
-              statusBarColor: _headerColor(context),
+              // The match band scrolls away under the status bar, so only
+              // the training header keeps a solid status bar colour.
+              statusBarColor: useTrainingHeader
+                  ? _headerColor(context)
+                  : AppColors.transparent,
               statusBarIconBrightness: Brightness.dark,
               statusBarBrightness: Brightness.light,
             )
@@ -419,18 +424,24 @@ class MatchDetailTemplate extends StatelessWidget {
                       _navExtent(collapse) +
                       _cardPadding(collapse) +
                       _bandOverlap(collapse),
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.vertical(
-                      bottom: Radius.circular(28),
-                    ),
-                    child: ColoredBox(
-                      key: const ValueKey('match-details-dark-header'),
-                      color: _headerColor(context),
-                      child: CustomPaint(
-                        painter: PitchMarkingsPainter(
-                          color: colors.grass.withValues(alpha: 0.32),
+                  child: _MatchBandParallax(
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.vertical(
+                        bottom: Radius.circular(28),
+                      ),
+                      child: ColoredBox(
+                        key: const ValueKey('match-details-dark-header'),
+                        color: _headerColor(context),
+                        child: CustomPaint(
+                          painter: PitchMarkingsPainter(
+                            color: colors.grass.withValues(alpha: 0.32),
+                            // Same cropped penalty area as home; the band is
+                            // too short for the halfway line and centre
+                            // circle.
+                            drawPenaltyArea: true,
+                          ),
+                          child: const SizedBox.expand(),
                         ),
-                        child: const SizedBox.expand(),
                       ),
                     ),
                   ),
@@ -688,6 +699,41 @@ class MatchDetailTemplate extends StatelessWidget {
       else
         ...timelineItems,
     ];
+  }
+}
+
+/// Slides the mint match band up at half the scroll speed, like the home
+/// band, so it leaves the screen behind the pinned hero card. It listens to
+/// the scroll position directly because the pinned header stops rebuilding
+/// once it is fully collapsed.
+class _MatchBandParallax extends StatelessWidget {
+  static const double parallaxFactor = 0.5;
+
+  final Widget child;
+
+  const _MatchBandParallax({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final position = Scrollable.maybeOf(context)?.position;
+    if (position == null || MediaQuery.disableAnimationsOf(context)) {
+      return child;
+    }
+
+    return IgnorePointer(
+      child: ListenableBuilder(
+        listenable: position,
+        builder: (context, child) {
+          final offset =
+              position.hasPixels ? math.max(0.0, position.pixels) : 0.0;
+          return Transform.translate(
+            offset: Offset(0, -offset * parallaxFactor),
+            child: child,
+          );
+        },
+        child: child,
+      ),
+    );
   }
 }
 
