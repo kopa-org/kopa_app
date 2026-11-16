@@ -245,7 +245,7 @@ class KopaApp extends StatefulWidget {
 class _KopaAppState extends State<KopaApp> {
   late final RouterRefreshNotifier _refreshNotifier;
   late final MatchProgrammeRefreshNotifier _matchProgrammeRefreshNotifier;
-  late final GoRouter _router;
+  late GoRouter _router;
   StreamSubscription<AuthState>? _authSubscription;
   StreamSubscription<String>? _deepLinkSubscription;
 
@@ -254,11 +254,8 @@ class _KopaAppState extends State<KopaApp> {
     super.initState();
     _refreshNotifier = RouterRefreshNotifier(widget.authCubit.stream);
     _matchProgrammeRefreshNotifier = MatchProgrammeRefreshNotifier();
-    _router = AppRouter.create(
-      authCubit: widget.authCubit,
-      onboardingCubit: widget.onboardingCubit,
-      featureFlags: widget.featureFlags,
-      refreshListenable: _refreshNotifier,
+    _router = _createRouter(
+      widget.featureFlagsCubit.state.featureFlags,
       initialLocation: widget.initialLocation,
     );
     widget.featureFlagsCubit.startWatching();
@@ -283,7 +280,52 @@ class _KopaAppState extends State<KopaApp> {
     super.dispose();
   }
 
+  GoRouter _createRouter(
+    AppFeatureFlags featureFlags, {
+    String? initialLocation,
+  }) {
+    return AppRouter.create(
+      authCubit: widget.authCubit,
+      onboardingCubit: widget.onboardingCubit,
+      featureFlags: featureFlags,
+      refreshListenable: _refreshNotifier,
+      initialLocation: initialLocation,
+    );
+  }
+
+  /// The tab shell's branches are fixed when the router is built, so a
+  /// change in which tabs are visible needs a new router. Keep the user on
+  /// the location they were viewing.
+  void _rebuildRouterForFeatureFlags(AppFeatureFlags featureFlags) {
+    final previousRouter = _router;
+    final currentLocation =
+        previousRouter.routerDelegate.currentConfiguration.uri.toString();
+    setState(() {
+      _router = _createRouter(
+        featureFlags,
+        initialLocation: currentLocation.isEmpty ? null : currentLocation,
+      );
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      previousRouter.dispose();
+    });
+  }
+
+  static bool _visibleTabsChanged(
+    FeatureFlagsState previous,
+    FeatureFlagsState current,
+  ) {
+    return previous.featureFlags.showStatistics !=
+            current.featureFlags.showStatistics ||
+        previous.featureFlags.showFineBox != current.featureFlags.showFineBox;
+  }
+
   Future<void> _handleAuthStateChanged(AuthState state) async {
+    final user = state.user;
+    unawaited(widget.featureFlagsCubit.updateScope(
+      state.isAuthenticated ? (user?.id, user?.teamDetails?.id) : null,
+    ));
+
     if (!state.isAuthenticated) {
       return;
     }
@@ -328,7 +370,6 @@ class _KopaAppState extends State<KopaApp> {
       providers: [
         RepositoryProvider.value(value: widget.authRepository),
         RepositoryProvider.value(value: widget.onboardingRepository),
-        Provider.value(value: widget.featureFlags),
         ChangeNotifierProvider.value(value: _matchProgrammeRefreshNotifier),
       ],
       child: MultiBlocProvider(
@@ -337,28 +378,40 @@ class _KopaAppState extends State<KopaApp> {
           BlocProvider.value(value: widget.featureFlagsCubit),
           BlocProvider.value(value: widget.onboardingCubit),
         ],
-        child: MaterialApp.router(
-          title: 'Kopa',
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.lightTheme,
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: const [
-            Locale('da'),
-            Locale('en'),
-          ],
-          builder: (context, child) => MaintenanceGate(
-            child: UpdateRequiredGate(
-              child: child ?? const SizedBox.shrink(),
-            ),
+        child: BlocConsumer<FeatureFlagsCubit, FeatureFlagsState>(
+          listenWhen: _visibleTabsChanged,
+          listener: (context, state) =>
+              _rebuildRouterForFeatureFlags(state.featureFlags),
+          builder: (context, featureFlagsState) => Provider.value(
+            value: featureFlagsState.featureFlags,
+            child: _buildApp(),
           ),
-          routerConfig: _router,
         ),
       ),
+    );
+  }
+
+  Widget _buildApp() {
+    return MaterialApp.router(
+      title: 'Kopa',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.lightTheme,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('da'),
+        Locale('en'),
+      ],
+      builder: (context, child) => MaintenanceGate(
+        child: UpdateRequiredGate(
+          child: child ?? const SizedBox.shrink(),
+        ),
+      ),
+      routerConfig: _router,
     );
   }
 }

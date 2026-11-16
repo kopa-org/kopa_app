@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -54,70 +55,113 @@ class FeatureFlagsRepository {
     }
   }
 
+  /// Streams feature flags over SSE, reconnecting on failure.
+  ///
+  /// The server resolves team-scoped flags from the auth token at connect
+  /// time, so cancelling the subscription closes the current connection and
+  /// stops reconnecting; callers re-listen after the auth scope changes.
   Stream<AppFeatureFlags> watchFeatureFlags({
     Duration reconnectDelay = const Duration(seconds: 5),
-  }) async* {
-    late final Uri url;
-    late final int? currentBuildNumber;
-    try {
-      currentBuildNumber = await _safeCurrentBuildNumber();
-      url = _featureFlagsUri('/features/stream', currentBuildNumber);
-    } catch (error) {
-      if (kDebugMode) {
-        print('Feature flags stream unavailable: $error');
-      }
-      return;
-    }
+  }) {
+    var cancelled = false;
+    StreamSubscription<String>? linesSubscription;
+    Completer<void>? connectionDone;
+    late final StreamController<AppFeatureFlags> controller;
 
-    while (!_closed) {
+    bool isActive() => !_closed && !cancelled;
+
+    Future<void> run() async {
+      final currentBuildNumber = await _safeCurrentBuildNumber();
+      final Uri url;
       try {
-        final headers = {
-          'accept': 'text/event-stream',
-          'cache-control': 'no-cache',
-          ...await _authHeaders(),
-        };
-        final request = http.Request('GET', url)..headers.addAll(headers);
-        final response = await _httpClient.send(request).timeout(
-              _requestTimeout,
-            );
-
-        if (response.statusCode != 200) {
-          await Future<void>.delayed(reconnectDelay);
-          continue;
-        }
-
-        final lines = response.stream
-            .transform(utf8.decoder)
-            .transform(const LineSplitter());
-        final dataLines = <String>[];
-
-        await for (final line in lines) {
-          if (_closed) return;
-
-          if (line.isEmpty) {
-            final featureFlags = _parseSseData(
-              dataLines,
-              currentBuildNumber: currentBuildNumber,
-            );
-            dataLines.clear();
-            if (featureFlags != null) yield featureFlags;
-            continue;
-          }
-
-          if (line.startsWith('data:')) {
-            dataLines.add(line.substring(5).trimLeft());
-          }
-        }
+        url = _featureFlagsUri('/features/stream', currentBuildNumber);
       } catch (error) {
         if (kDebugMode) {
-          print('Feature flags stream failed: $error');
+          print('Feature flags stream unavailable: $error');
         }
+        return;
       }
 
-      if (!_closed) {
-        await Future<void>.delayed(reconnectDelay);
+      while (isActive()) {
+        try {
+          final headers = {
+            'accept': 'text/event-stream',
+            'cache-control': 'no-cache',
+            ...await _authHeaders(),
+          };
+          final request = http.Request('GET', url)..headers.addAll(headers);
+          final response = await _httpClient.send(request).timeout(
+                _requestTimeout,
+              );
+          if (!isActive()) return;
+
+          if (response.statusCode == 200) {
+            final dataLines = <String>[];
+            final done = Completer<void>();
+            connectionDone = done;
+            linesSubscription = response.stream
+                .transform(utf8.decoder)
+                .transform(const LineSplitter())
+                .listen(
+              (line) {
+                if (line.isEmpty) {
+                  final featureFlags = _parseSseData(
+                    dataLines,
+                    currentBuildNumber: currentBuildNumber,
+                  );
+                  dataLines.clear();
+                  if (featureFlags != null && isActive()) {
+                    controller.add(featureFlags);
+                  }
+                  return;
+                }
+
+                if (line.startsWith('data:')) {
+                  dataLines.add(line.substring(5).trimLeft());
+                }
+              },
+              onError: (Object error) {
+                if (kDebugMode) {
+                  print('Feature flags stream failed: $error');
+                }
+                if (!done.isCompleted) done.complete();
+              },
+              onDone: () {
+                if (!done.isCompleted) done.complete();
+              },
+              cancelOnError: true,
+            );
+            await done.future;
+            linesSubscription = null;
+            connectionDone = null;
+          }
+        } catch (error) {
+          if (kDebugMode) {
+            print('Feature flags stream failed: $error');
+          }
+        }
+
+        if (isActive()) {
+          await Future<void>.delayed(reconnectDelay);
+        }
       }
     }
+
+    controller = StreamController<AppFeatureFlags>(
+      onListen: () {
+        unawaited(run().whenComplete(() {
+          if (!controller.isClosed) controller.close();
+        }));
+      },
+      onCancel: () async {
+        cancelled = true;
+        await linesSubscription?.cancel();
+        final done = connectionDone;
+        if (done != null && !done.isCompleted) done.complete();
+      },
+    );
+
+    return controller.stream;
   }
 
   void close() {

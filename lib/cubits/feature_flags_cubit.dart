@@ -26,13 +26,33 @@ class FeatureFlagsCubit extends Cubit<FeatureFlagsState> {
 
   final FeatureFlagsRepository _repository;
   StreamSubscription<AppFeatureFlags>? _subscription;
+  bool _hasScope = false;
+  Object? _scope;
 
   void startWatching() {
-    if (_subscription != null) return;
+    if (_subscription != null || isClosed) return;
 
     _subscription = _repository.watchFeatureFlags().listen((featureFlags) {
-      emit(FeatureFlagsState(featureFlags: featureFlags));
+      if (!isClosed) emit(FeatureFlagsState(featureFlags: featureFlags));
     });
+  }
+
+  /// Flags are team-scoped on the server, which resolves the team from the
+  /// auth token when the stream connects. Call this whenever the signed-in
+  /// user or team may have changed; it reconnects when the scope differs.
+  Future<void> updateScope(Object? scope) async {
+    if (_hasScope && scope == _scope) return;
+
+    final isInitialScope = !_hasScope;
+    _hasScope = true;
+    _scope = scope;
+    // The first scope is the one the bootstrap fetch and the initial stream
+    // connection already used.
+    if (isInitialScope && _subscription != null) return;
+
+    await _subscription?.cancel();
+    _subscription = null;
+    startWatching();
   }
 
   @override
