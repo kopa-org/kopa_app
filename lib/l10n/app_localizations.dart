@@ -98,6 +98,54 @@ abstract class AppLocalizations {
     Locale('en')
   ];
 
+  /// No description provided for @onboardingGetStartedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Get started'**
+  String get onboardingGetStartedTitle;
+
+  /// No description provided for @onboardingGetStartedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How do you want to use Kopa?'**
+  String get onboardingGetStartedSubtitle;
+
+  /// No description provided for @onboardingCreateTeamCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a team'**
+  String get onboardingCreateTeamCardTitle;
+
+  /// No description provided for @onboardingCreateTeamCardBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You become the team leader and invite the players afterwards.'**
+  String get onboardingCreateTeamCardBody;
+
+  /// No description provided for @onboardingJoinTeamCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Join a team'**
+  String get onboardingJoinTeamCardTitle;
+
+  /// No description provided for @onboardingJoinTeamCardBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Find your team and send a request to the team leader.'**
+  String get onboardingJoinTeamCardBody;
+
+  /// No description provided for @onboardingFindTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Find team'**
+  String get onboardingFindTeam;
+
+  /// No description provided for @onboardingInviteLinkHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Got an invite link? Open it to go straight to the team.'**
+  String get onboardingInviteLinkHint;
+
   /// No description provided for @onboardingPlayer.
   ///
   /// In en, this message translates to:
@@ -109,30 +157,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Team leader'**
   String get onboardingTeamLeader;
-
-  /// No description provided for @onboardingRoleChoiceDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose your role on the team.'**
-  String get onboardingRoleChoiceDescription;
-
-  /// No description provided for @onboardingRoleChoiceTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'What is your role?'**
-  String get onboardingRoleChoiceTitle;
-
-  /// No description provided for @onboardingTeamChoiceDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Start a new team or find your existing team on Kopa.'**
-  String get onboardingTeamChoiceDescription;
-
-  /// No description provided for @onboardingTeamChoiceTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Create or join a team'**
-  String get onboardingTeamChoiceTitle;
 
   /// No description provided for @matchDetailsLineupTab.
   ///
@@ -2437,12 +2461,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your team'**
   String get uiYourTeam2;
-
-  /// No description provided for @uiStep3Of5.
-  ///
-  /// In en, this message translates to:
-  /// **'Step 3 of 5'**
-  String get uiStep3Of5;
 
   /// No description provided for @uiWaitingForApproval.
   ///

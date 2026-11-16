@@ -4,24 +4,18 @@ import 'package:kopa/repository/onboarding_repository.dart';
 import 'package:kopa/model/team_logo_design.dart';
 
 void main() {
-  for (final leader in [true, false]) {
-    test('chosen role $leader reaches create, invite and request APIs',
-        () async {
-      final repository =
-          _FakeOnboardingRepository(joinResult: {'success': true});
-      final cubit = OnboardingCubit(repository);
-      addTearDown(cubit.close);
-      cubit.selectTeamRole(isTeamLeader: leader);
-      expect(cubit.state.isTeamLeader, leader);
-      expect(await cubit.createTeam(title: 'Role FC', playerCount: 7), isTrue);
-      expect(repository.createdAsLeader, leader);
-      cubit.emit(cubit.state.copyWith(inviteToken: 'invite'));
-      expect(await cubit.joinTeamWithToken(), isTrue);
-      expect(repository.joinedAsLeader, leader);
-      expect(await cubit.requestToJoinTeam(42), isTrue);
-      expect(repository.requestedAsLeader, leader);
-    });
-  }
+  test('create, invite join and join request reach the repository', () async {
+    final repository = _FakeOnboardingRepository(joinResult: {'success': true});
+    final cubit = OnboardingCubit(repository);
+    addTearDown(cubit.close);
+    expect(await cubit.createTeam(title: 'Role FC', playerCount: 7), isTrue);
+    expect(repository.createdTitle, 'Role FC');
+    cubit.emit(cubit.state.copyWith(inviteToken: 'invite'));
+    expect(await cubit.joinTeamWithToken(), isTrue);
+    expect(repository.joinedToken, 'invite');
+    expect(await cubit.requestToJoinTeam(42), isTrue);
+    expect(repository.requestedTeamId, 42);
+  });
   test('joinTeamWithToken returns true and clears token on success', () async {
     final cubit = OnboardingCubit(_FakeOnboardingRepository(
       joinResult: {'success': true},
@@ -96,9 +90,9 @@ void main() {
 }
 
 class _FakeOnboardingRepository extends OnboardingRepository {
-  bool? createdAsLeader;
-  bool? joinedAsLeader;
-  bool? requestedAsLeader;
+  String? createdTitle;
+  String? joinedToken;
+  int? requestedTeamId;
   final Map<String, dynamic> joinResult;
   final Map<String, dynamic> currentJoinRequestResult;
   final Map<String, dynamic> validateResult;
@@ -117,9 +111,8 @@ class _FakeOnboardingRepository extends OnboardingRepository {
       validateResult;
 
   @override
-  Future<Map<String, dynamic>> joinTeam(String token,
-      {bool isTeamLeader = false}) async {
-    joinedAsLeader = isTeamLeader;
+  Future<Map<String, dynamic>> joinTeam(String token) async {
+    joinedToken = token;
     return joinResult;
   }
 
@@ -127,12 +120,11 @@ class _FakeOnboardingRepository extends OnboardingRepository {
   Future<Map<String, dynamic>> createTeam({
     required String title,
     required int playerCount,
-    bool isTeamLeader = true,
     TeamLogoDesign? logoDesign,
     Map<String, dynamic>? dbuContext,
     List<Map<String, dynamic>> standings = const [],
   }) async {
-    createdAsLeader = isTeamLeader;
+    createdTitle = title;
     return {
       'success': true,
       'team': {'id': 42, 'title': title}
@@ -140,12 +132,11 @@ class _FakeOnboardingRepository extends OnboardingRepository {
   }
 
   @override
-  Future<Map<String, dynamic>> requestToJoinTeam(int teamId,
-      {bool isTeamLeader = false}) async {
-    requestedAsLeader = isTeamLeader;
+  Future<Map<String, dynamic>> requestToJoinTeam(int teamId) async {
+    requestedTeamId = teamId;
     return {
       'success': true,
-      'join_request': {'id': 1, 'is_team_leader': isTeamLeader}
+      'join_request': {'id': 1}
     };
   }
 

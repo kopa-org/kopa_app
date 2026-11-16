@@ -9,23 +9,37 @@ class AppLocalizationsDa extends AppLocalizations {
   AppLocalizationsDa([String locale = 'da']) : super(locale);
 
   @override
+  String get onboardingGetStartedTitle => 'Kom i gang';
+
+  @override
+  String get onboardingGetStartedSubtitle => 'Hvordan vil du bruge Kopa?';
+
+  @override
+  String get onboardingCreateTeamCardTitle => 'Opret et hold';
+
+  @override
+  String get onboardingCreateTeamCardBody =>
+      'Du bliver holdleder og inviterer spillerne bagefter.';
+
+  @override
+  String get onboardingJoinTeamCardTitle => 'Tilmeld et hold';
+
+  @override
+  String get onboardingJoinTeamCardBody =>
+      'Find dit hold, og send en anmodning til holdlederen.';
+
+  @override
+  String get onboardingFindTeam => 'Find hold';
+
+  @override
+  String get onboardingInviteLinkHint =>
+      'Har du fået et invitationslink? Åbn det, så kommer du direkte ind på holdet.';
+
+  @override
   String get onboardingPlayer => 'Spiller';
 
   @override
   String get onboardingTeamLeader => 'Holdleder';
-
-  @override
-  String get onboardingRoleChoiceDescription => 'Vælg din rolle på holdet.';
-
-  @override
-  String get onboardingRoleChoiceTitle => 'Hvad er din rolle?';
-
-  @override
-  String get onboardingTeamChoiceDescription =>
-      'Opret et nyt hold, eller find dit eksisterende hold på Kopa.';
-
-  @override
-  String get onboardingTeamChoiceTitle => 'Opret eller tilmeld dig et hold';
 
   @override
   String get matchDetailsLineupTab => 'Opstilling';
@@ -224,7 +238,7 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String get onboardingDbuRecommendation =>
-      'Det anbefles at synkronisere med DBU, for den bedste app oplevelse';
+      'Det anbefales at synkronisere med DBU for den bedste oplevelse i appen.';
 
   @override
   String get onboardingContinue => 'Fortsæt';
@@ -1301,9 +1315,6 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String get uiYourTeam2 => 'Dit hold';
-
-  @override
-  String get uiStep3Of5 => 'Trin 3 af 5';
 
   @override
   String get uiWaitingForApproval => 'Venter på accept';

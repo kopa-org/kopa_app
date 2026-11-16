@@ -4,6 +4,8 @@ import 'package:kopa/utils/app_analytics.dart';
 import 'package:kopa/l10n/current_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:kopa/component/avatar/team_avatar.dart';
+import 'package:kopa/component/button/button.dart';
+import 'package:kopa/component/chip/status_chip.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -16,6 +18,7 @@ import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/model/team_logo_design.dart';
 import 'package:kopa/navigation/app_router.dart';
+import 'package:kopa/pages/onboarding/onboarding_team_choice_view.dart';
 import 'package:kopa/repository/team_dbu_repository.dart';
 import 'package:kopa/repository/users_repository.dart';
 import 'package:kopa/theme/app_colors.dart';
@@ -37,7 +40,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
   final _teamNameController = TextEditingController();
   final _searchController = TextEditingController();
   bool _hasSelectedMode = false;
-  bool _hasSelectedRole = false;
   _OnboardingMode _mode = _OnboardingMode.create;
   int _createStep = 0;
   int _joinStep = 0;
@@ -90,7 +92,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
     if (state.inviteToken == null || state.teamId == null) return;
 
     _hasSelectedMode = true;
-    _hasSelectedRole = state.isTeamLeader != null;
     _mode = _OnboardingMode.join;
     _joinStep = 0;
     _usesElevenAside = state.teamPlayerCount != 7;
@@ -523,7 +524,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       } else if (_isInviteJoinFlow) {
         _leaveOnboarding();
       } else {
-        setState(() => _hasSelectedRole = false);
+        setState(() => _hasSelectedMode = false);
       }
       return;
     }
@@ -536,7 +537,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     if (_createStep > 0) {
       setState(() => _createStep -= 1);
     } else {
-      setState(() => _hasSelectedRole = false);
+      setState(() => _hasSelectedMode = false);
     }
   }
 
@@ -587,12 +588,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
             context.read<OnboardingCubit>().state.status ==
                 OnboardingStatus.waitingApproval) {
           _leaveOnboarding();
-        } else if (!_hasSelectedRole) {
-          if (_isInviteJoinFlow) {
-            _leaveOnboarding();
-          } else {
-            setState(() => _hasSelectedMode = false);
-          }
         } else {
           _handleBack();
         }
@@ -638,50 +633,16 @@ class _OnboardingPageState extends State<OnboardingPage> {
           }
 
           if (!_hasSelectedMode) {
-            return _OnboardingChoiceView(
-              colors: colors,
-              textStyles: textStyles,
-              title: l10n.onboardingTeamChoiceTitle,
-              description: l10n.onboardingTeamChoiceDescription,
-              firstLabel: l10n.onboardingCreateTeam,
-              secondLabel: l10n.onboardingJoinTeam,
+            return OnboardingTeamChoiceView(
               onExit: _leaveOnboarding,
-              onBack: _leaveOnboarding,
-              onFirstSelected: () => setState(() {
+              onCreateTeam: () => setState(() {
                 _mode = _OnboardingMode.create;
                 _hasSelectedMode = true;
               }),
-              onSecondSelected: () => setState(() {
+              onJoinTeam: () => setState(() {
                 _mode = _OnboardingMode.join;
                 _hasSelectedMode = true;
               }),
-            );
-          }
-
-          if (!_hasSelectedRole) {
-            return _OnboardingChoiceView(
-              colors: colors,
-              textStyles: textStyles,
-              title: l10n.onboardingRoleChoiceTitle,
-              description: l10n.onboardingRoleChoiceDescription,
-              firstLabel: l10n.onboardingTeamLeader,
-              secondLabel: l10n.onboardingPlayer,
-              onExit: _leaveOnboarding,
-              onBack: _isInviteJoinFlow
-                  ? _leaveOnboarding
-                  : () => setState(() => _hasSelectedMode = false),
-              onFirstSelected: () {
-                context
-                    .read<OnboardingCubit>()
-                    .selectTeamRole(isTeamLeader: true);
-                setState(() => _hasSelectedRole = true);
-              },
-              onSecondSelected: () {
-                context
-                    .read<OnboardingCubit>()
-                    .selectTeamRole(isTeamLeader: false);
-                setState(() => _hasSelectedRole = true);
-              },
             );
           }
 
@@ -691,8 +652,14 @@ class _OnboardingPageState extends State<OnboardingPage> {
           final fixedJoinPlayerCount = _isInviteJoinFlow
               ? (state.teamPlayerCount == 11 ? 11 : 7)
               : (_pendingJoinTeam?['player_count'] == 11 ? 11 : 7);
-          final step =
-              _mode == _OnboardingMode.create ? _createStep : _joinStep + 1;
+          // Create: name, position, logo, invite. Join: search, position,
+          // waiting for approval. An invite link only asks for the position.
+          final step = _mode == _OnboardingMode.create
+              ? _createStep
+              : (!_isInviteJoinFlow && showingJoinPosition ? 1 : 0);
+          final totalSteps = _mode == _OnboardingMode.create
+              ? _createTotalSteps
+              : (_isInviteJoinFlow ? 1 : _joinTotalSteps);
           final title = _mode == _OnboardingMode.join
               ? (showingJoinPosition
                   ? l10n.onboardingPositionTitle
@@ -769,7 +736,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         colors: colors,
                         textStyles: textStyles,
                         step: step,
-                        totalSteps: 4,
+                        totalSteps: totalSteps,
                         title: title,
                         subtitle: subtitle,
                       ),
@@ -843,178 +810,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
   }
 }
 
-class _OnboardingChoiceView extends StatelessWidget {
-  final AppColors colors;
-  final AppTextStyles textStyles;
-  final String title;
-  final String description;
-  final String firstLabel;
-  final String secondLabel;
-  final VoidCallback onFirstSelected;
-  final VoidCallback onSecondSelected;
-  final VoidCallback? onBack;
-  final VoidCallback? onExit;
-
-  const _OnboardingChoiceView({
-    required this.colors,
-    required this.textStyles,
-    required this.title,
-    required this.description,
-    required this.firstLabel,
-    required this.secondLabel,
-    required this.onFirstSelected,
-    required this.onSecondSelected,
-    this.onBack,
-    this.onExit,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: colors.white,
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                child: IntrinsicHeight(
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
-                        child: Row(
-                          children: [
-                            if (onBack != null)
-                              BackButton(
-                                  onPressed: onBack, color: colors.grass),
-                            SvgPicture.asset(
-                              'assets/logos/Logo.svg',
-                              height: 36,
-                              colorFilter: ColorFilter.mode(
-                                colors.primary,
-                                BlendMode.srcIn,
-                              ),
-                            ),
-                            const Spacer(),
-                            if (onExit != null)
-                              _OnboardingExitButton(onPressed: onExit),
-                          ],
-                        ),
-                      ),
-                      const Spacer(flex: 2),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
-                        child: Column(
-                          children: [
-                            Container(
-                              width: 180,
-                              height: 180,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: colors.background,
-                                borderRadius: BorderRadius.circular(90),
-                              ),
-                              child: SvgPicture.asset(
-                                'assets/illustrations/onboarding_leader_question.svg',
-                                width: 120,
-                                height: 120,
-                                fit: BoxFit.contain,
-                              ),
-                            ),
-                            const SizedBox(height: 32),
-                            Text(
-                              title,
-                              textAlign: TextAlign.center,
-                              style: textStyles.h4.copyWith(
-                                color: colors.textPrimary,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              description,
-                              textAlign: TextAlign.center,
-                              style: textStyles.body3.copyWith(
-                                color: colors.textSecondary,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w500,
-                                height: 1.5,
-                                letterSpacing: 0,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Spacer(flex: 3),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(24, 20, 24, 44),
-                        child: _OnboardingChoiceButtons(
-                          firstLabel: firstLabel,
-                          secondLabel: secondLabel,
-                          onFirstSelected: onFirstSelected,
-                          onSecondSelected: onSecondSelected,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-}
-
-class _OnboardingChoiceButtons extends StatelessWidget {
-  final String firstLabel;
-  final String secondLabel;
-  final VoidCallback onFirstSelected;
-  final VoidCallback onSecondSelected;
-
-  const _OnboardingChoiceButtons({
-    required this.firstLabel,
-    required this.secondLabel,
-    required this.onFirstSelected,
-    required this.onSecondSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-    final styles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-    final style = OutlinedButton.styleFrom(
-      minimumSize: const Size(0, 52),
-      backgroundColor: colors.white,
-      foregroundColor: colors.grass,
-      side: BorderSide(color: colors.grass, width: 1.5),
-      shape: const StadiumBorder(),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-      textStyle: styles.body3.copyWith(fontWeight: FontWeight.w800),
-    );
-    return Row(
-      children: [
-        Expanded(
-            child: OutlinedButton(
-          style: style,
-          onPressed: onFirstSelected,
-          child: Text(firstLabel, textAlign: TextAlign.center),
-        )),
-        const SizedBox(width: 12),
-        Expanded(
-            child: OutlinedButton(
-          style: style,
-          onPressed: onSecondSelected,
-          child: Text(secondLabel, textAlign: TextAlign.center),
-        )),
-      ],
-    );
-  }
-}
+const _createTotalSteps = 4;
+const _joinTotalSteps = 3;
 
 class _CreateTeamView extends StatelessWidget {
   final AppLocalizations l10n;
@@ -1548,7 +1345,7 @@ class _TeamSearchCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: textStyles.caption2.copyWith(
-                      color: colors.primary,
+                      color: colors.successForeground,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0,
                     ),
@@ -1661,23 +1458,12 @@ class _InviteTeamStep extends StatelessWidget {
                       ),
               ),
               const SizedBox(height: 16),
-              FilledButton.icon(
-                onPressed: inviteUri == null ? null : onShareInvite,
-                icon: const Icon(Icons.ios_share_rounded, size: 19),
-                label: Text(AppLocalizations.of(context)!.uiShareLink),
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size.fromHeight(47),
-                  backgroundColor: colors.primary,
-                  foregroundColor: colors.white,
-                  disabledBackgroundColor: colors.grey3,
-                  disabledForegroundColor: colors.white,
-                  textStyle: textStyles.body1.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
+              Button(
+                buttonText: AppLocalizations.of(context)!.uiShareLink,
+                icon: Icons.ios_share_rounded,
+                width: double.infinity,
+                enabled: inviteUri != null,
+                onPressed: onShareInvite,
               ),
             ],
           ),
@@ -1747,9 +1533,8 @@ class _OnboardingTitle extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 20),
-          child: Row(
+        if (totalSteps > 1) ...[
+          Row(
             children: [
               _StepDots(colors: colors, step: step, count: totalSteps),
               const SizedBox(width: 8),
@@ -1762,8 +1547,8 @@ class _OnboardingTitle extends StatelessWidget {
               ),
             ],
           ),
-        ),
-        const SizedBox(height: 12),
+          const SizedBox(height: 12),
+        ],
         Text(
           title,
           style: textStyles.h4.copyWith(
@@ -2159,30 +1944,12 @@ class _WaitingView extends StatelessWidget {
         child: Container(
           color: colors.background,
           padding: const EdgeInsets.fromLTRB(24, 12, 24, 40),
-          child: OutlinedButton(
-            onPressed: loading ? null : onCancel,
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size.fromHeight(47),
-              foregroundColor: colors.error,
-              backgroundColor: AppColors.of(context).errorSurface,
-              side: BorderSide(color: colors.error, width: 1.5),
-              textStyle: textStyles.body1.copyWith(
-                fontWeight: FontWeight.w900,
-                letterSpacing: 0,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: loading
-                ? SizedBox.square(
-                    dimension: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: colors.error,
-                    ),
-                  )
-                : Text(cancelLabel),
+          child: Button(
+            buttonText: cancelLabel,
+            variant: ButtonVariant.destructive,
+            width: double.infinity,
+            loading: loading,
+            onPressed: onCancel,
           ),
         ),
       ),
@@ -2196,14 +1963,18 @@ class _WaitingView extends StatelessWidget {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  _StepDots(colors: colors, step: 2, count: 5),
+                  _StepDots(
+                    colors: colors,
+                    step: _joinTotalSteps - 1,
+                    count: _joinTotalSteps,
+                  ),
                   const SizedBox(width: 8),
                   Text(
-                    AppLocalizations.of(context)!.uiStep3Of5,
+                    AppLocalizations.of(context)!
+                        .uiStepOf(_joinTotalSteps, _joinTotalSteps),
                     style: textStyles.caption2.copyWith(
                       color: colors.textSecondary,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ],
@@ -2254,21 +2025,9 @@ class _WaitingView extends StatelessWidget {
                 textStyles: textStyles,
                 team: displayTeam,
                 actionLabel: '',
-                trailing: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: AppColors.of(context).warningSurface,
-                    borderRadius: BorderRadius.circular(100),
-                    border: Border.all(color: colors.warning),
-                  ),
-                  child: Text(
-                    AppLocalizations.of(context)!.uiPending,
-                    style: textStyles.caption2.copyWith(
-                      color: colors.warning,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0,
-                    ),
-                  ),
+                trailing: StatusChip(
+                  label: AppLocalizations.of(context)!.uiPending,
+                  status: ChipStatus.warning,
                 ),
               ),
             ],

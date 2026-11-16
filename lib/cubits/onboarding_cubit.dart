@@ -16,7 +16,6 @@ enum OnboardingStatus {
 
 class OnboardingState extends Equatable {
   final OnboardingStatus status;
-  final bool? isTeamLeader;
   final String? inviteToken;
   final String? email;
   final String? name;
@@ -31,7 +30,6 @@ class OnboardingState extends Equatable {
 
   OnboardingState({
     this.status = OnboardingStatus.initial,
-    this.isTeamLeader,
     this.inviteToken,
     this.email,
     this.name,
@@ -47,7 +45,6 @@ class OnboardingState extends Equatable {
 
   OnboardingState copyWith({
     OnboardingStatus? status,
-    bool? isTeamLeader,
     Object? inviteToken = _unset,
     Object? email = _unset,
     Object? name = _unset,
@@ -62,7 +59,6 @@ class OnboardingState extends Equatable {
   }) {
     return OnboardingState(
       status: status ?? this.status,
-      isTeamLeader: isTeamLeader ?? this.isTeamLeader,
       inviteToken:
           inviteToken == _unset ? this.inviteToken : inviteToken as String?,
       email: email == _unset ? this.email : email as String?,
@@ -88,7 +84,6 @@ class OnboardingState extends Equatable {
   @override
   List<Object?> get props => [
         status,
-        isTeamLeader,
         inviteToken,
         email,
         name,
@@ -146,16 +141,11 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     }
   }
 
-  void selectTeamRole({required bool isTeamLeader}) {
-    emit(state.copyWith(isTeamLeader: isTeamLeader));
-  }
-
   Future<bool> joinTeamWithToken() async {
     if (state.inviteToken == null) return false;
 
     emit(state.copyWith(status: OnboardingStatus.loading));
-    final result = await _repository.joinTeam(state.inviteToken!,
-        isTeamLeader: state.isTeamLeader ?? false);
+    final result = await _repository.joinTeam(state.inviteToken!);
 
     if (result['success'] == true) {
       AppAnalytics.logEvent(
@@ -225,7 +215,6 @@ class OnboardingCubit extends Cubit<OnboardingState> {
       logoDesign: logoDesign,
       dbuContext: dbuContext,
       standings: standings,
-      isTeamLeader: state.isTeamLeader ?? true,
     );
 
     if (result['success'] == true) {
@@ -302,8 +291,7 @@ class OnboardingCubit extends Cubit<OnboardingState> {
 
   Future<bool> requestToJoinTeam(int teamId, {String? teamName}) async {
     emit(state.copyWith(status: OnboardingStatus.loading, errorMessage: null));
-    final result = await _repository.requestToJoinTeam(teamId,
-        isTeamLeader: state.isTeamLeader ?? false);
+    final result = await _repository.requestToJoinTeam(teamId);
     if (result['success'] == true) {
       AppAnalytics.logEvent(
         'team_join_requested',
@@ -312,7 +300,6 @@ class OnboardingCubit extends Cubit<OnboardingState> {
       final request = result['join_request'] as Map<String, dynamic>?;
       emit(state.copyWith(
         status: OnboardingStatus.waitingApproval,
-        isTeamLeader: request?['is_team_leader'] as bool?,
         pendingJoinRequestId: request?['id'],
       ));
       return true;
@@ -341,7 +328,6 @@ class OnboardingCubit extends Cubit<OnboardingState> {
 
     emit(state.copyWith(
       status: OnboardingStatus.waitingApproval,
-      isTeamLeader: request['is_team_leader'] as bool?,
       pendingJoinRequestId: request['id'],
       teamId: request['team_id'],
       teamTitle: request['team_title'],

@@ -9,23 +9,37 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get onboardingGetStartedTitle => 'Get started';
+
+  @override
+  String get onboardingGetStartedSubtitle => 'How do you want to use Kopa?';
+
+  @override
+  String get onboardingCreateTeamCardTitle => 'Create a team';
+
+  @override
+  String get onboardingCreateTeamCardBody =>
+      'You become the team leader and invite the players afterwards.';
+
+  @override
+  String get onboardingJoinTeamCardTitle => 'Join a team';
+
+  @override
+  String get onboardingJoinTeamCardBody =>
+      'Find your team and send a request to the team leader.';
+
+  @override
+  String get onboardingFindTeam => 'Find team';
+
+  @override
+  String get onboardingInviteLinkHint =>
+      'Got an invite link? Open it to go straight to the team.';
+
+  @override
   String get onboardingPlayer => 'Player';
 
   @override
   String get onboardingTeamLeader => 'Team leader';
-
-  @override
-  String get onboardingRoleChoiceDescription => 'Choose your role on the team.';
-
-  @override
-  String get onboardingRoleChoiceTitle => 'What is your role?';
-
-  @override
-  String get onboardingTeamChoiceDescription =>
-      'Start a new team or find your existing team on Kopa.';
-
-  @override
-  String get onboardingTeamChoiceTitle => 'Create or join a team';
 
   @override
   String get matchDetailsLineupTab => 'Lineup';
@@ -1304,9 +1318,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get uiYourTeam2 => 'Your team';
-
-  @override
-  String get uiStep3Of5 => 'Step 3 of 5';
 
   @override
   String get uiWaitingForApproval => 'Waiting for approval';

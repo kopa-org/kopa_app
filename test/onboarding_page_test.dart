@@ -19,7 +19,7 @@ import 'package:kopa/theme/app_colors.dart';
 
 void main() {
   for (final language in ['da', 'en']) {
-    testWidgets('both signup choice pairs are equal outlined pills: $language',
+    testWidgets('team choice shows create and join cards: $language',
         (tester) async {
       tester.view.physicalSize = const Size(360, 640);
       tester.view.devicePixelRatio = 1;
@@ -44,51 +44,40 @@ void main() {
       ));
       await tester.pumpAndSettle();
       final createLabel = language == 'en' ? 'Create Team' : 'Opret hold';
-      final joinLabel = language == 'en' ? 'Join team' : 'Tilmeld hold';
-      final leaderLabel = language == 'en' ? 'Team leader' : 'Holdleder';
-      final playerLabel = language == 'en' ? 'Player' : 'Spiller';
+      final joinLabel = language == 'en' ? 'Find team' : 'Find hold';
 
-      void checkPair(String first, String second) {
-        final buttons = find.byType(OutlinedButton);
-        expect(buttons, findsNWidgets(2));
-        expect(find.byType(FilledButton), findsNothing);
-        final firstRect = tester.getRect(find.ancestor(
-            of: find.text(first), matching: find.byType(OutlinedButton)));
-        final secondRect = tester.getRect(find.ancestor(
-            of: find.text(second), matching: find.byType(OutlinedButton)));
-        expect(firstRect.top, secondRect.top);
-        expect(firstRect.width, secondRect.width);
-        expect(firstRect.height, secondRect.height);
-        for (final button in tester.widgetList<OutlinedButton>(buttons)) {
-          final style = button.style!;
-          expect(style.backgroundColor!.resolve({}), AppColors.light.white);
-          expect(style.foregroundColor!.resolve({}), AppColors.light.grass);
-          expect(style.side!.resolve({})!.color, AppColors.light.grass);
-          expect(style.shape!.resolve({}), isA<StadiumBorder>());
-        }
+      void checkCards() {
+        expect(find.text(language == 'en' ? 'Get started' : 'Kom i gang'),
+            findsOneWidget);
+        final create = find.byKey(const ValueKey('onboarding-create-team'));
+        final join = find.byKey(const ValueKey('onboarding-join-team'));
+        expect(create, findsOneWidget);
+        expect(join, findsOneWidget);
+        expect(find.byType(OutlinedButton), findsNothing);
+        final createRect = tester.getRect(create);
+        final joinRect = tester.getRect(join);
+        expect(createRect.width, joinRect.width);
+        expect(createRect.bottom, lessThan(joinRect.top));
+        Color cardColor(Finder card) => tester
+            .widget<Material>(find
+                .descendant(of: card, matching: find.byType(Material))
+                .first)
+            .color!;
+        expect(cardColor(create), AppColors.light.lightGrass);
+        expect(cardColor(join), AppColors.light.surface);
         expect(tester.takeException(), isNull);
       }
 
-      checkPair(createLabel, joinLabel);
+      checkCards();
+      // Creating goes straight to the team form; no role question.
       await tester.tap(find.text(createLabel));
       await tester.pumpAndSettle();
-      checkPair(leaderLabel, playerLabel);
-      await tester.tap(find.text(playerLabel));
-      await tester.pumpAndSettle();
-      expect(onboardingCubit.state.isTeamLeader, isFalse);
       expect(find.byType(TextField), findsWidgets);
       await tester.tap(find.byKey(const ValueKey('onboarding-back-button')));
       await tester.pumpAndSettle();
-      checkPair(leaderLabel, playerLabel);
-      await tester.tap(find.byType(BackButton));
-      await tester.pumpAndSettle();
-      checkPair(createLabel, joinLabel);
+      checkCards();
       await tester.tap(find.text(joinLabel));
       await tester.pumpAndSettle();
-      checkPair(leaderLabel, playerLabel);
-      await tester.tap(find.text(leaderLabel));
-      await tester.pumpAndSettle();
-      expect(onboardingCubit.state.isTeamLeader, isTrue);
       expect(find.text(language == 'en' ? 'Join team' : 'Tilmeld hold'),
           findsOneWidget);
     });
@@ -113,9 +102,7 @@ void main() {
             supportedLocales: AppLocalizations.supportedLocales,
             home: OnboardingPage(updatePosition: (_) async => _user()),
           )));
-      await tester.tap(find.text('Tilmeld hold'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Holdleder'));
+      await tester.tap(find.text('Find hold'));
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('onboarding-formation-toggle')),
           findsNothing);
@@ -132,7 +119,6 @@ void main() {
       await tester.tap(find.text('Fortsæt'));
       await tester.pumpAndSettle();
       expect(onboarding.requestedTeamId, 42);
-      expect(onboarding.requestedAsLeader, isTrue);
     });
   }
 
@@ -187,9 +173,7 @@ void main() {
               supportedLocales: AppLocalizations.supportedLocales)));
       await tester.pumpAndSettle();
       if (stage == 'position') {
-        await tester.tap(find.text('Tilmeld hold'));
-        await tester.pumpAndSettle();
-        await tester.tap(find.text('Spiller'));
+        await tester.tap(find.text('Find hold'));
         await tester.pumpAndSettle();
         onboarding.setSearchResult(7);
         await tester.pumpAndSettle();
@@ -210,7 +194,7 @@ void main() {
     });
   }
 
-  testWidgets('role question scrolls on a compact viewport', (tester) async {
+  testWidgets('team choice fits on a compact viewport', (tester) async {
     tester.view.physicalSize = const Size(360, 416);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -246,11 +230,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
-    expect(find.text('Opret eller tilmeld dig et hold'), findsOneWidget);
-    expect(find.text('Tilmeld hold'), findsOneWidget);
+    expect(find.text('Kom i gang'), findsOneWidget);
+    expect(find.text('Find hold'), findsOneWidget);
   });
 
-  testWidgets('invite context asks for a role before the position step',
+  testWidgets('invite context goes straight to the position step',
       (tester) async {
     final onboardingCubit = _TestOnboardingCubit()
       ..setInviteContext(
@@ -258,7 +242,6 @@ void main() {
         name: 'Player One',
         teamId: 1,
         teamTitle: 'Kopa FC',
-        isTeamLeader: null,
       );
 
     await tester.pumpWidget(
@@ -287,13 +270,10 @@ void main() {
       ),
     );
 
-    expect(find.text('Hvad er din rolle?'), findsOneWidget);
-    expect(find.text('Opret hold'), findsNothing);
-    await tester.tap(find.text('Holdleder'));
     await tester.pumpAndSettle();
-    expect(onboardingCubit.state.isTeamLeader, isTrue);
+    expect(find.text('Opret hold'), findsNothing);
     expect(find.text('Vælg din position'), findsOneWidget);
-    expect(find.text('Opret eller tilmeld dig et hold'), findsNothing);
+    expect(find.text('Kom i gang'), findsNothing);
     expect(find.text('7-mand'), findsNothing);
     expect(find.text('11-mand'), findsNothing);
   });
@@ -335,8 +315,6 @@ void main() {
 
     await tester.tap(find.text('Opret hold'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Holdleder'));
-    await tester.pump();
     await tester.enterText(find.byType(TextField), 'Kopa FC');
     await tester.pump();
     await tester.tap(find.text('Fortsæt'));
@@ -432,8 +410,6 @@ void main() {
 
     await tester.tap(find.text('Opret hold'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Holdleder'));
-    await tester.pump();
     await tester.enterText(find.byType(TextField), 'Kopa FC');
     await tester.pump();
 
@@ -442,7 +418,7 @@ void main() {
 
     expect(
       find.text(
-        'Det anbefles at synkronisere med DBU, for den bedste app oplevelse',
+        'Det anbefales at synkronisere med DBU for den bedste oplevelse i appen.',
       ),
       findsOneWidget,
     );
@@ -452,7 +428,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
         find.text(
-            'Det anbefles at synkronisere med DBU, for den bedste app oplevelse'),
+            'Det anbefales at synkronisere med DBU for den bedste oplevelse i appen.'),
         findsNothing);
 
     await tester.tap(find.text('Fortsæt'));
@@ -495,8 +471,6 @@ void main() {
 
     await tester.tap(find.text('Opret hold'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Holdleder'));
-    await tester.pump();
 
     final backRect = tester.getRect(
       find.byKey(const ValueKey('onboarding-back-button')),
@@ -636,20 +610,14 @@ void main() {
     expect(find.byType(OnboardingPage), findsOneWidget);
     await tester.tap(find.text('Opret hold'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Holdleder'));
-    await tester.pump();
     await tester.tap(find.byKey(const ValueKey('onboarding-back-button')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Hvad er din rolle?'), findsOneWidget);
-    await tester.tap(find.byType(BackButton));
-    await tester.pumpAndSettle();
-    expect(find.text('Opret eller tilmeld dig et hold'), findsOneWidget);
-    await tester.tap(find.byType(BackButton));
+    expect(find.text('Kom i gang'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('onboarding-exit-button')));
     await tester.pumpAndSettle();
     expect(find.text('Login'), findsOneWidget);
     expect(authCubit.state.user, isNull);
-    expect(onboardingCubit.state.isTeamLeader, isNull);
     expect(find.byType(OnboardingPage), findsNothing);
   });
 
@@ -738,10 +706,10 @@ void main() {
     expect(find.text('Holdleder: Owner'), findsOneWidget);
     expect(find.text('Afventer'), findsOneWidget);
     expect(find.text('Holdleder: Afventer'), findsNothing);
-    expect(find.text('Opret eller tilmeld dig et hold'), findsNothing);
+    expect(find.text('Kom i gang'), findsNothing);
   });
 
-  testWidgets('async invite validation switches from role question to position',
+  testWidgets('async invite validation switches from team choice to position',
       (tester) async {
     final onboardingCubit = _TestOnboardingCubit();
 
@@ -771,7 +739,7 @@ void main() {
       ),
     );
 
-    expect(find.text('Opret eller tilmeld dig et hold'), findsOneWidget);
+    expect(find.text('Kom i gang'), findsOneWidget);
 
     onboardingCubit.setInviteContext(
       email: 'player@example.com',
@@ -782,7 +750,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('Vælg din position'), findsOneWidget);
-    expect(find.text('Opret eller tilmeld dig et hold'), findsNothing);
+    expect(find.text('Kom i gang'), findsNothing);
   });
 
   testWidgets('backend waiting approval state restores waiting screen',
@@ -846,7 +814,6 @@ class _TestOnboardingCubit extends OnboardingCubit {
   final OnboardingState? restoredPendingRequest;
   int restoreCallCount = 0;
   int? requestedTeamId;
-  bool? requestedAsLeader;
   bool failNextRequest = false;
 
   void setSearchResult(int count) => emit(state.copyWith(searchResults: [
@@ -856,7 +823,6 @@ class _TestOnboardingCubit extends OnboardingCubit {
   @override
   Future<bool> requestToJoinTeam(int teamId, {String? teamName}) async {
     requestedTeamId = teamId;
-    requestedAsLeader = state.isTeamLeader;
     if (failNextRequest) {
       failNextRequest = false;
       emit(state.copyWith(
@@ -877,7 +843,6 @@ class _TestOnboardingCubit extends OnboardingCubit {
     required int teamId,
     required String teamTitle,
     int? teamPlayerCount,
-    bool? isTeamLeader = false,
   }) {
     emit(OnboardingState(
       status: OnboardingStatus.validated,
@@ -887,7 +852,6 @@ class _TestOnboardingCubit extends OnboardingCubit {
       teamId: teamId,
       teamTitle: teamTitle,
       teamPlayerCount: teamPlayerCount,
-      isTeamLeader: isTeamLeader,
     ));
   }
 
