@@ -10,6 +10,7 @@ class SecureStorageService {
   static const _lineupDragHintSeenKey = 'lineupDragHintSeen';
   static const _hasAuthenticatedBeforeKey = 'hasAuthenticatedBefore';
   static const _analyticsEnabledKey = 'analyticsEnabled';
+  static const _pendingMobilePaymentKey = 'pendingMobilePayment';
 
   // ------------------------
   // Token methods
@@ -54,6 +55,16 @@ class SecureStorageService {
   static Future<void> setAnalyticsEnabled(bool enabled) async {
     await _storage.write(key: _analyticsEnabledKey, value: enabled.toString());
   }
+
+  /// A MobilePay payment the player has not yet confirmed, as JSON.
+  static Future<String?> getPendingMobilePayment() =>
+      _storage.read(key: _pendingMobilePaymentKey);
+
+  static Future<void> setPendingMobilePayment(String value) =>
+      _storage.write(key: _pendingMobilePaymentKey, value: value);
+
+  static Future<void> deletePendingMobilePayment() =>
+      _storage.delete(key: _pendingMobilePaymentKey);
 
   static Future<bool> hasSeenLineupDragHint() async {
     final value = await _storage.read(key: _lineupDragHintSeenKey);

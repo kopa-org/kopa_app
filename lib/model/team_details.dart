@@ -4,6 +4,9 @@ class TeamDetails {
   static const String firstComeFirstServed = 'first_come_first_served';
   static const String teamLeaderSelection = 'team_leader_selection';
 
+  /// The leader picks from the whole squad; players only withdraw.
+  static const String squadSelection = 'squad_selection';
+
   final TeamLogoDesign logoDesign;
   final int id;
   final String title;

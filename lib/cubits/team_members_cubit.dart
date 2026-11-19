@@ -25,6 +25,8 @@ class TeamMembersCubit extends Cubit<TeamMembersState> {
       {required int teamId,
       required int userId,
       required bool isFineAdmin}) _updateFineAdmin;
+  final Future<void> Function({required int teamId, required int userId})
+      _removeMember;
 
   TeamMembersCubit(
       {Future<List<UserDetails>> Function()? loadMembers,
@@ -37,10 +39,13 @@ class TeamMembersCubit extends Cubit<TeamMembersState> {
               {required int teamId,
               required int userId,
               required bool isFineAdmin})?
-          updateFineAdmin})
+          updateFineAdmin,
+      Future<void> Function({required int teamId, required int userId})?
+          removeMember})
       : _loadMembers = loadMembers ?? UsersRepository.getSquad,
         _updateRole = updateRole ?? UsersRepository.updateTeamRole,
         _updateFineAdmin = updateFineAdmin ?? UsersRepository.updateFineAdmin,
+        _removeMember = removeMember ?? UsersRepository.removeTeamMember,
         super(const TeamMembersState());
 
   Future<void> load() async {
@@ -72,6 +77,24 @@ class TeamMembersCubit extends Cubit<TeamMembersState> {
           userId,
           () => _updateFineAdmin(
               teamId: teamId, userId: userId, isFineAdmin: isFineAdmin));
+
+  /// Removes the player from the team and the roster. Throws on failure.
+  Future<void> removeMember({required int teamId, required int userId}) async {
+    if (state.savingUserId != null) return;
+    emit(TeamMembersState(members: state.members, savingUserId: userId));
+    try {
+      await _removeMember(teamId: teamId, userId: userId);
+      if (!isClosed) {
+        emit(TeamMembersState(members: [
+          for (final member in state.members)
+            if (member.id != userId) member,
+        ]));
+      }
+    } catch (_) {
+      if (!isClosed) emit(TeamMembersState(members: state.members));
+      rethrow;
+    }
+  }
 
   Future<UserDetails?> _saveMember(
       int userId, Future<UserDetails> Function() save) async {

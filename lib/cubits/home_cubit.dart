@@ -273,9 +273,12 @@ class HomeCubit extends Cubit<HomeState> {
           nextMatch,
           isCurrentUserRegistered: true,
           isCurrentUserSelected: nextMatch.isCurrentUserSelected,
-          registeredCount: nextMatch.isCurrentUserRegistered
-              ? nextMatch.registeredCount
-              : nextMatch.registeredCount + 1,
+          // With squad selection this only takes back a withdrawal; the
+          // count is of picked players, which does not change.
+          registeredCount:
+              nextMatch.isCurrentUserRegistered || nextMatch.usesSquadSelection
+                  ? nextMatch.registeredCount
+                  : nextMatch.registeredCount + 1,
           unavailableCount: nextMatch.unavailableCount,
         ),
         isRegisteringForNextMatch: true,
@@ -361,6 +364,9 @@ class HomeCubit extends Cubit<HomeState> {
       registeredCount: registeredCount,
       unavailableCount: unavailableCount,
       teamPlayerCount: match.teamPlayerCount,
+      rsvpSelectionMode: match.rsvpSelectionMode,
+      maxSignups: match.maxSignups,
+      lineupVisible: match.lineupVisible,
       formation: match.formation,
       latitude: match.latitude,
       longitude: match.longitude,

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:kopa/component/button/nav_bar_add_button.dart';
 import 'package:kopa/component/match/task_name_dialog.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/l10n/app_localizations.dart';
@@ -83,15 +84,33 @@ class _TeamTasksPageState extends State<TeamTasksPage> {
       title: l10n.teamTasksTitle,
       showBackButton: true,
       backgroundColor: colors.background,
-      floatingActionButton: FloatingActionButton(
-        key: const ValueKey('team-tasks-create'),
-        heroTag: 'team-tasks-create',
-        tooltip: l10n.teamTasksCreate,
-        backgroundColor: AppColors.matchDetailsHeader,
-        foregroundColor: colors.white,
-        onPressed: _isBusy ? null : _create,
-        child: const Icon(Icons.add),
-      ),
+      // iOS: "+" in the navigation bar; Android: Material FAB.
+      trailing: usesNavBarAddButton(context)
+          ? [
+              NavBarAddButton(
+                key: const ValueKey('team-tasks-create'),
+                label: l10n.teamTasksCreate,
+                actions: [
+                  AddAction(
+                    label: l10n.teamTasksCreate,
+                    icon: CupertinoIcons.add,
+                    onPressed: _isBusy ? null : _create,
+                  ),
+                ],
+              ),
+            ]
+          : null,
+      floatingActionButton: usesNavBarAddButton(context)
+          ? null
+          : FloatingActionButton(
+              key: const ValueKey('team-tasks-create'),
+              heroTag: 'team-tasks-create',
+              tooltip: l10n.teamTasksCreate,
+              backgroundColor: AppColors.matchDetailsHeader,
+              foregroundColor: colors.white,
+              onPressed: _isBusy ? null : _create,
+              child: const Icon(Icons.add),
+            ),
       body: RefreshIndicator(
         color: colors.grass,
         onRefresh: _load,

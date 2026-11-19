@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/component/season/season_selector.dart';
+import 'package:kopa/component/segment/expanding_segmented_control.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/cubits/in_form_cubit.dart';
 import 'package:kopa/cubits/in_form_state.dart';
@@ -104,7 +105,7 @@ class _InFormViewState extends State<_InFormView> {
                             onSelected: _savePosition,
                           ),
                         ],
-                        const SizedBox(height: Spacing.lg),
+                        const SizedBox(height: Spacing.md),
                         InFormSectionTitle(
                           title: AppLocalizations.of(context)!.uiTable,
                           action: AppLocalizations.of(context)!
@@ -251,6 +252,7 @@ class _InFormViewState extends State<_InFormView> {
   }
 }
 
+/// Compact intro above the table: the table is what the page is about.
 class _LeaderboardHero extends StatelessWidget {
   final InFormLeaderboardRow? currentPlayer;
 
@@ -261,54 +263,44 @@ class _LeaderboardHero extends StatelessWidget {
     final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
     final styles =
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final l10n = AppLocalizations.of(context)!;
 
     return InFormPanel(
+      key: const ValueKey('in-form-hero'),
       color: colors.surface,
-      padding: const EdgeInsets.all(Spacing.lg),
-      child: Stack(
+      padding: const EdgeInsets.symmetric(
+        horizontal: Spacing.md,
+        vertical: Spacing.itemGap,
+      ),
+      child: Row(
         children: [
-          Positioned(
-            right: -8,
-            top: 2,
-            child: Opacity(
-              opacity: .92,
-              child: InFormMascot(
-                asset: 'assets/illustrations/kopa_flag.svg',
-                size: 108,
-                color: colors.grass,
-              ),
-            ),
+          InFormMascot(
+            asset: 'assets/illustrations/kopa_flag.svg',
+            size: 44,
+            color: colors.grass,
           ),
-          Padding(
-            padding: const EdgeInsets.only(right: 88),
+          const SizedBox(width: Spacing.itemGap),
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                InFormEyebrow(
-                  label: AppLocalizations.of(context)!.uiTheTeamCompetition,
-                  color: colors.lightGrass,
-                ),
-                const SizedBox(height: Spacing.md),
                 Text(
-                  AppLocalizations.of(context)!.uiWhoIsNinForm,
-                  style: styles.pageTitle.copyWith(
+                  l10n.uiWhoIsNinForm,
+                  style: styles.bodyBold.copyWith(
                     color: colors.dirt,
-                    fontSize: 34,
-                    height: .98,
-                    letterSpacing: -1,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
-                const SizedBox(height: Spacing.sm),
+                const SizedBox(height: 2),
                 Text(
                   currentPlayer == null
-                      ? AppLocalizations.of(context)!
-                          .uiMatchDataStreaksAndBonusesIn
-                      : AppLocalizations.of(context)!.uiYouAreNoWith(
+                      ? l10n.uiMatchDataStreaksAndBonusesIn
+                      : l10n.uiYouAreNoWith(
                           currentPlayer!.rank, _points(currentPlayer!.total)),
-                  style: styles.body.copyWith(
-                    color: colors.textSecondary,
-                    height: 1.25,
-                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: styles.caption.copyWith(color: colors.textSecondary),
                 ),
               ],
             ),
@@ -335,38 +327,89 @@ class _FilterBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
+    final styles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final l10n = AppLocalizations.of(context)!;
+    final filtered = position != null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: InFormPeriod.values
-                .map(
-                  (item) => Padding(
-                    padding: const EdgeInsets.only(right: Spacing.sm),
-                    child: InFormPill(
+        Row(
+          children: [
+            Expanded(
+              // Same tab menu as match details and the fine box.
+              child: ExpandingSegmentedControl<InFormPeriod>(
+                key: const ValueKey('in-form-period-control'),
+                segments: [
+                  // Season first, then the shorter and longer views.
+                  for (final item in const [
+                    InFormPeriod.currentSeason,
+                    InFormPeriod.rollingThreeMonths,
+                    InFormPeriod.allTime,
+                  ])
+                    ExpandingSegment(
+                      value: item,
                       label: item.label,
-                      selected: period == item,
-                      onTap: () => onPeriodChanged(item),
+                      icon: _periodIcon(item),
+                      keyName: 'in-form-period-${item.name}',
+                    ),
+                ],
+                selected: period,
+                onChanged: onPeriodChanged,
+              ),
+            ),
+            const SizedBox(width: Spacing.sm),
+            Semantics(
+              button: true,
+              label: l10n.uiChoosePosition,
+              child: Material(
+                color: filtered ? colors.sky : colors.white,
+                shape: const CircleBorder(),
+                child: InkWell(
+                  key: const ValueKey('in-form-position-filter'),
+                  customBorder: const CircleBorder(),
+                  onTap: () => _selectPosition(context),
+                  child: SizedBox.square(
+                    dimension: 44,
+                    child: Icon(
+                      Icons.tune,
+                      size: 18,
+                      color: filtered ? colors.white : colors.dirt,
                     ),
                   ),
-                )
-                .toList(),
+                ),
+              ),
+            ),
+          ],
+        ),
+        if (filtered) ...[
+          const SizedBox(height: Spacing.sm),
+          InputChip(
+            label: Text(
+              inFormPositionLabel(position),
+              style: styles.caption.copyWith(
+                color: colors.dirt,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            backgroundColor: colors.lightSky,
+            side: BorderSide.none,
+            shape: const StadiumBorder(),
+            onPressed: () => _selectPosition(context),
+            onDeleted: () => onPositionChanged(null),
+            deleteIconColor: colors.dirt,
           ),
-        ),
-        const SizedBox(height: Spacing.sm),
-        InFormPill(
-          label: inFormPositionLabel(position),
-          selected: position != null,
-          selectedColor: colors.sky,
-          icon: Icons.tune,
-          onTap: () => _selectPosition(context),
-        ),
+        ],
       ],
     );
   }
+
+  static IconData _periodIcon(InFormPeriod period) => switch (period) {
+        InFormPeriod.rollingThreeMonths => Icons.date_range_outlined,
+        InFormPeriod.currentSeason => Icons.emoji_events_outlined,
+        InFormPeriod.allTime => Icons.all_inclusive_rounded,
+      };
 
   Future<void> _selectPosition(BuildContext context) async {
     final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
@@ -524,7 +567,6 @@ class InFormLeagueTable extends StatelessWidget {
 }
 
 const double _rankColumnWidth = 30;
-const double _numberColumnWidth = 54;
 
 class _LeagueTableHeader extends StatelessWidget {
   const _LeagueTableHeader();
@@ -541,11 +583,6 @@ class _LeagueTableHeader extends StatelessWidget {
       fontSize: 11,
     );
 
-    Widget number(String label) => SizedBox(
-          width: _numberColumnWidth,
-          child: Text(label, textAlign: TextAlign.right, style: style),
-        );
-
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         Spacing.md,
@@ -558,9 +595,20 @@ class _LeagueTableHeader extends StatelessWidget {
           SizedBox(width: _rankColumnWidth, child: Text('#', style: style)),
           const SizedBox(width: Spacing.sm),
           Expanded(child: Text(l10n.inFormColumnPlayer, style: style)),
-          number(l10n.inFormColumnLatest),
-          number(l10n.inFormColumnToFirst),
-          number(l10n.inFormColumnTotal),
+          // Explains the green and red numbers under each total.
+          Text.rich(
+            TextSpan(children: [
+              TextSpan(
+                text: '+ ${l10n.inFormLegendLatest}',
+                style: style.copyWith(color: colors.grass),
+              ),
+              const TextSpan(text: '  '),
+              TextSpan(
+                text: '− ${l10n.inFormLegendToFirst}',
+                style: style.copyWith(color: colors.error),
+              ),
+            ]),
+          ),
         ],
       ),
     );
@@ -589,6 +637,8 @@ class _LeagueTableRow extends StatelessWidget {
       3 => colors.sunset,
       _ => null,
     };
+    final detailStyle = styles.caption.copyWith(fontWeight: FontWeight.w700);
+    final behindFirst = row.rank != 1 && row.pointsToFirst > 0;
 
     return InkWell(
       onTap: onTap,
@@ -642,37 +692,39 @@ class _LeagueTableRow extends StatelessWidget {
                 ],
               ),
             ),
-            SizedBox(
-              width: _numberColumnWidth,
-              child: Text(
-                inFormSigned(row.latestRound),
-                textAlign: TextAlign.right,
-                style: styles.caption.copyWith(
-                  color: row.latestRound < 0 ? colors.error : colors.grass,
-                  fontWeight: FontWeight.w700,
+            const SizedBox(width: Spacing.sm),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  inFormNumber(row.total),
+                  key: ValueKey('in-form-total-${row.userId}'),
+                  style: styles.bodyBold.copyWith(
+                    color: colors.dirt,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 17,
+                  ),
                 ),
-              ),
-            ),
-            SizedBox(
-              width: _numberColumnWidth,
-              child: Text(
-                row.rank == 1 || row.pointsToFirst == 0
-                    ? '–'
-                    : '-${inFormNumber(row.pointsToFirst)}',
-                textAlign: TextAlign.right,
-                style: styles.caption.copyWith(color: colors.textSecondary),
-              ),
-            ),
-            SizedBox(
-              width: _numberColumnWidth,
-              child: Text(
-                inFormNumber(row.total),
-                textAlign: TextAlign.right,
-                style: styles.bodyBold.copyWith(
-                  color: colors.dirt,
-                  fontWeight: FontWeight.w800,
+                const SizedBox(height: 2),
+                Text.rich(
+                  key: ValueKey('in-form-detail-${row.userId}'),
+                  TextSpan(children: [
+                    TextSpan(
+                      text: inFormSigned(row.latestRound),
+                      style: detailStyle.copyWith(
+                        color: row.latestRound < 0
+                            ? colors.textSecondary
+                            : colors.grass,
+                      ),
+                    ),
+                    if (behindFirst)
+                      TextSpan(
+                        text: '  -${inFormNumber(row.pointsToFirst)}',
+                        style: detailStyle.copyWith(color: colors.error),
+                      ),
+                  ]),
                 ),
-              ),
+              ],
             ),
           ],
         ),

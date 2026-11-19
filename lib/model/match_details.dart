@@ -13,6 +13,7 @@ class MatchDetails {
   static const String trainingType = 'TRAINING';
   static const String firstComeFirstServed = 'first_come_first_served';
   static const String teamLeaderSelection = 'team_leader_selection';
+  static const String squadSelection = 'squad_selection';
 
   final int id;
   final String type;
@@ -149,9 +150,14 @@ class MatchDetails {
 
   bool get usesTeamLeaderSelection => rsvpSelectionMode == teamLeaderSelection;
 
+  /// The leader picks from the whole squad. Players do not sign up; everybody
+  /// is available until they withdraw.
+  bool get usesSquadSelection => rsvpSelectionMode == squadSelection;
+
   /// Attending players who are not selected are on a waitlist and move up
   /// automatically when a spot frees.
-  bool get usesWaitlist => !usesTeamLeaderSelection && maxSignups != null;
+  bool get usesWaitlist =>
+      rsvpSelectionMode == firstComeFirstServed && maxSignups != null;
 
   bool get hasMatchBeenPlayed => isMatch && hasFinalScore;
 

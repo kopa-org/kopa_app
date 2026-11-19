@@ -12,15 +12,15 @@ import 'package:kopa/theme/spacing.dart';
 /// Who is responsible for each task at this match (beer, laundry, ...).
 ///
 /// Recurring tasks come from the team settings and rotate through a queue;
-/// one-off tasks only belong to this match. The team leader is not always at
-/// the match, so anybody on the team can add one-off tasks and change who is
-/// responsible. Only the responsible player ticks a task off, and only setting
-/// up the recurring tasks is left to the leader.
+/// one-off tasks only belong to this match. Only the team leader adds and
+/// removes tasks. The leader is not always at the match, so anybody on the
+/// team can still change who is responsible, and the responsible player ticks
+/// the task off.
 class MatchTasksSection extends StatefulWidget {
   final int matchId;
   final int currentUserId;
 
-  /// Whether the user can set up the team's recurring tasks.
+  /// Whether the user can add, remove and set up the team's tasks.
   final bool canManage;
 
   const MatchTasksSection({
@@ -98,7 +98,11 @@ class _MatchTasksSectionState extends State<MatchTasksSection> {
       backgroundColor: AppColors.transparent,
       isScrollControlled: true,
       useSafeArea: true,
-      builder: (_) => _TaskSheet(matchId: widget.matchId, task: task),
+      builder: (_) => _TaskSheet(
+        matchId: widget.matchId,
+        task: task,
+        canDelete: widget.canManage,
+      ),
     );
     if (mounted) await _load();
   }
@@ -136,6 +140,8 @@ class _MatchTasksSectionState extends State<MatchTasksSection> {
   Widget build(BuildContext context) {
     final tasks = _tasks;
     if (tasks == null) return const SizedBox.shrink();
+    // Players cannot add tasks, so an empty list is just noise for them.
+    if (tasks.isEmpty && !widget.canManage) return const SizedBox.shrink();
 
     final l10n = AppLocalizations.of(context)!;
     final colors = AppColors.of(context);
@@ -184,9 +190,7 @@ class _MatchTasksSectionState extends State<MatchTasksSection> {
                   Padding(
                     padding: const EdgeInsets.all(Spacing.md),
                     child: Text(
-                      widget.canManage
-                          ? l10n.matchTasksEmptyLeader
-                          : l10n.matchTasksEmptyPlayer,
+                      l10n.matchTasksEmptyLeader,
                       style: styles.body3.copyWith(color: colors.grey5),
                     ),
                   ),
@@ -200,30 +204,31 @@ class _MatchTasksSectionState extends State<MatchTasksSection> {
                     onComplete: () => _complete(tasks[i]),
                   ),
                 ],
-                if (tasks.isNotEmpty) _divider(colors),
-                InkWell(
-                  key: const ValueKey('match-tasks-add-one-off'),
-                  onTap: _isBusy ? null : _addOneOff,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: Spacing.md,
-                      vertical: Spacing.itemGap + 2,
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(CupertinoIcons.plus,
-                            size: 18, color: colors.successForeground),
-                        const SizedBox(width: Spacing.itemGap),
-                        Text(
-                          l10n.matchTasksAddOneOff,
-                          style: styles.bodyBold.copyWith(
-                            color: colors.successForeground,
+                if (tasks.isNotEmpty && widget.canManage) _divider(colors),
+                if (widget.canManage)
+                  InkWell(
+                    key: const ValueKey('match-tasks-add-one-off'),
+                    onTap: _isBusy ? null : _addOneOff,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: Spacing.md,
+                        vertical: Spacing.itemGap + 2,
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(CupertinoIcons.plus,
+                              size: 18, color: colors.successForeground),
+                          const SizedBox(width: Spacing.itemGap),
+                          Text(
+                            l10n.matchTasksAddOneOff,
+                            style: styles.bodyBold.copyWith(
+                              color: colors.successForeground,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
           ),
@@ -494,9 +499,13 @@ class _TaskSheet extends StatefulWidget {
   final int matchId;
   final MatchTask task;
 
+  /// Only the team leader removes one-off tasks.
+  final bool canDelete;
+
   const _TaskSheet({
     required this.matchId,
     required this.task,
+    required this.canDelete,
   });
 
   @override
@@ -626,7 +635,7 @@ class _TaskSheetState extends State<_TaskSheet> {
                       ],
                     ),
                   ),
-                  if (!_task.isRecurring)
+                  if (!_task.isRecurring && widget.canDelete)
                     IconButton(
                       key: const ValueKey('match-task-delete'),
                       tooltip: l10n.matchTasksDelete,

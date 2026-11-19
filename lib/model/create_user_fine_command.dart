@@ -3,12 +3,14 @@ class CreateUserFineCommand {
   String fineTypeId;
   String owedAmount;
   String? note;
+  int? matchId;
 
   CreateUserFineCommand({
     required this.userId,
     required this.fineTypeId,
     required this.owedAmount,
     this.note,
+    this.matchId,
   });
 
   Map<String, dynamic> toJson() {
@@ -17,6 +19,7 @@ class CreateUserFineCommand {
       'fine_type_id': fineTypeId,
       'owed_amount': owedAmount,
       if (note != null && note!.trim().isNotEmpty) 'note': note!.trim(),
+      if (matchId != null) 'event_id': matchId.toString(),
     };
   }
 }

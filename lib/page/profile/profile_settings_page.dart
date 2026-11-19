@@ -4,12 +4,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kopa/component/avatar/app_avatar.dart';
 import 'package:kopa/component/avatar/team_avatar.dart';
-import 'package:kopa/component/button/full_width_button.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/component/settings/settings_list.dart';
 import 'package:kopa/cubits/analytics_preference_cubit.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
-import 'package:kopa/cubits/onboarding_cubit.dart';
 import 'package:kopa/cubits/team_settings_cubit.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/model/in_form.dart';
@@ -25,8 +23,6 @@ import 'package:kopa/repository/users_repository.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 import 'package:kopa/theme/spacing.dart';
-import 'package:kopa/utils/app_analytics.dart';
-import 'package:share_plus/share_plus.dart';
 
 /// Profile & settings hub. Settings are grouped by category; each row shows
 /// the current value and opens a focused sub-page.
@@ -79,7 +75,6 @@ class _ProfileSettingsView extends StatefulWidget {
 
 class _ProfileSettingsViewState extends State<_ProfileSettingsView> {
   bool _isLoggingOut = false;
-  bool _isSharing = false;
   bool _isSavingPosition = false;
   String? _errorMessage;
 
@@ -128,30 +123,6 @@ class _ProfileSettingsViewState extends State<_ProfileSettingsView> {
               onTap: _openJoinRequests,
             ),
           ],
-          const SizedBox(height: Spacing.itemGap),
-          FullWidthButton(
-            key: const ValueKey('profile-settings-invite'),
-            buttonText:
-                _isSharing ? l10n.uiFetchingLink : l10n.settingsInvitePlayers,
-            icon: Icons.person_add_alt_1_rounded,
-            // The design's solid brand green; the shared primary is mint.
-            backgroundColor: colors.primary,
-            foregroundColor: colors.white,
-            loading: _isSharing,
-            onPressed: _isSharing ? () {} : _shareInvite,
-          ),
-          BlocBuilder<OnboardingCubit, OnboardingState>(
-            builder: (context, state) {
-              if (state.errorMessage == null) return const SizedBox.shrink();
-              return Padding(
-                padding: const EdgeInsets.only(top: Spacing.sm),
-                child: Text(
-                  state.errorMessage!,
-                  style: styles.caption.copyWith(color: colors.error),
-                ),
-              );
-            },
-          ),
           if (canManage) ...[
             const SizedBox(height: Spacing.lg),
             SettingsSection(
@@ -283,13 +254,19 @@ class _ProfileSettingsViewState extends State<_ProfileSettingsView> {
   }
 
   String _matchDaySummary(AppLocalizations l10n, TeamSettingsState settings) {
-    final leaderPicks =
-        settings.rsvpSelectionMode == TeamDetails.teamLeaderSelection;
+    final mode = switch (settings.rsvpSelectionMode) {
+      TeamDetails.teamLeaderSelection => l10n.teamRsvpLeaderOption,
+      TeamDetails.squadSelection => l10n.teamRsvpSquadOption,
+      _ => l10n.teamRsvpFirstComeOption,
+    };
+    final firstCome =
+        settings.rsvpSelectionMode != TeamDetails.teamLeaderSelection &&
+            settings.rsvpSelectionMode != TeamDetails.squadSelection;
     final max = settings.maxSignups;
     final minutes = settings.meetingOffsetMinutes;
     return [
-      leaderPicks ? l10n.teamRsvpLeaderOption : l10n.teamRsvpFirstComeOption,
-      if (!leaderPicks && max != null) l10n.settingsSignupLimitSummary(max),
+      mode,
+      if (firstCome && max != null) l10n.settingsSignupLimitSummary(max),
       if (minutes != null && minutes != 0) l10n.settingsMeetingSummary(minutes),
     ].join(' · ');
   }
@@ -349,59 +326,6 @@ class _ProfileSettingsViewState extends State<_ProfileSettingsView> {
         ),
       ),
     );
-  }
-
-  Future<void> _shareInvite() async {
-    final l10n = AppLocalizations.of(context)!;
-    final team = context.read<AuthCubit>().state.user?.teamDetails;
-    if (team == null) {
-      setState(() => _errorMessage = l10n.uiYouMustBeOnATeam);
-      return;
-    }
-
-    setState(() {
-      _isSharing = true;
-      _errorMessage = null;
-    });
-
-    try {
-      final token =
-          await context.read<OnboardingCubit>().fetchTeamJoinToken(team.id);
-      if (!mounted) return;
-
-      if (token == null) {
-        setState(() {
-          _isSharing = false;
-          _errorMessage = l10n.uiCouldNotFetchTheInviteLink;
-        });
-        return;
-      }
-
-      final inviteUri = Uri.https('kopa.dk', '/join', {
-        'team_token': token,
-        'team_id': team.id.toString(),
-        'team_title': team.title,
-      });
-
-      final shareResult = await SharePlus.instance.share(
-        ShareParams(text: l10n.uiJoinOnKopa(team.title, inviteUri)),
-      );
-      AppAnalytics.logEvent(
-        'team_invite_shared',
-        parameters: {
-          'source': 'settings',
-          'status': shareResult.status.name,
-        },
-      );
-      if (!mounted) return;
-      setState(() => _isSharing = false);
-    } catch (_) {
-      if (!mounted) return;
-      setState(() {
-        _isSharing = false;
-        _errorMessage = l10n.uiCouldNotShareKopa;
-      });
-    }
   }
 
   Future<void> _logout() async {

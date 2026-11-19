@@ -6,7 +6,16 @@ import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 
-enum MatchRsvpStatus { pending, awaitingSelection, attending, declined }
+enum MatchRsvpStatus {
+  pending,
+  awaitingSelection,
+  attending,
+  declined,
+
+  /// The coach picks from the whole squad and has not picked this player
+  /// (yet). The player can only withdraw.
+  available,
+}
 
 class MatchRsvpCard extends StatelessWidget {
   final MatchRsvpStatus status;
@@ -15,6 +24,9 @@ class MatchRsvpCard extends StatelessWidget {
   final VoidCallback onAccept;
   final VoidCallback onDecline;
 
+  /// The team uses "coach picks the team" (squad selection).
+  final bool squadSelection;
+
   const MatchRsvpCard({
     super.key,
     required this.status,
@@ -22,6 +34,7 @@ class MatchRsvpCard extends StatelessWidget {
     required this.isSaving,
     required this.onAccept,
     required this.onDecline,
+    this.squadSelection = false,
   });
 
   @override
@@ -83,8 +96,18 @@ class MatchRsvpCard extends StatelessWidget {
                   child: _choice(context, l10n.matchDetailsRsvpAccept, onAccept,
                       accept: true)),
             ]),
+          ] else if (status == MatchRsvpStatus.available) ...[
+            Text(l10n.matchSquadAvailableTitle,
+                style: styles.body1.copyWith(fontSize: 16, height: 20 / 16)),
+            const SizedBox(height: 3),
+            Text(l10n.matchSquadAvailableBody,
+                style: styles.body3.copyWith(
+                    fontSize: 11, height: 14 / 11, color: colors.grey5)),
+            const SizedBox(height: 14),
+            _choice(context, l10n.matchSquadWithdraw, onDecline, accept: false),
           ] else
             AttendanceResponseDropdown(
+              squadSelection: squadSelection,
               currentResponse: status != MatchRsvpStatus.declined,
               awaitingSelection: awaitingSelection,
               isSaving: isSaving,

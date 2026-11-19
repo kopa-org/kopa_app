@@ -112,8 +112,6 @@ class _InFormPlayerView extends StatelessWidget {
                         _PlayerHero(row: row, total: breakdown.total),
                         const SizedBox(height: Spacing.md),
                         _PlayerMetrics(row: row),
-                        const SizedBox(height: Spacing.sm),
-                        _SummaryStrip(summary: breakdown.summary),
                         const SizedBox(height: Spacing.lg),
                         InFormSectionTitle(
                           title: l10n.inFormMatches,
@@ -347,82 +345,6 @@ class _PlayerMetrics extends StatelessWidget {
           value: movement,
           color: colors.sunset.withValues(alpha: .3),
           icon: row.rankChange >= 0 ? Icons.trending_up : Icons.trending_down,
-        ),
-      ],
-    );
-  }
-}
-
-/// Key data points for the period: matches, goals, assists, cards, MOTM and
-/// average points per match.
-class _SummaryStrip extends StatelessWidget {
-  final InFormPlayerSummary summary;
-
-  const _SummaryStrip({required this.summary});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
-
-    final items = [
-      (l10n.inFormMatches, '${summary.matches}'),
-      (l10n.inFormGoals, '${summary.goals}'),
-      (l10n.inFormAssists, '${summary.assists}'),
-      (l10n.inFormCards, '${summary.yellowCards + summary.redCards}'),
-      (l10n.inFormMotm, '${summary.motm}'),
-      (l10n.inFormAverage, inFormNumber(summary.average)),
-    ];
-
-    return InFormPanel(
-      padding: const EdgeInsets.symmetric(
-        horizontal: Spacing.sm,
-        vertical: Spacing.itemGap,
-      ),
-      child: Row(
-        children: [
-          for (var i = 0; i < items.length; i++) ...[
-            Expanded(
-                child: _SummaryCell(label: items[i].$1, value: items[i].$2)),
-            if (i < items.length - 1)
-              Container(width: 1, height: 28, color: colors.divider),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _SummaryCell extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _SummaryCell({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>() ?? AppColors.light;
-    final styles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
-
-    return Column(
-      children: [
-        Text(
-          value,
-          style: styles.bodyBold.copyWith(
-            color: colors.dirt,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: styles.caption.copyWith(
-            color: colors.textSecondary,
-            fontSize: 11,
-          ),
         ),
       ],
     );

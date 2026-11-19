@@ -43,6 +43,7 @@ import 'package:kopa/component/match/match_events_timeline.dart';
 import 'package:kopa/component/match/match_rsvp_card.dart';
 import 'package:kopa/component/match/match_tasks_section.dart';
 import 'package:kopa/component/match/match_actions_menu.dart';
+import 'package:kopa/component/button/nav_bar_add_button.dart';
 import 'package:kopa/component/match/match_external_player_fab.dart';
 import 'package:kopa/config/app_feature_flags.dart';
 import 'package:provider/provider.dart';
@@ -60,6 +61,13 @@ MatchRsvpStatus _matchRsvpStateFor(MatchDetails match, int userId) {
   if (match.isCurrentUserAttending == false ||
       currentUserAttendance?.isAttending == false) {
     return MatchRsvpStatus.declined;
+  }
+
+  // The coach picks from the whole squad: picked, or simply available.
+  if (match.usesSquadSelection) {
+    return match.isCurrentUserSelected == true
+        ? MatchRsvpStatus.attending
+        : MatchRsvpStatus.available;
   }
 
   if (match.isCurrentUserAttending == true &&
@@ -105,6 +113,9 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
   UserDetails? _currentUser;
   Object? _currentUserError;
   final Set<int> _savingAttendanceSelectionIds = {};
+
+  /// Players the leader is picking or unpicking right now (squad selection).
+  final Set<int> _savingSquadPickUserIds = {};
   final Set<int> _editingAttendanceSelectionIds = {};
   bool _isApprovingAllAttendances = false;
   bool _isUpdatingRegistration = false;
@@ -202,15 +213,18 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
     final bottomNavigationBar = widget.showBottomNavigationBar
         ? _buildMatchDetailsBottomNavigationBar(context)
         : null;
-    final externalPlayerFab =
-        !isTraining && _selectedSegment == MatchDetailSegment.attendance
-            ? MatchExternalPlayerFab(
-                matchId: matchDetails.id,
-                onPressed: _isAddingExternalPlayer
-                    ? null
-                    : () => _addExternalPlayer(matchDetails),
-              )
-            : null;
+    final canAddExternalPlayer =
+        !isTraining && _selectedSegment == MatchDetailSegment.attendance;
+    // iOS puts "+" in the header next to the menu; Android uses the FAB.
+    final addInHeader = usesNavBarAddButton(context);
+    final externalPlayerFab = canAddExternalPlayer && !addInHeader
+        ? MatchExternalPlayerFab(
+            matchId: matchDetails.id,
+            onPressed: _isAddingExternalPlayer
+                ? null
+                : () => _addExternalPlayer(matchDetails),
+          )
+        : null;
 
     final heroCard = MatchHeroCard(
       match: matchDetails,
@@ -231,12 +245,34 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
             currentUserId: user.id,
             canManage: user.canManageTeam,
           );
-    final headerAction = MatchActionsMenu(
+    final actionsMenu = MatchActionsMenu(
       isTraining: isTraining,
       hasFinalScore: matchDetails.hasFinalScore,
       onResult: isTraining ? null : () => setMatchScore(matchDetails),
       onDelete: () => _deleteMatch(matchDetails),
     );
+    final headerAction = canAddExternalPlayer && addInHeader
+        ? Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              NavBarAddButton(
+                key: const ValueKey('match-external-player-fab'),
+                label: l10n.matchFabAddExternalPlayers,
+                color: AppColors.of(context).textPrimary,
+                actions: [
+                  AddAction(
+                    label: l10n.matchFabAddExternalPlayers,
+                    icon: Icons.person_add_alt_1_outlined,
+                    onPressed: _isAddingExternalPlayer
+                        ? null
+                        : () => _addExternalPlayer(matchDetails),
+                  ),
+                ],
+              ),
+              actionsMenu,
+            ],
+          )
+        : actionsMenu;
 
     final lineupCard = !isTraining
         ? PlayerPositionsCard(
@@ -306,6 +342,7 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         isSaving: _isUpdatingRegistration,
         onAccept: () => _registerForMatch(matchDetails),
         onDecline: () => _unregisterFromMatch(matchDetails),
+        squadSelection: matchDetails.usesSquadSelection,
       ),
       bottomNavigationBar: bottomNavigationBar,
       useParentBottomNavigationBar: !widget.showBottomNavigationBar,
@@ -572,6 +609,9 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
 
   List<Widget> _buildAttendanceList(
       MatchDetails match, List<UserDetails> squad, UserDetails user) {
+    if (match.usesSquadSelection) {
+      return _buildSquadSelectionList(match, squad, user);
+    }
     final attending = match.attendingAttendanceDetails;
     final declined = match.declinedAttendanceDetails;
     final noRsvp = _membersWithoutRsvp(match, squad);
@@ -621,6 +661,127 @@ class _MatchDetailsPageState extends State<MatchDetailsPage> {
         ],
       ),
     ];
+  }
+
+  /// "Coach picks the team": everybody who has not withdrawn is available,
+  /// and the leader picks from them. Players only see who is picked once the
+  /// lineup is shown, like in the other modes.
+  List<Widget> _buildSquadSelectionList(
+    MatchDetails match,
+    List<UserDetails> squad,
+    UserDetails user,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    final attendances = match.attendanceDetailsList ?? const [];
+    final canPick = user.canManageTeam && !match.hasMatchBeenPlayed;
+    final selectionVisible = user.canManageTeam || match.lineupVisible;
+    final declined = match.declinedAttendanceDetails;
+    final withdrawnIds = {for (final a in declined) a.userDetails.id};
+    final picked = selectionVisible
+        ? attendances
+            .where((a) => a.isAttending && a.isSelected == true)
+            .map((a) => a.userDetails)
+            .toList()
+        : <UserDetails>[];
+    final pickedIds = {for (final player in picked) player.id};
+    final available = squad
+        .where((member) =>
+            !withdrawnIds.contains(member.id) && !pickedIds.contains(member.id))
+        .toList();
+    final external = match.externalPlayerDetailsList ?? const [];
+
+    Widget row(UserDetails player, {required bool isPicked}) {
+      final saving = _savingSquadPickUserIds.contains(player.id);
+      return PlayerListItem(
+        key: ValueKey('squad-player-${player.id}'),
+        name: player.name,
+        subtitle: isPicked
+            ? l10n.matchSquadSelectedStatus
+            : l10n.matchSquadAvailableStatus,
+        trailing: !canPick
+            ? null
+            : saving
+                ? const CupertinoActivityIndicator()
+                : isPicked
+                    ? IconButton(
+                        key: ValueKey('squad-unpick-${player.id}'),
+                        tooltip: l10n.matchSquadUnpick,
+                        onPressed: () =>
+                            _pickFromSquad(match.id, player.id, false),
+                        icon: const Icon(CupertinoIcons.minus_circle),
+                      )
+                    : TextButton(
+                        key: ValueKey('squad-pick-${player.id}'),
+                        onPressed: () =>
+                            _pickFromSquad(match.id, player.id, true),
+                        child: Text(l10n.matchSquadPick),
+                      ),
+      );
+    }
+
+    return [
+      _AttendanceMenu(
+        key: const ValueKey('attendance-menu'),
+        tabs: [
+          if (selectionVisible)
+            _AttendanceMenuTab(
+              label: l10n.matchSquadSelectedStatus,
+              count: picked.length,
+              children: picked.isEmpty
+                  ? [
+                      Padding(
+                        padding:
+                            const EdgeInsets.symmetric(vertical: Spacing.md),
+                        child: Text(l10n.matchSquadNoneSelected),
+                      ),
+                    ]
+                  : [for (final player in picked) row(player, isPicked: true)],
+            ),
+          _AttendanceMenuTab(
+            label: l10n.matchSquadAvailableStatus,
+            count: available.length,
+            children: [
+              for (final player in available) row(player, isPicked: false),
+            ],
+          ),
+          _AttendanceMenuTab(
+            label: l10n.uiDeclined,
+            count: declined.length,
+            children: _buildDeclinedAttendanceSection(declined),
+          ),
+          if (external.isNotEmpty)
+            _AttendanceMenuTab(
+              label: l10n.externalPlayerLabel,
+              count: external.length,
+              children: _buildExternalPlayersSection(match),
+            ),
+        ],
+      ),
+    ];
+  }
+
+  Future<void> _pickFromSquad(int matchId, int userId, bool pick) async {
+    if (_savingSquadPickUserIds.contains(userId)) return;
+    setState(() => _savingSquadPickUserIds.add(userId));
+    try {
+      await MatchRepository.updateAttendanceSelection(matchId, userId, pick);
+      AppAnalytics.logEvent(
+        'match_squad_pick_updated',
+        parameters: {'is_selected': pick},
+      );
+      await _refreshMatchAndSquad();
+    } catch (error, stack) {
+      CrashReporting.logWebError(error, stack);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.matchSquadSelectFailed),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _savingSquadPickUserIds.remove(userId));
+    }
   }
 
   List<Widget> _buildLeaderAttendanceApprovalList(

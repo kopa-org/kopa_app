@@ -64,8 +64,9 @@ class MatchSettingsPage extends StatelessWidget {
                 key: const ValueKey('match-settings-rsvp-first-come'),
                 title: l10n.teamRsvpFirstComeOption,
                 description: l10n.settingsRsvpFirstComeDescription,
-                selected:
-                    state.rsvpSelectionMode != TeamDetails.teamLeaderSelection,
+                selected: state.rsvpSelectionMode !=
+                        TeamDetails.teamLeaderSelection &&
+                    state.rsvpSelectionMode != TeamDetails.squadSelection,
                 onTap: saving
                     ? null
                     : () => cubit
@@ -83,8 +84,20 @@ class MatchSettingsPage extends StatelessWidget {
                     : () => cubit
                         .setRsvpSelectionMode(TeamDetails.teamLeaderSelection),
               ),
-              if (state.rsvpSelectionMode !=
-                  TeamDetails.teamLeaderSelection) ...[
+              const SizedBox(height: 10),
+              _RsvpModeOption(
+                key: const ValueKey('match-settings-rsvp-squad'),
+                title: l10n.teamRsvpSquadOption,
+                description: l10n.settingsRsvpSquadDescription,
+                selected: state.rsvpSelectionMode == TeamDetails.squadSelection,
+                onTap: saving
+                    ? null
+                    : () =>
+                        cubit.setRsvpSelectionMode(TeamDetails.squadSelection),
+              ),
+              // Only first come, first served fills a limited number of spots.
+              if (state.rsvpSelectionMode != TeamDetails.teamLeaderSelection &&
+                  state.rsvpSelectionMode != TeamDetails.squadSelection) ...[
                 const SizedBox(height: Spacing.lg),
                 SettingsSectionLabel(l10n.settingsSignupLimitSection),
                 _SignupLimitCard(

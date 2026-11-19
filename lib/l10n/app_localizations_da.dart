@@ -832,6 +832,21 @@ class AppLocalizationsDa extends AppLocalizations {
   String get teamRoleSaveFailed => 'Kunne ikke ændre rollen. Prøv igen.';
 
   @override
+  String get teamRemoveMember => 'Fjern fra holdet';
+
+  @override
+  String get teamRemoveMemberAction => 'Fjern';
+
+  @override
+  String teamRemoveMemberConfirm(String name) {
+    return 'Fjern $name fra holdet? Bøder og statistik bliver gemt, men tilmeldinger til kommende kampe slettes.';
+  }
+
+  @override
+  String get teamRemoveMemberFailed =>
+      'Spilleren kunne ikke fjernes. Prøv igen.';
+
+  @override
   String get teamRoleLastLeader =>
       'Udpeg en anden holdleder, før du skifter til spiller.';
 
@@ -1060,10 +1075,6 @@ class AppLocalizationsDa extends AppLocalizations {
   @override
   String get matchTasksEmptyLeader =>
       'Ingen opgaver endnu. Opret faste opgaver som øl og vasketøj under holdindstillingerne.';
-
-  @override
-  String get matchTasksEmptyPlayer =>
-      'Ingen opgaver endnu. Tilføj en opgave til kampen, fx bolde eller vand.';
 
   @override
   String get matchTasksManage => 'Faste opgaver';
@@ -1860,6 +1871,9 @@ class AppLocalizationsDa extends AppLocalizations {
   }
 
   @override
+  String get uiLeading => 'Fører';
+
+  @override
   String get uiStable => 'Stabil';
 
   @override
@@ -1867,9 +1881,6 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String get uiToFirstPlace => 'Til førsteplads';
-
-  @override
-  String get uiLeading => 'Fører';
 
   @override
   String get uiMovement => 'Bevægelse';
@@ -2153,6 +2164,9 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String get uiAttack => 'Angreb';
+
+  @override
+  String get squadNoPosition => 'Ingen position';
 
   @override
   String get uiNoEventsRecorded => 'Ingen hændelser registreret';
@@ -2704,13 +2718,10 @@ class AppLocalizationsDa extends AppLocalizations {
   String get inFormColumnPlayer => 'Spiller';
 
   @override
-  String get inFormColumnLatest => 'Seneste';
+  String get inFormLegendLatest => 'seneste';
 
   @override
-  String get inFormColumnToFirst => 'Til nr. 1';
-
-  @override
-  String get inFormColumnTotal => 'Point';
+  String get inFormLegendToFirst => 'til nr. 1';
 
   @override
   String get inFormPointsSystem => 'Pointsystem';
@@ -2725,21 +2736,6 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String get inFormMatches => 'Kampe';
-
-  @override
-  String get inFormGoals => 'Mål';
-
-  @override
-  String get inFormAssists => 'Assists';
-
-  @override
-  String get inFormCards => 'Kort';
-
-  @override
-  String get inFormMotm => 'MOTM';
-
-  @override
-  String get inFormAverage => 'Snit';
 
   @override
   String get inFormBonuses => 'Bonusser';
@@ -3249,6 +3245,51 @@ class AppLocalizationsDa extends AppLocalizations {
       'Bøden kunne ikke markeres som betalt. Prøv igen.';
 
   @override
+  String get fineBoxHeroSeePlayers => 'Se alle spilleres bøder';
+
+  @override
+  String get fineBoxPodiumNoFines =>
+      'Ingen bøder endnu. Bødetoppen fyldes op, når de første bøder bliver givet.';
+
+  @override
+  String get fineDetailPlayer => 'Spiller';
+
+  @override
+  String get fineDetailAmount => 'Beløb';
+
+  @override
+  String get fineDetailStatus => 'Status';
+
+  @override
+  String get fineDetailUnpaid => 'Ikke betalt';
+
+  @override
+  String get fineDetailGiven => 'Givet';
+
+  @override
+  String get fineDetailMatch => 'Kamp';
+
+  @override
+  String get fineDetailNote => 'Note';
+
+  @override
+  String get fineDetailClose => 'Luk';
+
+  @override
+  String get fineAssignMatchLabel => 'Kamp';
+
+  @override
+  String get fineAssignNoMatch => 'Ingen kamp';
+
+  @override
+  String get fineAssignPickMatch => 'Hvilken kamp blev bøden givet i?';
+
+  @override
+  String fineMatchAgainst(String opponent) {
+    return 'mod $opponent';
+  }
+
+  @override
   String get homeNextTraining => 'Næste træning';
 
   @override
@@ -3320,6 +3361,45 @@ class AppLocalizationsDa extends AppLocalizations {
   @override
   String get settingsRsvpLeaderDescription =>
       'Spillerne melder sig klar, og holdlederen udvælger truppen blandt dem.';
+
+  @override
+  String get teamRsvpSquadOption => 'Træneren udtager';
+
+  @override
+  String get settingsRsvpSquadDescription =>
+      'Hele truppen er til rådighed. Træneren udtager holdet, og spillerne melder kun afbud, hvis de ikke kan.';
+
+  @override
+  String get matchSquadAvailableTitle => 'Du er til rådighed';
+
+  @override
+  String get matchSquadAvailableBody =>
+      'Træneren udtager holdet. Kan du ikke, så meld afbud.';
+
+  @override
+  String get matchSquadSelectedStatus => 'Udtaget';
+
+  @override
+  String get matchSquadAvailableStatus => 'Til rådighed';
+
+  @override
+  String get matchSquadWithdraw => 'Meld afbud';
+
+  @override
+  String get matchSquadUndoWithdraw => 'Jeg kan alligevel';
+
+  @override
+  String get matchSquadPick => 'Udtag';
+
+  @override
+  String get matchSquadUnpick => 'Fjern fra holdet';
+
+  @override
+  String get matchSquadNoneSelected => 'Ingen er udtaget endnu.';
+
+  @override
+  String get matchSquadSelectFailed =>
+      'Spilleren kunne ikke udtages. Prøv igen.';
 
   @override
   String get settingsMeetingTimeSection => 'Mødetid';

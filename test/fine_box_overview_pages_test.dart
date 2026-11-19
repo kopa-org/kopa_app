@@ -43,6 +43,42 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('tapping a fine shows its match and note', (tester) async {
+    final fineBox = _fineBox();
+    fineBox.userFineDetails.add(_userFines(3, 'Carl', [
+      _fine(
+        3,
+        'Gult kort',
+        50,
+        paid: false,
+        note: 'Brokkede sig til dommeren',
+        match: FineMatch(id: 7, opponent: 'Boldklubben', date: _now),
+      ),
+    ]));
+    await tester.pumpWidget(_app(FineBoxHistoryPage(
+      title: 'Alle bøder',
+      canDelete: false,
+      loadFineBox: () async => fineBox,
+    )));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('fine-row-3')));
+    await tester.pumpAndSettle();
+
+    final sheet = find.byKey(const ValueKey('fine-detail-3'));
+    expect(sheet, findsOneWidget);
+    for (final text in ['Carl', 'Ikke betalt', 'Brokkede sig til dommeren']) {
+      expect(find.descendant(of: sheet, matching: find.text(text)),
+          findsOneWidget);
+    }
+    expect(
+      find.descendant(
+          of: sheet, matching: find.textContaining('mod Boldklubben')),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('history deletes unpaid fines after confirmation',
       (tester) async {
     final deleted = <int>[];
@@ -209,8 +245,17 @@ UserFineDetails _userFines(int id, String name, List<FineDetails> fines) {
   );
 }
 
-FineDetails _fine(int id, String title, int amount, {required bool paid}) {
+FineDetails _fine(
+  int id,
+  String title,
+  int amount, {
+  required bool paid,
+  String? note,
+  FineMatch? match,
+}) {
   return FineDetails(
+    note: note,
+    match: match,
     id: id,
     fineTypeDetails: FineTypeDetails(
       id: id,

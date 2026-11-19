@@ -13,6 +13,10 @@ class AttendanceResponseDropdown extends StatelessWidget {
   final Key? statusKey;
   final AlignmentGeometry alignment;
 
+  /// The coach picks the team: "going" means picked, and the choices are
+  /// withdrawing or taking a withdrawal back.
+  final bool squadSelection;
+
   const AttendanceResponseDropdown({
     super.key,
     required this.currentResponse,
@@ -22,6 +26,7 @@ class AttendanceResponseDropdown extends StatelessWidget {
     required this.onDecline,
     this.statusKey,
     this.alignment = Alignment.centerLeft,
+    this.squadSelection = false,
   });
 
   @override
@@ -48,6 +53,11 @@ class AttendanceResponseDropdown extends StatelessWidget {
           colors: colors,
           styles: styles,
           l10n: l10n,
+          yesLabel: squadSelection
+              ? l10n.matchSquadUndoWithdraw
+              : l10n.homeAttendanceYes,
+          noLabel:
+              squadSelection ? l10n.matchSquadWithdraw : l10n.homeAttendanceNo,
         ),
       );
       if (!context.mounted || response == null || response == currentResponse) {
@@ -89,7 +99,9 @@ class AttendanceResponseDropdown extends StatelessWidget {
                           : awaitingSelection
                               ? l10n.matchDetailsRsvpPendingSelection
                               : currentResponse
-                                  ? l10n.homeAttendanceGoing
+                                  ? squadSelection
+                                      ? l10n.matchSquadSelectedStatus
+                                      : l10n.homeAttendanceGoing
                                   : l10n.homeAttendanceDeclined,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -114,12 +126,16 @@ class _AttendanceResponseSheet extends StatelessWidget {
   final AppColors colors;
   final AppTextStyles styles;
   final AppLocalizations l10n;
+  final String yesLabel;
+  final String noLabel;
 
   const _AttendanceResponseSheet({
     required this.currentResponse,
     required this.colors,
     required this.styles,
     required this.l10n,
+    required this.yesLabel,
+    required this.noLabel,
   });
 
   @override
@@ -158,7 +174,7 @@ class _AttendanceResponseSheet extends StatelessWidget {
               const SizedBox(height: Spacing.sm),
               _AttendanceResponseOption(
                 key: const ValueKey('attendance_response_yes'),
-                label: l10n.homeAttendanceYes,
+                label: yesLabel,
                 icon: Icons.how_to_reg,
                 color: colors.grass,
                 selected: currentResponse,
@@ -167,7 +183,7 @@ class _AttendanceResponseSheet extends StatelessWidget {
               const SizedBox(height: Spacing.sm),
               _AttendanceResponseOption(
                 key: const ValueKey('attendance_response_no'),
-                label: l10n.homeAttendanceNo,
+                label: noLabel,
                 icon: Icons.close,
                 color: colors.error,
                 selected: !currentResponse,

@@ -7,9 +7,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopa/component/button/mobile_pay_button.dart';
 import 'package:kopa/component/button/expandable_fab.dart';
 import 'package:kopa/component/button/full_width_button.dart';
+import 'package:kopa/component/button/nav_bar_add_button.dart';
 import 'package:kopa/component/future_handler.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
+import 'package:kopa/component/segment/expanding_segmented_control.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
+import 'package:kopa/cubits/pending_mobile_payment_cubit.dart';
 import 'package:kopa/helpers/date_helper.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/model/fine_box_details.dart';
@@ -21,7 +24,6 @@ import 'package:kopa/page/in_form/in_form_ui.dart';
 import 'package:kopa/page/team_fines/assign_fines_modal.dart';
 import 'package:kopa/page/team_fines/create_fine_type_modal.dart';
 import 'package:kopa/page/team_fines/deposit_modal.dart';
-import 'package:kopa/page/team_fines/mobile_pay_paid_dialog.dart';
 import 'package:kopa/page/team_fines/mobile_pay_setup_modal.dart';
 import 'package:kopa/page/team_fines/withdraw_modal.dart';
 import 'package:kopa/repository/fines_repository.dart';
@@ -60,7 +62,8 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
   late Future<List<FineTypeDetails>> fineTypeDetails;
   late Future<UserDetails> currentUserData;
 
-  TeamOwnerFinesSegments _selectedSegment = TeamOwnerFinesSegments.overview;
+  /// Null until the user picks a tab; see [_segmentsFor] for the default.
+  TeamOwnerFinesSegments? _selectedSegment;
   final Set<int> _selectedPersonalFineIds = {};
 
   @override
@@ -108,12 +111,15 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
     final l10n = AppLocalizations.of(context)!;
 
     final fab = _buildCreateFineTypeFab();
-    final body = FutureHandler<UserDetails>(
+    Widget body = FutureHandler<UserDetails>(
       future: currentUserData,
       onSuccess: (context, user) {
-        final segment = user.canManageFines
-            ? _selectedSegment
-            : TeamOwnerFinesSegments.personal;
+        final segments = _segmentsFor(user);
+        final selected = _selectedSegment;
+        // Players land on their own fines; managers on the team overview.
+        final segment = selected != null && segments.contains(selected)
+            ? selected
+            : segments.first;
 
         return FutureHandler<FineBoxDetails>(
           future: fineBoxDetails,
@@ -130,15 +136,32 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
                           : l10n.fineBoxTitle,
                       subtitle: _teamSubtitle(user),
                       showBackButton: widget.showBackButton,
+                      trailing: usesNavBarAddButton(context) &&
+                              user.canManageFines &&
+                              segment == TeamOwnerFinesSegments.fineTypes
+                          ? NavBarAddButton(
+                              key: const ValueKey('create-fine-type-fab'),
+                              label: l10n.fineBoxCreateFineType,
+                              actions: [
+                                AddAction(
+                                  label: l10n.fineBoxCreateFineType,
+                                  icon: CupertinoIcons.add,
+                                  onPressed: () async => _openCreateFineType(
+                                    await fineTypeDetails,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : null,
                     ),
                   ),
-                  if (user.canManageFines)
-                    SliverToBoxAdapter(
-                      child: _SegmentTabs(
-                        selectedSegment: _selectedSegment,
-                        onChanged: _selectSegment,
-                      ),
+                  SliverToBoxAdapter(
+                    child: _SegmentTabs(
+                      segments: segments,
+                      selectedSegment: segment,
+                      onChanged: _selectSegment,
                     ),
+                  ),
                   SliverToBoxAdapter(
                     child: AnimatedSwitcher(
                       duration: const Duration(milliseconds: 160),
@@ -178,6 +201,14 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
       },
     );
 
+    // Reload after a MobilePay payment is confirmed on return to the app.
+    body = BlocListener<PendingMobilePaymentCubit, PendingMobilePaymentState>(
+      listenWhen: (previous, current) =>
+          current.confirmedCount != previous.confirmedCount,
+      listener: (_, __) => _refreshFineBox(),
+      child: body,
+    );
+
     // As a main tab the FAB must clear the bottom navigation bar, which the
     // tab scaffold handles the same way as the match programme page.
     if (!widget.showBackButton) {
@@ -201,6 +232,16 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
     );
   }
 
+  /// Everybody sees the team overview; only fine admins manage fine types.
+  List<TeamOwnerFinesSegments> _segmentsFor(UserDetails user) {
+    return user.canManageFines
+        ? TeamOwnerFinesSegments.values
+        : const [
+            TeamOwnerFinesSegments.personal,
+            TeamOwnerFinesSegments.overview,
+          ];
+  }
+
   Widget _buildOverview(FineBoxDetails fineBox, UserDetails user) {
     final l10n = AppLocalizations.of(context)!;
     final total = fineBox.totalAmount;
@@ -221,14 +262,18 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
             outstanding: fineBox.totalOwedAmount,
             inBox: fineBox.withdrawals.isEmpty ? null : fineBox.currentAmount,
             progress: progress,
+            onTap: () => _openFinePlayers(user),
           ),
-          const SizedBox(height: Spacing.itemGap),
-          _QuickActions(
-            onGiveFine: _openAssignFines,
-            onDeposit: () => _openTeamDeposit(fineBox),
-            onWithdraw: () => _openWithdraw(fineBox),
-          ),
-          if (user.isTeamOwner || !fineBox.hasMobilePayBox) ...[
+          if (user.canManageFines) ...[
+            const SizedBox(height: Spacing.itemGap),
+            _QuickActions(
+              onGiveFine: _openAssignFines,
+              onDeposit: () => _openTeamDeposit(fineBox),
+              onWithdraw: () => _openWithdraw(fineBox),
+            ),
+          ],
+          if (user.canManageFines &&
+              (user.isTeamOwner || !fineBox.hasMobilePayBox)) ...[
             const SizedBox(height: Spacing.itemGap),
             _MobilePaySetupPanel(
               isTeamOwner: user.isTeamOwner,
@@ -245,7 +290,10 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
           const SizedBox(height: Spacing.sm),
           if (topOffenders.isEmpty)
             _MascotMessage(
-              text: l10n.fineBoxPodiumEmpty,
+              // Everybody has paid up, or nobody has been fined yet.
+              text: fineBox.userFineDetails.isEmpty
+                  ? l10n.fineBoxPodiumNoFines
+                  : l10n.fineBoxPodiumEmpty,
               mascot: _heartMascot,
               color: AppColors.of(context).lightGrass,
             )
@@ -272,7 +320,10 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
             _GroupedPanel(
               children: recentFines
                   .take(5)
-                  .map((row) => _RecentFineRow(row: row))
+                  .map((row) => _RecentFineRow(
+                        row: row,
+                        onTap: () => _showFineDetails(context, row),
+                      ))
                   .toList(),
             ),
           if (fineBox.withdrawals.isNotEmpty) ...[
@@ -310,13 +361,6 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              InFormSectionTitle(
-                title: l10n.fineBoxCatalogTitle,
-                action: fineTypes.isEmpty
-                    ? null
-                    : l10n.fineBoxCatalogCount(fineTypes.length),
-              ),
-              const SizedBox(height: Spacing.sm),
               if (fineTypes.isEmpty)
                 _MascotMessage(
                   text: l10n.fineBoxCatalogEmpty,
@@ -363,10 +407,6 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
     );
     final allSelected = unpaidFines.isNotEmpty &&
         _selectedPersonalFineIds.length == unpaidFines.length;
-    // Managers already have the podium on the Overblik tab.
-    final podiumLeaders = user.canManageFines
-        ? const <_UserFineSummary>[]
-        : _topOffenders(fineBox).take(3).toList();
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
@@ -434,13 +474,16 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
               isTeamOwner: user.isTeamOwner,
               onSetupMobilePay: () =>
                   _openMobilePaySetup(fineBox.mobilePayBoxId),
-              onMobilePayOpened: selectedFines.isEmpty
+              onBeforeMobilePay: selectedFines.isEmpty
                   ? null
-                  : () => _confirmMobilePayment(
-                        fineBox.id,
-                        selectedFines,
-                        selectedAmount,
+                  : () => context.read<PendingMobilePaymentCubit>().start(
+                        fineBoxId: fineBox.id,
+                        userFineIds:
+                            selectedFines.map((fine) => fine.id).toList(),
+                        amount: selectedAmount,
                       ),
+              onMobilePayFailed: () =>
+                  context.read<PendingMobilePaymentCubit>().cancel(),
               onCashPaid: selectedFines.isEmpty
                   ? null
                   : () => _markSelectedPersonalFinesPaid(
@@ -450,12 +493,6 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
                       ),
             ),
           ],
-          if (podiumLeaders.isNotEmpty) ...[
-            const SizedBox(height: Spacing.lg),
-            InFormSectionTitle(title: l10n.fineBoxPodiumTitle),
-            const SizedBox(height: Spacing.sm),
-            _FinePodium(leaders: podiumLeaders),
-          ],
           if (paidFines.isNotEmpty) ...[
             const SizedBox(height: Spacing.lg),
             InFormSectionTitle(title: l10n.fineBoxHistoryTitle),
@@ -463,7 +500,13 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
             _GroupedPanel(
               children: paidFines
                   .take(5)
-                  .map((fine) => _HistoryFineRow(fine: fine))
+                  .map((fine) => _HistoryFineRow(
+                        fine: fine,
+                        onTap: () => _showFineDetails(
+                          context,
+                          _FineRowData(user: user, fine: fine),
+                        ),
+                      ))
                   .toList(),
             ),
           ],
@@ -537,7 +580,9 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
     }
   }
 
+  /// Android only; iOS shows "+" in the page header instead.
   Widget? _buildCreateFineTypeFab() {
+    if (usesNavBarAddButton(context)) return null;
     if (_selectedSegment != TeamOwnerFinesSegments.fineTypes) return null;
 
     return FutureHandler<UserDetails>(
@@ -632,33 +677,6 @@ class _TeamFinesPageState extends State<TeamFinesPage> {
     });
   }
 
-  // MobilePay Box has no payment callback, so the player confirms it here.
-  Future<void> _confirmMobilePayment(
-    int fineBoxId,
-    List<FineDetails> selectedFines,
-    int selectedAmount,
-  ) async {
-    final paid = await showMobilePayPaidDialog(context, selectedAmount);
-    AppAnalytics.logEvent(
-      'fine_mobile_pay_answered',
-      parameters: {'paid': paid.toString()},
-    );
-    if (!paid || !mounted) return;
-
-    final saveFailedMessage =
-        AppLocalizations.of(context)!.mobilePayPaidSaveFailed;
-    final messenger = ScaffoldMessenger.of(context);
-    try {
-      await _markSelectedPersonalFinesPaid(
-        fineBoxId,
-        selectedFines,
-        selectedAmount,
-      );
-    } catch (_) {
-      messenger.showSnackBar(SnackBar(content: Text(saveFailedMessage)));
-    }
-  }
-
   Future<void> _markSelectedPersonalFinesPaid(
     int fineBoxId,
     List<FineDetails> selectedFines,
@@ -704,11 +722,13 @@ class _FineHeader extends StatelessWidget {
   final String title;
   final String subtitle;
   final bool showBackButton;
+  final Widget? trailing;
 
   const _FineHeader({
     required this.title,
     required this.subtitle,
     required this.showBackButton,
+    this.trailing,
   });
 
   @override
@@ -755,26 +775,33 @@ class _FineHeader extends StatelessWidget {
               ],
             ),
           ),
+          if (trailing != null) trailing!,
         ],
       ),
     );
   }
 }
 
+/// The match details tab menu, shared through [ExpandingSegmentedControl].
 class _SegmentTabs extends StatelessWidget {
+  final List<TeamOwnerFinesSegments> segments;
   final TeamOwnerFinesSegments selectedSegment;
   final ValueChanged<TeamOwnerFinesSegments> onChanged;
 
   const _SegmentTabs({
+    required this.segments,
     required this.selectedSegment,
     required this.onChanged,
   });
 
+  static IconData _icon(TeamOwnerFinesSegments segment) => switch (segment) {
+        TeamOwnerFinesSegments.overview => Icons.info_outline_rounded,
+        TeamOwnerFinesSegments.fineTypes => Icons.sell_outlined,
+        TeamOwnerFinesSegments.personal => Icons.person_outline_rounded,
+      };
+
   @override
   Widget build(BuildContext context) {
-    final appColors = AppColors.of(context);
-    final appTextStyles =
-        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
     final l10n = AppLocalizations.of(context)!;
 
     return Padding(
@@ -784,54 +811,23 @@ class _SegmentTabs extends StatelessWidget {
         Spacing.md,
         Spacing.md,
       ),
-      child: Container(
-        padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          color: appColors.surface,
-          borderRadius: BorderRadius.circular(Spacing.borderRadiusFull),
-        ),
-        child: Row(
-          children: TeamOwnerFinesSegments.values.map((segment) {
-            final selected = selectedSegment == segment;
-            return Expanded(
-              child: Semantics(
-                button: true,
-                selected: selected,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () => onChanged(segment),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeOutCubic,
-                    padding: const EdgeInsets.symmetric(vertical: 11),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: selected ? appColors.grass : AppColors.transparent,
-                      borderRadius:
-                          BorderRadius.circular(Spacing.borderRadiusFull),
-                    ),
-                    child: Text(
-                      switch (segment) {
-                        TeamOwnerFinesSegments.overview =>
-                          l10n.fineBoxSegmentOverview,
-                        TeamOwnerFinesSegments.fineTypes =>
-                          l10n.fineBoxSegmentFineTypes,
-                        TeamOwnerFinesSegments.personal =>
-                          l10n.fineBoxSegmentFines,
-                      },
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: appTextStyles.caption.copyWith(
-                        color: selected ? appColors.white : appColors.dirt,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
-        ),
+      child: ExpandingSegmentedControl<TeamOwnerFinesSegments>(
+        segments: [
+          for (final segment in segments)
+            ExpandingSegment(
+              value: segment,
+              keyName: 'fine-box-segment-${segment.name}',
+              label: switch (segment) {
+                TeamOwnerFinesSegments.overview => l10n.fineBoxSegmentOverview,
+                TeamOwnerFinesSegments.fineTypes =>
+                  l10n.fineBoxSegmentFineTypes,
+                TeamOwnerFinesSegments.personal => l10n.fineBoxSegmentFines,
+              },
+              icon: _icon(segment),
+            ),
+        ],
+        selected: selectedSegment,
+        onChanged: onChanged,
       ),
     );
   }
@@ -845,12 +841,16 @@ class _TeamHero extends StatelessWidget {
   final double? inBox;
   final double progress;
 
+  /// Opens the overview of every player's fines.
+  final VoidCallback onTap;
+
   const _TeamHero({
     required this.total,
     required this.collected,
     required this.outstanding,
     this.inBox,
     required this.progress,
+    required this.onTap,
   });
 
   @override
@@ -860,7 +860,7 @@ class _TeamHero extends StatelessWidget {
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
     final l10n = AppLocalizations.of(context)!;
 
-    return _HeroShell(
+    final hero = _HeroShell(
       color: appColors.lightGrass,
       mascot: _thumbMascot,
       mascotColor: appColors.grass,
@@ -914,7 +914,34 @@ class _TeamHero extends StatelessWidget {
               ),
           ],
         ),
+        const SizedBox(height: Spacing.md),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                l10n.fineBoxHeroSeePlayers,
+                style: appTextStyles.caption.copyWith(
+                  color: appColors.dirt,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            Icon(
+              CupertinoIcons.chevron_right,
+              size: 16,
+              color: appColors.dirt,
+            ),
+          ],
+        ),
       ],
+    );
+
+    return _PressableTile(
+      key: const ValueKey('fine-box-hero'),
+      color: AppColors.transparent,
+      padding: EdgeInsets.zero,
+      onTap: onTap,
+      child: hero,
     );
   }
 }
@@ -1394,6 +1421,7 @@ class _PressableTile extends StatefulWidget {
   final EdgeInsetsGeometry padding;
 
   const _PressableTile({
+    super.key,
     required this.child,
     required this.color,
     required this.onTap,
@@ -1636,10 +1664,16 @@ class _GroupedPanel extends StatelessWidget {
 
 class _RecentFineRow extends StatelessWidget {
   final _FineRowData row;
+  final VoidCallback? onTap;
   final VoidCallback? onDelete;
   final VoidCallback? onMarkPaid;
 
-  const _RecentFineRow({required this.row, this.onDelete, this.onMarkPaid});
+  const _RecentFineRow({
+    required this.row,
+    this.onTap,
+    this.onDelete,
+    this.onMarkPaid,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1649,62 +1683,66 @@ class _RecentFineRow extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final paid = row.fine.hasBeenPaid;
 
-    return Padding(
-      padding: Spacing.listItemPadding,
-      child: Row(
-        children: [
-          InFormAvatar(name: row.user.name, radius: 19),
-          const SizedBox(width: Spacing.itemGap),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  row.user.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: appTextStyles.bodyBold.copyWith(fontSize: 15),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  '${row.fine.fineTypeDetails.title} · ${_relativeDate(row.fine.createdAt)}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: appTextStyles.caption
-                      .copyWith(color: appColors.textSecondary),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: Spacing.sm),
-          _AmountPill(
-            amount: row.fine.owedAmount,
-            paid: paid,
-            paidLabel: l10n.fineBoxPaidBadge,
-          ),
-          if (onMarkPaid != null)
-            IconButton(
-              key: ValueKey('mark-paid-fine-${row.fine.id}'),
-              tooltip: l10n.fineBoxMarkPaid,
-              onPressed: onMarkPaid,
-              icon: Icon(
-                CupertinoIcons.checkmark_circle,
-                color: appColors.successForeground,
-                size: 22,
+    return InkWell(
+      key: ValueKey('fine-row-${row.fine.id}'),
+      onTap: onTap,
+      child: Padding(
+        padding: Spacing.listItemPadding,
+        child: Row(
+          children: [
+            InFormAvatar(name: row.user.name, radius: 19),
+            const SizedBox(width: Spacing.itemGap),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    row.user.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: appTextStyles.bodyBold.copyWith(fontSize: 15),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    '${row.fine.fineTypeDetails.title} · ${_relativeDate(row.fine.createdAt)}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: appTextStyles.caption
+                        .copyWith(color: appColors.textSecondary),
+                  ),
+                ],
               ),
             ),
-          if (onDelete != null)
-            IconButton(
-              key: ValueKey('delete-fine-${row.fine.id}'),
-              tooltip: l10n.fineBoxDeleteFine,
-              onPressed: onDelete,
-              icon: Icon(
-                CupertinoIcons.delete,
-                color: appColors.errorForeground,
-                size: 20,
-              ),
+            const SizedBox(width: Spacing.sm),
+            _AmountPill(
+              amount: row.fine.owedAmount,
+              paid: paid,
+              paidLabel: l10n.fineBoxPaidBadge,
             ),
-        ],
+            if (onMarkPaid != null)
+              IconButton(
+                key: ValueKey('mark-paid-fine-${row.fine.id}'),
+                tooltip: l10n.fineBoxMarkPaid,
+                onPressed: onMarkPaid,
+                icon: Icon(
+                  CupertinoIcons.checkmark_circle,
+                  color: appColors.successForeground,
+                  size: 22,
+                ),
+              ),
+            if (onDelete != null)
+              IconButton(
+                key: ValueKey('delete-fine-${row.fine.id}'),
+                tooltip: l10n.fineBoxDeleteFine,
+                onPressed: onDelete,
+                icon: Icon(
+                  CupertinoIcons.delete,
+                  color: appColors.errorForeground,
+                  size: 20,
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -1922,8 +1960,9 @@ class _SelectionDot extends StatelessWidget {
 
 class _HistoryFineRow extends StatelessWidget {
   final FineDetails fine;
+  final VoidCallback? onTap;
 
-  const _HistoryFineRow({required this.fine});
+  const _HistoryFineRow({required this.fine, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -1931,27 +1970,30 @@ class _HistoryFineRow extends StatelessWidget {
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
     final l10n = AppLocalizations.of(context)!;
 
-    return Padding(
-      padding: Spacing.listItemPadding,
-      child: Row(
-        children: [
-          _DateBadge(date: fine.createdAt),
-          const SizedBox(width: Spacing.itemGap),
-          Expanded(
-            child: Text(
-              fine.fineTypeDetails.title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: appTextStyles.bodyBold.copyWith(fontSize: 15),
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: Spacing.listItemPadding,
+        child: Row(
+          children: [
+            _DateBadge(date: fine.createdAt),
+            const SizedBox(width: Spacing.itemGap),
+            Expanded(
+              child: Text(
+                fine.fineTypeDetails.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: appTextStyles.bodyBold.copyWith(fontSize: 15),
+              ),
             ),
-          ),
-          const SizedBox(width: Spacing.sm),
-          _AmountPill(
-            amount: fine.owedAmount,
-            paid: true,
-            paidLabel: l10n.fineBoxPaidBadge,
-          ),
-        ],
+            const SizedBox(width: Spacing.sm),
+            _AmountPill(
+              amount: fine.owedAmount,
+              paid: true,
+              paidLabel: l10n.fineBoxPaidBadge,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -2295,7 +2337,8 @@ class _PaymentPanel extends StatelessWidget {
   final String? mobilePayBoxId;
   final bool isTeamOwner;
   final VoidCallback? onSetupMobilePay;
-  final VoidCallback? onMobilePayOpened;
+  final Future<void> Function()? onBeforeMobilePay;
+  final VoidCallback onMobilePayFailed;
   final VoidCallback? onCashPaid;
 
   const _PaymentPanel({
@@ -2305,7 +2348,8 @@ class _PaymentPanel extends StatelessWidget {
     required this.mobilePayBoxId,
     required this.isTeamOwner,
     required this.onSetupMobilePay,
-    required this.onMobilePayOpened,
+    required this.onBeforeMobilePay,
+    required this.onMobilePayFailed,
     required this.onCashPaid,
   });
 
@@ -2365,7 +2409,8 @@ class _PaymentPanel extends StatelessWidget {
               buttonText: l10n.mobilePayDeposit,
               outlined: false,
               width: double.infinity,
-              onOpened: onMobilePayOpened,
+              onBeforeOpen: onBeforeMobilePay,
+              onOpenFailed: onMobilePayFailed,
             ),
           const SizedBox(height: Spacing.sm),
           Center(
@@ -2517,12 +2562,14 @@ String _firstName(String name) {
 
 String _fineSubline(FineDetails fine) {
   final note = fine.note?.trim();
-  final date = '${fine.createdAt.day.toString().padLeft(2, '0')}. '
-      '${DateHelper.getShortMonthName(fine.createdAt)}';
-  if (note == null || note.isEmpty) {
-    return date;
-  }
-  return '$date · $note';
+  final opponent = fine.match?.opponent;
+  return [
+    '${fine.createdAt.day.toString().padLeft(2, '0')}. '
+        '${DateHelper.getShortMonthName(fine.createdAt)}',
+    if (opponent != null && opponent.isNotEmpty)
+      currentL10n.fineMatchAgainst(opponent),
+    if (note != null && note.isNotEmpty) note,
+  ].join(' · ');
 }
 
 String _relativeDate(DateTime date) {

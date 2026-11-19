@@ -58,9 +58,14 @@ void main() {
       ),
     )));
 
-    expect(find.text('Til nr. 1'), findsOneWidget);
-    expect(find.text('-1100.5'), findsOneWidget);
-    expect(find.text('+22.5'), findsOneWidget);
+    // Under each total: green points in the latest round, red gap to first.
+    String detail(int userId) => tester
+        .widget<Text>(find.byKey(ValueKey('in-form-detail-$userId')))
+        .textSpan!
+        .toPlainText();
+    expect(detail(1), '+22.5'); // The leader has no gap.
+    expect(detail(2), '-3.5  -1100.5');
+    expect(find.text('1234.5'), findsOneWidget);
     expect(find.text('4'), findsOneWidget); // ▼4
     await tester.tap(find.text('Tobias'));
     expect(tapped?.userId, 2);

@@ -305,6 +305,7 @@ class _FineBoxHistoryPageState extends State<FineBoxHistoryPage> {
                     for (final row in rows)
                       _RecentFineRow(
                         row: row,
+                        onTap: () => _showFineDetails(context, row),
                         // Paid fines are already counted in the box.
                         onDelete: widget.canDelete && !row.fine.hasBeenPaid
                             ? () => _delete(row)
@@ -330,6 +331,151 @@ class _FineBoxHistoryPageState extends State<FineBoxHistoryPage> {
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+/// Shows when and where a fine was given, and any note the fine admin wrote.
+Future<void> _showFineDetails(BuildContext context, _FineRowData row) {
+  return showCupertinoModalBottomSheet<void>(
+    context: context,
+    expand: false,
+    builder: (_) => _FineDetailSheet(row: row),
+  );
+}
+
+class _FineDetailSheet extends StatelessWidget {
+  final _FineRowData row;
+
+  const _FineDetailSheet({required this.row});
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors = AppColors.of(context);
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+    final l10n = AppLocalizations.of(context)!;
+    final fine = row.fine;
+    final match = fine.match;
+    final note = fine.note?.trim();
+
+    return Material(
+      color: appColors.background,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, Spacing.md),
+          child: Column(
+            key: ValueKey('fine-detail-${fine.id}'),
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      fine.fineTypeDetails.title,
+                      style: appTextStyles.h4.copyWith(color: appColors.dirt),
+                    ),
+                  ),
+                  const SizedBox(width: Spacing.sm),
+                  _AmountPill(
+                    amount: fine.owedAmount,
+                    paid: fine.hasBeenPaid,
+                    paidLabel: l10n.fineBoxPaidBadge,
+                  ),
+                ],
+              ),
+              const SizedBox(height: Spacing.md),
+              _GroupedPanel(
+                children: [
+                  _FineDetailLine(
+                    icon: CupertinoIcons.person,
+                    label: l10n.fineDetailPlayer,
+                    value: row.user.name,
+                  ),
+                  _FineDetailLine(
+                    icon: CupertinoIcons.calendar,
+                    label: l10n.fineDetailGiven,
+                    value: DateHelper.getFormattedLongDate(
+                      fine.createdAt.toLocal(),
+                    ),
+                  ),
+                  if (match != null)
+                    _FineDetailLine(
+                      icon: CupertinoIcons.sportscourt,
+                      label: l10n.fineDetailMatch,
+                      value: [
+                        if (match.opponent?.isNotEmpty == true)
+                          l10n.fineMatchAgainst(match.opponent!),
+                        DateHelper.getFormattedLongDate(match.date),
+                      ].join(' · '),
+                    ),
+                  _FineDetailLine(
+                    icon: fine.hasBeenPaid
+                        ? CupertinoIcons.checkmark_seal
+                        : CupertinoIcons.hourglass,
+                    label: l10n.fineDetailStatus,
+                    value: fine.hasBeenPaid
+                        ? l10n.fineBoxPaidBadge
+                        : l10n.fineDetailUnpaid,
+                  ),
+                  if (note != null && note.isNotEmpty)
+                    _FineDetailLine(
+                      icon: CupertinoIcons.text_bubble,
+                      label: l10n.fineDetailNote,
+                      value: note,
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FineDetailLine extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+
+  const _FineDetailLine({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors = AppColors.of(context);
+    final appTextStyles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return Padding(
+      padding: Spacing.listItemPadding,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 20, color: appColors.textSecondary),
+          const SizedBox(width: Spacing.itemGap),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: appTextStyles.caption
+                      .copyWith(color: appColors.textSecondary),
+                ),
+                const SizedBox(height: 2),
+                Text(value, style: appTextStyles.body),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:kopa/component/segment/expanding_segmented_control.dart';
 import 'package:kopa/component/card/kopa_card.dart';
 import 'package:kopa/component/card/match_hero_card.dart';
 import 'package:kopa/component/pitch_markings.dart';
@@ -494,83 +495,56 @@ class MatchDetailTemplate extends StatelessWidget {
         (segment: MatchDetailSegment.timeline, label: _timelineSegmentLabel),
     ];
 
-    // Trainings only have two tabs, so both stay fully labelled side by side.
-    final row = useTrainingHeader
-        ? Row(
-            children: [
-              for (var index = 0; index < segments.length; index++) ...[
-                if (index > 0) SizedBox(width: darkHeader ? 4.0 : 8.0),
-                Expanded(
-                  child: _MatchDetailSegmentButton(
-                    key: ValueKey(
-                        'match-details-segment-${segments[index].segment.name}'),
-                    segment: segments[index].segment,
-                    label: segments[index].label,
-                    selected:
-                        _effectiveSelectedSegment == segments[index].segment,
-                    collapsedWidth: 0,
-                    expandedWidth: 0,
-                    fixed: true,
-                    textStyle: styles.body3,
-                    darkHeader: darkHeader,
-                    trainingHeader: useTrainingHeader,
-                    height: _segmentButtonExtent(collapse),
-                    onPressed: () =>
-                        onSegmentChanged?.call(segments[index].segment),
-                  ),
-                ),
-              ],
-            ],
-          )
-        : LayoutBuilder(builder: (context, constraints) {
-            final gap = darkHeader ? 4.0 : 8.0;
-            final availableWidth =
-                constraints.maxWidth - gap * (segments.length - 1);
-            final collapsedWidth =
-                (availableWidth / segments.length).clamp(0.0, 44.0);
-            final maximumExpandedWidth =
-                availableWidth - collapsedWidth * (segments.length - 1);
-            double labelWidth(String label) {
-              final painter = TextPainter(
-                text: TextSpan(
-                    text: label,
-                    style: styles.body3
-                        .copyWith(fontSize: 12, fontWeight: FontWeight.w700)),
-                textDirection: Directionality.of(context),
-                textScaler: MediaQuery.textScalerOf(context),
-                maxLines: 1,
-              )..layout();
-              final width = (painter.width + 48)
-                  .clamp(collapsedWidth, maximumExpandedWidth);
-              painter.dispose();
-              return width;
-            }
+    if (!useTrainingHeader) {
+      // Same menu as the fine box, from the shared component.
+      return ExpandingSegmentedControl<MatchDetailSegment>(
+        trackKey: darkHeader
+            ? const ValueKey('match-details-dark-segment-control')
+            : null,
+        segments: [
+          for (final item in segments)
+            ExpandingSegment(
+              value: item.segment,
+              label: item.label,
+              keyName: 'match-details-segment-${item.segment.name}',
+              icon: _segmentIconData(item.segment),
+              customIcon: item.segment == MatchDetailSegment.lineup
+                  ? (color) => _segmentIcon(item.segment, color)
+                  : null,
+            ),
+        ],
+        selected: _effectiveSelectedSegment,
+        onChanged: (segment) => onSegmentChanged?.call(segment),
+        showTrack: darkHeader,
+        // The pills fill the whole track, so they take over its padding and
+        // the header keeps its height.
+        height: _segmentButtonExtent(collapse) +
+            (darkHeader ? 2 * _segmentTrackPadding(collapse) : 0),
+      );
+    }
 
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                for (var index = 0; index < segments.length; index++) ...[
-                  if (index > 0) SizedBox(width: gap),
-                  _MatchDetailSegmentButton(
-                    key: ValueKey(
-                        'match-details-segment-${segments[index].segment.name}'),
-                    segment: segments[index].segment,
-                    label: segments[index].label,
-                    selected:
-                        _effectiveSelectedSegment == segments[index].segment,
-                    collapsedWidth: collapsedWidth,
-                    expandedWidth: labelWidth(segments[index].label),
-                    textStyle: styles.body3,
-                    darkHeader: darkHeader,
-                    trainingHeader: useTrainingHeader,
-                    height: _segmentButtonExtent(collapse),
-                    onPressed: () =>
-                        onSegmentChanged?.call(segments[index].segment),
-                  ),
-                ],
-              ],
-            );
-          });
+    // Trainings only have two tabs, so both stay fully labelled side by side.
+    final row = Row(
+      children: [
+        for (var index = 0; index < segments.length; index++) ...[
+          if (index > 0) SizedBox(width: darkHeader ? 4.0 : 8.0),
+          Expanded(
+            child: _MatchDetailSegmentButton(
+              key: ValueKey(
+                  'match-details-segment-${segments[index].segment.name}'),
+              segment: segments[index].segment,
+              label: segments[index].label,
+              selected: _effectiveSelectedSegment == segments[index].segment,
+              textStyle: styles.body3,
+              darkHeader: darkHeader,
+              trainingHeader: useTrainingHeader,
+              height: _segmentButtonExtent(collapse),
+              onPressed: () => onSegmentChanged?.call(segments[index].segment),
+            ),
+          ),
+        ],
+      ],
+    );
 
     if (darkHeader) {
       return Container(
@@ -589,6 +563,31 @@ class MatchDetailTemplate extends StatelessWidget {
       child: row,
     );
   }
+
+  IconData _segmentIconData(MatchDetailSegment segment) => switch (segment) {
+        MatchDetailSegment.overview => Icons.info_outline_rounded,
+        MatchDetailSegment.attendance => Icons.groups_outlined,
+        MatchDetailSegment.lineup => Icons.grid_view_rounded,
+        MatchDetailSegment.timeline => Icons.timeline_rounded,
+      };
+
+  Widget _segmentIcon(MatchDetailSegment segment, Color color) =>
+      switch (segment) {
+        MatchDetailSegment.lineup => SvgPicture.asset(
+            'assets/icons/match/lineup.svg',
+            key: const ValueKey('match-details-lineup-icon'),
+            width: 20,
+            height: 20,
+            fit: BoxFit.contain,
+            colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+          ),
+        MatchDetailSegment.overview =>
+          Icon(Icons.info_outline_rounded, size: 20, color: color),
+        MatchDetailSegment.attendance =>
+          Icon(Icons.groups_outlined, size: 20, color: color),
+        MatchDetailSegment.timeline =>
+          Icon(Icons.timeline_rounded, size: 20, color: color),
+      };
 
   bool get _hasTimelineSegment => showTimelineSegment && !timelineInOverview;
 
@@ -737,13 +736,11 @@ class _MatchBandParallax extends StatelessWidget {
   }
 }
 
+/// Fully labelled tab for trainings, which only have two.
 class _MatchDetailSegmentButton extends StatelessWidget {
   final MatchDetailSegment segment;
   final String label;
   final bool selected;
-  final double collapsedWidth;
-  final double expandedWidth;
-  final bool fixed;
   final TextStyle textStyle;
   final bool darkHeader;
   final bool trainingHeader;
@@ -755,9 +752,6 @@ class _MatchDetailSegmentButton extends StatelessWidget {
     required this.segment,
     required this.label,
     required this.selected,
-    required this.collapsedWidth,
-    required this.expandedWidth,
-    this.fixed = false,
     required this.textStyle,
     required this.darkHeader,
     required this.trainingHeader,
@@ -786,129 +780,50 @@ class _MatchDetailSegmentButton extends StatelessWidget {
         ? Duration.zero
         : const Duration(milliseconds: 400);
 
-    if (fixed) {
-      final foreground = selected ? selectedColor : unselectedColor;
-      return Semantics(
-        button: true,
-        selected: selected,
-        label: label,
-        excludeSemantics: true,
-        onTap: onPressed,
-        child: SizedBox(
-          height: height,
-          child: Material(
-            color: AppColors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(22),
-              onTap: onPressed,
-              child: AnimatedContainer(
-                key: ValueKey('match-details-segment-${segment.name}-surface'),
-                duration: duration == Duration.zero
-                    ? Duration.zero
-                    : const Duration(milliseconds: 200),
-                curve: Curves.easeOutCubic,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                decoration: BoxDecoration(
-                  color: background,
-                  borderRadius: BorderRadius.circular(22),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(_icon, size: 20, color: foreground),
-                    const SizedBox(width: 6),
-                    Flexible(
-                      child: Text(
-                        label,
-                        maxLines: 1,
-                        softWrap: false,
-                        overflow: TextOverflow.ellipsis,
-                        style: textStyle.copyWith(
-                          color: foreground,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
+    final foreground = selected ? selectedColor : unselectedColor;
     return Semantics(
       button: true,
       selected: selected,
       label: label,
       excludeSemantics: true,
       onTap: onPressed,
-      child: Tooltip(
-        message: label,
-        child: TweenAnimationBuilder<double>(
-          tween: Tween(begin: selected ? 1.0 : 0.0, end: selected ? 1.0 : 0.0),
-          duration: duration,
-          curve: Curves.easeOutCubic,
-          builder: (context, expansion, child) => SizedBox(
-            width:
-                collapsedWidth + (expandedWidth - collapsedWidth) * expansion,
-            height: height,
-            child: Material(
-              color: AppColors.transparent,
-              child: InkWell(
+      child: SizedBox(
+        height: height,
+        child: Material(
+          color: AppColors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(22),
+            onTap: onPressed,
+            child: AnimatedContainer(
+              key: ValueKey('match-details-segment-${segment.name}-surface'),
+              duration: duration == Duration.zero
+                  ? Duration.zero
+                  : const Duration(milliseconds: 200),
+              curve: Curves.easeOutCubic,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: background,
                 borderRadius: BorderRadius.circular(22),
-                onTap: onPressed,
-                child: Container(
-                  key:
-                      ValueKey('match-details-segment-${segment.name}-surface'),
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  decoration: BoxDecoration(
-                    color: background,
-                    borderRadius: BorderRadius.circular(22),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(_icon, size: 20, color: foreground),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      softWrap: false,
+                      overflow: TextOverflow.ellipsis,
+                      style: textStyle.copyWith(
+                        color: foreground,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (segment == MatchDetailSegment.lineup)
-                        SvgPicture.asset(
-                          'assets/icons/match/lineup.svg',
-                          key: const ValueKey('match-details-lineup-icon'),
-                          width: 20,
-                          height: 20,
-                          fit: BoxFit.contain,
-                          colorFilter: ColorFilter.mode(
-                            selected ? selectedColor : unselectedColor,
-                            BlendMode.srcIn,
-                          ),
-                        )
-                      else
-                        Icon(_icon,
-                            size: 20,
-                            color: selected ? selectedColor : unselectedColor),
-                      if (expansion > 0) ...[
-                        SizedBox(width: 4 * expansion),
-                        Expanded(
-                          child: Opacity(
-                            opacity: expansion,
-                            child: Text(
-                              label,
-                              maxLines: 1,
-                              softWrap: false,
-                              overflow: TextOverflow.ellipsis,
-                              style: textStyle.copyWith(
-                                color: selectedColor,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
+                ],
               ),
             ),
           ),

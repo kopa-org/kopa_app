@@ -22,6 +22,8 @@ import 'package:kopa/utils/crash_reporting.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:kopa/repository/onboarding_repository.dart';
 import 'package:kopa/cubits/onboarding_cubit.dart';
+import 'package:kopa/cubits/pending_mobile_payment_cubit.dart';
+import 'package:kopa/page/team_fines/mobile_pay_return_prompt.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/theme/app_theme.dart';
 import 'package:kopa/services/deep_link_service.dart';
@@ -130,8 +132,11 @@ class _KopaBootstrapAppState extends State<KopaBootstrapApp> {
       initialFeatureFlags: featureFlags,
     );
     final onboardingCubit = OnboardingCubit(onboardingRepository);
+    final pendingMobilePaymentCubit = PendingMobilePaymentCubit();
+    final restorePaymentFuture = pendingMobilePaymentCubit.restore();
 
     await authInitFuture;
+    await restorePaymentFuture;
     final user = authCubit.state.user;
     if (user != null && user.teamDetails == null) {
       await onboardingCubit.restorePendingJoinRequest();
@@ -144,6 +149,7 @@ class _KopaBootstrapAppState extends State<KopaBootstrapApp> {
       authCubit: authCubit,
       featureFlagsCubit: featureFlagsCubit,
       onboardingCubit: onboardingCubit,
+      pendingMobilePaymentCubit: pendingMobilePaymentCubit,
     );
   }
 
@@ -176,6 +182,7 @@ class _KopaBootstrapAppState extends State<KopaBootstrapApp> {
             authCubit: result.authCubit,
             featureFlagsCubit: result.featureFlagsCubit,
             onboardingCubit: result.onboardingCubit,
+            pendingMobilePaymentCubit: result.pendingMobilePaymentCubit,
             initialLocation: widget.initialLocation,
           );
 
@@ -204,6 +211,7 @@ class _BootstrapResult {
     required this.authCubit,
     required this.featureFlagsCubit,
     required this.onboardingCubit,
+    required this.pendingMobilePaymentCubit,
   });
 
   final AuthRepository authRepository;
@@ -212,6 +220,7 @@ class _BootstrapResult {
   final AuthCubit authCubit;
   final FeatureFlagsCubit featureFlagsCubit;
   final OnboardingCubit onboardingCubit;
+  final PendingMobilePaymentCubit pendingMobilePaymentCubit;
 }
 
 class KopaApp extends StatefulWidget {
@@ -221,6 +230,7 @@ class KopaApp extends StatefulWidget {
   final AuthCubit authCubit;
   final FeatureFlagsCubit featureFlagsCubit;
   final OnboardingCubit onboardingCubit;
+  final PendingMobilePaymentCubit pendingMobilePaymentCubit;
   final String? initialLocation;
 
   KopaApp({
@@ -231,8 +241,11 @@ class KopaApp extends StatefulWidget {
     required this.authCubit,
     FeatureFlagsCubit? featureFlagsCubit,
     required this.onboardingCubit,
+    PendingMobilePaymentCubit? pendingMobilePaymentCubit,
     this.initialLocation,
-  }) : featureFlagsCubit = featureFlagsCubit ??
+  })  : pendingMobilePaymentCubit =
+            pendingMobilePaymentCubit ?? PendingMobilePaymentCubit(),
+        featureFlagsCubit = featureFlagsCubit ??
             FeatureFlagsCubit(
               repository: FeatureFlagsRepository(),
               initialFeatureFlags: featureFlags,
@@ -275,6 +288,7 @@ class _KopaAppState extends State<KopaApp> {
     _authSubscription?.cancel();
     _deepLinkSubscription?.cancel();
     widget.featureFlagsCubit.close();
+    widget.pendingMobilePaymentCubit.close();
     _refreshNotifier.dispose();
     _matchProgrammeRefreshNotifier.dispose();
     super.dispose();
@@ -327,6 +341,9 @@ class _KopaAppState extends State<KopaApp> {
     ));
 
     if (!state.isAuthenticated) {
+      if (state.status == AuthStatus.unauthenticated) {
+        unawaited(widget.pendingMobilePaymentCubit.cancel());
+      }
       return;
     }
 
@@ -377,6 +394,7 @@ class _KopaAppState extends State<KopaApp> {
           BlocProvider.value(value: widget.authCubit),
           BlocProvider.value(value: widget.featureFlagsCubit),
           BlocProvider.value(value: widget.onboardingCubit),
+          BlocProvider.value(value: widget.pendingMobilePaymentCubit),
         ],
         child: BlocConsumer<FeatureFlagsCubit, FeatureFlagsState>(
           listenWhen: _visibleTabsChanged,
@@ -408,7 +426,11 @@ class _KopaAppState extends State<KopaApp> {
       ],
       builder: (context, child) => MaintenanceGate(
         child: UpdateRequiredGate(
-          child: child ?? const SizedBox.shrink(),
+          child: MobilePayReturnPrompt(
+            navigatorContext: () =>
+                _router.routerDelegate.navigatorKey.currentContext,
+            child: child ?? const SizedBox.shrink(),
+          ),
         ),
       ),
       routerConfig: _router,

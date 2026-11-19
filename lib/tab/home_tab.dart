@@ -1499,7 +1499,12 @@ class HomeMatchResponseCard extends StatelessWidget {
     }
 
     final l10n = AppLocalizations.of(context)!;
-    final answered = isRegistered || isUnavailable;
+    // "Coach picks the team": players are available until they withdraw, and
+    // only the coach's pick counts as going.
+    final squadSelection = match.usesSquadSelection;
+    final isPicked = match.isCurrentUserSelected == true;
+    final going = squadSelection ? isPicked : isRegistered;
+    final answered = going || isUnavailable;
     return Padding(
       padding: const EdgeInsets.symmetric(
           horizontal: Spacing.md, vertical: Spacing.sm),
@@ -1512,13 +1517,17 @@ class HomeMatchResponseCard extends StatelessWidget {
               Expanded(
                 child: answered
                     ? AttendanceResponseDropdown(
-                        currentResponse: isRegistered,
+                        currentResponse: going,
+                        squadSelection: squadSelection,
                         isSaving: isRegistering,
                         onAccept: register,
                         onDecline: decline,
                         statusKey: const ValueKey('match_response_status'),
                       )
-                    : Text(l10n.homeAttendanceQuestion,
+                    : Text(
+                        squadSelection
+                            ? l10n.matchSquadAvailableTitle
+                            : l10n.homeAttendanceQuestion,
                         style: appTextStyles.body3.copyWith(
                             color: appColors.dirt,
                             fontWeight: FontWeight.w600)),
@@ -1527,7 +1536,16 @@ class HomeMatchResponseCard extends StatelessWidget {
               _MatchSignupSummary(count: match.registeredCount),
             ],
           ),
-          if (!answered) ...[
+          if (!answered && squadSelection) ...[
+            const SizedBox(height: Spacing.sm),
+            _KopaChoiceButton(
+              key: const ValueKey('match_response_decline'),
+              label: l10n.matchSquadWithdraw,
+              icon: Icons.close,
+              outlined: true,
+              onPressed: isRegistering ? null : decline,
+            ),
+          ] else if (!answered) ...[
             const SizedBox(height: Spacing.sm),
             Row(
               children: [

@@ -18,6 +18,7 @@ String? notificationDestination(
     case 'match_calendar_changed':
     case 'match_lineup_revealed':
     case 'waitlist_promoted':
+    case 'selected_for_match':
       final matchId = int.tryParse(
         (data['match_id'] ?? data['event_id'] ?? '').toString(),
       );

@@ -44,6 +44,19 @@ class UsersRepository {
     return UserDetails.fromJson(jsonDecode(response.body)['user']);
   }
 
+  /// Removes a player from the team (team leaders only).
+  static Future<void> removeTeamMember({
+    required int teamId,
+    required int userId,
+  }) async {
+    final response = await _apiClient.delete(
+      Uri.parse('${ApiConfig.baseUrl}/teams/$teamId/members/$userId'),
+    );
+    if (response.statusCode != 204) {
+      throw Exception('Failed to remove team member');
+    }
+  }
+
   static Future<UserDetails> updateFineAdmin({
     required int teamId,
     required int userId,

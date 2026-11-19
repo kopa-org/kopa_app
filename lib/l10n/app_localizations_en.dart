@@ -835,6 +835,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get teamRoleSaveFailed => 'Could not change the role. Try again.';
 
   @override
+  String get teamRemoveMember => 'Remove from team';
+
+  @override
+  String get teamRemoveMemberAction => 'Remove';
+
+  @override
+  String teamRemoveMemberConfirm(String name) {
+    return 'Remove $name from the team? Fines and stats are kept, but signups for upcoming matches are deleted.';
+  }
+
+  @override
+  String get teamRemoveMemberFailed =>
+      'The player could not be removed. Try again.';
+
+  @override
   String get teamRoleLastLeader =>
       'Assign another team leader before switching to player.';
 
@@ -1064,10 +1079,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get matchTasksEmptyLeader =>
       'No tasks yet. Create recurring tasks such as beer and laundry in the team settings.';
-
-  @override
-  String get matchTasksEmptyPlayer =>
-      'No tasks yet. Add a task for this match, e.g. balls or water.';
 
   @override
   String get matchTasksManage => 'Recurring tasks';
@@ -1863,6 +1874,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get uiLeading => 'Leading';
+
+  @override
   String get uiStable => 'Stable';
 
   @override
@@ -1870,9 +1884,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get uiToFirstPlace => 'To first place';
-
-  @override
-  String get uiLeading => 'Leading';
 
   @override
   String get uiMovement => 'Movement';
@@ -2155,6 +2166,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get uiAttack => 'Attack';
+
+  @override
+  String get squadNoPosition => 'No position';
 
   @override
   String get uiNoEventsRecorded => 'No events recorded';
@@ -2706,13 +2720,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inFormColumnPlayer => 'Player';
 
   @override
-  String get inFormColumnLatest => 'Latest';
+  String get inFormLegendLatest => 'latest';
 
   @override
-  String get inFormColumnToFirst => 'To #1';
-
-  @override
-  String get inFormColumnTotal => 'Pts';
+  String get inFormLegendToFirst => 'to 1st';
 
   @override
   String get inFormPointsSystem => 'Points system';
@@ -2727,21 +2738,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get inFormMatches => 'Matches';
-
-  @override
-  String get inFormGoals => 'Goals';
-
-  @override
-  String get inFormAssists => 'Assists';
-
-  @override
-  String get inFormCards => 'Cards';
-
-  @override
-  String get inFormMotm => 'MOTM';
-
-  @override
-  String get inFormAverage => 'Avg.';
 
   @override
   String get inFormBonuses => 'Bonuses';
@@ -3240,6 +3236,51 @@ class AppLocalizationsEn extends AppLocalizations {
       'The fine could not be marked as paid. Try again.';
 
   @override
+  String get fineBoxHeroSeePlayers => 'See every player\'s fines';
+
+  @override
+  String get fineBoxPodiumNoFines =>
+      'No fines yet. The leaderboard fills up once the first fines are given.';
+
+  @override
+  String get fineDetailPlayer => 'Player';
+
+  @override
+  String get fineDetailAmount => 'Amount';
+
+  @override
+  String get fineDetailStatus => 'Status';
+
+  @override
+  String get fineDetailUnpaid => 'Not paid';
+
+  @override
+  String get fineDetailGiven => 'Given';
+
+  @override
+  String get fineDetailMatch => 'Match';
+
+  @override
+  String get fineDetailNote => 'Note';
+
+  @override
+  String get fineDetailClose => 'Close';
+
+  @override
+  String get fineAssignMatchLabel => 'Match';
+
+  @override
+  String get fineAssignNoMatch => 'No match';
+
+  @override
+  String get fineAssignPickMatch => 'Which match was the fine given at?';
+
+  @override
+  String fineMatchAgainst(String opponent) {
+    return 'vs $opponent';
+  }
+
+  @override
   String get homeNextTraining => 'Next training';
 
   @override
@@ -3311,6 +3352,45 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsRsvpLeaderDescription =>
       'Players sign up as available, and the team leader picks the squad from them.';
+
+  @override
+  String get teamRsvpSquadOption => 'Coach picks the team';
+
+  @override
+  String get settingsRsvpSquadDescription =>
+      'The whole squad is available. The coach picks the team, and players only withdraw if they can\'t make it.';
+
+  @override
+  String get matchSquadAvailableTitle => 'You\'re available';
+
+  @override
+  String get matchSquadAvailableBody =>
+      'The coach picks the team. Withdraw if you can\'t make it.';
+
+  @override
+  String get matchSquadSelectedStatus => 'Selected';
+
+  @override
+  String get matchSquadAvailableStatus => 'Available';
+
+  @override
+  String get matchSquadWithdraw => 'Withdraw';
+
+  @override
+  String get matchSquadUndoWithdraw => 'I can make it after all';
+
+  @override
+  String get matchSquadPick => 'Select';
+
+  @override
+  String get matchSquadUnpick => 'Remove from team';
+
+  @override
+  String get matchSquadNoneSelected => 'Nobody is selected yet.';
+
+  @override
+  String get matchSquadSelectFailed =>
+      'The player could not be selected. Try again.';
 
   @override
   String get settingsMeetingTimeSection => 'Meeting time';

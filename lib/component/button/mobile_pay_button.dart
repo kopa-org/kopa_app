@@ -12,8 +12,14 @@ class MobilePayButton extends StatelessWidget {
   final bool outlined;
   final double? width;
 
+  /// Runs right before MobilePay is opened, while Kopa is still in front.
+  final Future<void> Function()? onBeforeOpen;
+
   /// Runs once MobilePay has been opened.
   final VoidCallback? onOpened;
+
+  /// Runs when MobilePay could not be opened.
+  final VoidCallback? onOpenFailed;
 
   const MobilePayButton({
     super.key,
@@ -23,7 +29,9 @@ class MobilePayButton extends StatelessWidget {
     this.buttonText,
     this.outlined = true,
     this.width,
+    this.onBeforeOpen,
     this.onOpened,
+    this.onOpenFailed,
   });
 
   @override
@@ -35,6 +43,7 @@ class MobilePayButton extends StatelessWidget {
                 ? l10n.mobilePayAmount(amount!)
                 : l10n.mobilePayGoToBox),
         onPressed: () async {
+          await onBeforeOpen?.call();
           final opened = await UrlOpener.openMobilePay(
             amount: amount,
             message: message,
@@ -42,7 +51,10 @@ class MobilePayButton extends StatelessWidget {
           );
           if (opened) {
             onOpened?.call();
-          } else if (context.mounted) {
+            return;
+          }
+          onOpenFailed?.call();
+          if (context.mounted) {
             final invalidBox = mobilePayBoxId?.trim().isNotEmpty == true &&
                 MobilePayBoxLink.boxId(mobilePayBoxId!) == null;
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(

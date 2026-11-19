@@ -16,7 +16,10 @@ void main() {
           .load('packages/cupertino_icons/assets/CupertinoIcons.ttf'));
     await icons.load();
   });
-  for (final status in MatchRsvpStatus.values) {
+  // "Available" (coach picks the team) has its own tests in
+  // match_squad_selection_test.dart.
+  for (final status in MatchRsvpStatus.values
+      .where((status) => status != MatchRsvpStatus.available)) {
     for (final width in [320.0, 390.0]) {
       testWidgets('$status supports RSVP and attendee navigation at $width',
           (tester) async {
@@ -119,7 +122,10 @@ void main() {
     }
   }
 
-  for (final status in MatchRsvpStatus.values) {
+  // "Available" (coach picks the team) has its own tests in
+  // match_squad_selection_test.dart.
+  for (final status in MatchRsvpStatus.values
+      .where((status) => status != MatchRsvpStatus.available)) {
     testWidgets('saving disables response changes for $status', (tester) async {
       var changes = 0;
       await tester.pumpWidget(MaterialApp(

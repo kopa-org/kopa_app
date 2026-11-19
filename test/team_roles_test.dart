@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kopa/cubits/auth_cubit.dart';
+import 'package:kopa/cubits/onboarding_cubit.dart';
+import 'package:kopa/repository/onboarding_repository.dart';
 import 'package:kopa/cubits/team_members_cubit.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/model/team_details.dart';
@@ -150,6 +152,51 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
+  testWidgets('leader removes a player from the team', (tester) async {
+    final auth = AuthCubit(authRepository: _Auth())..updateUser(_user(1, true));
+    final removed = <int>[];
+    final cubit = TeamMembersCubit(
+        loadMembers: () async => [_user(1, true), _user(2, false)],
+        removeMember: ({required teamId, required userId}) async {
+          expect(teamId, 10);
+          removed.add(userId);
+        });
+    addTearDown(auth.close);
+    await cubit.load();
+    await _pump(tester, auth, cubit);
+
+    // Leaders cannot remove themselves.
+    await _openProfile(tester, 1);
+    await tester.tap(find.byTooltip('Skift rolle på holdet'));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100),
+        EnginePhase.sendSemanticsUpdate, const Duration(seconds: 5));
+    expect(find.text('Fjern fra holdet'), findsNothing);
+    await tester.tap(find.text('Annuller'));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100),
+        EnginePhase.sendSemanticsUpdate, const Duration(seconds: 5));
+    tester.state<NavigatorState>(find.byType(Navigator).first).pop();
+    await tester.pumpAndSettle(const Duration(milliseconds: 100),
+        EnginePhase.sendSemanticsUpdate, const Duration(seconds: 5));
+
+    await _openProfile(tester, 2);
+    await tester.tap(find.byTooltip('Skift rolle på holdet'));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100),
+        EnginePhase.sendSemanticsUpdate, const Duration(seconds: 5));
+    await tester.tap(find.text('Fjern fra holdet'));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100),
+        EnginePhase.sendSemanticsUpdate, const Duration(seconds: 5));
+    await tester.tap(find.byKey(const ValueKey('team-remove-member-confirm')));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100),
+        EnginePhase.sendSemanticsUpdate, const Duration(seconds: 5));
+
+    expect(removed, [2]);
+    expect(cubit.state.members.map((member) => member.id), [1]);
+    // Back on the roster, without the removed player.
+    expect(find.byKey(const ValueKey('team-member-2')), findsNothing);
+    expect(find.byKey(const ValueKey('team-member-1')), findsOneWidget);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets('players cannot hand out the fine admin role', (tester) async {
     final auth = AuthCubit(authRepository: _Auth())
       ..updateUser(_user(1, false, fineAdmin: true));
@@ -176,6 +223,8 @@ Future<void> _pump(
   await tester.pumpWidget(MultiBlocProvider(
       providers: [
         BlocProvider<AuthCubit>.value(value: auth),
+        BlocProvider<OnboardingCubit>(
+            create: (_) => OnboardingCubit(OnboardingRepository())),
       ],
       child: MaterialApp(
           theme: AppTheme.lightTheme,

@@ -3,6 +3,7 @@ import 'dart:ui' show SemanticsAction;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:kopa/component/card/kopa_card.dart';
 import 'package:kopa/component/card/match_hero_card.dart';
@@ -130,13 +131,6 @@ void main() {
         await tester.pumpAndSettle();
         Finder tab(MatchDetailSegment segment) =>
             find.byKey(ValueKey('match-details-segment-${segment.name}'));
-        double overviewIconOffset() =>
-            tester
-                .getCenter(find.descendant(
-                    of: tab(MatchDetailSegment.overview),
-                    matching: find.byType(Icon)))
-                .dx -
-            tester.getTopLeft(tab(MatchDetailSegment.overview)).dx;
         final visible = training
             ? [MatchDetailSegment.overview, MatchDetailSegment.attendance]
             : MatchDetailSegment.values;
@@ -144,17 +138,17 @@ void main() {
             tester.getSize(tab(MatchDetailSegment.overview)).width;
         expect(initialWidth, greaterThan(44));
         for (final segment in visible.skip(1)) {
-          expect(tester.getSize(tab(segment)).width, 44);
-          expect(find.descendant(of: tab(segment), matching: find.byType(Text)),
-              findsNothing);
+          // Unselected tabs shrink to just their icon.
+          expect(tester.getSize(tab(segment)).width, lessThan(initialWidth));
+          expect(_isActive(tester, tab(segment)), isFalse);
         }
-        expect(find.byIcon(Icons.info_outline_rounded), findsOneWidget);
-        expect(find.byIcon(Icons.groups_outlined), findsOneWidget);
+        expect(find.byIcon(Icons.info_outline_rounded), findsWidgets);
+        expect(find.byIcon(Icons.groups_outlined), findsWidgets);
         expect(find.byIcon(Icons.account_tree_outlined), findsNothing);
         expect(find.byKey(const ValueKey('match-details-lineup-icon')),
-            training ? findsNothing : findsOneWidget);
+            training ? findsNothing : findsWidgets);
         expect(find.byIcon(Icons.timeline_rounded),
-            training ? findsNothing : findsOneWidget);
+            training ? findsNothing : findsWidgets);
         await tester.tap(tab(MatchDetailSegment.attendance));
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 100));
@@ -163,26 +157,23 @@ void main() {
         expect(tester.getSize(tab(MatchDetailSegment.attendance)).width,
             lessThan(initialWidth));
         expect(tester.takeException(), isNull);
-        expect(overviewIconOffset(), closeTo(22, 0.01));
         // Resizing during expansion must use the current available width.
         tester.view.physicalSize = const Size(300, 640);
         await tester.pump();
         expect(tester.takeException(), isNull);
         await tester.pumpAndSettle();
-        expect(overviewIconOffset(), closeTo(22, 0.01));
+        expect(tester.takeException(), isNull);
         for (final segment in visible) {
           await tester.tap(tab(segment));
           await tester.pumpAndSettle();
           for (final candidate in visible) {
-            expect(
-                find.descendant(
-                    of: tab(candidate), matching: find.byType(Text)),
-                candidate == segment ? findsOneWidget : findsNothing);
+            expect(_isActive(tester, tab(candidate)), candidate == segment);
           }
           if (!training) {
             final icon = tester.widget<SvgPicture>(
-                find.byKey(const ValueKey('match-details-lineup-icon')));
-            final selectedColor = AppColors.light.dirt;
+                find.byKey(const ValueKey('match-details-lineup-icon')).first);
+            // White on the grass-green selected tab.
+            final selectedColor = AppColors.light.white;
             final unselectedColor = AppColors.light.textSecondary;
             expect(
                 icon.colorFilter,
@@ -192,8 +183,9 @@ void main() {
                         : unselectedColor,
                     BlendMode.srcIn));
             expect(
-                tester.getSize(
-                    find.byKey(const ValueKey('match-details-lineup-icon'))),
+                tester.getSize(find
+                    .byKey(const ValueKey('match-details-lineup-icon'))
+                    .first),
                 const Size(20, 20));
           }
           expect(tester.getSemantics(tab(segment)).getSemanticsData().label,
@@ -225,17 +217,16 @@ void main() {
                 onSegmentChanged: (value) => setState(() => selected = value),
               )),
     ));
-    await tester
-        .tap(find.byKey(const ValueKey('match-details-segment-attendance')));
+    const overview = ValueKey('match-details-segment-overview');
+    const attendance = ValueKey('match-details-segment-attendance');
+    await tester.tap(find.byKey(attendance));
+    // The tab animation shrinks to a single millisecond.
     await tester.pump();
-    expect(find.text('Tilmeldte'), findsOneWidget);
-    expect(find.text('Overblik'), findsNothing);
-    expect(
-        tester
-            .getSize(
-                find.byKey(const ValueKey('match-details-segment-overview')))
-            .width,
-        44);
+    await tester.pump(const Duration(milliseconds: 1));
+    expect(_isActive(tester, find.byKey(attendance)), isTrue);
+    expect(_isActive(tester, find.byKey(overview)), isFalse);
+    expect(tester.getSize(find.byKey(overview)).width,
+        lessThan(tester.getSize(find.byKey(attendance)).width));
     expect(tester.takeException(), isNull);
   });
 
@@ -368,10 +359,12 @@ void main() {
       ),
     );
 
-    final selectedSurface = tester.widget<Container>(
-        find.byKey(const ValueKey('match-details-segment-overview-surface')));
-    expect((selectedSurface.decoration! as BoxDecoration).color,
-        AppColors.light.lightGrass);
+    expect(tester.widget<GNav>(find.byType(GNav)).tabBackgroundColor,
+        AppColors.light.grass);
+    expect(
+        _isActive(tester,
+            find.byKey(const ValueKey('match-details-segment-overview'))),
+        isTrue);
     expect(
         tester
             .getSize(
@@ -385,16 +378,17 @@ void main() {
             .width,
         lessThan(140));
     expect(find.text('Overblik'), findsOneWidget);
-    expect(find.text('Tilmeldte'), findsNothing);
-    expect(find.byIcon(Icons.groups_outlined), findsOneWidget);
-    final unselectedSurface = tester.widget<Container>(
-        find.byKey(const ValueKey('match-details-segment-attendance-surface')));
-    expect((unselectedSurface.decoration! as BoxDecoration).color,
-        Colors.transparent);
+    expect(find.byIcon(Icons.groups_outlined), findsWidgets);
+    expect(
+        _isActive(tester,
+            find.byKey(const ValueKey('match-details-segment-attendance'))),
+        isFalse);
 
     await tester.tap(
       find.byKey(const ValueKey('match-details-segment-attendance')),
     );
+    // GNav ignores taps until its animation has finished.
+    await tester.pumpAndSettle();
 
     expect(selected, MatchDetailSegment.attendance);
   });
@@ -430,10 +424,6 @@ void main() {
     final segmentControl = tester.widget<Container>(
       find.byKey(const ValueKey('match-details-dark-segment-control')),
     );
-    final overviewSurface = tester.widget<Container>(
-      find.byKey(const ValueKey('match-details-segment-overview-surface')),
-    );
-    final overviewDecoration = overviewSurface.decoration! as BoxDecoration;
 
     expect(header.color, AppColors.light.lightGrass);
     expect(
@@ -448,11 +438,21 @@ void main() {
     expect((heroSurface.decoration as BoxDecoration).color,
         AppColors.light.surface);
     expect(contentBackground.color, AppColors.light.background);
+    // White, white-outlined track with the selected tab in grass green.
     expect(
       (segmentControl.decoration! as BoxDecoration).color,
-      AppColors.light.background,
+      AppColors.light.white,
     );
-    expect(overviewDecoration.color, AppColors.light.surface);
+    expect(
+      (segmentControl.foregroundDecoration! as BoxDecoration).border,
+      Border.all(color: AppColors.light.white, width: 1.5),
+    );
+    expect(tester.widget<GNav>(find.byType(GNav)).tabBackgroundColor,
+        AppColors.light.grass);
+    expect(
+        _isActive(tester,
+            find.byKey(const ValueKey('match-details-segment-overview'))),
+        isTrue);
     expect(find.text('Existing body content'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -727,3 +727,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 }
+
+/// Whether the tab (a google_nav_bar GButton) is the selected one.
+bool _isActive(WidgetTester tester, Finder tab) =>
+    tester.widget<GButton>(tab).active == true;

@@ -14,11 +14,15 @@ class TabPageHeader extends StatelessWidget {
   /// Optional control under the title, such as the season selector.
   final Widget? bottom;
 
+  /// Optional button at the end of the title row, e.g. iOS's "+".
+  final Widget? trailing;
+
   const TabPageHeader({
     super.key,
     required this.title,
     this.subtitle,
     this.bottom,
+    this.trailing,
   });
 
   @override
@@ -28,18 +32,26 @@ class TabPageHeader extends StatelessWidget {
         Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
     final subtitle = this.subtitle;
     final bottom = this.bottom;
+    final trailing = this.trailing;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: Spacing.xs),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Semantics(
-            header: true,
-            child: Text(
-              title,
-              style: styles.pageTitle.copyWith(color: colors.dirt),
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Semantics(
+                  header: true,
+                  child: Text(
+                    title,
+                    style: styles.pageTitle.copyWith(color: colors.dirt),
+                  ),
+                ),
+              ),
+              if (trailing != null) trailing,
+            ],
           ),
           if (subtitle != null) ...[
             const SizedBox(height: Spacing.xs),

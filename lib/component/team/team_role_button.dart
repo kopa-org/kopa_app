@@ -21,6 +21,7 @@ class TeamRoleButton extends StatelessWidget {
     // Only leaders hand out the fine admin role; a leader editing themselves
     // may still step down to player.
     final canManageTeam = auth.state.user?.canManageTeam == true;
+    final canRemove = canManageTeam && auth.state.user?.id != player.id;
     final choice = await showCupertinoModalPopup<_RoleChoice>(
       context: context,
       builder: (context) => CupertinoActionSheet(
@@ -44,6 +45,13 @@ class TeamRoleButton extends StatelessWidget {
                   ? l10n.teamRoleRemoveFineAdmin
                   : l10n.teamRoleMakeFineAdmin),
             ),
+          if (canRemove)
+            CupertinoActionSheetAction(
+              key: const ValueKey('team-remove-member'),
+              isDestructiveAction: true,
+              onPressed: () => Navigator.pop(context, _RoleChoice.remove),
+              child: Text(l10n.teamRemoveMember),
+            ),
         ],
         cancelButton: CupertinoActionSheetAction(
           onPressed: () => Navigator.pop(context),
@@ -52,8 +60,14 @@ class TeamRoleButton extends StatelessWidget {
       ),
     );
     if (choice == null || !context.mounted) return;
+    if (choice == _RoleChoice.remove) {
+      await _removeMember(context, members, teamId, player);
+      return;
+    }
     try {
       switch (choice) {
+        case _RoleChoice.remove:
+          return;
         case _RoleChoice.fineAdmin:
           await members.changeFineAdmin(
               teamId: teamId,
@@ -72,6 +86,49 @@ class TeamRoleButton extends StatelessWidget {
             ? l10n.teamRoleLastLeader
             : l10n.teamRoleSaveFailed),
         backgroundColor: AppColors.of(context).error,
+      ));
+    }
+  }
+
+  Future<void> _removeMember(
+    BuildContext context,
+    TeamMembersCubit members,
+    int teamId,
+    UserDetails player,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showCupertinoDialog<bool>(
+      context: context,
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(l10n.teamRemoveMember),
+        content: Text(l10n.teamRemoveMemberConfirm(player.name)),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(l10n.onboardingCancel),
+          ),
+          CupertinoDialogAction(
+            key: const ValueKey('team-remove-member-confirm'),
+            isDestructiveAction: true,
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(l10n.teamRemoveMemberAction),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final errorColor = AppColors.of(context).error;
+    try {
+      await members.removeMember(teamId: teamId, userId: player.id);
+      // The profile belongs to someone who is no longer on the team.
+      navigator.maybePop();
+    } catch (_) {
+      messenger.showSnackBar(SnackBar(
+        content: Text(l10n.teamRemoveMemberFailed),
+        backgroundColor: errorColor,
       ));
     }
   }
@@ -101,4 +158,4 @@ class TeamRoleButton extends StatelessWidget {
   }
 }
 
-enum _RoleChoice { leader, player, fineAdmin }
+enum _RoleChoice { leader, player, fineAdmin, remove }

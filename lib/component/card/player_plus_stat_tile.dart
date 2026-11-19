@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:kopa/l10n/current_l10n.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:kopa/page/in_form/in_form_ui.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
 
@@ -29,6 +30,9 @@ class PlayerPlusStatTileData {
   final Color accentColor;
   final Color? backgroundColor;
 
+  /// Mascot illustration drawn in the tile's corner, tinted with the accent.
+  final String? mascotAsset;
+
   const PlayerPlusStatTileData({
     required this.title,
     required this.value,
@@ -37,6 +41,7 @@ class PlayerPlusStatTileData {
     required this.icon,
     required this.accentColor,
     this.backgroundColor,
+    this.mascotAsset,
   });
 
   String get rankLabel =>
@@ -99,7 +104,9 @@ class PlayerPlusStatTile extends StatelessWidget {
       icon: data.icon,
       accentColor: data.accentColor,
       backgroundColor: data.backgroundColor,
+      mascotAsset: data.mascotAsset,
     );
+    final mascotAsset = displayData.mascotAsset;
     final effectiveBackgroundColor = backgroundColor ??
         displayData.backgroundColor ??
         appColors.lightGrass55;
@@ -126,62 +133,81 @@ class PlayerPlusStatTile extends StatelessWidget {
                   ]
                 : null,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Stack(
+            clipBehavior: Clip.none,
             children: [
-              Row(
-                children: [
-                  Icon(
-                    displayData.icon,
-                    color: displayData.accentColor,
-                    size: iconSize,
+              if (mascotAsset != null)
+                Positioned(
+                  right: -4,
+                  top: 24,
+                  child: ExcludeSemantics(
+                    child: InFormMascot(
+                      key: ValueKey('stat-tile-mascot-$mascotAsset'),
+                      asset: mascotAsset,
+                      size: 72,
+                      color: displayData.accentColor,
+                    ),
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
+                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        displayData.icon,
+                        color: displayData.accentColor,
+                        size: iconSize,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          displayData.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style:
+                              styles.bodyBold.copyWith(fontSize: titleFontSize),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  BlurredValue(
+                    blurred: obscureValue,
                     child: Text(
-                      displayData.title,
+                      displayData.value,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: styles.bodyBold.copyWith(fontSize: titleFontSize),
+                      style: styles.pageTitle.copyWith(
+                        color: appColors.textPrimary,
+                        fontSize: valueFontSize,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: valueRankGap),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: displayData.accentColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(borderRadius),
+                    ),
+                    child: BlurredValue(
+                      blurred: obscureRank,
+                      sigma: 3,
+                      child: Text(
+                        displayData.rankLabel,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: styles.caption.copyWith(
+                          color: appColors.textPrimary,
+                          fontWeight: FontWeight.w600,
+                          fontSize: rankFontSize,
+                        ),
+                      ),
                     ),
                   ),
                 ],
-              ),
-              const Spacer(),
-              BlurredValue(
-                blurred: obscureValue,
-                child: Text(
-                  displayData.value,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: styles.pageTitle.copyWith(
-                    color: appColors.textPrimary,
-                    fontSize: valueFontSize,
-                  ),
-                ),
-              ),
-              SizedBox(height: valueRankGap),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: displayData.accentColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(borderRadius),
-                ),
-                child: BlurredValue(
-                  blurred: obscureRank,
-                  sigma: 3,
-                  child: Text(
-                    displayData.rankLabel,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: styles.caption.copyWith(
-                      color: appColors.textPrimary,
-                      fontWeight: FontWeight.w600,
-                      fontSize: rankFontSize,
-                    ),
-                  ),
-                ),
               ),
             ],
           ),

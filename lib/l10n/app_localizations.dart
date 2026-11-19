@@ -1610,6 +1610,30 @@ abstract class AppLocalizations {
   /// **'Could not change the role. Try again.'**
   String get teamRoleSaveFailed;
 
+  /// No description provided for @teamRemoveMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from team'**
+  String get teamRemoveMember;
+
+  /// No description provided for @teamRemoveMemberAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get teamRemoveMemberAction;
+
+  /// No description provided for @teamRemoveMemberConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name} from the team? Fines and stats are kept, but signups for upcoming matches are deleted.'**
+  String teamRemoveMemberConfirm(String name);
+
+  /// No description provided for @teamRemoveMemberFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The player could not be removed. Try again.'**
+  String get teamRemoveMemberFailed;
+
   /// No description provided for @teamRoleLastLeader.
   ///
   /// In en, this message translates to:
@@ -2017,12 +2041,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No tasks yet. Create recurring tasks such as beer and laundry in the team settings.'**
   String get matchTasksEmptyLeader;
-
-  /// No description provided for @matchTasksEmptyPlayer.
-  ///
-  /// In en, this message translates to:
-  /// **'No tasks yet. Add a task for this match, e.g. balls or water.'**
-  String get matchTasksEmptyPlayer;
 
   /// No description provided for @matchTasksManage.
   ///
@@ -3422,6 +3440,12 @@ abstract class AppLocalizations {
   /// **'#{a} on the team'**
   String uiOnTheTeam(Object a);
 
+  /// No description provided for @uiLeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Leading'**
+  String get uiLeading;
+
   /// No description provided for @uiStable.
   ///
   /// In en, this message translates to:
@@ -3439,12 +3463,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'To first place'**
   String get uiToFirstPlace;
-
-  /// No description provided for @uiLeading.
-  ///
-  /// In en, this message translates to:
-  /// **'Leading'**
-  String get uiLeading;
 
   /// No description provided for @uiMovement.
   ///
@@ -3961,6 +3979,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Attack'**
   String get uiAttack;
+
+  /// No description provided for @squadNoPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'No position'**
+  String get squadNoPosition;
 
   /// No description provided for @uiNoEventsRecorded.
   ///
@@ -4940,23 +4964,17 @@ abstract class AppLocalizations {
   /// **'Player'**
   String get inFormColumnPlayer;
 
-  /// No description provided for @inFormColumnLatest.
+  /// No description provided for @inFormLegendLatest.
   ///
   /// In en, this message translates to:
-  /// **'Latest'**
-  String get inFormColumnLatest;
+  /// **'latest'**
+  String get inFormLegendLatest;
 
-  /// No description provided for @inFormColumnToFirst.
+  /// No description provided for @inFormLegendToFirst.
   ///
   /// In en, this message translates to:
-  /// **'To #1'**
-  String get inFormColumnToFirst;
-
-  /// No description provided for @inFormColumnTotal.
-  ///
-  /// In en, this message translates to:
-  /// **'Pts'**
-  String get inFormColumnTotal;
+  /// **'to 1st'**
+  String get inFormLegendToFirst;
 
   /// No description provided for @inFormPointsSystem.
   ///
@@ -4981,36 +4999,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Matches'**
   String get inFormMatches;
-
-  /// No description provided for @inFormGoals.
-  ///
-  /// In en, this message translates to:
-  /// **'Goals'**
-  String get inFormGoals;
-
-  /// No description provided for @inFormAssists.
-  ///
-  /// In en, this message translates to:
-  /// **'Assists'**
-  String get inFormAssists;
-
-  /// No description provided for @inFormCards.
-  ///
-  /// In en, this message translates to:
-  /// **'Cards'**
-  String get inFormCards;
-
-  /// No description provided for @inFormMotm.
-  ///
-  /// In en, this message translates to:
-  /// **'MOTM'**
-  String get inFormMotm;
-
-  /// No description provided for @inFormAverage.
-  ///
-  /// In en, this message translates to:
-  /// **'Avg.'**
-  String get inFormAverage;
 
   /// No description provided for @inFormBonuses.
   ///
@@ -5792,6 +5780,90 @@ abstract class AppLocalizations {
   /// **'The fine could not be marked as paid. Try again.'**
   String get fineBoxMarkPaidFailed;
 
+  /// No description provided for @fineBoxHeroSeePlayers.
+  ///
+  /// In en, this message translates to:
+  /// **'See every player\'s fines'**
+  String get fineBoxHeroSeePlayers;
+
+  /// No description provided for @fineBoxPodiumNoFines.
+  ///
+  /// In en, this message translates to:
+  /// **'No fines yet. The leaderboard fills up once the first fines are given.'**
+  String get fineBoxPodiumNoFines;
+
+  /// No description provided for @fineDetailPlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Player'**
+  String get fineDetailPlayer;
+
+  /// No description provided for @fineDetailAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get fineDetailAmount;
+
+  /// No description provided for @fineDetailStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get fineDetailStatus;
+
+  /// No description provided for @fineDetailUnpaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Not paid'**
+  String get fineDetailUnpaid;
+
+  /// No description provided for @fineDetailGiven.
+  ///
+  /// In en, this message translates to:
+  /// **'Given'**
+  String get fineDetailGiven;
+
+  /// No description provided for @fineDetailMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Match'**
+  String get fineDetailMatch;
+
+  /// No description provided for @fineDetailNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get fineDetailNote;
+
+  /// No description provided for @fineDetailClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get fineDetailClose;
+
+  /// No description provided for @fineAssignMatchLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Match'**
+  String get fineAssignMatchLabel;
+
+  /// No description provided for @fineAssignNoMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No match'**
+  String get fineAssignNoMatch;
+
+  /// No description provided for @fineAssignPickMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Which match was the fine given at?'**
+  String get fineAssignPickMatch;
+
+  /// No description provided for @fineMatchAgainst.
+  ///
+  /// In en, this message translates to:
+  /// **'vs {opponent}'**
+  String fineMatchAgainst(String opponent);
+
   /// No description provided for @homeNextTraining.
   ///
   /// In en, this message translates to:
@@ -5899,6 +5971,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Players sign up as available, and the team leader picks the squad from them.'**
   String get settingsRsvpLeaderDescription;
+
+  /// No description provided for @teamRsvpSquadOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Coach picks the team'**
+  String get teamRsvpSquadOption;
+
+  /// No description provided for @settingsRsvpSquadDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'The whole squad is available. The coach picks the team, and players only withdraw if they can\'t make it.'**
+  String get settingsRsvpSquadDescription;
+
+  /// No description provided for @matchSquadAvailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re available'**
+  String get matchSquadAvailableTitle;
+
+  /// No description provided for @matchSquadAvailableBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The coach picks the team. Withdraw if you can\'t make it.'**
+  String get matchSquadAvailableBody;
+
+  /// No description provided for @matchSquadSelectedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected'**
+  String get matchSquadSelectedStatus;
+
+  /// No description provided for @matchSquadAvailableStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get matchSquadAvailableStatus;
+
+  /// No description provided for @matchSquadWithdraw.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw'**
+  String get matchSquadWithdraw;
+
+  /// No description provided for @matchSquadUndoWithdraw.
+  ///
+  /// In en, this message translates to:
+  /// **'I can make it after all'**
+  String get matchSquadUndoWithdraw;
+
+  /// No description provided for @matchSquadPick.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get matchSquadPick;
+
+  /// No description provided for @matchSquadUnpick.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from team'**
+  String get matchSquadUnpick;
+
+  /// No description provided for @matchSquadNoneSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody is selected yet.'**
+  String get matchSquadNoneSelected;
+
+  /// No description provided for @matchSquadSelectFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The player could not be selected. Try again.'**
+  String get matchSquadSelectFailed;
 
   /// No description provided for @settingsMeetingTimeSection.
   ///

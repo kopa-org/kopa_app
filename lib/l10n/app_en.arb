@@ -300,6 +300,17 @@
   "onboardingExit": "Exit signup and log out",
   "teamRoleEdit": "Change team role",
   "teamRoleSaveFailed": "Could not change the role. Try again.",
+  "teamRemoveMember": "Remove from team",
+  "teamRemoveMemberAction": "Remove",
+  "teamRemoveMemberConfirm": "Remove {name} from the team? Fines and stats are kept, but signups for upcoming matches are deleted.",
+  "teamRemoveMemberFailed": "The player could not be removed. Try again.",
+  "@teamRemoveMemberConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "teamRoleLastLeader": "Assign another team leader before switching to player.",
   "teamSquadTitle": "Squad",
   "teamSquadEmpty": "No players found.",
@@ -438,7 +449,6 @@
   "matchTasksResetConfirm": "Reset the queue to the order players joined the team?",
   "matchTasksError": "The task could not be updated. Please try again.",
   "matchTasksEmptyLeader": "No tasks yet. Create recurring tasks such as beer and laundry in the team settings.",
-  "matchTasksEmptyPlayer": "No tasks yet. Add a task for this match, e.g. balls or water.",
   "matchTasksManage": "Recurring tasks",
   "teamTasksTitle": "Match tasks",
   "teamTasksIntro": "Recurring tasks rotate on every match. The player highest in the queue who is selected gets the task. Once it is done, that player moves to the back.",
@@ -911,10 +921,10 @@
       }
     }
   },
+  "uiLeading": "Leading",
   "uiStable": "Stable",
   "uiLatestRound": "Latest round",
   "uiToFirstPlace": "To first place",
-  "uiLeading": "Leading",
   "uiMovement": "Movement",
   "uiTable": "Table",
   "uiSomethingWentWrong": "Something went wrong.",
@@ -1046,6 +1056,7 @@
   "uiDefence": "Defence",
   "uiMidfield": "Midfield",
   "uiAttack": "Attack",
+  "squadNoPosition": "No position",
   "uiNoEventsRecorded": "No events recorded",
   "uiYellowCards": "Yellow cards",
   "uiRedCards": "Red cards",
@@ -1344,18 +1355,12 @@
   "inFormCategoryParticipationDescription": "Playing, man of the match votes and awards.",
   "inFormCategoryBonusDescription": "Extra points for streaks, form runs and monthly or season awards.",
   "inFormColumnPlayer": "Player",
-  "inFormColumnLatest": "Latest",
-  "inFormColumnToFirst": "To #1",
-  "inFormColumnTotal": "Pts",
+  "inFormLegendLatest": "latest",
+  "inFormLegendToFirst": "to 1st",
   "inFormPointsSystem": "Points system",
   "inFormPointsSystemIntro": "Your points depend on the position you played. Defenders earn more for clean sheets, attackers for goals and assists.",
   "inFormPointsSystemExtras": "On top of this come streaks and form bonuses, plus monthly and season awards.",
   "inFormMatches": "Matches",
-  "inFormGoals": "Goals",
-  "inFormAssists": "Assists",
-  "inFormCards": "Cards",
-  "inFormMotm": "MOTM",
-  "inFormAverage": "Avg.",
   "inFormBonuses": "Bonuses",
   "inFormHome": "Home",
   "inFormAway": "Away",
@@ -1740,6 +1745,27 @@
     }
   },
   "fineBoxMarkPaidFailed": "The fine could not be marked as paid. Try again.",
+  "fineBoxHeroSeePlayers": "See every player's fines",
+  "fineBoxPodiumNoFines": "No fines yet. The leaderboard fills up once the first fines are given.",
+  "fineDetailPlayer": "Player",
+  "fineDetailAmount": "Amount",
+  "fineDetailStatus": "Status",
+  "fineDetailUnpaid": "Not paid",
+  "fineDetailGiven": "Given",
+  "fineDetailMatch": "Match",
+  "fineDetailNote": "Note",
+  "fineDetailClose": "Close",
+  "fineAssignMatchLabel": "Match",
+  "fineAssignNoMatch": "No match",
+  "fineAssignPickMatch": "Which match was the fine given at?",
+  "fineMatchAgainst": "vs {opponent}",
+  "@fineMatchAgainst": {
+    "placeholders": {
+      "opponent": {
+        "type": "String"
+      }
+    }
+  },
   "homeNextTraining": "Next training",
   "wrappedAssistsLeaders": "Most assists",
   "settingsSectionMatches": "Matches",
@@ -1772,6 +1798,18 @@
   "settingsSignupQuestion": "Who makes the squad?",
   "settingsRsvpFirstComeDescription": "Players who sign up are included automatically.",
   "settingsRsvpLeaderDescription": "Players sign up as available, and the team leader picks the squad from them.",
+  "teamRsvpSquadOption": "Coach picks the team",
+  "settingsRsvpSquadDescription": "The whole squad is available. The coach picks the team, and players only withdraw if they can't make it.",
+  "matchSquadAvailableTitle": "You're available",
+  "matchSquadAvailableBody": "The coach picks the team. Withdraw if you can't make it.",
+  "matchSquadSelectedStatus": "Selected",
+  "matchSquadAvailableStatus": "Available",
+  "matchSquadWithdraw": "Withdraw",
+  "matchSquadUndoWithdraw": "I can make it after all",
+  "matchSquadPick": "Select",
+  "matchSquadUnpick": "Remove from team",
+  "matchSquadNoneSelected": "Nobody is selected yet.",
+  "matchSquadSelectFailed": "The player could not be selected. Try again.",
   "settingsMeetingTimeSection": "Meeting time",
   "settingsMeetingTimeLabel": "Meet before kickoff",
   "settingsMeetingNone": "None",

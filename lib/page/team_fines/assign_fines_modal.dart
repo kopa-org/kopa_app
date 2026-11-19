@@ -4,9 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:kopa/component/future_handler.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
+import 'package:kopa/helpers/date_helper.dart';
 import 'package:kopa/model/create_user_fine_command.dart';
+import 'package:kopa/model/match_details.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/repository/fines_repository.dart';
+import 'package:kopa/repository/match_repository.dart';
 import 'package:kopa/repository/users_repository.dart';
 import 'package:kopa/theme/app_colors.dart';
 import 'package:kopa/theme/app_text_styles.dart';
@@ -26,6 +29,10 @@ class _AssignFinesModalState extends State<AssignFinesModal> {
   Map<String, String> userFinePrices = {};
   Map<String, String> userFineNotes = {};
 
+  /// Recent matches the fines can be linked to, newest first.
+  List<MatchDetails> _recentMatches = [];
+  MatchDetails? _selectedMatch;
+
   @override
   void initState() {
     super.initState();
@@ -35,6 +42,13 @@ class _AssignFinesModalState extends State<AssignFinesModal> {
   Future<Map<String, dynamic>> _fetchFineTypesAndSquad() async {
     final squad = await UsersRepository.getSquad();
     final fineTypeDetailsList = await FinesRepository.getFineTypes();
+    _recentMatches = await _loadRecentMatches();
+    // Fines are usually handed out right after a match, so preselect it.
+    final latest = _recentMatches.firstOrNull;
+    if (latest != null &&
+        DateTime.now().difference(latest.date) < const Duration(days: 3)) {
+      _selectedMatch = latest;
+    }
 
     fineTypesExpanded = (fineTypeDetailsList as List<dynamic>).map((fine) {
       selectedUsers[fine.id] = {};
@@ -50,6 +64,84 @@ class _AssignFinesModalState extends State<AssignFinesModal> {
       'squad': squad,
       'fineTypeDetails': fineTypeDetailsList,
     };
+  }
+
+  /// Matches that have started, newest first. Linking a match is optional, so
+  /// a failed lookup just leaves the picker empty.
+  static Future<List<MatchDetails>> _loadRecentMatches() async {
+    try {
+      final now = DateTime.now();
+      final matches = await MatchRepository.getMatchSummaries();
+      return matches
+          .where((match) => match.isMatch && match.date.isBefore(now))
+          .toList()
+        ..sort((a, b) => b.date.compareTo(a.date));
+    } catch (_) {
+      return [];
+    }
+  }
+
+  static String _matchLabel(MatchDetails match) {
+    final opponent =
+        match.isHomeTeam == false ? match.homeTeam : match.awayTeam;
+    final date = DateHelper.getFormattedShortWeekdayDate(match.date);
+    return opponent == null || opponent.isEmpty ? date : '$opponent · $date';
+  }
+
+  Future<void> _pickMatch() async {
+    const noMatch = -1;
+    final l10n = AppLocalizations.of(context)!;
+    // Dismissing the sheet returns null and keeps the current choice.
+    final pickedId = await showCupertinoModalPopup<int>(
+      context: context,
+      builder: (sheetContext) => CupertinoActionSheet(
+        title: Text(l10n.fineAssignPickMatch),
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () => Navigator.of(sheetContext).pop(noMatch),
+            child: Text(l10n.fineAssignNoMatch),
+          ),
+          for (final match in _recentMatches.take(8))
+            CupertinoActionSheetAction(
+              isDefaultAction: match.id == _selectedMatch?.id,
+              onPressed: () => Navigator.of(sheetContext).pop(match.id),
+              child: Text(_matchLabel(match)),
+            ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.of(sheetContext).pop(),
+          child: Text(l10n.fineBoxDeleteCancel),
+        ),
+      ),
+    );
+    if (pickedId == null || !mounted) return;
+    setState(() {
+      _selectedMatch =
+          _recentMatches.where((match) => match.id == pickedId).firstOrNull;
+    });
+  }
+
+  Widget _buildMatchPicker(AppColors appColors) {
+    final l10n = AppLocalizations.of(context)!;
+    final selected = _selectedMatch;
+
+    return CupertinoListSection.insetGrouped(
+      backgroundColor: appColors.background,
+      children: [
+        CupertinoListTile(
+          key: const ValueKey('assign-fine-match'),
+          backgroundColor: appColors.surface,
+          leading:
+              Icon(CupertinoIcons.sportscourt, color: appColors.textSecondary),
+          title: Text(l10n.fineAssignMatchLabel),
+          additionalInfo: Text(
+            selected == null ? l10n.fineAssignNoMatch : _matchLabel(selected),
+          ),
+          trailing: const CupertinoListTileChevron(),
+          onTap: _pickMatch,
+        ),
+      ],
+    );
   }
 
   @override
@@ -103,7 +195,7 @@ class _AssignFinesModalState extends State<AssignFinesModal> {
                   ),
                 );
               }
-              return CupertinoListSection.insetGrouped(
+              final fineTypeSection = CupertinoListSection.insetGrouped(
                 backgroundColor: appColors.background,
                 dividerMargin: 0,
                 additionalDividerMargin: 0,
@@ -288,6 +380,13 @@ class _AssignFinesModalState extends State<AssignFinesModal> {
                   );
                 }).toList(),
               );
+
+              return Column(
+                children: [
+                  if (_recentMatches.isNotEmpty) _buildMatchPicker(appColors),
+                  fineTypeSection,
+                ],
+              );
             }),
       ),
     );
@@ -327,6 +426,7 @@ class _AssignFinesModalState extends State<AssignFinesModal> {
           fineTypeId: fine['id'].toString(),
           owedAmount: fine['price'].toString(),
           note: userFineNotes[fineUserKey(fine['id'], userId)],
+          matchId: _selectedMatch?.id,
         ));
       }
     }

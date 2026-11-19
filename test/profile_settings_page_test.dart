@@ -35,6 +35,8 @@ void main() {
 
     final logoRow = find.byKey(const ValueKey('profile-settings-team-logo'));
     await tester.scrollUntilVisible(logoRow, 200);
+    await tester.ensureVisible(logoRow);
+    await tester.pumpAndSettle();
     await tester.tap(logoRow);
     await tester.pumpAndSettle();
 
@@ -90,7 +92,8 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('Inviter spillere'), findsOneWidget);
+    // Inviting players lives on the squad tab now.
+    expect(find.text('Inviter spillere'), findsNothing);
     expect(find.text('Log ud'), findsOneWidget);
     expect(find.text('Holdlogo'), findsNothing);
     expect(find.text('Tilmelding & kampdag'), findsNothing);
@@ -161,6 +164,8 @@ void main() {
 
     final chip = find.byKey(const ValueKey('match-settings-offset-90'));
     await tester.scrollUntilVisible(chip, 100);
+    await tester.ensureVisible(chip);
+    await tester.pumpAndSettle();
     await tester.tap(chip);
     await tester.pumpAndSettle();
 

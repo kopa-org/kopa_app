@@ -17,6 +17,7 @@ import 'package:kopa/page/match/create_match_page.dart';
 import 'package:kopa/page/match/match_details_page.dart';
 import 'package:kopa/page/match/match_score_sheet.dart';
 import 'package:kopa/repository/match_repository.dart';
+import 'package:kopa/component/button/nav_bar_add_button.dart';
 import 'package:kopa/component/season/season_selector.dart';
 import 'package:kopa/state/match_programme_refresh_notifier.dart';
 import 'package:kopa/theme/app_colors.dart';
@@ -59,78 +60,86 @@ class _MatchProgrammePageState extends State<MatchProgrammePage> {
       },
       child: PageScaffold.tab(
         title: AppLocalizations.of(context)!.uiMatchSchedule,
-        floatingActionButton: FutureHandler<UserDetails>(
-          future: currentUser,
-          loadingIndicator: const SizedBox.shrink(),
-          onError: (_) => const SizedBox.shrink(),
-          // Everybody on the team can add matches and trainings.
-          onSuccess: (context, user) {
-            if (user.teamDetails == null) return const SizedBox.shrink();
-            final l10n = AppLocalizations.of(context)!;
+        // Android: Material FAB. iOS puts "+" in the page header instead.
+        floatingActionButton: usesNavBarAddButton(context)
+            ? null
+            : FutureHandler<UserDetails>(
+                future: currentUser,
+                loadingIndicator: const SizedBox.shrink(),
+                onError: (_) => const SizedBox.shrink(),
+                // Everybody on the team can add matches and trainings.
+                onSuccess: (context, user) {
+                  if (!_canCreateEvents(context, user)) {
+                    return const SizedBox.shrink();
+                  }
+                  final l10n = AppLocalizations.of(context)!;
 
-            // Finished seasons are read-only, so hide the create actions.
-            final isViewingPastSeason = context.select(
-              (MatchProgrammeCubit cubit) => cubit.state.isViewingPastSeason,
-            );
-            if (isViewingPastSeason) return const SizedBox.shrink();
-
-            // Arc of icon actions, styled like the match details FAB.
-            return ExpandableFab(
-              distance: 104,
-              openButtonKey: const ValueKey('create-match-fab'),
-              heroTag: 'create-match-fab',
-              tooltip: l10n.eventCreateTitle,
-              backgroundColor: AppColors.matchDetailsHeader,
-              foregroundColor: colors.white,
-              children: [
-                FloatingActionButton(
-                  heroTag: 'create-match-fab-match',
-                  tooltip: l10n.eventCreateMatch,
-                  backgroundColor: colors.surface,
-                  foregroundColor: AppColors.matchDetailsHeader,
-                  onPressed: () =>
-                      _showCreateEvent(context, KopaEventType.match),
-                  child: const Icon(Icons.sports_soccer),
-                ),
-                FloatingActionButton(
-                  heroTag: 'create-match-fab-training',
-                  tooltip: l10n.eventCreateTraining,
-                  backgroundColor: colors.surface,
-                  foregroundColor: colors.sky,
-                  onPressed: () =>
-                      _showCreateEvent(context, KopaEventType.training),
-                  child: const Icon(Icons.fitness_center),
-                ),
-              ],
-            );
-          },
-        ),
+                  // Arc of icon actions, styled like the match details FAB.
+                  return ExpandableFab(
+                    distance: 104,
+                    openButtonKey: const ValueKey('create-match-fab'),
+                    heroTag: 'create-match-fab',
+                    tooltip: l10n.eventCreateTitle,
+                    backgroundColor: AppColors.matchDetailsHeader,
+                    foregroundColor: colors.white,
+                    children: [
+                      FloatingActionButton(
+                        heroTag: 'create-match-fab-match',
+                        tooltip: l10n.eventCreateMatch,
+                        backgroundColor: colors.surface,
+                        foregroundColor: AppColors.matchDetailsHeader,
+                        onPressed: () =>
+                            showCreateEvent(context, KopaEventType.match),
+                        child: const Icon(Icons.sports_soccer),
+                      ),
+                      FloatingActionButton(
+                        heroTag: 'create-match-fab-training',
+                        tooltip: l10n.eventCreateTraining,
+                        backgroundColor: colors.surface,
+                        foregroundColor: colors.sky,
+                        onPressed: () =>
+                            showCreateEvent(context, KopaEventType.training),
+                        child: const Icon(Icons.fitness_center),
+                      ),
+                    ],
+                  );
+                },
+              ),
         body: const _MatchProgrammeRefreshListener(
           child: _MatchList(),
         ),
       ),
     );
   }
+}
 
-  Future<void> _showCreateEvent(
-    BuildContext context,
-    KopaEventType eventType,
-  ) async {
-    final cubit = context.read<MatchProgrammeCubit>();
-    if (!context.mounted) return;
+/// Everybody on the team can add matches and trainings, except while
+/// looking at a finished season, which is read-only.
+bool _canCreateEvents(BuildContext context, UserDetails user) {
+  if (user.teamDetails == null) return false;
+  return !context.select(
+    (MatchProgrammeCubit cubit) => cubit.state.isViewingPastSeason,
+  );
+}
 
-    await showCupertinoModalBottomSheet(
-      expand: true,
-      context: context,
-      builder: (modalContext) => BlocProvider.value(
-        value: cubit,
-        child: CreateMatchPage(
-          matches: cubit.state.matches,
-          eventType: eventType,
-        ),
+Future<void> showCreateEvent(
+  BuildContext context,
+  KopaEventType eventType,
+) async {
+  final cubit = context.read<MatchProgrammeCubit>();
+  if (!context.mounted) return;
+
+  await showCupertinoModalBottomSheet(
+    expand: true,
+    context: context,
+    builder: (modalContext) => BlocProvider.value(
+      value: cubit,
+      child: CreateMatchPage(
+        matches: cubit.state.matches,
+        eventType: eventType,
       ),
-    );
-  }
+    ),
+  );
 }
 
 class _MatchProgrammeRefreshListener extends StatefulWidget {
@@ -439,6 +448,7 @@ class _MatchProgrammeHeader extends StatelessWidget {
       ),
       child: TabPageHeader(
         title: AppLocalizations.of(context)!.uiMatchSchedule,
+        trailing: _iosAddButton(context),
         bottom: season == null
             ? null
             : SeasonSelectorButton(
@@ -446,6 +456,33 @@ class _MatchProgrammeHeader extends StatelessWidget {
                 onTap: canChangeSeason ? () => _pickSeason(context) : null,
               ),
       ),
+    );
+  }
+
+  /// iOS's "+" for new matches and trainings; Android uses the FAB.
+  Widget? _iosAddButton(BuildContext context) {
+    final user = context.read<AuthCubit>().state.user;
+    if (!usesNavBarAddButton(context) ||
+        user == null ||
+        !_canCreateEvents(context, user)) {
+      return null;
+    }
+    final l10n = AppLocalizations.of(context)!;
+    return NavBarAddButton(
+      key: const ValueKey('create-match-fab'),
+      label: l10n.eventCreateTitle,
+      actions: [
+        AddAction(
+          label: l10n.eventCreateMatch,
+          icon: Icons.sports_soccer,
+          onPressed: () => showCreateEvent(context, KopaEventType.match),
+        ),
+        AddAction(
+          label: l10n.eventCreateTraining,
+          icon: Icons.fitness_center,
+          onPressed: () => showCreateEvent(context, KopaEventType.training),
+        ),
+      ],
     );
   }
 

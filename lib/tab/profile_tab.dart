@@ -8,6 +8,7 @@ import 'package:kopa/cubits/auth_cubit.dart';
 import 'package:kopa/l10n/app_localizations.dart';
 import 'package:kopa/component/scaffold/page_scaffold.dart';
 import 'package:kopa/component/scaffold/tab_page_header.dart';
+import 'package:kopa/component/team/invite_players_button.dart';
 import 'package:kopa/model/user_details.dart';
 import 'package:kopa/page/profile/player_profile_page.dart';
 import 'package:kopa/theme/app_colors.dart';
@@ -82,6 +83,8 @@ class _SquadTabView extends StatelessWidget {
                     : null,
               ),
               const SizedBox(height: 20),
+              const InvitePlayersButton(source: 'squad'),
+              const SizedBox(height: Spacing.md),
               if (state.loading)
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: Spacing.xxl),
@@ -98,7 +101,13 @@ class _SquadTabView extends StatelessWidget {
                   child: Text(l10n.teamSquadEmpty),
                 )
               else
-                _RosterCard(squad: sortSquadByPlayerRole(state.members)),
+                ..._positionGroups(l10n, state.members).expand((group) => [
+                      _RosterGroupTitle(
+                          title: group.title, count: group.players.length),
+                      const SizedBox(height: Spacing.sm),
+                      _RosterCard(squad: group.players),
+                      const SizedBox(height: Spacing.lg),
+                    ]),
             ],
           ),
         );
@@ -119,6 +128,62 @@ List<UserDetails> sortSquadByPlayerRole(List<UserDetails> squad) {
   });
 
   return indexedSquad.map((entry) => entry.$2).toList();
+}
+
+/// The squad split into one box per line of the pitch, keeper first.
+List<({String title, List<UserDetails> players})> _positionGroups(
+    AppLocalizations l10n, List<UserDetails> squad) {
+  final titles = [
+    l10n.uiGoalkeeper,
+    l10n.uiDefence,
+    l10n.uiMidfield,
+    l10n.uiAttack,
+    l10n.squadNoPosition,
+  ];
+  final groups = [for (final _ in titles) <UserDetails>[]];
+  for (final player in sortSquadByPlayerRole(squad)) {
+    groups[_squadRoleSortIndex(player.position)].add(player);
+  }
+  return [
+    for (var index = 0; index < titles.length; index++)
+      if (groups[index].isNotEmpty)
+        (title: titles[index], players: groups[index]),
+  ];
+}
+
+class _RosterGroupTitle extends StatelessWidget {
+  final String title;
+  final int count;
+
+  const _RosterGroupTitle({required this.title, required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors = AppColors.of(context);
+    final styles =
+        Theme.of(context).extension<AppTextStyles>() ?? AppTextStyles.light;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: Spacing.xs),
+      child: Row(
+        children: [
+          Text(
+            title.toUpperCase(),
+            style: styles.caption.copyWith(
+              color: appColors.textSecondary,
+              fontWeight: FontWeight.w800,
+              letterSpacing: .6,
+            ),
+          ),
+          const SizedBox(width: Spacing.sm),
+          Text(
+            '$count',
+            style: styles.caption.copyWith(color: appColors.textSecondary),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 int _squadRoleSortIndex(String? position) {
