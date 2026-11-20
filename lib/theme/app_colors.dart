@@ -164,6 +164,10 @@ class AppColors extends ThemeExtension<AppColors> {
   Color get infoForeground => const Color(0xFF1257B5);
   Color get infoSurface => lightSky55;
 
+  // Home hero card: the bright mint pitch with grass markings.
+  Color get matchHeroSurface => lightGrass;
+  Color get matchHeroMarking => grass.withValues(alpha: .32);
+
   @override
   AppColors copyWith({
     Color? pitch,

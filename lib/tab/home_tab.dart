@@ -12,7 +12,6 @@ import 'package:kopa/component/home/home_bento_card.dart';
 import 'package:kopa/component/home/home_calendar_overlay.dart';
 import 'package:kopa/component/home/home_carousel_indicator.dart';
 import 'package:kopa/component/home/home_fine_box_card.dart';
-import 'package:kopa/component/pitch_markings.dart';
 import 'package:kopa/component/home/home_statistics_strip.dart';
 import 'package:kopa/component/home/latest_result_card.dart';
 import 'package:kopa/component/home/missing_result_hero.dart';
@@ -122,8 +121,7 @@ class _HomeTabViewState extends State<_HomeTabView> {
       title: 'Kopa',
       backgroundColor: appColors.background,
       showTopBar: false,
-      // The SliverAppBar pads for the status bar itself, so the mint match
-      // band can reach behind it like the match details header.
+      // The SliverAppBar pads for the status bar itself.
       useTopSafeArea: false,
       body: RefreshIndicator(
         color: appColors.primary,
@@ -171,19 +169,15 @@ class _HomeTabViewState extends State<_HomeTabView> {
               );
             }
 
-            // Upcoming matches get the hero carousel in a mint band that
-            // starts behind the status bar; the season-end heroes do not.
+            // Upcoming matches get the countdown and hero carousel; once no
+            // match is left the season-end heroes take the top spot.
             final showMatchBand = upcomingMatches.any((match) => match.isMatch);
 
             return CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
                 SliverAppBar(
-                  // With a match band the app bar is see-through: the band
-                  // paints the mint behind it as one parallax layer.
-                  backgroundColor: showMatchBand
-                      ? AppColors.transparent
-                      : appColors.background,
+                  backgroundColor: appColors.background,
                   surfaceTintColor: AppColors.transparent,
                   foregroundColor: appColors.grass,
                   elevation: 0,
@@ -488,88 +482,6 @@ List<MatchDetails> matchesMissingResult(
     ..sort((a, b) => b.date.compareTo(a.date));
 }
 
-Color _pitchMarkingColor(AppColors colors) =>
-    colors.grass.withValues(alpha: 0.32);
-
-/// The mint band behind the home app bar and countdown. It reaches up behind
-/// the transparent app bar and [overlap] further down, behind the top of the
-/// hero card, which the next sibling in the column paints over it. It scrolls
-/// slower than the content (parallax) so the hero panel slides up over it.
-class _HomeMatchBand extends StatelessWidget {
-  static const double overlap = 52;
-  static const double radius = 28;
-
-  /// Share of the scroll distance the band lags behind the content, so the
-  /// hero panel and bento grid slide up over it.
-  static const double parallaxFactor = 0.5;
-
-  final Widget child;
-
-  const _HomeMatchBand({required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-    final media = MediaQuery.of(context);
-    // The band reaches up behind the transparent app bar and status bar, and
-    // a screen further so a pull-down overscroll never shows a gap above it.
-    final appBarHeight = media.padding.top + kToolbarHeight;
-    final overscrollReserve = media.size.height;
-    final position = Scrollable.maybeOf(context)?.position;
-    final parallax = media.disableAnimations ? 0.0 : parallaxFactor;
-
-    final band = ClipRRect(
-      borderRadius: const BorderRadius.vertical(
-        bottom: Radius.circular(radius),
-      ),
-      child: ColoredBox(
-        key: const ValueKey('home-match-band'),
-        color: colors.lightGrass,
-        child: CustomPaint(
-          painter: PitchMarkingsPainter(
-            color: _pitchMarkingColor(colors),
-            // The penalty area is anchored to the top of the screen.
-            topOffset: -overscrollReserve,
-            drawMidfield: true,
-            drawPenaltyArea: true,
-          ),
-          child: const SizedBox.expand(),
-        ),
-      ),
-    );
-
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Positioned(
-          top: -(appBarHeight + overscrollReserve),
-          left: 0,
-          right: 0,
-          bottom: -overlap,
-          child: IgnorePointer(
-            child: position == null || parallax == 0
-                ? band
-                : ListenableBuilder(
-                    listenable: position,
-                    builder: (context, child) {
-                      final offset = position.hasPixels
-                          ? math.max(0.0, position.pixels)
-                          : 0.0;
-                      return Transform.translate(
-                        offset: Offset(0, offset * parallax),
-                        child: child,
-                      );
-                    },
-                    child: band,
-                  ),
-          ),
-        ),
-        child,
-      ],
-    );
-  }
-}
-
 class _HeroSection extends StatelessWidget {
   final MatchDetails? nextMatch;
 
@@ -590,7 +502,6 @@ class _HeroSection extends StatelessWidget {
             ? l10n.homeTrainingCountdownLabel
             : l10n.homeMatchCountdownLabel;
 
-    // Transparent: the mint band behind it comes from _HomeMatchBand.
     return Container(
       padding: const EdgeInsets.fromLTRB(
         Spacing.md,
@@ -880,10 +791,8 @@ class _HeroMatchCarouselState extends State<_HeroMatchCarousel> {
       color: AppColors.transparent,
       child: Column(
         children: [
-          _HomeMatchBand(
-            child: _HeroSection(
-              nextMatch: pages[_currentIndex],
-            ),
+          _HeroSection(
+            nextMatch: pages[_currentIndex],
           ),
           AnimatedSize(
             duration: const Duration(milliseconds: 260),
@@ -1077,158 +986,186 @@ class _HeroTeamPanel extends StatelessWidget {
                 borderRadius: heroRadius,
                 boxShadow: [
                   BoxShadow(
-                    // Tinted green so the shadow stays clean on the mint.
-                    color: appColors.pitch.withValues(alpha: 0.10),
-                    blurRadius: 24,
-                    offset: const Offset(0, 10),
+                    color: appColors.black.withValues(alpha: 0.05),
+                    blurRadius: 2,
+                    offset: const Offset(0, 1),
+                  ),
+                  BoxShadow(
+                    color: appColors.black.withValues(alpha: 0.07),
+                    blurRadius: 28,
+                    offset: const Offset(0, 12),
                   ),
                 ],
               ),
               child: Column(
                 children: [
-                  Container(
-                    width: double.infinity,
-                    padding: isTraining
-                        ? const EdgeInsets.fromLTRB(
-                            Spacing.md,
-                            14,
-                            Spacing.md,
-                            14,
-                          )
-                        : const EdgeInsets.fromLTRB(
-                            Spacing.md,
-                            14,
-                            Spacing.md,
-                            12,
+                  CustomPaint(
+                    // Only the teams header is the mint pitch, with the
+                    // halfway line running down behind the "VS" circle.
+                    painter: isTraining
+                        ? null
+                        : _MatchHeaderPitchPainter(
+                            surfaceColor: appColors.matchHeroSurface,
+                            lineColor: appColors.matchHeroMarking,
+                            radius: HomeBentoCard.cardRadius,
                           ),
-                    // Matches sit on the mint band, so their teams stay on
-                    // the white card; trainings keep their sky block.
-                    decoration: BoxDecoration(
-                      color:
-                          isTraining ? appColors.lightSky65 : appColors.white,
-                      borderRadius: heroRadius,
-                    ),
-                    child: Column(
+                    child: Stack(
                       children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                title,
-                                style: appTextStyles.caption.copyWith(
-                                  color: heroHeaderTextColor,
-                                  fontWeight: FontWeight.w700,
+                        Container(
+                          width: double.infinity,
+                          padding: isTraining
+                              ? const EdgeInsets.fromLTRB(
+                                  Spacing.md,
+                                  14,
+                                  Spacing.md,
+                                  14,
+                                )
+                              : const EdgeInsets.fromLTRB(
+                                  Spacing.md,
+                                  14,
+                                  Spacing.md,
+                                  14,
                                 ),
-                              ),
-                            ),
-                            if (match != null && currentUser.isTeamOwner)
-                              MatchResultReminderButton(
-                                match: match,
-                                backgroundColor: appColors.sunset,
-                                onPressed: () =>
-                                    _enterHomeMatchResult(context, match),
-                              ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        if (isTraining)
-                          _TrainingHeroEventContent(
-                            category: match?.category,
-                            colors: appColors,
-                            textStyles: appTextStyles,
-                          )
-                        else
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            // Top-aligned so a wrapped name does not push
-                            // its badge out of line with the other one.
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: Center(
-                                    child: TeamBadgeLabel(
-                                      teamName: homeTeam,
-                                      teamId: stableTeamSeed(homeTeam),
-                                      logoDesign: ownTeamName != null &&
-                                              teamNamesMatch(
-                                                  homeTeam, ownTeamName)
-                                          ? ownTeamLogo
-                                          : null,
-                                      heroTag: cardHeroTag == null
-                                          ? null
-                                          : MatchHeroCard.logoHeroTag(
-                                              cardHeroTag,
-                                              TeamSide.home,
-                                            ),
-                                      width: 86,
-                                      radius: 22,
-                                      labelMaxLines: 2,
-                                      labelStyle:
-                                          appTextStyles.caption.copyWith(
-                                        color: heroHeaderTextColor,
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 54,
-                                  // Badge diameter: 2 * (radius 22 + padding 5).
-                                  height: 54,
-                                  child: Center(
+                          // Trainings keep their sky block; the match header's
+                          // mint comes from the painter above.
+                          decoration: isTraining
+                              ? BoxDecoration(
+                                  color: appColors.lightSky65,
+                                  borderRadius: heroRadius,
+                                )
+                              : null,
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
                                     child: Text(
-                                      'VS',
-                                      textAlign: TextAlign.center,
-                                      style: appTextStyles.h5.copyWith(
+                                      title,
+                                      style: appTextStyles.caption.copyWith(
                                         color: heroHeaderTextColor,
-                                        fontWeight: FontWeight.w800,
+                                        fontWeight: FontWeight.w700,
                                       ),
                                     ),
                                   ),
-                                ),
-                                Expanded(
-                                  child: Center(
-                                    child: TeamBadgeLabel(
-                                      teamName: awayTeam,
-                                      teamId: stableTeamSeed(awayTeam),
-                                      logoDesign: ownTeamName != null &&
-                                              teamNamesMatch(
-                                                  awayTeam, ownTeamName)
-                                          ? ownTeamLogo
-                                          : null,
-                                      heroTag: cardHeroTag == null
-                                          ? null
-                                          : MatchHeroCard.logoHeroTag(
-                                              cardHeroTag,
-                                              TeamSide.away,
+                                  if (match != null && currentUser.isTeamOwner)
+                                    MatchResultReminderButton(
+                                      match: match,
+                                      backgroundColor: appColors.sunset,
+                                      onPressed: () =>
+                                          _enterHomeMatchResult(context, match),
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              if (isTraining)
+                                _TrainingHeroEventContent(
+                                  category: match?.category,
+                                  colors: appColors,
+                                  textStyles: appTextStyles,
+                                )
+                              else
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8.0),
+                                  // Top-aligned so a wrapped name does not push
+                                  // its badge out of line with the other one.
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Center(
+                                          child: TeamBadgeLabel(
+                                            teamName: homeTeam,
+                                            teamId: stableTeamSeed(homeTeam),
+                                            logoDesign: ownTeamName != null &&
+                                                    teamNamesMatch(
+                                                        homeTeam, ownTeamName)
+                                                ? ownTeamLogo
+                                                : null,
+                                            heroTag: cardHeroTag == null
+                                                ? null
+                                                : MatchHeroCard.logoHeroTag(
+                                                    cardHeroTag,
+                                                    TeamSide.home,
+                                                  ),
+                                            width: 86,
+                                            radius: 22,
+                                            labelMaxLines: 2,
+                                            labelStyle:
+                                                appTextStyles.caption.copyWith(
+                                              color: heroHeaderTextColor,
+                                              fontWeight: FontWeight.w800,
                                             ),
-                                      width: 86,
-                                      radius: 22,
-                                      labelMaxLines: 2,
-                                      labelStyle:
-                                          appTextStyles.caption.copyWith(
-                                        color: heroHeaderTextColor,
-                                        fontWeight: FontWeight.w800,
+                                          ),
+                                        ),
                                       ),
-                                    ),
+                                      // Room for the centre circle, which the
+                                      // header pitch paints in its middle.
+                                      const SizedBox(width: 54),
+                                      Expanded(
+                                        child: Center(
+                                          child: TeamBadgeLabel(
+                                            teamName: awayTeam,
+                                            teamId: stableTeamSeed(awayTeam),
+                                            logoDesign: ownTeamName != null &&
+                                                    teamNamesMatch(
+                                                        awayTeam, ownTeamName)
+                                                ? ownTeamLogo
+                                                : null,
+                                            heroTag: cardHeroTag == null
+                                                ? null
+                                                : MatchHeroCard.logoHeroTag(
+                                                    cardHeroTag,
+                                                    TeamSide.away,
+                                                  ),
+                                            width: 86,
+                                            radius: 22,
+                                            labelMaxLines: 2,
+                                            labelStyle:
+                                                appTextStyles.caption.copyWith(
+                                              color: heroHeaderTextColor,
+                                              fontWeight: FontWeight.w800,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                              ],
+                              if (match == null)
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.only(top: Spacing.md),
+                                  child: Text(
+                                    AppLocalizations.of(context)!
+                                        .uiNoMatchPlanned,
+                                    style: appTextStyles.buttonSmall.copyWith(
+                                      color: heroHeaderAccentColor,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                )
+                            ],
+                          ),
+                        ),
+                        if (!isTraining)
+                          // "VS" sits in the centre circle, in the middle of
+                          // the pitch rather than in line with the badges.
+                          Positioned.fill(
+                            child: IgnorePointer(
+                              child: Center(
+                                child: Text(
+                                  'VS',
+                                  style: appTextStyles.subtitle2.copyWith(
+                                    color: appColors.successForeground,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
-                        if (match == null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: Spacing.md),
-                            child: Text(
-                              AppLocalizations.of(context)!.uiNoMatchPlanned,
-                              style: appTextStyles.buttonSmall.copyWith(
-                                color: heroHeaderAccentColor,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                          )
                       ],
                     ),
                   ),
@@ -1265,6 +1202,57 @@ class _HeroTeamPanel extends StatelessWidget {
       },
     );
   }
+}
+
+/// The match header of the hero card: a mint pitch, rounded at the top to
+/// follow the card, square at the bottom where the white info starts, with
+/// the halfway line and centre circle exactly in its middle.
+class _MatchHeaderPitchPainter extends CustomPainter {
+  static const double centreCircleRadius = 32;
+
+  final Color surfaceColor;
+  final Color lineColor;
+  final double radius;
+
+  const _MatchHeaderPitchPainter({
+    required this.surfaceColor,
+    required this.lineColor,
+    required this.radius,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final corner = Radius.circular(radius);
+    canvas.drawRRect(
+      RRect.fromRectAndCorners(
+        Offset.zero & size,
+        topLeft: corner,
+        topRight: corner,
+      ),
+      Paint()..color = surfaceColor,
+    );
+    final centre = size.center(Offset.zero);
+    final line = Paint()
+      ..color = lineColor
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke;
+    canvas.drawLine(
+      Offset(centre.dx, 0),
+      Offset(centre.dx, size.height),
+      line,
+    );
+    // Filled with the mint so the halfway line stops at the circle and
+    // the "VS" on top stays clean.
+    canvas.drawCircle(
+        centre, centreCircleRadius, Paint()..color = surfaceColor);
+    canvas.drawCircle(centre, centreCircleRadius, line);
+  }
+
+  @override
+  bool shouldRepaint(_MatchHeaderPitchPainter oldDelegate) =>
+      oldDelegate.surfaceColor != surfaceColor ||
+      oldDelegate.lineColor != lineColor ||
+      oldDelegate.radius != radius;
 }
 
 class _TrainingHeroEventContent extends StatelessWidget {
